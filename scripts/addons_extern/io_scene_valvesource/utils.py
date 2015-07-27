@@ -187,7 +187,7 @@ def animationLength(ad):
 		return int(ad.action.frame_range[1])
 	else:
 		strips = [strip.frame_end for track in ad.nla_tracks if not track.mute for strip in track.strips]
-		if any(strips):
+		if strips:
 			return int(max(strips))
 		else:
 			return 0
@@ -294,13 +294,11 @@ def removeObject(obj):
 				bpy.data.armatures.remove(d)
 
 	return None if d else type
-
-def calc_norms(mesh):
-	mesh.calc_normals_split(split_angle=mesh.auto_smooth_angle if mesh.use_auto_smooth else pi)
 	
 def select_only(ob):
 	bpy.context.scene.objects.active = ob
-	if any(bpy.context.selected_objects):
+	bpy.ops.object.mode_set(mode='OBJECT')
+	if bpy.context.selected_objects:
 		bpy.ops.object.select_all(action='DESELECT')
 	ob.select = True
 
@@ -450,7 +448,7 @@ def scene_update(scene, immediate=False):
 						 and not (scene.vs.layer_filter and len([i for i in range(20) if ob.layers[i] and scene.layers[i]]) == 0)])
 
 	# dupli groups etc.
-	p_cache.validObs = p_cache.validObs.union(set([ob for ob in scene.objects if (ob.type == 'MESH' and ob.dupli_type in ['VERTS','FACES'] and any(ob.children)) or (ob.dupli_type == 'GROUP' and ob.dupli_group)]))
+	p_cache.validObs = p_cache.validObs.union(set([ob for ob in scene.objects if (ob.type == 'MESH' and ob.dupli_type in ['VERTS','FACES'] and ob.children) or (ob.dupli_type == 'GROUP' and ob.dupli_group)]))
 	
 	p_cache.validObs_version += 1
 

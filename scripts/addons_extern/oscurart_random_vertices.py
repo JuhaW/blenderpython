@@ -94,8 +94,9 @@ def add_object(self, context, VALMIN, VALMAX, FACTOR, VGFILTER):
                 
             if VALMIN[2] >= VALMAX[2]:
                 VALMAX[2] = VALMIN[2] + 1                
-                
+   
             for vertice in LISTVER:
+                ODATA.verts.ensure_lookup_table() 
                 if ODATA.verts[vertice].select:
                     ODATA.verts[vertice].co=(
                         (((random.randrange(VALMIN[0],VALMAX[0],1))*FACTOR)/1000)+ODATA.verts[vertice].co[0],

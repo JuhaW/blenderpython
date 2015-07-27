@@ -175,7 +175,7 @@ def register():
     bpy.utils.register_module(__name__)
 
     # Add "Extras" menu to the "Add Mesh" menu
-    bpy.types.VIEW3D_MT_edit_mesh_specials.prepend(menu_func)
+    bpy.types.VIEW3D_MT_edit_mesh_specials.append(menu_func)
 
 
 def unregister():

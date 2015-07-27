@@ -5,7 +5,7 @@
 bl_info = {
     "name": "Armature from Mesh",
     "version": (0, 1, 4),
-    "blender": (2, 6, 9),
+    "blender": (2, 7, 5),
     "location": "View3D > Tool Shelf",
     "description": "Grows a chain of bones from edge loops in geometry",
     "category": "Rigging"}

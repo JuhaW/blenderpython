@@ -64,9 +64,9 @@ class BisectUtils(bpy.types.Operator):
     bl_idname = "object.bisect_utils"  
     bl_label = "Bisect Util"  
     bl_options = {'REGISTER', 'UNDO'}
-    clearinner=bpy.props.BoolProperty(name="Clear Inner", description="Nil", default=False)
-    clearoutter=bpy.props.BoolProperty(name="Clear Ouuter", description="Nil", default=False)
-    planevector=bpy.props.FloatVectorProperty(name="Plane Normal", description="Nil", default=Vector((0.0,0.0,0.0)))
+    clearinner=bpy.props.BoolProperty(name="Clear Inner", description="Clear Inner", default=False)
+    clearoutter=bpy.props.BoolProperty(name="Clear Outer", description="Clear Outer", default=False)
+    planevector=bpy.props.FloatVectorProperty(name="Plane Normal", description="Plane Normal", default=Vector((0.0,0.0,0.0)))
     
     def execute(self, context):
         if bpy.context.mode == 'OBJECT' and len(bpy.context.selected_objects)>0 :  

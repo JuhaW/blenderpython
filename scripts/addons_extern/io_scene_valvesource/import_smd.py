@@ -53,10 +53,10 @@ class SmdImporter(bpy.types.Operator, Logger):
 	rotMode = EnumProperty(name=get_id("importer_rotmode"),items=rotModes,default='XYZ',description=get_id("importer_rotmode_tip"))
 	boneMode = EnumProperty(name=get_id("importer_bonemode"),items=(('NONE','Default',''),('ARROWS','Arrows',''),('SPHERE','Sphere','')),default='SPHERE',description=get_id("importer_bonemode_tip"))
 	
-	def execute(self, context):		
+	def execute(self, context):
 		pre_obs = set(bpy.context.scene.objects)
-
 		pre_eem = context.user_preferences.edit.use_enter_edit_mode
+		pre_append = self.append
 		context.user_preferences.edit.use_enter_edit_mode = False
 
 		self.existingBones = [] # bones which existed before importing began
@@ -97,7 +97,10 @@ class SmdImporter(bpy.types.Operator, Logger):
 					space.clip_end = max( space.clip_end, xyz * 2 )
 		if bpy.context.area and bpy.context.area.type == 'VIEW_3D' and bpy.context.region:
 			ops.view3d.view_selected()
+
 		context.user_preferences.edit.use_enter_edit_mode = pre_eem
+		self.append = pre_append
+
 		return {'FINISHED'}
 
 	def invoke(self, context, event):
@@ -109,6 +112,22 @@ class SmdImporter(bpy.types.Operator, Logger):
 		if self.smd.jobType == ANIM and self.append == 'APPEND' and (hasattr(self.smd,"a") or self.findArmature()):
 			print("- Appending bones from animations is destructive; switching Bone Append Mode to \"Validate\"")
 			self.append = 'VALIDATE'
+
+	# Datablock names are limited to 63 bytes of UTF-8
+	def truncate_id_name(self, name, id_type):
+		truncated = bytes(name,'utf8')	
+		if len(truncated) < 64:
+			return name
+
+		truncated = truncated[:63]
+		while truncated:
+			try:
+				truncated = truncated.decode('utf8')
+				break
+			except UnicodeDecodeError:
+				truncated = truncated[:-1]
+		self.error(get_id("importer_err_namelength",True).format(pgettext(id_type if isinstance(id_type,str) else id_type.__name__), name, truncated))
+		return truncated
 
 	# Identifies what type of SMD this is. Cannot tell between reference/lod/collision meshes!
 	def scanSMD(self):
@@ -206,7 +225,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 		boneParents = {}
 
 		def addBone(id,name,parent):
-			bone = smd.a.data.edit_bones.new(name)
+			bone = smd.a.data.edit_bones.new(self.truncate_id_name(name,bpy.types.Bone))
 			bone.tail = 0,5,0 # Blender removes zero-length bones
 
 			smd.boneIDs[int(id)] = bone.name
@@ -253,7 +272,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 				print("- Validated {} bones against armature \"{}\"{}".format(validated, smd.a.name, " (could not find {})".format(missing) if missing > 0 else ""))
 
 		if not smd.a:		
-			smd.a = self.createArmature((self.qc.jobName if self.qc else smd.jobName) + "_skeleton")
+			smd.a = self.createArmature(self.truncate_id_name((self.qc.jobName if self.qc else smd.jobName) + "_skeleton",bpy.types.Armature))
 			if self.qc: self.qc.a = smd.a
 			smd.a.data.vs.implicit_zero_bone = False # Too easy to break compatibility, plus the skeleton is probably set up already
 		
@@ -273,7 +292,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 				smd.a.data.edit_bones[bone_name].parent = smd.a.data.edit_bones[ smd.boneIDs[parent_id] ]
 
 		ops.object.mode_set(mode='OBJECT')
-		if any(boneParents): print("- Imported {} new bones".format(len(boneParents)) )
+		if boneParents: print("- Imported {} new bones".format(len(boneParents)) )
 
 		if len(smd.a.data.bones) > 128:
 			self.warning(get_id("importer_err_bonelimit_smd"))
@@ -485,7 +504,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 				bone.rotation_mode = smd.rotMode
 				
 			for bone,frames in list(keyframes.items()):
-				if not any(frames):
+				if not frames:
 					del keyframes[bone]
 			
 			if smd.isDMX == False:
@@ -582,14 +601,17 @@ class SmdImporter(bpy.types.Operator, Logger):
 		
 		print( "- Imported {} frames of animation".format(num_frames) )
 
-	def getMeshMaterial(self,in_name):
+	def getMeshMaterial(self,mat_name):
 		smd = self.smd
-		if in_name == "": # buggered SMD
-			in_name = "Material"
+		if mat_name:
+			mat_name = self.truncate_id_name(mat_name, bpy.types.Material)
+		else:
+			mat_name = "Material"
+
 		md = smd.m.data
 		mat = None
 		for candidate in bpy.data.materials: # Do we have this material already?
-			if candidate.name == in_name:
+			if candidate.name == mat_name:
 				mat = candidate
 		if mat:
 			if md.materials.get(mat.name): # Look for it on this mesh
@@ -601,8 +623,8 @@ class SmdImporter(bpy.types.Operator, Logger):
 				md.materials.append(mat)
 				mat_ind = len(md.materials) - 1
 		else: # material does not exist
-			print("- New material: {}".format(in_name))
-			mat = bpy.data.materials.new(in_name)
+			print("- New material: {}".format(mat_name))
+			mat = bpy.data.materials.new(mat_name)
 			md.materials.append(mat)
 			# Give it a random colour
 			randCol = []
@@ -685,13 +707,13 @@ class SmdImporter(bpy.types.Operator, Logger):
 		if smd.jobType not in [ REF, PHYS ]:
 			return
 
-		# Create a new mesh object, disable double-sided rendering, link it to the current scene
+		mesh_name = smd.jobName
 		if smd.jobType == REF and not smd.jobName.lower().find("reference") and not smd.jobName.lower().endswith("ref"):
-			meshName = smd.jobName + " ref"
-		else:
-			meshName = smd.jobName
+			mesh_name += " ref"
+		mesh_name = self.truncate_id_name(mesh_name, bpy.types.Mesh)
 
-		smd.m = bpy.data.objects.new(meshName,bpy.data.meshes.new(meshName))
+		# Create a new mesh object, disable double-sided rendering, link it to the current scene
+		smd.m = bpy.data.objects.new(mesh_name,bpy.data.meshes.new(mesh_name))
 		smd.m.data.show_double_sided = False
 		smd.m.parent = smd.a
 		bpy.context.scene.objects.link(smd.m)
@@ -712,7 +734,6 @@ class SmdImporter(bpy.types.Operator, Logger):
 		md = smd.m.data
 		lastWindowUpdate = time.time()
 		# Vertex values
-		cos = []
 		norms = []
 		weights = []
 		# Face values
@@ -750,16 +771,17 @@ class SmdImporter(bpy.types.Operator, Logger):
 				values = line.split()
 
 				vertexCount+= 1
-				co = []
-				#norm = []
+				co = [0,0,0]
+				norm = [0,0,0]
 
 				# Read co-ordinates and normals
 				for i in range(1,4): # 0 is the deprecated bone weight value
-					co.append( float(values[i]) )
-					#norm.append( float(values[i+3]) ) # Blender currenty ignores this data!
+					co[i-1] = float(values[i])
+					norm[i-1] = float(values[i+3])
 				
 				faceVerts.append( bm.verts.new(co) )
-				
+				norms.append(norm)
+
 				# Can't do these in the above for loop since there's only two
 				uvs.append( ( float(values[7]), float(values[8]) ) )
 
@@ -790,6 +812,11 @@ class SmdImporter(bpy.types.Operator, Logger):
 		bm.to_mesh(md)
 		bm.free()
 		md.update()
+		
+		if self.skipRemDoubles:
+			md.create_normals_split()
+			md.use_auto_smooth = True
+			md.normals_split_custom_set(norms)
 		
 		if countPolys:	
 			md.polygons.foreach_set("material_index", mats)
@@ -920,7 +947,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 					bpy.data.meshes.remove(vd)
 					del vd
 
-					if any(bad_vta_verts):
+					if bad_vta_verts:
 						err_ratio = len(bad_vta_verts) / num_vta_verts
 						vta_err_vg.add(bad_vta_verts,1.0,'REPLACE')
 						message = get_id("importer_err_unmatched_mesh", True).format(len(bad_vta_verts), int(err_ratio * 100))
@@ -1232,7 +1259,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 		
 		while True:
 			header = self.parseQuoteBlockedLine(file.readline())
-			if any(header): break
+			if header: break
 		
 		if header != ["version" ,"1"]:
 			self.warning (get_id("importer_err_smd_ver"))
@@ -1325,7 +1352,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 						bone = smd.a.data.edit_bones.get(elem.name)
 						if not bone:
 							if self.append == 'APPEND' and smd.jobType in [REF,ANIM]:
-								bone = smd.a.data.edit_bones.new(elem.name)
+								bone = smd.a.data.edit_bones.new(self.truncate_id_name(elem.name, bpy.types.Bone))
 								if parent_elem:
 									bone.parent = smd.a.data.edit_bones[parent_elem.name]
 								bone.tail = (0,5,0)
@@ -1353,12 +1380,12 @@ class SmdImporter(bpy.types.Operator, Logger):
 				ops.object.mode_set(mode='EDIT')
 				validateSkeleton(DmeModel["children"], None)
 
-				if any(missing_bones) and smd.jobType != ANIM: # animations report missing bones seperately
+				if missing_bones and smd.jobType != ANIM: # animations report missing bones seperately
 					self.warning(get_id("importer_err_missingbones", True).format(smd.jobName,len(missing_bones),smd.a.name))
 					print("\n".join(missing_bones))
-			elif any([child for child in DmeModel["children"] if child.type == "DmeJoint"]):
+			elif any(child for child in DmeModel["children"] if child and child.type == "DmeJoint"):
 				self.append = 'NEW_ARMATURE'
-				ob = smd.a = self.createArmature(DmeModel.name)
+				ob = smd.a = self.createArmature(self.truncate_id_name(DmeModel.name, bpy.types.Armature))
 				if self.qc: self.qc.a = ob
 				bpy.context.scene.objects.active = smd.a
 				ops.object.mode_set(mode='EDIT')
@@ -1368,7 +1395,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 				def parseSkeleton(elem_array, parent_bone):
 					for elem in elem_array:
 						if elem.type =="DmeDag" and elem.get("shape") and elem["shape"].type == "DmeAttachment":
-							atch = smd.atch = bpy.data.objects.new(name=elem["shape"].name, object_data=None)
+							atch = smd.atch = bpy.data.objects.new(name=self.truncate_id_name(elem["shape"].name, "Attachment"), object_data=None)
 							bpy.context.scene.objects.link(atch)
 							atch.show_x_ray = True
 							atch.empty_draw_type = 'ARROWS'
@@ -1380,7 +1407,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 						
 							atch.matrix_local = get_transform_matrix(elem)
 						elif (elem.type == "DmeJoint" and elem.name != "blender_implicit") and not elem.get("shape"): # don't import Dags which simply wrap meshes
-							bone = smd.a.data.edit_bones.new(elem.name)
+							bone = smd.a.data.edit_bones.new(self.truncate_id_name(elem.name,bpy.types.Bone))
 							bone.parent = parent_bone
 							bone.tail = (0,5,0)
 							bone_matrices[bone.name] = get_transform_matrix(elem)
@@ -1399,14 +1426,14 @@ class SmdImporter(bpy.types.Operator, Logger):
 						keyframe = KeyFrame()
 						keyframe.matrix = mat
 						restData[bone] = {0:keyframe}
-				if any(restData):
+				if restData:
 					self.applyFrames(restData,1,None)
 			
 			def parseModel(elem,matrix=Matrix(), last_bone = None):
 				if elem.type in ["DmeModel","DmeDag", "DmeJoint"]:
 					if elem.type == "DmeDag":
 						matrix *= get_transform_matrix(elem)
-					if elem.get("children") and any(elem["children"]):
+					if elem.get("children") and elem["children"]:
 						if elem.type == "DmeJoint":
 							last_bone = elem
 						subelems = elem["children"]
@@ -1420,7 +1447,8 @@ class SmdImporter(bpy.types.Operator, Logger):
 					DmeMesh = elem
 					if bpy.context.active_object:
 						ops.object.mode_set(mode='OBJECT')
-					ob = smd.m = bpy.data.objects.new(name=DmeMesh.name, object_data=bpy.data.meshes.new(name=DmeMesh.name))
+					mesh_name = self.truncate_id_name(DmeMesh.name,bpy.types.Mesh)
+					ob = smd.m = bpy.data.objects.new(name=mesh_name, object_data=bpy.data.meshes.new(name=mesh_name))
 					bpy.context.scene.objects.link(ob)
 					self.setLayer()
 					ob.show_wire = smd.jobType == PHYS
@@ -1453,7 +1481,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 						bm.verts.ensure_lookup_table()
 					
 					# Faces and Materials
-					skipfaces = []
+					skipfaces = set()
 					for face_set in DmeMesh["faceSets"]:
 						mat_path = face_set["material"]["mtlName"]
 						bpy.context.scene.vs.material_path = os.path.dirname(mat_path).replace("\\","/")
@@ -1467,7 +1495,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 									face.smooth = True
 									face.material_index = mat_ind
 								except ValueError: # can't have an overlapping face...this will be painful later
-									skipfaces.append(dmx_face)
+									skipfaces.add(dmx_face)
 								dmx_face += 1
 								face_verts = []
 								continue
@@ -1481,6 +1509,27 @@ class SmdImporter(bpy.types.Operator, Logger):
 						ob.matrix_world = ob.parent.matrix_world * ob.matrix_world
 					if smd.jobType == PHYS:
 						ob.draw_type = 'SOLID'
+
+					# Normals					
+					ob.data.create_normals_split()
+					ob.data.use_auto_smooth = True
+
+					normals = DmeVertexData[keywords['norm']]
+					normalsIndices = DmeVertexData[keywords['norm'] + "Indices"]
+
+					normals_ordered = [None] * len(normalsIndices)
+					i = f = 0
+					for vert in [vert for faceset in DmeMesh["faceSets"] for vert in faceset["faces"]]:
+						if vert == -1:
+							f += 1
+							continue
+						if f in skipfaces:
+							continue
+
+						normals_ordered[i] = normals[normalsIndices[vert]]
+						i += 1
+
+					ob.data.normals_split_custom_set(normals_ordered[:i])
 					
 					# Weightmap
 					if have_weightmap:
@@ -1593,7 +1642,7 @@ class SmdImporter(bpy.types.Operator, Logger):
 					bone_name = smd.boneTransformIDs.get(toElement.id)
 					bone = smd.a.pose.bones.get(bone_name) if bone_name else None
 					if not bone:
-						if toElement.name not in unknown_bones:
+						if self.append != 'NEW_ARMATURE' and toElement.name not in unknown_bones:
 							unknown_bones.append(toElement.name)
 							print("- Animation refers to unrecognised bone \"{}\"".format(toElement.name))
 						continue
@@ -1622,15 +1671,15 @@ class SmdImporter(bpy.types.Operator, Logger):
 				
 				smd.a.hide = False
 				bpy.context.scene.objects.active = smd.a
-				if any(unknown_bones):
+				if unknown_bones:
 					self.warning(get_id("importer_err_missingbones", True).format(smd.jobName,len(unknown_bones),smd.a.name))
 				self.applyFrames(keyframes,total_frames,frameRate)
 		except datamodel.AttributeError as e:
-			e.args = ["Invalid DMX file: {}".format(e.args[0] if any(e.args) else "Unknown error")]
+			e.args = ["Invalid DMX file: {}".format(e.args[0] if e.args else "Unknown error")]
 			raise
 		
 		new_obs = set(bpy.context.scene.objects).difference(starting_objects)
-		if any(new_obs):
+		if new_obs:
 			group = bpy.data.groups.new(smd.jobName)
 			for ob in new_obs:
 				if ob.type != 'ARMATURE':

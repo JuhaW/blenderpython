@@ -22,12 +22,12 @@
 bl_info = {
     "name": "Black Hole",
     "author": "Crocadillian/Takanu @ Polarised Games",
-    "version": (1),
+    "version": (1, 0, 0),
     "blender": (2, 7, 3),
-    "api": 39347,
     "location": "3D View > Object Mode > Tools > Black Hole",
     "description": "Adds additional Object Origin tools",
-    "wiki_url": "",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts",
+    "tracker_url": "https://github.com/",
     "category": "Object"}
     
 #//////////////////////////////// - IMPORT - ///////////////////////////    
@@ -188,12 +188,9 @@ class BH_Menu(PropertyGroup):
     
 #//////////////////////////////// - USER INTERFACE - ///////////////////////////  
 
-class BH_Interface(bpy.types.Panel):
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
-    bl_context = "objectmode"
-    bl_label = "Black Hole"
-    bl_category = "Tools"
+class VIEW3D_PT_tools_object_Interface(bpy.types.Menu):
+    bl_label = "Object Origin"
+    bl_options = {'REGISTER', 'UNDO'}
     
     @classmethod
     def poll(cls, context):
@@ -483,27 +480,30 @@ def SetObjectOrigin(object, enum, context):
         # Set the origin
         bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
+def panel_func(self, context):
+    self.layout.label(text="Object Origin:")
+    self.layout.menu("VIEW3D_PT_tools_object_Interface", text="Origin Tools")
 
 #//////////////////////// - REGISTER/UNREGISTER DEFINITIONS - ////////////////////////
 property_classes = (BH_Object, BH_Menu)
 
 def register():
-    
+   
     # Register the properties first
     for cls in property_classes:
         bpy.utils.register_class(cls)
         
     bpy.types.Object.BHObj = PointerProperty(type=BH_Object)
     bpy.types.Object.BHMnu = PointerProperty(type=BH_Menu)
-        
-    bpy.utils.register_module(__name__) 
+    bpy.types.VIEW3D_PT_tools_object.append(panel_func)        
+    bpy.utils.register_module(__name__)  
     
 def unregister():
     
     # Unregister the properties first
     del bpy.types.Object.BHObj
     del bpy.types.Object.BHMnu
-    
+    bpy.types.VIEW3D_PT_tools_object.remove(panel_func)    
     for cls in property_classes:
         bpy.utils.unregister_class(cls)
     

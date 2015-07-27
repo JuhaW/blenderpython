@@ -170,7 +170,7 @@ class PanelUI(bpy.types.Panel):
     bl_label = "Turnaround Camera"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-	bl_category = "Animation"
+    bl_category = "Animation"
     # ------------------------------
     # Draw UI
     # ------------------------------

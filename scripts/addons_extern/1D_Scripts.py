@@ -21,7 +21,7 @@
 bl_info = {
     "name": "1D_Scripts",                     
     "author": "Alexander Nedovizin, Paul Kotelevets aka 1D_Inc (concept design), Nikitron",
-    "version": (0, 7, 14),
+    "version": (0, 7, 15),
     "blender": (2, 7, 3),
     "location": "View3D > Toolbar",
     "category": "Mesh"
@@ -34,8 +34,13 @@ from mathutils import Vector
 from mathutils.geometry import intersect_line_plane, intersect_point_line
 from math import sin, cos, pi, sqrt, degrees
 import os, urllib
-from bpy.props import BoolProperty
-from bpy_extras.io_utils import ExportHelper
+from bpy.props import (BoolProperty,
+                       FloatProperty,
+                       StringProperty,
+                       EnumProperty,
+                       CollectionProperty
+                       )
+from bpy_extras.io_utils import ExportHelper, ImportHelper
 from bpy.types import Operator
 import time 
 
@@ -3907,6 +3912,43 @@ class LayoutSSPanel(bpy.types.Panel):
                 row = col_top.row(align=True)
                 row.operator('eap.op2_id', text = 'Extrude')
         
+        split = col.split(percentage=0.15)
+        if lt.disp_obj:
+            split.prop(lt, "disp_obj", text="", icon='DOWNARROW_HLT')
+        else:
+            split.prop(lt, "disp_obj", text="", icon='RIGHTARROW')
+        
+        op_obj = split.operator("import_scene.multiple_objs", text='Multiple obj import')
+        if lt.disp_obj:
+            box = col.column(align=True).box().column()
+            layout = box.column(align=True)
+
+            row = layout.row(align=True)
+            row.prop(lt, "ngons_setting")
+            row = layout.row(align=True)
+            row.prop(lt, "edges_setting")
+
+            layout.prop(lt, "smooth_groups_setting")
+
+            box = layout.box()
+            row = box.row()
+            row.prop(lt, "split_mode_setting", expand=True)
+
+            row = box.row()
+            if lt.split_mode_setting == 'ON':
+                row.label(text="Split by:")
+                row.prop(lt, "split_objects_setting")
+                row.prop(lt, "split_groups_setting")
+            else:
+                row.prop(lt, "groups_as_vgroups_setting")
+
+            row = layout.split(percentage=0.67)
+            row.prop(lt, "clamp_size_setting")
+            layout.prop(lt, "axis_forward_setting")
+            layout.prop(lt, "axis_up_setting")
+            layout.prop(lt, "image_search_setting")
+            
+            
         split = col.split()
         split.operator("scene.render_me", text='Render')
         
@@ -4649,6 +4691,7 @@ class paul_managerProps(bpy.types.PropertyGroup):
     disp_fedge = bpy.props.BoolProperty(name = 'disp_fedge', default = False)
     disp_coll = bpy.props.BoolProperty(name = 'disp_coll', default = False)
     disp_3drotor = bpy.props.BoolProperty(name = 'disp_3drotor', default = False)
+    disp_obj = bpy.props.BoolProperty(name = 'disp_obj', default = False)
     
     fedge_verts = BoolProperty(name='verts', default=True)
     fedge_edges = BoolProperty(name='edges', default=True)
@@ -4656,6 +4699,87 @@ class paul_managerProps(bpy.types.PropertyGroup):
     fedge_empty = BoolProperty(name='empty', default=True)
     fedge_three = BoolProperty(name='three', default=True)
     fedge_WRONG_AREA = bpy.props.FloatProperty(name="WRONG_AREA", default=0.02, precision=4)
+    
+    
+    # List of operator properties, the attributes will be assigned
+    # to the class instance from the operator settings before calling.
+    ngons_setting = BoolProperty(
+            name="NGons",
+            description="Import faces with more than 4 verts as ngons",
+            default=True,
+            )
+    edges_setting = BoolProperty(
+            name="Lines",
+            description="Import lines and faces with 2 verts as edge",
+            default=True,
+            )
+    smooth_groups_setting = BoolProperty(
+            name="Smooth Groups",
+            description="Surround smooth groups by sharp edges",
+            default=True,
+            )
+
+    split_objects_setting = BoolProperty(
+            name="Object",
+            description="Import OBJ Objects into Blender Objects",
+            default=True,
+            )
+    split_groups_setting = BoolProperty(
+            name="Group",
+            description="Import OBJ Groups into Blender Objects",
+            default=True,
+            )
+
+    groups_as_vgroups_setting = BoolProperty(
+            name="Poly Groups",
+            description="Import OBJ groups as vertex groups",
+            default=False,
+            )
+
+    image_search_setting = BoolProperty(
+            name="Image Search",
+            description="Search subdirs for any associated images "
+                        "(Warning, may be slow)",
+            default=True,
+            )
+
+    split_mode_setting = EnumProperty(
+            name="Split",
+            items=(('ON', "Split", "Split geometry, omits unused verts"),
+                   ('OFF', "Keep Vert Order", "Keep vertex order from file"),
+                   ),
+            )
+
+    clamp_size_setting = FloatProperty(
+            name="Clamp Size",
+            description="Clamp bounds under this value (zero to disable)",
+            min=0.0, max=1000.0,
+            soft_min=0.0, soft_max=1000.0,
+            default=0.0,
+            )
+    axis_forward_setting = EnumProperty(
+            name="Forward",
+            items=(('X', "X Forward", ""),
+                   ('Y', "Y Forward", ""),
+                   ('Z', "Z Forward", ""),
+                   ('-X', "-X Forward", ""),
+                   ('-Y', "-Y Forward", ""),
+                   ('-Z', "-Z Forward", ""),
+                   ),
+            default='-Z',
+            )
+
+    axis_up_setting = EnumProperty(
+            name="Up",
+            items=(('X', "X Up", ""),
+                   ('Y', "Y Up", ""),
+                   ('Z', "Z Up", ""),
+                   ('-X', "-X Up", ""),
+                   ('-Y', "-Y Up", ""),
+                   ('-Z', "-Z Up", ""),
+                   ),
+            default='Y',
+            )
     
 
 class MessageOperator(bpy.types.Operator):
@@ -4730,6 +4854,58 @@ class CheredatorModalOperator(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 
+# *********** Import Objs *************
+'''
+"name": "Import multiple OBJ files",
+"author": "poor",
+"description": "Import multiple OBJ files, UV's, materials",
+'''
+class ImportMultipleObjs(bpy.types.Operator, ImportHelper):
+    """This appears in the tooltip of the operator and in the generated docs"""
+    bl_idname = "import_scene.multiple_objs"
+    bl_label = "Import multiple OBJ's"
+    bl_options = {'PRESET', 'UNDO'}
+
+    # ImportHelper mixin class uses this
+    filename_ext = ".obj"
+
+    filter_glob = StringProperty(
+            default="*.obj",
+            options={'HIDDEN'},
+            )
+
+    # Selected files
+    files = CollectionProperty(type=bpy.types.PropertyGroup)
+
+
+    def execute(self, context):
+        config = bpy.context.window_manager.paul_manager
+
+        # get the folder
+        folder = (os.path.dirname(self.filepath))
+
+        # iterate through the selected files
+        for i in self.files:
+
+            # generate full path to file
+            path_to_file = (os.path.join(folder, i.name))
+
+            # call obj operator and assign ui values                  
+            bpy.ops.import_scene.obj(filepath = path_to_file,
+                                axis_forward = config.axis_forward_setting,
+                                axis_up = config.axis_up_setting, 
+                                use_edges = config.edges_setting,
+                                use_smooth_groups = config.smooth_groups_setting, 
+                                use_split_objects = config.split_objects_setting,
+                                use_split_groups = config.split_groups_setting,
+                                use_groups_as_vgroups = config.groups_as_vgroups_setting,
+                                use_image_search = config.image_search_setting,
+                                split_mode = config.split_mode_setting,
+                                global_clamp_size = config.clamp_size_setting)
+
+        return {'FINISHED'}
+
+
 # ***********  Autoupdate  ***************
 class ThisScriptUpdateAddon(bpy.types.Operator):
     """ Update this addon without any browsing and so on. After - press F8 to reload addons """
@@ -4760,7 +4936,7 @@ class ThisScriptUpdateAddon(bpy.types.Operator):
 
 
 classes = [eap_op0, eap_op1, eap_op2, \
-    RenderMe, ExportSomeData, RotorOperator, DisableDubleSideOperator, \
+    RenderMe, ExportSomeData, RotorOperator, DisableDubleSideOperator, ImportMultipleObjs, \
     MatExrudeOperator, GetMatsOperator, CrossPolsOperator, SSOperator, SpreadOperator, \
     AlignOperator, Project3DLoopOperator, BarcOperator, LayoutSSPanel, MessageOperator, \
     OffsetOperator, MiscOperator, paul_managerProps, ThisScriptUpdateAddon, \

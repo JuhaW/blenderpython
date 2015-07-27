@@ -388,6 +388,10 @@ _data = {
 	'en': "Skipping vertex animations on Group \"{0}\", which could not be merged into a single DMX object due to its envelope. To fix this, either ensure that the entire Group has the same bone parent or remove all envelopes.",
 	'ru': "Пропуск вершинной анимации для группы «{0}», которую не удаётся слить в DMX-модель из-за огибающих. Проверьте, что у всей группы одна и та же кость-родитель или удалите все огибающие.",
 },
+'exporter_warn_unicode': {
+	'ja': "{0}「{1}」の名前はUnicode文字を含みます。間違ってコンパイルすることが可能です。",
+	'en': "Name of {0} \"{1}\" contains Unicode characters. This may not compile correctly!",
+},
 'exporter_err_flexctrl_loadfail': {
 	'en': "Could not load flex controllers. Python reports: {0}",
 	'ru': "Загрузить контроллеры из указанного DMX-файла не удалось. Ошибка Python: {0}",
@@ -395,6 +399,9 @@ _data = {
 'qc_compile_err_nofiles': {
 	'en': "Cannot compile, no QCs provided. The Blender Source Tools do not generate QCs.",
 	'ru': "Нет QC-файлов, нечего компилировать. Blender Source Tools не генерируют QC-файлы.",
+},
+'exporter_err_missing_corrective_target': {
+	'en': "Found corrective shape key \"{0}\", but not target shape \"{1}\"",
 },
 'qc_compile_complete': {
 	'ja': "{0}つ「{1}」QCがコンパイルしました",
@@ -590,7 +597,7 @@ _data = {
 	'ru': "Задаёт тип создаваемых при экспорте ключевых кадров с вращением",
 },
 'importer_skipremdoubles_tip': {
-	'en': "Skips the \"Remove Doubles\" step; use this if your SMD has overlapping elements",
+	'en': "Import raw, disconnected polygons from SMD files; these are harder to edit but a closer match to the original mesh",
 },
 'importer_balance_group': {
 	'en': "DMX Stereo Balance",
@@ -605,8 +612,8 @@ _data = {
 	'ru': "Способ задания вращения",
 },
 'importer_skipremdoubles': {
-	'ja': "SMDのポリゴンを保持",
-	'en': "Preserve SMD polygons",
+	'ja': "SMDのポリゴンと法線を保持",
+	'en': "Preserve SMD Polygons & Normals",
 },
 'importer_bonemode_tip': {
 	'en': "How bones in new Armatures should be displayed",
@@ -623,6 +630,9 @@ _data = {
 'importer_up_tip': {
 	'en': "Which axis represents 'up' (ignored for QCs)",
 	'ru': "Какая из осей соответствует направлению \"вврех\"?",
+},
+'importer_err_namelength': {
+	'en': "{0} name \"{1}\" is too long to import. Truncating to \"{2}\"",
 },
 'importer_bones_append_desc': {
 	'en': "Add new bones to the target Armature",

@@ -32,11 +32,9 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
-    importlib.reload(face_info_select)
     importlib.reload(lint)
 
 else:
-    from . import face_info_select
     from . import lint
 
 

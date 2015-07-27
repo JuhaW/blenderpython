@@ -24,8 +24,8 @@ bl_info = {
     "location": "3D Viewport",
     "description": "Mifth Tools",
     "warning": "",
-    "wiki_url": "",
-    "tracker_url": "",
+    "wiki_url": "https://github.com/mifth/mifthtools/tree/master/blender/addons/mifth_tools",
+    "tracker_url": "https://github.com/mifth/mifthtools/issues",
     "category": "Tools"}
 
 

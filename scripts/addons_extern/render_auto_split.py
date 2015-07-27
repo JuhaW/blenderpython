@@ -26,7 +26,7 @@ bl_info = {
     "blender": (2, 72, 0),
     "location": "Scene > AutoSplit",
     "description": "Split Objects in 2 renders",
-    "category": "Object"}
+    "category": "Render"}
     
 
 def layerAdd(array1, array2):

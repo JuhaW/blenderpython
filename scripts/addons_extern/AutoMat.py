@@ -21,7 +21,7 @@ bl_info = {
     " action of yours is related to the error, please include a description"
     " of it too.):",
     "support": "COMMUNITY",
-    "category": "Materials"}
+    "category": "Material"}
 
 
 class AutomatOperatorFromTexture(bpy.types.Operator):

@@ -253,7 +253,24 @@ class SelectionHelper:
         bm.to_mesh(mesh)
         bpy.ops.object.mode_set(mode = 'EDIT')
 
+class roundify_help(bpy.types.Operator):
+    bl_idname = 'help.roundify'
+    bl_label = ''
 
+    def draw(self, context):
+        layout = self.layout
+        layout.label('To use:')
+        layout.label('Select a face or faces & inset.')
+        layout.label('Inset square, circle or outside.')
+        layout.label('To Help:')
+        layout.label('Circle: use remove doubles to tidy joins.')
+        layout.label('Outset: select & use normals flip before extruding.')
+    
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_popup(self, width = 350)
 
 ###################################################################################
 

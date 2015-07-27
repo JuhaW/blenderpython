@@ -20,6 +20,7 @@
 
 import bpy, bmesh, subprocess, collections
 from bpy import ops
+from bpy.app.translations import pgettext
 from mathutils import *
 from math import *
 from bpy.types import Group
@@ -213,7 +214,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 				else:
 					group = bpy.data.groups[self.group]
 					if group.vs.mute: self.error(get_id("exporter_err_groupmuted", True).format(group.name))
-					elif not any(group.objects): self.error(get_id("exporter_err_groupempty", True).format(group.name))
+					elif not group.objects: self.error(get_id("exporter_err_groupempty", True).format(group.name))
 					else: self.exportId(context, group)
 			
 			num_good_compiles = None
@@ -292,15 +293,13 @@ class SmdExporter(bpy.types.Operator, Logger):
 				pass
 			elif ad.action:
 				export_name = ad.action.name
-			elif any(ad.nla_tracks):
+			elif ad.nla_tracks:
 				export_name = id.name
 			else:
 				self.error(get_id("exporter_err_arm_noanims",True).format(id.name))
 		else:
 			export_name = id.name
-
-		export_name = self.sanitiseFilename(export_name)
-		
+				
 		# We don't want to bake any meshes with poses applied
 		# NOTE: this won't change the posebone values, but it will remove deformations
 		for ob in [ob for ob in context.scene.objects if ob.type == 'ARMATURE' and ob.data.pose_position == 'POSE']:
@@ -365,7 +364,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 		skip_vca = False
 		if isinstance(id, Group) and len(id.vs.vertex_animations) and len(id.objects) > 1:
 			if len(mesh_bakes) > len([bake for bake in bake_results if (type(bake.envelope) is str and bake.envelope == bake_results[0].envelope) or bake.envelope is None]):
-				self.error(get_id("exporter_err_unmergable",true).format(id.name))
+				self.error(get_id("exporter_err_unmergable",True).format(id.name))
 				skip_vca = True
 			elif not id.vs.automerge:
 				id.vs.automerge = True
@@ -407,7 +406,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 					if context.scene.rigidbody_world:
 						bpy.context.scene.rigidbody_world.enabled = prev_rbw
 
-				if any(bpy.context.selected_objects) and not shouldExportDMX():
+				if bpy.context.selected_objects and not shouldExportDMX():
 					bpy.context.scene.objects.active = bpy.context.selected_objects[0]
 					ops.object.join()
 				
@@ -509,7 +508,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 			skipped_bones = len(self.armature.pose.bones) - len(self.exportable_bones)
 			if skipped_bones:
 				print("- Skipping {} non-deforming bones".format(skipped_bones))
-		
+
 		write_func = self.writeDMX if shouldExportDMX() else self.writeSMD
 		bench.report("Post Bake")
 
@@ -518,13 +517,35 @@ class SmdExporter(bpy.types.Operator, Logger):
 		if isinstance(id, bpy.types.Object) and id.type == 'ARMATURE' and id.data.vs.action_selection == 'FILTERED':
 			for action in actionsForFilter(id.vs.action_filter):
 				bake_results[0].object.animation_data.action = action
-				self.files_exported += write_func(id, bake_results, sanitiseFilename(action.name), path)
+				self.files_exported += write_func(id, bake_results, self.sanitiseFilename(action.name), path)
 				bench.report(write_func.__name__)
 		else:
-			self.files_exported += write_func(id, bake_results, export_name, path)
+			self.files_exported += write_func(id, bake_results, self.sanitiseFilename(export_name), path)
 			bench.report(write_func.__name__)
 
 		self.armature = None
+		
+		# Source doesn't handle Unicode characters in models. Detect any unicode strings and warn the user about them.
+		unicode_tested = set()
+		def test_for_unicode(name, id, display_type):
+			if id in unicode_tested: return;
+			unicode_tested.add(id)
+
+			try:
+				name.encode('ascii')
+			except UnicodeEncodeError:
+				self.warning(get_id("exporter_warn_unicode", format_string=True).format(pgettext(display_type), name))
+
+		for bake in bake_results:
+			test_for_unicode(bake.name, bake, type(bake.src).__name__)
+			for shape_name, shape_id in bake.shapes.items():
+				test_for_unicode(shape_name, shape_id, "Shape Key")
+			if hasattr(bake.object,"objects"):
+				for ob in bake.object.objects:
+					test_for_unicode(ob.name, ob, ob.type.capitalize())
+		for mat in self.materials_used:
+			test_for_unicode(mat[0], mat[1], type(mat[1]).__name__)
+
 		
 	def getWeightmap(self,bake_result):
 		out = []
@@ -591,17 +612,18 @@ class SmdExporter(bpy.types.Operator, Logger):
 		
 	def GetMaterialName(self, ob, poly):
 		mat_name = None
+		mat_id = None
 		if not bpy.context.scene.vs.use_image_names and len(ob.material_slots) > poly.material_index:
-			mat = ob.material_slots[poly.material_index].material
-			if mat:
-				mat_name = mat.name
+			mat_id = ob.material_slots[poly.material_index].material
+			if mat_id:
+				mat_name = mat_id.name
 		if not mat_name and ob.data.uv_textures.active.data:
-			image = ob.data.uv_textures.active.data[poly.index].image
-			if image:
-				mat_name = os.path.basename(bpy.path.abspath(image.filepath))
-				if len(mat_name) == 0: mat_name = image.name
+			mat_id = ob.data.uv_textures.active.data[poly.index].image
+			if mat_id:
+				mat_name = os.path.basename(bpy.path.abspath(mat_id.filepath))
+				if not mat_name: mat_name = mat_id.name
 		if mat_name:
-			self.materials_used.add(mat_name)
+			self.materials_used.add((mat_name,mat_id))
 			return mat_name, True
 		else:
 			return "no_material", ob.draw_type != 'TEXTURED' # assume it's a collision mesh if it's not textured
@@ -637,7 +659,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 			
 	# Creates a mesh with object transformations and modifiers applied
 	def bakeObj(self,id, generate_uvs = True):
-		for bake in [bake for bake in self.bake_results if bake.src == id or bake.object == id]:
+		for bake in (bake for bake in self.bake_results if bake.src == id or bake.object == id):
 			return bake
 		
 		result = self.BakeResult(id.name)
@@ -645,8 +667,6 @@ class SmdExporter(bpy.types.Operator, Logger):
 		self.bake_results.append(result)
 
 		select_only(id)
-
-		ops.object.mode_set(mode='OBJECT')
 
 		should_triangulate = not shouldExportDMX() or id.vs.triangulate
 
@@ -662,7 +682,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 		for dupli in bpy.context.selected_objects[:]:
 			dupli.parent = id
 			duplis.append(self.bakeObj(dupli, generate_uvs = False))
-		if any(duplis):
+		if duplis:
 			for bake in duplis: bake.object.select=True
 			del duplis
 			bpy.ops.object.join()
@@ -733,7 +753,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 		shapes_invalid = False
 		for mod in id.modifiers:
 			if mod.type == 'ARMATURE' and mod.object:
-				if result.envelope or any((br for br in self.bake_results if br.envelope != mod.object)):
+				if result.envelope and any(br for br in self.bake_results if br.envelope != mod.object):
 					self.warning(get_id("exporter_err_dupeenv_arm",True).format(mod.name,id.name))
 				else:
 					self.armature_src = mod.object
@@ -792,7 +812,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 		result.object = baked
 		data = baked.data
 
-		if not any(data.polygons):
+		if not data.polygons:
 			self.error(get_id("exporter_err_nopolys", True).format(id.name))
 			return
 		
@@ -866,7 +886,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 		baked.select = True
 
 		# project a UV map
-		if generate_uvs and not any(baked.data.uv_textures):
+		if generate_uvs and not baked.data.uv_textures:
 			if len(result.object.data.vertices) < 2000:
 				ops.object.mode_set(mode='OBJECT')
 				ops.uv.smart_project()
@@ -882,7 +902,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 		full_path = os.path.realpath(os.path.join(path, name))
 
 		try:
-			f = open(full_path, 'w')
+			f = open(full_path, 'w',encoding='utf-8')
 		except Exception as err:
 			self.error(get_id("exporter_err_open", True).format(description, err))
 			return None
@@ -1007,7 +1027,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 				ob = bake.object
 				data = ob.data
 				
-				calc_norms(data)
+				data.calc_normals_split()
 
 				uv_loop = data.uv_layers.active.data
 				uv_tex = data.uv_textures.active.data
@@ -1017,7 +1037,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 				ob_weight_str = None
 				if type(bake.envelope) == str:
 					ob_weight_str = " 1 {} 1".format(self.bone_ids[bake.envelope])
-				elif not any(weights):
+				elif not weights:
 					ob_weight_str = " 0"
 				
 				bad_face_mats = 0
@@ -1062,7 +1082,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 				
 				print("- Exported {} materials".format(len(self.materials_used)))
 				for mat in self.materials_used:
-					print("   " + mat)
+					print("   " + mat[0])
 			
 			if done_header:
 				self.smd_file.write("end\n")
@@ -1092,7 +1112,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 			def _makeVertLine(i,co,norm):
 				return "{} {} {}\n".format(i, getSmdVec(co), getSmdVec(norm))
 			
-			calc_norms(bake.object.data)
+			bake.object.data.calc_normals_split()
 
 			_writeTime(0)
 			for bake in [bake for bake in bake_results if bake.object.type != 'ARMATURE']:
@@ -1110,7 +1130,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 					shape = bake.shapes.get(shape_name)
 					if not shape: continue
 
-					calc_norms(shape)
+					shape.calc_normals_split()
 					
 					vert_index = bake.offset
 					num_bad_verts = 0
@@ -1138,7 +1158,7 @@ class SmdExporter(bpy.types.Operator, Logger):
 
 		written = 1
 		if filetype == 'smd':
-			for bake in [bake for bake in bake_results if any(bake.shapes)]:
+			for bake in [bake for bake in bake_results if bake.shapes]:
 				written += self.writeSMD(id,bake_results,name,filepath,filetype='vta')
 			for name,vca in bake_results[0].vertex_animations.items():
 				written += self.writeVCA(name,vca,filepath)
@@ -1167,7 +1187,7 @@ skeleton
 		for frame, vca_ob in enumerate(vca):
 			self.smd_file.write("time {}\n".format(frame))
 
-			calc_norms(vca_ob.data)
+			vca_ob.data.calc_normals_split()
 			self.smd_file.writelines(["{} {} {}\n".format(loop.index, getSmdVec(vca_ob.data.vertices[loop.vertex_index].co), getSmdVec(loop.normal)) for loop in vca_ob.data.loops])
 			
 			if two_percent and frame % two_percent == 0:
@@ -1318,7 +1338,7 @@ skeleton
 			DmeModel_children.extend(writeBone("vcabone_{}".format(vca)))
 
 		DmeCombinationOperator = None
-		for _ in [bake for bake in bake_results if any(bake.shapes)]:
+		for _ in [bake for bake in bake_results if bake.shapes]:
 			if self.flex_controller_mode == 'ADVANCED':
 				if not hasFlexControllerSource(self.flex_controller_source):
 					self.error(get_id("exporter_err_flexctrl_undefined",True).format(name) )
@@ -1419,7 +1439,7 @@ skeleton
 			
 			format = [ keywords['pos'], keywords['norm'], keywords['texco'] ]
 			if have_weightmap: format.extend( [ keywords['weight'], keywords["weight_indices"] ] )
-			if any(bake.shapes) and bake.balance_vg:
+			if bake.shapes and bake.balance_vg:
 				format.append(keywords["balance"])
 			vertex_data["vertexFormat"] = datamodel.make_array( format, str)
 			
@@ -1438,7 +1458,7 @@ skeleton
 			
 			Indices = [None] * num_loops
 			
-			calc_norms(ob.data)
+			ob.data.calc_normals_split()
 
 			uv_layer = ob.data.uv_layers.active.data
 			
@@ -1448,7 +1468,7 @@ skeleton
 				pos[vert.index] = datamodel.Vector3(vert.co)
 				vert.select = False
 				
-				if any(bake.shapes) and bake.balance_vg:
+				if bake.shapes and bake.balance_vg:
 					try: balance[vert.index] = bake.balance_vg.weight(vert.index)
 					except: pass
 				
@@ -1469,7 +1489,7 @@ skeleton
 				if len(pos) % 50 == 0:
 					bpy.context.window_manager.progress_update(len(pos) / num_verts)
 
-			calc_norms(ob.data)
+			ob.data.calc_normals_split()
 
 			for i,loop in enumerate([ob.data.loops[i] for poly in ob.data.polygons for i in poly.loop_indices]):
 				texcoIndices[loop.index] = texco.add(datamodel.Vector2(uv_layer[loop.index].uv))
@@ -1488,7 +1508,7 @@ skeleton
 				vertex_data[keywords["weight"]] = datamodel.make_array(jointWeights,float)
 				vertex_data[keywords["weight_indices"]] = datamodel.make_array(jointIndices,int)
 			
-			if any(bake.shapes):
+			if bake.shapes:
 				vertex_data[keywords["balance"]] = datamodel.make_array(balance,float)
 				vertex_data[keywords["balance"] + "Indices"] = datamodel.make_array(Indices,int)
 			
@@ -1541,17 +1561,18 @@ skeleton
 			two_percent = int(len(bake.shapes) / 50)
 			print("Shapes: ",debug_only=True,newline=False)
 			delta_states = []
-			if any(bake.shapes):
+			if bake.shapes:
 				shape_names = []
 				num_shapes = len(bake.shapes)
 				num_correctives = 0
 				num_wrinkles = 0
-									
+				
 				for shape_name,shape in bake.shapes.items():
 					shape_names.append(shape_name)
 					
 					wrinkle_scale = 0
-					if "_" in shape_name:
+					corrective = "_" in shape_name
+					if corrective:
 						num_correctives += 1
 					else:
 						if self.flex_controller_mode == 'ADVANCED':
@@ -1584,12 +1605,11 @@ skeleton
 					shape_posIndices = []
 					shape_norms = []
 					shape_normIndices = []
-					if wrinkle_scale:
+					cache_deltas = wrinkle_scale or corrective
+					if cache_deltas:
 						delta_lengths = [None] * len(ob.data.vertices)
 						max_delta = 0
-
-					calc_norms(shape)
-
+					
 					for ob_vert in ob.data.vertices:
 						shape_vert = shape.vertices[ob_vert.index]
 
@@ -1598,24 +1618,50 @@ skeleton
 							delta_length = delta.length
 
 							if abs(delta_length) > 1e-5:
-								if wrinkle_scale: delta_lengths[ob_vert.index] = delta_length
+								if cache_deltas:
+									delta_lengths[ob_vert.index] = delta_length
 								shape_pos.append(datamodel.Vector3(delta))
 								shape_posIndices.append(ob_vert.index)
 
+					if corrective:
+						corrective_target_shapes = []
+						for corrective_shape_name in shape_name.split("_"):
+							corrective_target = bake.shapes.get(corrective_shape_name)
+							if corrective_target:
+								corrective_target_shapes.append(corrective_target)
+							else:
+							   self.warning(get_id("exporter_err_missing_corrective_target", format_string=True).format(shape_name, corrective_shape_name))
+							   continue
+
+							# We need the absolute normals as generated by Blender
+							for shape_vert in shape.vertices:
+								if delta_lengths[shape_vert.index]:
+									shape_vert.co -= ob.data.vertices[shape_vert.index].co - corrective_target.vertices[shape_vert.index].co
+
+					shape.calc_normals_split()
+
 					for ob_loop in ob.data.loops:
 						shape_loop = shape.loops[ob_loop.index]
+						norm = shape_loop.normal
 
-						norm = Vector(shape_loop.normal)
-						if abs(1.0 - norm.dot(ob_loop.normal)) > epsilon[0]:
-							shape_norms.append(datamodel.Vector3(norm - ob_loop.normal))
+						if corrective:
+							base = Vector(ob_loop.normal)
+							for corrective_target in corrective_target_shapes:
+								# Normals for corrective shape keys are deltas from those of the deformed mesh, not the basis shape.
+								base += corrective_target.loops[shape_loop.index].normal - ob_loop.normal
+						else:
+							base = ob_loop.normal
+
+						if norm.dot(base.normalized()) < 1 - 1e-3:
+							shape_norms.append(datamodel.Vector3(norm - base))
 							shape_normIndices.append(shape_loop.index)
 
 						if wrinkle_scale:
-							delta_len = delta_lengths[loop.vertex_index]
+							delta_len = delta_lengths[ob_loop.vertex_index]
 							if delta_len:
 								max_delta = max(max_delta,delta_len)
 								wrinkle.append(delta_len)
-								wrinkleIndices.append(texcoIndices[loop.index])
+								wrinkleIndices.append(texcoIndices[ob_loop.index])
 
 					del shape_vert
 
@@ -1635,19 +1681,22 @@ skeleton
 						num_wrinkles += 1
 						DmeVertexDeltaData[keywords["wrinkle"]] = datamodel.make_array(wrinkle,float)
 						DmeVertexDeltaData[keywords["wrinkle"] + "Indices"] = datamodel.make_array(wrinkleIndices,int)
-					
-					del bake.shapes[shape_name]
-					bpy.data.meshes.remove(shape)
-					del shape
+										
 					bpy.context.window_manager.progress_update(len(shape_names) / num_shapes)
 					if two_percent and len(shape_names) % two_percent == 0:
 						print(".",debug_only=True,newline=False)
+
+				if bpy.app.debug_value <= 1:
+					for shape in bake.shapes.values():					
+						bpy.data.meshes.remove(shape)
+						del shape
+					bake.shapes.clear()
 
 				print(debug_only=True)
 				bench.report("shapes")
 				print("- {} flexes ({} with wrinklemaps) + {} correctives".format(num_shapes - num_correctives,num_wrinkles,num_correctives))
 			
-			calc_norms(ob.data)
+			ob.data.calc_normals_split()
 			vca_matrix = ob.matrix_world.inverted()
 			for vca_name,vca in bake_results[0].vertex_animations.items():
 				frame_shapes = []
@@ -1663,7 +1712,7 @@ skeleton
 					shape_norms = []
 					shape_normIndices = []
 
-					calc_norms(vca_ob.data)
+					vca_ob.data.calc_normals_split()
 
 					for shape_loop in vca_ob.data.loops:
 						shape_vert = vca_ob.data.vertices[shape_loop.vertex_index]
@@ -1733,7 +1782,7 @@ skeleton
 					self.exportId(bpy.context,vca_arm)
 					written += 1
 
-			if any(delta_states):
+			if delta_states:
 				DmeMesh["deltaStates"] = datamodel.make_array(delta_states,datamodel.Element)
 				DmeMesh["deltaStateWeights"] = DmeMesh["deltaStateWeightsLagged"] = \
 					datamodel.make_array([datamodel.Vector2([0.0,0.0])] * len(delta_states),datamodel.Vector2)
