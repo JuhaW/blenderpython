@@ -145,7 +145,7 @@ class TriLighting(bpy.types.Operator):
 
 
         return {'FINISHED'}
-
+'''
 class Tri_Light(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
@@ -158,7 +158,7 @@ class Tri_Light(bpy.types.Panel):
         layout = self.layout
         self.layout.label(text="Tri-Lighting:")
         self.layout.operator("object.trilighting", text="Add Tri-Lighting")
-
+'''
 
 def register():
 

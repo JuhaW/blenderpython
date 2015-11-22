@@ -38,7 +38,8 @@ class SelectModePieOperator(bpy.types.Operator):
 	def execute(self, context):
 		bpy.ops.wm.call_menu_pie(name=SelectModePie.bl_idname)
 		return {'FINISHED'}
-class SelectModePie(bpy.types.Menu): #
+
+class SelectModePie(bpy.types.Menu):
 	bl_idname = "VIEW3D_MT_edit_mesh_pie_select_mode"
 	bl_label = "Mesh selection mode"
 	bl_description = "Is a pie menu selection of mesh"
@@ -60,6 +61,7 @@ class ProportionalPieOperator(bpy.types.Operator):
 		else:
 			context.scene.tool_settings.proportional_edit = "DISABLED"
 		return {'FINISHED'}
+
 class ProportionalPie(bpy.types.Menu): #
 	bl_idname = "VIEW3D_MT_edit_mesh_pie_proportional"
 	bl_label = "Proportional edit"
@@ -69,6 +71,7 @@ class ProportionalPie(bpy.types.Menu): #
 		self.layout.menu_pie().operator(SetProportionalEdit.bl_idname, text="Enabling", icon="PROP_ON").mode = "ENABLED"
 		self.layout.menu_pie().operator(SetProportionalEdit.bl_idname, text="Projection (2D)", icon="PROP_ON").mode = "PROJECTED"
 		self.layout.menu_pie().operator(SetProportionalEdit.bl_idname, text="Connection", icon="PROP_CON").mode = "CONNECTED"
+
 class SetProportionalEdit(bpy.types.Operator): #
 	bl_idname = "mesh.set_proportional_edit"
 	bl_label = "Set the proportional editing modes"
@@ -91,23 +94,21 @@ class PieMenu(bpy.types.Menu):
 	bl_description = "Is a pie on the mesh editing"
 	
 	def draw(self, context):
-		self.layout.operator(SelectModePieOperator.bl_idname, icon="PLUGIN")
-		self.layout.operator(ProportionalPieOperator.bl_idname, icon="PLUGIN")
+		self.layout.operator(SelectModePieOperator.bl_idname, icon="COLOR")
+		self.layout.operator(ProportionalPieOperator.bl_idname, icon="COLOR")
 
 class ShortcutMenu(bpy.types.Menu):
 	bl_idname = "VIEW3D_MT_edit_mesh_shortcut"
-	bl_label = "Shortcut for registration"
-	bl_description = "Looks useful functions is to register the shortcut"
+	bl_label = "Shortcuts"
+	bl_description = "Experimental Shortcuts menu"
 	
 	def draw(self, context):
-		self.layout.operator(ToggleMeshSelectMode.bl_idname, icon="PLUGIN")
-
-
+		self.layout.operator(ToggleMeshSelectMode.bl_idname, icon="EDITMODE_HLT")
 
 # menu
 def menu(self, context):
 
 	self.layout.separator()
-	self.layout.menu(ShortcutMenu.bl_idname, icon="PLUGIN")
-	self.layout.menu(PieMenu.bl_idname, icon="PLUGIN")
+	self.layout.menu(ShortcutMenu.bl_idname, icon="LINE_DATA")
+	self.layout.menu(PieMenu.bl_idname, icon="COLOR")
 

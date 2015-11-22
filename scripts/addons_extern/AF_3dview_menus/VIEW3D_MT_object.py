@@ -19,7 +19,7 @@ class CopyPieOperator(bpy.types.Operator):
 class CopyPie(bpy.types.Menu):
 	bl_idname = "VIEW3D_MT_object_pie_copy"
 	bl_label = "Copy Pie"
-	bl_description = "Copy pie menu of is about the object"
+	bl_description = "Copy pie menu (test)"
 	
 	def draw(self, context):
 		self.layout.menu_pie().operator("view3d.copybuffer", icon="COPY_ID")
@@ -70,8 +70,8 @@ class SetObjectMode(bpy.types.Operator): #
 
 class SubdivisionSetPieOperator(bpy.types.Operator):
 	bl_idname = "object.subdivision_set_pie_operator"
-	bl_label = "Sabusafu Pie"
-	bl_description = "This is a pie menu to set the level of Sabusafu"
+	bl_label = "Subsurface Pie"
+	bl_description = "This is a pie menu to set the level of Subsurface modifier"
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	def execute(self, context):
@@ -112,6 +112,7 @@ class DrawTypePie(bpy.types.Menu):
 		self.layout.menu_pie().operator(SetDrawType.bl_idname, text="Wire", icon="WIRE").type = "WIRE"
 		self.layout.menu_pie().operator(SetDrawType.bl_idname, text="Solid", icon="SOLID").type = "SOLID"
 		self.layout.menu_pie().operator(SetDrawType.bl_idname, text="Textured", icon="POTATO").type = "TEXTURED"
+
 
 class SetDrawType(bpy.types.Operator): #
 	bl_idname = "object.set_draw_type"
