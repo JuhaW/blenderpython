@@ -241,10 +241,6 @@ class VIEW3D_MT_transform_object(VIEW3D_MT_transform_base):
         VIEW3D_MT_transform_base.draw(self, context)
 
         # object-specific option follow...
-        layout.separator()
-        layout.menu("VIEW3D_MT_object_clear")
-        layout.menu("VIEW3D_MT_object_apply")
-        layout.separator()
 
         layout.operator("transform.translate", text="Move Texture Space").texture_space = True
         layout.operator("transform.resize", text="Scale Texture Space").texture_space = True
@@ -1168,24 +1164,28 @@ class VIEW3D_MT_object(Menu):
         layout.operator("object.delete", text="Delete...").use_global = False
         layout.separator()
 		
-        layout.menu("VIEW3D_MT_transform_object")
         layout.menu("VIEW3D_MT_mirror")
         layout.menu("VIEW3D_MT_object_parent")
         layout.menu("VIEW3D_MT_object_group")
         layout.menu("VIEW3D_MT_snap")
         layout.separator()
+
+        layout.menu("VIEW3D_MT_transform_object")
+        layout.menu("VIEW3D_MT_object_clear")
+        layout.menu("VIEW3D_MT_object_apply")
+        layout.separator()
+
         layout.operator("object.duplicate_move")
         layout.operator("object.join")
         layout.operator("object.move_to_layer", text="Move to Layer...")
-		
         layout.separator()
 
         layout.menu("VIEW3D_MT_make_links", text="Make Links...")
         layout.menu("INFO_MT_object_relations")
         layout.menu("VIEW3D_MT_object_constraints")
         layout.menu("VIEW3D_MT_object_track")
-
         layout.separator()
+
         layout.menu("VIEW3D_MT_object_animation")
         layout.separator()		
         layout.menu("VIEW3D_MT_object_game")
@@ -2016,7 +2016,7 @@ class VIEW3D_MT_pose_group(Menu):
 
             layout.separator()
 
-            #layout.operator_context = 'INVOKE_AREA'
+            # layout.operator_context = 'INVOKE_AREA'
             layout.operator("pose.group_unassign")
             layout.operator("pose.group_remove")
 
@@ -3058,7 +3058,7 @@ class VIEW3D_PT_view3d_shading(Panel):
             col.prop(view, "use_matcap")
             if view.use_matcap:
                 col.template_icon_view(view, "matcap_icon")
-        elif view.viewport_shade == 'TEXTURED':
+        if view.viewport_shade == 'TEXTURED':
             if scene.render.use_shading_nodes or gs.material_mode != 'GLSL':
                 col.prop(view, "show_textured_shadeless")
 
@@ -3304,7 +3304,7 @@ class VIEW3D_PT_background_image(Panel):
                         box.template_image(bg, "image", bg.image_user, compact=True)
                         has_bg = True
 
-                        if use_multiview and bg.view_axis in {'CAMERA','ALL'}:
+                        if use_multiview and bg.view_axis in {'CAMERA', 'ALL'}:
                             box.prop(bg.image, "use_multiview")
 
                             column = box.column()
