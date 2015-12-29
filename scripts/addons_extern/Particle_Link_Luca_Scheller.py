@@ -26,7 +26,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
-    "category": "Particle"}
+    "category": "Particle Systems"}
 
 import bpy
 from bpy.app.handlers import persistent
@@ -483,6 +483,9 @@ def unregister():
     bpy.utils.unregister_class(PL_Generate_ParticleLinks) 
     bpy.utils.unregister_class(PL_Generate_ParticleLinks_RandomSeed) 
     bpy.utils.unregister_class(PL_Settings)  
+
+    # App Handlers
+    bpy.app.handlers.load_post.remove(PL_Addon_ExecutionFunction)
 
     # PL Frame Handlers
     for x in bpy.app.handlers.frame_change_post:
