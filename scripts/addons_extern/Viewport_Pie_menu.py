@@ -23,7 +23,7 @@ bl_info = {
     "description": "A pie menu for selecting editor or viewport type, "
                    "with split and join functions.",
     "location": "Hotkey: SHIFT + Spacebar, Help: Addon file",
-    "category": "Pie menu"}
+    "category": "Pie Menu"}
 
 import bpy
 
@@ -80,6 +80,7 @@ class PieAreaViews(Menu):
                      icon='VIEW3D').variable = "VIEW_3D"
 
         pie.operator("area.joinarea", text="Join", icon='X')
+        # pie.operator("wm.call_menu_pie", text="", icon='')
         pie.operator("wm.call_menu_pie", text="Split",
                      icon='SPLITSCREEN').name = "pie.split_viewport"
         pie.operator("wm.call_menu_pie", text="Utils",
