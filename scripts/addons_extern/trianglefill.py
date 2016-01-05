@@ -28,7 +28,7 @@ bl_info = {
     "description": "Fills the selected face with evenly sized triangles",
     "warning": "",
     "wiki_url": "",
-    "category": "",
+    "category": "Mesh",
     }
 
 import bpy
@@ -47,13 +47,13 @@ class Plane:
         self.x_dir = (v2 - self.orig).normalized()
         self.y_dir = v3 - self.orig
         self.y_dir = (self.y_dir - self.y_dir.project(self.x_dir)).normalized()
-    
+
     def to_2d(self, p):
         p = p - self.orig
         x = p.dot(self.x_dir)
         y = p.dot(self.y_dir)
         return Vector([x,y])
-    
+
     def to_3d(self, p):
         return self.orig + self.x_dir * p.x + self.y_dir * p.y
 
@@ -86,21 +86,21 @@ class Polygon:
                 break
         else:
             raise Exception("Could not find non-colinear pair of edges")
-        
+
         self.points = [self.plane.to_2d(p) for p in points]
         self.min_x = min([p.x for p in self.points])
         self.min_y = min([p.y for p in self.points])
         self.max_x = max([p.x for p in self.points])
         self.max_y = max([p.y for p in self.points])
-    
+
     def shortest_edge_length(self):
         '''Returns length of the shortest polygon edge'''
         return min((p1 - p2).magnitude for p1, p2 in iter_tuples(self.points, 2))
-    
+
     def average_edge_length(self):
         '''Returns average length of polygon edges'''
         return sum((p1 - p2).magnitude for p1, p2 in iter_tuples(self.points, 2)) / len(self.points)
-    
+
     def contains(self, point):
         '''Returns true if the 2D point is inside the polygon.'''
         # From: http://blenderartists.org/forum/showthread.php?229303-Point-in-Polygon-Script
@@ -117,7 +117,7 @@ class Polygon:
                     inside = not inside
             p1x,p1y = p2x,p2y
         return inside
-    
+
     def edge_distance(self, point):
         '''Given a 2D point, returns the closest point on polygon edge and the distance to it.'''
         best = None
@@ -152,7 +152,7 @@ class TriangleFill(bpy.types.Operator):
         unit='LENGTH',
         description='Adjust target edge length as percentage of current average edge length.'
     )
-    
+
     only_edges = bpy.props.BoolProperty(
         name = "Add only edges",
         default = False
@@ -160,33 +160,33 @@ class TriangleFill(bpy.types.Operator):
 
     def execute(self, context):
         start = time.time()
-    
+
         # Load the bmesh from current edit mode object
         obj = bpy.context.object
         bm = bmesh.from_edit_mesh(obj.data)
         face = bm.faces.active # TODO: Allow selecting multiple faces
-        
+
         # Compute target length of each edge
         poly = Polygon([v.co for v in face.verts])
         targetlen = self.edge_length * poly.average_edge_length() / 100.0
-        
+
         # Check if there are any overly long edges that we should subdivide
         for edge in list(face.edges):
             length = (edge.verts[0].co - edge.verts[1].co).magnitude
             cuts = round(length / targetlen) - 1
             if cuts >= 1:
                 bmesh.ops.subdivide_edges(bm, edges = [edge], cuts = cuts)
-        
+
         # Cast the face into 2D coordinate space
         poly = Polygon([v.co for v in face.verts])
-        
+
         # Build a mapping from resulting 2D points back to the original vertices.
         # We need this when building 3D faces later.
         vertidx = dict((id(poly.points[i]), face.verts[i]) for i in range(len(face.verts)))
-        
+
         print("Loading: %6.3f s" % (time.time() - start))
         start = time.time()
-        
+
         # Generate vertices at each triangle grid intersection inside the polygon
         newpoints = []
         locationidx = {}
@@ -201,12 +201,12 @@ class TriangleFill(bpy.types.Operator):
             for xidx in range(xsteps):
                 mxidx = xidx * 2 + (1 - yidx % 2)
                 x = poly.min_x + offsetx + mxidx * xstepsize / 2
-                
+
                 p = Vector([x, y])
                 if poly.contains(p) and poly.edge_distance(p)[1] > xstepsize / 4:
                     locationidx[(mxidx, yidx)] = p
                     newpoints.append(p)
-        
+
         # Index from point id() to point instance.
         # To make it possible to ignore duplicate edges, the items must be hashable, so
         # the code above uses id() of points.
@@ -214,7 +214,7 @@ class TriangleFill(bpy.types.Operator):
         allpoints = newpoints + poly.points
         pointidx = dict((id(p), p) for p in allpoints)
         orig_edges = {sortedge((id(p1), id(p2))) for p1, p2 in iter_tuples(poly.points, 2)}
-        
+
         # Generate faces and edges for the regularly spaced inner area.
         regular_edges = set()
         regular_faces = set()
@@ -225,25 +225,25 @@ class TriangleFill(bpy.types.Operator):
             #   c
             #  / \
             # p3--p4
-            
+
             p1 = locationidx.get((xidx-1,yidx-1))
             p2 = locationidx.get((xidx+1,yidx-1))
             c = locationidx.get((xidx,yidx))
             p3 = locationidx.get((xidx-1,yidx+1))
             p4 = locationidx.get((xidx+1,yidx+1))
-            
+
             if p1 and p2 and c:
                 regular_edges |= {sortedge((id(p1), id(p2))),
                                   sortedge((id(p2), id(c))),
                                   sortedge((id(c), id(p1)))}
                 regular_faces |= {sortface(pointidx, (id(p1), id(p2), id(c)))}
-            
+
             if p3 and p4 and c:
                 regular_edges |= {sortedge((id(p3), id(p4))),
                                   sortedge((id(p4), id(c))),
                                   sortedge((id(c), id(p3)))}
                 regular_faces |= {sortface(pointidx, (id(p3), id(p4), id(c)))}
-        
+
         # Figure out which vertices lie outside the regular inner area
         edgecounts = dict((id(p),0) for p in newpoints)
         for p1, p2 in regular_edges:
@@ -252,10 +252,10 @@ class TriangleFill(bpy.types.Operator):
         borderpoints = {p for p, c in edgecounts.items() if c < 6}
         regular_edges_on_border = {e for e in regular_edges
                                      if e[0] in borderpoints and e[1] in borderpoints}
-        
+
         print("Regulars: %6.3f s" % (time.time() - start))
         start = time.time()
-        
+
         # Connecting the border area vertices:
         # Generate edges between vertices that are close enough to each other
         border_edge_candidates = set()
@@ -265,7 +265,7 @@ class TriangleFill(bpy.types.Operator):
                 if newedge not in regular_edges and newedge not in orig_edges:
                     if (pointidx[p1] - pointidx[p2]).magnitude <= targetlen * 2:
                         border_edge_candidates.add(newedge)
-        
+
         # When edges intersect each other, keep only the shortest edge.
         discardededges = set()
         border_edge_candidates = list(border_edge_candidates)
@@ -277,7 +277,7 @@ class TriangleFill(bpy.types.Operator):
                         # Always favor the regular edges
                         discardededges.add(e1)
                         break
-            
+
             if e1 not in discardededges:
                 for e2 in border_edge_candidates[i+1:]:
                     if (e1[0] not in e2) and (e1[1] not in e2) and (e2 not in discardededges):
@@ -315,19 +315,19 @@ class TriangleFill(bpy.types.Operator):
                 e3 = [e for e in e3_candidates if p3 in e]
                 if e3:
                     border_faces.add(sortface(pointidx, (e1[0], e1[1], p3)))
-    
+
         print("Border faces: %6.3f s" % (time.time() - start))
         start = time.time()
-    
+
         # Add all new points to the bmesh as 3D vertices.
         # Update the vertidx mapping also.
         for p in newpoints:
             vertidx[id(p)] = bm.verts.new(poly.plane.to_3d(p))
-        
+
         if regular_faces or border_faces:
             # Remove the original selected face
             bmesh.ops.delete(bm, geom=[bm.faces.active], context=3)
-        
+
         if self.only_edges:
             # For debugging: show the edges instead of faces
             for p1, p2 in border_edges | regular_edges:
@@ -338,9 +338,9 @@ class TriangleFill(bpy.types.Operator):
             for p1, p2, p3 in (regular_faces | border_faces):
                 f = bm.faces.new((vertidx[p1], vertidx[p2], vertidx[p3]))
                 f.normal_update()
-        
+
         bmesh.update_edit_mesh(obj.data)
-        
+
         print("Storage: %6.3f s" % (time.time() - start))
         start = time.time()
         return {'FINISHED'}
@@ -353,5 +353,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
-
