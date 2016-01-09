@@ -30,7 +30,7 @@ bl_info = {
                 "/Scripts/Render/Render_Shots",
     "tracker_url": "http://projects.blender.org/tracker/index.php?func="\
                 "detail&aid=32122&group_id=153&atid=467",
-    "category": "Render"}
+    "category": "Camera"}
 
 
 import bpy

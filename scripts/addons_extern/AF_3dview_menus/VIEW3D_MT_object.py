@@ -45,10 +45,11 @@ class ObjectModePie(bpy.types.Menu):
 		self.layout.menu_pie().operator(SetObjectMode.bl_idname, text="Sculpt", icon="SCULPTMODE_HLT").mode = "SCULPT"
 		self.layout.menu_pie().operator(SetObjectMode.bl_idname, text="Weight Paint", icon="WPAINT_HLT").mode = "WEIGHT_PAINT"
 		self.layout.menu_pie().operator(SetObjectMode.bl_idname, text="Object", icon="OBJECT_DATAMODE").mode = "OBJECT"
-		self.layout.menu_pie().operator(SetObjectMode.bl_idname, text="Particle Edit", icon="PARTICLEMODE").mode = "PARTICLE_EDIT"
+		self.layout.menu_pie().operator(SetObjectMode.bl_idname, text="", icon="PARTICLEMODE").mode = "PARTICLE_EDIT"
 		self.layout.menu_pie().operator(SetObjectMode.bl_idname, text="Edit", icon="EDITMODE_HLT").mode = "EDIT"
 		self.layout.menu_pie().operator(SetObjectMode.bl_idname, text="Texture Paint", icon="TPAINT_HLT").mode = "TEXTURE_PAINT"
 		self.layout.menu_pie().operator(SetObjectMode.bl_idname, text="Vertex Paint", icon="VPAINT_HLT").mode = "VERTEX_PAINT"
+
 
 class SetObjectMode(bpy.types.Operator): #
 	bl_idname = "object.set_object_mode"

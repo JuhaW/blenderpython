@@ -40,7 +40,7 @@ bl_info = {
 "blender": (2, 6, 3),
 "api": 46461,
 "location": "UVEditor>UVs>Weld/Align>UVDistribute",
-"category": "Mesh",
+"category": "UV",
 "description": "Evenly distributes UVs to along Horizontal and Vertical",
 "warning": "Beta",
 "wiki_url": "",

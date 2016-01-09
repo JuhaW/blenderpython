@@ -25,7 +25,7 @@ bl_info = {
     "description": "Adds some tools for improve the blender to unreal engine workflow",
     "warning": "",
     "wiki_url": "http://www.lluisgarcia.es/ue-tools-addon/",
-    "category": "UE4 Tools"}
+    "category": "Tools"}
 
 
 

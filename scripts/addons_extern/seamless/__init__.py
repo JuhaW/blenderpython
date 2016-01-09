@@ -3235,16 +3235,14 @@ def draw_callback_seamless(context):
 # Init Stuff
 def install_draw_callback(scene):
 	bpy.app.handlers.scene_update_post.remove(install_draw_callback)
-
-	global uperf
-	uperf = bpy.context.user_preferences.addons[__name__].preferences
-
 	global cb_handle
 	cb_handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_seamless, (bpy.context,), 'WINDOW', 'POST_VIEW')
 
 def register():
 	bpy.app.handlers.scene_update_post.append(install_draw_callback)
 	bpy.utils.register_module(__name__)
+	global uperf
+	uperf = bpy.context.user_preferences.addons[__name__].preferences
 	bpy.types.PARTICLE_PT_context_particles.append(particle_refresh)
 
 def unregister():

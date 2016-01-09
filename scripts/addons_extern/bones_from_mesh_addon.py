@@ -4,11 +4,12 @@
 
 bl_info = {
     "name": "Armature from Mesh",
-    "version": (0, 1, 4),
-    "blender": (2, 7, 5),
+    "author": "liero",
+    "version": (0, 1, 3),
+    "blender": (2, 6, 3),
     "location": "View3D > Tool Shelf",
     "description": "Grows a chain of bones from edge loops in geometry",
-    "category": "Rigging"}
+    "category": "Object"}
 
 import bpy, mathutils
 from mathutils import Vector
@@ -110,7 +111,7 @@ class BB(bpy.types.Operator):
             scn.objects.active = obj
             for t in range(self.numb):
                 bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.object.vertex_group_assign_new()
+                bpy.ops.object.vertex_group_assign(new=True)
                 for m in range(self.skip+1):
                     bpy.ops.mesh.select_more()
                 bpy.ops.object.vertex_group_deselect()

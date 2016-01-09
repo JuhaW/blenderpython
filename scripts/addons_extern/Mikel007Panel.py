@@ -9,7 +9,7 @@ bl_info = {
     "description": "Mikel007 addons",
     "warning": "",
     "wiki_url": "",
-    "category": "User Interface"}
+    "category": "Tools"}
 
 #Blender phyton import
 

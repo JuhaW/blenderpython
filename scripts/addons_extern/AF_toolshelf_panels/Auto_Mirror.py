@@ -169,6 +169,7 @@ class BisectMirror(bpy.types.Panel):
         layout = self.layout
         if bpy.context.object and bpy.context.object.type == 'MESH':
             layout.operator("object.automirror")
+            layout.prop(context.object, 'location')
             layout.prop(context.scene, "AutoMirror_axis", text="Mirror Axis", expand=True)
             layout.prop(context.scene, "AutoMirror_orientation", text="Orientation")
             layout.prop(context.scene, "AutoMirror_threshold", text="Threshold")

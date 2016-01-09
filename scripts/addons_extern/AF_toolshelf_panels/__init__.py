@@ -24,12 +24,14 @@ if "bpy" in locals():
     importlib.reload(display_tools)
     importlib.reload(curve_convert0_7)
     importlib.reload(bevel_curve)
+    importlib.reload(Auto_Mirror)
 
 else:
     from . import analyse_dicom_3d_models
     from . import display_tools
     from . import curve_convert0_7
     from . import bevel_curve
+    from . import Auto_Mirror
 
 
 bl_info = {

@@ -11,6 +11,7 @@ bl_info={
         #'warning': 'pmx importer/exporter is under development', 
         'wiki_url': 'https://github.com/ousttrue/pymeshio',
         'support': 'COMMUNITY',
+        'category': 'Import-Export'
         }
 
 

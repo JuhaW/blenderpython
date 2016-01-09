@@ -24,7 +24,7 @@ bl_info = {
     "blender": (2, 68, 0),
     "location": "View3D > Toolshelf > Turnaround camera",
     "description": "Add a camera rotation around selected object.",
-    "category": "3D View"}
+    "category": "Camera"}
 
 
 import bpy

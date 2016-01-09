@@ -26,7 +26,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
-    "category": "Particle Systems"}
+    "category": "Particle"}
 
 import bpy
 from bpy.app.handlers import persistent

@@ -113,7 +113,7 @@ class batch:
           Execute the operator.
         '''
 
-        # auto
+        # main
         function.batch.auto.main(context)
         return {'FINISHED'}
 
@@ -879,8 +879,12 @@ class batch:
       # option
       option = context.screen.batchNameSettings
 
+      column = layout.column(align=True)
+
+      row = column.row(align=True)
+
       # batch type
-      layout.prop(option, 'batchType', expand=True)
+      row.prop(option, 'batchType', expand=True)
 
       # column
       column = layout.column(align=True)
@@ -950,6 +954,7 @@ class batch:
       row.prop(option, 'nodeGroups', text='', icon='NODETREE')
       row.prop(option, 'texts', text='', icon='TEXT')
 
+
       # row
       row = column.row()
       row.separator()
@@ -991,14 +996,44 @@ class batch:
       row.label(text='Trim End:')
       row.prop(option, 'trimEnd', text='')
 
+      # row
+      row = column.row()
+
+      # separator
+      row.separator()
+
+      # sort duplicates
+
+      # row
+      row = column.row(align=True)
+      row.prop(option, 'sort', text='Sort Duplicates', toggle=True)
+      row.prop(option, 'padding', text='Padding')
+      row.prop(option, 'start', text='Start at')
+
+      # sub
+      sub = row.row(align=True)
+      sub.scale_x = 0.1
+      sub.prop(option, 'separator', text='')
+      row.prop(option, 'sortOnly', text='', icon='LOCKED')
+
     # execute
     def execute(self, context):
       '''
         Execute the operator.
       '''
 
-      # name
+      # main
       function.batch.main(context)
+
+      # info messege
+      if function.batch.count != 1:
+        self.report({'INFO'}, str(function.batch.count) + ' datablocks were renamed.')
+      else:
+        self.report({'INFO'}, str(function.batch.count) + ' datablock was renamed.')
+
+      # reset batch count
+      function.batch.count = 0
+
       return {'FINISHED'}
 
     # invoke

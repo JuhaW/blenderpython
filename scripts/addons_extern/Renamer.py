@@ -19,7 +19,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "tracker_url": "http://le-terrier-de-lapineige.over-blog.com/contact",
-    "category": "Scene"}
+    "category": "Object"}
 
 import bpy
 

@@ -20,9 +20,9 @@
 
 bl_info = {
     "name": "Nikitron tools",
-    "version": (2, 1, 0),
-    "blender": (2, 7, 5), 
-    "category": "Object",
+    "version": (2, 1, 1),
+    "blender": (2, 7, 5),  
+    "category": "Tools",
     "author": "Nikita Gorodetskiy",
     "location": "object",
     "description": "Nikitron tools - vertices and object names, curves to 3d, material to object mode, spread objects, bounding boxes",
@@ -57,7 +57,8 @@ my_str_classes = [
                 'Curves_section', 'verticesNum_separator', 'shift_vers',
                 'hook', 'maxvers', 'Mesh_section', 'toolsetNT',
                 'NTTextMeshWeld', 'areaseps', 'areacoma',
-                'volume',
+                'volume', 'NTManifestGenerator', 'NTbezierOrdering',
+                'NTduplicat',
                 ]
                 
 my_var_names = [] # extend with veriables names
@@ -76,7 +77,7 @@ ru_dict = [
                 'КРИВЫЕ', 'Верш', 'Сдвиг',
                 'Крюк', 'МаксВер', 'СЕТКА', 'ИНСТРУМЕНТЫ НТ',
                 'ТЕКСТ+СЕТКА', 'Разделитель', 'Точка',
-                'Объём'
+                'Объём', 'МаниФест', 'Безье выпрямить', 'Дубликаты',
                 ]
                 
 en_dict = [
@@ -91,7 +92,7 @@ en_dict = [
                 'CURVES', 'Vers', 'Shift',
                 'Hook', 'MaxVers', 'MESH', 'TOOLSET NT',
                 'TEXT+MESH', 'Separator', 'Coma',
-                'Volume',
+                'Volume', 'ManiFest', 'Good bezier', 'Duplicats'
                 ]
 
 area_seps = [(';',';',';'),('    ','tab','    '),(',',',',','),(' ','space',' ')]
@@ -171,10 +172,85 @@ def maxim():
             maxim = min(len1, len2)
             return maxim
 
+def NTmaketext(name):
+    texts = bpy.data.texts.items()
+    exists = False
+    for t in texts:
+        if bpy.data.texts[t[0]].name == name:
+            exists = True
+            break
+    if not exists:
+        bpy.data.texts.new(name)
+
 lang_dict_ru = nt_make_lang(my_str_classes, ru_dict)
 lang_dict_en = nt_make_lang(my_str_classes, en_dict)
 vert_max = 0
 nt_lang_panel()
+
+
+
+
+
+
+class NTduplicat(bpy.types.Operator):
+    """дубликатирует"""
+    bl_idname = "object.nt_duplicat"
+    bl_label = 'ДУБЛИКАТИТ'
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        obj = bpy.context.selected_objects
+
+        o = bpy.context.active_object
+        locata = o.matrix_local.copy()
+        data = o.data
+        name = o.name
+        for o in obj:
+            if o.name != name:
+                ob = bpy.data.objects.new(name+'_duplicatio', data)
+                ob.matrix_local = locata
+                bpy.context.scene.objects.link(ob)
+                ob.parent = o
+        return {'FINISHED'}
+
+
+class NTbezierOrdering(bpy.types.Operator):
+    """Делает прямые безье прямыми для перевода в сетку"""
+    bl_idname = "object.nt_bezier_making_good"
+    bl_label = 'ДЕЛАТЬ_БЕЗЬЕ_ХОРОШО'
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    допуск = bpy.props.FloatProperty(name='допуск', default=0.001)
+    
+    def bezier_make_good(self, curve):
+        for spline in curve.splines:
+            spline.type == 'BEZIER'
+            for i in range(len(spline.bezier_points)):
+                if i != 0:
+                    poileft = spline.bezier_points[i-1]
+                    poiright = spline.bezier_points[i]
+                    if poileft.handle_right_type != 'VECTOR' and poiright.handle_left_type != 'VECTOR':
+                        pl,pr,hl,hr = poileft.co, poiright.co, poileft.handle_right, poiright.handle_left
+                        n1 = (pl-pr)
+                        n1.normalize()
+                        n2 = (pl-hl)
+                        n2.normalize()
+                        n3 = (pl-hr)
+                        n3.normalize()
+                        #ugly solution
+                        if (n1-n2).length <= self.допуск:
+                            poileft.handle_right_type = 'VECTOR'
+                        if (n1-n3).length <= self.допуск:
+                            poiright.handle_left_type = 'VECTOR'
+    
+    def execute(self, context):
+        obj = bpy.context.selected_objects
+        for o in obj:
+            curve = o.data
+            self.bezier_make_good(curve)
+        return {'FINISHED'}
+
+
 
 class NTTextMeshWeld(bpy.types.Operator):
     """Соединение текстов и сеток если матрицы совпадают"""
@@ -208,6 +284,7 @@ class NTTextMeshWeld(bpy.types.Operator):
                 bpy.ops.object.select_all(action='TOGGLE')
         return {'FINISHED'}
 
+
 class NTcsvCalc(bpy.types.Operator):
         
     def calcarea(self):
@@ -231,14 +308,7 @@ class NTcsvCalc(bpy.types.Operator):
         else:
             tab = '    '
         coma = bpy.context.scene.nt_areacoma
-        texts = bpy.data.texts.items()
-        exists = False
-        for t in texts:
-            if bpy.data.texts[t[0]].name == 'Materials.csv':
-                exists = True
-                break
-        if not exists:
-            bpy.data.texts.new('Materials.csv')
+        NTmaketext('Materials.csv')
 
 
         for_file = 'Объект'+ sep + 'Материал' + sep + 'Площадь м2'+sep + 'Примечание\n\n'
@@ -463,6 +533,58 @@ class CliffordAttractors(bpy.types.Operator):
         # CREATE OBJECT
         new_obj = object_data_add(bpy.context, crv)
         return {'FINISHED'}
+
+class NTManifestGenerator(bpy.types.Operator):
+    """Генератор манифестов"""
+    bl_idname = "object.nt_manifest_generator"
+    bl_label = "манифест"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    manifest = bpy.props.StringProperty(name='манифест', default='')
+    
+    def execute(self, context):
+        #a = context.window_manager
+        #a.progress_begin(0,1)
+        self.main()
+        #a.progress_update(0.5)
+        #a.progress_end()
+        return {'FINISHED'}
+    
+    def w(self, a):
+        return random.choice(a)
+    
+    def main(self):
+        a1 = ['Дорогие ',]
+        a2 = ['друзья! ', 'соратники! ', 'братья! ', 'сёстры! ', 'ляшки! ']
+        a3 = ['Мы собрались здесь сегодня чтобы сказать наше решительное ']
+        a4 = ['да','нет','геть','вали в Москву','дайте денег']
+        a5 = [' продажной власти ']
+        a6 = ['Кучмы','Ющенко','Порошенко','Яйценюха','Этого']
+        a7 = ['. Мы все, как один, требуем немедленно ']
+        a8 = ['вернуть Крым','посадить Тимошенко','освободить Тимошенко','войти в Европу','ещё пива']
+        a9 = ['. Предупреждаем! Если власти не пойдут навстречу нашим ']
+        a10 = ['справедливым','наглым','невнятным','идиотским','кличкоподобным']
+        a11 = [' требованиям, то мы незамедлительно начнём ']
+        a12 = ['жечь покрышки!!! ','есть печеньки!!! ','скакать как немоскали!!! ','воровать газ!!! ']
+        a13 = [' Москаляку на гиляку!!! ','Судью на мыло!!!  ','Деньги на бочку!!! ','Зубы на полку!!! ']
+        a14 = ['Да здравствует небесная ']
+        a15 = ['сотня','тысяча','армия Украины']
+        a16 = ['. Слава Украини! Героям ']
+        a17 = ['сала.','утку.','по лбу.','памятник.','уже всё равно.']
+        manifest = (str(self.w(a1))+str(self.w(a2))+ str(self.w(a3))+ \
+                        str(self.w(a4))+ str(self.w(a5))+ str(self.w(a6))
+                        + str(self.w(a7))+ str(self.w(a8))+ str(self.w(a9)) 
+                        + str(self.w(a10)) + str(self.w(a11)) + str(self.w(a12)) 
+                        + str(self.w(a13)) + str(self.w(a14)) + str(self.w(a15)) 
+                        + str(self.w(a16)) + str(self.w(a17))
+                        )
+        self.report({'INFO'}, 'Смотри в текстовом окне и терминале.')
+        self.manifest = manifest
+        NTmaketext(self.bl_label)
+        bpy.data.texts[self.bl_label].clear()
+        bpy.data.texts[self.bl_label].write(manifest)
+        print(manifest)
+        return
 
 class ComplimentWoman(bpy.types.Operator):
     """Делайте дамам приятно"""
@@ -1386,7 +1508,8 @@ class NikitronPanel(bpy.types.Panel):
         if main.nt_main_panel:
             row = box.row(align=True)
             row.operator("object.nt_compliment_wom", text=sv_lang['ComplimentWoman'])
-            row.operator('wm.url_open', text=sv_lang['ComplimMan']).url = 'http://w-o-s.ru/article/2469'
+            row.operator("object.nt_manifest_generator", text=sv_lang['NTManifestGenerator'])
+            ##row.operator('wm.url_open', text=sv_lang['ComplimMan']).url = 'http://w-o-s.ru/article/2469'
             
             
             col = box.column(align=True)
@@ -1437,6 +1560,7 @@ class NikitronPanel(bpy.types.Panel):
                         row = col.row(align=True)
                         row.operator("object.nt_curv_to_3d",icon="CURVE_DATA", text=sv_lang['CurvesTo3D'])
                         row.operator("object.nt_curv_to_2d",icon="CURVE_DATA", text=sv_lang['CurvesTo2D'])
+                        row.operator("object.nt_bezier_making_good",icon="CURVE_DATA", text=sv_lang['NTbezierOrdering'])
                 
                     if context.selected_objects[0].type == 'MESH':
                         box0 = col.box()
@@ -1463,6 +1587,8 @@ class NikitronPanel(bpy.types.Panel):
                         #row.operator("object.nt_boolerator_translation",icon="MOD_BOOLEAN", text=sv_lang['BooleratorTranslation'])
                         
                         row = col.row(align=True)
+                        row.operator("object.nt_duplicat",icon="GROUP_VERTEX", text=sv_lang['NTduplicat'])
+                        row = col.row(align=True)
                         row.operator("object.nt_text_mesh_weld",icon="FULLSCREEN_EXIT", text=sv_lang['NTTextMeshWeld'])
                         row = col.row(align=True)
                         row.operator("object.nt_connect2objects",icon="LINKED", text=sv_lang['Connect2Meshes'])
@@ -1481,6 +1607,7 @@ my_classes = [
                 ComplimentWoman, AreaOfLenin, EdgeLength,
                 CliffordAttractors, NT_ClearNodesLayouts,
                 NT_language, NTTextMeshWeld, NTVolumeCalculate,
+                NTManifestGenerator, NTbezierOrdering, NTduplicat,
                 ]
 
 
