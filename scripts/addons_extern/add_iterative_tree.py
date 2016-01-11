@@ -3,7 +3,7 @@ bl_info = {
     "author": "Herpin Maxime",
     "version": (1, 0),
     "blender": (2, 75, 0),
-    "location": "View3D > Add > Curve > Tree",
+    "location": "View3D > Toolshelf > Create > Tree",
     "description": "Adds a Tree",
     "warning": "",
     "wiki_url": "",

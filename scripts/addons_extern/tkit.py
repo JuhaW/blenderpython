@@ -21,14 +21,13 @@ bl_info = {
     "author": "dustractor@gmail.com",
     "version": (5,1),
     "blender": (2,6,7),
-    "api": 56794,
     "location": "Hotkeys \\, [, ],\", & ' ",
     "description": "various edge selection operators",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
-    "category": "Tools
-	"}
+    "category": "Tools",
+    }
 
 import bpy
 import bmesh

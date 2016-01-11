@@ -36,6 +36,7 @@ bl_info = {
 
 import bpy
 import bmesh
+from bpy_extras.object_utils import AddObjectHelper, object_data_add
 
 def is_boundary(edge):
     return len(edge.link_loops) == 1
@@ -186,7 +187,7 @@ def make_dual_bmesh_blend(bm_orig, blend_factor, preserve_boundary, bm, sk):
                 face.material_index = 2
 
 
-class AddDualMeshOperator(bpy.types.Operator):
+class AddDualMeshOperator(bpy.types.Operator, AddObjectHelper):
     bl_options = {'REGISTER', 'UNDO'}
     bl_idname = "object.dual_mesh_operator"
     bl_label = "Add Dual Mesh"
@@ -272,11 +273,17 @@ class AddDualMeshOperator(bpy.types.Operator):
 
         return {'FINISHED'}
 
+def menu_func(self, context):
+    self.layout.operator(AddDualMeshOperator.bl_idname,
+                        text="Cuel Mesh", icon="PLUGIN")
+
 def register():
     bpy.utils.register_module(__name__)
+    bpy.types.INFO_MT_mesh_add.append(menu_func)
 
 def unregister():
     bpy.utils.unregister_module(__name__)
-
+    bpy.types.INFO_MT_mesh_add.remove(menu_func)
+	
 if __name__ == "__main__":
     register()

@@ -29,7 +29,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/"
                 "Scripts/Curve/Curve_Objects",
-    "category": "Addon Factory"}
+    "category": "Add Curve"}
 
 if "bpy" in locals():
     import importlib
@@ -150,17 +150,19 @@ def menu_surface(self, context):
 	self.layout.operator("object.add_surface_plane", text="Plane", icon="MOD_CURVE")
 	self.layout.operator("curve.smooth_x_times", text="Special Smooth", icon="MOD_CURVE")
 
-# Addons Preferences
-class AddonPreferences(bpy.types.AddonPreferences):
-	bl_idname = __name__
-	
-	def draw(self, context):
-		layout = self.layout
-		layout.label(text="----Add Curve Objects----")
-		layout.label(text="Merges most Curve Object Addons into One")
-		layout.label(text="New sub menu's & organization")
-		layout.label(text="Includes Add Surface Shapes")
+class CurveObjectPrefs(bpy.types.AddonPreferences):
+    bl_idname = __name__
 
+    bpy.types.Scene.Enable_Tab_01 = bpy.props.BoolProperty(default=False)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(context.scene, "Enable_Tab_01", text="info", icon="INFO")   
+        if context.scene.Enable_Tab_01:
+            row = layout.row()
+            layout.label(text="----Add Curve Objects----")
+            layout.label(text="Merges most Curve Object Addons into One")
+            layout.label(text="Includes Add Surface Shapes")
 		
 def register():
     bpy.utils.register_module(__name__)

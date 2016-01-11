@@ -41,7 +41,7 @@ bl_info = {
     "description": "Add extra mesh object types",
     "warning": "",
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Add_Mesh/Add_Extra",
-    "category": "Addon Factory",
+    "category": "Add Mesh",
 }
 
 if "bpy" in locals():
@@ -344,14 +344,19 @@ def menu(self, context):
 	self.layout.menu("INFO_MT_mesh_boundbox_add", text="Bound Box", icon="LATTICE_DATA")
 
 # Addons Preferences
-class AddonPreferences(bpy.types.AddonPreferences):
-	bl_idname = __name__
-	
-	def draw(self, context):
-		layout = self.layout
-		layout.label(text="----Add Mesh Objects----")
-		layout.label(text="Merges most Mesh Object Addons into One")
-		layout.label(text="New sub menu's & organization")
+class MeshObjectPrefs(bpy.types.AddonPreferences):
+    bl_idname = __name__
+
+    bpy.types.Scene.Enable_Tab_01 = bpy.props.BoolProperty(default=False)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(context.scene, "Enable_Tab_01", text="info", icon="INFO")   
+        if context.scene.Enable_Tab_01:
+            row = layout.row()
+            layout.label(text="----Add Mesh Objects----")
+            layout.label(text="Merges most Mesh Object Addons into One")
+            layout.label(text="New sub menu's & organization")
 
 def register():
     bpy.utils.register_module(__name__)

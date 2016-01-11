@@ -16,7 +16,7 @@
 #  ***** END GPL LICENSE BLOCK *****
 
 bl_info = {
-    "name": "Cut/Copy/Paste objects and elements",
+    "name": "Cut/Copy/Paste",
     "description": "Cut/Copy/Paste objects and elements",
     "author": "dairin0d",
     "version": (0, 6, 3),

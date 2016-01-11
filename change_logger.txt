@@ -1,0 +1,19 @@
+updates:
+tkit: bad bl_info.
+duel mesh: make add mesh menu
+auto perspective: delete.
+cursor control: delete
+paul scripts: delete
+cut_copy_paste: rename/modify
+index_visualizer: Delete: Use Measureit
+space_view3d_index_visualizer: Delete: Use Measureit
+space_view3d_mouselook_navigation: Remove
+Viewport_info: Remove
+fiber mesh: Remove, broken, might come back with hope.
+trim/extend curve remove
+add Itérative tree: fix bl info
+select_similar: remove
+
+Addons Factory:
+Add Curve: move to add curve prefs menu, user prefs mod
+Add Mesh: move to add mesh menu, user prefs mod
