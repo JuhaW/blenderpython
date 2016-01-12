@@ -79,12 +79,14 @@ class PieAreaViews(Menu):
         pie.operator("object.view_menu", text="3D View",
                      icon='VIEW3D').variable = "VIEW_3D"
 
-        pie.operator("area.joinarea", text="Join", icon='X')
-        # pie.operator("wm.call_menu_pie", text="", icon='')
-        pie.operator("wm.call_menu_pie", text="Split",
-                     icon='SPLITSCREEN').name = "pie.split_viewport"
         pie.operator("wm.call_menu_pie", text="Utils",
                      icon='BUTS').name = "PieAreaViewsUtils"
+        pie = pie.row()
+        pie.label('')
+        pie = layout.menu_pie()
+        pie.operator("area.joinarea", text="Join", icon='X')
+        pie.operator("wm.call_menu_pie", text="Split",
+                     icon='SPLITSCREEN').name = "pie.split_viewport"
 
 
 class PieAreaViewsAnim(Menu):
