@@ -68,30 +68,44 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
-        layout.operator("object.mextrude",
-            text="Multi Extrude")
-        layout.operator("faceinfillet.op0_id",
-            text="Face Inset Fillet")
-        layout.operator("mesh.add_faces_to_object",
-            text="PKHG Faces")
-        layout.operator("fillet.op0_id",
+		
+        split = layout.split()		
+        col = split.column()
+        col.label(text="Edge")
+        col.operator("fillet.op0_id",
             text="Edge Fillet Plus")
-        layout.operator("mesh.offset_edges",
+        col.operator("mesh.offset_edges",
             text="Offset Edges")
-        layout.operator("mesh.vertex_chamfer",
-            text="Vertex Chamfer")
-        layout.operator("mesh.edge_roundifier",
+        col.operator("mesh.edge_roundifier",
             text="Edge Roundify")
-        layout.operator("mesh.ext_cut_faces",
-            text="Cut Faces")
-        layout.operator("sp_sol.op0_id",
-            text="Split Solidify")
-        layout.operator("bpt.mesh_to_wall",
+        col.operator("bpt.mesh_to_wall",
             text="Edge(s) to Wall")
-        layout.operator("object.mesh_edge_length_set",
-            text="Set Edge Length")
+			
+        row = split.row(align=True)		
+        col = split.column()
+        col.label(text="Face")
+        col.operator("object.mextrude",
+            text="Multi Extrude")
+        col.operator("faceinfillet.op0_id",
+            text="Face Inset Fillet")
+        col.operator("mesh.add_faces_to_object",
+            text="PKHG Faces")
+        col.operator("mesh.ext_cut_faces",
+            text="Cut Faces")
+        col.operator("sp_sol.op0_id",
+            text="Split Solidify")
 
+        row = split.row(align=True)		
+        col = split.column()
+        col.label(text="Vert")
+        col.operator("mesh.vertex_chamfer",
+            text="Vertex Chamfer")
 
+        row = split.row(align=True)		
+        col = split.column()
+        col.label(text="Utilities")
+        col.operator('mesh.flip_normals', text = 'Normals Flip')
+        col.operator('mesh.remove_doubles', text = 'Remove Doubles')
 
 class ExtrasPanel(bpy.types.Panel):
     bl_label = 'Mesh Edit Tools'
