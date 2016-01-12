@@ -26,13 +26,13 @@ bl_info = {
         'description': "Adds my personal collection of small handy scripts (mostly modeling tools)",
         'category': "Mesh",
         'blender': (2, 7, 6),
-        'version': (0, 2, 4),
+        'version': (0, 2, 7),
         'wiki_url': 'http://www.kjartantysdal.com/scripts',
 }
 
 
 import bpy, bmesh 
-from bpy.props import StringProperty, IntProperty, FloatProperty, EnumProperty, BoolProperty
+from bpy.props import StringProperty, IntProperty, FloatProperty, EnumProperty, BoolProperty, BoolVectorProperty, FloatVectorProperty
 
 
 
@@ -92,12 +92,14 @@ class snaptoaxis(bpy.types.Operator):
         snap_y = BoolProperty(name = "Snap to Y", description = "Snaps to zero in Y. Also sets the axis for the mirror modifier if that button is turned on", default = False)
         snap_z = BoolProperty(name = "Snap to Z", description = "Snaps to zero in Z. Also sets the axis for the mirror modifier if that button is turned on", default = False)
         
-        mirror_add = BoolProperty(name = "Mirror Modifier", description = "Adds a mirror modifer", default = False)
+        mirror_add = BoolProperty(name = "Add Mirror Modifier", description = "Adds a mirror modifer", default = False)
         
         mirror_x = BoolProperty(name = "Mirror on X", description = "Sets the modifier to mirror on X", default = True)
         mirror_y = BoolProperty(name = "Mirror on Y", description = "Sets the modifier to mirror on Y", default = False)
         mirror_z = BoolProperty(name = "Mirror on Z", description = "Sets the modifier to mirror on Z", default = False)
         clipping = BoolProperty(name = "Enable Clipping", description = "Prevents vertices from going through the mirror during transform", default = True)
+        
+
 
 
         def draw(self, context):
@@ -150,7 +152,7 @@ class snaptoaxis(bpy.types.Operator):
                 mode = bpy.context.active_object.mode
                 mirror_find = bpy.context.object.modifiers.find('Mirror')
                 run = True
-                
+                    
 
                 if mode == 'EDIT':
                     loc = bpy.context.object.location
@@ -168,42 +170,27 @@ class snaptoaxis(bpy.types.Operator):
                                 if self.snap_z == True:
                                     v.co.z = 0
                                 
-
                     bmesh.update_edit_mesh(me, True, False)
                     
                 if self.mirror_add == True:
                     
                     if mirror_find <= -1:
                         bpy.ops.object.modifier_add(type='MIRROR')
-                        bpy.context.object.modifiers["Mirror"].use_clip = self.clipping
+                        
                         bpy.context.object.modifiers['Mirror'].show_viewport = True
                         
                         run = False
-                        
-                    if self.mirror_x == True:
-                        bpy.context.object.modifiers["Mirror"].use_x = True
-                    if self.mirror_x == False:
-                        bpy.context.object.modifiers["Mirror"].use_x = False
-                    if self.mirror_y == True:
-                        bpy.context.object.modifiers["Mirror"].use_y = True
-                    if self.mirror_y == False:
-                        bpy.context.object.modifiers["Mirror"].use_y = False
-                    if self.mirror_z == True:
-                        bpy.context.object.modifiers["Mirror"].use_z = True
-                    if self.mirror_z == False:
-                        bpy.context.object.modifiers["Mirror"].use_z = False
-                        
+                    
+                    bpy.context.object.modifiers["Mirror"].use_clip = self.clipping
+                    bpy.context.object.modifiers["Mirror"].use_x = self.mirror_x
+                    bpy.context.object.modifiers["Mirror"].use_y = self.mirror_y
+                    bpy.context.object.modifiers["Mirror"].use_z = self.mirror_z
+                    
                         
 
-                elif mirror_find >= 0 and self.mirror_add == False:
-                    bpy.ops.object.modifier_remove(modifier="Mirror")
+                #elif mirror_find >= 0 and self.mirror_add == False:
+                #    bpy.ops.object.modifier_remove(modifier="Mirror")
                     
-                
-                    
-                    
-
-                        
-
                         
                 return {'FINISHED'} 
 
@@ -218,16 +205,38 @@ class quickbool(bpy.types.Operator):
         
         del_bool = BoolProperty(name="Delete BoolMesh", description="Deletes the objects used for the boolean operation.", default= True)
         move_to = BoolProperty(name="Move to layer 10", description="Moves the objects used for the boolean operation to layer 10", default= False)
+        operation = EnumProperty(items= (('UNION', 'Union', 'Combines'),
+                                                                                                 ('INTERSECT', 'Intersect', 'Keep the part that overlaps'),          
+                                                                                                 ('DIFFERENCE', 'Difference', 'Cuts out')),
+                                                                                                 name = "Operation", default = 'DIFFERENCE') 
+                                                                                                  
+        def draw(self, context):
+            layout = self.layout
+            col = layout.column()
+            col.prop(self, "del_bool")
+            
+            col = col.column()
+            col.active = self.del_bool == False
+            col.prop(self, "move_to") 
+            
+            col = layout.column()
+            col.prop(self, "operation")
+               
+           
+                
 
         def execute(self, context):
                 
                 del_bool = self.del_bool
                 move_to = self.move_to
                 mode = bpy.context.active_object.mode
+                
+                
 
                 if mode == 'EDIT':
 
                     #Boolean From Edit mode
+                    bpy.ops.mesh.select_linked()
                     bpy.ops.mesh.separate(type='SELECTED')
                     bpy.ops.object.editmode_toggle()
 
@@ -238,7 +247,7 @@ class quickbool(bpy.types.Operator):
                     #perform boolean
                     bpy.ops.object.modifier_add(type='BOOLEAN')
                     bpy.context.object.modifiers["Boolean"].object = bpy.data.objects[bool]
-                    bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
+                    bpy.context.object.modifiers["Boolean"].operation = self.operation
                     bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Boolean")
 
                     #delete Bool object
@@ -280,7 +289,7 @@ class quickbool(bpy.types.Operator):
                                 #Perform Boolean
                                 bpy.ops.object.modifier_add(type='BOOLEAN')
                                 bpy.context.object.modifiers["Boolean"].object = bpy.data.objects[name]
-                                bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
+                                bpy.context.object.modifiers["Boolean"].operation = self.operation
                                 bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Boolean")
                                 
                                 
@@ -465,11 +474,15 @@ class cut_tool(bpy.types.Operator):
                         
                         bm.to_mesh(me)
                         bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-                                
+                        
+                        
+                        """        
                         if len(sel) == 0 and len(edge_sel) == 0 and len(vert_sel) == 0 :
                                 bpy.ops.mesh.knife_tool("INVOKE_DEFAULT")
-                                
-                        elif sel_mode[2] == True and len(sel) > 1:
+                        """        
+                        
+                        
+                        if sel_mode[2] == True and len(sel) > 1:
 
                                 vgrp = bpy.context.object.vertex_groups.active_index
                                 
@@ -610,15 +623,18 @@ class cut_tool(bpy.types.Operator):
                                 bpy.ops.object.vertex_group_remove(all=False)
                                 bpy.ops.mesh.select_mode(use_extend=True, use_expand=False, type='FACE')
 
-                        elif sel_mode[0] == True:
+                        elif sel_mode[0] == True and len(vert_sel) >= 2:
                                 bpy.ops.mesh.vert_connect_path()
                                 
-                        elif sel_mode[1] == True and loopcut == False:
+                        elif sel_mode[1] == True and loopcut == False and len(edge_sel) != 0:
                                 bpy.ops.mesh.subdivide(number_cuts = cuts, smoothness = smoothness, quadcorner = quad_corners)
                                 
-                        elif sel_mode[1] == True and loopcut == True:
+                        elif sel_mode[1] == True and loopcut == True and len(edge_sel) != 0:
                                 bpy.ops.mesh.loop_multi_select(ring=True)
                                 bpy.ops.mesh.subdivide(number_cuts = cuts, smoothness = smoothness, quadcorner = quad_corners)
+                        else:
+                            bpy.ops.mesh.select_all(action='DESELECT')
+                            bpy.ops.mesh.knife_tool("INVOKE_DEFAULT")
                 
                 else:
                         self.report({'ERROR'}, "This one only works in Edit mode")
@@ -668,22 +684,20 @@ class shrinkwrapSmooth(bpy.types.Operator):
         bl_label = "Shrinkwrap Smooth"               
         bl_options = {'REGISTER', 'UNDO'} 
 
-        #iterate = IntProperty(name="Iterate Smooth", description="More or less smoothing.", default= 6, min = 0, soft_max = 20)
-        pin = BoolProperty(name="Pin Selection Border", description="Pins the outer edge of the selection.", default = True)
-        mode = bpy.props.EnumProperty(items= (('PROJECT', 'Project', 'Best results, but can cause wonky geometry in certain cases'),        
-                                                                                                 ('NEAREST_SURFACEPOINT', 'Nearest Surface', 'Very stable, but can giv slightly worse results')),
-                                                                                                 name = "Shrinkwrap Mode", default = 'NEAREST_SURFACEPOINT')            
-
+        pin = BoolProperty(name="Pin Selection Border", description="Pins the outer edge of the selection.", default = True)  
+        subsurf = IntProperty(name="Subsurf Levels", description="More reliable, but slower results", default = 0, min = 0, soft_max = 4)  
 
 
         def execute(self, context):
                 
                 iterate = 6
                 pin = self.pin
-                mode = self.mode
                 data = bpy.context.object.data.name
 
-
+                # Set up for vertex weight
+                bpy.context.scene.tool_settings.vertex_group_weight = 1
+                v_grps = len(bpy.context.object.vertex_groups.items())
+                
                 bpy.ops.object.mode_set(mode = 'OBJECT', toggle = False)
                 org_ob = bpy.context.object.name
 
@@ -703,58 +717,61 @@ class shrinkwrapSmooth(bpy.types.Operator):
 
                 bpy.ops.object.mode_set(mode = 'EDIT', toggle = False)
                 bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
-
+                
+                if v_grps >= 1:
+                    for x in range(v_grps):
+                        bpy.ops.object.vertex_group_add()
+                    
 
                 if pin == True:
-                		bpy.ops.object.vertex_group_assign_new()
-                		org_id = bpy.context.object.vertex_groups.active_index
-                		
-                		bpy.ops.object.vertex_group_assign_new()
-                		sel = bpy.context.object.vertex_groups.active.name
-                		sel_id = bpy.context.object.vertex_groups.active_index
-                		
-                		bpy.ops.mesh.region_to_loop()
-                		bpy.ops.object.vertex_group_remove_from(use_all_groups=False, use_all_verts=False)
-                		
-                		bpy.ops.mesh.select_all(action='SELECT')
-                		bpy.ops.mesh.region_to_loop()
-                		bpy.ops.object.vertex_group_remove_from(use_all_groups=False, use_all_verts=False)
-                		
-                		bpy.ops.mesh.select_all(action='DESELECT')
-                		bpy.ops.object.vertex_group_select(sel_id)
-                		
-                		
+                        bpy.ops.object.vertex_group_assign_new()
+                        org_id = bpy.context.object.vertex_groups.active_index
+                        
+                        bpy.ops.object.vertex_group_assign_new()
+                        sel = bpy.context.object.vertex_groups.active.name
+                        sel_id = bpy.context.object.vertex_groups.active_index
+                        
+                        bpy.ops.mesh.region_to_loop()
+                        bpy.ops.object.vertex_group_remove_from(use_all_groups=False, use_all_verts=False)
+                        
+                        bpy.ops.mesh.select_all(action='SELECT')
+                        bpy.ops.mesh.region_to_loop()
+                        bpy.ops.object.vertex_group_remove_from(use_all_groups=False, use_all_verts=False)
+                        
+                        bpy.ops.mesh.select_all(action='DESELECT')
+                        bpy.ops.object.vertex_group_select(sel_id)
+                        
+                        
                 else:
-                		bpy.ops.object.vertex_group_assign_new()
-                		sel = bpy.context.object.vertex_groups.active.name	  
+                        bpy.ops.object.vertex_group_assign_new()
+                        sel = bpy.context.object.vertex_groups.active.name    
 
 
                 for x in range(iterate):
-                		bpy.ops.object.modifier_add(type='SHRINKWRAP')
-                		mod_id = (len(bpy.context.object.modifiers)-1)
-                		shrink_name = bpy.context.object.modifiers[mod_id].name
+                        bpy.ops.object.modifier_add(type='SHRINKWRAP')
+                        mod_id = (len(bpy.context.object.modifiers)-1)
+                        shrink_name = bpy.context.object.modifiers[mod_id].name
 
-                		bpy.context.object.modifiers[shrink_name].target = bpy.data.objects[shrink_ob]
-                		bpy.context.object.modifiers[shrink_name].vertex_group = sel
-                		
-                		if mode == 'PROJECT':
-                				bpy.context.object.modifiers[shrink_name].wrap_method = 'PROJECT'
-                				bpy.context.object.modifiers[shrink_name].use_negative_direction = True
-                				bpy.context.object.modifiers[shrink_name].cull_face = 'FRONT'
-                		else:
-                				bpy.context.object.modifiers[shrink_name].wrap_method = 'NEAREST_SURFACEPOINT'
+                        bpy.context.object.modifiers[shrink_name].target = bpy.data.objects[shrink_ob]
+                        bpy.context.object.modifiers[shrink_name].vertex_group = sel
+                        
+                        bpy.context.object.modifiers[shrink_name].wrap_method = 'PROJECT'
+                        bpy.context.object.modifiers[shrink_name].use_negative_direction = True
+                        bpy.context.object.modifiers[shrink_name].subsurf_levels = self.subsurf
+                
 
-
-                		bpy.ops.mesh.vertices_smooth(factor=1, repeat=1)
+                        bpy.ops.mesh.vertices_smooth(factor=1, repeat=1)
 
 
-                		bpy.ops.object.mode_set(mode = 'OBJECT', toggle = False)
-                		bpy.ops.object.convert(target='MESH')
-                		bpy.ops.object.mode_set(mode = 'EDIT', toggle = False)
-                		
+                        bpy.ops.object.mode_set(mode = 'OBJECT', toggle = False)
+                        bpy.ops.object.convert(target='MESH')
+                        bpy.ops.object.mode_set(mode = 'EDIT', toggle = False)
+                        
 
                 bpy.ops.object.mode_set(mode = 'OBJECT', toggle = False)
-
+                
+                
+                
                 bpy.ops.object.vertex_group_remove(all = False)
                 bpy.ops.object.modifier_remove(modifier=shrink_name)
 
@@ -777,8 +794,8 @@ class shrinkwrapSmooth(bpy.types.Operator):
                 bpy.ops.object.mode_set(mode = 'EDIT', toggle = False)
 
                 if pin == True:
-                		bpy.ops.mesh.select_all(action='DESELECT')
-                		bpy.ops.object.vertex_group_select(sel_id)
+                        bpy.ops.mesh.select_all(action='DESELECT')
+                        bpy.ops.object.vertex_group_select(org_id)
 
                 bpy.ops.object.mode_set(mode = 'OBJECT', toggle = False)
 
@@ -789,7 +806,11 @@ class shrinkwrapSmooth(bpy.types.Operator):
                 bpy.context.scene.objects.active = bpy.data.objects[org_ob] 
 
                 bpy.ops.object.mode_set(mode = 'EDIT', toggle = False)
-
+                
+                # Fix for Blender remembering the previous selection
+                bpy.ops.object.vertex_group_assign_new()
+                bpy.ops.object.vertex_group_remove(all = False)
+                
 
                 return {'FINISHED'}
 
@@ -903,11 +924,289 @@ class buildCorner(bpy.types.Operator):
                                 bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
                                 bpy.ops.mesh.tris_convert_to_quads(face_threshold=3.14159, shape_threshold=3.14159)
                                 return {'FINISHED'}
-                        
 
                 else:
                         self.report({'WARNING'}, "No active object, could not finish")
                         return {'CANCELLED'}
+
+
+class drawPoly(bpy.types.Operator):
+    """Draw a polygon"""
+    bl_idname = "mesh.draw_poly"
+    bl_label = "Draw Poly"
+    
+    cursor_co = FloatVectorProperty()
+    vert_count = 0
+    manip = BoolProperty()
+    vgrp = IntProperty()
+    sel_mode = BoolVectorProperty()
+    cursor_depth = BoolProperty()
+    snap = BoolProperty()
+    
+    
+    def modal(self, context, event):
+        
+        mesh = bpy.context.active_object.data
+        
+        if event.type == 'LEFTMOUSE':
+            if event.value == 'PRESS':
+                
+                
+                bpy.ops.view3d.cursor3d('INVOKE_DEFAULT')
+                
+                obj = bpy.context.active_object
+                vert_co = bpy.context.scene.cursor_location
+                world = obj.matrix_world.inverted_safe()
+               
+                bpy.ops.mesh.select_all(action='DESELECT')
+                bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+                
+                me = bpy.context.object.data
+                bm = bmesh.new()
+                bm.from_mesh(me)
+                
+                # Add new vert
+                new_vert = bm.verts.new(vert_co)
+                new_vert.co = world*new_vert.co
+                new_vert_id = new_vert.index
+                self.vert_count += 1
+                
+                if self.vert_count >= 2:
+                    bm.verts.ensure_lookup_table()
+                    set_of_verts = set(bm.verts[i] for i in range(-2,0))
+                    bm.edges.new(set_of_verts)
+                    
+                # Get index of first and last vertex
+                first_index = len(bm.verts)-self.vert_count
+                second_index = first_index+1
+                third_index = first_index+2
+                second_to_last_index = len(bm.verts)-2
+                
+                
+                bm.to_mesh(me)
+                bm.free()
+                
+                mesh.vertices[new_vert_id].select = True
+                bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                bpy.context.scene.cursor_location = self.cursor_co
+                
+                
+                if self.vert_count >= 4:
+                    bpy.ops.object.vertex_group_assign()
+                
+                if self.vert_count == 3:
+                    # remove second vertex from group
+                    bpy.ops.mesh.select_all(action='DESELECT')
+                    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+                    mesh.vertices[first_index].select = True
+                    mesh.vertices[third_index].select = True
+                    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                    bpy.ops.object.vertex_group_assign()
+                    bpy.ops.mesh.select_more()
+                    
+                if self.vert_count == 2:
+                    bpy.ops.mesh.select_more()
+                    
+                if self.vert_count >= 4:
+                    # make core poly
+                    bpy.ops.mesh.select_all(action='DESELECT')
+                    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+                    mesh.vertices[first_index].select = True
+                    mesh.vertices[second_index].select = True
+                    mesh.vertices[third_index].select = True
+                    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                    bpy.ops.mesh.edge_face_add()
+                    
+                if self.vert_count == 4:
+                    bpy.ops.mesh.select_all(action='DESELECT')
+                    bpy.ops.object.vertex_group_select(self.vgrp)
+                    bpy.ops.mesh.edge_face_add()
+                    
+                    # Remove remaining core edge
+                    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+                    mesh.vertices[second_index].select = True
+                    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                    bpy.ops.mesh.edge_face_add()
+                    
+                
+                if self.vert_count >= 5:
+                    #bpy.ops.object.vertex_group_assign()
+                    bpy.ops.mesh.select_all(action='DESELECT')
+                    
+                    # Remove Last Edge
+                    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+                    mesh.vertices[first_index].select = True
+                    mesh.vertices[second_to_last_index].select = True
+                    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                    bpy.ops.mesh.delete(type='EDGE')
+                    
+                    # Fill in rest of face
+                    bpy.ops.object.vertex_group_select(self.vgrp)
+                    bpy.ops.mesh.edge_face_add()
+                    
+                    
+                    # Remove remaining core edge
+                    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+                    mesh.vertices[second_index].select = True
+                    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                    bpy.ops.mesh.edge_face_add()
+                    bpy.ops.mesh.flip_normals()
+                    
+            
+            #return {'FINISHED'}
+        elif event.type == 'MIDDLEMOUSE':
+            
+            # Convert to Quads
+            bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
+            bpy.ops.mesh.tris_convert_to_quads()
+            bpy.ops.mesh.tris_convert_to_quads(face_threshold=3.14159, shape_threshold=3.14159)
+
+            
+            # restore selection mode and manipulator
+            bpy.context.tool_settings.mesh_select_mode = self.sel_mode
+            bpy.context.space_data.show_manipulator = self.manip
+            bpy.context.user_preferences.view.use_mouse_depth_cursor = self.cursor_depth
+            bpy.context.scene.tool_settings.use_snap = self.snap
+            
+            
+            # Remove and make sure vertex group data is gone
+            bpy.ops.object.vertex_group_remove_from(use_all_verts=True)
+            bpy.ops.object.vertex_group_remove()
+            bpy.ops.object.vertex_group_assign_new()
+            bpy.context.object.vertex_groups.active.name = "drawPoly_temp"
+            bpy.ops.object.vertex_group_remove()
+
+            
+            return {'CANCELLED'}
+        
+        elif event.type in {'RIGHTMOUSE', 'ESC', 'SPACE'}:
+            
+            # restore selection mode and manipulator
+            bpy.context.tool_settings.mesh_select_mode = self.sel_mode
+            bpy.context.space_data.show_manipulator = self.manip
+            bpy.context.user_preferences.view.use_mouse_depth_cursor = self.cursor_depth
+            bpy.context.scene.tool_settings.use_snap = self.snap
+            
+            
+            # Remove and make sure vertex group data is gone
+            bpy.ops.object.vertex_group_remove_from(use_all_verts=True)
+            bpy.ops.object.vertex_group_remove()
+            bpy.ops.object.vertex_group_assign_new()
+            bpy.context.object.vertex_groups.active.name = "drawPoly_temp"
+            bpy.ops.object.vertex_group_remove()
+
+            
+            return {'CANCELLED'}
+        
+        elif event.type == 'LEFT_SHIFT' or event.type == 'RIGHT_SHIFT':
+            bpy.ops.mesh.flip_normals()
+            
+            return {'PASS_THROUGH'}
+        
+        elif event.type == 'LEFT_CTRL' or event.type == 'RIGHT_CTRL' :
+            if bpy.context.user_preferences.view.use_mouse_depth_cursor == True:
+                bpy.context.user_preferences.view.use_mouse_depth_cursor = False
+                bpy.context.scene.tool_settings.use_snap = False
+            else:
+                bpy.context.user_preferences.view.use_mouse_depth_cursor = True
+                bpy.context.scene.tool_settings.use_snap = True
+            return {'PASS_THROUGH'}
+
+        return {'RUNNING_MODAL'}
+
+    def invoke(self, context, event):
+        
+        
+        sel_ob = len(bpy.context.selected_objects)
+        
+        
+        if sel_ob >= 1:
+            sel_type = bpy.context.object.type
+            
+            if sel_type == 'MESH':
+                bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                
+            else:
+                self.report({'WARNING'}, "Active object is not a mesh.")
+                return {'CANCELLED'}
+            
+        
+        elif sel_ob == 0:
+            bpy.ops.mesh.primitive_plane_add()
+            bpy.context.selected_objects[0].name = "polyDraw"
+            bpy.context.selected_objects[0].data.name = "polyDraw"
+            bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+            bpy.ops.mesh.select_all(action='SELECT')
+            bpy.ops.mesh.delete(type='VERT')
+            
+        
+        
+        
+        # Store selection mode, snap and manipulator settings
+        self.sel_mode = bpy.context.tool_settings.mesh_select_mode[:]
+        bpy.context.tool_settings.mesh_select_mode = True, False, False
+        self.manip = bpy.context.space_data.show_manipulator
+        bpy.context.space_data.show_manipulator = False
+        self.cursor_depth = bpy.context.user_preferences.view.use_mouse_depth_cursor 
+        bpy.context.user_preferences.view.use_mouse_depth_cursor = False
+        self.snap = bpy.context.scene.tool_settings.use_snap
+        bpy.context.scene.tool_settings.use_snap = False
+        
+        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+        
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_assign_new()
+        self.vgrp = bpy.context.object.vertex_groups.active_index
+        bpy.context.object.vertex_groups.active.name = "drawPoly_temp"
+        
+        self.cursor_co = bpy.context.scene.cursor_location
+        
+
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+
+class toggleSilhouette(bpy.types.Operator):
+    """Turns everything black so that you can evaluate the overall shape. Useful when designing"""
+    bl_idname = "object.toggle_silhouette"
+    bl_label = "Toggle Silhouette"
+
+    
+    diff_col = FloatVectorProperty(default = (0.226, 0.179, 0.141))
+    disp_mode = StringProperty(default = 'SOLID')
+    matcap = BoolProperty(default = False)
+    only_render = BoolProperty(default = False)
+    
+    def execute(self, context):
+        
+        
+        light_check = bpy.context.user_preferences.system.solid_lights[0].use
+
+        if light_check == True:
+            # Set Lights to Off
+            bpy.context.user_preferences.system.solid_lights[0].use = False
+            bpy.context.user_preferences.system.solid_lights[1].use = False
+            
+            # Store variables
+            self.diff_col = bpy.context.user_preferences.system.solid_lights[2].diffuse_color
+            self.disp_mode = bpy.context.space_data.viewport_shade
+            self.matcap = bpy.context.space_data.use_matcap
+            self.only_render = bpy.context.space_data.show_only_render
+            
+            bpy.context.user_preferences.system.solid_lights[2].diffuse_color = 0,0,0
+            bpy.context.space_data.viewport_shade = 'SOLID'
+            bpy.context.space_data.use_matcap = False
+            bpy.context.space_data.show_only_render = True
+            
+        else:
+            bpy.context.user_preferences.system.solid_lights[0].use = True
+            bpy.context.user_preferences.system.solid_lights[1].use = True
+            bpy.context.user_preferences.system.solid_lights[2].diffuse_color = self.diff_col
+            bpy.context.space_data.viewport_shade = self.disp_mode
+            bpy.context.space_data.use_matcap = self.matcap
+            bpy.context.space_data.show_only_render = self.only_render
+        
+        return {'FINISHED'}
+
 
         
 #Adds growLoop to the Addon  
@@ -1525,6 +1824,251 @@ class shrinkLoop(bpy.types.Operator):
                 
                 return {'FINISHED'}
 
+class paintSelect(bpy.types.Operator):
+    """Click and drag to select"""
+    bl_idname = "view3d.select_paint"
+    bl_label = "Paint Select"
+    bl_options = {'REGISTER', 'UNDO'} 
+
+    deselect = BoolProperty(default = False, description = 'Deselect objects, polys, edges or verts')
+    toggle = BoolProperty(default = False, description = 'Toggles the selection. NOTE: this option can be slow on heavy meshes')
+    sel_before = IntProperty(description = 'Do Not Touch', options = {'HIDDEN'})
+    sel_after = IntProperty(description = 'Do Not Touch', options = {'HIDDEN'})
+
+    def modal(self, context, event):
+        
+        #if event.type == 'MOUSEMOVE':
+        refresh = event.mouse_x
+        
+        
+        if self.deselect == False:
+            bpy.ops.view3d.select('INVOKE_DEFAULT', extend = True, deselect = False)
+        else:
+            bpy.ops.view3d.select('INVOKE_DEFAULT', extend = False, deselect = True, toggle = True)
+        
+        
+        if event.value == 'RELEASE':    
+            return {'FINISHED'}
+
+
+        return {'RUNNING_MODAL'}
+
+    def invoke(self, context, event):
+        
+        if self.toggle:
+            sel_ob = len(bpy.context.selected_objects)
+            
+            if sel_ob >= 1:
+                mode = bpy.context.object.mode
+                
+                if mode == 'EDIT':
+                    sel_mode = bpy.context.tool_settings.mesh_select_mode[:]
+            
+                    # Get Selection before
+                    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+                    ob = bpy.context.object.data
+                    # check verts
+                    if sel_mode[0]:
+                        for v in ob.vertices:
+                            if v.select:
+                                self.sel_before += 1
+                    # check edges
+                    elif sel_mode[1]:
+                        for e in ob.edges:
+                            if e.select:
+                                self.sel_before += 1
+                    # check polys
+                    else:
+                        for p in ob.polygons:
+                            if p.select:
+                                self.sel_before += 1
+                    
+                    # Toggle Selection
+                    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                    bpy.ops.view3d.select('INVOKE_DEFAULT', extend = False, toggle = True)
+                    
+                    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+                    ob = bpy.context.object.data
+                    # check verts after
+                    if sel_mode[0]:
+                        for v in ob.vertices:
+                            if v.select:
+                                self.sel_after += 1
+                    
+                    # check edges after
+                    elif sel_mode[1]:
+                        for e in ob.edges:
+                            if e.select:
+                                self.sel_after += 1
+                    # check polys after
+                    else:
+                        for p in ob.polygons:
+                            if p.select:
+                                self.sel_after += 1
+                    
+                    
+                    if self.sel_after > self.sel_before:
+                        self.deselect = False
+                    elif self.sel_after == self.sel_before:
+                        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                        bpy.ops.mesh.select_all(action='DESELECT')
+                        return {'FINISHED'}
+                    else:
+                        self.deselect = True
+
+                    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                
+                elif mode == 'OBJECT':
+                    bpy.ops.view3d.select('INVOKE_DEFAULT', extend = False, toggle = True)
+                    
+                    sel_ob_after = len(bpy.context.selected_objects)
+                    
+                    if sel_ob_after < sel_ob:
+                        self.deselect = True        
+                    
+        
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+
+
+class pathSelectRing(bpy.types.Operator):
+    """Selects the shortest edge ring path"""
+    bl_idname = "mesh.path_select_ring"
+    bl_label = "Path Select Ring"
+    bl_options = {'REGISTER', 'UNDO'} 
+    
+    pick = BoolProperty(name = "Pick Mode", description = "Pick Mode", default = False)
+    collapse = BoolProperty(name = "Collapse", description = "Collapses everything between your two selected edges", default = False)
+
+    def draw(self, context):
+        layout = self.layout
+
+    
+    def execute(self, context):
+        
+        me = bpy.context.object.data
+        bm = bmesh.from_edit_mesh(me)
+        mesh = bpy.context.active_object.data
+        sel_mode = bpy.context.tool_settings.mesh_select_mode[:]
+        
+        org_sel = []
+        start_end = []
+        active_edge = []
+        border_sel = []
+        vert_sel = []
+        face_sel = []
+        
+        if sel_mode[1]:
+            
+            bpy.context.tool_settings.mesh_select_mode = [False, True, False]
+            
+            if self.pick:
+                bpy.ops.view3d.select('INVOKE_DEFAULT', extend=True, deselect=False, toggle=False)
+            
+
+            # Store the Start and End edges 
+            iterate = 0
+            for e in reversed(bm.select_history):
+                if isinstance(e, bmesh.types.BMEdge):
+                    iterate += 1
+                    start_end.append(e)
+                    if iterate >= 2:
+                        break 
+            
+            if len(start_end) <= 1:
+                if self.collapse:
+                    bpy.ops.mesh.merge(type='COLLAPSE', uvs=True)
+                    return{'FINISHED'}
+                return{'CANCELLED'}
+            
+            # Store active edge
+            for e in reversed(bm.select_history):
+                if isinstance(e, bmesh.types.BMEdge):
+                    active_edge = e.index
+                    break 
+            
+            # Store original edges
+            for e in bm.edges:
+                if e.select:
+                    org_sel.append(e)
+
+            # Store visible faces
+            bpy.ops.mesh.select_all(action='SELECT')
+            for f in bm.faces:
+                if f.select:
+                    face_sel.append(f)
+            
+            
+            # Store boundry edges
+            bpy.ops.mesh.region_to_loop()
+
+            for e in bm.edges:
+                if e.select:
+                    border_sel.append(e)
+
+            bpy.ops.mesh.select_all(action='DESELECT')
+            
+            # Select Start and End edges
+            for e in start_end:
+                e.select = True
+            
+            # Hide trick
+            bpy.ops.mesh.loop_multi_select(ring=True)
+            
+            bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='FACE')
+            bpy.ops.mesh.hide(unselected=True)
+            
+            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+            bpy.ops.mesh.select_all(action='DESELECT')
+            for e in start_end:
+                e.select = True
+            bpy.ops.mesh.shortest_path_select()
+            bpy.ops.mesh.select_more()
+            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
+            
+            bpy.ops.mesh.select_all(action='INVERT')
+            bpy.ops.mesh.reveal()
+            bpy.ops.mesh.select_all(action='INVERT')
+            bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='EDGE')
+
+            # Deselect border edges
+            for e in border_sel:
+                e.select = False
+            
+            # Add to original selection
+            for e in bm.edges:
+                if e.select:
+                    org_sel.append(e)
+            
+            # Restore hidden polygons
+            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
+            for f in face_sel:
+                f.select = True
+            bpy.ops.mesh.hide(unselected=True)
+            
+            
+            # Reselect original selection
+            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+            bpy.ops.mesh.select_all(action='DESELECT')
+            for e in org_sel:
+                e.select = True
+            
+            # Set active edge
+            bm.select_history.add(bm.edges[active_edge])
+            
+            
+            if self.collapse:
+                bpy.ops.mesh.merge(type='COLLAPSE', uvs=True)
+            
+            bmesh.update_edit_mesh(me, True, False)
+            
+            return {'FINISHED'}
+        
+        else:
+            self.report({'WARNING'}, "This tool only workins in edge mode.")
+            return {'CANCELLED'}
+
+
 
 
 #Draws the Custom Menu in Object Mode
@@ -1535,7 +2079,9 @@ class ktools_menu(bpy.types.Menu):
         def draw(self, context):
 
                 layout = self.layout
-
+                layout.operator_context = 'INVOKE_DEFAULT'
+                layout.operator("mesh.draw_poly")
+                layout.operator("object.toggle_silhouette")  
                 layout.operator("mesh.quickbool")
                 layout.operator("mesh.calc_normals")
                 layout.operator("object.custom_autosmooth")
@@ -1561,12 +2107,17 @@ class VIEW3D_MT_edit_mesh_ktools_menuEdit(bpy.types.Menu):
                 layout.operator_context = 'INVOKE_DEFAULT'
                 layout.operator("mesh.build_corner")
                 
+                layout.separator()
+                
+                layout.operator("mesh.path_select_ring")
                 layout.operator("mesh.grow_loop")
                 layout.operator("mesh.shrink_loop")
                 layout.operator("mesh.extend_loop")
                 
                 layout.separator()
-
+                
+                layout.operator("mesh.draw_poly")
+                layout.operator("object.toggle_silhouette")    
                 layout.operator("mesh.quickbool")            
                 layout.operator("object.custom_autosmooth")
                 layout.operator("mesh.calc_normals")
@@ -1574,26 +2125,33 @@ class VIEW3D_MT_edit_mesh_ktools_menuEdit(bpy.types.Menu):
 
 
 
-#Calls the KTools Menu
+#Calls the KTools Object Menu
 class ktools(bpy.types.Operator): #Namesuggestion: K-Tools or K-Mac
         """Calls the KTools Menu""" 
         bl_idname = "object.ktools"          
-        bl_label = "KTools"             
+        bl_label = "KTools Object Menu"             
         #bl_options = {'REGISTER', 'UNDO'}  
 
         def execute(self, context):
                 
-                mode = bpy.context.active_object.mode
                 
-                if mode == 'OBJECT':
+            bpy.ops.wm.call_menu(name=ktools_menu.bl_idname)    
+            return {'FINISHED'} 
+        
                 
-                        bpy.ops.wm.call_menu(name=ktools_menu.bl_idname)
-                        
-                elif mode == 'EDIT':
-                
-                        bpy.ops.wm.call_menu(name=VIEW3D_MT_edit_mesh_ktools_menuEdit.bl_idname)
+#Calls the KTools Edit Menu
+class ktools_mesh(bpy.types.Operator): #Namesuggestion: K-Tools or K-Mac
+        """Calls the KTools Edit Menu""" 
+        bl_idname = "mesh.ktools_mesh"          
+        bl_label = "KTools Mesh Menu"             
+        #bl_options = {'REGISTER', 'UNDO'}  
 
-                return {'FINISHED'} 
+        def execute(self, context):
+                
+                
+            bpy.ops.wm.call_menu(name=VIEW3D_MT_edit_mesh_ktools_menuEdit.bl_idname)
+            return {'FINISHED'} 
+
 
 # draw function for integration in menus
 def menu_func(self, context):
@@ -1612,20 +2170,31 @@ def register():
         bpy.utils.register_class(customAutoSmooth)
         bpy.utils.register_class(shrinkwrapSmooth)
         bpy.utils.register_class(buildCorner)
+        bpy.utils.register_class(drawPoly)
+        bpy.utils.register_class(toggleSilhouette)
         bpy.utils.register_class(growLoop)
         bpy.utils.register_class(extendLoop)
         bpy.utils.register_class(shrinkLoop)
+        bpy.utils.register_class(paintSelect)
+        bpy.utils.register_class(pathSelectRing)
         bpy.utils.register_class(ktools_menu)
         bpy.utils.register_class(VIEW3D_MT_edit_mesh_ktools_menuEdit)
         bpy.utils.register_class(ktools)
+        bpy.utils.register_class(ktools_mesh)
         bpy.types.VIEW3D_MT_edit_mesh_specials.append(menu_func)
         
         kc = bpy.context.window_manager.keyconfigs.addon
         if kc:
-            km = kc.keymaps.new(name="3D View", space_type="VIEW_3D")
+            # Add KTools object menu to inputs
+            km = kc.keymaps.new(name="Object Mode", space_type="EMPTY")
             kmi = km.keymap_items.new('object.ktools', 'Q', 'PRESS', shift=True)
-            # Could pass settings to operator properties here
-            #kmi.properties.mode = (False, True, False)
+            # Add KTools edit menu to inputs
+            km = kc.keymaps.new(name="Mesh", space_type="EMPTY")
+            kmi = km.keymap_items.new('mesh.ktools_mesh', 'Q', 'PRESS', shift=True)
+            # Add paint select to CTRL+SHIFT+ALT+LeftMouse
+            km = kc.keymaps.new(name="3D View", space_type="VIEW_3D")
+            kmi = km.keymap_items.new('view3d.select_paint', 'ACTIONMOUSE', 'PRESS', shift=True, ctrl=True, alt=True)
+            
 
 
 def unregister():
@@ -1638,19 +2207,34 @@ def unregister():
         bpy.utils.unregister_class(customAutoSmooth)
         bpy.utils.unregister_class(shrinkwrapSmooth)
         bpy.utils.unregister_class(buildCorner)
+        bpy.utils.unregister_class(drawPoly)
+        bpy.utils.unregister_class(toggleSilhouette)
         bpy.utils.unregister_class(growLoop)
         bpy.utils.unregister_class(extendLoop)
         bpy.utils.unregister_class(shrinkLoop)
+        bpy.utils.unregister_class(paintSelect)
+        bpy.utils.unregister_class(pathSelectRing)
         bpy.utils.unregister_class(ktools_menu)
         bpy.utils.unregister_class(VIEW3D_MT_edit_mesh_ktools_menuEdit)
         bpy.utils.unregister_class(ktools)
+        bpy.utils.unregister_class(ktools_mesh)
         bpy.types.VIEW3D_MT_edit_mesh_specials.remove(menu_func)
 
         kc = bpy.context.window_manager.keyconfigs.addon
         if kc:
-            km = kc.keymaps["3D View"]
+            km = kc.keymaps["Object Mode"]
             for kmi in km.keymap_items:
                 if kmi.idname == 'object.ktools':
+                    km.keymap_items.remove(kmi)
+                    break
+            km = kc.keymaps["Mesh"]
+            for kmi in km.keymap_items:
+                if kmi.idname == 'mesh.ktools_mesh':
+                    km.keymap_items.remove(kmi)
+                    break
+            km = kc.keymaps["3D View"]
+            for kmi in km.keymap_items:
+                if kmi.idname == 'view3d.select_paint':
                     km.keymap_items.remove(kmi)
                     break
 
