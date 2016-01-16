@@ -1,18 +1,19 @@
 """
-A pie menu for selecting editors and viewport with split and join functions.
+    Pie menu for selecting editors and viewport with split and join functions.
 
-Default key binding is SHIFT+SPACE. Editors are categorized, such as anim,
-utils and image editors. Split the editor with the split subpie. To join,
-invoke the join operation over the editor you want to keep, then click on
-an adjacent editor you wish to remove. The two editors must share an edge
-like normal editor joining (triple lines in editor corners).
+    Default key binding is SHIFT+SPACE. Editors are categorized, such as anim,
+    utils and image editors. Split the editor with the split subpie. To join,
+    invoke the join operation over the editor you want to keep, then click on
+    an adjacent editor you wish to remove. The two editors must share an edge
+    like normal editor joining (triple lines in editor corners).
 
-Known issues:
-Editors may become unstable if you invoke the join operation and click in the
-original editor. If this occurs, merge another editor over the troublesome
-editor and split off a new editor. This will return behavior to normal.
+    Known issues:
+    Editors may become unstable if you invoke the join operation and click in
+    the original editor. If this occurs, merge another editor over the
+    troublesome editor and split off a new editor. This will return behavior
+    to normal.
 
--- Italic_
+    -- Italic_
 """
 
 bl_info = {
@@ -44,7 +45,6 @@ from bpy.props import IntProperty
 
 
 class ViewMenu(bpy.types.Operator):
-    """Get editor context."""
 
     bl_idname = "object.view_menu"
     bl_label = "View Menu"
@@ -79,6 +79,7 @@ class PieAreaViews(Menu):
         pie.operator("object.view_menu", text="3D View",
                      icon='VIEW3D').variable = "VIEW_3D"
 
+        # DIAGONALS
         pie.operator("wm.call_menu_pie", text="Utils",
                      icon='BUTS').name = "PieAreaViewsUtils"
         pie = pie.row()
@@ -160,7 +161,6 @@ class PieSplitViewport(Menu):
     def draw(self, context):
         """Draw split subpie."""
         layout = self.layout
-        pie = layout.menu_pie()
         pie = layout.menu_pie()
 
         pie.operator("split.vertical",
