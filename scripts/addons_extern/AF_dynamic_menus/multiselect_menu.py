@@ -1,8 +1,6 @@
-#view3d_multiselect_menu.py (c) 2011 Sean Olson (liquidApe)
-#Original Script by: Mariano Hidalgo (uselessdreamer)
-#contributed to by: Crouch, sim88, sam, meta-androcto, and Michael W
-#
-#Tested with r37702
+# view3d_multiselect_menu.py (c) 2011 Sean Olson (liquidApe)
+# Original Script by: Mariano Hidalgo (uselessdreamer)
+# contributed to by: Crouch, sim88, sam, meta-androcto, Michael W and Italic_
 #
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
@@ -24,64 +22,227 @@
 
 bl_info = {
     'name': '3D View: Multiselect Menu',
-    'author': 'Sean Olson (liquidApe)',
-    'version': (1, 2),
-    'blender': (2, 6, 1),
+    'author': 'Sean Olson (liquidApe), Italic_',
+    'version': (2, 0),
+    'blender': (2, 7, 6),
     'location': 'View3D > Mouse > Menu ',
-    'warning':'',
+    'warning': '',
     'description': 'Added options for multiselect to the ctrl-tab menu',
-    'wiki_url': 'http://wiki.blender.org/index.php/Extensions:2.6/Py/' \
-        'Scripts/3D_interaction/multiselect_Menu',
     'tracker_url': 'https://projects.blender.org/tracker/index.php?'
                    'func=detail&aid=22132',
     'category': '3D View'}
 
 import bpy
+import bpy.ops
+from bpy.types import Menu
+
 
 # multiselect menu
-class VIEW3D_MT_Multiselect_Menu(bpy.types.Menu):
+class VIEW3D_MT_Multiselect_Menu(Menu):
     bl_label = "MultiSelect Menu"
 
     def draw(self, context):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
 
+        layout.operator("multi.vert",
+                        text="Vertex",
+                        icon='VERTEXSEL')
+
+        layout.operator("multi.edge",
+                        text="Edge",
+                        icon='EDGESEL')
+
+        layout.operator("multi.face",
+                        text="Face",
+                        icon='FACESEL')
+
         layout.separator()
-        prop = layout.operator("wm.context_set_value", text="Vertex Select",
-            icon='VERTEXSEL')
-        prop.value = "(True, False, False)"
-        prop.data_path = "tool_settings.mesh_select_mode"
+        layout.operator("multi.vertedge",
+                        text="Vertex/Edge",
+                        icon='EDITMODE_HLT')
 
-        prop = layout.operator("wm.context_set_value", text="Edge Select",
-            icon='EDGESEL')
-        prop.value = "(False, True, False)"
-        prop.data_path = "tool_settings.mesh_select_mode"
+        layout.operator("multi.vertface",
+                        text="Vertex/Face",
+                        icon='ORTHO')
 
-        prop = layout.operator("wm.context_set_value", text="Face Select",
-            icon='FACESEL')
-        prop.value = "(False, False, True)"
-        prop.data_path = "tool_settings.mesh_select_mode"
+        layout.operator("multi.edgeface",
+                        text="Edge/Face",
+                        icon='SNAP_FACE')
+
         layout.separator()
+        layout.operator("multi.vertedgeface",
+                        text="Vertex/Edge/Face",
+                        icon='SNAP_VOLUME')
 
-        prop = layout.operator("wm.context_set_value",
-            text="Vertex & Edge Select", icon='EDITMODE_HLT')
-        prop.value = "(True, True, False)"
-        prop.data_path = "tool_settings.mesh_select_mode"
-
-        prop = layout.operator("wm.context_set_value",
-            text="Vertex & Face Select", icon='ORTHO')
-        prop.value = "(True, False, True)"
-        prop.data_path = "tool_settings.mesh_select_mode"
-
-        prop = layout.operator("wm.context_set_value",
-            text="Edge & Face Select", icon='SNAP_FACE')
-        prop.value = "(False, True, True)"
-        prop.data_path = "tool_settings.mesh_select_mode"
-        layout.separator()
-
-        prop = layout.operator("wm.context_set_value",
-            text="Vertex & Edge & Face Select", icon='SNAP_VOLUME')
-        prop.value = "(True, True, True)"
-        prop.data_path = "tool_settings.mesh_select_mode"
         layout.separator()
 
+
+# Pie menus
+class VIEW3D_MT_Multiselect_Menu_Pie(Menu):
+    """
+    Main pie for individual selection modes,
+    with subpie for multiselect modes
+    """
+
+    bl_label = "Multiselect Pie"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        # 1 (position 4)
+        pie.operator("multi.vert",
+                     text="Vertex Select",
+                     icon='VERTEXSEL')
+
+        # 2 (position 6)
+        pie.operator("multi.edge",
+                     text="Edge Select",
+                     icon='EDGESEL')
+
+        # 3 (position 2)
+        pie.operator("multi.face",
+                     text="Face Select",
+                     icon='FACESEL')
+
+        # 4 (position 8)
+        pie.operator("wm.call_menu_pie",
+                     text="Multiselect",
+                     icon='FACESEL').name = "MultiPie"
+
+
+class MultiPie(Menu):
+    """Subpie for multiple selection modes"""
+
+    bl_label = "Multiselect Options"
+
+    def draw(self, context):
+        layout = self.layout
+        pie = layout.menu_pie()
+
+        # 1 (position 4)
+        pie.operator("multi.vertedge",
+                     text="Vertex/Edge",
+                     icon='EDITMODE_HLT')
+
+        # 2 (position 6)
+        pie.operator("multi.vertface",
+                     text="Vertex/Face",
+                     icon='ORTHO')
+
+        # 3 (position 2)
+        pie.operator("multi.edgeface",
+                     text="Edge/Face",
+                     icon='SNAP_FACE')
+
+        # 4 (position 8)
+        pie.operator("multi.vertedgeface",
+                     text="Vert/Edge/Face",
+                     icon='SNAP_VOLUME')
+
+
+class SelModeVert(bpy.types.Operator):
+    bl_idname = "multi.vert"
+    bl_label = "Vertex Select Mode"
+
+    def execute(self, context):
+        wm = bpy.ops.wm
+        wm.context_set_value(data_path="tool_settings.mesh_select_mode",
+                             value="(True, False, False)")
+        return {'FINISHED'}
+
+
+class SelModeEdge(bpy.types.Operator):
+    bl_idname = "multi.edge"
+    bl_label = "Edge Select Mode"
+
+    def execute(self, context):
+        wm = bpy.ops.wm
+        wm.context_set_value(data_path="tool_settings.mesh_select_mode",
+                             value="(False, True, False)")
+        return {'FINISHED'}
+
+
+class SelModeFace(bpy.types.Operator):
+    bl_idname = "multi.face"
+    bl_label = "Face Select Mode"
+
+    def execute(self, context):
+        wm = bpy.ops.wm
+        wm.context_set_value(data_path="tool_settings.mesh_select_mode",
+                             value="(False, False, True)")
+        return {'FINISHED'}
+
+
+class SelModeVertEdge(bpy.types.Operator):
+    bl_idname = "multi.vertedge"
+    bl_label = "Vert/Edge Select Mode"
+
+    def execute(self, context):
+        wm = bpy.ops.wm
+        wm.context_set_value(data_path="tool_settings.mesh_select_mode",
+                             value="(True, True, False)")
+        return {'FINISHED'}
+
+
+class SelModeVertFace(bpy.types.Operator):
+    bl_idname = "multi.vertface"
+    bl_label = "Vert/Face Select Mode"
+
+    def execute(self, context):
+        wm = bpy.ops.wm
+        wm.context_set_value(data_path="tool_settings.mesh_select_mode",
+                             value="(True, False, True)")
+        return {'FINISHED'}
+
+
+class SelModeEdgeFace(bpy.types.Operator):
+    bl_idname = "multi.edgeface"
+    bl_label = "Edge/Face Select Mode"
+
+    def execute(self, context):
+        wm = bpy.ops.wm
+        wm.context_set_value(data_path="tool_settings.mesh_select_mode",
+                             value="(False, True, True)")
+        return {'FINISHED'}
+
+
+class SelModeVertEdgeFace(bpy.types.Operator):
+    bl_idname = "multi.vertedgeface"
+    bl_label = "Vert/Edge/Face Select Mode"
+
+    def execute(self, context):
+        wm = bpy.ops.wm
+        wm.context_set_value(data_path="tool_settings.mesh_select_mode",
+                             value="(True, True, True)")
+        return {'FINISHED'}
+
+
+"""
+def menu(self, context):
+    if (context.user_preferences.addons["Dynamic Menus"].preferences.enable_pie_multiselect):
+        # remove multiselect keybinding
+        km = bpy.context.window_manager.keyconfigs.active.keymaps['Mesh']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu':
+                if kmi.properties.name == "VIEW3D_MT_Multiselect_Menu":
+                    km.keymap_items.remove(kmi)
+                    break
+
+        km = bpy.context.window_manager.keyconfigs.active.keymaps['Mesh']
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS', ctrl=True)
+        kmi.properties.name = "VIEW3D_MT_Multiselect_Menu_Pie"
+    else:
+        # remove multiselect keybinding
+        km = bpy.context.window_manager.keyconfigs.active.keymaps['Mesh']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "VIEW3D_MT_Multiselect_Menu_Pie":
+                    km.keymap_items.remove(kmi)
+                    break
+
+        km = bpy.context.window_manager.keyconfigs.active.keymaps['Mesh']
+        kmi = km.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
+        kmi.properties.name = "VIEW3D_MT_Multiselect_Menu"
+"""
