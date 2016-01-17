@@ -594,9 +594,9 @@ def register():
 
 def unregister():
 	bpy.utils.unregister_class(Add_iterative_Tree)
-	bpy.utils.register_class(TreeMaker)
-	bpy.utils.register_class(AddLeaves)
-	bpy.utils.register_class(AddDetail)
+	bpy.utils.unregister_class(TreeMaker)
+	bpy.utils.unregister_class(AddLeaves)
+	bpy.utils.unregister_class(AddDetail)
 	
 if __name__ == "__main__":
 	register()

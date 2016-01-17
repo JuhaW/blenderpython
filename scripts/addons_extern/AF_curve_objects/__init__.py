@@ -46,6 +46,7 @@ if "bpy" in locals():
     importlib.reload(curve_simplify)
     importlib.reload(add_surface_plane_cone)
     importlib.reload(curve_edit_outline)
+    importlib.reload(DialScale)
 
 
 else:
@@ -62,6 +63,7 @@ else:
     from . import curve_simplify
     from . import add_surface_plane_cone
     from . import curve_edit_outline
+    from . import DialScale
 
 import bpy
 
@@ -114,8 +116,10 @@ class INFO_MT_curve_extras_add(bpy.types.Menu):
         layout.label(text="Curve Utils")
         layout.operator("curve.simplify",
             text="Simplify Curves")
-        layout.operator("object._curve_outline",
+        layout.operator("object.curve_outline",
             text="Outline")
+        layout.operator("curve.dial_scale",
+            text="Dial/Scale")
 
 
 
@@ -133,6 +137,7 @@ def menu(self, context):
 	self.layout.operator("curve.curlycurve", text="Curly Curve", icon="CURVE_DATA")
 	self.layout.operator("curve.formulacurves", text="Formula Curve", icon="CURVE_DATA")
 	self.layout.operator("curve.wires", text="Curve Wires", icon="CURVE_DATA")
+	self.layout.operator("curve.dial_scale", text="Dial/Scale", icon="CURVE_DATA")
 	self.layout.separator()
 	layout.label(text="Curve Utils")
 	self.layout.operator("curve.simplify", text="Curve Simplify", icon="CURVE_DATA")
