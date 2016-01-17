@@ -366,11 +366,6 @@ class Add_iterative_Tree(bpy.types.Operator):
 		create_tree(self.iterations, self.radius ,self.rad_dec, self.trunk_radius_dec , self.split_proba, self.dist, self.split_angle, self.first_split_angle, self.bevel, self.trunk_min_length, self.trunk_variation, self.gravity_fact, self.preserve_trunk, self.dist_dec, self.branch_variation, self.split_proba_rise, self.force, self.force_factor, self.emitter)
 		return {'FINISHED'}
 
-
-
-
-
-
 # the class who creates the buttons and call other classes
 class TreeMaker(bpy.types.Panel):
 	bl_space_type = "VIEW_3D"
@@ -378,6 +373,7 @@ class TreeMaker(bpy.types.Panel):
 	bl_context = "objectmode"
 	bl_category = "Create"
 	bl_label = "Add Tree"
+	bl_options = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
 		TheCol = self.layout.column()

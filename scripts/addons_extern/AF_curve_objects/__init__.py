@@ -17,7 +17,10 @@
 # ##### END GPL LICENSE BLOCK #####
 # Contributed to by
 # testscreenings, Alejandro Omar Chocano Vasquez, Jimmy Hazevoet, Adam Newgas, meta-androcto #
-
+from .object_tube_and_pipe import __init__
+from .object_tube_and_pipe import Makemesh
+from .object_tube_and_pipe import Pipe
+from .object_tube_and_pipe import Tube
 
 bl_info = {
     "name": "Add Curve Factory",
@@ -47,6 +50,7 @@ if "bpy" in locals():
     importlib.reload(add_surface_plane_cone)
     importlib.reload(curve_edit_outline)
     importlib.reload(DialScale)
+    importlib.reload(add_iterative_tree)
 
 
 else:
@@ -64,6 +68,7 @@ else:
     from . import add_surface_plane_cone
     from . import curve_edit_outline
     from . import DialScale
+    from . import add_iterative_tree
 
 import bpy
 
