@@ -70,7 +70,7 @@ if "bpy" in locals():
     importlib.reload(Boltactory)
     importlib.reload(add_mesh_beam_builder)
     importlib.reload(terrain_gen)
-    importlib.reload(duel_poly)
+    importlib.reload(add_dual_mesh)
     importlib.reload(add_mesh_grating)
 
 else:
@@ -98,7 +98,7 @@ else:
     from . import Boltfactory
     from . import add_mesh_beam_builder
     from . import terrain_gen
-    from . import duel_poly
+    from . import add_dual_mesh
     from . import add_mesh_grating
 
 
@@ -187,7 +187,7 @@ class INFO_MT_mesh_math_add(bpy.types.Menu):
         layout.operator("mesh.primitive_xyz_function_surface",
             text="XYZ Math Surface")
         self.layout.operator("mesh.primitive_solid_add", text="Regular Solid")
-        self.layout.operator("mesh.dual_add", text="Duel Poly")
+        self.layout.operator("object.dual_mesh_operator", text="Dual Mesh")
 
 class INFO_MT_mesh_extras_add(bpy.types.Menu):
     # Define the "Simple Objects" menu
