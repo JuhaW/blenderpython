@@ -34,11 +34,8 @@ bl_info = {
     }
 
 
-if "bpy" in locals():
-    import imp
-    imp.reload(Castle)
-else:
-    from add_mesh_castle import Castle
+
+from . import Castle
 
 import bpy
 

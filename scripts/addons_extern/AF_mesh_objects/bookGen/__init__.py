@@ -36,7 +36,7 @@ import random
 import time
 from math import pi, radians, sin , cos
 
-from bookGen.utils import *
+from .utils import *
 
 
 class bookGen(bpy.types.Operator):

@@ -31,6 +31,10 @@ from .add_ant_erosion import erosion
 from .add_bound_box import bound_box
 from .add_mesh_building_objects import build
 from .add_mesh_rocks import rock_generator
+from .bookGen import __init__
+from .bookGen import utils
+from .add_mesh_castle import __init__
+from .add_mesh_castle import Castle
 
 bl_info = {
     "name": "Add Mesh Factory",
@@ -331,6 +335,10 @@ class INFO_MT_mesh_building_add(bpy.types.Menu):
             text="Stair Builder")
         layout.operator("mesh.primitive_add_grating",
             text="Grating")
+        layout.operator("object.book_gen",
+            text="Book Gen")
+        layout.operator("mesh.add_castle",
+            text="Castle")
 
 # Define "Extras" menu
 def menu(self, context):
@@ -412,6 +420,8 @@ class MeshObjectPrefs(bpy.types.AddonPreferences):
             layout.label(text="Wall Factory: Add Castle Wall")
             layout.label(text="Stair Builder: Add Stairs")
             layout.label(text="Grating: Add mesh Grating")
+            layout.label(text="Book Gen: Create rows of books")
+            layout.label(text="Castle: Create Castles (wip)")
 
         layout.prop(context.scene, "Enable_Tab_07", text="Extras", icon="INFO")  
         if context.scene.Enable_Tab_07:
