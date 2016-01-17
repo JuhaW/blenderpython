@@ -68,13 +68,13 @@
 
 #-----------------------------------------------------------
 # BEGIN NEW B2.5/Py3.2 CODE
-from .general import General
-from .post import Posts
-from .rail import Rails
-from .retainer import Retainers
-from .stringer import Stringer
-from .tread import Treads
 import bpy
+from add_mesh_building_objects.general import General
+from add_mesh_building_objects.post import Posts
+from add_mesh_building_objects.rail import Rails
+from add_mesh_building_objects.retainer import Retainers
+from add_mesh_building_objects.stringer import Stringer
+from add_mesh_building_objects.tread import Treads
 from bpy.props import (BoolProperty,
                        EnumProperty,
                        IntProperty,

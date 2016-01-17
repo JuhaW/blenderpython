@@ -110,19 +110,11 @@
 
 # <pep8 compliant>
 
-
-if "bpy" in locals():
-    import importlib
-    importlib.reload(settings)
-    importlib.reload(utils)
-else:
-    from . import settings
-    from . import utils
-
 import bpy
 import math
 import time
-
+from add_mesh_rocks import (settings,
+                            utils)
 from bpy_extras import object_utils
 from mathutils import (Color,
                        Vector)
@@ -1454,8 +1446,8 @@ class rocks(bpy.types.Operator):
                             min = 0, max = 128, default = defaults[14])
 
     # @todo Add material properties
-    mat_enable = BoolProperty(name = "Generate BI Materials",
-                              description = "Blender Internal Only Mats & Textures!",
+    mat_enable = BoolProperty(name = "Generate materials",
+                              description = "Generate materials and textures for the rocks",
                               default = defaults[15])
     mat_color = FloatVectorProperty(name = "Color",
                                     description = "Base color settings (RGB)",

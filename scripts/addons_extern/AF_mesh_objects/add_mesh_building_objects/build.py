@@ -17,6 +17,9 @@
 # ##### END GPL LICENSE BLOCK #####
 # Contributed to by
 # SAYproductions, meta-androcto, jambay, brikbot#
+from .add_window import __init__
+from .add_window import window_panel
+from .add_window import window_tools
 
 bl_info = {
     "name": "Building Objects",

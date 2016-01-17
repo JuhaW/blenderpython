@@ -54,15 +54,10 @@ if flag is False:
 # ----------------------------------------------
 # Import modules
 # ----------------------------------------------
-if "bpy" in locals():
-    import imp
 
-    imp.reload(window_panel)
-    print("window: Reloaded multifiles")
-else:
-    import window_panel
+from . import window_panel
 
-    print("window: Imported multifiles")
+print("window: Imported multifiles")
 
 import bpy
 # noinspection PyUnresolvedReferences

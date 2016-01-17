@@ -72,7 +72,6 @@ if "bpy" in locals():
     importlib.reload(add_mesh_lowpoly_rock)
     importlib.reload(fractalDome)
     importlib.reload(Boltfactory)
-    importlib.reload(add_mesh_beam_builder)
     importlib.reload(terrain_gen)
     importlib.reload(add_dual_mesh)
     importlib.reload(add_mesh_grating)
@@ -102,7 +101,6 @@ else:
     from . import add_mesh_lowpoly_rock
     from . import fractalDome
     from . import Boltfactory
-    from . import add_mesh_beam_builder
     from . import terrain_gen
     from . import add_dual_mesh
     from . import add_mesh_grating
@@ -321,7 +319,6 @@ class INFO_MT_mesh_building_add(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
-        layout.menu("INFO_MT_mesh_beambuilder_add", text="Beam Builder", icon="NOCURVE")
         layout.menu("INFO_MT_mesh_floorwall_add", text="Floors & Walls", icon = "UV_ISLANDSEL")
         layout.operator("mesh.add_say3d_balcony",
             text="Balcony")
@@ -339,6 +336,7 @@ class INFO_MT_mesh_building_add(bpy.types.Menu):
             text="Book Gen")
         layout.operator("mesh.add_castle",
             text="Castle")
+        layout.operator("window.run_action", text="Window (editable)", icon="MOD_LATTICE")
 
 # Define "Extras" menu
 def menu(self, context):

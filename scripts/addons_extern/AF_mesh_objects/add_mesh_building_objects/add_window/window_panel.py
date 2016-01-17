@@ -30,7 +30,7 @@
 # ----------------------------------------------------------
 # noinspection PyUnresolvedReferences
 import bpy
-from window_tools import remove_doubles, set_normals, create_diffuse_material, create_glass_material
+from .window_tools import remove_doubles, set_normals, create_diffuse_material, create_glass_material
 from math import pi, sin, cos, sqrt
 
 
