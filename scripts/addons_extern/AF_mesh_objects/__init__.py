@@ -67,11 +67,12 @@ if "bpy" in locals():
     importlib.reload(add_mesh_cave_gen)
     importlib.reload(add_mesh_lowpoly_rock)
     importlib.reload(fractalDome)
-    importlib.reload(Boltactory)
+    importlib.reload(Boltfactory)
     importlib.reload(add_mesh_beam_builder)
     importlib.reload(terrain_gen)
     importlib.reload(add_dual_mesh)
     importlib.reload(add_mesh_grating)
+    importlib.reload(add_mesh_propeller)
 
 else:
     from . import add_mesh_star
@@ -100,6 +101,7 @@ else:
     from . import terrain_gen
     from . import add_dual_mesh
     from . import add_mesh_grating
+    from . import add_mesh_propeller
 
 
 import bpy
@@ -302,6 +304,7 @@ class INFO_MT_mesh_mech_add(bpy.types.Menu):
         layout.menu("INFO_MT_mesh_pipe_joints_add", text="Pipe Joints", icon="SNAP_PEEL_OBJECT")
         layout.menu("INFO_MT_mesh_gears_add", text="Gears", icon="SCRIPTWIN")
         layout.operator("mesh.bolt_add", text="Add Bolt", icon="CURSOR")
+        layout.operator("mesh.propeller_add", text="Propeller", icon="SCRIPTWIN")
 
 class INFO_MT_mesh_building_add(bpy.types.Menu):
     # Define the "Building" menu
