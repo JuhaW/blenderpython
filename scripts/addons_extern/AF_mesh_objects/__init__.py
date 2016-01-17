@@ -73,6 +73,7 @@ if "bpy" in locals():
     importlib.reload(add_dual_mesh)
     importlib.reload(add_mesh_grating)
     importlib.reload(add_mesh_propeller)
+    importlib.reload(basket_arch)
 
 else:
     from . import add_mesh_star
@@ -102,7 +103,7 @@ else:
     from . import add_dual_mesh
     from . import add_mesh_grating
     from . import add_mesh_propeller
-
+    from . import basket_arch
 
 import bpy
 
@@ -213,6 +214,8 @@ class INFO_MT_mesh_extras_add(bpy.types.Menu):
             text="Menger Sponge")
         layout.operator("mesh.fractal_dome",
             text="Fractal Dome")
+        layout.operator("mesh.basketarch",
+            text="Basket Arch")
 
 
 class INFO_MT_mesh_torus_add(bpy.types.Menu):
@@ -351,6 +354,12 @@ class MeshObjectPrefs(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     bpy.types.Scene.Enable_Tab_01 = bpy.props.BoolProperty(default=False)
+    bpy.types.Scene.Enable_Tab_02 = bpy.props.BoolProperty(default=False)
+    bpy.types.Scene.Enable_Tab_03 = bpy.props.BoolProperty(default=False)
+    bpy.types.Scene.Enable_Tab_04 = bpy.props.BoolProperty(default=False)
+    bpy.types.Scene.Enable_Tab_05 = bpy.props.BoolProperty(default=False)
+    bpy.types.Scene.Enable_Tab_06 = bpy.props.BoolProperty(default=False)
+    bpy.types.Scene.Enable_Tab_07 = bpy.props.BoolProperty(default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -360,6 +369,57 @@ class MeshObjectPrefs(bpy.types.AddonPreferences):
             layout.label(text="----Add Mesh Objects----")
             layout.label(text="Merges most Mesh Object Addons into One")
             layout.label(text="New sub menu's & organization")
+
+        layout.prop(context.scene, "Enable_Tab_02", text="Helper Objects", icon="INFO")  
+        if context.scene.Enable_Tab_02:
+            row = layout.row()
+            layout.label(text="Add Mesh Vert: Adds single Vert with options")
+            layout.label(text="Add Mesh Round Cube: Adds base sulpting objects")
+            layout.label(text="Add Bound Box: Adds bounding box with options")
+
+        layout.prop(context.scene, "Enable_Tab_03", text="Landscape", icon="INFO")  
+        if context.scene.Enable_Tab_03:
+            row = layout.row()
+            layout.label(text="ANT Landscape: Create Landscape Mesh")
+            layout.label(text="Erode: Add erosion To ANT Landscape mesh")
+            layout.label(text="Terrain: create large Terrain mesh")
+            layout.label(text="Rock Gen: Create displacement Rocks")
+            layout.label(text="Cave Gen: Create Caves with lights")
+            layout.label(text="Low Poly Rock: Create Low Poly Rock Shapes")
+
+        layout.prop(context.scene, "Enable_Tab_04", text="Math Function", icon="INFO")  
+        if context.scene.Enable_Tab_04:
+            row = layout.row()
+            layout.label(text="Torus Objects: Twisted, Super & Knot")
+            layout.label(text="Z math & XYZ surface functions")
+            layout.label(text="Regular Solid: Library of Solid Math Shapes")
+            layout.label(text="Duel Mesh: Create duel copy of mesh")
+
+        layout.prop(context.scene, "Enable_Tab_05", text="Mechanical", icon="INFO")  
+        if context.scene.Enable_Tab_05:
+            row = layout.row()
+            layout.label(text="Pipe Joints: Create various pipes")
+            layout.label(text="Gears: Create Gears")
+            layout.label(text="Bolt: Add several types of Bolt")
+            layout.label(text="Propeller: Add Aerodynamic propeller")
+
+        layout.prop(context.scene, "Enable_Tab_06", text="Building", icon="INFO")  
+        if context.scene.Enable_Tab_06:
+            row = layout.row()
+            layout.label(text="Beam Builder: Create various Beams")
+            layout.label(text="Floors & Walls: Siding, Drystone, Floorboards, Plancher")
+            layout.label(text="Balcony, Sove, Window")
+            layout.label(text="Wall Factory: Add Castle Wall")
+            layout.label(text="Stair Builder: Add Stairs")
+            layout.label(text="Grating: Add mesh Grating")
+
+        layout.prop(context.scene, "Enable_Tab_07", text="Extras", icon="INFO")  
+        if context.scene.Enable_Tab_07:
+            row = layout.row()
+            layout.label(text="Diamonds, Icicle & Snowflake")
+            layout.label(text="Simple Star, Step Pyramid, Honeycomb")
+            layout.label(text="Teapot+, Menger Sponge, Fractal Dome")
+            layout.label(text="Basket Arch")
 
 def register():
     bpy.utils.register_module(__name__)
