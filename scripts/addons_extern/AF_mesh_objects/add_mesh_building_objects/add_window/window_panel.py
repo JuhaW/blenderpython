@@ -201,7 +201,8 @@ class WindowMainPanel(bpy.types.Panel):
     bl_label = "Window"
     bl_space_type = 'VIEW_3D'
     bl_region_type = "TOOLS"
-    bl_category = 'Window'
+    bl_category = 'Create'
+    bl_options = {'DEFAULT_CLOSED'}
 
     # ------------------------------
     # Draw UI
