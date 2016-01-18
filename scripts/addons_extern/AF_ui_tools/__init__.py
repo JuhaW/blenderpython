@@ -37,7 +37,7 @@ from . import drawnearest
 from . import lockcoords
 from . import lockcursor3d
 from . import mousegesture
-from . import overwrite_builtin_images
+from . import navigation
 from . import spacebar_menu
 from . import regionruler
 from . import screencastkeys
@@ -65,7 +65,7 @@ sub_modules = [
     lockcoords,
     lockcursor3d,
     mousegesture,
-    overwrite_builtin_images,
+    navigation,
     spacebar_menu,
     regionruler,
     screencastkeys,
