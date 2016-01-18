@@ -41,6 +41,8 @@ from . import lockcursor3d
 from . import navigation
 from . import spacebar_menu
 from . import toolshelf_menu
+from . import manipulator_menu
+from . import multiselect_menu
 
 
 bl_info = {
@@ -62,7 +64,9 @@ sub_modules = [
     navigation,
     spacebar_menu,
     toolshelf_menu,
-]
+    manipulator_menu,
+    multiselect_menu
+    ]
 
 
 sub_modules.sort(
@@ -206,9 +210,7 @@ class UIToolsPreferences(bpy.types.AddonPreferences):
                             box = column.box()
                         else:
                             box = box.column()
-                        if mod_name == 'overwrite_builtin_images':
-                            if not test_platform():
-                                box.active = False
+
                         prefs.layout = box
                         try:
                             prefs.draw(context)
@@ -218,10 +220,6 @@ class UIToolsPreferences(bpy.types.AddonPreferences):
                         del prefs.layout
 
         row = layout.row()
-        sub = row.row()
-        sub.alignment = 'LEFT'
-        op = sub.operator('script.UIutils_module_update',
-                     icon='FILE_REFRESH')
         sub = row.row()
         sub.alignment = 'RIGHT'
         sub.prop(self, 'align_box_draw')
