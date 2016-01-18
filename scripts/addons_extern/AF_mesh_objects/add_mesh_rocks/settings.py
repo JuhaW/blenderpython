@@ -34,7 +34,7 @@
 
 import inspect
 import shutil
-from add_mesh_rocks import utils
+from . import utils
 from xml.dom import minidom
 
 basePath = inspect.getfile(inspect.currentframe())[0:-len("settings.py")]

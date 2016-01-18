@@ -113,8 +113,8 @@
 import bpy
 import math
 import time
-from add_mesh_rocks import (settings,
-                            utils)
+from . import (settings,
+                       utils)
 from bpy_extras import object_utils
 from mathutils import (Color,
                        Vector)
