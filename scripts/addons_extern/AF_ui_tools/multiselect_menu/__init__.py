@@ -32,12 +32,14 @@ bl_info = {
                    'func=detail&aid=22132',
     'category': '3D View'}
 
-from .utils import AddonPreferences, SpaceProperty
-
+from .utils import AddonPreferences, SpaceProperty, operator_call
 import bpy
 import bpy.ops
 from bpy.types import Menu
+from bpy.app.handlers import persistent
+from bpy.props import BoolProperty
 
+import inspect
 
 # multiselect menu
 class VIEW3D_MT_Multiselect_Menu(Menu):
@@ -220,8 +222,64 @@ class SelModeVertEdgeFace(bpy.types.Operator):
                              value="(True, True, True)")
         return {'FINISHED'}
 
+# =============================================================================
+#  USER PREFERENCES
+# =============================================================================
+
+def update_Prefs(self, context):
+    
+    wm = bpy.context.window_manager
+    
+    if wm.keyconfigs.addon:
+        for km in addon_keymaps:
+            for kmi in km.keymap_items:
+                km.keymap_items.remove(kmi)
+
+            wm.keyconfigs.addon.keymaps.remove(km)
+
+    addon_keymaps.clear()
+    
+    kc = wm.keyconfigs.addon
+    
+    if kc:
+
+        #set up
+        if self.use_3D_View_prop:
+            km = bpy.context.window_manager.keyconfigs.active.keymaps['Mesh']
+
+            #Multiselect_Menu
+            kmi = km.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
+            kmi.properties.name = "VIEW3D_MT_Multiselect_Menu"
+
+        #Multi Select Pie
+        if self.use_3D_Pie_prop:
+            km = bpy.context.window_manager.keyconfigs.active.keymaps['Mesh']
+
+            #Multiselect_Menu
+            kmi = km.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
+            kmi.properties.name = "VIEW3D_MT_Multiselect_Menu_Pie"
+
+class MultiSelectPreferences(
+        AddonPreferences,
+        bpy.types.PropertyGroup,
+        bpy.types.AddonPreferences):
+    bl_idname = __name__
+    
+    use_3D_View_prop = BoolProperty(name="Menu", description="Use Menu Style", default=False, update=update_Prefs)
+    use_3D_Pie_prop = BoolProperty(name="Pie", description="Use Pie Style", default=False, update=update_Prefs)
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        
+        col.prop(self, "use_3D_View_prop")
+        col.prop(self, "use_3D_Pie_prop")
+
+
 classes = [
     VIEW3D_MT_Multiselect_Menu,
+    VIEW3D_MT_Multiselect_Menu_Pie,
+    MultiSelectPreferences,
     SelModeVert,
     SelModeEdge,
     SelModeFace,
@@ -231,14 +289,22 @@ classes = [
     SelModeVertEdgeFace,
     ]
 
+addon_keymaps = []
+
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon    
     #add multiselect keybinding
-    km = bpy.context.window_manager.keyconfigs.active.keymaps['Mesh']
+    km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
     kmi = km.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
     kmi.properties.name = "VIEW3D_MT_Multiselect_Menu"
+	
+    #add multiselect keybinding
+    km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
+    kmi = km.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
+    kmi.properties.name = "VIEW3D_MT_Multiselect_Menu_Pie"
 
     #remove default keybinding
     km = bpy.context.window_manager.keyconfigs.active.keymaps['Mesh']
@@ -259,11 +325,20 @@ def unregister():
             if kmi.properties.name == "VIEW3D_MT_Multiselect_Menu":
                 km.keymap_items.remove(kmi)
                 break
+    km = bpy.context.window_manager.keyconfigs.active.keymaps['Mesh']
+    for kmi in km.keymap_items:
+        if kmi.idname == 'wm.call_menu':
+            if kmi.properties.name == "VIEW3D_MT_Multiselect_Menu_Pie":
+                km.keymap_items.remove(kmi)
+                break
+
 
     #replace default keymap
     km = bpy.context.window_manager.keyconfigs.active.keymaps['Mesh']
     kmi = km.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
     kmi.properties.name = "VIEW3D_MT_edit_mesh_select_mode"
+
+#    addon_keymaps.clear()
 
 if __name__ == "__main__":
     register()
