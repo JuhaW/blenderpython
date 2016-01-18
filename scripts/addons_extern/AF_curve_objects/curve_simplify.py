@@ -240,7 +240,11 @@ def main(context, obj, options):
     output = options[1]
     degreeOut = options[5]
     keepShort = options[7]
-    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.editmode_toggle()
+
+    bpy.ops.curve.select_all(action='TOGGLE')
+    bpy.ops.object.editmode_toggle()
+
     scene = context.scene
     splines = obj.data.splines.values()
 
