@@ -240,6 +240,7 @@ class SelModeVertEdgeFace(bpy.types.Operator):
 def update_Prefs(self, context):
     """Function to toggle keymaps and menu style."""
     wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
 
     if wm.keyconfigs.addon:
         for km in addon_keymaps:
@@ -249,8 +250,6 @@ def update_Prefs(self, context):
             wm.keyconfigs.addon.keymaps.remove(km)
 
     addon_keymaps.clear()
-
-    kc = wm.keyconfigs.addon
 
     if kc:
         # Multi Select Pie
