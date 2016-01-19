@@ -322,10 +322,9 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     wm = bpy.context.window_manager
-    kc = wm.keyconfigs.addon
+    km = wm.keyconfigs.active.keymaps['Mesh']
 
     # remove default keybinding
-    km = wm.keyconfigs.active.keymaps['Mesh']
     for kmi in km.keymap_items:
         if kmi.idname == 'wm.call_menu':
             if kmi.properties.name == "VIEW3D_MT_edit_mesh_select_mode":
