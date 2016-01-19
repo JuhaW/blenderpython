@@ -107,7 +107,7 @@ class OperatorClass(bpy.types.Operator):
 
 # USER PREFERENCES
 
-# keymap update function ((un)register keymaps based on toggle state)
+# keymap update function ((un)register keymaps based on toggle state) - MUST be defined BEFORE preferences class to be run
 def update_prefs(self, context):
     """Function to toggle keymaps and menu style."""
     wm = bpy.context.window_manager
@@ -152,7 +152,7 @@ def update_prefs(self, context):
             kmi.properties.name = "ListStyleMenu"
 
 
-# addon preferences class here
+# addon preferences class here - AFTER update function
 class AddonPreferencesClass(
         AddonPreferences,
         bpy.types.AddonPreferences,
@@ -161,7 +161,7 @@ class AddonPreferencesClass(
 
     bl_idname = __name__
 
-    use_pie_prop = BoolProperty(
+    use_pie_prop = BoolProperty(  # MUST be defined BEFORE the button object is created
         name="Toggle Pie",
         description="Toggle between pie-style menu and classic list-style menu",
         default=False,
@@ -171,7 +171,7 @@ class AddonPreferencesClass(
         layout = self.layout
         col = layout.column()
 
-        col.prop(self, "use_pie_prop")
+        col.prop(self, "use_pie_prop")  # LAST part of the update path created - draws the button with update function, which calls predefined update function (update_prefs())
 
 
 # class list
