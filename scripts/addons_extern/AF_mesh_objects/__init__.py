@@ -37,10 +37,10 @@ from .add_mesh_castle import __init__
 from .add_mesh_castle import Castle
 
 bl_info = {
-    "name": "Add Mesh Factory",
+    "name": "AF: Mesh Objects",
     "author": "Multiple Authors",
-    "version": (0, 3, 0),
-    "blender": (2, 7, 5),
+    "version": (0, 4, 9),
+    "blender": (2, 7, 6),
     "location": "View3D > Add > Mesh",
     "description": "Add extra mesh object types",
     "warning": "",
@@ -147,7 +147,6 @@ class INFO_MT_mesh_vert_add(bpy.types.Menu):
         layout.operator("mesh.primitive_symmetrical_empty_add",
             text="Object Origin Mirrored")
 
-
 class INFO_MT_mesh_gears_add(bpy.types.Menu):
     # Define the "Gears" menu
     bl_idname = "INFO_MT_mesh_gears_add"
@@ -160,7 +159,6 @@ class INFO_MT_mesh_gears_add(bpy.types.Menu):
             text="Gear")
         layout.operator("mesh.primitive_worm_gear",
             text="Worm")
-
 
 class INFO_MT_mesh_diamonds_add(bpy.types.Menu):
     # Define the "Gears" menu
@@ -176,7 +174,6 @@ class INFO_MT_mesh_diamonds_add(bpy.types.Menu):
             text="Diamond")
         layout.operator("mesh.primitive_gem_add",
             text="Gem")
-
 
 class INFO_MT_mesh_math_add(bpy.types.Menu):
     # Define the "Math Function" menu
@@ -345,7 +342,7 @@ def menu(self, context):
 	self.layout.separator()
 	self.layout.operator("object.parent_to_empty", text="Parent To Empty", icon="LINK_AREA")
 	self.layout.separator()
-	layout.label(text="Object Factory")
+	layout.label(text="AF: Mesh Objects")
 	self.layout.menu("INFO_MT_mesh_vert_add", text="Single Vert", icon="LAYER_ACTIVE")
 	self.layout.operator("mesh.primitive_round_cube_add", text="Round Cube", icon="WIRE")
 	self.layout.menu("INFO_MT_mesh_ant_add", text="Landscape", icon="RNDCURVE")
@@ -361,11 +358,6 @@ class MeshObjectPrefs(bpy.types.AddonPreferences):
 
     bpy.types.Scene.Enable_Tab_01 = bpy.props.BoolProperty(default=False)
     bpy.types.Scene.Enable_Tab_02 = bpy.props.BoolProperty(default=False)
-    bpy.types.Scene.Enable_Tab_03 = bpy.props.BoolProperty(default=False)
-    bpy.types.Scene.Enable_Tab_04 = bpy.props.BoolProperty(default=False)
-    bpy.types.Scene.Enable_Tab_05 = bpy.props.BoolProperty(default=False)
-    bpy.types.Scene.Enable_Tab_06 = bpy.props.BoolProperty(default=False)
-    bpy.types.Scene.Enable_Tab_07 = bpy.props.BoolProperty(default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -376,42 +368,26 @@ class MeshObjectPrefs(bpy.types.AddonPreferences):
             layout.label(text="Merges most Mesh Object Addons into One")
             layout.label(text="New sub menu's & organization")
 
-        layout.prop(context.scene, "Enable_Tab_02", text="Helper Objects", icon="INFO")  
+        layout.prop(context.scene, "Enable_Tab_02", text="Mesh Objects", icon="INFO")  
         if context.scene.Enable_Tab_02:
             row = layout.row()
             layout.label(text="Add Mesh Vert: Adds single Vert with options")
             layout.label(text="Add Mesh Round Cube: Adds base sulpting objects")
             layout.label(text="Add Bound Box: Adds bounding box with options")
-
-        layout.prop(context.scene, "Enable_Tab_03", text="Landscape", icon="INFO")  
-        if context.scene.Enable_Tab_03:
-            row = layout.row()
             layout.label(text="ANT Landscape: Create Landscape Mesh")
             layout.label(text="Erode: Add erosion To ANT Landscape mesh")
             layout.label(text="Terrain: create large Terrain mesh")
             layout.label(text="Rock Gen: Create displacement Rocks")
             layout.label(text="Cave Gen: Create Caves with lights")
             layout.label(text="Low Poly Rock: Create Low Poly Rock Shapes")
-
-        layout.prop(context.scene, "Enable_Tab_04", text="Math Function", icon="INFO")  
-        if context.scene.Enable_Tab_04:
-            row = layout.row()
             layout.label(text="Torus Objects: Twisted, Super & Knot")
             layout.label(text="Z math & XYZ surface functions")
             layout.label(text="Regular Solid: Library of Solid Math Shapes")
             layout.label(text="Duel Mesh: Create duel copy of mesh")
-
-        layout.prop(context.scene, "Enable_Tab_05", text="Mechanical", icon="INFO")  
-        if context.scene.Enable_Tab_05:
-            row = layout.row()
             layout.label(text="Pipe Joints: Create various pipes")
             layout.label(text="Gears: Create Gears")
             layout.label(text="Bolt: Add several types of Bolt")
             layout.label(text="Propeller: Add Aerodynamic propeller")
-
-        layout.prop(context.scene, "Enable_Tab_06", text="Building", icon="INFO")  
-        if context.scene.Enable_Tab_06:
-            row = layout.row()
             layout.label(text="Beam Builder: Create various Beams")
             layout.label(text="Floors & Walls: Siding, Drystone, Floorboards, Plancher")
             layout.label(text="Balcony, Sove, Window")
@@ -420,10 +396,6 @@ class MeshObjectPrefs(bpy.types.AddonPreferences):
             layout.label(text="Grating: Add mesh Grating")
             layout.label(text="Book Gen: Create rows of books")
             layout.label(text="Castle: Create Castles (wip)")
-
-        layout.prop(context.scene, "Enable_Tab_07", text="Extras", icon="INFO")  
-        if context.scene.Enable_Tab_07:
-            row = layout.row()
             layout.label(text="Diamonds, Icicle & Snowflake")
             layout.label(text="Simple Star, Step Pyramid, Honeycomb")
             layout.label(text="Teapot+, Menger Sponge, Fractal Dome")
@@ -432,17 +404,14 @@ class MeshObjectPrefs(bpy.types.AddonPreferences):
 def register():
     bpy.utils.register_module(__name__)
 
-    # Add "Extras" menu to the "Add Mesh" menu
+    # Add "AF:" menu to the "Add Mesh" menu
     bpy.types.INFO_MT_mesh_add.append(menu)
 
-
 def unregister():
-    # Remove "Extras" menu from the "Add Mesh" menu.
+    # Remove "AF:" menu from the "Add Mesh" menu.
     bpy.types.INFO_MT_mesh_add.remove(menu)
 
     bpy.utils.unregister_module(__name__)
 
-
 if __name__ == "__main__":
     register()
-
