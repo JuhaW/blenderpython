@@ -182,7 +182,7 @@ class CurveObjectPrefs(bpy.types.AddonPreferences):
         layout.prop(context.scene, "Enable_Tab_02", text="Curve Objects", icon="INFO")  
         if context.scene.Enable_Tab_02:
             row = layout.row()
-            layout.label(text="Add Plants: Sapling, Ivy Gen & Add Iterative Tree (panel)")
+            layout.label(text="Add Plants: Sapling & Ivy Gen, Add Iterative Tree(panel)")
             layout.label(text="Add Knots: Celtic, TorusKnot+ & Braid")
             layout.label(text="Curves_Galore: 2d curve shapes")
             layout.label(text="Spirals: Create Spiral curve type")
@@ -192,9 +192,9 @@ class CurveObjectPrefs(bpy.types.AddonPreferences):
             layout.label(text="Dial Scale: Clock Face or Scale")
             layout.label(text="Curve Simplify: Simplify Curves")
             layout.label(text="Curve Outline: Create duplicate curve outline")
-            layout.label(text="Tubes & Pipes: Create Solid Tubes & Pipes (panel)")
-            layout.label(text="Curve Converter: Curve to Mesh re-editing (panel)")
-            layout.label(text="Bevel Curve Tool (panel)")
+            layout.label(text="Tubes & Pipes: Create Solid Tubes & Pipes(panel)")
+            layout.label(text="Curve Converter: Curve to Mesh re-editing(panel)")
+            layout.label(text="Bevel Curve Tool(panel)")
 
 def register():
     bpy.utils.register_module(__name__)
