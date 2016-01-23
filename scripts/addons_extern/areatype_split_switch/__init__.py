@@ -52,14 +52,35 @@ def viewdraw(self,context):
     layout = self.layout
     layout.operator("areatype.splitview",text="",icon="COLOR_BLUE")
 
+import bpy
+
+class AREATYPE_OT_switch(bpy.types.Operator):
+    bl_idname = "areatype.switch"
+    bl_label = "areatype.switch"
+    switchto = bpy.props.StringProperty()
+    def execute(self,context):
+        context.area.type = self.switchto
+        return {"FINISHED"}
+
+def timedraw(self,context):
+    layout = self.layout
+    layout.operator("areatype.switch",text="",icon="NODETREE").switchto = "NODE_EDITOR"
+
+def nodedraw(self,context):
+    layout = self.layout
+    layout.operator("areatype.switch",text="",icon="TIME").switchto = "TIMELINE"
 
 def register():
     bpy.types.VIEW3D_HT_header.prepend(viewdraw)
+    bpy.types.TIME_HT_header.prepend(timedraw)
+    bpy.types.NODE_HT_header.prepend(nodedraw)
     bpy.utils.register_module(__name__)
 
 
 def unregister():
     bpy.types.VIEW3D_HT_header.remove(viewdraw)
+    bpy.types.TIME_HT_header.remove(timedraw)
+    bpy.types.NODE_HT_header.remove(nodedraw)
     bpy.utils.unregister_module(__name__)
     
 
