@@ -31,29 +31,40 @@ bl_info = {
     "tracker_url": "https://developer.blender.org/T22092",
     "category": "3D View"}
 
-import bpy
-from bpy.props import BoolProperty, EnumProperty, StringProperty
 from .utils import AddonPreferences, SpaceProperty
-
+import bpy
 
 def main(context):
     bpy.context.space_data.manipulator = False
 
+#class VIEW3D_OT_disable_manipulator(bpy.types.Operator):
+#    """"""
+#    bl_idname = "VIEW3D_OT_disable_manipulator"
+#    bl_label = "disable manipulator"
+#
+#    def poll(self, context):
+#        return context.active_object != None
+#
+#    def execute(self, context):
+#        main(context)
+#        return {'FINISHED'}
+#
 
-class ManipListMenu(bpy.types.Menu):
+
+class VIEW3D_MT_ManipulatorMenu(bpy.types.Menu):
     bl_label = "ManipulatorType"
 
     def draw(self, context):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        props = layout.operator("view3d.enable_manipulator", text='Translate', icon='MAN_TRANS')
+        props = layout.operator("view3d.enable_manipulator",text ='Translate', icon='MAN_TRANS')
         props.translate = True
 
-        props = layout.operator("view3d.enable_manipulator", text='Rotate', icon='MAN_ROT')
+        props = layout.operator("view3d.enable_manipulator",text ='Rotate', icon='MAN_ROT')
         props.rotate = True
 
-        props = layout.operator("view3d.enable_manipulator", text='Scale', icon='MAN_SCALE')
+        props = layout.operator("view3d.enable_manipulator",text ='Scale', icon='MAN_SCALE')
         props.scale = True
         layout.separator()
 
@@ -64,182 +75,38 @@ class ManipListMenu(bpy.types.Menu):
 
         layout.separator()
 
-        props = layout.operator("view3d.enable_manipulator", text='Hide', icon='MAN_SCALE')
+        props = layout.operator("view3d.enable_manipulator",text ='Hide', icon='MAN_SCALE')
         props.scale = False
         props.rotate = False
         props.translate = False
 
         layout.separator()
 
-
-class ManipEnum(bpy.types.Operator):
-    """Copy of Antony/Sergey's manip pie from official pie addon."""
-
-    bl_label = "Set Manipulator"
-    bl_idname = "manip.enum"
-    bl_options = {'INTERNAL'}
-
-    type = EnumProperty(
-        name="Type",
-        items=(('TRANSLATE', "Translate", "Use the manipulator for movement transformations"),
-               ('ROTATE', "Rotate", "Use the manipulator for rotation transformations"),
-               ('SCALE', "Scale", "Use the manipulator for scale transformations"),
-               ),
-        )
-
-    def execute(self, context):
-        # show manipulator if user selects an option
-        context.space_data.show_manipulator = True
-
-        context.space_data.transform_manipulators = {self.type}
-
-        return {'FINISHED'}
-
-
-class ManipPieMenu(bpy.types.Menu):
-    """New pie-style menu, copied from Antony/Sergey's official pie addon."""
-
-    bl_label = "ManipulatorType"
-
-    def draw(self, context):
-        layout = self.layout
-        pie = layout.menu_pie()
-
-        pie.operator("manip.enum", text="Translate", icon='MAN_TRANS').type = 'TRANSLATE'
-        pie.operator("manip.enum", text="Rotate", icon='MAN_ROT').type = 'ROTATE'
-        pie.operator("manip.enum", text="Scale", icon='MAN_SCALE').type = 'SCALE'
-        pie.prop(context.space_data, "show_manipulator")
-
-
-# =============================================================================
-#  USER PREFERENCES
-# =============================================================================
-
-def update_prefs(self, context):
-    """Function to toggle keymaps and menu style."""
-    wm = bpy.context.window_manager
-    kc = wm.keyconfigs.addon
-
-    if wm.keyconfigs.addon:
-        for km in addon_keymaps:
-            for kmi in km.keymap_items:
-                km.keymap_items.remove(kmi)
-
-            wm.keyconfigs.addon.keymaps.remove(km)
-
-    addon_keymaps.clear()
-
-    if kc:
-        # Manip Pie
-        if self.use_pie_prop:
-            km = wm.keyconfigs.active.keymaps['Object Non-modal']
-
-            for kmi in km.keymap_items:
-                if kmi.idname == 'wm.call_menu':
-                    if kmi.properties.name == "ManipListMenu":
-                        km.keymap_items.remove(kmi)
-                        break
-
-            # Manip Menu
-            kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', ctrl=True)
-            kmi.properties.name = "ManipPieMenu"
-
-        else:
-            km = wm.keyconfigs.active.keymaps['Object Non-modal']
-
-            for kmi in km.keymap_items:
-                if kmi.idname == 'wm.call_menu_pie':
-                    if kmi.properties.name == "ManipPieMenu":
-                        km.keymap_items.remove(kmi)
-                        break
-
-            # Multiselect_Menu
-            kmi = km.keymap_items.new('wm.call_menu', 'SPACE', 'PRESS', ctrl=True)
-            kmi.properties.name = "ManipListMenu"
-
-
-class ManipPreferences(
-        AddonPreferences,
-        bpy.types.PropertyGroup,
-        bpy.types.AddonPreferences):
-    """Addon preferences displayed in the user preferences after activation."""
-
-    bl_idname = __name__
-
-    use_pie_prop = BoolProperty(
-        name="Toggle Pie",
-        description="Toggle between pie-style menu and classic list-style menu",
-        default=False,
-        update=update_prefs)
-
-    def draw(self, context):
-        layout = self.layout
-        col = layout.column()
-
-        col.prop(self, "use_pie_prop")
-
-
 classes = [
-    ManipListMenu,
-    ManipEnum,
-    ManipPieMenu,
-    ManipPreferences
+    VIEW3D_MT_ManipulatorMenu,
     ]
-
-
-addon_keymaps = []
-
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
+
     wm = bpy.context.window_manager
-
-    # Remove default keymaps
-    for kmi in wm.keyconfigs.active.keymaps['3D View'].keymap_items:
-        if kmi.idname == 'wm.context_toggle':
-            if kmi.properties.data_path == "space_data.show_manipulator":
-                wm.keyconfigs.active.keymaps['3D View'].keymap_items.remove(kmi)
-                break
-
-    for kmi in wm.keyconfigs.active.keymaps['Object Non-modal'].keymap_items:
-        if kmi.idname == 'wm.call_menu_pie':
-            if kmi.properties.name == "VIEW3D_PIE_manipulator":
-                wm.keyconfigs.active.keymaps['Object Non-modal'].keymap_items.remove(kmi)
-                break
-
-    # add new manip keybinding
-    km = wm.keyconfigs.active.keymaps['Object Non-modal']
+    km = wm.keyconfigs.addon.keymaps.new(name='3D View Generic', space_type='VIEW_3D')
     kmi = km.keymap_items.new('wm.call_menu', 'SPACE', 'PRESS', ctrl=True)
-    kmi.properties.name = "ManipListMenu"
+    kmi.properties.name = "VIEW3D_MT_ManipulatorMenu"
 
 
 def unregister():
-    for cls in classes[::-1]:
+    for cls in classes:
         bpy.utils.unregister_class(cls)
-    wm = bpy.context.window_manager
-    km = wm.keyconfigs.addon.keymaps['Object Non-modal']
 
+    wm = bpy.context.window_manager
+    km = wm.keyconfigs.addon.keymaps['3D View Generic']
     for kmi in km.keymap_items:
         if kmi.idname == 'wm.call_menu':
-            if kmi.properties.name == "ManipListMenu":
+            if kmi.properties.name == "VIEW3D_MT_ManipulatorMenu":
                 km.keymap_items.remove(kmi)
                 break
-
-    for kmi in km.keymap_items:
-        if kmi.idname == 'wm.call_menu_pie':
-            if kmi.properties.name == "ManipPieMenu":
-                km.keymap_items.remove(kmi)
-                break
-
-    km = wm.keyconfigs.addon.keymaps['3D View']
-    kmi = km.keymap_items.new('wm.context_toggle', 'SPACE', 'PRESS', ctrl=True)
-    kmi.properties.data_path = "space_data.show_manipulator"
-
-    km = wm.keyconfigs.addon.keymaps['Object Non-modal']
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', ctrl=True)
-    kmi.properties.name = "VIEW3D_PIE_manipulator"
-
 
 if __name__ == "__main__":
     register
