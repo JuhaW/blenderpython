@@ -36,34 +36,25 @@ from math import *
 from bpy.props import IntProperty, BoolProperty, FloatProperty, EnumProperty, PointerProperty, StringProperty, CollectionProperty
 from bpy.types import PropertyGroup
 
-from . import drawnearest
-from . import lockcursor3d
-from . import navigation
 from . import spacebar_menu
-from . import toolshelf_menu
 from . import manipulator_menu
 from . import multiselect_menu
 
-
 bl_info = {
     'name': 'AF_UI_Tools',
-    'author': 'meta-androcto, chromoly',
+    'author': 'meta-androcto, chromoly, itslic',
     'version': (1, 1),
     'blender': (2, 76, 0),
     'location': '',
     'description': 'Addon Collection',
-    'warning': '',
+    'warning': 'Experimental',
     'wiki_url': '',
     'category': 'Tools'
 }
 
 
 sub_modules = [
-    drawnearest,
-    lockcursor3d,
-    navigation,
     spacebar_menu,
-    toolshelf_menu,
     manipulator_menu,
     multiselect_menu
     ]
