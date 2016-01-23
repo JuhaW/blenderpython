@@ -1,7 +1,17 @@
 # 3Dビュー > Shift+S
+bl_info = {
+    'name': '3D View: Snap Menu',
+    'author': 'meta-androcto, saidenka',
+    'version': (2, 0),
+    'blender': (2, 7, 6),
+    'location': 'View3D > Shift/s ',
+    'warning': '',
+    'description': 'Added options for snapping & cursor',
+    'category': '3D View'}
 
+from .utils import AddonPreferences, SpaceProperty
 import bpy
-
+from bpy.types import PropertyGroup, Menu
 ################
 # オペレーター #
 ################
@@ -85,8 +95,9 @@ class SetOriginToSelected(bpy.types.Operator):
         
         
         return {'FINISHED'}
+
 # menu
-def menu(self, context):
+def menu_func(self, context):
 
 	self.layout.separator()
 	self.layout.operator(Move3DCursorToViewLocation.bl_idname, text="Cursor To View")
@@ -95,3 +106,29 @@ def menu(self, context):
 	self.layout.separator()
 	self.layout.label(text="Object Origin")
 	self.layout.operator(SetOriginToSelected.bl_idname, text="Origin To F/V/E")
+
+classes = [
+    SnapMesh3DCursor,
+    Move3DCursorToViewLocation,
+    Move3DCursorFar,
+    SetOriginToSelected
+    ]
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    bpy.types.VIEW3D_MT_snap.append(menu_func)
+
+
+
+def unregister():
+
+    bpy.types.VIEW3D_MT_snap.remove(menu_func)
+
+
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+
+if __name__ == "__main__":
+    register

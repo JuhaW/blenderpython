@@ -10,6 +10,7 @@ bl_info = {
     "category": "Mesh",
 }
 
+from .utils import AddonPreferences, SpaceProperty, operator_call
 import bpy
 from bpy_extras import view3d_utils
 
@@ -47,4 +48,35 @@ class MESH_OT_CallContextMenu(bpy.types.Operator):
         else:
             return bpy.ops.wm.call_menu(name=MESH_MT_CombinedMenu.bl_idname)
         
+classes = [
+    MESH_MT_CombinedMenu,
+    MESH_OT_CallContextMenu
+    ]
 
+addon_keymaps = []
+
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    wm = bpy.context.window_manager
+    km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
+    kmi = km.keymap_items.new('mesh.addon_call_context_menu', 'RIGHTMOUSE', 'DOUBLE_CLICK')
+
+def unregister():
+    for cls in classes[::-1]:
+        bpy.utils.unregister_class(cls)
+
+    wm = bpy.context.window_manager
+
+    # remove multiselect keybinding
+    km = wm.keyconfigs.addon.keymaps['3D View']
+    for kmi in km.keymap_items:
+        if kmi.idname == 'wm.call_menu':
+            if kmi.properties.name == "mesh.addon_call_context_menu":
+                km.keymap_items.remove(kmi)
+                break
+
+if __name__ == "__main__":
+    register()

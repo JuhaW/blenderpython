@@ -39,10 +39,13 @@ from bpy.types import PropertyGroup
 from . import spacebar_menu
 from . import manipulator_menu
 from . import multiselect_menu
+from . import snap_menu
+from . import edit_context_mode
+
 
 bl_info = {
     'name': 'AF_UI_Tools',
-    'author': 'meta-androcto, chromoly, itslic',
+    'author': 'meta-androcto, chromoly, italic',
     'version': (1, 1),
     'blender': (2, 76, 0),
     'location': '',
@@ -56,7 +59,9 @@ bl_info = {
 sub_modules = [
     spacebar_menu,
     manipulator_menu,
-    multiselect_menu
+    multiselect_menu,
+    snap_menu,
+    edit_context_mode,
     ]
 
 
@@ -265,3 +270,6 @@ def unregister():
 
     for cls in classes[::-1]:
         bpy.utils.unregister_class(cls)
+
+if __name__ == "__main__":
+    register()
