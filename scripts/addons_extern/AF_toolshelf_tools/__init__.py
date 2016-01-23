@@ -42,10 +42,11 @@ from . import auto_mirror
 from . import display_tools
 from . import navigation
 from . import toolshelf_menu
+from . import origin_tools
 
 
 bl_info = {
-    'name': 'AF: Toolshelf Tools',
+    'name': 'AF_Toolshelf_Tools',
     'author': 'meta-androcto',
     'version': (1, 1, 0),
     'blender': (2, 7, 6),
@@ -64,6 +65,7 @@ sub_modules = [
     display_tools,
     navigation,
     toolshelf_menu,
+    origin_tools,
     ]
 
 
