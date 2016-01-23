@@ -34,14 +34,14 @@ then have to find & replace for each new Blender version.
 * 
  
 * The addons_extern folder I use contains many working addons I've collected over the years.
-* Currently the addons_extern is reasonably up to date for blender 2.75b.
+* Currently the addons_extern is reasonably up to date for blender 2.76b.
 * However, I cannot guarentee every addon will be up to date at any given time.
 * Please check original authors site/s for updates.
 * The flip side of this is there's many addons here that are not working elsewhere...
 
 Note: 
 ====================
-* addons_extern should be placed next to addons & addons contrib in "blender version"\2.75\scripts
+* addons_extern should be placed next to addons & addons contrib in "blender version"\2.76\scripts
 * some addons in the repo are hard coded to addons_extern folder
 
 * Update the addons_utils.py to activate addons_extern folder & paste into new blender scripts directory & your favorites are right there.
