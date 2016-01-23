@@ -26,7 +26,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
-    "category": "3D View"}
+    "category": "Add Mesh"}
 	
 def CNT(type = 1,res = 1, m=10,n=5,bL=1.56,bR=.1,aR=.2):
     import bpy
