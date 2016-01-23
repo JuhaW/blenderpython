@@ -8,7 +8,7 @@ Installation
 
 * Download recent Blender Build from here: https://builder.blender.org/download/
 * This repo is kept mostly uptodate with recent Builds.
-* Currently Blender 2.75b is supported also & would represent a minimum requirement for all features.
+* Currently Blender 2.76b is supported also & would represent a minimum requirement for all features.
 
 * Download the blenderpython zip file & unpack.
 * Copy the "scripts" folder or it's contents & paste over the Blender "scripts" folder on your os or to the buildbot build "scripts" folder.
@@ -19,7 +19,7 @@ Optional Config Folder
 
 * I reccommend for all d/l zip builds & custom builds you make yourself to add the secret config folder.
 * After downloading a build from buildbot:
-* Create the config folder here: 'blender_version'/2.75/config
+* Create the config folder here: 'blender_version'/2.76/config
 * The config folder makes the build save the user preferences & user settings into that folder & bypasses appdata, which is used by Blender Installers.
 * By keeping your modified build seperate from blender, there's little chance of anything going wrong with your install.
 
