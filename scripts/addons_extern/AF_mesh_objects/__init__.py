@@ -342,7 +342,7 @@ def menu(self, context):
 	self.layout.separator()
 	self.layout.operator("object.parent_to_empty", text="Parent To Empty", icon="LINK_AREA")
 	self.layout.separator()
-	layout.label(text="AF: Mesh Objects")
+	layout.label(text="AF: Mesh Objects", icon="OBJECT_DATAMODE")
 	self.layout.menu("INFO_MT_mesh_vert_add", text="Single Vert", icon="LAYER_ACTIVE")
 	self.layout.operator("mesh.primitive_round_cube_add", text="Round Cube", icon="WIRE")
 	self.layout.menu("INFO_MT_mesh_ant_add", text="Landscape", icon="RNDCURVE")

@@ -20,7 +20,7 @@ bl_info = {
     "tracker_url": "http://blenderlounge.fr/forum/viewtopic.php?f=18&p=7103#p7103",
     "category": "Mesh"}
 ############# 
-
+from .utils import AddonPreferences, SpaceProperty, operator_call
 import bpy
 from mathutils import Vector
 
@@ -184,17 +184,19 @@ class BisectMirror(bpy.types.Panel):
         else:
             layout.label(icon="ERROR", text="No mesh selected")
 
+classes = [
+    BisectMirror,
+    AutoMirror,
+    AlignVertices,
+    ]
 
 def register():
-    bpy.utils.register_class(BisectMirror)
-    bpy.utils.register_class(AutoMirror)
-    bpy.utils.register_class(AlignVertices)
-
+    for cls in classes:
+        bpy.utils.register_class(cls)
 
 def unregister():
-    bpy.utils.unregister_class(BisectMirror)
-    bpy.utils.unregister_class(AutoMirror)
-    bpy.utils.unregister_class(AlignVertices)
+    for cls in classes[::-1]:
+        bpy.utils.unregister_class(cls)
 
 
 if __name__ == "__main__":

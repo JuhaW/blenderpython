@@ -258,9 +258,8 @@ def get_proper_index_bevel_placement(curve_obj):
 class BevelCurveToolPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    #bl_context = "objectmode"
+    bl_category = "Create"
     bl_label = "Bevel Curve Tools"
-    bl_category = "Tools"
     bl_options = {'DEFAULT_CLOSED'}
     
     def draw(self, context):

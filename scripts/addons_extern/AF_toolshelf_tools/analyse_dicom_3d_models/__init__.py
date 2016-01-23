@@ -10,7 +10,7 @@ bl_info = {
 	'tracker_url': '',
 	'category': '3D View'
 }
-
+from .utils import AddonPreferences, SpaceProperty
 import bpy
 from bpy.props import StringProperty, FloatProperty, BoolProperty, EnumProperty, IntProperty
 from bpy_extras.io_utils import ImportHelper

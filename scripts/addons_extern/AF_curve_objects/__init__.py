@@ -23,7 +23,7 @@ from .object_tube_and_pipe import Pipe
 from .object_tube_and_pipe import Tube
 
 bl_info = {
-    "name": "Add Curve Factory",
+    "name": "AF: Curve Objects",
     "author": "Multiple Authors",
     "version": (0, 1),
     "blender": (2, 74, 0),
@@ -51,6 +51,8 @@ if "bpy" in locals():
     importlib.reload(curve_edit_outline)
     importlib.reload(DialScale)
     importlib.reload(add_iterative_tree)
+    importlib.reload(curve_convert0_7)
+    importlib.reload(bevel_curve)
 
 
 else:
@@ -69,6 +71,8 @@ else:
     from . import curve_edit_outline
     from . import DialScale
     from . import add_iterative_tree
+    from . import curve_convert0_7
+    from . import bevel_curve
 
 import bpy
 
@@ -134,7 +138,7 @@ def menu(self, context):
 	layout = self.layout
 	col = layout.column()
 	self.layout.separator()
-	layout.label(text="Curve Factory")
+	layout.label(text="AF: Curve Objects", icon="OUTLINER_OB_CURVE")
 	self.layout.menu("curve_plants_add", text="Plants", icon="CURVE_DATA")
 	self.layout.menu("curve_knots_add", text="Knots", icon='CURVE_DATA')
 	self.layout.operator("mesh.curveaceous_galore", text="Curves Galore!", icon="CURVE_DATA")
@@ -164,6 +168,7 @@ class CurveObjectPrefs(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     bpy.types.Scene.Enable_Tab_01 = bpy.props.BoolProperty(default=False)
+    bpy.types.Scene.Enable_Tab_02 = bpy.props.BoolProperty(default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -173,7 +178,24 @@ class CurveObjectPrefs(bpy.types.AddonPreferences):
             layout.label(text="----Add Curve Objects----")
             layout.label(text="Merges most Curve Object Addons into One")
             layout.label(text="Includes Add Surface Shapes")
-		
+
+        layout.prop(context.scene, "Enable_Tab_02", text="Curve Objects", icon="INFO")  
+        if context.scene.Enable_Tab_02:
+            row = layout.row()
+            layout.label(text="Add Plants: Sapling, Ivy Gen & Add Iterative Tree (panel)")
+            layout.label(text="Add Knots: Celtic, TorusKnot+ & Braid")
+            layout.label(text="Curves_Galore: 2d curve shapes")
+            layout.label(text="Spirals: Create Spiral curve type")
+            layout.label(text="Curly Curve: Florishes & Curls")
+            layout.label(text="Formular Curve: Math based curve")
+            layout.label(text="Curve Wires: String a wire between 2 objects")
+            layout.label(text="Dial Scale: Clock Face or Scale")
+            layout.label(text="Curve Simplify: Simplify Curves")
+            layout.label(text="Curve Outline: Create duplicate curve outline")
+            layout.label(text="Tubes & Pipes: Create Solid Tubes & Pipes (panel)")
+            layout.label(text="Curve Converter: Curve to Mesh re-editing (panel)")
+            layout.label(text="Bevel Curve Tool (panel)")
+
 def register():
     bpy.utils.register_module(__name__)
     # Add "Extras" menu to the "Add Mesh" menu

@@ -33,11 +33,7 @@ bl_info = {
     "tracker_url": "",
     "category": "3D View"}
 
-"""
-Additional links:
-    Author Site: http://jordiart3d.blogspot.com.es/
-"""
-
+from .utils import AddonPreferences, SpaceProperty, operator_call
 import bpy
 from bpy.props import *
 
@@ -1015,72 +1011,49 @@ class VIEW3D_PT_DisplayTools(bpy.types.Panel):
         
         row = layout.row(align=True)
         row.operator("view3d.display_modifiers_apply",icon='MODIFIER')
-               
-# register the classes
+
+classes = [
+    FastNavigate,
+    FastNavigateStop,
+    DisplayTextured,
+    DisplaySolid,
+    DisplayWire,
+    DisplayBounds,
+    DisplayWireframeOn,
+    DisplayShadeSmooth,
+    DisplayShadeFlat,
+    DisplayShadelessOn,
+    DisplayShadelessOff,
+    DisplayWireframeOff,
+    DisplayDoubleSidedOn,
+    DisplayDoubleSidedOff,
+    DisplayXRayOn,
+    DisplayXRayOff,
+    DisplayModifiersRenderOn,
+    DisplayModifiersRenderOff,
+    DisplayModifiersViewportOn,
+    DisplayModifiersViewportOff,
+    DisplayModifiersEditOn,
+    DisplayModifiersEditOff,
+    DisplayModifiersCageOn,
+    DisplayModifiersCageOff,
+    DisplayModifiersExpand,
+    DisplayModifiersCollapse,
+    DisplayModifiersApply,
+    DisplaySimplify,
+    VIEW3D_PT_DisplayTools
+    ]	
+# register the class
 def register():
-    bpy.utils.register_class(FastNavigate)
-    bpy.utils.register_class(DisplayTextured)
-    bpy.utils.register_class(DisplaySolid)
-    bpy.utils.register_class(DisplayWire)
-    bpy.utils.register_class(DisplayBounds)
-    bpy.utils.register_class(DisplayWireframeOn)
-    bpy.utils.register_class(DisplayShadeSmooth)
-    bpy.utils.register_class(DisplayShadeFlat)
-    bpy.utils.register_class(DisplayShadelessOn)
-    bpy.utils.register_class(DisplayShadelessOff)
-    bpy.utils.register_class(DisplayWireframeOff)
-    bpy.utils.register_class(DisplayDoubleSidedOn)
-    bpy.utils.register_class(DisplayDoubleSidedOff)
-    bpy.utils.register_class(DisplayXRayOn)
-    bpy.utils.register_class(DisplayXRayOff)
-    bpy.utils.register_class(DisplayModifiersRenderOn)
-    bpy.utils.register_class(DisplayModifiersRenderOff)
-    bpy.utils.register_class(DisplayModifiersViewportOn)
-    bpy.utils.register_class(DisplayModifiersViewportOff)
-    bpy.utils.register_class(DisplayModifiersEditOn)
-    bpy.utils.register_class(DisplayModifiersEditOff)
-    bpy.utils.register_class(DisplayModifiersCageOn)
-    bpy.utils.register_class(DisplayModifiersCageOff)
-    bpy.utils.register_class(DisplayModifiersExpand)
-    bpy.utils.register_class(DisplayModifiersCollapse)
-    bpy.utils.register_class(DisplayModifiersApply)
-    bpy.utils.register_class(DisplaySimplify)
-    bpy.utils.register_module(__name__)
- 
-    pass 
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    pass
 
 def unregister():
-    bpy.utils.unregister_class(FastNavigate)
-    bpy.utils.unregister_class(DisplayTextured)
-    bpy.utils.unregister_class(DisplaySolid)
-    bpy.utils.unregister_class(DisplayWire)
-    bpy.utils.unregister_class(DisplayBounds)
-    bpy.utils.unregister_class(DisplayShadeSmooth)
-    bpy.utils.unregister_class(DisplayShadeFlat)
-    bpy.utils.unregister_class(DisplayShadelessOn)
-    bpy.utils.unregister_class(DisplayShadelessOff)
-    bpy.utils.unregister_class(DisplayWireframeOn)
-    bpy.utils.unregister_class(DisplayWireframeOff)
-    bpy.utils.unregister_class(DisplayDoubleSidedOn)
-    bpy.utils.unregister_class(DisplayDoubleSidedOff)
-    bpy.utils.unregister_class(DisplayXRayOn)
-    bpy.utils.unregister_class(DisplayXRayOff)
-    bpy.utils.unregister_class(DisplayModifiersRenderOn)
-    bpy.utils.unregister_class(DisplayModifiersRenderOff)
-    bpy.utils.unregister_class(DisplayModifiersViewportOn)
-    bpy.utils.unregister_class(DisplayModifiersViewportOff)
-    bpy.utils.unregister_class(DisplayModifiersEditOn)
-    bpy.utils.unregister_class(DisplayModifiersEditOff)
-    bpy.utils.unregister_class(DisplayModifiersCageOn)
-    bpy.utils.unregister_class(DisplayModifiersCageOff)
-    bpy.utils.unregister_class(DisplayModifiersExpand)
-    bpy.utils.unregister_class(DisplayModifiersCollapse)
-    bpy.utils.unregister_class(DisplayModifiersApply)
-    bpy.utils.unregister_class(DisplaySimplify)
-    bpy.utils.unregister_module(__name__)
- 
-    pass 
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+    pass
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     register()
-    

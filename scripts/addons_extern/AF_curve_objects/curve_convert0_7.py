@@ -151,7 +151,7 @@ class CurveConversionPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_convert"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-    bl_category = "Tools"
+    bl_category = "Create"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
