@@ -537,7 +537,7 @@ class ExtrasPanel(bpy.types.Panel):
         row.label(text="Utilities:")
         row = layout.row()
         row = layout.split(0.70)
-        row.operator('object_ot.fastloop', text = 'Random Vertices')
+        row.operator('object_ot.fastloop', text = 'Fast Loop')
         row.operator('help.random_vert', text = '?')
         row = layout.row()
         row.operator('mesh.flip_normals', text = 'Normals Flip')
