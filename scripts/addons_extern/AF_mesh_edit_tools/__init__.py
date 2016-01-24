@@ -45,6 +45,7 @@ if "bpy" in locals():
     importlib.reload(split_solidify)
     importlib.reload(mesh_to_wall)
     importlib.reload(mesh_edges_length)
+    importlib.reload(random_vertices)
 
 else:
     from . import face_inset_fillet
@@ -58,6 +59,7 @@ else:
     from . import split_solidify
     from . import mesh_to_wall
     from . import mesh_edges_length
+    from . import random_vertices
 
 import bpy, blf, bgl
 import bmesh
@@ -464,6 +466,8 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
         col.label(text="Vert")
         col.operator("mesh.vertex_chamfer",
             text="Vertex Chamfer")
+        col.operator("mesh.random_vertices",
+            text="Random Vertices")
         col.operator("pt.op0_id",
             text="Pen Tool")
 
@@ -522,6 +526,9 @@ class ExtrasPanel(bpy.types.Panel):
         row = layout.split(0.70)
         row.operator('mesh.vertex_chamfer', text = 'Chamfer')
         row.operator('help.vertexchamfer', text = '?')
+        row = layout.split(0.70)
+        row.operator('mesh.random_vertices', text = 'Random Vertices')
+        row.operator('help.random_vert', text = '?')
         row = layout.row()
         row.label(text="Utilities:")
         row = layout.row()
