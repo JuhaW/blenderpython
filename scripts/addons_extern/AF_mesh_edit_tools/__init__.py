@@ -439,6 +439,16 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
 		
         split = layout.split()		
         col = split.column()
+        col.label(text="Vert")
+        col.operator("mesh.vertex_chamfer",
+            text="Vertex Chamfer")
+        col.operator("mesh.random_vertices",
+            text="Random Vertices")
+        col.operator("pt.op0_id",
+            text="Pen Tool")
+
+        row = split.row(align=True)		
+        col = split.column()
         col.label(text="Edge")
         col.operator("fillet.op0_id",
             text="Edge Fillet Plus")
@@ -446,6 +456,8 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
             text="Offset Edges")
         col.operator("mesh.edge_roundifier",
             text="Edge Roundify")
+        col.operator("object.mesh_edge_length_set",
+            text="Set Edge Length")
         col.operator("bpt.mesh_to_wall",
             text="Edge(s) to Wall")
 			
@@ -462,16 +474,6 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
             text="Cut Faces")
         col.operator("sp_sol.op0_id",
             text="Split Solidify")
-
-        row = split.row(align=True)		
-        col = split.column()
-        col.label(text="Vert")
-        col.operator("mesh.vertex_chamfer",
-            text="Vertex Chamfer")
-        col.operator("mesh.random_vertices",
-            text="Random Vertices")
-        col.operator("pt.op0_id",
-            text="Pen Tool")
 
         row = split.row(align=True)		
         col = split.column()
@@ -492,22 +494,13 @@ class ExtrasPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         row = layout.row()
-        row.label(text="Face Tools:", icon="FACESEL")
+        row.label(text="Vert Tools:", icon="VERTEXSEL")
         row = layout.split(0.70)
-        row.operator('object.mextrude', text = 'Multi Extrude')
-        row.operator('help.mextrude', text = '?')
+        row.operator('mesh.vertex_chamfer', text = 'Chamfer')
+        row.operator('help.vertexchamfer', text = '?')
         row = layout.split(0.70)
-        row.operator('faceinfillet.op0_id', text = 'Inset Fillet')
-        row.operator('help.face_inset', text = '?')
-        row = layout.split(0.70)
-        row.operator('mesh.add_faces_to_object', text = 'Face Extrude')
-        row.operator('help.pkhg', text = '?')
-        row = layout.split(0.70)
-        row.operator('mesh.ext_cut_faces', text = 'Cut Faces')
-        row.operator('help.cut_faces', text = '?')
-        row = layout.split(0.70)
-        row.operator('sp_sol.op0_id', text = 'Split Solidify')
-        row.operator('help.solidify', text = '?')
+        row.operator('mesh.random_vertices', text = 'Random Vertices')
+        row.operator('help.random_vert', text = '?')
         row = layout.row()
         row.label(text="Edge Tools:", icon="EDGESEL")
         row = layout.split(0.70)
@@ -526,13 +519,23 @@ class ExtrasPanel(bpy.types.Panel):
         row.operator('bpt.mesh_to_wall', text = 'Mesh to wall')
         row.operator('help.wall', text = '?')
         row = layout.row()
-        row.label(text="Vert Tools:", icon="VERTEXSEL")
+        row.label(text="Face Tools:", icon="FACESEL")
         row = layout.split(0.70)
-        row.operator('mesh.vertex_chamfer', text = 'Chamfer')
-        row.operator('help.vertexchamfer', text = '?')
+        row.operator('object.mextrude', text = 'Multi Extrude')
+        row.operator('help.mextrude', text = '?')
         row = layout.split(0.70)
-        row.operator('mesh.random_vertices', text = 'Random Vertices')
-        row.operator('help.random_vert', text = '?')
+        row.operator('faceinfillet.op0_id', text = 'Inset Fillet')
+        row.operator('help.face_inset', text = '?')
+        row = layout.split(0.70)
+        row.operator('mesh.add_faces_to_object', text = 'Face Extrude')
+        row.operator('help.pkhg', text = '?')
+        row = layout.split(0.70)
+        row.operator('mesh.ext_cut_faces', text = 'Cut Faces')
+        row.operator('help.cut_faces', text = '?')
+        row = layout.split(0.70)
+        row.operator('sp_sol.op0_id', text = 'Split Solidify')
+        row.operator('help.solidify', text = '?')
+        row = layout.row()
         row = layout.row()
         row.label(text="Utilities:")
         row = layout.row()
