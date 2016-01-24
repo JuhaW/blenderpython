@@ -56,22 +56,11 @@ v0.13 - Initial revision."""
 
 import bpy
 
-
-class MakeFastLoopButton(bpy.types.Panel):
-    bl_label = "FastLoop!"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
-    bl_context = "mesh_edit"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator("object_ot.fastloop")
-        
-
 class OBJECT_OT_FastLoop(bpy.types.Operator):
     bl_idname = "object_ot.fastloop"
     bl_label = "FastLoop"
-    
+    bl_description = 'Press TAB x 2 to exit'
+
     active = bpy.props.BoolProperty(name="active", default=False)
     
     @classmethod
@@ -95,7 +84,21 @@ class OBJECT_OT_FastLoop(bpy.types.Operator):
     def invoke(self, context, event):
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
-        
+
+class fastloop_help(bpy.types.Operator):
+	""" Press TAB x2 to exit """
+	bl_idname = 'help.fastloop'
+	bl_label = ''
+
+	def draw(self, context):
+		layout = self.layout
+		layout.label('To use:')
+		layout.label('Make an edge or loop selection')
+		layout.label('Create Multiple Edge Loops')
+		layout.label('Press ESC x2 to exit')
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_popup(self, width = 300) 
 ## registring
 def register():
     bpy.utils.register_module(__name__)

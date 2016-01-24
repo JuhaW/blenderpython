@@ -19,10 +19,10 @@
 # meta-androcto #
 
 bl_info = {
-    "name": "Edit Tools",
+    "name": "AF: Edit Tools",
     "author": "various",
     "version": (0, 1),
-    "blender": (2, 71, 0),
+    "blender": (2, 76, 0),
     "location": "View3D > Toolshelf > Tools & Specials (W-key)",
     "description": "Add extra mesh edit tools",
     "warning": "",
@@ -46,6 +46,7 @@ if "bpy" in locals():
     importlib.reload(mesh_to_wall)
     importlib.reload(mesh_edges_length)
     importlib.reload(random_vertices)
+    importlib.reload(mesh_fastloop)
 
 else:
     from . import face_inset_fillet
@@ -60,6 +61,7 @@ else:
     from . import mesh_to_wall
     from . import mesh_edges_length
     from . import random_vertices
+    from . import mesh_fastloop
 
 import bpy, blf, bgl
 import bmesh
@@ -474,6 +476,8 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
         row = split.row(align=True)		
         col = split.column()
         col.label(text="Utilities")
+        col.operator("object_ot.fastloop",
+            text="Fast loop")
         col.operator('mesh.flip_normals', text = 'Normals Flip')
         col.operator('mesh.remove_doubles', text = 'Remove Doubles')
 
@@ -532,6 +536,9 @@ class ExtrasPanel(bpy.types.Panel):
         row = layout.row()
         row.label(text="Utilities:")
         row = layout.row()
+        row = layout.split(0.70)
+        row.operator('object_ot.fastloop', text = 'Random Vertices')
+        row.operator('help.random_vert', text = '?')
         row.operator('mesh.flip_normals', text = 'Normals Flip')
         row = layout.row()
         row.operator('mesh.remove_doubles', text = 'Remove Doubles')
