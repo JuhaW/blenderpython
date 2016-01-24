@@ -225,7 +225,22 @@ class MeshtoWall(bpy.types.Operator):
         
         
         return {'FINISHED'}
-        
+
+class wall_help(bpy.types.Operator):
+	bl_idname = 'help.wall'
+	bl_label = ''
+
+	def draw(self, context):
+		layout = self.layout
+		layout.label('To use:')
+		layout.label('Extrude Flat Edges.')
+
+	def execute(self, context):
+		return {'FINISHED'}
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_popup(self, width = 300)
+  
 #-------------------------------------------------------------------------
 def menu_func(self, context):
     self.layout.operator(MeshtoWall.bl_idname, text="Mesh to wall")

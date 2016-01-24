@@ -237,7 +237,22 @@ def menu_func(self, context):
     row = self.layout.row(align=True)
     row.operator(LengthSet.bl_idname, "Set edges length")
     
-    
+class addarm_help(bpy.types.Operator):
+	bl_idname = 'help.edge_length'
+	bl_label = ''
+
+	def draw(self, context):
+		layout = self.layout
+		layout.label('To use:')
+		layout.label('Select a single edge')
+		layout.label('Change length.')
+
+	def execute(self, context):
+		return {'FINISHED'}
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_popup(self, width = 300)
+
 def register():
     bpy.utils.register_class(LengthSet)
     bpy.types.VIEW3D_PT_tools_meshedit.append(menu_func)

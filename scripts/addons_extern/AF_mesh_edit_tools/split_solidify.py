@@ -175,6 +175,19 @@ class sp_sol_op0(bpy.types.Operator):
                 pass
             return {'FINISHED'}
 
+class solidify_help(bpy.types.Operator):
+	bl_idname = 'help.solidify'
+	bl_label = ''
+
+	def draw(self, context):
+		layout = self.layout
+		layout.label('To use:')
+		layout.label('Make a selection or selection of Faces.')
+		layout.label('Split Faces & Extrude results')
+		layout.label('Similar to a shatter/explode effect')
+
+	def invoke(self, context, event):
+		return context.window_manager.invoke_popup(self, width = 300)
 # ------ ------
 class_list = [sp_sol_op0]
 
