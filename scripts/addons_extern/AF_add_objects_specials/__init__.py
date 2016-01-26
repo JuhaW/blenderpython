@@ -18,7 +18,7 @@
 # by meta-androcto #
 
 bl_info = {
-    "name": "Add Advanced",
+    "name": "AF: Add Advanced",
     "author": "Meta Androcto, ",
     "version": (0, 2),
     "blender": (2, 75, 0),

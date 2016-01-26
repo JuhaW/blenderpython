@@ -18,7 +18,7 @@
 #  (c) 2015 meta-androcto, parts based on work by Saidenka, Materials Utils by MichaleW Materials Conversion: Silvio Falcinelli#
 
 bl_info = {
-    "name": "Materials Specials",
+    "name": "AF: Materials Specials",
     "author": "Meta Androcto",
     "version": (0, 2),
     "blender": (2, 75, 0),

@@ -1,6 +1,6 @@
 # 3Dビュー > Shift+S
 bl_info = {
-    'name': '3D View: Snap Menu',
+    'name': 'Snap Menu',
     'author': 'meta-androcto, saidenka',
     'version': (2, 0),
     'blender': (2, 7, 6),

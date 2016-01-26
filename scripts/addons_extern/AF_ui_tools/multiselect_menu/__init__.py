@@ -21,7 +21,7 @@
 # ##### END GPL LICENSE BLOCK #####
 
 bl_info = {
-    'name': '3D View: Multiselect Menu',
+    'name': 'Multiselect Menu',
     'author': 'Sean Olson (liquidApe), Italic_',
     'version': (2, 0),
     'blender': (2, 7, 6),

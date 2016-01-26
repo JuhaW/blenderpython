@@ -18,7 +18,7 @@
 # by meta-androcto, parts based on work by Erich Toven #
 
 bl_info = {
-    "name": "Edit Mesh Menu's",
+    "name": "AF: Edit Mesh Menu's",
     "author": "Meta Androcto, ",
     "version": (0, 2),
     "blender": (2, 75, 0),

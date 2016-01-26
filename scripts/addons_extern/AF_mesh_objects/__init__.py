@@ -45,7 +45,7 @@ bl_info = {
     "description": "Add extra mesh object types",
     "warning": "",
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Add_Mesh/Add_Extra",
-    "category": "Add Mesh",
+    "category": "Addon Factory",
 }
 
 if "bpy" in locals():

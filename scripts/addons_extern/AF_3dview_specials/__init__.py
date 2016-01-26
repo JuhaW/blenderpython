@@ -18,7 +18,7 @@
 # by meta-androcto, parts based on work by Saidenka #
 
 bl_info = {
-    "name": "3d View Specials",
+    "name": "AF: 3d View Specials",
     "author": "Meta Androcto, ",
     "version": (0, 2),
     "blender": (2, 75, 0),

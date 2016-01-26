@@ -20,7 +20,7 @@
 
 
 bl_info = {
-    "name": "3d View: Manipulator Menu",
+    "name": "Manipulator Menu",
     "author": "MichaelW",
     "version": (1, 2, 1),
     "blender": (2, 61, 0),

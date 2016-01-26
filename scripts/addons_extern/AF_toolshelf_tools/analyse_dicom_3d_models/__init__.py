@@ -1,14 +1,14 @@
 bl_info = {
-	'name': 'Analyse DICOM 3D Model',
+	'name': 'Select, Modify, Transform',
 	'author': 'Jakub Bełcik',
 	'version': (1, 0),
 	'blender': (2, 7, 3),
 	'location': '3D View > Tools > Analyse DICOM',
-	'description': 'Functions that helps in analysing DICOM 3D models',
+	'description': '3 panels, Select, Modify, Transform',
 	'warning': '',
 	'wiki_url': '',
 	'tracker_url': '',
-	'category': '3D View'
+	'category': 'Toolshelf'
 }
 from .utils import AddonPreferences, SpaceProperty
 import bpy

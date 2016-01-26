@@ -46,7 +46,7 @@ from . import origin_tools
 
 
 bl_info = {
-    'name': 'AF_Toolshelf_Tools',
+    'name': 'AF: Toolshelf_Tools',
     'author': 'meta-androcto',
     'version': (1, 1, 0),
     'blender': (2, 7, 6),
@@ -54,7 +54,7 @@ bl_info = {
     'description': 'Addon Collection',
     'warning': '',
     'wiki_url': '',
-    'category': 'Tools'
+    'category': 'Addon Factory'
 }
 
 

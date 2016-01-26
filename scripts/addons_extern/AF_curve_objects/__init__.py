@@ -32,7 +32,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/"
                 "Scripts/Curve/Curve_Objects",
-    "category": "Add Curve"}
+    "category": "Addon Factory"}
 
 if "bpy" in locals():
     import importlib

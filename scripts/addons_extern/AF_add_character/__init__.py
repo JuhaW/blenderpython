@@ -19,7 +19,7 @@
 # meta-androcto :code, macouno :petunia model, slikdigit: Mancandy Model#
 
 bl_info = {
-    "name": "Model: Character",
+    "name": "AF: Character Models",
     "author": "Meta-Androcto",
     "version": (0, 1),
     "blender": (2, 7, 3),

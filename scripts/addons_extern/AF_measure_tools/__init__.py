@@ -20,7 +20,7 @@
 
 
 bl_info = {
-    "name": "Measure Tools",
+    "name": "AF: Measure Tools",
     "author": "Multiple Authors",
     "version": (0, 1),
     "blender": (2, 74, 0),

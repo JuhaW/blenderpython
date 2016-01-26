@@ -2,11 +2,11 @@
 # (or use Blender's Install From File... function).
 
 bl_info = {
-    "name": "Mesh Context Menu",
+    "name": "V/E/F Context Menu",
     "author": "Stanislav Blinov",
     "version": (1, 0, 0),
     "blender": (2, 74, 0),
-    "description": "Context-sensitive mesh menu",
+    "description": "Vert Edge Face Double Right Click Edit Mode",
     "category": "Mesh",
 }
 

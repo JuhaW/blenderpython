@@ -44,15 +44,15 @@ from . import edit_context_mode
 
 
 bl_info = {
-    'name': 'AF_UI_Tools',
+    'name': 'AF: UI_Tools',
     'author': 'meta-androcto, chromoly, italic',
     'version': (1, 1),
     'blender': (2, 76, 0),
     'location': '',
     'description': 'Addon Collection',
-    'warning': 'Experimental',
+    'warning': '',
     'wiki_url': '',
-    'category': 'Tools'
+    'category': 'Addon Factory'
 }
 
 

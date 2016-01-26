@@ -18,7 +18,7 @@
 # by meta-androcto, parts based on work by Erich Toven #
 
 bl_info = {
-    "name": "3d View Menus",
+    "name": "AF: 3d View Menus",
     "author": "Meta Androcto, ",
     "version": (0, 2),
     "blender": (2, 75, 0),

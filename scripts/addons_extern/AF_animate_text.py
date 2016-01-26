@@ -18,7 +18,7 @@
 ## by LeoMoon Studios, Marcin Zielinski, Martin Wacker, Bassam Kurdali, Jared Felsman, meta-androcto ##
 
 bl_info = {
-    "name": "Text Animate",
+    "name": "AF: Text Animate",
     "author": "Multiple Authors",
     "version": (0, 3, 0),
     "blender": (2, 74, 5),
