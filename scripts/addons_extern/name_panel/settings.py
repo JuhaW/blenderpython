@@ -19,18 +19,65 @@
 
 # imports
 import bpy
-from bpy.types import PropertyGroup
-from bpy.props import EnumProperty, BoolProperty, StringProperty, IntProperty
+from bpy.types import PropertyGroup, AddonPreferences
+from bpy.props import PointerProperty, EnumProperty, BoolProperty, StringProperty, IntProperty
 from . import storage
 
 #####################
 ## PROPERTY GROUPS ##
 #####################
 
+# addon
+class preferences(AddonPreferences):
+  '''
+    Add-on user preferences.
+  '''
+  bl_idname = __package__
+
+  # dialogues
+  dialogues = BoolProperty(
+    name = 'Enable Operator Confirm Dialogues',
+    description = 'Enable confirm dialogues for batch operators',
+    default = True
+  )
+
+  # popups
+  popups = BoolProperty(
+  name = 'Enable Pop Ups (Experimental)',
+  description = 'Enable popups related to the settings of datablocks in the item panel.',
+  default = False
+  )
+
+  def draw(self, context):
+
+    # layout
+    layout = self.layout
+
+    # enable popups
+    # layout.prop(self, 'dialogues')
+    layout.prop(self, 'popups')
+
+    # split
+    split = layout.split(align=True)
+    split.scale_y = 2
+
+    # prop = split.operator('wm.url_open', text='BlenderMarket')
+    # prop.url = ''
+
+    prop = split.operator('wm.url_open', text='BlenderArtists')
+    prop.url = 'http://blenderartists.org/forum/showthread.php?272086-Addon-Item-Panel-amp-Batch-Naming-1-5'
+
+    # prop = split.operator('wm.url_open', text='BlendSwap')
+    # prop.url = 'http://www.blendswap.com/blends/view/82472'
+
+    prop = split.operator('wm.url_open', text='Github')
+    prop.url = 'https://github.com/trentinfrederick/name-panel'
+
+
 # panel
 class panel(PropertyGroup):
   '''
-    Properties that effect how item panel displays the datablocks within the users current selection.
+    Properties that effect how name panel displays the datablocks within the users current selection.
   '''
 
   # filters
@@ -50,7 +97,7 @@ class panel(PropertyGroup):
   # selected
   selected = BoolProperty(
     name = 'Selected',
-    description = 'Display all possible object related datablock names within your current selection inside the item panel.',
+    description = 'Display all possible object related datablock names within your current selection inside the name panel.',
     default = False
   )
 
@@ -58,13 +105,6 @@ class panel(PropertyGroup):
   pinActiveObject = BoolProperty(
     name = 'Pin Active Object',
     description = 'Keeps the active object at the top of the stack.',
-    default = True
-  )
-
-  # hide search
-  hideSearch = BoolProperty(
-    name = 'Hide Search Field',
-    description = 'Hide the search field when the datablock filters are hidden.',
     default = True
   )
 
@@ -166,13 +206,6 @@ class panel(PropertyGroup):
     default = False
   )
 
-  # search
-  search = StringProperty(
-    name = 'Search',
-    description = 'Search filtering string.',
-    default = ''
-  )
-
   # selected bones
   selectedBones = BoolProperty(
     name = 'Selected',
@@ -208,8 +241,9 @@ class batch:
         name = 'Batch Type',
         description = '',
         items = [
-          ('SELECTED', 'Selected', 'Effect all objects, and object related datablock names in the current 3D view selection.'),
-          ('OBJECTS', 'All Objects', 'Effect all objects, and object related datablock names in the file.')
+          ('SELECTED', 'Selected', 'Effect all objects and object related datablock names in the current 3D view selection.'),
+          ('SCENE', 'Scene', 'Effect all objects and object related datablock names in the current scene.'),
+          ('OBJECTS', 'All Objects', 'Effect all objects and object related datablock names in the file.')
         ],
         default = 'SELECTED'
       )
@@ -354,7 +388,7 @@ class batch:
         default = 'Lamp'
       )
 
-    # constraint
+    # constraints
     class constraints(PropertyGroup):
       '''
         Properties that effect the names used when auto naming constraints.
@@ -990,9 +1024,10 @@ class batch:
       name = 'Batch Type',
       description = '',
       items = [
-        ('SELECTED', 'Selected', 'Effect all objects, and object related datablock names in the current 3D view selection.'),
-        ('OBJECTS', 'All Objects', 'Effect all objects, and object related datablock names in the file.'),
-        ('GLOBAL', 'Global', 'Effect all datablocks in the file. (Disables type filter menus.)')
+        ('SELECTED', 'Selected', 'Effect all objects and object related datablock names in the current 3D view selection.'),
+        ('SCENE', 'Scene', 'Effect all objects and object related datablock names in the current scene.'),
+        ('OBJECTS', 'All Objects', 'Effect all objects and object related datablock names in the file.'),
+        ('GLOBAL', 'Global', 'Effect all datablocks in the file whether they are attached to an object or not. (Disables type filter menus.)')
       ],
       default = 'SELECTED'
     )
@@ -1007,7 +1042,7 @@ class batch:
     # groups
     groups = BoolProperty(
       name = 'Groups',
-      description = 'Name groups.',
+      description = 'Name object groups.',
       default = False
     )
 
@@ -1282,7 +1317,7 @@ class batch:
     # find
     find = StringProperty(
       name = 'Find',
-      description = 'Find this string in the datablock name and remove it.'
+      description = 'Find this text in the name and remove it.'
     )
 
     # regex
@@ -1295,25 +1330,25 @@ class batch:
     # replace
     replace = StringProperty(
       name = 'Replace',
-      description = 'Replace found string with the string entered here.'
+      description = 'Replace found text with the text entered here.'
     )
 
     # prefix
     prefix = StringProperty(
       name = 'Prefix',
-      description = 'Place this string at the beginning of the name.'
+      description = 'Place this text at the beginning of the name.'
     )
 
     # suffix
     suffix = StringProperty(
       name = 'Suffix',
-      description = 'Place this string at the end of the name.'
+      description = 'Place this text at the end of the name.'
     )
 
     # trim start
     trimStart = IntProperty(
       name = 'Trim Start',
-      description = 'Trim the beginning of the name.',
+      description = 'Remove this many characters from the beginning of the name.',
       min = 0,
       max = 63,
       default = 0
@@ -1322,7 +1357,7 @@ class batch:
     # trim end
     trimEnd = IntProperty(
       name = 'Trim End',
-      description = 'Trim the ending of the name.',
+      description = 'Remove this many characters from the end of the name.',
       min = 0,
       max = 63,
       default = 0
@@ -1331,22 +1366,22 @@ class batch:
     # sort
     sort = BoolProperty(
       name = 'Sort Duplicates',
-      description = 'Manage names that are identical with a trailing value.',
+      description = 'Recount names that are identical with a trailing number.',
       default = True
     )
 
     # start
     start = IntProperty(
       name = 'Start',
-      description = 'Number to start with when renaming duplicates.',
-      min = 1,
+      description = 'Number to start with.',
+      min = 0,
       default = 1
     )
 
     # padding
     padding = IntProperty(
       name = 'Padding',
-      description = 'Number of zeroes to place before the incrementing number.',
+      description = 'Number of zeroes to place before the final incrementing number.',
       min = 0,
       default = 0
     )
@@ -1354,14 +1389,14 @@ class batch:
     # separator
     separator = StringProperty(
         name = 'Separator',
-        description = 'The separator to use between the name and number when renaming duplicates.',
+        description = 'The separator to use between the name and number.',
         default = '.'
     )
 
     # sort only
     sortOnly = BoolProperty(
        name = 'Only Sort Duplicates',
-       description = 'Only effect names during the operator process that are considered duplicates.',
+       description = 'Only effect names during the naming process that need to be numbered.',
        default = False
      )
 
@@ -1376,8 +1411,9 @@ class batch:
       name = 'Batch Type',
       description = '',
       items = [
-        ('SELECTED', 'Selected', 'Effect all objects, and object related datablock names in the current 3D view selection.'),
-        ('OBJECTS', 'All Objects', 'Effect all objects, and object related datablock names in the file.')
+        ('SELECTED', 'Selected', 'Effect all objects and object related datablock names in the current 3D view selection.'),
+        ('SCENE', 'Scene', 'Effect all objects and object related datablock names in the current scene.'),
+        ('OBJECTS', 'All Objects', 'Effect all objects and object related datablock names in the file.')
       ],
       default = 'SELECTED'
     )
@@ -1389,10 +1425,10 @@ class batch:
       items = [
         ('OBJECT', 'Object', 'Use the name from the object.', 'OBJECT_DATA', 0),
         ('DATA', 'Object Data', 'Use the name from the object\'s data.', 'MESH_DATA', 1),
-        ('MATERIAL', 'Material', 'Use the name from the active material of the object.', 'MATERIAL', 2),
-        ('TEXTURE', 'Texture', 'Use the name from the active material\'s active texture of the object.', 'TEXTURE', 3),
-        ('PARTICLE_SYSTEM', 'Particle System', 'Use the name from the active particle system of the object.', 'PARTICLES', 4),
-        ('PARTICLE_SETTINGS', 'Particle Settings', 'Use the name from the active particle system\'s settings of the object.', 'MOD_PARTICLES', 5)
+        ('MATERIAL', 'Active Material', 'Use the name from the active material of the object.', 'MATERIAL', 2),
+        ('TEXTURE', 'Active Texture', 'Use the name from the active material\'s active texture of the object.', 'TEXTURE', 3),
+        ('PARTICLE_SYSTEM', 'Active Particle System', 'Use the name from the active particle system of the object.', 'PARTICLES', 4),
+        ('PARTICLE_SETTINGS', 'Active Particle Settings', 'Use the name from the active particle system\'s settings of the object.', 'MOD_PARTICLES', 5)
       ],
       default = 'OBJECT'
     )
