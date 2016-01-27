@@ -13,6 +13,8 @@ Installation
 * Download the blenderpython zip file & unpack.
 * Copy the "scripts" folder or it's contents & paste over the Blender "scripts" folder on your os or to the buildbot build "scripts" folder.
 * This will replace addons_utils.py in modules to activate the addons extern folder.
+* This will also add patched space_view3d.py with my ui redesign here: https://developer.blender.org/T46853
+* Note that some addons on the AF_ collection series may require this patch to work. (AF: add_advanced is one for sure & one not to miss out on :) )
 
 Optional Config Folder 
 =======================
