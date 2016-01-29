@@ -12,7 +12,7 @@ bl_info = {
         }
 
 import bpy
-
+from .utils import AddonPreferences, SpaceProperty
 
 class AREATYPE_OT_split(bpy.types.Operator):
     bl_idname = "areatype.splitview"
@@ -70,17 +70,27 @@ def nodedraw(self,context):
     layout = self.layout
     layout.operator("areatype.switch",text="",icon="TIME").switchto = "TIMELINE"
 
+classes = [
+    AREATYPE_OT_split,
+    AREATYPE_OT_switch,
+    ]
+
 def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
     bpy.types.VIEW3D_HT_header.prepend(viewdraw)
     bpy.types.TIME_HT_header.prepend(timedraw)
     bpy.types.NODE_HT_header.prepend(nodedraw)
-    bpy.utils.register_module(__name__)
+
 
 
 def unregister():
+    for cls in classes:
+        bpy.utils.register_class(cls)
     bpy.types.VIEW3D_HT_header.remove(viewdraw)
     bpy.types.TIME_HT_header.remove(timedraw)
     bpy.types.NODE_HT_header.remove(nodedraw)
-    bpy.utils.unregister_module(__name__)
-    
+
+if __name__ == "__main__":
+    register()	
 
