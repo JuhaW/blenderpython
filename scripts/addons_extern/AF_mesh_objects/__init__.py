@@ -77,6 +77,7 @@ if "bpy" in locals():
     importlib.reload(add_mesh_grating)
     importlib.reload(add_mesh_propeller)
     importlib.reload(basket_arch)
+    importlib.reload(add_mesh_curved_plane)
 
 else:
     from . import add_mesh_star
@@ -106,6 +107,7 @@ else:
     from . import add_mesh_grating
     from . import add_mesh_propeller
     from . import basket_arch
+    from . import add_mesh_curved_plane
 
 import bpy
 
@@ -199,6 +201,8 @@ class INFO_MT_mesh_extras_add(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
+        layout.operator("mesh.curved_plane",
+            text="Curved Plane", icon="SMOOTHCURVE")
         layout.menu("INFO_MT_mesh_diamonds_add", text="Diamonds", icon="PMARKER_SEL")
         layout.menu("INFO_MT_mesh_ice_add", text="Ice & Snow", icon="FREEZE")
         layout.operator("mesh.primitive_star_add",
