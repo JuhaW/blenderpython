@@ -41,6 +41,7 @@ from . import manipulator_menu
 from . import multiselect_menu
 from . import snap_menu
 from . import edit_context_mode
+from . import areatype_split_switch
 
 
 bl_info = {
@@ -62,6 +63,7 @@ sub_modules = [
     multiselect_menu,
     snap_menu,
     edit_context_mode,
+    areatype_split_switch,
     ]
 
 
