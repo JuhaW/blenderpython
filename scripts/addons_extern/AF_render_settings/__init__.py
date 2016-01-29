@@ -1,5 +1,5 @@
 bl_info = {
-	"name" : "AF: Render Factory",
+	"name" : "AF: Render Settings",
 	"author" : "meta-androcto, Saidenka",
 	"version" : (0, 1, 1),
 	"blender" : (2, 7, 5),
