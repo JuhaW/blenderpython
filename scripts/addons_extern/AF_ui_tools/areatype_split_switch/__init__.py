@@ -86,7 +86,7 @@ def register():
 
 def unregister():
     for cls in classes:
-        bpy.utils.register_class(cls)
+        bpy.utils.unregister_class(cls)
     bpy.types.VIEW3D_HT_header.remove(viewdraw)
     bpy.types.TIME_HT_header.remove(timedraw)
     bpy.types.NODE_HT_header.remove(nodedraw)
