@@ -32,7 +32,7 @@ class RenderBackground(bpy.types.Operator):
 	def execute(self, context):
 		blend_path = bpy.data.filepath
 		if (not blend_path):
-			self.report(type={'ERROR'}, message="blend not saved")
+			self.report(type={'ERROR'}, message="Save File First")
 			return {'CANCELLED'}
 		if (self.mode == 'IMAGE'):
 			subprocess.Popen([sys.argv[0], '-b', blend_path, '-f', str(context.scene.frame_current), '-t', str(self.thread)])
@@ -110,7 +110,7 @@ class SetAllSubsurfRenderLevels(bpy.types.Operator):
 
 class SyncAllSubsurfRenderLevels(bpy.types.Operator):
 	bl_idname = "render.sync_all_subsurf_render_levels"
-	bl_label = "Sync Subsurf Levels"
+	bl_label = "Sync All Subsurf Levels"
 	bl_description = "sync_all_subsurf_render_levels"
 	bl_options = {'REGISTER', 'UNDO'}
 	
@@ -230,22 +230,22 @@ class RenderToolsMenu(bpy.types.Operator):
 			self.layout.operator("render.render", text="Render Image", icon='RENDER_STILL').use_viewport = True
 			self.layout.operator("render.render", text="Render Animation", icon='RENDER_ANIMATION')
 			self.layout.separator()
-			self.layout.prop(context.scene.render, "resolution_percentage", text="Render Resolution", icon="CAMERA_DATA" )
 			self.layout.prop(context.scene.render, 'resolution_x', text="Resolution X", icon="CAMERA_DATA")
 			self.layout.prop(context.scene.render, 'resolution_y', text="Resolution Y", icon="CAMERA_DATA")
+			self.layout.prop(context.scene.render, "resolution_percentage", text="Render Resolution", icon="CAMERA_DATA" )
 			self.layout.menu(RenderResolutionPercentageMenu.bl_idname, text="Resolution Presets", icon="CAMERA_DATA")
 			self.layout.prop_menu_enum(context.scene.render.image_settings, 'file_format', text="File Format", icon="PACKAGE")
 			self.layout.separator()
 			self.layout.menu(AnimateRenderMenu.bl_idname, text="Animation", icon="CLIP")
 			self.layout.separator()
-			self.layout.prop(context.scene.world.light_settings, 'use_ambient_occlusion', text="Use the AO", icon="WORLD_DATA")
+			self.layout.prop(context.scene.world.light_settings, 'use_ambient_occlusion', text="Use AO", icon="WORLD_DATA")
 			self.layout.prop(context.scene.world.light_settings, "ao_factor", text="AO Factor")
 			self.layout.separator()
 			self.layout.label(text="Samples:")
 			self.layout.prop(cscene, "samples", text="Render")
 			self.layout.prop(cscene, "preview_samples", text="Preview")
 			self.layout.separator()
-			self.layout.prop(context.scene.render, 'use_freestyle', text="FreeStyle Use", icon="WIRE")
+			self.layout.prop(context.scene.render, 'use_freestyle', text="Use FreeStyle", icon="WIRE")
 			self.layout.separator()
 			self.layout.menu(SimplifyRenderMenu.bl_idname, icon="RENDER_RESULT")
 			self.layout.menu(SubsurfMenu.bl_idname, icon="MOD_SUBSURF")
@@ -268,12 +268,12 @@ class RenderToolsMenu(bpy.types.Operator):
 			self.layout.separator()
 			self.layout.menu(AnimateRenderMenu.bl_idname, text="Animation", icon="CLIP")
 			self.layout.separator()
-			self.layout.prop(context.scene.world.light_settings, 'use_ambient_occlusion', text="Use the AO", icon="WORLD_DATA")
+			self.layout.prop(context.scene.world.light_settings, 'use_ambient_occlusion', text="Use AO", icon="WORLD_DATA")
 			self.layout.prop(context.scene.world.light_settings, "ao_factor", text="AO Factor")
-			self.layout.prop(context.scene.render, 'use_antialiasing', text="Anti-aliasing use", icon="ALIASED")
+			self.layout.prop(context.scene.render, 'use_antialiasing', text="Use Anti-aliasing", icon="ALIASED")
 			self.layout.prop_menu_enum(context.scene.render, 'antialiasing_samples', text="Set Anti-Aliasing", icon="ANTIALIASED")
 			self.layout.prop(context.scene.world.light_settings, 'samples', text="Ray Samples", icon="WORLD")
-			self.layout.prop(context.scene.render, 'use_freestyle', text="FreeStyle Use", icon="WIRE")
+			self.layout.prop(context.scene.render, 'use_freestyle', text="Use FreeStyle", icon="WIRE")
 			self.layout.menu(ShadeingMenu.bl_idname, icon="TEXTURE_SHADED")
 			self.layout.separator()
 			self.layout.menu(SimplifyRenderMenu.bl_idname, icon="RENDER_RESULT")
@@ -325,22 +325,22 @@ class RenderSettingsPanel(bpy.types.Panel):
 			self.layout.operator("render.render", text="Render Image", icon='RENDER_STILL').use_viewport = True
 			self.layout.operator("render.render", text="Render Animation", icon='RENDER_ANIMATION')
 			self.layout.separator()
-			self.layout.prop(context.scene.render, "resolution_percentage", text="Render Resolution", icon="CAMERA_DATA" )
 			self.layout.prop(context.scene.render, 'resolution_x', text="Resolution X", icon="CAMERA_DATA")
 			self.layout.prop(context.scene.render, 'resolution_y', text="Resolution Y", icon="CAMERA_DATA")
+			self.layout.prop(context.scene.render, "resolution_percentage", text="Render Resolution", icon="CAMERA_DATA" )
 			self.layout.menu(RenderResolutionPercentageMenu.bl_idname, text="Resolution Presets", icon="CAMERA_DATA")
 			self.layout.prop_menu_enum(context.scene.render.image_settings, 'file_format', text="File Format", icon="PACKAGE")
 			self.layout.separator()
 			self.layout.menu(AnimateRenderMenu.bl_idname, text="Animation", icon="CLIP")
 			self.layout.separator()
-			self.layout.prop(context.scene.world.light_settings, 'use_ambient_occlusion', text="Use the AO", icon="WORLD_DATA")
+			self.layout.prop(context.scene.world.light_settings, 'use_ambient_occlusion', text="Use AO", icon="WORLD_DATA")
 			self.layout.prop(context.scene.world.light_settings, "ao_factor", text="AO Factor")
 			self.layout.separator()
 			self.layout.label(text="Samples:")
 			self.layout.prop(cscene, "samples", text="Render")
 			self.layout.prop(cscene, "preview_samples", text="Preview")
 			self.layout.separator()
-			self.layout.prop(context.scene.render, 'use_freestyle', text="FreeStyle Use", icon="WIRE")
+			self.layout.prop(context.scene.render, 'use_freestyle', text="Use FreeStyle", icon="WIRE")
 			self.layout.separator()
 			self.layout.menu(SimplifyRenderMenu.bl_idname, icon="RENDER_RESULT")
 			self.layout.menu(SubsurfMenu.bl_idname, icon="MOD_SUBSURF")
@@ -355,20 +355,20 @@ class RenderSettingsPanel(bpy.types.Panel):
 			self.layout.operator("render.render", text="Render Image", icon='RENDER_STILL').use_viewport = True
 			self.layout.operator("render.render", text="Render Animation", icon='RENDER_ANIMATION')
 			self.layout.separator()
-			self.layout.prop(context.scene.render, "resolution_percentage", text="Render Resolution", icon="CAMERA_DATA" )
 			self.layout.prop(context.scene.render, 'resolution_x', text="Resolution X", icon="CAMERA_DATA")
 			self.layout.prop(context.scene.render, 'resolution_y', text="Resolution Y", icon="CAMERA_DATA")
+			self.layout.prop(context.scene.render, "resolution_percentage", text="Render Resolution", icon="CAMERA_DATA" )
 			self.layout.menu(RenderResolutionPercentageMenu.bl_idname, text="Resolution Presets", icon="CAMERA_DATA")
 			self.layout.prop_menu_enum(context.scene.render.image_settings, 'file_format', text="File Format", icon="PACKAGE")
 			self.layout.separator()
 			self.layout.menu(AnimateRenderMenu.bl_idname, text="Animation", icon="CLIP")
 			self.layout.separator()
-			self.layout.prop(context.scene.world.light_settings, 'use_ambient_occlusion', text="Use the AO", icon="WORLD_DATA")
+			self.layout.prop(context.scene.world.light_settings, 'use_ambient_occlusion', text="Use AO", icon="WORLD_DATA")
 			self.layout.prop(context.scene.world.light_settings, "ao_factor", text="AO Factor")
-			self.layout.prop(context.scene.render, 'use_antialiasing', text="Anti-aliasing use", icon="ALIASED")
+			self.layout.prop(context.scene.render, 'use_antialiasing', text="Use Anti-aliasing", icon="ALIASED")
 			self.layout.prop_menu_enum(context.scene.render, 'antialiasing_samples', text="Set Anti-Aliasing", icon="ANTIALIASED")
 			self.layout.prop(context.scene.world.light_settings, 'samples', text="Ray Samples", icon="WORLD")
-			self.layout.prop(context.scene.render, 'use_freestyle', text="FreeStyle Use", icon="WIRE")
+			self.layout.prop(context.scene.render, 'use_freestyle', text="Use FreeStyle", icon="WIRE")
 			self.layout.menu(ShadeingMenu.bl_idname, icon="TEXTURE_SHADED")
 			self.layout.separator()
 			self.layout.menu(SimplifyRenderMenu.bl_idname, icon="RENDER_RESULT")
