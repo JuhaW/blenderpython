@@ -1,10 +1,17 @@
-# 「プロパティ」エリア > 「オブジェクト」タブ
-
+# 「3Dビュー」エリア > プロパティパネル > 「アイテム」パネル
+bl_info = {
+    "name": "Data Re-Name",
+    "author": "saidenka",
+    "version": (0, 1),
+    "blender": (2, 73),
+    "location": "Item Panel",
+    "description": "Match Data/Object names",
+    "warning": "",
+    "wiki_url": "",
+    "category": "Item"
+}
 import bpy
-
-################
-# オペレーター #
-################
+from .utils import AddonPreferences, SpaceProperty
 
 class DataNameToObjectName(bpy.types.Operator):
 	bl_idname = "object.data_name_to_object_name"
@@ -82,31 +89,41 @@ class CopyDataName(bpy.types.Operator):
 		self.report(type={'INFO'}, message=context.object.data.name)
 		return {'FINISHED'}
 
-################
-# メニュー追加 #
-################
-
-# メニューのオン/オフの判定
-def IsMenuEnable(self_id):
-	for id in bpy.context.user_preferences.addons["Addon_Factory"].preferences.disabled_menu.split(','):
-		if (id == self_id):
-			return False
-	else:
-		return True
-
 # メニューを登録する関数
 def menu(self, context):
-	if (IsMenuEnable(__name__.split('.')[-1])):
-		row = self.layout.row(align=True)
-		row.alignment = 'RIGHT'
-		row.label("To the Clipboard", icon='COPYDOWN')
-		row.operator('object.copy_object_name', icon='OBJECT_DATAMODE', text="")
-		if (context.active_bone or context.active_pose_bone):
-			row.operator('object.copy_bone_name', icon='BONE_DATA', text="")
-		row.operator('object.copy_data_name', icon='EDITMODE_HLT', text="")
-		row.label("Name synchronization", icon='LINKED')
-		row.operator('object.object_name_to_data_name', icon='TRIA_DOWN_BAR', text="")
-		row.operator('object.data_name_to_object_name', icon='TRIA_UP_BAR', text="")
-		self.layout.template_ID(context.object, 'data')
-	if (context.user_preferences.addons["Addon_Factory"].preferences.use_disabled_menu):
-		self.layout.operator('wm.toggle_menu_enable', icon='VISIBLE_IPO_ON').id = __name__.split('.')[-1]
+
+	row = self.layout.row(align=True)
+	row.alignment = 'LEFT'
+	row.label("Copy Data", icon='COPYDOWN')
+	row.operator('object.copy_object_name', icon='OBJECT_DATAMODE', text="")
+	if (context.active_bone or context.active_pose_bone):
+		row.operator('object.copy_bone_name', icon='BONE_DATA', text="")
+	row.operator('object.copy_data_name', icon='EDITMODE_HLT', text="")
+	row = self.layout.row(align=True)
+	row.alignment = 'LEFT'
+	row.label("Name Sync", icon='LINKED')
+	row.operator('object.object_name_to_data_name', icon='TRIA_DOWN_BAR', text="")
+	row.operator('object.data_name_to_object_name', icon='TRIA_UP_BAR', text="")
+#	self.layout.template_ID(context.object, 'data')
+
+classes = [
+    DataNameToObjectName,
+    ObjectNameToDataName,
+    CopyObjectName,
+    CopyDataName,
+    ]
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    pass
+    bpy.types.VIEW3D_PT_view3d_name.append(menu)
+
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+    pass
+    bpy.types.VIEW3D_PT_view3d_name.remove(menu)
+	
+if __name__ == "__main__":
+    register()

@@ -7,7 +7,7 @@
 ######################################################################################################
 
 bl_info = {
-    "name": "Wire Tools",
+    "name": "Shading Types",
     "description": 'Some options to enable wire (into solid mode) to all objects',
     "author": "Lapineige",
     "version": (1, 1),
@@ -16,9 +16,10 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "tracker_url": "http://blenderlounge.fr/forum/viewtopic.php?f=18&t=736",
-    "category": "3D View"}
+    "category": "Shading"}
 
 import bpy
+from .utils import AddonPreferences, SpaceProperty
 
 bpy.types.Scene.WT_only_selection = bpy.props.BoolProperty(name="Only Selection", default=True)
 bpy.types.Scene.WT_invert = bpy.props.BoolProperty(name="Invert")
@@ -130,24 +131,27 @@ def menu(self, context):
 	col.operator("object.draw_only_box", icon="BBOX", text="Only Bounds")
 	col.operator("object.draw_textured", icon="MATCUBE", text="Textured")
 
-
+classes = [
+    DrawWireEdges,
+    DrawOnlyWire,
+    HideAllWire,
+    DrawOnlyBounds,
+    DrawTextured,
+    ]
 
 def register():
-    bpy.utils.register_class(DrawWireEdges)
-    bpy.utils.register_class(DrawOnlyWire)
-    bpy.utils.register_class(HideAllWire)
-    bpy.utils.register_class(DrawOnlyBounds)
-    bpy.utils.register_class(DrawTextured)
-    bpy.types.VIEW3D_PT_view3d_shading.append(shading_wire_tools_layout)
+
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    pass
+    bpy.types.VIEW3D_PT_view3d_shading.append(menu)
 
 
 def unregister():
-    bpy.types.VIEW3D_PT_view3d_shading.remove(shading_wire_tools_layout)
-    bpy.utils.unregister_class(DrawWireEdges)
-    bpy.utils.unregister_class(DrawOnlyWire)
-    bpy.utils.unregister_class(HideAllWire)
-    bpy.utils.unregister_class(DrawOnlyBounds)
-    bpy.utils.unregister_class(DrawTextured)
+    bpy.types.VIEW3D_PT_view3d_shading.remove(menu)
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+    pass
 
 if __name__ == "__main__":
     register()

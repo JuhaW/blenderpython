@@ -1,7 +1,17 @@
 # 「3Dビュー」エリア > プロパティ > 「3Dカーソル」パネル
-
+bl_info = {
+    "name": "Snap Menu",
+    "author": "meta-androcto, saidenka",
+    "version": (0, 1),
+    "blender": (2, 73),
+    "location": "3d cursor Panel",
+    "description": "Snap Cursor Menu",
+    "warning": "",
+    "wiki_url": "",
+    "category": "3D Cursor"
+}
 import bpy
-
+from .utils import AddonPreferences, SpaceProperty
 ################
 # オペレーター #
 ################
@@ -65,3 +75,22 @@ def menu(self, context):
 	row.operator("view3d.revert_pivot",
 		text="Revert Pivot")
 
+classes = [
+    VIEW3D_OT_pivot_cursor,
+    VIEW3D_OT_revert_pivot,
+    ]
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    pass
+    bpy.types.VIEW3D_PT_view3d_cursor.append(menu)
+
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+    pass
+    bpy.types.VIEW3D_PT_view3d_cursor.remove(menu)
+	
+if __name__ == "__main__":
+    register()

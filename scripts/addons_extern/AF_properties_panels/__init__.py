@@ -1,4 +1,4 @@
-# ##### BEGIN GPL LICENSE BLOCK #####
+﻿# ##### BEGIN GPL LICENSE BLOCK #####
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
@@ -17,9 +17,36 @@
 # ##### END GPL LICENSE BLOCK #####
 # by meta-androcto, parts based on work by Saidenka #
 
+
+
+import bpy
+import platform
+import inspect
+import traceback
+import tempfile
+import urllib.request
+import zipfile
+import os
+import shutil
+import pathlib
+import difflib
+import sys
+import hashlib
+import datetime
+from subprocess import Popen, PIPE
+
+from math import *
+from bpy.props import IntProperty, BoolProperty, FloatProperty, EnumProperty, PointerProperty, StringProperty, CollectionProperty
+from bpy.types import PropertyGroup
+
+from . import VIEW3D_PT_view3d_cursor
+from . import VIEW3D_PT_view3d_name
+from . import VIEW3D_PT_view3d_shading
+from . import quick_prefs
+
 bl_info = {
     "name": "AF: Properties Panels",
-    "author": "Meta Androcto, ",
+    "author": "Meta Androcto",
     "version": (0, 2),
     "blender": (2, 75, 0),
     "location": "View3D > Properties Panels",
@@ -30,82 +57,219 @@ bl_info = {
     "tracker_url": "",
     "category": "Addon Factory"}
 
-if "bpy" in locals():
-    import importlib
-    importlib.reload(VIEW3D_PT_view3d_cursor)
-    importlib.reload(VIEW3D_PT_view3d_name)
-    importlib.reload(VIEW3D_PT_view3d_properties)
-    importlib.reload(VIEW3D_PT_view3d_shading)
-    importlib.reload(OBJECT_PT_context_object)
-    importlib.reload(quick_prefs)
-    importlib.reload(easy_lightmap)
 
-else:
-    from . import VIEW3D_PT_view3d_cursor
-    from . import VIEW3D_PT_view3d_name
-    from . import VIEW3D_PT_view3d_properties
-    from . import VIEW3D_PT_view3d_shading
-    from . import OBJECT_PT_context_object
-    from . import quick_prefs
-    from . import easy_lightmap
-
-import bpy
-from bpy.props import StringProperty, BoolProperty, IntProperty
-from subprocess import Popen, PIPE
-##############
-## REGISTER ##
-##############
-class EasyLightMapProperties(bpy.types.PropertyGroup):
-    
-    bake_path = StringProperty(name="Bake folder:", default="", subtype="DIR_PATH", description="Path for saving baked maps.")
-    image_w = IntProperty(name="Width", default=1024, min=1, description="Image width")
-    image_h = IntProperty(name="Height", default=1024, min=1, description="Image height")
-    check_uv = BoolProperty(name="Check/Create UV Layers", default=True, description="Create two uv layers if there is not any.")
-    bake_diffuse = BoolProperty(name="Bake diffuse color", default=False, description="Bake material diffuse color into map.")
-    bake_textures = BoolProperty(name="Bake textures", default=False, description="Bake material textures into map.")
+sub_modules = [
+    VIEW3D_PT_view3d_cursor,
+    VIEW3D_PT_view3d_name,
+    VIEW3D_PT_view3d_shading,
+    quick_prefs,
+    ]
 
 
-# Addons Preferences
-class AddonPreferences(bpy.types.AddonPreferences):
-	bl_idname = __name__
+sub_modules.sort(
+    key=lambda mod: (mod.bl_info['category'], mod.bl_info['name']))
 
-	view_savedata = bpy.props.StringProperty(name="View Saved Data", default="")
-	
-	def draw(self, context):
-		layout = self.layout
-		layout.label(text="Save your Views to addons preferences")
-		layout.label(text="Per Session ues only")
-		layout.label(text="Save User Settings to store permenantly")
-		layout.prop(self, 'view_savedata')
-		box = layout.box()
-		box.label(text = 'Preferences')
-	
-		layout.label(text="----Properties Panels----")
-		layout.label(text="Adds additional features & concepts")
-		layout.label(text="Quick Prefs, Easy Light Map, Shading & more")
+
+def _get_pref_class(mod):
+    for obj in vars(mod).values():
+        if inspect.isclass(obj) and issubclass(obj, bpy.types.PropertyGroup):
+            if hasattr(obj, 'bl_idname') and obj.bl_idname == mod.__name__:
+                return obj
+
+
+def get_addon_preferences(name=''):
+    """?????"""
+    addons = bpy.context.user_preferences.addons
+    if __name__ not in addons:  # wm.read_factory_settings()
+        return None
+    prefs = addons[__name__].preferences
+    if name:
+        if not hasattr(prefs, name):
+            for mod in sub_modules:
+                if mod.__name__.split('.')[-1] == name:
+                    cls = _get_pref_class(mod)
+                    if cls:
+                        prop = bpy.props.PointerProperty(type=cls)
+                        setattr(UIToolsPreferences, name, prop)
+                        bpy.utils.unregister_class(UIToolsPreferences)
+                        bpy.utils.register_class(UIToolsPreferences)
+        return getattr(prefs, name, None)
+    else:
+        return prefs
+
+
+def register_submodule(mod):
+    if not hasattr(mod, '__addon_enabled__'):
+        mod.__addon_enabled__ = False
+    if not mod.__addon_enabled__:
+        mod.register()
+        mod.__addon_enabled__ = True
+
+
+def unregister_submodule(mod):
+    if mod.__addon_enabled__:
+        mod.unregister()
+        mod.__addon_enabled__ = False
+
+        prefs = get_addon_preferences()
+        name = mod.__name__.split('.')[-1]
+        if hasattr(UIToolsPreferences, name):
+            delattr(UIToolsPreferences, name)
+            if prefs:
+                bpy.utils.unregister_class(UIToolsPreferences)
+                bpy.utils.register_class(UIToolsPreferences)
+                if name in prefs:
+                    del prefs[name]
+
+
+def test_platform():
+    return (platform.platform().split('-')[0].lower()
+            not in {'darwin', 'windows'})
+
+
+class UIToolsPreferences(bpy.types.AddonPreferences):
+    bl_idname = __name__
+
+    align_box_draw = bpy.props.BoolProperty(
+            name='Box Draw',
+            description='If applied patch: patch/ui_layout_box.patch',
+            default=False)
+
+    def draw(self, context):
+        layout = self.layout
+        """:type: bpy.types.UILayout"""
+
+        for mod in sub_modules:
+            mod_name = mod.__name__.split('.')[-1]
+            info = mod.bl_info
+            column = layout.column(align=self.align_box_draw)
+            box = column.box()
+
+            # ???
+            expand = getattr(self, 'show_expanded_' + mod_name)
+            icon = 'TRIA_DOWN' if expand else 'TRIA_RIGHT'
+            col = box.column()  # box??????????
+            row = col.row()
+            sub = row.row()
+            sub.context_pointer_set('addon_prefs', self)
+            sub.alignment = 'LEFT'
+            op = sub.operator('wm.context_toggle', text='', icon=icon,
+                              emboss=False)
+            op.data_path = 'addon_prefs.show_expanded_' + mod_name
+            sub.label('{}: {}'.format(info['category'], info['name']))
+            sub = row.row()
+            sub.alignment = 'RIGHT'
+            if info.get('warning'):
+                sub.label('', icon='ERROR')
+            sub.prop(self, 'use_' + mod_name, text='')
+            # ???
+            if expand:
+                # col = box.column()  # box??????????
+                # ??: space_userpref.py
+                if info.get('description'):
+                    split = col.row().split(percentage=0.15)
+                    split.label('Description:')
+                    split.label(info['description'])
+                if info.get('location'):
+                    split = col.row().split(percentage=0.15)
+                    split.label('Location:')
+                    split.label(info['location'])
+                if info.get('author') and info.get('author') != 'chromoly':
+                    split = col.row().split(percentage=0.15)
+                    split.label('Author:')
+                    split.label(info['author'])
+                if info.get('version'):
+                    split = col.row().split(percentage=0.15)
+                    split.label('Version:')
+                    split.label('.'.join(str(x) for x in info['version']),
+                                translate=False)
+                if info.get('warning'):
+                    split = col.row().split(percentage=0.15)
+                    split.label('Warning:')
+                    split.label('  ' + info['warning'], icon='ERROR')
+
+                tot_row = int(bool(info.get('wiki_url')))
+                if tot_row:
+                    split = col.row().split(percentage=0.15)
+                    split.label(text='Internet:')
+                    if info.get('wiki_url'):
+                        op = split.operator('wm.url_open',
+                                            text='Documentation', icon='HELP')
+                        op.url = info.get('wiki_url')
+                    for i in range(4 - tot_row):
+                        split.separator()
+
+                # ?????
+                if getattr(self, 'use_' + mod_name):
+                    prefs = get_addon_preferences(mod_name)
+                    if prefs and hasattr(prefs, 'draw'):
+                        if self.align_box_draw:
+                            box = column.box()
+                        else:
+                            box = box.column()
+
+                        prefs.layout = box
+                        try:
+                            prefs.draw(context)
+                        except:
+                            traceback.print_exc()
+                            box.label(text='Error (see console)', icon='ERROR')
+                        del prefs.layout
+
+        row = layout.row()
+        sub = row.row()
+        sub.alignment = 'RIGHT'
+        sub.prop(self, 'align_box_draw')
+
+
+for mod in sub_modules:
+    info = mod.bl_info
+    mod_name = mod.__name__.split('.')[-1]
+
+    def gen_update(mod):
+        def update(self, context):
+            if getattr(self, 'use_' + mod.__name__.split('.')[-1]):
+                if not mod.__addon_enabled__:
+                    register_submodule(mod)
+            else:
+                if mod.__addon_enabled__:
+                    unregister_submodule(mod)
+        return update
+
+
+    prop = bpy.props.BoolProperty(
+        name=info['name'],
+        description=info.get('description', ''),
+        update=gen_update(mod),
+    )
+    setattr(UIToolsPreferences, 'use_' + mod_name, prop)
+    prop = bpy.props.BoolProperty()
+    setattr(UIToolsPreferences, 'show_expanded_' + mod_name, prop)
+
+classes = [
+    UIToolsPreferences,
+    ]
 
 
 def register():
-    """ Register """
-    bpy.utils.register_class(EasyLightMapProperties)
-    bpy.types.Scene.easyLightMap = bpy.props.PointerProperty(type=EasyLightMapProperties)
-    windowManager = bpy.types.WindowManager
-    # Add "Extras" menu to the "Properties" menu
-    bpy.types.VIEW3D_PT_view3d_cursor.append(VIEW3D_PT_view3d_cursor.menu)
-    bpy.types.VIEW3D_PT_view3d_name.prepend(VIEW3D_PT_view3d_name.menu)
-    bpy.types.VIEW3D_PT_view3d_properties.append(VIEW3D_PT_view3d_properties.menu)
-    bpy.types.VIEW3D_PT_view3d_shading.append(VIEW3D_PT_view3d_shading.menu)
+    for cls in classes:
+        bpy.utils.register_class(cls)
 
-    bpy.utils.register_module(__name__)
+    prefs = get_addon_preferences()
+    for mod in sub_modules:
+        if not hasattr(mod, '__addon_enabled__'):
+            mod.__addon_enabled__ = False
+        name = mod.__name__.split('.')[-1]
+        if getattr(prefs, 'use_' + name):
+            register_submodule(mod)
+
+
 def unregister():
+    for mod in sub_modules:
+        if mod.__addon_enabled__:
+            unregister_submodule(mod)
 
-    bpy.types.VIEW3D_PT_view3d_cursor.remove(VIEW3D_PT_view3d_cursor.menu)
-    bpy.types.VIEW3D_PT_view3d_name.remove(VIEW3D_PT_view3d_name.menu)
-    bpy.types.VIEW3D_PT_view3d_properties.remove(VIEW3D_PT_view3d_properties.menu)
-    bpy.types.VIEW3D_PT_view3d_shading.remove(VIEW3D_PT_view3d_shading.menu)
+    for cls in classes[::-1]:
+        bpy.utils.unregister_class(cls)
 
-    bpy.utils.unregister_module(__name__)
-
-if __name__ == "__main__":
-    register()
 
