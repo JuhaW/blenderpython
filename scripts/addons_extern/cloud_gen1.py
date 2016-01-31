@@ -469,7 +469,6 @@ class VIEW3D_PT_tools_cloud(Panel):
             col.operator("cloud.generate_cloud", text="Generate Cloud")
 
             col.prop(context.scene, "cloud_type")
-            col.prop(context.scene, "cloudparticles")
             col.prop(context.scene, "cloudsmoothing")
         else:
             col.label(text="Select one or more")
