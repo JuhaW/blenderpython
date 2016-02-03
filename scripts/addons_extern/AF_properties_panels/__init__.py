@@ -43,6 +43,7 @@ from . import VIEW3D_PT_view3d_cursor
 from . import VIEW3D_PT_view3d_name
 from . import VIEW3D_PT_view3d_shading
 from . import quick_prefs
+from . import mesh_statistics
 
 bl_info = {
     "name": "AF: Properties Panels",
@@ -63,6 +64,7 @@ sub_modules = [
     VIEW3D_PT_view3d_name,
     VIEW3D_PT_view3d_shading,
     quick_prefs,
+    mesh_statistics,
     ]
 
 
