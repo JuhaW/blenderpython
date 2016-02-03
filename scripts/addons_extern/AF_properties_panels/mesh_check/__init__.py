@@ -3,36 +3,13 @@ bl_info = {
     "author": "Clarkx, Cedric Lepiller, CoDEmanX, Pistiwique",
     "version": (0, 1, 1),
     "blender": (2, 75, 0),
+    "location": "Mesh Analysis",
     "description": "Custom Menu to show faces, tris, Ngons on the mesh",
-    "category": "3D View",}
+    "category": "Mesh Analysis",}
     
 import bpy
 import bmesh
 from bpy.props import EnumProperty
-
-class WazouPieMenuPrefs(bpy.types.AddonPreferences):
-    """Check your meshes for Ngons, Tris"""
-    bl_idname = __name__
-
-    bpy.types.Scene.Enable_Tab_01 = bpy.props.BoolProperty(default=False)
-    bpy.types.Scene.Enable_Tab_02 = bpy.props.BoolProperty(default=False)
-
-    def draw(self, context):
-        layout = self.layout
-        
-        layout.prop(context.scene, "Enable_Tab_01", text="info", icon="INFO")   
-        if context.scene.Enable_Tab_01:
-            row = layout.row()
-            layout.label(text="This Addon allow you to check your meshes and select Ngons and Tris")
-            layout.label(text="This Addon is placed in the N panel / Shading")
-
-        layout.prop(context.scene, "Enable_Tab_02", text="URL's", icon="URL")   
-        if context.scene.Enable_Tab_02:
-            row = layout.row()
-            row.operator("wm.url_open", text="Pitiwazou.com").url = "http://www.pitiwazou.com/"
-            row.operator("wm.url_open", text="Wazou's Ghitub").url = "https://github.com/pitiwazou/Scripts-Blender"
-            row.operator("wm.url_open", text="BlenderLounge Forum ").url = "http://blenderlounge.fr/forum/"
- 
 
 mesh_check_handle = []
 display_color = [False]  
@@ -300,19 +277,29 @@ def DisplayMeshCheckPanel(self, context):
                     split.separator()
                     split.label(info_str, icon='MESH_DATA')       
         
+classes = [
+    AddMaterials,
+    RemoveMaterials,
+    MeshCheckCollectionGroup,
+    DATA_OP_facetype_select
+    ]
     
 def register():
-    bpy.utils.register_module(__name__)
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    pass
     bpy.types.WindowManager.m_check = bpy.props.PointerProperty(
         type=MeshCheckCollectionGroup)
-    bpy.types.VIEW3D_PT_view3d_shading.append(DisplayMeshCheckPanel)
+    bpy.types.VIEW3D_PT_view3d_meshstatvis.append(DisplayMeshCheckPanel)
     if mesh_check_handle:
         bpy.types.SpaceView3D.draw_handler_remove(mesh_check_handle[0], 'WINDOW')
     mesh_check_handle[:] = [bpy.types.SpaceView3D.draw_handler_add(mesh_check_display_color_callback, (), 'WINDOW', 'POST_VIEW')]
     
 def unregister():
-    bpy.types.VIEW3D_PT_view3d_shading.remove(DisplayMeshCheckPanel)
-    bpy.utils.unregister_module(__name__)
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+    pass
+    bpy.types.VIEW3D_PT_view3d_meshstatvis.remove(DisplayMeshCheckPanel)
     del bpy.types.WindowManager.m_check
     if mesh_check_handle:
         bpy.types.SpaceView3D.draw_handler_remove(mesh_check_handle[0], 'WINDOW')
