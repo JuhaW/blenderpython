@@ -42,7 +42,6 @@ from bpy.types import PropertyGroup
 from . import VIEW3D_PT_view3d_cursor
 from . import VIEW3D_PT_view3d_name
 from . import VIEW3D_PT_view3d_shading
-from . import quick_prefs
 from . import mesh_statistics
 from . import mesh_check
 
@@ -64,7 +63,6 @@ sub_modules = [
     VIEW3D_PT_view3d_cursor,
     VIEW3D_PT_view3d_name,
     VIEW3D_PT_view3d_shading,
-    quick_prefs,
     mesh_statistics,
     mesh_check,
     ]
