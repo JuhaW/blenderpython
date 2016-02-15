@@ -1,15 +1,16 @@
 bl_info = {
-    "name": "Mesh check",
+    "name": "Mesh Check",
     "author": "Clarkx, Cedric Lepiller, CoDEmanX, Pistiwique",
     "version": (0, 1, 1),
     "blender": (2, 75, 0),
-    "location": "Mesh Analysis",
+    "location": "Properties Panel",
     "description": "Custom Menu to show faces, tris, Ngons on the mesh",
     "category": "Mesh Analysis",}
     
 import bpy
 import bmesh
-from bpy.props import EnumProperty
+from bpy.props import EnumProperty, PointerProperty
+from bpy.types import PropertyGroup
 
 mesh_check_handle = []
 display_color = [False]  
@@ -287,7 +288,7 @@ classes = [
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    pass
+
     bpy.types.WindowManager.m_check = bpy.props.PointerProperty(
         type=MeshCheckCollectionGroup)
     bpy.types.VIEW3D_PT_view3d_meshstatvis.append(DisplayMeshCheckPanel)
@@ -296,14 +297,13 @@ def register():
     mesh_check_handle[:] = [bpy.types.SpaceView3D.draw_handler_add(mesh_check_display_color_callback, (), 'WINDOW', 'POST_VIEW')]
     
 def unregister():
+
+
+    bpy.types.VIEW3D_PT_view3d_meshstatvis.remove(DisplayMeshCheckPanel)
+
     for cls in classes:
         bpy.utils.unregister_class(cls)
-    pass
-    bpy.types.VIEW3D_PT_view3d_meshstatvis.remove(DisplayMeshCheckPanel)
     del bpy.types.WindowManager.m_check
-    if mesh_check_handle:
-        bpy.types.SpaceView3D.draw_handler_remove(mesh_check_handle[0], 'WINDOW')
-        mesh_check_handle[:] = []
 
 if __name__ == "__main__":
     register()

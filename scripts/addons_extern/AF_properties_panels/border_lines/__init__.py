@@ -35,11 +35,11 @@ bl_info = {"name": "Border Lines - BMesh Edition",
            "warning": "",
            "wiki_url": "",
            "tracker_url": "",
-           "category": "3D View"
+           "category": "Shading"
            }
 
 
-
+from .utils import AddonPreferences, SpaceProperty
 import bpy
 from bpy_extras.mesh_utils import edge_face_count
 from mathutils import Vector
@@ -379,10 +379,20 @@ def displayBorderLinesPanel(self, context):
 
         box.operator("object.border_lines_copy_settings", icon='COPYDOWN')
             
-    
+classes = [
+    BorderLinesCopyUseOperator,
+    BorderLinesCopyWidthOperator,
+    BorderLinesCopyFinerOperator,
+    BorderLinesCopyColorOperator,
+    BorderLinesCopyCustomOperator,
+    BorderLinesCopySettingsOperator,
+    BorderLinesCollectionGroup,
+    ]    
 
 def register():
-    bpy.utils.register_module(__name__)
+    for cls in classes:
+        bpy.utils.register_class(cls)
+    pass
     bpy.types.Object.border_lines = bpy.props.PointerProperty(
         type=BorderLinesCollectionGroup)
     bpy.types.VIEW3D_PT_view3d_shading.append(displayBorderLinesPanel)
@@ -398,7 +408,9 @@ def unregister():
     if handle:
         bpy.types.SpaceView3D.draw_handler_remove(handle[0], 'WINDOW')
         handle[:] = []
-    bpy.utils.unregister_module(__name__)
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+    pass
     
 
 if __name__ == "__main__":

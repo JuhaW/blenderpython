@@ -42,8 +42,10 @@ from bpy.types import PropertyGroup
 from . import VIEW3D_PT_view3d_cursor
 from . import VIEW3D_PT_view3d_name
 from . import VIEW3D_PT_view3d_shading
+from . import border_lines
 from . import mesh_statistics
 from . import mesh_check
+
 
 bl_info = {
     "name": "AF: Properties Panels",
@@ -63,6 +65,7 @@ sub_modules = [
     VIEW3D_PT_view3d_cursor,
     VIEW3D_PT_view3d_name,
     VIEW3D_PT_view3d_shading,
+    border_lines,
     mesh_statistics,
     mesh_check,
     ]
