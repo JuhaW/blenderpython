@@ -17,13 +17,15 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
+# modified properties_constraints.py
+
 # imports
 import bpy
 
 # constraint button
 class ConstraintButtons:
   '''
-    The UI settings for the constraint.
+    The UI settings for the constraints.
   '''
 
   def main(self, context, layout, con):

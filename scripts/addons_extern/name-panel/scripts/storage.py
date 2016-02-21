@@ -17,13 +17,6 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-# imports
-import bpy
-
-#############
-## CLASSES ##
-#############
-
 # batch
 class batch:
   '''
@@ -207,7 +200,7 @@ class batch:
 
   # lists
   # list = [
-  #  [datablock.name, [count, datablock]]
+  #  [datablock.name, [count, datablock]
   # ]
 
   # objects

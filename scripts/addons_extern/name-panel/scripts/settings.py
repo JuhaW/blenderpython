@@ -19,60 +19,9 @@
 
 # imports
 import bpy
-from bpy.types import PropertyGroup, AddonPreferences
-from bpy.props import PointerProperty, EnumProperty, BoolProperty, StringProperty, IntProperty
+from bpy.types import PropertyGroup
+from bpy.props import *
 from . import storage
-
-#####################
-## PROPERTY GROUPS ##
-#####################
-
-# addon
-class preferences(AddonPreferences):
-  '''
-    Add-on user preferences.
-  '''
-  bl_idname = __package__
-
-  # dialogues
-  dialogues = BoolProperty(
-    name = 'Enable Operator Confirm Dialogues',
-    description = 'Enable confirm dialogues for batch operators',
-    default = True
-  )
-
-  # popups
-  popups = BoolProperty(
-  name = 'Enable Pop Ups (Experimental)',
-  description = 'Enable popups related to the settings of datablocks in the item panel.',
-  default = False
-  )
-
-  def draw(self, context):
-
-    # layout
-    layout = self.layout
-
-    # enable popups
-    # layout.prop(self, 'dialogues')
-    layout.prop(self, 'popups')
-
-    # split
-    split = layout.split(align=True)
-    split.scale_y = 2
-
-    # prop = split.operator('wm.url_open', text='BlenderMarket')
-    # prop.url = ''
-
-    prop = split.operator('wm.url_open', text='BlenderArtists')
-    prop.url = 'http://blenderartists.org/forum/showthread.php?272086-Addon-Item-Panel-amp-Batch-Naming-1-5'
-
-    # prop = split.operator('wm.url_open', text='BlendSwap')
-    # prop.url = 'http://www.blendswap.com/blends/view/82472'
-
-    prop = split.operator('wm.url_open', text='Github')
-    prop.url = 'https://github.com/trentinfrederick/name-panel'
-
 
 # panel
 class panel(PropertyGroup):
@@ -106,6 +55,20 @@ class panel(PropertyGroup):
     name = 'Pin Active Object',
     description = 'Keeps the active object at the top of the stack.',
     default = True
+  )
+
+  # search
+  search = StringProperty(
+    name = 'Search',
+    description = 'Search filter.',
+    default = ''
+  )
+
+  # regex
+  regex = BoolProperty(
+    name = 'Regular Expressions',
+    description = 'Enable regular expressions.',
+    default = False
   )
 
   # groups
@@ -1323,7 +1286,7 @@ class batch:
     # regex
     regex = BoolProperty(
       name = 'Regular Expressions',
-      description = 'Use regular expressions.',
+      description = 'Enable regular expressions.',
       default = False
     )
 

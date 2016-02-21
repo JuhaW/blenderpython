@@ -21,8 +21,8 @@
 import bpy
 from bpy.types import Operator
 from bpy.props import StringProperty
-from ..interface.popups.constraints import ConstraintButtons
-from ..interface.popups.modifiers import ModifierButtons
+from ..interface.shortcuts.constraints import ConstraintButtons
+from ..interface.shortcuts.modifiers import ModifierButtons
 
 # constraints
 class constraint(ConstraintButtons, Operator):
@@ -31,7 +31,7 @@ class constraint(ConstraintButtons, Operator):
   '''
   bl_idname = 'view3d.constraint_settings'
   bl_label = 'Constraint'
-  bl_description = 'Adjust the options for this constraint.'
+  bl_description = 'Adjust the options for this constraint. (Experimental)'
   bl_options = {'REGISTER', 'UNDO'}
 
   # object
@@ -53,6 +53,14 @@ class constraint(ConstraintButtons, Operator):
     description = 'The constraint you wish to edit the settings of.',
     default = ''
   )
+
+  # poll
+  @classmethod
+  def poll(cls, context):
+    '''
+      Space data type must be in 3D view.
+    '''
+    return context.space_data.type in 'VIEW_3D'
 
   # draw
   def draw(self, context):
@@ -101,7 +109,7 @@ class constraint(ConstraintButtons, Operator):
     '''
       Invoke the operator panel/menu, control its width.
     '''
-    context.window_manager.invoke_popup(self, width=300)
+    context.window_manager.invoke_popup(self, width=350)
     return {'RUNNING_MODAL'}
 
 # modifier modal
@@ -111,7 +119,7 @@ class modifier(ModifierButtons, Operator):
   '''
   bl_idname = 'view3d.modifier_settings'
   bl_label = 'Modifier'
-  bl_description = 'Adjust the options for this modifier.'
+  bl_description = 'Adjust the options for this modifier. (Experimental)'
   bl_options = {'REGISTER', 'UNDO'}
 
   # object
@@ -127,6 +135,14 @@ class modifier(ModifierButtons, Operator):
     description = 'The modifier you wish to edit the settings of.',
     default = ''
   )
+
+  # poll
+  @classmethod
+  def poll(cls, context):
+    '''
+      Space data type must be in 3D view.
+    '''
+    return context.space_data.type in 'VIEW_3D'
 
   # draw
   def draw(self, context):
@@ -167,5 +183,5 @@ class modifier(ModifierButtons, Operator):
     '''
       Invoke the operator panel/menu, control its width.
     '''
-    context.window_manager.invoke_popup(self, width=300)
+    context.window_manager.invoke_popup(self, width=350)
     return {'RUNNING_MODAL'}

@@ -31,19 +31,72 @@ bl_info = {
   'author': 'Trentin Frederick (proxe)',
   'version': (1, 5),
   'blender': (2, 76, 0),
-  'location': '3D View → Properties Panel → Name',
+  'location': '3D View → Tool or Property Shelf → Name',
   'description': 'An improved 3D view name panel with batch name tools.',
-  'wiki_url': '',
   'tracker_url': 'https://github.com/trentinfrederick/name-panel/issues',
   'category': '3D View'
 }
 
 # imports
 import bpy
-from bpy.props import PointerProperty
-from . import settings as addon
-from .interface import button, menu, panel
-from .operator import active, batch, popups, select, settings
+from bpy.types import AddonPreferences
+from bpy.props import *
+from .scripts import settings as PropertyGroup
+from .scripts.interface import button, icon, menu, panel
+from .scripts.operator import active, auto, batch, copy, shortcuts, select, settings, text
+
+# addon
+addon = bpy.context.user_preferences.addons.get(__name__)
+
+# preferences
+class preferences(AddonPreferences):
+  '''
+    Add-on user preferences.
+  '''
+  bl_idname = __name__
+
+  # location
+  location = EnumProperty(
+    name = 'Panel Location',
+    description = 'The 3D view shelf to use. (Requires Restart)',
+    items = [
+      ('TOOLS', 'Tool Shelf', 'Places the Name panel in the tool shelf under the tab labeled \'Name\''),
+      ('UI', 'Property Shelf', 'Places the Name panel in the property shelf.')
+    ],
+    default = 'TOOLS'
+  )
+
+  def draw(self, context):
+
+    # layout
+    layout = self.layout
+
+    # enable popups
+    # layout.prop(self, 'dialogues')
+    # layout.prop(self, 'popups')
+
+    # row
+    row = layout.row()
+    row.prop(self, 'location', expand=True)
+
+    # label
+    layout.label(text='Links:')
+
+    # split
+    split = layout.split(align=True)
+    split.scale_y = 2
+
+    # prop = split.operator('wm.url_open', text='BlenderMarket')
+    # prop.url = ''
+
+    prop = split.operator('wm.url_open', text='BlenderArtists')
+    prop.url = 'http://blenderartists.org/forum/showthread.php?272086-Addon-Item-Panel-amp-Batch-Naming-1-5'
+
+    # prop = split.operator('wm.url_open', text='BlendSwap')
+    # prop.url = 'http://www.blendswap.com/blends/view/82472'
+
+    prop = split.operator('wm.url_open', text='Github')
+    prop.url = 'https://github.com/trentinfrederick/name-panel'
 
 # register
 def register():
@@ -51,102 +104,80 @@ def register():
     Register.
   '''
 
-  # remove blender default panel
-  try:
-    bpy.utils.unregister_class(bpy.types.VIEW3D_PT_view3d_name)
-  except:
-    pass
+  # register module
+  bpy.utils.register_module(__name__)
 
-  # preferences
-  bpy.utils.register_class(addon.preferences)
-
-  # panel
-  bpy.utils.register_class(panel.name)
-
-  # menus
-  bpy.utils.register_class(menu.specials)
-
-  # operators
-  bpy.utils.register_class(batch.auto.name)
-  bpy.utils.register_class(batch.auto.objects)
-  bpy.utils.register_class(batch.auto.constraints)
-  bpy.utils.register_class(batch.auto.modifiers)
-  bpy.utils.register_class(batch.auto.objectData)
-  bpy.utils.register_class(batch.name)
-  bpy.utils.register_class(batch.generateCheatsheet)
-  bpy.utils.register_class(batch.copy)
-  bpy.utils.register_class(settings.reset)
-  bpy.utils.register_class(settings.transfer)
-  bpy.utils.register_class(active.object)
-  bpy.utils.register_class(active.bone)
-  bpy.utils.register_class(select.vertexGroup)
-  bpy.utils.register_class(popups.constraint)
-  bpy.utils.register_class(popups.modifier)
-
-  # property groups
-  bpy.utils.register_class(addon.batch.auto.name)
-  bpy.utils.register_class(addon.batch.auto.objects)
-  bpy.utils.register_class(addon.batch.auto.constraints)
-  bpy.utils.register_class(addon.batch.auto.modifiers)
-  bpy.utils.register_class(addon.batch.auto.objectData)
-  bpy.utils.register_class(addon.batch.name)
-  bpy.utils.register_class(addon.batch.copy)
-  bpy.utils.register_class(addon.panel)
+  # shelf position
+  # addon
+  if addon:
+    try:
+      if addon.preferences['location'] == 0:
+        bpy.utils.unregister_class(panel.UIName)
+      else:
+        # remove blender default panel
+        try:
+          bpy.utils.unregister_class(bpy.types.VIEW3D_PT_view3d_name)
+        except:
+          pass
+        bpy.utils.unregister_class(panel.toolsName)
+    except:
+      bpy.utils.unregister_class(panel.UIName)
+  else:
+    bpy.utils.unregister_class(panel.UIName)
 
   # pointer properties
-
   # batch auto name settings
   bpy.types.Scene.BatchAutoName = PointerProperty(
-    type = addon.batch.auto.name,
+    type = PropertyGroup.batch.auto.name,
     name = 'Batch Auto Name Settings',
     description = 'Storage location for the batch auto name operator settings.'
   )
 
   # batch auto name object names
   bpy.types.Scene.BatchAutoName_ObjectNames = PointerProperty(
-    type = addon.batch.auto.objects,
+    type = PropertyGroup.batch.auto.objects,
     name = 'Batch Auto Name Object Names',
     description = 'Storage location for the object names used during the auto name operation.'
   )
 
   # batch auto name constraint names
   bpy.types.Scene.BatchAutoName_ConstraintNames = PointerProperty(
-    type = addon.batch.auto.constraints,
+    type = PropertyGroup.batch.auto.constraints,
     name = 'Batch Auto Name Constraint Names',
     description = 'Storage location for the constraint names used during the auto name operation.'
   )
 
   # batch auto name modifier names
   bpy.types.Scene.BatchAutoName_ModifierNames = PointerProperty(
-    type = addon.batch.auto.modifiers,
+    type = PropertyGroup.batch.auto.modifiers,
     name = 'Batch Auto Name Modifier Names',
     description = 'Storage location for the modifier names used during the auto name operation.'
   )
 
   # batch auto name object data names
   bpy.types.Scene.BatchAutoName_ObjectDataNames = PointerProperty(
-    type = addon.batch.auto.objectData,
+    type = PropertyGroup.batch.auto.objectData,
     name = 'Batch Auto Name Object Data Names',
     description = 'Storage location for the object data names used during the auto name operation.'
   )
 
   # batch name settings
   bpy.types.Scene.BatchName = PointerProperty(
-    type = addon.batch.name,
+    type = PropertyGroup.batch.name,
     name = 'Batch Name Settings',
     description = 'Storage location for the batch name operator settings.'
   )
 
   # batch copy settings
   bpy.types.Scene.BatchCopyName = PointerProperty(
-    type = addon.batch.copy,
+    type = PropertyGroup.batch.copy,
     name = 'Batch Name Copy Settings',
     description = 'Storage location for the batch copy name operator settings.'
   )
 
   # name panel settings
   bpy.types.Scene.NamePanel = PointerProperty(
-    type = addon.panel,
+    type = PropertyGroup.panel,
     name = 'Name Panel Settings',
     description = 'Storage location for the name panel settings.'
   )
@@ -160,41 +191,8 @@ def unregister():
     Unregister.
   '''
 
-  # preferences
-  bpy.utils.unregister_class(addon.preferences)
-
-  # panel
-  bpy.utils.unregister_class(panel.name)
-
-  # menu
-  bpy.utils.unregister_class(menu.specials)
-
-  # operators
-  bpy.utils.unregister_class(batch.auto.name)
-  bpy.utils.unregister_class(batch.auto.objects)
-  bpy.utils.unregister_class(batch.auto.constraints)
-  bpy.utils.unregister_class(batch.auto.modifiers)
-  bpy.utils.unregister_class(batch.auto.objectData)
-  bpy.utils.unregister_class(batch.name)
-  bpy.utils.unregister_class(batch.generateCheatsheet)
-  bpy.utils.unregister_class(batch.copy)
-  bpy.utils.unregister_class(settings.reset)
-  bpy.utils.unregister_class(settings.transfer)
-  bpy.utils.unregister_class(active.object)
-  bpy.utils.unregister_class(active.bone)
-  bpy.utils.unregister_class(select.vertexGroup)
-  bpy.utils.unregister_class(popups.constraint)
-  bpy.utils.unregister_class(popups.modifier)
-
-  # property groups
-  bpy.utils.unregister_class(addon.batch.auto.name)
-  bpy.utils.unregister_class(addon.batch.auto.objects)
-  bpy.utils.unregister_class(addon.batch.auto.constraints)
-  bpy.utils.unregister_class(addon.batch.auto.modifiers)
-  bpy.utils.unregister_class(addon.batch.auto.objectData)
-  bpy.utils.unregister_class(addon.batch.name)
-  bpy.utils.unregister_class(addon.batch.copy)
-  bpy.utils.unregister_class(addon.panel)
+  # register module
+  bpy.utils.unregister_module(__name__)
 
   # pointer properties
   del bpy.types.Scene.BatchAutoName
@@ -207,7 +205,7 @@ def unregister():
   del bpy.types.Scene.NamePanel
 
   # remove batch name button
-  bpy.types.OUTLINER_HT_header.remove(interface.button.batchName)
+  bpy.types.OUTLINER_HT_header.remove(button.batchName)
 
-if __name__ in '__main__':
+if __name__ == '__main__':
   register()
