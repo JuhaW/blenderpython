@@ -3,7 +3,7 @@ bl_info = {
     "author": "Yusuf Umar",
     "version": (0, 0, 0),
     "blender": (2, 74, 0),
-    "location": "Anywhere",
+    "location": "Search Menu",
     "description": "Encode (and decode) HDR image into RGBM format",
     "wiki_url": "http://twitter.com/ucupumar",
     "category": "Material",
