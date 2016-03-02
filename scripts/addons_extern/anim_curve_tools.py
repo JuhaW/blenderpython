@@ -31,7 +31,7 @@ bl_info = {
     'author': 'cotejrp1',
     'version': (0, 1),
     "blender": (2, 6, 4),
-    'location': 'Properties > Object Data',
+    'location': 'Graph Editor -> Properties -> F-Curve Tools',
     'description': 'Manipulates animation f-curves',
     'warning': '',  # used for warning icon and text in addons panel
     'category': 'Animation'}
@@ -236,12 +236,11 @@ class EvenOutHandlesOperator(bpy.types.Operator):
 
 
 class FCurvePanel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
+    """Creates a Panel in the F-Curve properties region."""
     bl_label = "F-Curve Tools"
     bl_idname = "OBJECT_PT_fcurves"
-    bl_space_type = 'PROPERTIES'
-    bl_region_type = 'WINDOW'
-    bl_context = "data"
+    bl_space_type = 'GRAPH_EDITOR'
+    bl_region_type = 'UI'
 
     def draw(self, context):
         layout = self.layout
