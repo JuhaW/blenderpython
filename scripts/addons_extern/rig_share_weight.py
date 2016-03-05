@@ -8,7 +8,7 @@ bl_info = {
     "location": "View3D > Specials > Share weight",
     "description": "Share weight",
     "warning": "",
-    "category": "Rig"}
+    "category": "Rigging"}
 
 
 def auto_weight():

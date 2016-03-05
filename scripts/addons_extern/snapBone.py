@@ -8,7 +8,7 @@ bl_info = {
     "location": "View3D > Specials > Attach bone",
     "description": "attach one bone to another",
     "warning": "",
-    "category": "Rig"}
+    "category": "Rigging"}
 
 def attach(context):
     scn = bpy.context.scene
