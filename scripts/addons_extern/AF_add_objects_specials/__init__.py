@@ -175,6 +175,19 @@ class INFO_MT_mesh_lamps_add(bpy.types.Menu):
         layout.operator("object.trilighting",
             text="Add Tri Lighting")
 
+class INFO_MT_mesh_cameras_add(bpy.types.Menu):
+    # Define the "mesh objects" menu
+    bl_idname = "INFO_MT_scene_cameras"
+    bl_label = "Camera Sets"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator_context = 'INVOKE_REGION_WIN'
+        layout.operator("object.build_dolly_rig",
+            text="Dolly Rig")
+        layout.operator("object.build_crane_rig",
+            text="Crane Rig")
+
 
 # Define "Extras" menu
 def menu(self, context):
@@ -187,6 +200,7 @@ def menu(self, context):
 	self.layout.menu("INFO_MT_scene_lamps", icon="LAMP_SPOT")
 	self.layout.menu("INFO_MT_array_mods", icon="MOD_ARRAY")
 	self.layout.menu("INFO_MT_quick_tools", icon="MOD_BUILD")
+	self.layout.menu("INFO_MT_scene_cameras", icon="OUTLINER_DATA_CAMERA")
 
 # Addons Preferences
 class AddonPreferences(bpy.types.AddonPreferences):
@@ -209,15 +223,13 @@ def register():
     bpy.utils.register_module(__name__)
     # Add "Extras" menu to the "Add Mesh" menu
     bpy.types.INFO_MT_add.append(menu)
-    bpy.types.INFO_MT_camera_add.append(advanced_camera_rigs.add_dolly_button)
-    bpy.types.INFO_MT_camera_add.append(advanced_camera_rigs.add_crane_button)
+
 	
 def unregister():
 
     # Remove "Extras" menu from the "Add Mesh" menu.
     bpy.types.INFO_MT_add.remove(menu)
-    bpy.types.INFO_MT_camera_add.remove(advanced_camera_rigs.add_dolly_button)
-    bpy.types.INFO_MT_camera_add.remove(advanced_camera_rigs.add_crane_button)
+
     bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":
