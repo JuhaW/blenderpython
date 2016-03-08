@@ -7,28 +7,29 @@ bl_info = {
     "location": "",
     "warning": "",
     "wiki_url": "",
-    "category": ""
+    "category": "3D View"
 }
 
 import bpy
+
 
 class BonesExtraSelectSimilar(bpy.types.Operator):
     """Additional options for select_similar operator for Bones"""
     bl_idname = 'armature.select_similar_extra_options'
     bl_label = 'Select Similar Extra Options'
-    bl_options = { 'REGISTER', 'UNDO' }
+    bl_options = {'REGISTER', 'UNDO'}
 
-    prop_type = bpy.props.StringProperty(name="type", 
-        description="(enum in [‘LENGTH’, ‘DIRECTION’, ‘PREFIX’, ‘SUFFIX’, ‘LAYER’], (optional)) – Type", 
+    prop_type = bpy.props.StringProperty(name="type",
+        description="(enum in [‘LENGTH’, ‘DIRECTION’, ‘PREFIX’, ‘SUFFIX’, ‘LAYER’], (optional)) – Type",
         default="LENGTH")
 
-    threshold = bpy.props.FloatProperty(name="threshold", 
+    threshold = bpy.props.FloatProperty(name="threshold",
         description="(float in [0, 1], (optional)) – Threshold",
         default=0.1, min=0.0)
 
     #  Extra options for search
-    search_set = bpy.props.StringProperty(name="search_set", 
-        description="(enum in ['ALL', 'GROUP', 'CHILDREN', 'IMMEDIATE-CHILDREN', 'SIBLINGS']) - Search Set", 
+    search_set = bpy.props.StringProperty(name="search_set",
+        description="(enum in ['ALL', 'GROUP', 'CHILDREN', 'IMMEDIATE-CHILDREN', 'SIBLINGS']) - Search Set",
         default="ALL")
 
     def deselect_bone(self, bone):
@@ -59,7 +60,7 @@ class BonesExtraSelectSimilar(bpy.types.Operator):
     def filter_selected_as_immediate_children(self, active_bone, context):
         print('Active bone: ' + active_bone.name)
         for selected_bone in context.selected_bones:
-            if selected_bone not in active_bone.children:  
+            if selected_bone not in active_bone.children:
                 self.deselect_bone(selected_bone)
 
     def filter_selected_as_siblings(self, active_bone, context):
@@ -88,10 +89,12 @@ class BonesExtraSelectSimilar(bpy.types.Operator):
                     self.filter_selected_as_immediate_children(active_bone, context)
                 elif self.search_set == 'SIBLINGS':
                     self.filter_selected_as_siblings(active_bone, context)
-        return { 'FINISHED' }
+        return {'FINISHED'}
+
 
 def register():
     bpy.utils.register_class(BonesExtraSelectSimilar)
+
 
 def unregister():
     bpy.utils.unregister_class(BonesExtraSelectSimilar)
