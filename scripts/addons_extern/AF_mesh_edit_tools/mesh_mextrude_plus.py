@@ -20,19 +20,19 @@
 # Repeats extrusion + rotation + scale for one or more faces                   #
 
 ################################################################################
-'''
+
 bl_info = {
-    "name": "MExtrude Plus",
+    "name": "MExtrude Plus1",
     "author": "liero",
-    "version": (1, 2, 8),
-    "blender": (2, 71, 0),
+    "version": (1, 2, 9),
+    "blender": (2, 77, 0),
     "location": "View3D > Tool Shelf",
     "description": "Repeat extrusions from faces to create organic shapes",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "https://developer.blender.org/T28570",
     "category": "Mesh"}
-'''
+
 
 import  bpy, bmesh, mathutils, random
 from random import gauss
@@ -180,34 +180,34 @@ class MExtrude(bpy.types.Operator):
         return{'FINISHED'}
 
 class mextrude_help(bpy.types.Operator):
-	bl_idname = 'help.mextrude'
-	bl_label = ''
+  bl_idname = 'help.mextrude'
+  bl_label = ''
 
-	def draw(self, context):
-		layout = self.layout
-		layout.label('To use:')
-		layout.label('Make a selection or selection of Faces.')
-		layout.label('Extrude, rotate extrusions & more.')
+  def draw(self, context):
+    layout = self.layout
+    layout.label('To use:')
+    layout.label('Make a selection or selection of Faces.')
+    layout.label('Extrude, rotate extrusions & more.')
 
-	def invoke(self, context, event):
-		return context.window_manager.invoke_popup(self, width = 300)
+  def invoke(self, context, event):
+    return context.window_manager.invoke_popup(self, width = 300)
 
 class addarm_help(bpy.types.Operator):
-	bl_idname = 'help.addarm'
-	bl_label = ''
+  bl_idname = 'help.addarm'
+  bl_label = ''
 
-	def draw(self, context):
-		layout = self.layout
-		layout.label('To use:')
-		layout.label('With Multi extrude to rig extrusions.')
-		layout.label('Adds Empty to control rig.')
-		layout.label('Based on selected face/s & object center.')
+  def draw(self, context):
+    layout = self.layout
+    layout.label('To use:')
+    layout.label('With Multi extrude to rig extrusions.')
+    layout.label('Adds Empty to control rig.')
+    layout.label('Based on selected face/s & object center.')
 
-	def execute(self, context):
-		return {'FINISHED'}
+  def execute(self, context):
+    return {'FINISHED'}
 
-	def invoke(self, context, event):
-		return context.window_manager.invoke_popup(self, width = 300)
+  def invoke(self, context, event):
+    return context.window_manager.invoke_popup(self, width = 300)
 
 class BB(bpy.types.Operator):
     bl_idname = 'object.mesh2bones'
@@ -216,7 +216,7 @@ class BB(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     numb = IntProperty(name='Max Bones', min=1, max=1000, soft_max=100, default=5, description='Max number of bones')
-    skip = IntProperty(name='Skip Loops', min=0, max=5, default=0, description='Skip some edges to get longer bones')
+    skip = IntProperty(name='Skip Loops', min=0, max=5, default=1, description='Skip some edges to get longer bones')
     long = FloatProperty(name='Min Length', min=0.01, max=5, default=0.15, description='Discard bones shorter than this value')
     ika = BoolProperty(name='IK constraints', default=True, description='Add IK constraint and Empty as target')
     rotk = BoolProperty(name='IK Rotation', default=False, description='IK constraint follows target rotation')
@@ -375,18 +375,33 @@ class BB(bpy.types.Operator):
         scn.objects.active = obj
         volver(obj, copia, om, msm, msv)
         return{'FINISHED'}
-'''
-def register():
-    bpy.utils.register_class(MExtrude)
+        
+        
+class UI(bpy.types.Panel):
+    bl_label = 'MExtrude'
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = "TOOLS"
+    bl_category = 'Tools'
+    bl_options = {'DEFAULT_CLOSED'}
 
-    bpy.utils.register_class(BB)
+    def draw(self, context):
+        layout = self.layout
+        layout.operator('object.mextrude')
+        layout.operator('object.mesh2bones')
+
+        
+        
+''''''
+def register():
+    bpy.utils.register_module(__name__)
+
+    #bpy.utils.register_class(BB)
 
 def unregister():
-    bpy.utils.unregister_class(MExtrude)
+    bpy.utils.unregister_module(__name__)
 
-    bpy.utils.unregister_class(BB)
+    #bpy.utils.unregister_class(BB)
 
 
 if __name__ == '__main__':
     register()
-'''

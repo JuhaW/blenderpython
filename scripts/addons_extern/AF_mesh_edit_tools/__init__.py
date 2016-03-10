@@ -460,6 +460,8 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
                 text="Fast loop")
             col.operator('mesh.flip_normals', text = 'Normals Flip')
             col.operator('mesh.remove_doubles', text = 'Remove Doubles')
+            col.operator('mesh.subdivide', text = 'Subdivide')
+            col.operator('mesh.dissolve_limited', text = 'Dissolve Limited')
 
         elif mode[1]: 	
             split = layout.split()		
@@ -483,6 +485,9 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
                 text="Fast loop")
             col.operator('mesh.flip_normals', text = 'Normals Flip')
             col.operator('mesh.remove_doubles', text = 'Remove Doubles')
+            col.operator('mesh.remove_doubles', text = 'Remove Doubles')
+            col.operator('mesh.subdivide', text = 'Subdivide')
+            col.operator('mesh.dissolve_limited', text = 'Dissolve Limited')
 
         elif mode[2]: 			
             split = layout.split()		
@@ -506,6 +511,8 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
                 text="Fast loop")
             col.operator('mesh.flip_normals', text = 'Normals Flip')
             col.operator('mesh.remove_doubles', text = 'Remove Doubles')
+            col.operator('mesh.subdivide', text = 'Subdivide')
+            col.operator('mesh.dissolve_limited', text = 'Dissolve Limited')
 
 
 class EditToolsSettings(bpy.types.PropertyGroup):
@@ -643,7 +650,10 @@ class EditToolsPanel(bpy.types.Panel):
             row.operator('mesh.flip_normals', text = 'Normals Flip')
             row = layout.row()
             row.operator('mesh.remove_doubles', text = 'Remove Doubles')
-
+            row = layout.row()
+            row.operator('mesh.subdivide', text = 'Subdivide')
+            row = layout.row()
+            row.operator('mesh.dissolve_limited', text = 'Dissolve Limited')
 # Addons Preferences
 class AddonPreferences(bpy.types.AddonPreferences):
 	bl_idname = __name__
