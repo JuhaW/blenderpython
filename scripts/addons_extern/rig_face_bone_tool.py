@@ -23,9 +23,9 @@ bl_info = {
     "name": "Face Bone Tool",
     "description": "Create facial bones and body bones for rigify.",
     "author": "khuuyj",
-    "version": (0,5),
-    "api":51777,
-    "blender": (2, 6, 4),
+    "version": (0,5,1),
+    "api":9337574,
+    "blender": (2, 7, 1),
     "location": "Tool > Face Bone Tool",
     "warning": '', # used for warning icon and text in addons panel
     "wiki_url": "",
@@ -579,8 +579,8 @@ def create_bones(rig,bones,constraints):
             eb[c[0]].tail = eb[c[4]].head
             
     bpy.ops.object.mode_set(mode='OBJECT')
-    pose_mode = context.object.data.pose_position
-    context.object.data.pose_position = 'REST'
+    bpy.context.object.data.pose_position = 'REST'
+
     # Constraints
     for c in constraints:
         b = pb.get(c[0])
@@ -636,8 +636,11 @@ def create_bones(rig,bones,constraints):
                 cn.target_space = c[6]
                 cn.owner_space = c[7]
                 cn.influence = c[8]
-    context.object.data.pose_position = pose_mode
-    return (0)
+    bpy.ops.object.mode_set(mode='POSE')
+    bpy.context.scene.layers[16] = True
+    bpy.context.scene.layers[17] = True
+
+    return ()
 
 #-------------------------------------------------------         
 # Preset LipSync Action
@@ -1343,6 +1346,8 @@ def _check_ui_poll(obj):
                 return(1)
         elif obj.type=='MESH':
             return(3)
+        else:
+            return(0)
     except:
         return(0)
 
@@ -1356,8 +1361,10 @@ class VIEW3D_PT_tool_facebone(bpy.types.Panel):
     @classmethod
     def poll(cls,context):
         if context.area.type=='VIEW_3D':
-            if context.object.mode=='OBJECT':
-                return(_check_ui_poll(context.object))
+            if context.active_object==None:
+                return(0)
+            elif context.active_object.mode=='OBJECT':
+                return(_check_ui_poll(context.active_object))
             else:
                 return(0)
         else:
@@ -1406,6 +1413,7 @@ class body_bones(bpy.types.Operator):
     @classmethod
     def poll(cls,context):
         r = _check_ui_poll(context.object)
+        return(0) # 2014-9-8
         if r == 1:
             return(1)
         else:
