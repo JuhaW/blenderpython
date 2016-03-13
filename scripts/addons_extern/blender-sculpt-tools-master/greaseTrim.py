@@ -17,6 +17,14 @@ class GreaseTrim(bpy.types.Operator):
         objBBDiagonal = helper.objDiagonal(context.active_object)*2
         # objBBDiagonal = objBBDiagonal*2
         subdivisions = 32
+        
+        #Added by Kent Trammell -----------------
+        wm = bpy.context.window_manager
+        noDel = []
+        for ob in bpy.data.objects:
+            if ob.hide == False:
+                noDel.append(ob)
+        #----------------------------------------        
 
         if len(bpy.context.selected_objects)==1:
             try:
@@ -92,6 +100,15 @@ class GreaseTrim(bpy.types.Operator):
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.context.scene.objects.active = mesh
         bpy.ops.boolean.separate()
+        
+        #Added by Kent Trammell-------------------------       
+        if wm.useSubtractMode:            
+            for ob in bpy.data.objects:
+                if ob not in noDel:
+                    bpy.data.scenes[0].objects.unlink(ob)
+                    bpy.data.objects.remove(ob)
+        #Added by Kent Trammell---------------------------       
+                
     
         return {'FINISHED'}
 
@@ -112,3 +129,5 @@ class PurgeAllPencils(bpy.types.Operator):
             if not context.scene.objects[obj.name].grease_pencil == None:
                 context.scene.objects[obj.name].grease_pencil.clear() 
         return {'FINISHED'}   
+
+

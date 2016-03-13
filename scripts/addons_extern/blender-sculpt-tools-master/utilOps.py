@@ -111,6 +111,13 @@ class RemeshOperator(bpy.types.Operator):
             bpy.data.scenes[0].objects.unlink(obCopy)
             bpy.data.objects.remove(obCopy)
         
+        #added by Kent Trammell ----------------------------------------------    
+        if wm.useAutoDecimate == True:
+            dec = ob.modifiers.new("decimator", "DECIMATE")
+            dec.ratio = wm.autoDecimateRatio  
+            bpy.ops.object.modifier_apply(apply_as='DATA', modifier="decimator")
+        #---------------------------------------------------------------------    
+        
         bpy.ops.object.mode_set(mode=oldMode)
         
         if dyntopoOn == True:
@@ -204,3 +211,4 @@ class SymmetrizeBoolMesh(bpy.types.Operator):
         if mode_curr == 'VERTEX_PAINT':
             func.object.mode_set(mode='VERTEX_PAINT')
         return {'FINISHED'}
+
