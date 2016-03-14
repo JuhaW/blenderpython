@@ -434,6 +434,10 @@ class mlrefresh(bpy.types.Operator):
     
     def execute(self, context):
         AutoNode()
+        bpy.ops.object.editmode_toggle()
+        bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.001)
+        bpy.ops.object.editmode_toggle()
+
         return {'FINISHED'}
 
 class mlrefresh_active(bpy.types.Operator):
@@ -449,12 +453,15 @@ class mlrefresh_active(bpy.types.Operator):
     
     def execute(self, context):
         AutoNode(True)
+        bpy.ops.object.editmode_toggle()
+        bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.001)
+        bpy.ops.object.editmode_toggle()
         return {'FINISHED'}
 
 class mlrestore(bpy.types.Operator):
     bl_idname = "ml.restore"
     bl_label = "Restore"
-    bl_description = "Switch Back to non nodes & Blender Internal"
+    bl_description = "Switch Back to Blender Internal Nodes Off"
     bl_register = True
     bl_undo = True
     @classmethod
@@ -472,7 +479,7 @@ sc.EXTRACT_OW = BoolProperty(attr="Overwrite", default=False, description="Extra
 
 
 class OBJECT_PT_scenemassive(bpy.types.Panel):
-    bl_label = "Convert Materials to Cycles"
+    bl_label = "Convert BI Materials to Cycles"
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "material"
@@ -482,16 +489,19 @@ class OBJECT_PT_scenemassive(bpy.types.Panel):
         layout = self.layout
         row = layout.row()
         box = row.box()
-        box.operator("ml.refresh", text='Convert All to Cycles', icon='TEXTURE')
-        box.operator("ml.refresh_active", text='Convert Active to Cycles', icon='TEXTURE')
-#        box.prop(sc, "EXTRACT_ALPHA", text='Extract Alpha Textures (slow)')
-#        box.prop(sc, "EXTRACT_PTEX", text='Extract Procedural Textures (slow)')
-#        box.prop(sc, "EXTRACT_OW", text='Re-extract Textures')
+        box.operator("ml.refresh", text='Convert All to Cycles', icon='MATERIAL')
+        box.operator("ml.refresh_active", text='Convert Active to Cycles', icon='MATERIAL')
+        box.operator("ml.restore", text='To BI Nodes Off', icon='MATERIAL')
         row = layout.row()
-        row.operator("ml.restore", text='Back to Blender', icon='MATERIAL')
+        box = row.box()
+        box.label(text = 'Blender Internal Texture (One Per Object)')
+        box.prop(sc, "EXTRACT_ALPHA", text='Extract Alpha Textures (slow)')
+        box.prop(sc, "EXTRACT_PTEX", text='Extract Procedural Textures (slow)')
+        box.prop(sc, "EXTRACT_OW", text='Re-extract Textures')
 
+'''
         # Locking of nodes objects
-'''        try:
+        try:
             cmat = bpy.context.selected_objects[0].active_material
             TreeNodes = cmat.node_tree # throws exception for non-nodes mats
             locked = False

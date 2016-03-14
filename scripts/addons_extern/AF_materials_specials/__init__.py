@@ -33,8 +33,10 @@ bl_info = {
 if "bpy" in locals():
     import importlib
     importlib.reload(materials_cycles_converter)
+    importlib.reload(material_converter)
 else:
     from . import materials_cycles_converter
+    from . import material_converter
 
 import bpy
 from bpy.props import StringProperty, BoolProperty, EnumProperty
@@ -932,6 +934,7 @@ class VIEW3D_MT_master_material(bpy.types.Menu):
 			layout.separator()
 			layout.label(text="Switch To Blender Render")
 			layout.operator("ml.restore", text='BI Nodes Off', icon='APPEND_BLEND')
+			layout.operator("xps_tools.restore_bi_materials_all", text='BI Nodes On', icon='APPEND_BLEND')
 
 	#Blender Internal
 
@@ -988,6 +991,7 @@ def menu_func(self, context):
         layout.separator()
         layout.label(text="Switch To Blender Render")
         layout.operator("ml.restore", text='BI Nodes Off', icon='APPEND_BLEND')
+        layout.operator("xps_tools.restore_bi_materials_all", text='BI Nodes On', icon='APPEND_BLEND')
 #Blender Internal
 
     elif context.scene.render.engine == "BLENDER_RENDER":
