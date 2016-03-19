@@ -78,6 +78,7 @@ if "bpy" in locals():
     importlib.reload(add_mesh_propeller)
     importlib.reload(basket_arch)
     importlib.reload(add_mesh_curved_plane)
+    importlib.reload(add_mesh_beam_builder)
 
 else:
     from . import add_mesh_star
@@ -108,6 +109,7 @@ else:
     from . import add_mesh_propeller
     from . import basket_arch
     from . import add_mesh_curved_plane
+    from . import add_mesh_beam_builder
 
 import bpy
 
@@ -321,6 +323,8 @@ class INFO_MT_mesh_building_add(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.menu("INFO_MT_mesh_floorwall_add", text="Floors & Walls", icon = "UV_ISLANDSEL")
+        layout.menu("INFO_MT_mesh_beambuilder_add",
+            text="Beam Builder")
         layout.operator("mesh.add_say3d_balcony",
             text="Balcony")
         layout.operator("mesh.add_say3d_sove",
