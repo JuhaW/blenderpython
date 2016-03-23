@@ -29,7 +29,7 @@ class curved_plane(bpy.types.Operator, AddObjectHelper):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "add curved_plane primitive"
 
-    def execute(self, context, event):
+    def execute(self, context):
 
         mesh = bpy.data.meshes.new(name="curved_plane")
         obj = bpy.data.objects.new(name="curved_plane", object_data=mesh)
