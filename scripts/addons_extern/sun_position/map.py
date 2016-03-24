@@ -1063,7 +1063,7 @@ def Draw_map_callback(self, context):
         bgl.glEnable(bgl.GL_BLEND)
         if Map.glImage.bindcode == 0:
             Map.load_gl_image()
-        bgl.glBindTexture(bgl.GL_TEXTURE_2D, Map.glImage.bindcode)
+        bgl.glBindTexture(bgl.GL_TEXTURE_2D, Map.glImage.bindcode[0])
         bgl.glEnable(bgl.GL_TEXTURE_2D)
         bgl.glColor4f(1.0, 1.0, 1.0, Map.object[0].opacity)
         bgl.glBegin(bgl.GL_QUADS)
