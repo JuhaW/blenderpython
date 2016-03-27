@@ -52,11 +52,10 @@ class INFO_MT_mesh_boundbox_add(bpy.types.Menu):
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.operator("mesh.boundbox_add",
             text = "Bound Box Add")
+        layout.operator("mesh.multi_boundbox_add",
+            text = "Multi Bound Box Add")
         layout.operator("object.min_bounds",
             text="Minimum Bounds")
-#        layout.operator("object.bounding_boxers",
-#            text="BBOX")
-# Register all operators and panels
 
 # Define "Extras" menu
 def menu_func(self, context):

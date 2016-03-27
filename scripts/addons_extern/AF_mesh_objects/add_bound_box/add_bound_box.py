@@ -146,7 +146,7 @@ class CreateBoundingBox(bpy.types.Operator):
         self.location[0] = minx+((maxx-minx)/2)
         self.location[1] = miny+((maxy-miny)/2)
         self.location[2] = minz+((maxz-minz)/2)
-        bbox = object_utils.object_data_add(context, mesh, operator=self)
+        bbox = object_utils.object_data_add(context, mesh, operator=None)
         # does a bounding box need to display more than the bounds??
         bbox.object.draw_type = 'BOUNDS'
         bbox.object.hide_render = True
@@ -207,7 +207,7 @@ class CreateMultiBoundingBox(bpy.types.Operator):
 
             self.location = obj.location
             self.rotation = obj.rotation_euler
-            bbox = object_utils.object_data_add(context, mesh, operator=self)
+            bbox = object_utils.object_data_add(context, mesh, operator=None)
             # does a bounding box need to display more than the bounds??
             bbox.object.draw_type = 'BOUNDS'
             bbox.object.scale = obj.scale
