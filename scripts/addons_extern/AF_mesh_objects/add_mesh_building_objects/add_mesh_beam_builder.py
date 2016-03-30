@@ -58,7 +58,6 @@ bl_info = {
 
 import bpy
 
-from bpy_extras import object_utils
 
 
 def create_mesh (self, context, name, verts, faces, debug):
@@ -74,11 +73,12 @@ def create_mesh (self, context, name, verts, faces, debug):
     # add verts & faces to object
     mesh.from_pydata(verts, [], faces)
     mesh.update(calc_edges=True)
-
+    from bpy_extras import object_utils        
+    object_utils.object_data_add(context, mesh, operator=self)
     if debug:
         print("create_mesh function called and finished")
+        
 
-    return object_utils.object_data_add(self, context, mesh)
 
 
 def recalc_normals(debug):
@@ -932,7 +932,13 @@ def create_I_beam(size, thick, taper, debug):
 
     return verts_final, faces_final
 
-
+from bpy.props import (
+        BoolProperty,
+        BoolVectorProperty,
+        FloatProperty,
+        FloatVectorProperty,
+        IntProperty,
+        )
 
 # Define "Add_Rectangular_Beam" operator
 ########### Needs Work ###############
@@ -987,20 +993,12 @@ class Add_Rectangular_Beam(bpy.types.Operator):
             name="Rotation",
             subtype='EULER',
             )
-
-    # Define tool parameter layout
-    def draw(self, context):
-        layout = self.layout
-        layout.prop(self, 'mesh_z_size')
-        layout.prop(self, 'mesh_x_size')
-        layout.prop(self, 'mesh_y_size')
-        layout.prop(self, 'thick_bool')
-        if self.thick_bool:
-            layout.prop(self, 'thick')
-        layout.prop(self, 'view_align')
-        col = layout.column()
-        col.prop(self, 'location')
-        col.prop(self, 'rotation')
+    layers = BoolVectorProperty(
+            name="Layers",
+            size=20,
+            subtype='LAYER',
+            options={'HIDDEN', 'SKIP_SAVE'},
+            )
 
     def execute(self, context):
         # debug flag - True prints debug info to console
@@ -1021,15 +1019,16 @@ class Add_Rectangular_Beam(bpy.types.Operator):
         create_mesh(self, context, verts, faces, debug)
 
         recalc_normals(debug)
+#    add the mesh as an object into the scene with this utility module
 
         return {'FINISHED'}
 
-'''
+
     def invoke(self, context, event):
-        #self.align_matrix = align_matrix(context)
+        self.align_matrix = align_matrix(context)
         self.execute(context)
         return {'FINISHED'}
-'''
+
 
 
 # Define "Add_C_Beam" operator
@@ -1091,7 +1090,12 @@ class Add_C_Beam(bpy.types.Operator):
             name="Rotation",
             subtype='EULER',
             )
-
+    layers = BoolVectorProperty(
+            name="Layers",
+            size=20,
+            subtype='LAYER',
+            options={'HIDDEN', 'SKIP_SAVE'},
+            )
     # Define tool parameter layout
     def draw(self, context):
         layout = self.layout
@@ -1202,7 +1206,12 @@ class Add_L_Beam(bpy.types.Operator):
             name="Rotation",
             subtype='EULER',
             )
-
+    layers = BoolVectorProperty(
+            name="Layers",
+            size=20,
+            subtype='LAYER',
+            options={'HIDDEN', 'SKIP_SAVE'},
+            )
     # Define tool parameter layout
     def draw(self, context):
         layout = self.layout
@@ -1297,7 +1306,12 @@ class Add_T_Beam(bpy.types.Operator):
             name="Rotation",
             subtype='EULER',
             )
-
+    layers = BoolVectorProperty(
+            name="Layers",
+            size=20,
+            subtype='LAYER',
+            options={'HIDDEN', 'SKIP_SAVE'},
+            )
     # Define tool parameter layout
     def draw(self, context):
         layout = self.layout
@@ -1392,7 +1406,12 @@ class Add_I_Beam(bpy.types.Operator):
             name="Rotation",
             subtype='EULER',
             )
-
+    layers = BoolVectorProperty(
+            name="Layers",
+            size=20,
+            subtype='LAYER',
+            options={'HIDDEN', 'SKIP_SAVE'},
+            )
     # Define tool parameter layout
     def draw(self, context):
         layout = self.layout
@@ -1401,10 +1420,7 @@ class Add_I_Beam(bpy.types.Operator):
         layout.prop(self, 'mesh_y_size')
         layout.prop(self, 'thick')
         layout.prop(self, 'taper')
-        layout.prop(self, 'view_align')
-        col = layout.column()
-        col.prop(self, 'location')
-        col.prop(self, 'rotation')
+
 
 
     def execute(self, context):
@@ -1426,12 +1442,12 @@ class Add_I_Beam(bpy.types.Operator):
         return {'FINISHED'}
 
 
-'''
+
     def invoke(self, context, event):
         self.align_matrix = align_matrix(context)
         self.execute(context)
         return {'FINISHED'}
-'''
+
 
 
 # Register all operators and define menus

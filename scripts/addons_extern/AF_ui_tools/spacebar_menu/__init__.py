@@ -31,9 +31,11 @@ bl_info = {
     "category": "3D View",
 }
 
-from .utils import AddonPreferences, SpaceProperty
-
 import bpy
+from .utils import (
+    AddonPreferences,
+    SpaceProperty,
+    )
 
 # Dynamic Menu
 class VIEW3D_MT_Space_Dynamic_Menu(bpy.types.Menu):
