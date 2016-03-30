@@ -10,16 +10,15 @@ from .modules.icons import preview_collections
 
 def icon_tria(prop):
 	if prop:
-		icon = 'TRIA_DOWN'
+		return 'TRIA_DOWN'
 	else:
-		icon = 'TRIA_RIGHT'
-	return icon
+		return 'TRIA_RIGHT'
 
 
 
-class JewelCraftImportPanel(Panel):
+class ImportPanel(Panel):
 
-	bl_label = "Jewels"
+	bl_label = "Gems"
 	bl_idname = "JEWELCRAFT_IMPORT"
 	bl_space_type = "VIEW_3D"
 	bl_region_type = "TOOLS"
@@ -34,38 +33,45 @@ class JewelCraftImportPanel(Panel):
 		prefs = context.user_preferences.addons[var.addon_id].preferences
 		props = context.scene.jewelcraft
 		l = localization.locale[prefs.lang]
-		pcoll = preview_collections['main']
+		icons = preview_collections['icons']
 
 		col = layout.column(align=True)
 
+		col.template_icon_view(props, "import_gem_cut", show_labels=True)
+
+		col.separator()
 		row = col.row(align=True)
-		row.prop(props, 'import_gem_type', text="")
-		row.operator("jewelcraft.import_type", text="", icon="COLOR")
-		row = col.row(align=True)
-		row.prop(props, 'import_gem_cut', text="")
-		row.operator("jewelcraft.import_cut", text="", icon_value=pcoll['cut'].icon_id)
-		col.prop(props, 'import_gem_size', text=l['size'])
+		row.prop(props, "import_gem_type", text="")
+		row.operator("jewelcraft.search_type", text="", icon="VIEWZOOM")
+		col.prop(props, "import_gem_size", text=l['size'])
 		col.operator("jewelcraft.import_gem", text=l['make_gem'])
 
 		col.separator()
 		row = col.row(align=True)
+		row.label(l['gem'])
+		row.operator("jewelcraft.import_type", text="", icon="COLOR")
+		row.operator("jewelcraft.import_cut", text="", icon_value=icons['TOOL-CUT'].icon_id)
+
+		col.separator()
+		row = col.row(align=True)
 		row.label(l['prongs'])
-		row.operator("jewelcraft.import_single_prong", text="", icon="ROTATE")
+		row.operator("jewelcraft.import_single_prong", text="", icon_value=icons['TOOL-SINGLE_PRONG'].icon_id)
 		row.operator("jewelcraft.import_prongs", text="", icon="SURFACE_NCIRCLE")
 		row = col.row(align=True)
 		row.label(l['cutter'])
-		row.operator("jewelcraft.import_cutter_seat_only", text="", icon_value=pcoll['cutter_s'].icon_id)
-		row.operator("jewelcraft.import_cutter", text="", icon_value=pcoll['cutter'].icon_id)
+		row.operator("jewelcraft.import_cutter_seat", text="", icon_value=icons['TOOL-CUTTER_SEAT'].icon_id)
+		row.operator("jewelcraft.import_cutter", text="", icon_value=icons['TOOL-CUTTER'].icon_id)
 		row = col.row(align=True)
 		row.label(l['imitation'])
-		row.operator("jewelcraft.import_imitation_3_prong", text="", icon="MOD_SKIN")
+		row.operator("jewelcraft.import_imitation_3_prong", text="", icon_value=icons['TOOL-IMITATION_3_PRONG'].icon_id)
 
 		col.separator()
 		col.operator("jewelcraft.make_dupliface", text=l['make_dupliface'])
+		col.operator("jewelcraft.select_dupli", text=l['select_dupli'])
 
 
 
-class JewelCraftWeightingPanel(Panel):
+class WeightingPanel(Panel):
 
 	bl_label = "Weighting"
 	bl_idname = "JEWELCRAFT_WEIGHTING"
@@ -79,18 +85,19 @@ class JewelCraftWeightingPanel(Panel):
 		return context.mode == 'OBJECT'
 
 	def draw(self, context):
+		layout = self.layout
 		prefs = context.user_preferences.addons[var.addon_id].preferences
 		props = context.scene.jewelcraft
 		l = localization.locale[prefs.lang]
 		m = props.weighting_metals
 		weight = report.data
 
-		layout = self.layout
-
 		col = layout.column(align=True)
+
 		col.prop(props, "weighting_metals", text="")
 
 		if m == 'CUSTOM':
+			col.separator()
 			col.prop(props, "weighting_custom", text=l['g/cm'])
 
 		col.separator()
@@ -103,7 +110,7 @@ class JewelCraftWeightingPanel(Panel):
 
 
 
-class JewelCraftExportPanel(Panel):
+class ExportPanel(Panel):
 	
 	bl_label = "Export"
 	bl_idname = "JEWELCRAFT_EXPORT"
@@ -150,30 +157,30 @@ class JewelCraftExportPanel(Panel):
 			row.label(l['metals'])
 			if props.export_metals:
 				col = box.column(align=True)
-				col.prop(props, 'export_m_24kt',        text=l['24kt'])
-				col.prop(props, 'export_m_22kt',        text=l['22kt'])
-				col.prop(props, 'export_m_18kt_white',  text=l['18kt_white'])
-				col.prop(props, 'export_m_14kt_white',  text=l['14kt_white'])
-				col.prop(props, 'export_m_18kt_yellow', text=l['18kt_yellow'])
-				col.prop(props, 'export_m_14kt_yellow', text=l['14kt_yellow'])
-				col.prop(props, 'export_m_sterling',    text=l['sterling'])
-				col.prop(props, 'export_m_palladium',   text=l['palladium'])
-				col.prop(props, 'export_m_platinum',    text=l['platinum'])
-				col.prop(props, 'export_m_custom',      text=l['custom'])
+				col.prop(props, "export_m_24g",    text=l['24g'])
+				col.prop(props, "export_m_22g",    text=l['22g'])
+				col.prop(props, "export_m_18wg",   text=l['18wg'])
+				col.prop(props, "export_m_18yg",   text=l['18yg'])
+				col.prop(props, "export_m_14wg",   text=l['14wg'])
+				col.prop(props, "export_m_14yg",   text=l['14yg'])
+				col.prop(props, "export_m_ster",   text=l['ster'])
+				col.prop(props, "export_m_pd",     text=l['pd'])
+				col.prop(props, "export_m_pl",     text=l['pl'])
+				col.prop(props, "export_m_custom", text=l['custom'])
+
 				col = col.column(align=True)
-				if not props.export_m_custom:
-					col.enabled = False
+				col.enabled = props.export_m_custom
 				row = col.row()
 				row.label(l['custom_name'])
-				row.label(l['g/cm']+':')
+				row.label(l['g/cm']+":")
 				row = col.row()
-				row.prop(props, "export_m_custom_name",    text="")
-				row.prop(props, "export_m_custom_density", text="")
+				row.prop(props, "export_m_custom_name", text="")
+				row.prop(props, "export_m_custom_dens", text="")
 
 
 			row = box.row(align=True)
 			row.label(l['lang']+":")
-			row.prop(props, 'export_lang', text="")
+			row.prop(props, "export_lang", text="")
 
 
 		col = layout.column(align=True)

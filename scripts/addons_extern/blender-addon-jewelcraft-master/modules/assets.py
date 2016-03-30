@@ -1,6 +1,11 @@
 import bpy
 from mathutils import Matrix
+from collections import defaultdict
 from .. import var
+from . import (
+	units,
+	utility,
+)
 
 
 def gem_import():
@@ -13,7 +18,7 @@ def gem_import():
 	bpy.ops.object.select_all(action='DESELECT')
 
 	ob = data_to.objects[0]
-	ob.data['gem'] = {'CUT': cut}
+	ob.data['gem'] = {'cut': cut}
 
 	ob.location = bpy.context.scene.cursor_location
 	to_size(ob, size)
@@ -27,11 +32,11 @@ def cut_replace():
 	cut = props.import_gem_cut
 
 	for obj in context.selected_objects:
-		if obj.data.get('gem'):
+		if 'gem' in obj.data:
 			data_to = asset_import(ob_name=cut.title())
 
 			ob = data_to.objects[0]
-			ob.data['gem'] = {'CUT': cut}
+			ob.data['gem'] = {'cut': cut}
 
 			append_to(ob, obj)
 			to_size(ob, obj.dimensions[1])
@@ -48,7 +53,7 @@ def type_replace():
 
 	data_to = asset_import(mat_name=tpe.replace('_', ' ').title())
 	for ob in context.selected_objects:
-		if ob.data.get('gem'):
+		if 'gem' in ob.data:
 			type_set(ob, tpe, data_to.materials)
 
 
@@ -58,8 +63,9 @@ def type_replace():
 
 def prongs_import():
 	for obj in bpy.context.selected_objects:
-		if obj.data.get('gem'):
-			cut = obj.data['gem']['CUT']
+		if 'gem' in obj.data:
+			utility.ob_prop_style_convert(obj)
+			cut = obj.data['gem']['cut']
 			data_to = asset_import(ob_name=cut.title()+' Prongs', mat_name='Prongs')
 
 			ob = data_to.objects[0]
@@ -85,8 +91,9 @@ def cutter_import(seat_only=False):
 		suffix = ' (Seat only)'
 
 	for obj in bpy.context.selected_objects:
-		if obj.data.get('gem'):
-			cut = obj.data['gem']['CUT']
+		if 'gem' in obj.data:
+			utility.ob_prop_style_convert(obj)
+			cut = obj.data['gem']['cut']
 			data_to = asset_import(ob_name=cut.title()+' Cutter'+suffix, mat_name='Cutter')
 
 			ob = data_to.objects[0]
@@ -114,7 +121,7 @@ def make_dupliface():
 	obs = []
 	obs_app = obs.append
 	for ob in context.selected_objects:
-		if (ob.data and ob.data.get('gem')):
+		if (ob.type == 'MESH' and 'gem' in ob.data):
 			gem = ob
 			obs_app(ob)
 		else:
@@ -122,7 +129,7 @@ def make_dupliface():
 
 	if gem:
 		ob = gem
-		name = ob.name+' '
+		name = ob.name + ' '
 	else:
 		ob = obs[0]
 		name = ''
@@ -132,24 +139,53 @@ def make_dupliface():
 	faces = [(3,2,1,0)]
 
 
-	offset = (ob.dimensions[0]+1, 0, 0)
+	offset = (ob.dimensions[0] + 1, 0, 0)
 	for i in range(len(verts)):
 		verts[i] = tuple(x+y for x,y in zip(verts[i], offset))
 
 
-	me = data.meshes.new(name+'Duplifaces')
+	me = data.meshes.new(name + 'Duplifaces')
 	me.from_pydata(verts, [], faces)
 	me.update()
 
-	df = data.objects.new(name+'Duplifaces', me)
+	df = data.objects.new(name + 'Duplifaces', me)
 	df.location = ob.location
 	df.dupli_type = 'FACES'
 	context.scene.objects.link(df)
 
 	for ob in obs:
 		ob.parent = df
-		ob.location = [0,0,0]
 		apply_transforms(ob)
+	bpy.ops.object.origin_clear()
+
+
+def select_dupli():
+	context = bpy.context
+	sce = context.scene
+	gems_loc = []
+	gems_name = []
+
+	bpy.ops.object.select_all(action='DESELECT')
+
+	loc_app = gems_loc.append
+	name_app = gems_name.append
+	for ob in context.visible_objects:
+		if (ob.type == 'MESH' and 'gem' in ob.data):
+			utility.ob_prop_style_convert(ob)
+			loc_app(ob.location.freeze())
+			name_app(ob.name)
+
+	dupli = defaultdict(list)
+	for i,item in enumerate(gems_loc):
+		dupli[item].append(i)
+	dupli = {k:v for k,v in dupli.items() if len(v)>1}
+
+	if dupli:
+		for i in dupli.items():
+			for p in range(len(i[1])):
+				if p != 0:
+					sce.objects[gems_name[i[1][p]]].select = True
+		return True
 
 
 
@@ -174,12 +210,14 @@ def asset_import(ob_name=False, mat_name=False):
 
 
 def type_set(ob, tpe, materials):
-	ob.data['gem']['TYPE'] = tpe
+	utility.ob_prop_style_convert(ob)
+	ob.data['gem']['type'] = tpe
 	material_assign(ob, tpe.replace('_', ' ').title(), materials)
 
 
 def type_copy(ob, obj):
-	ob.data['gem']['TYPE'] = obj.data['gem']['TYPE']
+	utility.ob_prop_style_convert(obj)
+	ob.data['gem']['type'] = obj.data['gem']['type']
 	append = ob.data.materials.append
 	for mat in obj.data.materials:
 		append(mat)
@@ -240,7 +278,7 @@ def to_dimensions(ob, obj):
 	else:
 		width = size
 
-	ctr = 0.01 * size # Make cutter sligtly bigger than gemstone
+	ctr = 0.01 * size # Make cutter sligtly bigger than gem
 	ob.dimensions = [width+ctr, size+ctr, ob.dimensions[2]*size+ctr]
 
 

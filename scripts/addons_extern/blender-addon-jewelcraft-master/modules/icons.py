@@ -2,26 +2,41 @@ from bpy.utils import previews
 from os import path
 from .. import var
 
+
 preview_collections = {}
-pcoll = previews.new()
 
-load = pcoll.load
-icon_path = path.join
 
-load('cut',      icon_path(var.icons_path, 'cut.png'),              'IMAGE')
-load('cutter',   icon_path(var.icons_path, 'cutter.png'),           'IMAGE')
-load('cutter_s', icon_path(var.icons_path, 'cutter_seat_only.png'), 'IMAGE')
+icon_names = (
+	'cut-round',
+	'cut-oval',
+	'cut-emerald',
+	'cut-marquise',
+	'cut-pear',
+	'cut-baguette',
+	'cut-square',
+	'cut-asscher',
+	'cut-cushion',
+	'cut-princess',
+	'cut-trillion',
+	'cut-octagon',
+	'cut-heart',
+	'cut-radiant',
+	'cut-flanders',
+	'cut-trilliant',
+	'cut-triangle',
 
-load('cut-round',    icon_path(var.icons_path, 'cut-round.png'),    'IMAGE')
-load('cut-oval',     icon_path(var.icons_path, 'cut-oval.png'),     'IMAGE')
-load('cut-emerald',  icon_path(var.icons_path, 'cut-emerald.png'),  'IMAGE')
-load('cut-marquise', icon_path(var.icons_path, 'cut-marquise.png'), 'IMAGE')
-load('cut-pearl',    icon_path(var.icons_path, 'cut-pearl.png'),    'IMAGE')
-load('cut-baguette', icon_path(var.icons_path, 'cut-baguette.png'), 'IMAGE')
-load('cut-square',   icon_path(var.icons_path, 'cut-square.png'),   'IMAGE')
-load('cut-asscher',  icon_path(var.icons_path, 'cut-asscher.png'),  'IMAGE')
-load('cut-cushion',  icon_path(var.icons_path, 'cut-cushion.png'),  'IMAGE')
-load('cut-princess', icon_path(var.icons_path, 'cut-princess.png'), 'IMAGE')
-load('cut-trillion', icon_path(var.icons_path, 'cut-trillion.png'), 'IMAGE')
+	'tool-cut',
+	'tool-single_prong',
+	'tool-cutter',
+	'tool-cutter_seat',
+	'tool-imitation_3_prong',
+)
 
-preview_collections['main'] = pcoll
+icons = previews.new()
+load = icons.load
+
+for name in icon_names:
+	load(name.upper(), path.join(var.icons_path, name + '.png'), 'IMAGE')
+
+
+preview_collections['icons'] = icons
