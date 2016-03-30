@@ -746,19 +746,21 @@ class NewNoise(bpy.types.Operator):
 	def execute(self, context):
 		img = bpy.data.images.new(self.name, self.width, self.height, self.alpha, self.float_buffer)
 		width, height, channel = img.size[0], img.size[1], img.channels
+		mu, sigma = 0, 0.1
 		pixels = numpy.array(img.pixels).reshape(width, height, channel)
+
 		if (self.monochrome):
-			values = numpy.random.rand(width, height)
+			values = numpy.random.normal(mu, sigma, 1024)
 			pixels[:,:,0] = values.copy()
 			pixels[:,:,1] = values.copy()
 			pixels[:,:,2] = values.copy()
 		else:
-			pixels[:,:,0] = numpy.random.rand(width, height)
-			pixels[:,:,1] = numpy.random.rand(width, height)
-			pixels[:,:,2] = numpy.random.rand(width, height)
+			pixels[:,:,0] = numpy.random.normal(mu, sigma, 1024)
+			pixels[:,:,1] = numpy.random.normal(mu, sigma, 1024)
+			pixels[:,:,2] = numpy.random.normal(mu, sigma, 1024)
 		if (self.alpha_noise):
 			if (4 <= channel):
-				pixels[:,:,3] = numpy.random.rand(width, height)
+				pixels[:,:,3] = numpy.random.normal(mu, sigma, 1024)
 		img.pixels = pixels.flatten()
 		img.gl_free()
 		context.space_data.image = img

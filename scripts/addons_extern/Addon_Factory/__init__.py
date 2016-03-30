@@ -262,7 +262,7 @@ def register():
 	bpy.types.NODE_MT_node.append(NODE_MT_node.menu)
 	bpy.types.NODE_MT_view.append(NODE_MT_view.menu)
 
-	bpy.types.OBJECT_PT_display.append(OBJECT_PT_display.menu)
+	bpy.types.VIEW3D_PT_view3d_display.append(OBJECT_PT_display.menu)
 	bpy.types.OBJECT_PT_transform.append(OBJECT_PT_transform.menu)
 
 	bpy.types.PHYSICS_PT_rigid_body.append(PHYSICS_PT_rigid_body.menu)
@@ -342,7 +342,7 @@ def unregister():
 	bpy.types.NODE_MT_node.remove(NODE_MT_node.menu)
 	bpy.types.NODE_MT_view.remove(NODE_MT_view.menu)
 
-	bpy.types.OBJECT_PT_display.remove(OBJECT_PT_display.menu)
+	bpy.types.VIEW3D_PT_view3d_display.remove(OBJECT_PT_display.menu)
 	bpy.types.OBJECT_PT_transform.remove(OBJECT_PT_transform.menu)
 
 	bpy.types.PHYSICS_PT_rigid_body.remove(PHYSICS_PT_rigid_body.menu)

@@ -470,7 +470,7 @@ def register():
 def unregister():
     bpy.utils.unregister_class(AssetFlingerMenu)
     bpy.utils.unregister_class(AssetFlingerPreferences)
-    bpy.types.INFO_MT_mesh_add.remove(menu_draw)
+
     # handle the keymap
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
