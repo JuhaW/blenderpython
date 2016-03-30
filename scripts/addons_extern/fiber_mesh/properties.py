@@ -97,3 +97,4 @@ def register():
 
 def unregister():
 	bpy.utils.unregister_module(__name__)
+

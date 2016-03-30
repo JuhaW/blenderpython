@@ -56,6 +56,3 @@ def unregister():
 	properties.unregister()
 	operators.unregister()
 	ui.unregister()
-
-if __name__ == "__main__":
-    register()
