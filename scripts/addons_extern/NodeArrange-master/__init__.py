@@ -39,8 +39,6 @@ bl_info = {
 import sys
 import bpy
 
-CYCLES = True
-VRAY = not CYCLES
 
 
 class values():
@@ -175,13 +173,8 @@ def outputnode_search(mat):  # return node/None
     # print ("ntree:", ntree[:])
 
     for node in ntree:
-        # print ("node:",node)
-        if VRAY:
-            if node.bl_idname == 'VRayNodeOutputMaterial' and node.inputs[0].is_linked:
-                return node
-        else:
-            if 'OUTPUT' in node.type and node.inputs[0].is_linked:
-                return node
+        if 'OUTPUT' in node.type and node.inputs[0].is_linked:
+            return node
 
     print("No material output node found")
     return None
@@ -333,10 +326,8 @@ def nodes_arrange(nodelist, level):
 
 def nodetree_get(mat):
 
-    if VRAY:
-        return mat.vray.ntree.nodes
-    else:
-        return mat.node_tree.nodes
+
+    return mat.node_tree.nodes
 
 
 def nodes_center(mat):
