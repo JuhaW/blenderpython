@@ -88,7 +88,7 @@ def main(self, context):
   search = context.scene.NamePanel.search if option.regex else re.escape(context.scene.NamePanel.search)
 
   # member
-  member = gather(context, {object.name: [] for object in context.selected_objects[:]})
+  member = gather(context, {object.name: [] for object in context.selected_objects[:]}) if option.search != '' else {}
 
   # pin active object
   if option.pinActiveObject:
@@ -180,14 +180,14 @@ def filters(self, context, layout, option):
     # scale
     row.scale_x = 5 # hack: forces buttons to line up correctly
 
-    # groups
-    row.prop(option, 'groups', text='', icon='GROUP')
-
     # action
     row.prop(option, 'action', text='', icon='ACTION')
 
     # grease pencil
     row.prop(option, 'greasePencil', text='', icon='GREASEPENCIL')
+
+    # groups
+    row.prop(option, 'groups', text='', icon='GROUP')
 
     # constraints
     row.prop(option, 'constraints', text='', icon='CONSTRAINT')
@@ -235,6 +235,8 @@ def filters(self, context, layout, option):
   row.prop(option, 'search', text='', icon='VIEWZOOM')
   row.operator('wm.regular_expression_cheatsheet', text='', icon='FILE_TEXT')
   row.prop(option, 'regex', text='', icon='SCRIPTPLUGINS')
+  op = row.operator('wm.batch_name', text='', icon='SORTALPHA')
+  op.quickBatch = True
 
 # gather
 def gather(context, member):
@@ -257,7 +259,7 @@ def gather(context, member):
 # sort
 def sort(context, member, object):
   '''
-    Sorts object related datablocks for panel population and feeds batch name operator.
+    Sorts object related datablocks for search panel population.
   '''
 
   # option
@@ -448,7 +450,10 @@ def sort(context, member, object):
       if object.mode in {'POSE', 'EDIT'}:
 
         # constraints
-        constraints = [item.name for item in context.active_pose_bone.constraints[:]] if context.object.mode in 'POSE' else []
+        try:
+          constraints = [item.name for item in context.active_pose_bone.constraints[:]]
+        except:
+          constraints = []
 
         # search
         if search == '' or re.search(search, context.active_bone.name, re.I) or [re.search(search, item, re.I) for item in constraints if re.search(search, item, re.I) != None]:
@@ -487,7 +492,10 @@ def sort(context, member, object):
             if bone.name != context.active_bone:
 
               # constraints
-              constraints = [constraint.name for constraint in object.pose.bones[bone.name].constraints[:] if hasattr(bone, 'constraints')]
+              try:
+                constraints = [constraint.name for constraint in object.pose.bones[bone.name].constraints[:]]
+              except:
+                constraints = []
 
               # search
               if search == '' or re.search(search, bone.name, re.I) or [re.search(search, item, re.I) for item in constraints if re.search(search, item, re.I) != None]:
@@ -601,8 +609,8 @@ class block:
       # groups
       if option.groups:
         for group in bpy.data.groups[:]:
-          for groupobject in group.objects[:]:
-            if groupobject == object:
+          for groupObject in group.objects[:]:
+            if groupObject == object:
 
               # search
               if search == '' or re.search(search, group.name, re.I):
@@ -925,7 +933,10 @@ class block:
 
 
         # constraints
-        constraints = [item.name for item in context.active_pose_bone.constraints[:]] if object.mode in 'POSE' else []
+        try:
+          constraints = [item.name for item in context.active_pose_bone.constraints[:]]
+        except:
+          constraints = []
 
         # search
         if search == '' or re.search(search, context.active_bone.name, re.I) or [re.search(search, item, re.I) for item in constraints if re.search(search, item, re.I) != None]:
@@ -937,13 +948,14 @@ class block:
           if option.boneConstraints:
             if object.mode in 'POSE':
               bone = context.active_pose_bone
-              for constraint in bone.constraints[:]:
+              if bone:
+                for constraint in bone.constraints[:]:
 
-                # search
-                if search == '' or re.search(search, constraint.name, re.I):
+                  # search
+                  if search == '' or re.search(search, constraint.name, re.I):
 
-                  # constraint
-                  Constraint(self, context, layout, constraint, object, bone, option)
+                    # constraint
+                    Constraint(self, context, layout, constraint, object, bone, option)
 
         # selected bones
         if option.selectedBones:
@@ -975,32 +987,35 @@ class block:
           # sort and display
           for bone in sorted(selectedBones):
             if bone[1] != context.active_bone:
+              if bone[1]:
+                # constraints
+                try:
+                  constraints = [item.name for item in object.pose.bones[bone[1].name].constraints[:]]
+                except:
+                  constraints = []
 
-              # constraints
-              constraints = [item.name for item in object.pose.bones[bone[1].name].constraints[:] if hasattr(object.pose.bones[bone[1].name], 'constraints')]
+                # search
+                if search == '' or re.search(search, bone[1].name, re.I) or [re.search(search, item, re.I) for item in constraints if re.search(search, item, re.I) != None]:
 
-              # search
-              if search == '' or re.search(search, bone[1].name, re.I) or [re.search(search, item, re.I) for item in constraints if re.search(search, item, re.I) != None]:
+                  # bone
+                  Bone(self, context, layout, bone[1], object, option)
 
-                # bone
-                Bone(self, context, layout, bone[1], object, option)
+                  # bone constraints
+                  if option.boneConstraints:
+                    if object.mode in 'POSE':
+                      for constraint in object.pose.bones[bone[1].name].constraints[:]:
 
-                # bone constraints
-                if option.boneConstraints:
-                  if object.mode in 'POSE':
-                    for constraint in object.pose.bones[bone[1].name].constraints[:]:
+                        # search
+                        if search == '' or re.search(search, constraint.name, re.I):
 
-                      # search
-                      if search == '' or re.search(search, constraint.name, re.I):
+                          # constraint
+                          Constraint(self, context, layout, constraint, object, bone[1], option)
 
-                        # constraint
-                        Constraint(self, context, layout, constraint, object, bone[1], option)
+                  # row
+                  row = layout.row()
 
-                # row
-                row = layout.row()
-
-                # separator
-                row.separator()
+                  # separator
+                  row.separator()
         else:
 
           # row
@@ -1022,7 +1037,7 @@ def Object(self, context, layout, datablock, option):
 
     # row
     row = layout.row(align=True)
-    row.active = (search == '' or re.search(search, datablock.name, re.I) != None)
+    row.enabled = (search == '' or re.search(search, datablock.name, re.I) != None)
 
     # template
     row.template_ID(context.scene.objects, 'active')
@@ -1032,7 +1047,7 @@ def Object(self, context, layout, datablock, option):
 
     # row
     row = layout.row(align=True)
-    row.active = (search == '' or re.search(search, datablock.name, re.I) != None)
+    row.enabled = (search == '' or re.search(search, datablock.name, re.I) != None)
 
     # sub
     sub = row.row(align=True)
@@ -1111,7 +1126,7 @@ def GreasePencil(self, context, layout, datablock, object, option):
 
   # row
   row = layout.row(align=True)
-  row.active = (search == '' or re.search(search, datablock.name, re.I) != None)
+  row.enabled = (search == '' or re.search(search, datablock.name, re.I) != None)
 
   # sub
   sub = row.row()
@@ -1173,21 +1188,30 @@ def Constraint(self, context, layout, datablock, object, bone, option):
   # scale
   sub.scale_x = 1.6
 
-  # label
-  # sub.label(text='', icon='CONSTRAINT')
+  try:
 
-  if object.type in 'ARMATURE' and object.mode in 'POSE':
-    prop = sub.operator('view3d.constraint_settings', text='', icon='CONSTRAINT', emboss=False)
-    prop.object = object.name
-    prop.bone = bone.name
-    prop.target = datablock.name
+    # experimental
+    if addon.preferences['experimental'] == 1:
+      if object.type in 'ARMATURE' and object.mode in 'POSE':
+        prop = sub.operator('view3d.constraint_settings', text='', icon='CONSTRAINT', emboss=False)
+        prop.object = object.name
+        prop.bone = bone.name
+        prop.target = datablock.name
 
-  else:
-    prop = sub.operator('view3d.constraint_settings', text='', icon='CONSTRAINT', emboss=False)
-    prop.object = object.name
-    prop.bone = ''
-    prop.target = datablock.name
+      else:
+        prop = sub.operator('view3d.constraint_settings', text='', icon='CONSTRAINT', emboss=False)
+        prop.object = object.name
+        prop.bone = ''
+        prop.target = datablock.name
+    else:
 
+      # label
+      sub.label(text='', icon='CONSTRAINT')
+
+  except:
+
+    # label
+    sub.label(text='', icon='CONSTRAINT')
 
   # name
   row.prop(datablock, 'name', text='')
@@ -1227,7 +1251,7 @@ def Modifier(self, context, layout, datablock, object, option):
 
   # row
   row = layout.row(align=True)
-  row.active = (search == '' or re.search(search, datablock.name, re.I) != None)
+  row.enabled = (search == '' or re.search(search, datablock.name, re.I) != None)
 
   # sub
   sub = row.row()
@@ -1235,10 +1259,22 @@ def Modifier(self, context, layout, datablock, object, option):
   # scale
   sub.scale_x = 1.6
 
-  # label
-  prop = sub.operator('view3d.modifier_settings', text='', icon=icon.modifier(datablock), emboss=False)
-  prop.object = object.name
-  prop.target = datablock.name
+  try:
+
+    # experimental
+    if addon.preferences['experimental'] == 1:
+      prop = sub.operator('view3d.modifier_settings', text='', icon=icon.modifier(datablock), emboss=False)
+      prop.object = object.name
+      prop.target = datablock.name
+    else:
+
+      # label
+      sub.label(text='', icon=icon.modifier(datablock))
+
+  except:
+
+    # label
+    sub.label(text='', icon=icon.modifier(datablock))
 
   # name
   row.prop(datablock, 'name', text='')
@@ -1277,7 +1313,7 @@ def ObjectData(self, context, layout, datablock, option):
   # row
   row = layout.row(align=True)
   if datablock.type != 'EMPTY':
-    row.active = (search == '' or re.search(search, datablock.data.name, re.I) != None)
+    row.enabled = (search == '' or re.search(search, datablock.data.name, re.I) != None)
 
   # empty
   if datablock.type in 'EMPTY':
@@ -1317,13 +1353,24 @@ def VertexGroup(self, context, layout, datablock, object, option):
   # scale
   sub.scale_x = 1.6
 
-  # label
-  # sub.label(text='', icon='GROUP_VERTEX')
+  try:
 
-  # select vertex group
-  prop = sub.operator('object.select_vertex_group', text='', icon='GROUP_VERTEX', emboss=False)
-  prop.object = object.name
-  prop.target = datablock.name
+    # experimental
+    if addon.preferences['experimental'] == 1:
+
+      # select vertex group
+      prop = sub.operator('object.select_vertex_group', text='', icon='GROUP_VERTEX', emboss=False)
+      prop.object = object.name
+      prop.target = datablock.name
+    else:
+
+      # label
+      sub.label(text='', icon='GROUP_VERTEX')
+
+  except:
+
+    # label
+    sub.label(text='', icon='GROUP_VERTEX')
 
   # name
   row.prop(datablock, 'name', text='')
@@ -1454,7 +1501,7 @@ def Material(self, context, layout, datablock, object, option):
 
   # row
   row = layout.row(align=True)
-  row.active = (search == '' or re.search(search, datablock.name, re.I) != None)
+  row.enabled = (search == '' or re.search(search, datablock.name, re.I) != None)
 
   # sub
   sub = row.row()
@@ -1512,7 +1559,7 @@ def Particle(self, context, layout, datablock, object, option):
 
   # row
   row = layout.row(align=True)
-  row.active = (search == '' or re.search(search, datablock.particle_system.name, re.I) != None)
+  row.enabled = (search == '' or re.search(search, datablock.particle_system.name, re.I) != None)
 
   # sub
   sub = row.row()
@@ -1576,7 +1623,7 @@ def Bone(self, context, layout, datablock, object, option):
 
   # row
   row = layout.row(align=True)
-  row.active = (search == '' or re.search(search, datablock.name, re.I) != None)
+  row.enabled = (search == '' or re.search(search, datablock.name, re.I) != None)
 
   # sub
   sub = row.row(align=True)

@@ -990,9 +990,37 @@ class batch:
         ('SELECTED', 'Selected', 'Effect all objects and object related datablock names in the current 3D view selection.'),
         ('SCENE', 'Scene', 'Effect all objects and object related datablock names in the current scene.'),
         ('OBJECTS', 'All Objects', 'Effect all objects and object related datablock names in the file.'),
-        ('GLOBAL', 'Global', 'Effect all datablocks in the file whether they are attached to an object or not. (Disables type filter menus.)')
+        ('GLOBAL', 'Global', 'Effect all datablocks in the file whether they are attached to an object or not.')
       ],
       default = 'SELECTED'
+    )
+
+    # actions
+    actions = BoolProperty(
+      name = 'Actions',
+      description = 'Name object actions. (Use \'Global\' for all)',
+      default = False
+    )
+
+    # action groups
+    actionGroups = BoolProperty(
+      name = 'Action Groups',
+      description = 'Name object action groups. (Use \'Global\' for all)',
+      default = False
+    )
+
+    # grease pencil
+    greasePencil = BoolProperty(
+      name = 'Grease Pencil',
+      description = 'Name object grease pencils. (Use \'Global\' for all)',
+      default = False
+    )
+
+    # pencil layers
+    pencilLayers = BoolProperty(
+      name = 'Grease Pencil Layers',
+      description = 'Name object grease pencils layers. (Use \'Global\' for all)',
+      default = False
     )
 
     # objects
@@ -1009,115 +1037,109 @@ class batch:
       default = False
     )
 
-    # actions
-    actions = BoolProperty(
-      name = 'Actions',
-      description = 'Name actions.',
-      default = False
-    )
-
-    # grease pencil
-    greasePencil = BoolProperty(
-      name = 'Grease Pencil',
-      description = 'Name grease pencils and layers.',
-      default = False
-    )
-
     # constraints
     constraints = BoolProperty(
       name = 'Object Constraints',
-      description = 'Name constraints.',
+      description = 'Name object constraints.',
       default = False
     )
 
     # modifiers
     modifiers = BoolProperty(
       name = 'Modifiers',
-      description = 'Name modifiers.',
+      description = 'Name object modifiers.',
       default = False
     )
 
     # object data
     objectData = BoolProperty(
       name = 'Object Data',
-      description = 'Name object data.',
+      description = 'Name object data. (Use \'Global\' for all)',
       default = False
     )
 
     # bone groups
     boneGroups = BoolProperty(
       name = 'Bone Groups',
-      description = 'Name bone groups.',
+      description = 'Name armature bone groups.',
       default = False
     )
 
     # bones
     bones = BoolProperty(
       name = 'Bones',
-      description = 'Name bones.',
+      description = 'Name armature bones.',
       default = False
     )
 
     # bone constraints
     boneConstraints = BoolProperty(
       name = 'Bone Constraints',
-      description = 'Name bone constraints.',
+      description = 'Name armature bone constraints.',
+      default = False
+    )
+
+
+    # grease pencil layers
+    greasePencilLayers = BoolProperty(
+      name = 'Grease Pencil Layers',
+      description = 'Name grease pencil layers.',
       default = False
     )
 
     # vertex groups
     vertexGroups = BoolProperty(
       name = 'Vertex Groups',
-      description = 'Name vertex groups.',
+      description = 'Name object vertex groups.',
       default = False
     )
 
     # shapekeys
     shapekeys = BoolProperty(
       name = 'Shapekeys',
-      description = 'Name shapekeys.',
+      description = 'Name object shapekeys.',
       default = False
     )
 
     # uvs
     uvs = BoolProperty(
       name = 'UV Maps',
-      description = 'Name uv maps.',
+      description = 'Name object uv maps.',
       default = False
     )
 
     # vertex colors
     vertexColors = BoolProperty(
       name = 'Vertex Colors',
-      description = 'Name vertex colors.',
+      description = 'Name object vertex colors.',
       default = False
     )
 
     # materials
     materials = BoolProperty(
       name = 'Materials',
-      description = 'Name materials.',
+      description = 'Name object materials. (Use \'Global\' for all)',
       default = False
     )
 
     # textures
     textures = BoolProperty(
       name = 'Textures',
-      description = 'Name material textures.',
+      description = 'Name object material textures. (Use \'Global\' for all)',
       default = False
     )
 
     # particle systems
     particleSystems = BoolProperty(
       name = 'Particle Systems',
-      description = 'Name particle systems.',
+      description = 'Name object particle systems. (Use \'Global\' for all)',
       default = False
     )
 
     # particle settings
     particleSettings = BoolProperty(
       name = 'Particle Settings',
-      description = 'Name particle settings.',
+      description = 'Name object particle system settings. (Use \'Global\' for all)',
       default = False
     )
 
@@ -1142,6 +1164,57 @@ class batch:
       name = 'Modifier Type',
       description = 'Type of modifiers to be effected.',
       items = storage.batch.menu.modifiers,
+      default = 'ALL'
+    )
+
+    # sensors
+    sensors = BoolProperty(
+      name = 'Sensors',
+      description = 'Name object game sensors.',
+      default = False
+    )
+
+
+    # controllers
+    controllers = BoolProperty(
+      name = 'Controllers',
+      description = 'Name object game controllers',
+      default = False
+    )
+
+    # actuators
+    actuators = BoolProperty(
+      name = 'Actuators',
+      description = 'Name object game actuators',
+      default = False
+    )
+
+    # lineSet
+    lineSets = BoolProperty(
+      name = 'Line Sets',
+      description = 'Name line sets.',
+      default = False
+    )
+
+    # linestyles
+    linestyles = BoolProperty(
+      name = 'Linestyles',
+      description = 'Name linestyles.',
+      default = False
+    )
+
+    # linestyle modifiers
+    linestyleModifiers = BoolProperty(
+    name = 'Linestyle Modifiers',
+    description = 'Name linestyle modifiers.',
+    default = False
+    )
+
+    # linestyle modifier type
+    linestyleModifierType = EnumProperty(
+      name = 'Linestyle Modifier Type',
+      description = 'Type of linestyle modifiers to be effected.',
+      items = storage.batch.menu.linestyleModifiers,
       default = 'ALL'
     )
 
@@ -1211,7 +1284,7 @@ class batch:
     # screens
     screens = BoolProperty(
       name = 'Screens',
-      description = 'Name screens.',
+      description = 'Name screens. (No undo support)',
       default = False
     )
 
@@ -1233,13 +1306,6 @@ class batch:
     brushes = BoolProperty(
       name = 'Brushes',
       description = 'Name brushes.',
-      default = False
-    )
-
-    # linestyles
-    linestyles = BoolProperty(
-      name = 'Linestyles',
-      description = 'Name linestyles.',
       default = False
     )
 
@@ -1306,6 +1372,13 @@ class batch:
     suffix = StringProperty(
       name = 'Suffix',
       description = 'Place this text at the end of the name.'
+    )
+
+    # suffix last
+    suffixLast = BoolProperty(
+      name = 'Suffix Last',
+      description = 'Force the suffix to be placed last when recounting duplicate names.',
+      default = False
     )
 
     # trim start

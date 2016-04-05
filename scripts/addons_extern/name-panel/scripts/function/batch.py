@@ -50,250 +50,695 @@ class shared:
   textures = []
 
 # main
-def main(context):
+def main(context, quickBatch):
   '''
-    Process quick batch or send datablock values to sort then send collections to proces.
+    Send datablock values to sort then send collections to process, action group & lineset names are sent to name.
   '''
 
   # tag
   global tag
 
-  # all collections
-  all = [
-
-    # objects
-    storage.batch.objects,
-
-    # groups
-    storage.batch.groups,
-
-    # actions
-    storage.batch.actions,
-
-    # grease pencils
-    storage.batch.greasePencils,
-
-    # pencil layers
-    storage.batch.pencilLayers,
-
-    # constraints
-    storage.batch.constraints,
-
-    # modifiers
-    storage.batch.modifiers,
-
-    # cameras
-    storage.batch.cameras,
-
-    # meshes
-    storage.batch.meshes,
-
-    # curves
-    storage.batch.curves,
-
-    # lamps
-    storage.batch.lamps,
-
-    # lattices
-    storage.batch.lattices,
-
-    # metaballs
-    storage.batch.metaballs,
-
-    # speakers
-    storage.batch.speakers,
-
-    # armatures
-    storage.batch.armatures,
-
-    # bone groups
-    storage.batch.boneGroups,
-
-    # bones
-    storage.batch.bones,
-
-    # vertex groups
-    storage.batch.vertexGroups,
-
-    # shapekeys
-    storage.batch.shapekeys,
-
-    # uvs
-    storage.batch.uvs,
-
-    # vertex colors
-    storage.batch.vertexColors,
-
-    # materials
-    storage.batch.materials,
-
-    # textures
-    storage.batch.textures,
-
-    # particle systems
-    storage.batch.particleSystems,
-
-    # particle settings
-    storage.batch.particleSettings,
-
-    # scenes
-    storage.batch.scenes,
-
-    # render layers
-    storage.batch.renderLayers,
-
-    # worlds
-    storage.batch.worlds,
-
-    # libraries
-    storage.batch.libraries,
-
-    # images
-    storage.batch.images,
-
-    # masks
-    storage.batch.masks,
-
-    # sequences
-    storage.batch.sequences,
-
-    # movie clips
-    storage.batch.movieClips,
-
-    # sounds
-    storage.batch.sounds,
-
-    # screens
-    storage.batch.screens,
-
-    # keying sets
-    storage.batch.keyingSets,
-
-    # palettes
-    storage.batch.palettes,
-
-    # brushes
-    storage.batch.brushes,
-
-    # linestyles
-    storage.batch.linestyles,
-
-    # nodes
-    storage.batch.nodes,
-
-    # node labels
-    storage.batch.nodeLabels,
-
-    # node groups
-    storage.batch.nodeGroups,
-
-    # texts
-    storage.batch.texts
-  ]
-
-  [collection.clear() for collection in all]
+  # panel
+  panel = context.scene.NamePanel
 
   # option
   option = context.scene.BatchName
 
-  # batch type
-  if option.batchType in {'SELECTED', 'OBJECTS'}:
+  # quick batch
+  if quickBatch:
 
-    # objects
-    if option.objects:
-      for object in bpy.data.objects[:]:
+    # search
+    search = panel.search if panel.regex else re.escape(panel.search)
 
-        # batch type
-        if option.batchType in 'SELECTED':
-          if object.select:
+    # selected
+    if not panel.selected:
 
-            # object type
-            if option.objectType in 'ALL':
+      object = context.active_object
 
-              # sort
-              sort(context, object)
+      # search
+      if search == '' or re.search(search, object.name, re.I):
 
-            # object type
-            elif option.objectType in object.type:
+        # name
+        object.name = name(context, object.name) if not option.suffixLast else name(context, object.name) + option.suffix
 
-              # sort
-              sort(context, object)
-
-        # batch type
-        else:
-
-          # object type
-          if option.objectType in 'ALL':
-
-            # sort
-            sort(context, object)
-
-          # object type
-          elif option.objectType in object.type:
-
-            # sort
-            sort(context, object)
-
-      # process
-      process(context, storage.batch.objects)
-
-    # groups
-    if option.groups:
-      for object in bpy.data.objects[:]:
-
-        # batch type
-        if option.batchType in 'SELECTED':
-          if object.select:
-
-            # object type
-            if option.objectType in 'ALL':
-              for group in bpy.data.groups[:]:
-                if object in group.objects[:]:
-
-                  # sort
-                  sort(context, group)
-
-
-            # object type
-            elif option.objectType in object.type:
-              for group in bpy.data.groups[:]:
-                if object in group.objects[:]:
-
-                  # sort
-                  sort(context, group)
-
-        # batch type
-        else:
-
-            # object type
-            if option.objectType in 'ALL':
-              for group in bpy.data.groups[:]:
-                if object in group.objects[:]:
-
-                  # sort
-                  sort(context, group)
-
-            # object type
-            elif option.objectType in object.type:
-              for group in bpy.data.groups[:]:
-                if object in group.objects[:]:
-
-                  # sort
-                  sort(context, group)
-
-      # clear duplicates
-      objectGroups = []
-      [objectGroups.append(item) for item in storage.batch.groups if item not in objectGroups]
-      storage.batch.groups.clear()
-
-      # process
-      process(context, objectGroups)
-
-    # actions
-    if option.actions:
-      for object in bpy.data.objects[:]:
+      # actions
+      if panel.action:
         if hasattr(object.animation_data, 'action'):
           if hasattr(object.animation_data.action, 'name'):
+
+            # search
+            if search == '' or re.search(search, object.animation_data.action.name, re.I):
+
+              # name
+              object.animation_data.action.name = name(context, object.animation_data.action.name) if not option.suffixLast else name(object.animation_data.action.name) + option.suffix
+
+      # grease pencils
+      if panel.greasePencil:
+        if hasattr(object.grease_pencil, 'name'):
+
+          # search
+          if search == '' or re.search(search, object.grease_pencil.name, re.I):
+
+            # name
+            object.grease_pencil.name = name(context, object.grease_pencil.name) if not option.suffixLast else name(context, object.grease_pencil.name) + option.suffix
+
+          # layers
+          for layer in object.grease_pencil.layers[:]:
+
+            # search
+            if search == '' or re.search(search, layer.info, re.I):
+
+              # append
+              storage.batch.pencilLayers.append([layer.info, [1, layer]])
+
+          # process
+          process(context, storage.batch.pencilLayers)
+
+          # clear
+          storage.batch.pencilLayers.clear()
+
+      # groups
+      if panel.groups:
+        for group in bpy.data.groups[:]:
+          for groupObject in group.objects[:]:
+            if groupObject == object:
+
+              # search
+              if search == '' or re.search(search, group.name, re.I):
+
+                # name
+                group.name = name(context, group.name) if not option.suffixLast else name(context, group.name) + option.suffix
+
+      # constraints
+      if panel.constraints:
+        for constraint in object.constraints[:]:
+
+          # search
+          if search == '' or re.search(search, constraint.name, re.I):
+
+            # append
+            storage.batch.constraints.append([constraint.name, [1, constraint]])
+
+        # process
+        process(context, storage.batch.constraints)
+
+        # clear
+        storage.batch.constraints.clear()
+
+      # modifiers
+      if panel.modifiers:
+        for modifier in object.modifiers[:]:
+
+          # search
+          if search == '' or re.search(search, modifier.name, re.I):
+
+            # append
+            storage.batch.modifiers.append([modifier.name, [1, modifier]])
+
+        # process
+        process(context, storage.batch.modifiers)
+
+        # clear
+        storage.batch.modifiers.clear()
+
+      # bones
+      if object.type == 'ARMATURE':
+
+        # selected bones
+        if panel.selectedBones:
+
+          # mode
+          if object.mode == 'EDIT':
+            for bone in context.selected_bones[:]:
+
+              # search
+              if search == '' or re.search(search, bone.name, re.I):
+
+                # append
+                storage.batch.bones.append([bone.name, [1, bone]])
+
+            # process
+            process(context, storage.batch.bones)
+
+            # clear
+            storage.batch.bones.clear()
+
+          # mode
+          elif object.mode == 'POSE':
+            for bone in context.selected_pose_bones[:]:
+
+              # search
+              if search == '' or re.search(search, bone.name, re.I):
+
+                # append
+                storage.batch.bones.append([bone.name, [1, bone]])
+
+            # process
+            process(context, storage.batch.bones)
+
+            # clear
+            storage.batch.bones.clear()
+
+        # selected bones
+        else:
+
+          # mode
+          if object.mode == 'EDIT':
+
+            # search
+            if search == '' or re.search(search, context.active_bone, re.I):
+
+              # name
+              context.active_bone.name = name(context, context.active_bone.name) if option.suffixLast else name(context, context.active_bone) + option.suffix
+
+          # mode
+          elif object.mode == 'POSE':
+
+            # search
+            if search == '' or re.search(search, context.active_pose_bone, re.I):
+
+              # name
+              context.active_pose_bone.name = name(context, context.active_pose_bone.name) if option.suffixLast else name(context, context.active_pose_bone) + option.suffix
+
+      # bone constraints
+      if panel.boneConstraints:
+        if object.type == 'ARMATURE':
+          if context.mode == 'POSE':
+
+              # selected bones
+              if panel.selectedBones:
+                for bone in context.selected_pose_bones[:]:
+                  for constraint in bone.constraints[:]:
+
+                    # search
+                    if search == '' or re.search(search, constraint.name):
+
+                      # append
+                      storage.batch.constraints.append([constraint.name, [1, constraint]])
+
+                  # process
+                  process(context, storage.batch.constraints)
+
+                  # clear
+                  storage.batch.constraints.clear()
+
+              # selected bones
+              else:
+                for constraint in context.active_pose_bone.constraints[:]:
+
+                  # search
+                  if search == '' or re.search(search, constraint.name):
+
+                    # append
+                    storage.batch.constraints.append([constraint.name, [1, constraint]])
+
+                # process
+                process(context, storage.batch.constraints)
+
+                # clear
+                storage.batch.constraints.clear()
+
+      # bone groups
+      if panel.boneGroups:
+        if object.type in 'ARMATURE':
+          for group in object.pose.bone_groups[:]:
+
+            # search
+            if search == '' or re.search(search, group.name, re.I):
+
+              # sort
+              storage.batch.boneGroups.append([group.name, [1, group]])
+
+          # process
+          process(context, storage.batch.boneGroups)
+
+          # clear
+          storage.batch.boneGroups.clear()
+
+      # object data
+
+      # search
+      if search == '' or re.search(search, object.data.name, re.I):
+
+        # name
+        object.data.name = name(context, object.data.name) if option.suffixLast else name(context, object.data.name) + option.suffix
+
+      # vertex groups
+      if panel.vertexGroups:
+        if hasattr(object, 'vertex_groups'):
+          for group in object.vertex_groups[:]:
+
+            # search
+            if search == '' or re.search(search, group.name, re.I):
+
+              # sort
+              storage.batch.vertexGroups.append([group.name, [1, group]])
+
+          # process
+          process(context, storage.batch.vertexGroups)
+
+          # clear
+          storage.batch.vertexGroups.clear()
+
+
+      # shapekeys
+      if panel.shapekeys:
+        if hasattr(object.data, 'shape_keys'):
+          if hasattr(object.data.shape_keys, 'key_blocks'):
+            for key in object.data.shape_keys.key_blocks[:]:
+
+              # search
+              if search == '' or re.search(search, key.name, re.I):
+
+                # sort
+                storage.batch.shapekeys.append([key.name, [1, key]])
+
+            # process
+            process(context, storage.batch.shapekeys)
+
+            # clear
+            storage.batch.shapekeys.clear()
+
+
+      # uv maps
+      if panel.uvs:
+        if object.type in 'MESH':
+          for uv in object.data.uv_textures[:]:
+
+            # search
+            if search == '' or re.search(search, uv.name, re.I):
+
+              # append
+              storage.batch.uvs.append([uv.name, [1, uv]])
+
+          # process
+          process(context, storage.batch.uvs)
+
+          # clear
+          storage.batch.uvs.clear()
+
+      # vertex colors
+      if panel.vertexColors:
+        if object.type in 'MESH':
+          for vertexColor in object.data.vertex_colors[:]:
+
+            # search
+            if search == '' or re.search(search, vertexColor.name, re.I):
+
+              # append
+              storage.batch.vertexColors.append([vertexColor.name, [1, vertexColor]])
+
+          # process
+          process(context, storage.batch.vertexColors)
+
+          # clear
+          storage.batch.vertexColors.clear()
+
+      # materials
+      if panel.materials:
+        for slot in object.material_slots:
+          if slot.material != None:
+
+            # search
+            if search == '' or re.search(search, slot.material.name, re.I):
+
+              # append
+              storage.batch.materials.append([slot.material.name, [1, slot.material]])
+
+        # process
+        process(context, storage.batch.materials)
+
+        # clear
+        storage.batch.materials.clear()
+
+      # textures
+      if panel.textures:
+        for slot in object.material_slots:
+          if slot.material != None:
+            if context.scene.render.engine in {'BLENDER_RENDER', 'BLENDER_GAME'}:
+              for tslot in slot.material.texture_slots[:]:
+                if hasattr(tslot, 'texture'):
+                  if tslot.texture != None:
+
+                    # search
+                    if search == '' or re.search(search, tslot.texture.name, re.I):
+
+                      # append
+                      storage.batch.textures.append([tslot.texture.name, [1, tslot.texture]])
+
+              # process
+              process(context, storage.batch.textures)
+
+              # clear
+              storage.batch.textures.clear()
+
+      # particleSystems
+      if panel.particleSystems:
+        for modifier in object.modifiers[:]:
+          if modifier.type in 'PARTICLE_SYSTEM':
+
+            # search
+            if search == '' or re.search(search, modifier.particle_system.name, re.I):
+
+              # append
+              storage.batch.particleSystems.append([modifier.particle_system.name, [1, modifier.particle_system]])
+
+            if search == '' or re.search(search, modifier.particle_system.settings.name, re.I):
+
+              # append
+              storage.batch.particleSettings.append([modifier.particle_system.settings.name, [1, modifier.particle_system.settings]])
+
+        # process
+        process(context, storage.batch.particleSystems)
+        process(context, storage.batch.particleSettings)
+
+        # clear
+        storage.batch.particleSystems.clear()
+        storage.batch.particleSettings.clear()
+
+    # selected
+    else:
+      for object in context.selected_objects[:]:
+
+        # object
+
+        # search
+        if search == '' or re.search(search, object.name, re.I):
+
+          # append
+          storage.batch.objects.append([object.name, [1, object]])
+
+        # actions
+        if panel.action:
+          if hasattr(object.animation_data, 'action'):
+            if hasattr(object.animation_data.action, 'name'):
+
+              # search
+              if search == '' or re.search(search, object.animation_data.action.name, re.I):
+
+                # name
+                object.animation_data.action.name = name(context, object.animation_data.action.name) if not option.suffixLast else name(object.animation_data.action.name) + option.suffix
+
+        # grease pencils
+        if panel.greasePencil:
+          if hasattr(object.grease_pencil, 'name'):
+
+            # search
+            if search == '' or re.search(search, object.grease_pencil.name, re.I):
+
+              # name
+              object.grease_pencil.name = name(context, object.grease_pencil.name) if not option.suffixLast else name(context, object.grease_pencil.name) + option.suffix
+
+            # layers
+            for layer in object.grease_pencil.layers[:]:
+
+              # search
+              if search == '' or re.search(search, layer.info, re.I):
+
+                # append
+                storage.batch.pencilLayers.append([layer.info, [1, layer]])
+
+            # process
+            process(context, storage.batch.pencilLayers)
+
+            # clear
+            storage.batch.pencilLayers.clear()
+
+        # groups
+        if panel.groups:
+          for group in bpy.data.groups[:]:
+            for groupObject in group.objects[:]:
+              if groupObject == object:
+
+                # search
+                if search == '' or re.search(search, group.name, re.I):
+
+                  # name
+                  group.name = name(context, group.name) if not option.suffixLast else name(context, group.name) + option.suffix
+
+        # constraints
+        if panel.constraints:
+          for constraint in object.constraints[:]:
+
+            # search
+            if search == '' or re.search(search, constraint.name, re.I):
+
+              # append
+              storage.batch.constraints.append([constraint.name, [1, constraint]])
+
+          # process
+          process(context, storage.batch.constraints)
+
+          # clear
+          storage.batch.constraints.clear()
+
+        # modifiers
+        if panel.modifiers:
+          for modifier in object.modifiers[:]:
+
+            # search
+            if search == '' or re.search(search, modifier.name, re.I):
+
+              # append
+              storage.batch.modifiers.append([modifier.name, [1, modifier]])
+
+          # process
+          process(context, storage.batch.modifiers)
+
+          # clear
+          storage.batch.modifiers.clear()
+
+        # bone groups
+        if panel.boneGroups:
+          if object.type in 'ARMATURE':
+            for group in object.pose.bone_groups[:]:
+
+              # search
+              if search == '' or re.search(search, group.name, re.I):
+
+                # sort
+                storage.batch.boneGroups.append([group.name, [1, group]])
+
+            # process
+            process(context, storage.batch.boneGroups)
+
+            # clear
+            storage.batch.boneGroups.clear()
+
+        # object data
+
+        # search
+        if search == '' or re.search(search, object.data.name, re.I):
+
+          # cameras
+          if object.data.rna_type.identifier == 'Camera':
+            storage.batch.cameras.append([object.data.name, [1, object.data]])
+
+          # meshes
+          if object.data.rna_type.identifier == 'Mesh':
+            storage.batch.meshes.append([object.data.name, [1, object.data]])
+
+          # curves
+          if object.data.rna_type.identifier in {'SurfaceCurve', 'TextCurve', 'Curve'}:
+            storage.batch.curves.append([object.data.name, [1, object.data]])
+
+          # lamps
+          if hasattr(object.data.rna_type.base, 'identifier'):
+            if object.data.rna_type.base.identifier == 'Lamp':
+              storage.batch.lamps.append([object.data.name, [1, object.data]])
+
+          # lattices
+          if object.data.rna_type.identifier == 'Lattice':
+            storage.batch.lattices.append([object.data.name, [1, object.data]])
+
+          # metaballs
+          if object.data.rna_type.identifier == 'MetaBall':
+            storage.batch.metaballs.append([object.data.name, [1, object.data]])
+
+          # speakers
+          if object.data.rna_type.identifier == 'Speaker':
+            storage.batch.speakers.append([object.data.name, [1, object.data]])
+
+          # armatures
+          if object.data.rna_type.identifier == 'Armature':
+            storage.batch.armatures.append([object.data.name, [1, object.data]])
+
+        # vertex groups
+        if panel.vertexGroups:
+          if hasattr(object, 'vertex_groups'):
+            for group in object.vertex_groups[:]:
+
+              # search
+              if search == '' or re.search(search, group.name, re.I):
+
+                # sort
+                storage.batch.vertexGroups.append([group.name, [1, group]])
+
+            # process
+            process(context, storage.batch.vertexGroups)
+
+            # clear
+            storage.batch.vertexGroups.clear()
+
+        # shapekeys
+        if panel.shapekeys:
+          if hasattr(object.data, 'shape_keys'):
+            if hasattr(object.data.shape_keys, 'key_blocks'):
+              for key in object.data.shape_keys.key_blocks[:]:
+
+                # search
+                if search == '' or re.search(search, key.name, re.I):
+
+                  # sort
+                  storage.batch.shapekeys.append([key.name, [1, key]])
+
+              # process
+              process(context, storage.batch.shapekeys)
+
+              # clear
+              storage.batch.shapekeys.clear()
+
+        # uv maps
+        if panel.uvs:
+          if object.type in 'MESH':
+            for uv in object.data.uv_textures[:]:
+
+              # search
+              if search == '' or re.search(search, uv.name, re.I):
+
+                # append
+                storage.batch.uvs.append([uv.name, [1, uv]])
+
+            # process
+            process(context, storage.batch.uvs)
+
+            # clear
+            storage.batch.uvs.clear()
+
+        # vertex colors
+        if panel.vertexColors:
+          if object.type in 'MESH':
+            for vertexColor in object.data.vertex_colors[:]:
+
+              # search
+              if search == '' or re.search(search, vertexColor.name, re.I):
+
+                # append
+                storage.batch.vertexColors.append([vertexColor.name, [1, vertexColor]])
+
+            # process
+            process(context, storage.batch.vertexColors)
+
+            # clear
+            storage.batch.vertexColors.clear()
+
+        # materials
+        if panel.materials:
+          for slot in object.material_slots:
+            if slot.material != None:
+
+              # search
+              if search == '' or re.search(search, slot.material.name, re.I):
+
+                # append
+                storage.batch.materials.append([slot.material.name, [1, slot.material]])
+
+          # process
+          process(context, storage.batch.materials)
+
+          # clear
+          storage.batch.materials.clear()
+
+        # textures
+        if panel.textures:
+          for slot in object.material_slots:
+            if slot.material != None:
+              if context.scene.render.engine in {'BLENDER_RENDER', 'BLENDER_GAME'}:
+                for tslot in slot.material.texture_slots[:]:
+                  if hasattr(tslot, 'texture'):
+                    if tslot.texture != None:
+
+                      # search
+                      if search == '' or re.search(search, tslot.texture.name, re.I):
+
+                        # append
+                        storage.batch.textures.append([tslot.texture.name, [1, tslot.texture]])
+
+                # process
+                process(context, storage.batch.textures)
+
+                # clear
+                storage.batch.textures.clear()
+
+        # particleSystems
+        if panel.particleSystems:
+          for modifier in object.modifiers[:]:
+            if modifier.type in 'PARTICLE_SYSTEM':
+
+              # search
+              if search == '' or re.search(search, modifier.particle_system.name, re.I):
+
+                # append
+                storage.batch.particleSystems.append([modifier.particle_system.name, [1, modifier.particle_system]])
+
+              if search == '' or re.search(search, modifier.particle_system.settings.name, re.I):
+
+                # append
+                storage.batch.particleSettings.append([modifier.particle_system.settings.name, [1, modifier.particle_system.settings]])
+
+          # process
+          process(context, storage.batch.particleSystems)
+          process(context, storage.batch.particleSettings)
+
+          # clear
+          storage.batch.particleSystems.clear()
+          storage.batch.particleSettings.clear()
+
+      all = [
+        # object
+        storage.batch.objects,
+
+        # cameras
+        storage.batch.cameras,
+
+        # meshes
+        storage.batch.meshes,
+
+        # curves
+        storage.batch.curves,
+
+        # lamps
+        storage.batch.lamps,
+
+        # lattices
+        storage.batch.lattices,
+
+        # metaballs
+        storage.batch.metaballs,
+
+        # speakers
+        storage.batch.speakers,
+
+        # armatures
+        storage.batch.armatures,
+      ]
+      for collection in all:
+
+        # process
+        process(context, collection)
+
+        # clear
+        collection.clear()
+
+  # quick batch
+  else:
+    # batch type
+    if option.batchType in {'SELECTED', 'OBJECTS'}:
+
+      # actions
+      if option.actions:
+        for object in bpy.data.objects[:]:
+          if hasattr(object.animation_data, 'action'):
 
             # batch type
             if option.batchType in 'SELECTED':
@@ -326,22 +771,102 @@ def main(context):
                 # sort
                 sort(context, object.animation_data.action)
 
-      # clear duplicates
-      actions = []
-      [actions.append(item) for item in storage.batch.actions if item not in actions]
-      storage.batch.actions.clear()
+        # clear duplicates
+        actions = []
+        [actions.append(item) for item in storage.batch.actions if item not in actions]
+        storage.batch.actions.clear()
 
-      # process
-      process(context, actions)
+        # process
+        process(context, actions)
 
-    # grease pencil
-    if option.greasePencil:
-      for object in bpy.data.objects[:]:
-        if hasattr(object.grease_pencil, 'name'):
+      # action groups
+      if option.actionGroups:
+        for object in bpy.data.objects[:]:
+          if hasattr(object.animation_data, 'action'):
+            if hasattr(object.animation_data.action, 'name'):
 
-          # batch type
-          if option.batchType in 'SELECTED':
-            if object.select:
+              # batch type
+              if option.batchType in 'SELECTED':
+                if object.select:
+
+                  # object type
+                  if option.objectType in 'ALL':
+
+                    # sort
+                    sort(context, object.animation_data.action)
+
+                  # object type
+                  elif option.objectType in object.type:
+
+                    # sort
+                    sort(context, object.animation_data.action)
+
+              # batch type
+              else:
+
+                # object type
+                if option.objectType in 'ALL':
+
+                  # sort
+                  sort(context, object.animation_data.action)
+
+                # object type
+                elif option.objectType in object.type:
+
+                  # sort
+                  sort(context, object.animation_data.action)
+
+        # clear duplicates
+        actions = []
+        [actions.append(item) for item in storage.batch.actions if item not in actions]
+        storage.batch.actions.clear()
+
+        # name action groups
+        for action in actions:
+          for group in action[1][1].groups:
+            group.name = name(context, group.name) if not option.suffixLast else name(context, group.name) + option.suffix
+
+      # grease pencil
+      if option.greasePencil:
+        for object in bpy.data.objects[:]:
+          if hasattr(object.grease_pencil, 'name'):
+
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
+
+                # object type
+                if option.objectType in 'ALL':
+                  if object.grease_pencil.users == 1:
+
+                    # sort
+                    sort(context, object.grease_pencil)
+                  else:
+
+                    # shared
+                    if object.grease_pencil not in shared.greasePencils[:]:
+                      shared.greasePencils.append(object.grease_pencil)
+
+                      # sort
+                      sort(context, object.grease_pencil)
+
+                # object type
+                elif option.objectType in object.type:
+                  if object.grease_pencil.users == 1:
+
+                    # sort
+                    sort(context, object.grease_pencil)
+                  else:
+
+                    # shared
+                    if object.grease_pencil not in shared.greasePencils[:]:
+                      shared.greasePencils.append(object.grease_pencil)
+
+                      # sort
+                      sort(context, object.grease_pencil)
+
+            # batch type
+            else:
 
               # object type
               if option.objectType in 'ALL':
@@ -349,6 +874,97 @@ def main(context):
 
                   # sort
                   sort(context, object.grease_pencil)
+                else:
+
+                  # shared
+                  if object.grease_pencil not in shared.greasePencils[:]:
+                    shared.greasePencils.append(object.grease_pencil)
+
+                    # sort
+                    sort(context, object.grease_pencil)
+
+              # object type
+              elif option.objectType in object.type:
+                if object.grease_pencil.users == 1:
+
+                  # sort
+                  sort(context, object.grease_pencil)
+
+                else:
+
+                  # shared
+                  if object.grease_pencil not in shared.greasePencils[:]:
+                    shared.greasePencils.append(object.grease_pencil)
+
+                    # sort
+                    sort(context, object.grease_pencil)
+
+        # clear shared
+        shared.greasePencils.clear()
+
+        # process
+        process(context, storage.batch.greasePencils)
+
+        # clear collection
+        storage.batch.greasePencils.clear()
+
+      # pencil layers
+      if option.pencilLayers:
+        for object in bpy.data.objects[:]:
+          if hasattr(object.grease_pencil, 'name'):
+
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
+
+                # object type
+                if option.objectType in 'ALL':
+                  if object.grease_pencil.users == 1:
+
+                    # layers
+                    for layer in object.grease_pencil.layers[:]:
+
+                      # sort
+                      sort(context, layer)
+                  else:
+
+                    # shared
+                    if object.grease_pencil not in shared.greasePencils[:]:
+                      shared.greasePencils.append(object.grease_pencil)
+
+                      # layers
+                      for layer in object.grease_pencil.layers[:]:
+
+                        # sort
+                        sort(context, layer)
+
+                # object type
+                elif option.objectType in object.type:
+                  if object.grease_pencil.users == 1:
+
+                    # layers
+                    for layer in object.grease_pencil.layers[:]:
+
+                      # sort
+                      sort(context, layer)
+                  else:
+
+                    # shared
+                    if object.grease_pencil not in shared.greasePencils[:]:
+                      shared.greasePencils.append(object.grease_pencil)
+
+                      # layers
+                      for layer in object.grease_pencil.layers[:]:
+
+                        # sort
+                        sort(context, layer)
+
+            # batch type
+            else:
+
+              # object type
+              if option.objectType in 'ALL':
+                if object.grease_pencil.users == 1:
 
                   # layers
                   for layer in object.grease_pencil.layers[:]:
@@ -360,9 +976,6 @@ def main(context):
                   # shared
                   if object.grease_pencil not in shared.greasePencils[:]:
                     shared.greasePencils.append(object.grease_pencil)
-
-                    # sort
-                    sort(context, object.grease_pencil)
 
                     # layers
                     for layer in object.grease_pencil.layers[:]:
@@ -374,9 +987,6 @@ def main(context):
               elif option.objectType in object.type:
                 if object.grease_pencil.users == 1:
 
-                  # sort
-                  sort(context, object.grease_pencil)
-
                   # layers
                   for layer in object.grease_pencil.layers[:]:
 
@@ -388,88 +998,139 @@ def main(context):
                   if object.grease_pencil not in shared.greasePencils[:]:
                     shared.greasePencils.append(object.grease_pencil)
 
-                    # sort
-                    sort(context, object.grease_pencil)
-
                     # layers
                     for layer in object.grease_pencil.layers[:]:
 
                       # sort
                       sort(context, layer)
 
+            # process
+            process(context, storage.batch.pencilLayers)
+
+            print(storage.batch.pencilLayers)
+
+            # clear collection
+            storage.batch.pencilLayers.clear()
+
+        # clear shared
+        shared.greasePencils.clear()
+
+      # objects
+      if option.objects:
+        for object in bpy.data.objects[:]:
+
+          # batch type
+          if option.batchType in 'SELECTED':
+            if object.select:
+
+              # object type
+              if option.objectType in 'ALL':
+
+                # sort
+                sort(context, object)
+
+              # object type
+              elif option.objectType in object.type:
+
+                # sort
+                sort(context, object)
+
+              # batch type
+              else:
+
+                # object type
+                if option.objectType in 'ALL':
+
+                  # sort
+                  sort(context, object)
+
+                # object type
+                elif option.objectType in object.type:
+
+                  # sort
+                  sort(context, object)
+
+        # process
+        process(context, storage.batch.objects)
+
+        # clear collection
+        storage.batch.objects.clear()
+
+      # groups
+      if option.groups:
+        for object in bpy.data.objects[:]:
+
+          # batch type
+          if option.batchType in 'SELECTED':
+            if object.select:
+
+              # object type
+              if option.objectType in 'ALL':
+                for group in bpy.data.groups[:]:
+                  if object in group.objects[:]:
+
+                    # sort
+                    sort(context, group)
+
+
+                    # object type
+                  elif option.objectType in object.type:
+                    for group in bpy.data.groups[:]:
+                      if object in group.objects[:]:
+
+                        # sort
+                        sort(context, group)
+
+                        # batch type
+                      else:
+
+                        # object type
+                        if option.objectType in 'ALL':
+                          for group in bpy.data.groups[:]:
+                            if object in group.objects[:]:
+
+                              # sort
+                              sort(context, group)
+
+                              # object type
+                            elif option.objectType in object.type:
+                              for group in bpy.data.groups[:]:
+                                if object in group.objects[:]:
+
+                                  # sort
+                                  sort(context, group)
+
+        # clear duplicates
+        objectGroups = []
+        [objectGroups.append(item) for item in storage.batch.groups if item not in objectGroups]
+        storage.batch.groups.clear()
+
+        # process
+        process(context, objectGroups)
+
+      # constraints
+      if option.constraints:
+        for object in bpy.data.objects[:]:
+
+          # batch type
+          if option.batchType in 'SELECTED':
+            if object.select:
+              for constraint in object.constraints[:]:
+
+                # constraint type
+                if option.constraintType in 'ALL':
+
+                  # sort
+                  sort(context, constraint)
+
+                # constraint type
+                elif option.constraintType in constraint.type:
+
+                  # sort
+                  sort(context, constraint)
+
           # batch type
           else:
-
-            # object type
-            if option.objectType in 'ALL':
-              if object.grease_pencil.users == 1:
-
-                # sort
-                sort(context, object.grease_pencil)
-
-                # layers
-                for layer in object.grease_pencil.layers[:]:
-
-                  # sort
-                  sort(context, layer)
-              else:
-
-                # shared
-                if object.grease_pencil not in shared.greasePencils[:]:
-                  shared.greasePencils.append(object.grease_pencil)
-
-                  # sort
-                  sort(context, object.grease_pencil)
-
-                  # layers
-                  for layer in object.grease_pencil.layers[:]:
-
-                    # sort
-                    sort(context, layer)
-
-            # object type
-            elif option.objectType in object.type:
-              if object.grease_pencil.users == 1:
-
-                # sort
-                sort(context, object.grease_pencil)
-
-                # layers
-                for layer in object.grease_pencil.layers[:]:
-
-                  # sort
-                  sort(context, layer)
-              else:
-
-                # shared
-                if object.grease_pencil not in shared.greasePencils[:]:
-                  shared.greasePencils.append(object.grease_pencil)
-
-                  # sort
-                  sort(context, object.grease_pencil)
-
-                  # layers
-                  for layer in object.grease_pencil.layers[:]:
-
-                    # sort
-                    sort(context, layer)
-
-          # process
-          process(context, storage.batch.pencilLayers)
-
-      # clear shared
-      shared.greasePencils.clear()
-
-      # process
-      process(context, storage.batch.greasePencils)
-
-    # constraints
-    if option.constraints:
-      for object in bpy.data.objects[:]:
-
-        # batch type
-        if option.batchType in 'SELECTED':
-          if object.select:
             for constraint in object.constraints[:]:
 
               # constraint type
@@ -484,32 +1145,35 @@ def main(context):
                 # sort
                 sort(context, constraint)
 
-        # batch type
-        else:
-          for constraint in object.constraints[:]:
+          # process
+          process(context, storage.batch.constraints)
 
-            # constraint type
-            if option.constraintType in 'ALL':
+          # clear collection
+          storage.batch.constraints.clear()
 
-              # sort
-              sort(context, constraint)
+      # modifiers
+      if option.modifiers:
+        for object in bpy.data.objects[:]:
 
-            # constraint type
-            elif option.constraintType in constraint.type:
+          # batch type
+          if option.batchType in 'SELECTED':
+            if object.select:
+              for modifier in object.modifiers[:]:
 
-              # sort
-              sort(context, constraint)
+                # modifier type
+                if option.modifierType in 'ALL':
 
-        # process
-        process(context, storage.batch.constraints)
+                  # sort
+                  sort(context, modifier)
 
-    # modifiers
-    if option.modifiers:
-      for object in bpy.data.objects[:]:
+                # modifier tye
+                elif option.modifierType in modifier.type:
 
-        # batch type
-        if option.batchType in 'SELECTED':
-          if object.select:
+                  # sort
+                  sort(context, modifier)
+
+          # batch type
+          else:
             for modifier in object.modifiers[:]:
 
               # modifier type
@@ -524,33 +1188,53 @@ def main(context):
                 # sort
                 sort(context, modifier)
 
-        # batch type
-        else:
-          for modifier in object.modifiers[:]:
+          # process
+          process(context, storage.batch.modifiers)
 
-            # modifier type
-            if option.modifierType in 'ALL':
+          # clear collection
+          storage.batch.modifiers.clear()
 
-              # sort
-              sort(context, modifier)
+      # object data
+      if option.objectData:
+        for object in bpy.data.objects[:]:
+          if object.type not in 'EMPTY':
 
-            # modifier tye
-            elif option.modifierType in modifier.type:
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
 
-              # sort
-              sort(context, modifier)
+                # object type
+                if option.objectType in 'ALL':
+                  if object.data.users == 1:
 
-        # process
-        process(context, storage.batch.modifiers)
+                    # sort
+                    sort(context, object.data)
+                  else:
 
-    # object data
-    if option.objectData:
-      for object in bpy.data.objects[:]:
-        if object.type not in 'EMPTY':
+                    # shared
+                    if object.data.name not in shared.objectData[:]:
+                      shared.objectData.append(object.data.name)
 
-          # batch type
-          if option.batchType in 'SELECTED':
-            if object.select:
+                      # sort
+                      sort(context, object.data)
+
+                # object type
+                elif option.objectType in object.type:
+                  if object.data.users == 1:
+
+                    # sort
+                    sort(context, object.data)
+                  else:
+
+                    # shared shared
+                    if object.data.name not in shared.objectData[:]:
+                      shared.objectData.append(object.data.name)
+
+                      # sort
+                      sort(context, object.data)
+
+            # batch type
+            else:
 
               # object type
               if option.objectType in 'ALL':
@@ -560,7 +1244,7 @@ def main(context):
                   sort(context, object.data)
                 else:
 
-                  # shared
+                  # shared shared
                   if object.data.name not in shared.objectData[:]:
                     shared.objectData.append(object.data.name)
 
@@ -582,96 +1266,89 @@ def main(context):
                     # sort
                     sort(context, object.data)
 
-          # batch type
-          else:
+        # clear shared
+        shared.objectData.clear()
 
-            # object type
-            if option.objectType in 'ALL':
-              if object.data.users == 1:
+        # object data
+        objectData = [
+          storage.batch.curves,
+          storage.batch.cameras,
+          storage.batch.meshes,
+          storage.batch.lamps,
+          storage.batch.lattices,
+          storage.batch.metaballs,
+          storage.batch.speakers,
+          storage.batch.armatures
+        ]
 
-                # sort
-                sort(context, object.data)
-              else:
+        # process collection
+        for collection in objectData:
 
-                # shared shared
-                if object.data.name not in shared.objectData[:]:
-                  shared.objectData.append(object.data.name)
+          # process
+          process(context, collection)
 
-                  # sort
-                  sort(context, object.data)
+          # clear collection
+          collection.clear()
 
-            # object type
-            elif option.objectType in object.type:
-              if object.data.users == 1:
-
-                # sort
-                sort(context, object.data)
-              else:
-
-                # shared shared
-                if object.data.name not in shared.objectData[:]:
-                  shared.objectData.append(object.data.name)
-
-                  # sort
-                  sort(context, object.data)
-
-      # clear shared
-      shared.objectData.clear()
-
-      # object data
-      objectData = [
-        storage.batch.curves,
-        storage.batch.cameras,
-        storage.batch.meshes,
-        storage.batch.lamps,
-        storage.batch.lattices,
-        storage.batch.metaballs,
-        storage.batch.speakers,
-        storage.batch.armatures
-      ]
-      for collection in objectData:
-
-        # process
-        process(context, collection)
-
-    # bone groups
-    if option.boneGroups:
-      for object in bpy.data.objects[:]:
-
-        # batch type
-        if option.batchType in 'SELECTED':
-          if object.select:
-            if object.type in 'ARMATURE':
-              for group in object.pose.bone_groups[:]:
-                if object.select:
-
-                  # sort
-                  sort(context, group)
-
-        # batch type
-        else:
-          if object.type in 'ARMATURE':
-            for group in object.pose.bone_groups[:]:
-
-              # sort
-              sort(context, group)
-
-        # process
-        process(context, storage.batch.boneGroups)
-
-    # bones
-    if option.bones:
-      for object in bpy.data.objects[:]:
-        if object.type in 'ARMATURE':
+      # bone groups
+      if option.boneGroups:
+        for object in bpy.data.objects[:]:
 
           # batch type
           if option.batchType in 'SELECTED':
             if object.select:
+              if object.type in 'ARMATURE':
+                for group in object.pose.bone_groups[:]:
+                  if object.select:
+
+                    # sort
+                    sort(context, group)
+
+          # batch type
+          else:
+            if object.type in 'ARMATURE':
+              for group in object.pose.bone_groups[:]:
+
+                # sort
+                sort(context, group)
+
+          # process
+          process(context, storage.batch.boneGroups)
+
+          # clear collection
+          storage.batch.boneGroups.clear()
+
+      # bones
+      if option.bones:
+        for object in bpy.data.objects[:]:
+          if object.type in 'ARMATURE':
+
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
+
+                # edit mode
+                if object.mode in 'EDIT':
+                  for bone in bpy.data.armatures[object.data.name].edit_bones[:]:
+                    if bone.select:
+
+                      # sort
+                      sort(context, bone)
+
+                # pose or object mode
+                else:
+                  for bone in bpy.data.armatures[object.data.name].bones[:]:
+                    if bone.select:
+
+                      # sort
+                      sort(context, bone)
+
+            # batch type
+            else:
 
               # edit mode
               if object.mode in 'EDIT':
                 for bone in bpy.data.armatures[object.data.name].edit_bones[:]:
-                  if bone.select:
 
                     # sort
                     sort(context, bone)
@@ -679,86 +1356,99 @@ def main(context):
               # pose or object mode
               else:
                 for bone in bpy.data.armatures[object.data.name].bones[:]:
-                  if bone.select:
 
                     # sort
                     sort(context, bone)
 
-          # batch type
-          else:
+            # process
+            process(context, storage.batch.bones)
 
-            # edit mode
-            if object.mode in 'EDIT':
-              for bone in bpy.data.armatures[object.data.name].edit_bones[:]:
+            # clear collection
+            storage.batch.bones.clear()
 
-                  # sort
-                  sort(context, bone)
+      # bone constraints
+      if option.boneConstraints:
+        for object in bpy.data.objects[:]:
+          if object.type in 'ARMATURE':
 
-            # pose or object mode
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
+                for bone in object.pose.bones[:]:
+                  if bone.bone.select:
+                    for constraint in bone.constraints[:]:
+
+                      # constraint type
+                      if option.constraintType in 'ALL':
+
+                        # sort
+                        sort(context, constraint)
+
+                      # constraint type
+                      elif option.constraintType in constraint.type:
+
+                        # sort
+                        sort(context, constraint)
+
+                    # process
+                    process(context, storage.batch.constraints)
+
+                    # clear collection
+                    storage.batch.constraints.clear()
+
+            # batch type
             else:
-              for bone in bpy.data.armatures[object.data.name].bones[:]:
-
-                  # sort
-                  sort(context, bone)
-
-          # process
-          process(context, storage.batch.bones)
-
-    # bone constraints
-    if option.boneConstraints:
-      for object in bpy.data.objects[:]:
-        if object.type in 'ARMATURE':
-
-          # batch type
-          if option.batchType in 'SELECTED':
-            if object.select:
               for bone in object.pose.bones[:]:
-                if bone.bone.select:
-                  for constraint in bone.constraints[:]:
+                for constraint in bone.constraints[:]:
 
-                    # constraint type
-                    if option.constraintType in 'ALL':
+                  # constraint type
+                  if option.constraintType in 'ALL':
 
-                      # sort
-                      sort(context, constraint)
+                    # sort
+                    sort(context, constraint)
 
-                    # constraint type
-                    elif option.constraintType in constraint.type:
+                  # constraint type
+                  elif option.constraintType in constraint.type:
 
-                      # sort
-                      sort(context, constraint)
+                    # sort
+                    sort(context, constraint)
 
-                  # process
-                  process(context, storage.batch.constraints)
+                # process
+                process(context, storage.batch.constraints)
 
-          # batch type
-          else:
-            for bone in object.pose.bones[:]:
-              for constraint in bone.constraints[:]:
+                # clear collection
+                storage.batch.constraints.clear()
 
-                # constraint type
-                if option.constraintType in 'ALL':
+      # vertex groups
+      if option.vertexGroups:
+        for object in bpy.data.objects[:]:
+          if hasattr(object, 'vertex_groups'):
 
-                  # sort
-                  sort(context, constraint)
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
+                for group in object.vertex_groups[:]:
 
-                # constraint type
-                elif option.constraintType in constraint.type:
+                  # object type
+                  if option.objectType in 'ALL':
 
-                  # sort
-                  sort(context, constraint)
+                    # sort
+                    sort(context, group)
 
-              # process
-              process(context, storage.batch.constraints)
+                  # object type
+                  elif option.objectType in object.type:
 
-    # vertex groups
-    if option.vertexGroups:
-      for object in bpy.data.objects[:]:
-        if hasattr(object, 'vertex_groups'):
+                    # sort
+                    sort(context, group)
 
-          # batch type
-          if option.batchType in 'SELECTED':
-            if object.select:
+                # process
+                process(context, storage.batch.vertexGroups)
+
+                # clear collection
+                storage.batch.vertexGroups.clear()
+
+            # batch type
+            else:
               for group in object.vertex_groups[:]:
 
                 # object type
@@ -776,35 +1466,35 @@ def main(context):
               # process
               process(context, storage.batch.vertexGroups)
 
-          # batch type
-          else:
-            for group in object.vertex_groups[:]:
-
-              # object type
-              if option.objectType in 'ALL':
-
-                # sort
-                sort(context, group)
-
-              # object type
-              elif option.objectType in object.type:
-
-                # sort
-                sort(context, group)
-
-            # process
-            process(context, storage.batch.vertexGroups)
+              # clear collection
+              storage.batch.vertexGroups.clear()
 
 
-    # shapekeys
-    if option.shapekeys:
-      for object in bpy.data.objects[:]:
-        if hasattr(object.data, 'shape_keys'):
-          if hasattr(object.data.shape_keys, 'key_blocks'):
+      # shapekeys
+      if option.shapekeys:
+        for object in bpy.data.objects[:]:
+          if hasattr(object.data, 'shape_keys'):
+            if hasattr(object.data.shape_keys, 'key_blocks'):
 
-            # batch type
-            if option.batchType in 'SELECTED':
-              if object.select:
+              # batch type
+              if option.batchType in 'SELECTED':
+                if object.select:
+                  for block in object.data.shape_keys.key_blocks[:]:
+
+                    # object type
+                    if option.objectType in 'ALL':
+
+                      # sort
+                      sort(context, block)
+
+                    # object type
+                    elif option.objectType in object.type:
+
+                      # sort
+                      sort(context, block)
+
+              # batch type
+              else:
                 for block in object.data.shape_keys.key_blocks[:]:
 
                   # object type
@@ -819,78 +1509,97 @@ def main(context):
                     # sort
                     sort(context, block)
 
+              # process
+              process(context, storage.batch.shapekeys)
+
+              # clear collection
+              storage.batch.shapekeys.clear()
+
+      # uvs
+      if option.uvs:
+        for object in bpy.data.objects[:]:
+          if object.type in 'MESH':
+
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
+                for uv in object.data.uv_textures[:]:
+
+                  # sort
+                  sort(context, uv)
+
             # batch type
             else:
-              for block in object.data.shape_keys.key_blocks[:]:
-
-                # object type
-                if option.objectType in 'ALL':
-
-                  # sort
-                  sort(context, block)
-
-                # object type
-                elif option.objectType in object.type:
-
-                  # sort
-                  sort(context, block)
-
-            # process
-            process(context, storage.batch.shapekeys)
-
-    # uvs
-    if option.uvs:
-      for object in bpy.data.objects[:]:
-        if object.type in 'MESH':
-
-          # batch type
-          if option.batchType in 'SELECTED':
-            if object.select:
-              for uv in object.data.uv_textures[:]:
+             for uv in object.data.uv_textures[:]:
 
                 # sort
                 sort(context, uv)
 
-          # batch type
-          else:
-           for uv in object.data.uv_textures[:]:
+            # process
+            process(context, storage.batch.uvs)
 
-              # sort
-              sort(context, uv)
+            # clear collection
+            storage.batch.uvs.clear()
 
-          # process
-          process(context, storage.batch.uvs)
+      # vertex colors
+      if option.vertexColors:
+        for object in bpy.data.objects[:]:
+          if object.type in 'MESH':
 
-    # vertex colors
-    if option.vertexColors:
-      for object in bpy.data.objects[:]:
-        if object.type in 'MESH':
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
+                for color in object.data.vertex_colors[:]:
 
-          # batch type
-          if option.batchType in 'SELECTED':
-            if object.select:
+                  # sort
+                  sort(context, color)
+
+            # batch type
+            else:
               for color in object.data.vertex_colors[:]:
 
                 # sort
                 sort(context, color)
 
+            # process
+            process(context, storage.batch.vertexColors)
+
+            # clear collection
+            storage.batch.vertexColors.clear()
+
+      # materials
+      if option.materials:
+        for object in bpy.data.objects[:]:
+
+          # batch type
+          if option.batchType in 'SELECTED':
+            if object.select:
+              for slot in object.material_slots[:]:
+                if slot.material != None:
+                  if slot.material.users == 1:
+
+                    # object type
+                    if option.objectType in 'ALL':
+
+                      # sort
+                      sort(context, slot.material)
+
+                    # object type
+                    elif option.objectType in object.type:
+
+                      # sort
+                      sort(context, slot.material)
+                  else:
+
+                    # shared
+                    if slot.material not in shared.materials[:]:
+                      shared.materials.append(slot.material)
+
+                      # sort
+                      sort(context, slot.material)
+
           # batch type
           else:
-            for color in object.data.vertex_colors[:]:
-
-              # sort
-              sort(context, color)
-
-          # process
-          process(context, storage.batch.vertexColors)
-
-    # materials
-    if option.materials:
-      for object in bpy.data.objects[:]:
-
-        # batch type
-        if option.batchType in 'SELECTED':
-          if object.select:
             for slot in object.material_slots[:]:
               if slot.material != None:
                 if slot.material.users == 1:
@@ -915,46 +1624,80 @@ def main(context):
                     # sort
                     sort(context, slot.material)
 
-        # batch type
-        else:
-          for slot in object.material_slots[:]:
-            if slot.material != None:
-              if slot.material.users == 1:
+        # clear shared
+        shared.materials.clear()
 
-                # object type
-                if option.objectType in 'ALL':
+        # process
+        process(context, storage.batch.materials)
 
-                  # sort
-                  sort(context, slot.material)
+        # clear collection
+        storage.batch.materials.clear()
 
-                # object type
-                elif option.objectType in object.type:
+      # textures
+      if option.textures:
+        for object in bpy.data.objects[:]:
+          if context.scene.render.engine not in 'CYCLES':
 
-                  # sort
-                  sort(context, slot.material)
-              else:
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
+                for slot in object.material_slots[:]:
+                  if slot.material != None:
+                    if slot.material.users == 1:
+                      for texslot in slot.material.texture_slots[:]:
+                        if texslot != None:
+                          if texslot.texture.users == 1:
 
-                # shared
-                if slot.material not in shared.materials[:]:
-                  shared.materials.append(slot.material)
+                            # object type
+                            if option.objectType in 'ALL':
 
-                  # sort
-                  sort(context, slot.material)
+                              # sort
+                              sort(context, texslot.texture)
 
-      # clear shared
-      shared.materials.clear()
+                            # object type
+                            elif option.objectType in object.type:
 
-      # process
-      process(context, storage.batch.materials)
+                              # sort
+                              sort(context, texslot.texture)
+                          else:
 
-    # textures
-    if option.textures:
-      for object in bpy.data.objects[:]:
-        if context.scene.render.engine not in 'CYCLES':
+                            # shared
+                            if texslot.texture not in shared.textures[:]:
+                              shared.textures.append(texslot.texture)
 
-          # batch type
-          if option.batchType in 'SELECTED':
-            if object.select:
+                              # sort
+                              sort(context, texslot.texture)
+                    else:
+
+                      # shared
+                      if slot.material not in shared.materials[:]:
+                        shared.materials.append(slot.material)
+                        for texslot in slot.material.texture_slots[:]:
+                          if texslot != None:
+                            if texslot.texture.users == 1:
+
+                              # object type
+                              if option.objectType in 'ALL':
+
+                                # sort
+                                sort(context, texslot.texture)
+
+                              # object type
+                              elif option.objectType in object.type:
+
+                                # sort
+                                sort(context, texslot.texture)
+                            else:
+
+                              # shared
+                              if texslot.texture not in shared.textures[:]:
+                                shared.textures.append(texslot.texture)
+
+                                # sort
+                                sort(context, texslot.texture)
+
+            # batch type
+            else:
               for slot in object.material_slots[:]:
                 if slot.material != None:
                   if slot.material.users == 1:
@@ -976,8 +1719,8 @@ def main(context):
                         else:
 
                           # shared
-                          if texslot.texture not in shared.textures[:]:
-                            shared.textures.append(texslot.texture)
+                          if texslot.texture not in shared[:]:
+                            shared.append(texslot.texture)
 
                             # sort
                             sort(context, texslot.texture)
@@ -1010,8 +1753,770 @@ def main(context):
                               # sort
                               sort(context, texslot.texture)
 
-          # batch type
-          else:
+        # clear shared
+        shared.textures.clear()
+
+        # process
+        process(context, storage.batch.textures)
+
+        # clear collection
+        storage.batch.textures.clear()
+
+      # particle systems
+      if option.particleSystems:
+        for object in bpy.data.objects[:]:
+          if object.type in 'MESH':
+
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
+                for system in object.particle_systems[:]:
+
+                  # object type
+                  if option.objectType in 'ALL':
+
+                    # sort
+                    sort(context, system)
+
+                  # object type
+                  elif option.objectType in object.type:
+
+                    # sort
+                    sort(context, system)
+
+            # batch type
+            else:
+              for system in object.particle_systems[:]:
+
+                # object type
+                if option.objectType in 'ALL':
+
+                  # sort
+                  sort(context, system)
+
+                # object type
+                elif option.objectType in object.type:
+
+                  # sort
+                  sort(context, system)
+
+            # process
+            process(context, storage.batch.particleSystems)
+
+            # clear collection
+            storage.batch.particleSystems.clear()
+
+      # particle settings
+      if option.particleSettings:
+        for object in bpy.data.objects[:]:
+          if object.type in 'MESH':
+
+            # batch type
+            if option.batchType in 'SELECTED':
+              if object.select:
+                for system in object.particle_systems[:]:
+
+                  # object type
+                  if option.objectType in 'ALL':
+                    if system.settings.users == 1:
+
+                      # sort
+                      sort(context, system.settings)
+                    else:
+
+                      # shared
+                      if system.settings not in shared.particleSettings[:]:
+                        shared.particleSettings.append(system.settings)
+
+                        # sort
+                        sort(context, system.settings)
+
+                  # object type
+                  elif option.objectType in object.type:
+                    if system.settings.users == 1:
+
+                      # sort
+                      sort(context, system.settings)
+                    else:
+
+                      # shared
+                      if system.settings not in shared.particleSettings[:]:
+                        shared.particleSettings.append(system.settings)
+
+                        # sort
+                        sort(context, system.settings)
+
+            # batch type
+            else:
+              for system in object.particle_systems[:]:
+
+                # object type
+                if option.objectType in 'ALL':
+                  if system.settings.users == 1:
+
+                    # sort
+                    sort(context, system.settings)
+                  else:
+
+                    # shared
+                    if system.settings not in shared.particleSettings[:]:
+                      shared.particleSettings.append(system.settings)
+
+                      # sort
+                      sort(context, system.settings)
+
+                # object type
+                elif option.objectType in object.type:
+                  if system.settings.users == 1:
+
+                    # sort
+                    sort(context, system.settings)
+                  else:
+
+                    # shared
+                    if system.settings not in shared.particleSettings[:]:
+                      shared.particleSettings.append(system.settings)
+
+                      # sort
+                      sort(context, system.settings)
+
+        # clear shared
+        shared.particleSettings.clear()
+
+        # process
+        process(context, storage.batch.particleSettings)
+
+        # clear collection
+        storage.batch.particleSettings.clear()
+
+    # sensors
+    if option.sensors:
+      for object in bpy.data.objects[:]:
+
+        # batch type
+        if option.batchType in 'SELECTED':
+          if object.select:
+
+            # object type
+            if option.objectType in 'ALL':
+
+              # sort
+              for sensor in object.game.sensors[:]:
+                sort(context, sensor)
+
+            # object type
+            elif option.objectType in object.type:
+
+              # sort
+              for sensor in object.game.sensors[:]:
+                sort(context, sensor)
+
+        # batch type
+        else:
+
+          # object type
+          if option.objectType in 'ALL':
+
+            # sort
+            for sensor in object.game.sensors[:]:
+              sort(context, sensor)
+
+          # object type
+          elif option.objectType in object.type:
+
+            # sort
+            for sensor in object.game.sensors[:]:
+              sort(context, sensor)
+
+        # process
+        process(context, storage.batch.sensors)
+
+        # clear collection
+        storage.batch.sensors.clear()
+
+    # controllers
+    if option.controllers:
+      for object in bpy.data.objects[:]:
+
+        # batch type
+        if option.batchType in 'SELECTED':
+          if object.select:
+
+            # object type
+            if option.objectType in 'ALL':
+
+              # sort
+              for controller in object.game.controllers[:]:
+                sort(context, controller)
+
+            # object type
+            elif option.objectType in object.type:
+
+              # sort
+              for controller in object.game.controllers[:]:
+                sort(context, controller)
+
+        # batch type
+        else:
+
+          # object type
+          if option.objectType in 'ALL':
+
+            # sort
+            for controller in object.game.controllers[:]:
+              sort(context, controller)
+
+          # object type
+          elif option.objectType in object.type:
+
+            # sort
+            for controller in object.game.controllers[:]:
+              sort(context, controller)
+
+        # process
+        process(context, storage.batch.controllers)
+
+        # clear collection
+        storage.batch.controllers.clear()
+
+    # actuators
+    if option.actuators:
+      for object in bpy.data.objects[:]:
+
+        # batch type
+        if option.batchType in 'SELECTED':
+          if object.select:
+
+            # object type
+            if option.objectType in 'ALL':
+
+              # sort
+              for actuator in object.game.actuators[:]:
+                sort(context, actuator)
+
+            # object type
+            elif option.objectType in object.type:
+
+              # sort
+              for actuator in object.game.actuators[:]:
+                sort(context, actuator)
+
+        # batch type
+        else:
+
+          # object type
+          if option.objectType in 'ALL':
+
+            # sort
+            for actuator in object.game.actuators[:]:
+              sort(context, actuator)
+
+          # object type
+          elif option.objectType in object.type:
+
+            # sort
+            for actuator in object.game.actuators[:]:
+              sort(context, actuator)
+
+        # process
+        process(context, storage.batch.actuators)
+
+        # clear collection
+        storage.batch.actuators.clear()
+
+    # batch type
+    if option.batchType in 'SCENE':
+
+      # actions
+      if option.actions:
+        for object in context.scene.objects[:]:
+          if hasattr(object.animation_data, 'action'):
+            if hasattr(object.animation_data.action, 'name'):
+
+              # object type
+              if option.objectType in 'ALL':
+
+                # sort
+                sort(context, object.animation_data.action)
+
+              # object type
+              elif option.objectType in object.type:
+
+                # sort
+                sort(context, object.animation_data.action)
+
+        # clear duplicates
+        actions = []
+        [actions.append(item) for item in storage.batch.actions if item not in actions]
+        storage.batch.actions.clear()
+
+        # process
+        process(context, actions)
+
+      # action groups
+      if option.actionGroups:
+        for object in context.scene.objects[:]:
+          if hasattr(object.animation_data, 'action'):
+            if hasattr(object.animation_data.action, 'name'):
+
+              # object type
+              if option.objectType in 'ALL':
+
+                # sort
+                sort(context, object.animation_data.action)
+
+              # object type
+              elif option.objectType in object.type:
+
+                # sort
+                sort(context, object.animation_data.action)
+
+        # clear duplicates
+        actions = []
+        [actions.append(item) for item in storage.batch.actions if item not in actions]
+        storage.batch.actions.clear()
+
+        # name action groups
+        for action in actions:
+          for group in action[1][1].groups:
+            group.name = name(context, group.name) if not option.suffixLast else name(context, group.name) + option.suffix
+
+      # grease pencil
+      if option.greasePencil:
+        for object in context.scene.objects[:]:
+          if hasattr(object.grease_pencil, 'name'):
+
+            # object type
+            if option.objectType in 'ALL':
+              if object.grease_pencil.users == 1:
+
+                # sort
+                sort(context, object.grease_pencil)
+
+              else:
+
+                # shared
+                if object.grease_pencil not in shared.greasePencils[:]:
+                  shared.greasePencils.append(object.grease_pencil)
+
+                  # sort
+                  sort(context, object.grease_pencil)
+
+            # object type
+            elif option.objectType in object.type:
+              if object.grease_pencil.users == 1:
+
+                # sort
+                sort(context, object.grease_pencil)
+
+              else:
+
+                # shared
+                if object.grease_pencil not in shared.greasePencils[:]:
+                  shared.greasePencils.append(object.grease_pencil)
+
+                  # sort
+                  sort(context, object.grease_pencil)
+
+        # clear shared
+        shared.greasePencils.clear()
+
+        # process
+        process(context, storage.batch.greasePencils)
+
+        # clear collection
+        storage.batch.greasePencils.clear()
+
+      # pencil layers
+      if option.pencilLayers:
+        for object in context.scene.objects[:]:
+          if hasattr(object.grease_pencil, 'name'):
+
+            # object type
+            if option.objectType in 'ALL':
+              if object.grease_pencil.users == 1:
+
+                # layers
+                for layer in object.grease_pencil.layers[:]:
+
+                  # sort
+                  sort(context, layer)
+              else:
+
+                # shared
+                if object.grease_pencil not in shared.greasePencils[:]:
+                  shared.greasePencils.append(object.grease_pencil)
+
+                  # layers
+                  for layer in object.grease_pencil.layers[:]:
+
+                    # sort
+                    sort(context, layer)
+
+            # object type
+            elif option.objectType in object.type:
+              if object.grease_pencil.users == 1:
+
+                # layers
+                for layer in object.grease_pencil.layers[:]:
+
+                  # sort
+                  sort(context, layer)
+              else:
+
+                # shared
+                if object.grease_pencil not in shared.greasePencils[:]:
+                  shared.greasePencils.append(object.grease_pencil)
+
+                  # layers
+                  for layer in object.grease_pencil.layers[:]:
+
+                    # sort
+                    sort(context, layer)
+
+            # process
+            process(context, storage.batch.pencilLayers)
+
+            # clear collection
+            storage.batch.pencilLayers.clear()
+
+        # clear shared
+        shared.greasePencils.clear()
+
+      # objects
+      if option.objects:
+        for object in context.scene.objects[:]:
+
+          # object type
+          if option.objectType in 'ALL':
+
+            # sort
+            sort(context, object)
+
+          # object type
+          elif option.objectType in object.type:
+
+            # sort
+            sort(context, object)
+
+        # process
+        process(context, storage.batch.objects)
+
+        # clear collection
+        storage.batch.objects.clear()
+
+      # groups
+      if option.groups:
+        for object in context.scene.objects[:]:
+
+          # object type
+          if option.objectType in 'ALL':
+            for group in bpy.data.groups[:]:
+              if object in group.objects[:]:
+
+                # sort
+                sort(context, group)
+
+          # object type
+          elif option.objectType in object.type:
+            for group in bpy.data.groups[:]:
+              if object in group.objects[:]:
+
+                # sort
+                sort(context, group)
+
+        # clear duplicates
+        objectGroups = []
+        [objectGroups.append(item) for item in storage.batch.groups if item not in objectGroups]
+        storage.batch.groups.clear()
+
+        # process
+        process(context, objectGroups)
+
+      # constraints
+      if option.constraints:
+        for object in context.scene.objects[:]:
+          for constraint in object.constraints[:]:
+
+            # constraint type
+            if option.constraintType in 'ALL':
+
+              # sort
+              sort(context, constraint)
+
+            # constraint type
+            elif option.constraintType in constraint.type:
+
+              # sort
+              sort(context, constraint)
+
+          # process
+          process(context, storage.batch.constraints)
+
+          # clear collection
+          storage.batch.constraints.clear()
+
+      # modifiers
+      if option.modifiers:
+        for object in context.scene.objects[:]:
+          for modifier in object.modifiers[:]:
+
+            # modifier type
+            if option.modifierType in 'ALL':
+
+              # sort
+              sort(context, modifier)
+
+            # modifier tye
+            elif option.modifierType in modifier.type:
+
+              # sort
+              sort(context, modifier)
+
+          # process
+          process(context, storage.batch.modifiers)
+
+          # clear collection
+          storage.batch.modifiers.clear()
+
+      # object data
+      if option.objectData:
+        for object in context.scene.objects[:]:
+          if object.type not in 'EMPTY':
+
+            # object type
+            if option.objectType in 'ALL':
+              if object.data.users == 1:
+
+                # sort
+                sort(context, object.data)
+              else:
+
+                # shared shared
+                if object.data.name not in shared.objectData[:]:
+                  shared.objectData.append(object.data.name)
+
+                  # sort
+                  sort(context, object.data)
+
+            # object type
+            elif option.objectType in object.type:
+              if object.data.users == 1:
+
+                # sort
+                sort(context, object.data)
+              else:
+
+                # shared shared
+                if object.data.name not in shared.objectData[:]:
+                  shared.objectData.append(object.data.name)
+
+                  # sort
+                  sort(context, object.data)
+
+        # clear shared
+        shared.objectData.clear()
+
+        # object data
+        objectData = [
+          storage.batch.curves,
+          storage.batch.cameras,
+          storage.batch.meshes,
+          storage.batch.lamps,
+          storage.batch.lattices,
+          storage.batch.metaballs,
+          storage.batch.speakers,
+          storage.batch.armatures
+        ]
+        for collection in objectData:
+
+          # process
+          process(context, collection)
+
+      # bone groups
+      if option.boneGroups:
+        for object in context.scene.objects[:]:
+          if object.type in 'ARMATURE':
+            for group in object.pose.bone_groups[:]:
+
+              # sort
+              sort(context, group)
+
+          # process
+          process(context, storage.batch.boneGroups)
+
+          # clear collection
+          storage.batch.boneGroups.clear()
+
+      # bones
+      if option.bones:
+        for object in context.scene.objects[:]:
+          if object.type in 'ARMATURE':
+
+            # edit mode
+            if object.mode in 'EDIT':
+              for bone in bpy.data.armatures[object.data.name].edit_bones[:]:
+
+                  # sort
+                  sort(context, bone)
+
+            # pose or object mode
+            else:
+              for bone in bpy.data.armatures[object.data.name].bones[:]:
+
+                  # sort
+                  sort(context, bone)
+
+            # process
+            process(context, storage.batch.bones)
+
+            # clear collection
+            storage.batch.bones.clear()
+
+      # bone constraints
+      if option.boneConstraints:
+        for object in context.scene.objects[:]:
+          if object.type in 'ARMATURE':
+            for bone in object.pose.bones[:]:
+              for constraint in bone.constraints[:]:
+
+                # constraint type
+                if option.constraintType in 'ALL':
+
+                  # sort
+                  sort(context, constraint)
+
+                # constraint type
+                elif option.constraintType in constraint.type:
+
+                  # sort
+                  sort(context, constraint)
+
+              # process
+              process(context, storage.batch.constraints)
+
+              # clear collection
+              storage.batch.constraints.clear()
+
+      # vertex groups
+      if option.vertexGroups:
+        for object in context.scene.objects[:]:
+          if hasattr(object, 'vertex_groups'):
+            for group in object.vertex_groups[:]:
+
+              # object type
+              if option.objectType in 'ALL':
+
+                # sort
+                sort(context, group)
+
+              # object type
+              elif option.objectType in object.type:
+
+                # sort
+                sort(context, group)
+
+            # process
+            process(context, storage.batch.vertexGroups)
+
+            # clear collection
+            storage.batch.vertexGroups.clear()
+
+      # shapekeys
+      if option.shapekeys:
+        for object in context.scene.objects[:]:
+          if hasattr(object.data, 'shape_keys'):
+            if hasattr(object.data.shape_keys, 'key_blocks'):
+              for block in object.data.shape_keys.key_blocks[:]:
+
+                # object type
+                if option.objectType in 'ALL':
+
+                  # sort
+                  sort(context, block)
+
+                # object type
+                elif option.objectType in object.type:
+
+                  # sort
+                  sort(context, block)
+
+              # process
+              process(context, storage.batch.shapekeys)
+
+              # clear collection
+              storage.batch.shapekeys.clear()
+
+      # uvs
+      if option.uvs:
+        for object in context.scene.objects[:]:
+          if object.type in 'MESH':
+            for uv in object.data.uv_textures[:]:
+
+              # sort
+              sort(context, uv)
+
+            # process
+            process(context, storage.batch.uvs)
+
+            # clear collection
+            storage.batch.uvs.clear()
+
+      # vertex colors
+      if option.vertexColors:
+        for object in context.scene.objects[:]:
+          if object.type in 'MESH':
+            for color in object.data.vertex_colors[:]:
+
+              # sort
+              sort(context, color)
+
+            # process
+            process(context, storage.batch.vertexColors)
+
+            # clear collection
+            storage.batch.vertexColors.clear()
+
+      # materials
+      if option.materials:
+        for object in context.scene.objects[:]:
+          for slot in object.material_slots[:]:
+            if slot.material != None:
+              if slot.material.users == 1:
+
+                # object type
+                if option.objectType in 'ALL':
+
+                  # sort
+                  sort(context, slot.material)
+
+                # object type
+                elif option.objectType in object.type:
+
+                  # sort
+                  sort(context, slot.material)
+              else:
+
+                # shared
+                if slot.material not in shared.materials[:]:
+                  shared.materials.append(slot.material)
+
+                  # sort
+                  sort(context, slot.material)
+
+        # clear shared
+        shared.materials.clear()
+
+        # process
+        process(context, storage.batch.materials)
+
+        # clear collection
+        storage.batch.materials.clear()
+
+      # textures
+      if option.textures:
+        for object in context.scene.objects[:]:
+          if context.scene.render.engine not in 'CYCLES':
             for slot in object.material_slots[:]:
               if slot.material != None:
                 if slot.material.users == 1:
@@ -1067,36 +2572,19 @@ def main(context):
                             # sort
                             sort(context, texslot.texture)
 
-      # clear shared
-      shared.textures.clear()
+        # clear shared
+        shared.textures.clear()
 
-      # process
-      process(context, storage.batch.textures)
+        # process
+        process(context, storage.batch.textures)
 
-    # particle systems
-    if option.particleSystems:
-      for object in bpy.data.objects[:]:
-        if object.type in 'MESH':
+        # clear collection
+        storage.batch.textures.clear()
 
-          # batch type
-          if option.batchType in 'SELECTED':
-            if object.select:
-              for system in object.particle_systems[:]:
-
-                # object type
-                if option.objectType in 'ALL':
-
-                  # sort
-                  sort(context, system)
-
-                # object type
-                elif option.objectType in object.type:
-
-                  # sort
-                  sort(context, system)
-
-          # batch type
-          else:
+      # particle systems
+      if option.particleSystems:
+        for object in context.scene.objects[:]:
+          if object.type in 'MESH':
             for system in object.particle_systems[:]:
 
               # object type
@@ -1111,51 +2599,16 @@ def main(context):
                 # sort
                 sort(context, system)
 
-          # process
-          process(context, storage.batch.particleSystems)
+            # process
+            process(context, storage.batch.particleSystems)
 
-    # particle settings
-    if option.particleSettings:
-      for object in bpy.data.objects[:]:
-        if object.type in 'MESH':
+            # clear collection
+            storage.batch.particleSystems.clear()
 
-          # batch type
-          if option.batchType in 'SELECTED':
-            if object.select:
-              for system in object.particle_systems[:]:
-
-                # object type
-                if option.objectType in 'ALL':
-                  if system.settings.users == 1:
-
-                    # sort
-                    sort(context, system.settings)
-                  else:
-
-                    # shared
-                    if system.settings not in shared.particleSettings[:]:
-                      shared.particleSettings.append(system.settings)
-
-                      # sort
-                      sort(context, system.settings)
-
-                # object type
-                elif option.objectType in object.type:
-                  if system.settings.users == 1:
-
-                    # sort
-                    sort(context, system.settings)
-                  else:
-
-                    # shared
-                    if system.settings not in shared.particleSettings[:]:
-                      shared.particleSettings.append(system.settings)
-
-                      # sort
-                      sort(context, system.settings)
-
-          # batch type
-          else:
+      # particle settings
+      if option.particleSettings:
+        for object in context.scene.objects[:]:
+          if object.type in 'MESH':
             for system in object.particle_systems[:]:
 
               # object type
@@ -1188,290 +2641,189 @@ def main(context):
                     # sort
                     sort(context, system.settings)
 
-      # clear shared
-      shared.particleSettings.clear()
+        # clear shared
+        shared.particleSettings.clear()
 
-      # process
-      process(context, storage.batch.particleSettings)
+        # process
+        process(context, storage.batch.particleSettings)
 
-  # batch type
-  if option.batchType in 'SCENE':
+        # clear collection
+        storage.batch.particleSettings.clear()
 
-    # objects
-    if option.objects:
-      for object in context.scene.objects[:]:
-
-        # object type
-        if option.objectType in 'ALL':
-
-          # sort
-          sort(context, object)
-
-        # object type
-        elif option.objectType in object.type:
-
-          # sort
-          sort(context, object)
-
-      # process
-      process(context, storage.batch.objects)
-
-    # groups
-    if option.groups:
-      for object in context.scene.objects[:]:
-
-        # object type
-        if option.objectType in 'ALL':
-          for group in bpy.data.groups[:]:
-            if object in group.objects[:]:
-
-              # sort
-              sort(context, group)
-
-        # object type
-        elif option.objectType in object.type:
-          for group in bpy.data.groups[:]:
-            if object in group.objects[:]:
-
-              # sort
-              sort(context, group)
-
-      # clear duplicates
-      objectGroups = []
-      [objectGroups.append(item) for item in storage.batch.groups if item not in objectGroups]
-      storage.batch.groups.clear()
-
-      # process
-      process(context, objectGroups)
-
-    # actions
-    if option.actions:
-      for object in context.scene.objects[:]:
-        if hasattr(object.animation_data, 'action'):
-          if hasattr(object.animation_data.action, 'name'):
-
-            # object type
-            if option.objectType in 'ALL':
-
-              # sort
-              sort(context, object.animation_data.action)
-
-            # object type
-            elif option.objectType in object.type:
-
-              # sort
-              sort(context, object.animation_data.action)
-
-      # clear duplicates
-      actions = []
-      [actions.append(item) for item in storage.batch.actions if item not in actions]
-      storage.batch.actions.clear()
-
-      # process
-      process(context, actions)
-
-    # grease pencil
-    if option.greasePencil:
-      for object in context.scene.objects[:]:
-        if hasattr(object.grease_pencil, 'name'):
+      # sensors
+      if option.sensors:
+        for object in context.scene.objects[:]:
 
           # object type
           if option.objectType in 'ALL':
-            if object.grease_pencil.users == 1:
 
-              # sort
-              sort(context, object.grease_pencil)
-
-              # layers
-              for layer in object.grease_pencil.layers[:]:
-
-                # sort
-                sort(context, layer)
-            else:
-
-              # shared
-              if object.grease_pencil not in shared.greasePencils[:]:
-                shared.greasePencils.append(object.grease_pencil)
-
-                # sort
-                sort(context, object.grease_pencil)
-
-                # layers
-                for layer in object.grease_pencil.layers[:]:
-
-                  # sort
-                  sort(context, layer)
+            # sort
+            for sensor in object.game.sensors[:]:
+              sort(context, sensor)
 
           # object type
           elif option.objectType in object.type:
-            if object.grease_pencil.users == 1:
 
-              # sort
-              sort(context, object.grease_pencil)
+            # sort
+            for sensor in object.game.sensors[:]:
+              sort(context, sensor)
 
-              # layers
-              for layer in object.grease_pencil.layers[:]:
+          # process
+          process(context, storage.batch.sensors)
 
-                # sort
-                sort(context, layer)
-            else:
+          # clear collection
+          storage.batch.sensors.clear()
 
-              # shared
-              if object.grease_pencil not in shared.greasePencils[:]:
-                shared.greasePencils.append(object.grease_pencil)
+      # controllers
+      if option.controllers:
+        for object in context.scene.objects[:]:
 
-                # sort
-                sort(context, object.grease_pencil)
+          # object type
+          if option.objectType in 'ALL':
 
-                # layers
-                for layer in object.grease_pencil.layers[:]:
+            # sort
+            for controller in object.game.controllers[:]:
+              sort(context, controller)
 
-                  # sort
-                  sort(context, layer)
+          # object type
+          elif option.objectType in object.type:
+
+            # sort
+            for controller in object.game.controllers[:]:
+              sort(context, controller)
+
+          # process
+          process(context, storage.batch.controllers)
+
+          # clear collection
+          storage.batch.controllers.clear()
+
+      # actuators
+      if option.actuators:
+        for object in context.scene.objects[:]:
+
+          # object type
+          if option.objectType in 'ALL':
+
+            # sort
+            for actuator in object.game.actuators[:]:
+              sort(context, actuator)
+
+          # object type
+          elif option.objectType in object.type:
+
+            # sort
+            for actuator in object.game.actuators[:]:
+              sort(context, actuator)
+
+          # process
+          process(context, storage.batch.actuators)
+
+          # clear collection
+          storage.batch.actuators.clear()
+
+    # batch type
+    elif option.batchType in 'GLOBAL':
+
+      # actions
+      if option.actions:
+        for action in bpy.data.actions[:]:
+
+          # sort
+          sort(context, action)
+
+        # process
+        process(context, storage.batch.actions)
+
+        # clear collection
+        storage.batch.actions.clear()
+
+      # action groups
+      if option.actionGroups:
+        for action in bpy.data.actions[:]:
+
+          # sort
+          sort(context, action)
+
+        # process
+        for action in storage.batch.actions:
+          for group in action[1][1].groups:
+            group.name = name(context, group.name) if not option.suffixLast else name(context, group.name) + option.suffix
+
+        # clear collection
+        storage.batch.actions.clear()
+
+      # grease pencil
+      if option.greasePencil:
+        for pencil in bpy.data.grease_pencil[:]:
+
+          # sort
+          sort(context, pencil)
+
+        # process
+        process(context, storage.batch.greasePencils)
+
+        # clear collection
+        storage.batch.greasePencils.clear()
+
+      # pencil layers
+      if option.pencilLayers:
+        for pencil in bpy.data.grease_pencil[:]:
+
+          # layers
+          for layer in pencil.layers[:]:
+
+            # sort
+            sort(context, layer)
 
           # process
           process(context, storage.batch.pencilLayers)
 
-      # clear shared
-      shared.greasePencils.clear()
+          # clear collection
+          storage.batch.pencilLayers.clear()
 
-      # process
-      process(context, storage.batch.greasePencils)
-
-    # constraints
-    if option.constraints:
-      for object in context.scene.objects[:]:
-        for constraint in object.constraints[:]:
-
-          # constraint type
-          if option.constraintType in 'ALL':
-
-            # sort
-            sort(context, constraint)
-
-          # constraint type
-          elif option.constraintType in constraint.type:
-
-            # sort
-            sort(context, constraint)
-
-        # process
-        process(context, storage.batch.constraints)
-
-    # modifiers
-    if option.modifiers:
-      for object in context.scene.objects[:]:
-        for modifier in object.modifiers[:]:
-
-          # modifier type
-          if option.modifierType in 'ALL':
-
-            # sort
-            sort(context, modifier)
-
-          # modifier tye
-          elif option.modifierType in modifier.type:
-
-            # sort
-            sort(context, modifier)
-
-        # process
-        process(context, storage.batch.modifiers)
-
-    # object data
-    if option.objectData:
-      for object in context.scene.objects[:]:
-        if object.type not in 'EMPTY':
+      # objects
+      if option.objects:
+        for object in bpy.data.objects[:]:
 
           # object type
           if option.objectType in 'ALL':
-            if object.data.users == 1:
 
-              # sort
-              sort(context, object.data)
-            else:
-
-              # shared shared
-              if object.data.name not in shared.objectData[:]:
-                shared.objectData.append(object.data.name)
-
-                # sort
-                sort(context, object.data)
+            # sort
+            sort(context, object)
 
           # object type
           elif option.objectType in object.type:
-            if object.data.users == 1:
-
-              # sort
-              sort(context, object.data)
-            else:
-
-              # shared shared
-              if object.data.name not in shared.objectData[:]:
-                shared.objectData.append(object.data.name)
-
-                # sort
-                sort(context, object.data)
-
-      # clear shared
-      shared.objectData.clear()
-
-      # object data
-      objectData = [
-        storage.batch.curves,
-        storage.batch.cameras,
-        storage.batch.meshes,
-        storage.batch.lamps,
-        storage.batch.lattices,
-        storage.batch.metaballs,
-        storage.batch.speakers,
-        storage.batch.armatures
-      ]
-      for collection in objectData:
-
-        # process
-        process(context, collection)
-
-    # bone groups
-    if option.boneGroups:
-      for object in context.scene.objects[:]:
-        if object.type in 'ARMATURE':
-          for group in object.pose.bone_groups[:]:
 
             # sort
-            sort(context, group)
+            sort(context, object)
 
         # process
-        process(context, storage.batch.boneGroups)
+        process(context, storage.batch.objects)
 
-    # bones
-    if option.bones:
-      for object in context.scene.objects[:]:
-        if object.type in 'ARMATURE':
+        # clear collection
+        storage.batch.objects.clear()
 
-          # edit mode
-          if object.mode in 'EDIT':
-            for bone in bpy.data.armatures[object.data.name].edit_bones[:]:
+      # groups
+      if option.groups:
+        for group in bpy.data.groups[:]:
 
-                # sort
-                sort(context, bone)
+          # sort
+          sort(context, group)
 
-          # pose or object mode
-          else:
-            for bone in bpy.data.armatures[object.data.name].bones[:]:
+        # process
+        process(context, storage.batch.groups)
 
-                # sort
-                sort(context, bone)
+        # clear collection
+        storage.batch.groups.clear()
 
-          # process
-          process(context, storage.batch.bones)
+      # constraints
+      if option.constraints:
+        for object in bpy.data.objects[:]:
+          for constraint in object.constraints[:]:
 
-    # bone constraints
-    if option.boneConstraints:
-      for object in context.scene.objects[:]:
-        if object.type in 'ARMATURE':
-          for bone in object.pose.bones[:]:
-            for constraint in bone.constraints[:]:
+            # object type
+            if option.objectType in 'ALL':
 
               # constraint type
               if option.constraintType in 'ALL':
@@ -1485,773 +2837,833 @@ def main(context):
                 # sort
                 sort(context, constraint)
 
-            # process
-            process(context, storage.batch.constraints)
+            # object type
+            elif option.objectType in object.type:
 
-    # vertex groups
-    if option.vertexGroups:
-      for object in context.scene.objects[:]:
-        if hasattr(object, 'vertex_groups'):
-          for group in object.vertex_groups[:]:
+              # constraint type
+              if option.constraintType in 'ALL':
+
+                # sort
+                sort(context, constraint)
+
+                # constraint type
+              elif option.constraintType in constraint.type:
+
+                # sort
+                sort(context, constraint)
+
+          # process
+          process(context, storage.batch.constraints)
+
+          # clear collection
+          storage.batch.constraints.clear()
+
+      # modifiers
+      if option.modifiers:
+        for object in bpy.data.objects[:]:
+          for modifier in object.modifiers[:]:
 
             # object type
             if option.objectType in 'ALL':
 
-              # sort
-              sort(context, group)
+              # modifier type
+              if option.modifierType in 'ALL':
+
+                # sort
+                sort(context, modifier)
+
+              # modifier type
+              elif option.modifierType in modifier.type:
+
+                # sort
+                sort(context, modifier)
 
             # object type
             elif option.objectType in object.type:
 
+              # modifier type
+              if option.modifierType in 'ALL':
+
+                # sort
+                sort(context, modifier)
+
+              # modifier type
+              elif option.modifierType in modifier.type:
+
+                # sort
+                sort(context, modifier)
+
+          # process
+          process(context, storage.batch.modifiers)
+
+          # clear collection
+          storage.batch.modifiers.clear()
+
+      # object data
+      if option.objectData:
+
+        # cameras
+        for camera in bpy.data.cameras[:]:
+
+          # sort
+          sort(context, camera)
+
+        # process
+        process(context, storage.batch.cameras)
+
+        # clear collection
+        storage.batch.cameras.clear()
+
+        # meshes
+        for mesh in bpy.data.meshes[:]:
+
+          # sort
+          sort(context, mesh)
+
+        # process
+        process(context, storage.batch.meshes)
+
+        # clear collection
+        storage.batch.meshes.clear()
+
+        # curves
+        for curve in bpy.data.curves[:]:
+
+          # sort
+          sort(context, curve)
+
+        # process
+        process(context, storage.batch.curves)
+
+        # clear collection
+        storage.batch.curves.clear()
+
+        # lamps
+        for lamp in bpy.data.lamps[:]:
+
+          # sort
+          sort(context, lamp)
+
+        # process
+        process(context, storage.batch.lamps)
+
+        # clear collection
+        storage.batch.lamps.clear()
+
+        # lattices
+        for lattice in bpy.data.lattices[:]:
+
+          # sort
+          sort(context, lattice)
+
+        # process
+        process(context, storage.batch.lattices)
+
+        # clear collection
+        storage.batch.lattices.clear()
+
+        # metaballs
+        for metaball in bpy.data.metaballs[:]:
+
+          # sort
+          sort(context, metaball)
+
+        # process
+        process(context, storage.batch.metaballs)
+
+        # clear collection
+        storage.batch.metaballs.clear()
+
+        # speakers
+        for speaker in bpy.data.speakers[:]:
+
+          # sort
+          sort(context, speaker)
+
+        # process
+        process(context, storage.batch.speakers)
+
+        # clear collection
+        storage.batch.speakers.clear()
+
+        # armatures
+        for armature in bpy.data.armatures[:]:
+
+          # sort
+          sort(context, armature)
+
+        # process
+        process(context, storage.batch.armatures)
+
+        # clear collection
+        storage.batch.armatures.clear()
+
+      # bone groups
+      if option.boneGroups:
+        for object in bpy.data.objects[:]:
+          if object.type in 'ARMATURE':
+            for group in object.pose.bone_groups[:]:
+
               # sort
               sort(context, group)
 
+            # process
+            process(context, storage.batch.boneGroups)
+
+            # clear collection
+            storage.batch.boneGroups.clear()
+
+      # bones
+      if option.bones:
+        for armature in bpy.data.armatures[:]:
+          for bone in armature.bones[:]:
+
+            # sort
+            sort(context, bone)
+
           # process
-          process(context, storage.batch.vertexGroups)
+          process(context, storage.batch.bones)
 
-    # shapekeys
-    if option.shapekeys:
-      for object in context.scene.objects[:]:
-        if hasattr(object.data, 'shape_keys'):
-          if hasattr(object.data.shape_keys, 'key_blocks'):
-            for block in object.data.shape_keys.key_blocks[:]:
+          # clear collection
+          storage.batch.bones.clear()
 
-              # object type
-              if option.objectType in 'ALL':
-
-                # sort
-                sort(context, block)
-
-              # object type
-              elif option.objectType in object.type:
+      # bone constraints
+      if option.boneConstraints:
+        for object in bpy.data.objects[:]:
+          if object.type in 'ARMATURE':
+            for bone in object.pose.bones[:]:
+              for constraint in bone.constraints[:]:
 
                 # sort
-                sort(context, block)
+                sort(context, constraint)
+
+              # process
+              process(context, storage.batch.constraints)
+
+              # clear collection
+              storage.batch.constraints.clear()
+
+      # vertex groups
+      if option.vertexGroups:
+        for object in bpy.data.objects[:]:
+          if object.type in {'MESH', 'LATTICE'}:
+            for group in object.vertex_groups[:]:
+
+              # sort
+              sort(context, group)
+
+            # process
+            process(context, storage.batch.vertexGroups)
+
+            # clear collection
+            storage.batch.vertexGroups.clear()
+
+      # shape keys
+      if option.shapekeys:
+        for shapekey in bpy.data.shape_keys[:]:
+
+            # sort
+            sort(context, shapekey)
+            for block in shapekey.key_blocks[:]:
+
+              # sort
+              sort(context, block)
 
             # process
             process(context, storage.batch.shapekeys)
 
-    # uvs
-    if option.uvs:
-      for object in context.scene.objects[:]:
-        if object.type in 'MESH':
-          for uv in object.data.uv_textures[:]:
+            # clear collection
+            storage.batch.shapekeys.clear()
 
-            # sort
-            sort(context, uv)
+      # uvs
+      if option.uvs:
+        for object in bpy.data.objects[:]:
+          if object.type in 'MESH':
+            for uv in object.data.uv_textures[:]:
 
-          # process
-          process(context, storage.batch.uvs)
+              # sort
+              sort(context, uv)
 
-    # vertex colors
-    if option.vertexColors:
-      for object in context.scene.objects[:]:
-        if object.type in 'MESH':
-          for color in object.data.vertex_colors[:]:
+            # process
+            process(context, storage.batch.uvs)
 
-            # sort
-            sort(context, color)
+            # clear collection
+            storage.batch.uvs.clear()
 
-          # process
-          process(context, storage.batch.vertexColors)
+      # vertex colors
+      if option.vertexColors:
+        for object in bpy.data.objects[:]:
+          if object.type in 'MESH':
+            for color in object.data.vertex_colors[:]:
 
-    # materials
-    if option.materials:
-      for object in context.scene.objects[:]:
-        for slot in object.material_slots[:]:
-          if slot.material != None:
-            if slot.material.users == 1:
+              # sort
+              sort(context, color)
 
-              # object type
-              if option.objectType in 'ALL':
+            # process
+            process(context, storage.batch.vertexColors)
 
-                # sort
-                sort(context, slot.material)
+            # clear collection
+            storage.batch.vertexColors.clear()
 
-              # object type
-              elif option.objectType in object.type:
+      # materials
+      if option.materials:
+        for material in bpy.data.materials[:]:
 
-                # sort
-                sort(context, slot.material)
-            else:
+          # sort
+          sort(context, material)
 
-              # shared
-              if slot.material not in shared.materials[:]:
-                shared.materials.append(slot.material)
+        # process
+        process(context, storage.batch.materials)
 
-                # sort
-                sort(context, slot.material)
+        # clear collection
+        storage.batch.materials.clear()
 
-      # clear shared
-      shared.materials.clear()
+      # textures
+      if option.textures:
+        for texture in bpy.data.textures[:]:
 
-      # process
-      process(context, storage.batch.materials)
+          # sort
+          sort(context, texture)
 
-    # textures
-    if option.textures:
-      for object in context.scene.objects[:]:
-        if context.scene.render.engine not in 'CYCLES':
-          for slot in object.material_slots[:]:
-            if slot.material != None:
-              if slot.material.users == 1:
-                for texslot in slot.material.texture_slots[:]:
-                  if texslot != None:
-                    if texslot.texture.users == 1:
+        # process
+        process(context, storage.batch.textures)
 
-                      # object type
-                      if option.objectType in 'ALL':
+        # clear collection
+        storage.batch.textures.clear()
 
-                        # sort
-                        sort(context, texslot.texture)
-
-                      # object type
-                      elif option.objectType in object.type:
-
-                        # sort
-                        sort(context, texslot.texture)
-                    else:
-
-                      # shared
-                      if texslot.texture not in shared[:]:
-                        shared.append(texslot.texture)
-
-                        # sort
-                        sort(context, texslot.texture)
-              else:
-
-                # shared
-                if slot.material not in shared.materials[:]:
-                  shared.materials.append(slot.material)
-                  for texslot in slot.material.texture_slots[:]:
-                    if texslot != None:
-                      if texslot.texture.users == 1:
-
-                        # object type
-                        if option.objectType in 'ALL':
-
-                          # sort
-                          sort(context, texslot.texture)
-
-                        # object type
-                        elif option.objectType in object.type:
-
-                          # sort
-                          sort(context, texslot.texture)
-                      else:
-
-                        # shared
-                        if texslot.texture not in shared.textures[:]:
-                          shared.textures.append(texslot.texture)
-
-                          # sort
-                          sort(context, texslot.texture)
-
-      # clear shared
-      shared.textures.clear()
-
-      # process
-      process(context, storage.batch.textures)
-
-    # particle systems
-    if option.particleSystems:
-      for object in context.scene.objects[:]:
-        if object.type in 'MESH':
-          for system in object.particle_systems[:]:
-
-            # object type
-            if option.objectType in 'ALL':
+      # particles systems
+      if option.particleSystems:
+        for object in bpy.data.objects[:]:
+          if object.type in 'MESH':
+            for system in object.particle_systems[:]:
 
               # sort
               sort(context, system)
 
-            # object type
-            elif option.objectType in object.type:
+            # process
+            process(context, storage.batch.particleSystems)
 
-              # sort
-              sort(context, system)
+            # clear collection
+            storage.batch.particleSystems.clear()
+
+      # particles settings
+      if option.particleSettings:
+        for settings in bpy.data.particles[:]:
+
+          # sort
+          sort(context, settings)
+
+        # process
+        process(context, storage.batch.particleSettings)
+
+        # clear collection
+        storage.batch.particleSettings.clear()
+
+      # sensors
+      if option.sensors:
+        for object in bpy.data.objects[:]:
+
+          # object type
+          if option.objectType in 'ALL':
+
+            # sort
+            for sensor in object.game.sensors[:]:
+              sort(context, sensor)
+
+          # object type
+          elif option.objectType in object.type:
+
+            # sort
+            for sensor in object.game.sensors[:]:
+              sort(context, sensor)
 
           # process
-          process(context, storage.batch.particleSystems)
+          process(context, storage.batch.sensors)
 
-    # particle settings
-    if option.particleSettings:
-      for object in context.scene.objects[:]:
-        if object.type in 'MESH':
-          for system in object.particle_systems[:]:
+          # clear collection
+          storage.batch.sensors.clear()
 
-            # object type
-            if option.objectType in 'ALL':
-              if system.settings.users == 1:
+      # controllers
+      if option.controllers:
+        for object in bpy.data.objects[:]:
 
-                # sort
-                sort(context, system.settings)
-              else:
+          # object type
+          if option.objectType in 'ALL':
 
-                # shared
-                if system.settings not in shared.particleSettings[:]:
-                  shared.particleSettings.append(system.settings)
+            # sort
+            for controller in object.game.controllers[:]:
+              sort(context, controller)
 
-                  # sort
-                  sort(context, system.settings)
+          # object type
+          elif option.objectType in object.type:
 
-            # object type
-            elif option.objectType in object.type:
-              if system.settings.users == 1:
+            # sort
+            for controller in object.game.controllers[:]:
+              sort(context, controller)
 
-                # sort
-                sort(context, system.settings)
-              else:
+          # process
+          process(context, storage.batch.controllers)
 
-                # shared
-                if system.settings not in shared.particleSettings[:]:
-                  shared.particleSettings.append(system.settings)
+          # clear collection
+          storage.batch.controllers.clear()
 
-                  # sort
-                  sort(context, system.settings)
+      # actuators
+      if option.actuators:
+        for object in bpy.data.objects[:]:
 
-      # clear shared
-      shared.particleSettings.clear()
+          # object type
+          if option.objectType in 'ALL':
 
-      # process
-      process(context, storage.batch.particleSettings)
+            # sort
+            for actuator in object.game.actuators[:]:
+              sort(context, actuator)
 
-  # batch type
-  elif option.batchType in 'GLOBAL':
+          # object type
+          elif option.objectType in object.type:
 
-    # objects
-    if option.objects:
-      for object in bpy.data.objects[:]:
+            # sort
+            for actuator in object.game.actuators[:]:
+              sort(context, actuator)
+
+          # process
+          process(context, storage.batch.actuators)
+
+          # clear collection
+          storage.batch.actuators.clear()
+
+    # line sets
+    if option.lineSets:
+      for scene in bpy.data.scenes[:]:
+        for layer in scene.render.layers[:]:
+          for lineset in layer.freestyle_settings.linesets[:]:
+            if hasattr(lineset, 'name'):
+              lineset.name = name(context, lineset.name) if not option.suffixLast else name(context, lineset.name) + option.suffix
+
+    # linestyles
+    if option.linestyles:
+      for style in bpy.data.linestyles[:]:
 
         # sort
-        sort(context, object)
+        sort(context, style)
 
       # process
-      process(context, storage.batch.objects)
+      process(context, storage.batch.linestyles)
 
-    # groups
-    if option.groups:
-      for group in bpy.data.groups[:]:
+      # clear collection
+      storage.batch.linestyles.clear()
+
+    # linestyle modifiers
+    if option.linestyleModifiers:
+      for style in bpy.data.linestyles[:]:
+
+
+        # color
+        for modifier in style.color_modifiers[:]:
+
+          # linestyle modifier type
+          if option.linestyleModifierType in 'ALL':
+
+            # sort
+            sort(context, modifier)
+
+          # linestyle modifier type
+          elif option.linestyleModifierType in modifier.type:
+
+            # sort
+            sort(context, modifier)
+
+        # process
+        process(context, storage.batch.modifiers)
+
+        # clear storage
+        storage.batch.modifiers.clear()
+
+
+        # alpha
+        for modifier in style.alpha_modifiers[:]:
+
+          # linestyle modifier type
+          if option.linestyleModifierType in 'ALL':
+
+            # sort
+            sort(context, modifier)
+
+          # linestyle modifier type
+          elif option.linestyleModifierType in modifier.type:
+
+            # sort
+            sort(context, modifier)
+
+        # process
+        process(context, storage.batch.modifiers)
+
+        # clear storage
+        storage.batch.modifiers.clear()
+
+
+        # thickness
+        for modifier in style.thickness_modifiers[:]:
+
+          # linestyle modifier type
+          if option.linestyleModifierType in 'ALL':
+
+            # sort
+            sort(context, modifier)
+
+          # linestyle modifier type
+          elif option.linestyleModifierType in modifier.type:
+
+            # sort
+            sort(context, modifier)
+
+        # process
+        process(context, storage.batch.modifiers)
+
+        # clear storage
+        storage.batch.modifiers.clear()
+
+
+        # geometry
+        for modifier in style.geometry_modifiers[:]:
+
+          # linestyle modifier type
+          if option.linestyleModifierType in 'ALL':
+
+            # sort
+            sort(context, modifier)
+
+          # linestyle modifier type
+          elif option.linestyleModifierType in modifier.type:
+
+            # sort
+            sort(context, modifier)
+
+        # process
+        process(context, storage.batch.modifiers)
+
+        # clear storage
+        storage.batch.modifiers.clear()
+
+    # scenes
+    if option.scenes:
+      for scene in bpy.data.scenes[:]:
+
+        # sort
+        sort(context, scene)
+
+      # process
+      process(context, storage.batch.scenes)
+
+      # clear collection
+      storage.batch.scenes.clear()
+
+    # render layers
+    if option.renderLayers:
+      for scene in bpy.data.scenes[:]:
+        for layer in scene.render.layers[:]:
+
+          # sort
+          sort(context, layer)
+
+        # process
+        process(context, storage.batch.renderLayers)
+
+        # clear collection
+        storage.batch.renderLayers.clear()
+
+    # worlds
+    if option.worlds:
+      for world in bpy.data.worlds[:]:
+
+        # sort
+        sort(context, world)
+
+      # process
+      process(context, storage.batch.worlds)
+
+      # clear collection
+      storage.batch.worlds.clear()
+
+    # libraries
+    if option.libraries:
+      for library in bpy.data.libraries[:]:
+
+        # sort
+        sort(context, library)
+
+      # process
+      process(context, storage.batch.libraries)
+
+      # clear collection
+      storage.batch.libraries.clear()
+
+    # images
+    if option.images:
+      for image in bpy.data.images[:]:
+
+        # sort
+        sort(context, image)
+
+      # process
+      process(context, storage.batch.images)
+
+      # clear collection
+      storage.batch.images.clear()
+
+    # masks
+    if option.masks:
+      for mask in bpy.data.masks[:]:
+
+        # sort
+        sort(context, mask)
+
+      # process
+      process(context, storage.batch.masks)
+
+      # clear collection
+      storage.batch.masks.clear()
+
+    # sequences
+    if option.sequences:
+      for scene in bpy.data.scenes[:]:
+        if hasattr(scene.sequence_editor, 'sequence_all'):
+          for sequence in scene.sequence_editor.sequences_all[:]:
+
+            # sort
+            sort(context, sequence)
+
+          # process
+          process(context, storage.batch.sequences)
+
+          # clear collection
+          storage.batch.sequences.clear()
+
+    # movie clips
+    if option.movieClips:
+      for clip in bpy.data.movieclips[:]:
+
+        # sort
+        sort(context, clip)
+
+      # process
+      process(context, storage.batch.movieClips)
+
+      # clear collection
+      storage.batch.movieClips.clear()
+
+    # sounds
+    if option.sounds:
+      for sound in bpy.data.sounds[:]:
+
+        # sort
+        sort(context, sound)
+
+      # process
+      process(context, storage.batch.sounds)
+
+      # clear collection
+      storage.batch.sounds.clear()
+
+    # screens
+    if option.screens:
+      for screen in bpy.data.screens[:]:
+
+        # sort
+        sort(context, screen)
+
+      # process
+      process(context, storage.batch.screens)
+
+      # clear collection
+      storage.batch.screens.clear()
+
+    # keying sets
+    if option.keyingSets:
+      for scene in bpy.data.scenes[:]:
+        for keyingSet in scene.keying_sets[:]:
+
+          # sort
+          sort(context, keyingSet)
+
+        # process
+        process(context, storage.batch.keyingSets)
+
+        # clear collection
+        storage.batch.keyingSets.clear()
+
+    # palettes
+    if option.palettes:
+      for palette in bpy.data.palettes[:]:
+
+        # sort
+        sort(context, palette)
+
+      # process
+      process(context, storage.batch.palettes)
+
+      # clear collection
+      storage.batch.palettes.clear()
+
+    # brushes
+    if option.brushes:
+      for brush in bpy.data.brushes[:]:
+
+        # sort
+        sort(context, brush)
+
+      # process
+      process(context, storage.batch.brushes)
+
+      # clear collection
+      storage.batch.brushes.clear()
+
+    # nodes
+    if option.nodes:
+
+      # shader
+      for material in bpy.data.materials[:]:
+        if hasattr(material.node_tree, 'nodes'):
+          for node in material.node_tree.nodes[:]:
+
+            # sort
+            sort(context, node)
+
+          # process
+          process(context, storage.batch.nodes)
+
+          # clear collection
+          storage.batch.nodes.clear()
+
+      # compositing
+      for scene in bpy.data.scenes[:]:
+        if hasattr(scene.node_tree, 'nodes'):
+          for node in scene.node_tree.nodes[:]:
+
+            # sort
+            sort(context, node)
+
+          # process
+          process(context, storage.batch.nodes)
+
+          # clear collection
+          storage.batch.nodes.clear()
+
+      # texture
+      for texture in bpy.data.textures[:]:
+        if hasattr(texture.node_tree, 'nodes'):
+          for node in texture.node_tree.nodes[:]:
+
+            # sort
+            sort(context, node)
+
+          # process
+          process(context, storage.batch.nodes)
+
+          # clear collection
+          storage.batch.nodes.clear()
+
+      # groups
+      for group in bpy.data.node_groups[:]:
+        for node in group.nodes[:]:
+
+          # sort
+          sort(context, node)
+
+        # process
+        process(context, storage.batch.nodes)
+
+        # clear collection
+        storage.batch.nodes.clear()
+
+    # node labels
+    if option.nodeLabels:
+
+      # batch tag
+      tag = True
+
+      # shader
+      for material in bpy.data.materials[:]:
+        if hasattr(material.node_tree, 'nodes'):
+          for node in material.node_tree.nodes[:]:
+
+            # sort
+            sort(context, node)
+
+          # process
+          process(context, storage.batch.nodeLabels)
+
+          # clear collection
+          storage.batch.nodeLabels.clear()
+
+      # compositing
+      for scene in bpy.data.scenes[:]:
+        if hasattr(scene.node_tree, 'nodes'):
+          for node in scene.node_tree.nodes[:]:
+
+            # sort
+            sort(context, node)
+
+          # process
+          process(context, storage.batch.nodeLabels)
+
+          # clear collection
+          storage.batch.nodeLabels.clear()
+
+      # texture
+      for texture in bpy.data.textures[:]:
+        if hasattr(texture.node_tree, 'nodes'):
+          for node in texture.node_tree.nodes[:]:
+
+            # sort
+            sort(context, node)
+
+          # process
+          process(context, storage.batch.nodeLabels)
+
+          # clear collection
+          storage.batch.nodeLabels.clear()
+
+      # groups
+      for group in bpy.data.node_groups[:]:
+        for node in group.nodes[:]:
+
+          # sort
+          sort(context, node)
+
+        # process
+        process(context, storage.batch.nodeLabels)
+
+        # clear collection
+        storage.batch.nodeLabels.clear()
+
+      # batch tag
+      tag = False
+
+    # node groups
+    if option.nodeGroups:
+      for group in bpy.data.node_groups[:]:
 
         # sort
         sort(context, group)
 
       # process
-      process(context, storage.batch.groups)
+      process(context, storage.batch.nodeGroups)
 
-    # actions
-    if option.actions:
-      for action in bpy.data.actions[:]:
+      # clear collection
+      storage.batch.nodeGroups.clear()
 
-        # sort
-        sort(context, action)
-
-      # process
-      process(context, storage.batch.actions)
-
-    # grease pencil
-    if option.greasePencil:
-      for pencil in bpy.data.grease_pencil[:]:
+    # texts
+    if option.texts:
+      for text in bpy.data.texts[:]:
 
         # sort
-        sort(context, pencil)
-
-        # layers
-        for layer in pencil.layers[:]:
-
-          # sort
-          sort(context, layer)
+        sort(context, text)
 
       # process
-      process(context, storage.batch.pencilLayers)
-      process(context, storage.batch.greasePencils)
+      process(context, storage.batch.texts)
 
-    # constraints
-    if option.constraints:
-      for object in bpy.data.objects[:]:
-        for constraint in object.constraints[:]:
-
-          # sort
-          sort(context, constraint)
-
-        # process
-        process(context, storage.batch.constraints)
-
-    # modifiers
-    if option.modifiers:
-      for object in bpy.data.objects[:]:
-        for modifier in object.modifiers[:]:
-
-          # sort
-          sort(context, modifier)
-
-        # process
-        process(context, storage.batch.modifiers)
-
-    # object data
-    if option.objectData:
-
-      # cameras
-      for camera in bpy.data.cameras[:]:
-
-        # sort
-        sort(context, camera)
-
-      # process
-      process(context, storage.batch.cameras)
-
-      # meshes
-      for mesh in bpy.data.meshes[:]:
-
-        # sort
-        sort(context, mesh)
-
-      # process
-      process(context, storage.batch.meshes)
-
-      # curves
-      for curve in bpy.data.curves[:]:
-
-        # sort
-        sort(context, curve)
-
-      # process
-      process(context, storage.batch.curves)
-
-      # lamps
-      for lamp in bpy.data.lamps[:]:
-
-        # sort
-        sort(context, lamp)
-
-      # process
-      process(context, storage.batch.lamps)
-
-      # lattices
-      for lattice in bpy.data.lattices[:]:
-
-        # sort
-        sort(context, lattice)
-
-      # process
-      process(context, storage.batch.lattices)
-
-      # metaballs
-      for metaball in bpy.data.metaballs[:]:
-
-        # sort
-        sort(context, metaball)
-
-      # process
-      process(context, storage.batch.metaballs)
-
-      # speakers
-      for speaker in bpy.data.speakers[:]:
-
-        # sort
-        sort(context, speaker)
-
-      # process
-      process(context, storage.batch.speakers)
-
-      # armatures
-      for armature in bpy.data.armatures[:]:
-
-        # sort
-        sort(context, armature)
-
-      # process
-      process(context, storage.batch.armatures)
-
-    # bone groups
-    if option.boneGroups:
-      for object in bpy.data.objects[:]:
-        if object.type in 'ARMATURE':
-          for group in object.pose.bone_groups[:]:
-
-            # sort
-            sort(context, group)
-
-          # process
-          process(context, storage.batch.boneGroups)
-
-    # bones
-    if option.bones:
-      for armature in bpy.data.armatures[:]:
-        for bone in armature.bones[:]:
-
-          # sort
-          sort(context, bone)
-
-        # process
-        process(context, storage.batch.bones)
-
-    # bone constraints
-    if option.boneConstraints:
-      for object in bpy.data.objects[:]:
-        if object.type in 'ARMATURE':
-          for bone in object.pose.bones[:]:
-            for constraint in bone.constraints[:]:
-
-              # sort
-              sort(context, constraint)
-
-            # process
-            process(context, storage.batch.constraints)
-
-    # vertex groups
-    if option.vertexGroups:
-      for object in bpy.data.objects[:]:
-        if object.type in {'MESH', 'LATTICE'}:
-          for group in object.vertex_groups[:]:
-
-            # sort
-            sort(context, group)
-
-          # process
-          process(context, storage.batch.vertexGroups)
-
-    # shape keys
-    if option.shapekeys:
-      for shapekey in bpy.data.shape_keys[:]:
-
-          # sort
-          sort(context, shapekey)
-          for block in shapekey.key_blocks[:]:
-
-            # sort
-            sort(context, block)
-
-          # process
-          process(context, storage.batch.shapekeys)
-
-    # uvs
-    if option.uvs:
-      for object in bpy.data.objects[:]:
-        if object.type in 'MESH':
-          for uv in object.data.uv_textures[:]:
-
-            # sort
-            sort(context, uv)
-
-          # process
-          process(context, storage.batch.uvs)
-
-    # vertex colors
-    if option.vertexColors:
-      for object in bpy.data.objects[:]:
-        if object.type in 'MESH':
-          for color in object.data.vertex_colors[:]:
-
-            # sort
-            sort(context, color)
-
-          # process
-          process(context, storage.batch.vertexColors)
-
-    # materials
-    if option.materials:
-      for material in bpy.data.materials[:]:
-
-        # sort
-        sort(context, material)
-
-      # process
-      process(context, storage.batch.materials)
-
-    # textures
-    if option.textures:
-      for texture in bpy.data.textures[:]:
-
-        # sort
-        sort(context, texture)
-
-      # process
-      process(context, storage.batch.textures)
-
-    # particles systems
-    if option.particleSystems:
-      for object in bpy.data.objects[:]:
-        if object.type in 'MESH':
-          for system in object.particle_systems[:]:
-
-            # sort
-            sort(context, system)
-
-          # process
-          process(context, storage.batch.particleSystems)
-
-    # particles settings
-    if option.particleSettings:
-      for settings in bpy.data.particles[:]:
-
-        # sort
-        sort(context, settings)
-
-      # process
-      process(context, storage.batch.particleSettings)
-
-  # scenes
-  if option.scenes:
-    for scene in bpy.data.scenes[:]:
-
-      # sort
-      sort(context, scene)
-
-    # process
-    process(context, storage.batch.scenes)
-
-  # render layers
-  if option.renderLayers:
-    for scene in bpy.data.scenes[:]:
-      for layer in scene.render.layers[:]:
-
-        # sort
-        sort(context, layer)
-
-      # process
-      process(context, storage.batch.renderLayers)
-
-  # worlds
-  if option.worlds:
-    for world in bpy.data.worlds[:]:
-
-      # sort
-      sort(context, world)
-
-    # process
-    process(context, storage.batch.worlds)
-
-  # libraries
-  if option.libraries:
-    for library in bpy.data.libraries[:]:
-
-      # sort
-      sort(context, library)
-
-    # process
-    process(context, storage.batch.libraries)
-
-  # images
-  if option.images:
-    for image in bpy.data.images[:]:
-
-      # sort
-      sort(context, image)
-
-    # process
-    process(context, storage.batch.images)
-
-  # masks
-  if option.masks:
-    for mask in bpy.data.masks[:]:
-
-      # sort
-      sort(context, mask)
-
-    # process
-    process(context, storage.batch.masks)
-
-  # sequences
-  if option.sequences:
-    for scene in bpy.data.scenes[:]:
-      if hasattr(scene.sequence_editor, 'sequence_all'):
-        for sequence in scene.sequence_editor.sequences_all[:]:
-
-          # sort
-          sort(context, sequence)
-
-        # process
-        process(context, storage.batch.sequences)
-
-  # movie clips
-  if option.movieClips:
-    for clip in bpy.data.movieclips[:]:
-
-      # sort
-      sort(context, clip)
-
-    # process
-    process(context, storage.batch.movieClips)
-
-  # sounds
-  if option.sounds:
-    for sound in bpy.data.sounds[:]:
-
-      # sort
-      sort(context, sound)
-
-    # process
-    process(context, storage.batch.sounds)
-
-  # screens
-  if option.screens:
-    for screen in bpy.data.screens[:]:
-
-      # sort
-      sort(context, screen)
-
-    # process
-    process(context, storage.batch.screens)
-
-  # keying sets
-  if option.keyingSets:
-    for scene in bpy.data.scenes[:]:
-      for keyingSet in scene.keying_sets[:]:
-
-        # sort
-        sort(context, keyingSet)
-
-      # process
-      process(context, storage.batch.keyingSets)
-
-  # palettes
-  if option.palettes:
-    for palette in bpy.data.palettes[:]:
-
-      # sort
-      sort(context, palette)
-
-    # process
-    process(context, storage.batch.palettes)
-
-  # brushes
-  if option.brushes:
-    for brush in bpy.data.brushes[:]:
-
-      # sort
-      sort(context, brush)
-
-    # process
-    process(context, storage.batch.brushes)
-
-  # line styles
-  if option.linestyles:
-    for style in bpy.data.linestyles[:]:
-
-      # sort
-      sort(context, style)
-
-    # process
-    process(context, storage.batch.linestyles)
-
-  # nodes
-  if option.nodes:
-
-    # shader
-    for material in bpy.data.materials[:]:
-      if hasattr(material.node_tree, 'nodes'):
-        for node in material.node_tree.nodes[:]:
-
-          # sort
-          sort(context, node)
-
-        # process
-        process(context, storage.batch.nodes)
-
-    # compositing
-    for scene in bpy.data.scenes[:]:
-      if hasattr(scene.node_tree, 'nodes'):
-        for node in scene.node_tree.nodes[:]:
-
-          # sort
-          sort(context, node)
-
-        # process
-        process(context, storage.batch.nodes)
-
-    # texture
-    for texture in bpy.data.textures[:]:
-      if hasattr(texture.node_tree, 'nodes'):
-        for node in texture.node_tree.nodes[:]:
-
-          # sort
-          sort(context, node)
-
-        # process
-        process(context, storage.batch.nodes)
-
-    # groups
-    for group in bpy.data.node_groups[:]:
-      for node in group.nodes[:]:
-
-        # sort
-        sort(context, node)
-
-      # process
-      process(context, storage.batch.nodes)
-
-  # node labels
-  if option.nodeLabels:
-
-    # batch tag
-    tag = True
-
-    # shader
-    for material in bpy.data.materials[:]:
-      if hasattr(material.node_tree, 'nodes'):
-        for node in material.node_tree.nodes[:]:
-
-          # sort
-          sort(context, node)
-
-        # process
-        process(context, storage.batch.nodeLabels)
-
-    # compositing
-    for scene in bpy.data.scenes[:]:
-      if hasattr(scene.node_tree, 'nodes'):
-        for node in scene.node_tree.nodes[:]:
-
-          # sort
-          sort(context, node)
-
-        # process
-        process(context, storage.batch.nodeLabels)
-
-    # texture
-    for texture in bpy.data.textures[:]:
-      if hasattr(texture.node_tree, 'nodes'):
-        for node in texture.node_tree.nodes[:]:
-
-          # sort
-          sort(context, node)
-
-        # process
-        process(context, storage.batch.nodeLabels)
-
-    # groups
-    for group in bpy.data.node_groups[:]:
-      for node in group.nodes[:]:
-
-        # sort
-        sort(context, node)
-
-      # process
-      process(context, storage.batch.nodeLabels)
-
-    # batch tag
-    tag = False
-
-  # node groups
-  if option.nodeGroups:
-    for group in bpy.data.node_groups[:]:
-
-      # sort
-      sort(context, group)
-
-    # process
-    process(context, storage.batch.nodeGroups)
-
-  # texts
-  if option.texts:
-    for text in bpy.data.texts[:]:
-
-      # sort
-      sort(context, text)
-
-    # process
-    process(context, storage.batch.texts)
+      # clear collection
+      storage.batch.texts.clear()
 
 # sort
 def sort(context, datablock):
@@ -2276,7 +3688,7 @@ def sort(context, datablock):
       storage.batch.groups.append([datablock.name, [1, datablock]])
 
   # actions
-  if option.actions:
+  if option.actions or option.actionGroups:
     if datablock.rna_type.identifier == 'Action':
       storage.batch.actions.append([datablock.name, [1, datablock]])
 
@@ -2285,12 +3697,13 @@ def sort(context, datablock):
     if datablock.rna_type.identifier == 'GreasePencil':
       storage.batch.greasePencils.append([datablock.name, [1, datablock]])
 
-    # pencil layers
+  # pencil layers
+  if option.pencilLayers:
     if datablock.rna_type.identifier == 'GPencilLayer':
       storage.batch.pencilLayers.append([datablock.info, [1, datablock]])
 
   # constraints
-  if option.constraints:
+  if option.constraints or option.boneConstraints:
     if hasattr(datablock.rna_type.base, 'identifier'):
       if datablock.rna_type.base.identifier == 'Constraint':
         storage.batch.constraints.append([datablock.name, [1, datablock]])
@@ -2383,6 +3796,36 @@ def sort(context, datablock):
     if datablock.rna_type.identifier == 'ParticleSettings':
       storage.batch.particleSettings.append([datablock.name, [1, datablock]])
 
+  # line style
+  if option.linestyles:
+    if datablock.rna_type.identifier == 'FreestyleLineStyle':
+      storage.batch.linestyles.append([datablock.name, [1, datablock]])
+
+  # line style modifiers
+  if option.linestyleModifiers:
+    if hasattr(datablock.rna_type.base, 'identifier'):
+      if hasattr(datablock.rna_type.base.base, 'identifier'):
+        if datablock.rna_type.base.base.identifier == 'LineStyleModifier':
+          storage.batch.modifiers.append([datablock.name, [1, datablock]])
+
+  # sensors
+  if option.sensors:
+    if hasattr(datablock.rna_type.base, 'identifier'):
+      if datablock.rna_type.base.identifier == 'Sensor':
+        storage.batch.sensors.append([datablock.name, [1, datablock]])
+
+  # controllers
+  if option.controllers:
+    if hasattr(datablock.rna_type.base, 'identifier'):
+      if datablock.rna_type.base.identifier == 'Controller':
+        storage.batch.controllers.append([datablock.name, [1, datablock]])
+
+  # actuators
+  if option.actuators:
+    if hasattr(datablock.rna_type.base, 'identifier'):
+      if datablock.rna_type.base.identifier == 'Actuator':
+        storage.batch.actuators.append([datablock.name, [1, datablock]])
+
   # scenes
   if option.scenes:
     if datablock.rna_type.identifier == 'Scene':
@@ -2448,11 +3891,6 @@ def sort(context, datablock):
   if option.brushes:
     if datablock.rna_type.identifier == 'Brush':
       storage.batch.brushes.append([datablock.name, [1, datablock]])
-
-  # linestyles
-  if option.linestyles:
-    if datablock.rna_type.identifier == 'FreestyleLineStyle':
-      storage.batch.linestyles.append([datablock.name, [1, datablock]])
 
   # nodes
   if option.nodes:
@@ -2571,13 +4009,23 @@ def process(context, collection):
           # duplicates
           if collection[item[1]][0] not in duplicates:
 
+            # suffix last
+            if option.suffixLast:
+
+              # rename
+              rename = collection[item[1]][0] + option.separator + '0'*option.padding + str(i + option.start).zfill(len(str(collection[item[1]][1][0]))) + option.suffix
+            else:
+
+              # rename
+              rename = collection[item[1]][0] + option.separator + '0'*option.padding + str(i + option.start).zfill(len(str(collection[item[1]][1][0])))
+
             # name
             if hasattr(collection[item[1]][1][1], 'name'):
-              collection[item[1]][1][1].name = collection[item[1]][0] + option.separator + '0'*option.padding + str(i + option.start).zfill(len(str(collection[item[1]][1][0])))
+              collection[item[1]][1][1].name = rename
             elif hasattr(collection[item[1]][1][1], 'info'):
-              collection[item[1]][1][1].info = collection[item[1]][0] + option.separator + '0'*option.padding + str(i + option.start).zfill(len(str(collection[item[1]][1][0])))
+              collection[item[1]][1][1].info = rename
             elif hasattr(collection[item[1]][1][1], 'bl_label'):
-              collection[item[1]][1][1].bl_label = collection[item[1]][0] + option.separator + '0'*option.padding + str(i + option.start).zfill(len(str(collection[item[1]][1][0])))
+              collection[item[1]][1][1].bl_label = rename
             i += 1
           if i == collection[item[1]][1][0]:
             i = 0
@@ -2590,13 +4038,23 @@ def process(context, collection):
       for item in collection[:]:
         if item[0] not in duplicates:
 
+          # suffix last
+          if option.suffixLast:
+
+            # rename
+            rename = item[0] + option.suffix
+          else:
+
+            # rename
+            rename = item[0]
+
           # name
           if hasattr(item[1][1], 'name'):
-            item[1][1].name = item[0]
+            item[1][1].name = rename
           elif hasattr(item[1][1], 'info'):
-            item[1][1].info = item[0]
+            item[1][1].info = rename
           elif hasattr(item[1][1], 'bl_label'):
-            item[1][1].bl_label = item[0]
+            item[1][1].bl_label = rename
 
     # clear counter
     counter.clear()
@@ -2643,7 +4101,7 @@ def name(context, oldName):
     newName = re.sub(re.escape(option.find), option.replace, newName)
 
   # prefix & suffix
-  newName = option.prefix + newName + option.suffix
+  newName = option.prefix + newName + option.suffix if not option.suffixLast else option.prefix + newName
 
   # name check
   if nameCheck != newName:
