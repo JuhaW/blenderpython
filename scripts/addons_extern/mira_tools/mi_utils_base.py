@@ -95,15 +95,20 @@ def obj_raycast(obj, matrix, view_vector, ray_origin, ray_max):
     ray_target_obj = matrix_inv * ray_target
 
     # cast the ray
-    hit, normal, face_index = obj.ray_cast(ray_origin_obj, ray_target_obj)
+    hit_result, hit, normal, face_index = obj.ray_cast(ray_origin_obj, ray_target_obj)
 
-    if hit is not None:
+    if hit_result:
         hit_world = matrix * hit
 
         length_squared = (hit_world - ray_origin).length_squared
 
         if face_index != -1:
-            normal_world = (matrix.to_quaternion() * normal).normalized()
+            #normal_world = (matrix.to_quaternion() * normal).normalized()
+
+            normal_world = (matrix.to_quaternion() * normal).to_4d()
+            normal_world.w = 0
+            normal_world = (matrix.to_quaternion() * (matrix_inv * normal_world).to_3d()).normalized()
+
             return normal_world, hit_world, length_squared
 
     return None, None, None
@@ -165,13 +170,13 @@ def generate_id(other_ids):
     return uniq_numb
 
 
-# CODE FOR SELECTED BMESH ---
-def get_selected_bmesh(bm):
-    sel_verts = get_selected_bmverts(bm)
-    sel_edges = [e for e in bm.edges if e.select]
-    sel_faces = [f for f in bm.faces if f.select]
+## CODE FOR SELECTED BMESH ---
+#def get_selected_bmesh(bm):
+    #sel_verts = get_selected_bmverts(bm)
+    #sel_edges = [e for e in bm.edges if e.select]
+    #sel_faces = [f for f in bm.faces if f.select]
 
-    return [sel_verts, sel_edges, sel_faces]
+    #return [sel_verts, sel_edges, sel_faces]
 
 
 def get_selected_bmverts(bm):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import io
-import os
+import ntpath
 
 from XNALaraMesh import ascii_ops
 from XNALaraMesh import xps_const
@@ -116,7 +116,7 @@ def readMeshes(file, hasBones):
         textures = []
         textureCount = ascii_ops.readInt(file)
         for texId in range(textureCount):
-            textureFile = os.path.basename(ascii_ops.readString(file))
+            textureFile = ntpath.basename(ascii_ops.readString(file))
             # print('Texture file', textureFile)
             uvLayerId = ascii_ops.readInt(file)
 
@@ -196,6 +196,22 @@ def poseData(string):
     return poseData
 
 
+def boneDictData(string):
+    boneDictRename = {}
+    boneDictRestore = {}
+    poseList = string.split('\n')
+    for bonePose in poseList:
+        if bonePose:
+            pose = bonePose.split(';')
+
+            oldName = pose[0]
+            newName = pose[1]
+            boneDictRename[oldName]=newName
+            boneDictRestore[newName]=oldName
+    poseData = (boneDictRename, boneDictRestore)
+    return poseData
+
+
 def readIoStream(filename):
     with open(filename, "r", encoding=xps_const.ENCODING_READ) as a_file:
         ioStream = io.StringIO(a_file.read())
@@ -221,6 +237,12 @@ def readXpsPose(filename):
     poseString = readPoseFile(ioStream)
     bonesPose = poseData(poseString)
     return bonesPose
+
+def readBoneDict(filename):
+    ioStream = readIoStream(filename)
+    boneDictString = readPoseFile(ioStream)
+    boneDict = boneDictData(boneDictString)
+    return boneDict
 
 if __name__ == "__main__":
     readModelfilename = r'G:\3DModeling\XNALara\XNALara_XPS\data\TESTING2\Tekken\Tekken - Lili Bride\generic_item.mesh.ascii'

@@ -26,7 +26,7 @@ bl_info = {
     'blender': (2, 70, 0),
     'location': 'View3D > EditMode > (w) Specials', 
     'warning': "",
-    'category': 'Mesh'}
+    'category': 'Object'}
 
 import bpy,bmesh
 from bpy.props import FloatProperty, IntProperty, BoolProperty,EnumProperty,StringProperty

@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 #  ***** GPL LICENSE BLOCK *****
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -16,7 +18,7 @@
 #  ***** GPL LICENSE BLOCK *****
 
 bl_info = {
-	"name": "Delaunay Voronoi ",
+	"name": "[bgis] Delaunay Voronoi",
 	"description": "Points cloud Delaunay triangulation in 2.5D (suitable for terrain modelling) or Voronoi diagram in 2D",
 	"author": "Domlysz",
 	'license': 'GPL',
@@ -43,7 +45,3 @@ def register():
 
 def unregister():
 	bpy.utils.unregister_module(__name__)
-	
-
-if __name__ == "__main__":
-    register()

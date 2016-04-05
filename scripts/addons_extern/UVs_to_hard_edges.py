@@ -23,7 +23,7 @@ bl_info = {
     "blender": (2, 7, 4),
     "location": "3D View -> Tools Panel",
     "description": "Sets the object UV islands borders' edges to hard edges and an Edge Split modifier",
-    "category": "Object"}
+    "category": "UV"}
 
 
 import bpy

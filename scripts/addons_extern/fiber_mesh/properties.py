@@ -39,7 +39,7 @@ class cls_BounceFibers(bpy.types.PropertyGroup):
     bounce_count = IntProperty(
         name="Number Bounces",
         description = "How many curve points each fiber will have.",
-        min = 3, max = 4800, default=10, update=property_update)
+        min = 3, max = 4800, default=960, update=property_update)
         
     sub_steps = IntProperty(
         name="Sub Steps",
@@ -78,7 +78,7 @@ class cls_BounceFibers(bpy.types.PropertyGroup):
     rnd_seed = IntProperty(
         name="Random Seed",
         description="A seed value for the random number generator. Change for variations.",
-        min=0, max=16384, default=10, update=property_update)
+        min=0, max=16384, default=801, update=property_update)
         
     use_selection = BoolProperty(name="Use Selection",
         description="When enabled multiple curves will be generated, one for each face selected in the mesh in edit mode. A single random face is chosen when disabled.",
@@ -97,3 +97,4 @@ def register():
 
 def unregister():
 	bpy.utils.unregister_module(__name__)
+

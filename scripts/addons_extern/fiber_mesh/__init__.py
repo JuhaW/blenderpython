@@ -28,7 +28,7 @@ bl_info = {
     "name": "Bounce Fibers",
     "author": "Liero, Atom",
     "version": (1,1),
-    "blender": (2, 7, 0),
+    "blender": (2, 7, 6),
     "location": "View3D > Add > Curve > Bounce Fibers",
     "description": "Creates a set of curves in the shape of mesh.",
     "warning": "This is a parametric object.",
@@ -56,5 +56,3 @@ def unregister():
 	properties.unregister()
 	operators.unregister()
 	ui.unregister()
-
-

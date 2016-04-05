@@ -18,11 +18,11 @@
 
 
 bl_info = {
-    "name": "Blend Library",
+    "name": "Blend Library1",
     "author": "Vincent Gires",
     "description": "Asset Manager - Append or link materials/objects/groups/node groups of specific folder locations",
-    "version": (0, 3, 2),
-    "blender": (2, 7, 4),
+    "version": (0, 3, 3),
+    "blender": (2, 7, 6),
     "location": "3D View > Tools || Node Editor > Tools",
     "warning": "",
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Import-Export/Blend_Library",
@@ -317,10 +317,10 @@ def import_from_library(datablock, folderpath, file, selected, link, instance_gr
     folderpath = bpy.path.abspath(folderpath)
     
     if link:
-        bpy.ops.wm.link(directory=folderpath+"//"+file+"/"+datablock+"/", filepath=file, filename=selected)
+        bpy.ops.wm.link(directory=os.path.join(folderpath, file, datablock), filename=selected)
         
     else:
-        bpy.ops.wm.append(directory=folderpath+"//"+file+"/"+datablock+"/", filepath=file, filename=selected, instance_groups=instance_group)
+        bpy.ops.wm.append(directory=os.path.join(folderpath, file, datablock), filename=selected, instance_groups=instance_group)
     
 
 def scan_folder_nodes(folderpath, tree_type):
@@ -349,8 +349,6 @@ def scan_folder_nodes(folderpath, tree_type):
 
 
 def scan_folder_files(folderpath, datablock):
-    exec("bpy.context.scene."+datablock+"_library_list.clear()")
-    exec("bpy.context.scene."+datablock+"_library_index = 0")
     
     folderpath = bpy.path.abspath(folderpath)
     
@@ -784,6 +782,9 @@ class materials_library_scan(bpy.types.Operator):
     
     def execute(self, context):
         
+        context.scene.materials_library_list.clear()
+        context.scene.materials_library_index = 0
+        
         if bpy.context.scene.library_customPaths_materials:
             if context.scene.customFolderpath_materials:
                 scan_folder_files(context.scene.customFolderpath_materials, "materials")
@@ -800,6 +801,9 @@ class objects_library_scan(bpy.types.Operator):
     bl_description = "Scan files on the objects folder"
     
     def execute(self, context):
+        
+        context.scene.objects_library_list.clear()
+        context.scene.objects_library_index = 0
         
         if bpy.context.scene.library_customPaths_objects:
             if context.scene.customFolderpath_objects:
@@ -818,6 +822,9 @@ class groups_library_scan(bpy.types.Operator):
     bl_description = "Scan files on the materials folder"
     
     def execute(self, context):
+        
+        context.scene.groups_library_list.clear()
+        context.scene.groups_library_index = 0
         
         if bpy.context.scene.library_customPaths_groups:
             if context.scene.customFolderpath_groups:
@@ -973,7 +980,6 @@ class materials_library_append(bpy.types.Operator):
             if context.scene.materials_library_single:
                 materials_list_import = list_blend_materials()
                 material_created = "".join(set(materials_list_import) - set(materials_list))
-                print (material_created)
                 
                 for obj in selected_objects:
                     self.is_replace(context, obj)
@@ -1031,6 +1037,12 @@ class objects_library_import(bpy.types.Operator):
             import_link = True
         else:
             import_link = False
+        
+        
+        index = context.scene.objects_library_index
+        object_selected = list[index].name
+        filename = list[index].file
+        
         
         if is_listChecked(list):
             for item in list:

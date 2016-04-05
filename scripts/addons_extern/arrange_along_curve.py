@@ -146,10 +146,7 @@ class CancelOperator(bpy.types.Operator):
 
 def register():
     bpy.utils.register_module(__name__)
-    bpy.utils.register_class(PaneldeArranjarObjetosNumaCurva)
-    bpy.utils.register_class(ArranjarObjetosNumaCurva)
-    bpy.utils.register_class(CancelOperator)
-    bpy.utils.register_class(ContinueOperator)
+
     bpy.types.Object.objeto_arranjar = bpy.props.StringProperty(name="")
     #bpy.types.Object.group_arranjar = bpy.props.StringProperty(name="Group", update=name_up)
     bpy.types.Scene.distancia_entre_objetos = bpy.props.FloatProperty \
@@ -167,10 +164,7 @@ def register():
               ],
               default='0')
 def unregister() :
-    bpy.utils.unregister_class(PaneldeArranjarObjetosNumaCurva)
-    bpy.utils.unregister_class(ArranjarObjetosNumaCurva)
-    bpy.utils.unregister_class(CancelOperator)
-    bpy.utils.unregister_class(ContinueOperator)
+
     del bpy.types.Object.objeto_arranjar
     #del bpy.types.Object.group_arranjar
     del bpy.types.Scene.distancia_entre_objetos

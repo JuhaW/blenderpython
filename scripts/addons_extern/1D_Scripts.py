@@ -21,8 +21,8 @@
 bl_info = {
     "name": "1D_Scripts",                     
     "author": "Alexander Nedovizin, Paul Kotelevets aka 1D_Inc (concept design), Nikitron",
-    "version": (0, 7, 15),
-    "blender": (2, 7, 3),
+    "version": (0, 8, 5),
+    "blender": (2, 7, 5),
     "location": "View3D > Toolbar",
     "category": "Mesh"
 }  
@@ -30,14 +30,15 @@ bl_info = {
 # http://dl.dropboxusercontent.com/u/59609328/Blender-Rus/1D_Scripts.py
 
 import bpy,bmesh, mathutils, math
-from mathutils import Vector
-from mathutils.geometry import intersect_line_plane, intersect_point_line
-from math import sin, cos, pi, sqrt, degrees
+from mathutils import Vector, Matrix
+from mathutils.geometry import intersect_line_plane, intersect_point_line, intersect_line_line
+from math import sin, cos, pi, sqrt, degrees, tan, radians
 import os, urllib
 from bpy.props import (BoolProperty,
                        FloatProperty,
                        StringProperty,
                        EnumProperty,
+                       IntProperty,
                        CollectionProperty
                        )
 from bpy_extras.io_utils import ExportHelper, ImportHelper
@@ -57,6 +58,187 @@ def check_lukap(bm):
         bm.verts.ensure_lookup_table()
         bm.edges.ensure_lookup_table()
         bm.faces.ensure_lookup_table()
+
+
+#----- Module: edge fillet-------
+# author this module: Zmj100
+# version 0.3.0
+# ref: 
+def a_rot(ang, rp, axis, q):
+    mtrx = Matrix.Rotation(ang, 3, axis)
+    tmp = q - rp
+    tmp1 = mtrx * tmp
+    tmp2 = tmp1 + rp
+    return tmp2
+
+# ------ ------
+class f_buf():
+    an = 0
+
+# ------ ------
+def f_edgefillet(bme, list_0, adj, n, radius, out, flip):
+    check_lukap(bme)
+
+    dict_0 = get_adj_v_(list_0)
+    list_1 = [[dict_0[i][0], i, dict_0[i][1]] for i in dict_0 if (len(dict_0[i]) == 2)][0]
+
+    list_del = [bme.verts[list_1[1]]]
+    list_2 = []
+
+    p = (bme.verts[list_1[1]].co).copy()
+    p1 = (bme.verts[list_1[0]].co).copy()
+    p2 = (bme.verts[list_1[2]].co).copy()
+
+    vec1 = p - p1
+    vec2 = p - p2
+
+    ang = vec1.angle(vec2, any)
+    f_buf.an = round(degrees(ang))
+
+    if f_buf.an == 180 or f_buf.an == 0.0:
+        pass
+    else:
+        opp = adj
+        if radius == False:
+            h = adj * (1 / cos(ang * 0.5))
+            d = adj
+        elif radius == True:
+            h = opp / sin(ang * 0.5)
+            d = opp / tan(ang * 0.5)
+
+        p3 = p - (vec1.normalized() * d)
+        p4 = p - (vec2.normalized() * d)
+
+        no = (vec1.cross(vec2)).normalized()
+        rp = a_rot(radians(90), p, (p3 - p4), (p - (no * h)))
+
+        vec3 = rp - p3
+        vec4 = rp - p4
+
+        axis = vec1.cross(vec2)
+
+        if out == False:
+            if flip == False:
+                rot_ang = vec3.angle(vec4)
+            elif flip == True:
+                rot_ang = vec1.angle(vec2)
+        elif out == True:
+            rot_ang = (2 * pi) - vec1.angle(vec2)
+
+        for j in range(n + 1):
+            if out == False:
+                if flip == False:
+                    tmp2 = a_rot(rot_ang * j / n, rp, axis, p4)
+                elif flip == True:
+                    tmp2 = a_rot(rot_ang * j / n, p, axis, p - (vec1.normalized() * opp))
+            elif out == True:
+                tmp2 = a_rot(rot_ang * j / n, p, axis, p - (vec2.normalized() * opp))
+
+            bme.verts.new(tmp2)
+            bme.verts.index_update()
+            check_lukap(bme)
+            list_2.append(bme.verts[-1].index)
+        
+        check_lukap(bme)
+        if flip == True:
+            list_1[1:2] = list_2
+        else:
+            list_2.reverse()
+            list_1[1:2] = list_2
+        list_2[:] = []
+
+        n1 = len(list_1)
+        for t in range(n1 - 1):
+            bme.edges.new([bme.verts[list_1[t]], bme.verts[list_1[(t + 1) % n1]]])
+            bme.edges.index_update()
+        
+        check_lukap(bme)
+        
+    bme.verts.remove(list_del[0])
+    bme.verts.index_update()
+    check_lukap(bme)
+
+class f_op0(bpy.types.Operator):
+    bl_idname = 'f.op0_id'
+    bl_label = 'Edge Fillet'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    adj = FloatProperty( name = '', default = 0.1, min = 0.00001, max = 100.0, step = 1, precision = 3 )
+    n = IntProperty( name = '', default = 3, min = 1, max = 100, step = 1 )
+    out = BoolProperty( name = 'Outside', default = False )
+    flip = BoolProperty( name = 'Flip', default = False )
+    radius = BoolProperty( name = 'Radius', default = False )
+    
+    def draw(self, context):
+        layout = self.layout
+        if f_buf.an == 180 or f_buf.an == 0.0:
+            box = layout.box()
+            box.label('Info:')
+            box.label('Angle equal to 0 or 180,')
+            box.label('unable to fillet.')
+        else:
+            box = layout.box()
+            box.prop(self, 'radius')
+            row = box.split(0.35, align = True)
+
+            if self.radius == True:
+                row.label('Radius:')
+            elif self.radius == False:
+                row.label('Distance:')
+            row.prop(self, 'adj')
+            row1 = box.split(0.55, align = True)
+            row1.label('Number of sides:')
+            row1.prop(self, 'n', slider = True)
+
+            if self.n > 1:
+                row2 = box.split(0.50, align = True)
+                row2.prop(self, 'out')
+                if self.out == False:
+                    row2.prop(self, 'flip')
+
+    def execute(self, context):
+        adj = self.adj
+        n = self.n
+        out = self.out
+        flip = self.flip
+        radius = self.radius
+
+        edit_mode_out()
+        ob_act = context.active_object
+        bme = bmesh.new()
+        bme.from_mesh(ob_act.data)
+        check_lukap(bme)
+
+        list_0 = [[v.index for v in e.verts] for e in bme.edges if e.select and e.is_valid]
+        if not list_0:
+            list_v = [v.index for v in bme.verts if v.select and v.is_valid]
+            
+        if not list_0 and len(list_v)==1:
+            connected_edges = bme.verts[list_v[0]].link_edges
+            list_1 = [[v.index for v in e.verts ] for e in connected_edges if e.is_valid]
+            if len(list_1)!=2:
+                self.report({'INFO'}, 'Two adjacent edges or single vert must be selected.')
+                edit_mode_in()
+                return {'CANCELLED'}
+            
+            if out == True:
+                flip = False
+            f_edgefillet(bme, list_1, adj, n, radius, out, flip)
+            
+        elif len(list_0) != 2:
+            self.report({'INFO'}, 'Two adjacent edges or single vert must be selected.')
+            edit_mode_in()
+            return {'CANCELLED'}
+        else:
+            if out == True:
+                flip = False
+            f_edgefillet(bme, list_0, adj, n, radius, out, flip)
+
+        bme.to_mesh(ob_act.data)
+        edit_mode_in()
+        bpy.ops.mesh.select_all(action = 'DESELECT')
+        return {'FINISHED'}
+
 
 
 #----- Module: extrude along path -------
@@ -232,6 +414,7 @@ class eap_op0(bpy.types.Operator):
                 e.select_set(0)
         bme.to_mesh(ob_act.data)
         edit_mode_in()
+        bme.free()
         return {'FINISHED'}
 
 # ------ operator 1 ------
@@ -252,6 +435,7 @@ class eap_op1(bpy.types.Operator):
                 v.select_set(0)
         bme.to_mesh(ob_act.data)
         edit_mode_in()
+        bme.free()
         return {'FINISHED'}
 
 # ------ operator 2 ------
@@ -264,7 +448,6 @@ class eap_op2(bpy.types.Operator):
         layout = self.layout
 
     def execute(self, context):
-
         edit_mode_out()
         ob_act = context.active_object
         bme = bmesh.new()
@@ -278,7 +461,32 @@ class eap_op2(bpy.types.Operator):
 
         bme.to_mesh(ob_act.data)
         edit_mode_in()
+        bme.free()
         return {'FINISHED'}
+
+#------ operator 3 ------
+class eap_op3(bpy.types.Operator):
+    bl_idname = 'eap.op3_id'
+    bl_label = '.......'
+
+    def execute(self, context):
+        edit_mode_out()
+        ob_act = context.active_object
+        bme = bmesh.new()
+        bme.from_mesh(ob_act.data)
+        check_lukap(bme)
+        av = bm_vert_active_get(bme)
+        if av[1]=='V':
+            eap_buf.list_sp[:] = []
+            v = bme.verts[av[0]]
+            if v.select and v.is_valid:
+                eap_buf.list_sp.append(v.index)
+                v.select_set(0)
+                bpy.ops.eap.op0_id()
+        edit_mode_in()
+        bme.free()
+        return {'FINISHED'}
+
 
 #-------------- END --- extrude along path ---------
         
@@ -345,6 +553,43 @@ def find_all_connected_verts(me, active_v, not_list=[], step=0):
         list_v_2 = find_all_connected_verts(me, v, not_list, step) 
         vlist += list_v_2
     return vlist  
+
+
+def find_connected_verts_bm(bm, found_index, not_list):  
+    connecting_edges = bm.verts[found_index].link_edges
+    
+    if len(connecting_edges) == 0: 
+        return []
+    else:  
+        connected_verts = []  
+        for edge in connecting_edges:  
+            cvert = set((edge.verts[0].index, edge.verts[1].index))   
+            cvert.remove(found_index)                            
+            vert = cvert.pop()
+            if not (vert in not_list) and bm.verts[vert].select:
+                connected_verts.append(vert)  
+                not_list.append(vert)
+        return connected_verts      
+    
+
+def find_all_connected_verts_bm(bm, active_v, not_list=[]):
+    result = [active_v]
+    vlist = [active_v]
+    if active_v not in not_list:
+        not_list.append(active_v)
+        
+    list_v_1 = find_connected_verts_bm(bm, active_v, not_list)   
+    list_v_3 = [] 
+    for list_v in list_v_1:  
+        list_v_2 = find_all_connected_verts_bm(bm, list_v, not_list)
+        list_v_3.append(list_v_2)
+        
+    if list_v_3:
+        result = list_v_3[0] + vlist
+        if len(list_v_3)>1:
+            result = result + list(reversed(list_v_3[1]))
+
+    return result  
 
 
 def bm_vert_active_get(bm):
@@ -1073,6 +1318,7 @@ def main_align():
 
 def main_spread(context, mode, influe):
     conf = bpy.context.window_manager.paul_manager
+    if not conf.shape_spline: mode = (mode[0], mode[1], mode[2], not mode[3])
     
     if conf.shape_spline and influe<51:
         return main_spline(context, mode, influe/50)
@@ -1365,6 +1611,31 @@ def main_offset(x):
                     
             if config.shift_local:
                 obj.matrix_world*=mat_loc
+
+def scaler_get(sign):
+    config = bpy.context.window_manager.paul_manager
+    obj_name = config.object_name_store
+    if obj_name == '' and obj_name in bpy.data.objects:
+        print_error2('Stored key is required', '01 scaler')
+        return False
+    
+    obj = bpy.data.objects[obj_name]
+    edge1 = obj.data.edges[config.active_edge1_store]
+    edge2 = obj.data.edges[config.active_edge2_store]
+    i11=edge1.vertices[0]
+    i12=edge1.vertices[1]
+    i21=edge2.vertices[0]
+    i22=edge2.vertices[1]
+    length1 = (obj.data.vertices[i11].co-obj.data.vertices[i12].co).length
+    length2 = (obj.data.vertices[i21].co-obj.data.vertices[i22].co).length
+    l = [length1,length2]
+    l.sort()
+    if sign>0:
+        ko = l[1]/l[0]
+    else:
+        ko = l[0]/l[1]
+    
+    bpy.ops.transform.resize(value=(ko,ko,ko))
                 
 
 def main_rotor(angle_):
@@ -1623,15 +1894,18 @@ def crosspols():
         p1_no_ = mathutils.geometry.normal(v0,v2,v3,v1)
         
     bpy.ops.mesh.select_mode(type='FACE') 
-    
+    faceact = bm.faces.active
+    if not faceact:
+        faceact = [f for f in bm.faces if f.select==True][0]
+        
     if mode == 'E':
         pols = [p.index for p in me.polygons if p.select]
         vts_all = [v for v in bm.verts if v.select]
         eds_all = [e for e in bm.edges if e.select]
-        P1 = me.polygons[bm.faces.active.index]
+        P1 = me.polygons[faceact.index]
         list_p1co = [me.vertices[P1.vertices[0]].co]
     elif mode == 'F':
-        P1 = me.polygons[bm.faces.active.index]
+        P1 = me.polygons[faceact.index]
         pols = [p.index for p in me.polygons if p.select and p.index!= P1.index]
         vts_all = [v for v in bm.verts if v.select and v.index not in P1.vertices]
         eds_all = [e for e in bm.edges if e.select and e.verts[0].index not in P1.vertices \
@@ -3299,8 +3573,25 @@ def all_mats_to_active():
             if m.name not in mats:
                 bpy.ops.object.material_slot_add()
                 obj.material_slots[-1].material = bpy.data.materials[m.name]
-                
 
+
+def selected_mats_to_active():
+    obj = bpy.context.scene.objects.active
+    if obj:
+        mats = []
+        for mat in obj.material_slots:
+            mats.append(mat.name)
+        for obj2 in bpy.data.objects:
+            if not obj2.select or obj2 is obj: continue
+            if obj.type=='MESH':
+                for mat2 in obj2.material_slots:
+                    mat_name = mat2.name
+                    if mat_name and mat_name not in mats:
+                        mats.append(mat_name)
+                        bpy.ops.object.material_slot_add()
+                        obj.material_slots[-1].material = bpy.data.materials[mat_name]
+
+                    
 def select_2d_curves():
     for obj in bpy.data.objects:
         if not obj.select: continue
@@ -3311,7 +3602,7 @@ def select_2d_curves():
         
 
 def filter_dubles_origins():
-    global maloe
+    maloe = bpy.context.tool_settings.double_threshold
     locs = []
     for obj in bpy.context.scene.objects:
         if obj.type=='CURVE' or obj.type=='MESH':
@@ -3427,6 +3718,334 @@ def matchProp():
         for p in wpps:
             if hasattr(o,p):
                  setattr(o,p,wpps[p])
+
+    
+def Select_chunks(maloe, setting):
+    maloe = maloe/1e+6
+    obj = bpy.context.active_object
+    if obj.type!='MESH': return
+    if obj.mode != 'EDIT': return 
+    
+    bpy.ops.object.mode_set(mode='OBJECT') 
+    bpy.ops.object.mode_set(mode='EDIT') 
+    mesh = obj.data
+    
+    chunk_obj = list(obj.get('chunk_key', []))
+    chunk_obj_curr = [len(mesh.vertices), len(mesh.edges), len(mesh.polygons)]
+    
+    if setting != 'SF':
+        mesh.update()
+        mem_v_start = [v.index for v in mesh.vertices if v.select==True]
+        mem_f_start = [f.index for f in mesh.polygons if f.select==True]
+        #if chunk_obj_curr != chunk_obj:
+        if setting=='V':
+            set_chunks_v = []
+            bpy.ops.mesh.select_all(action='DESELECT')
+            vl = len(mesh.vertices)
+            black_list = []
+            for v_ in range(vl):
+                if v_ in black_list: continue
+                v = mesh.vertices[v_]
+                bpy.ops.object.mode_set(mode='OBJECT') 
+                mesh.vertices[v_].select = True
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.select_linked()
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.object.editmode_toggle()
+                bl = [v1.index for v1 in mesh.vertices if v1.select==True]
+                set_chunks_v.append(bl)
+                black_list.extend(bl)
+                    
+                bpy.ops.mesh.select_all(action='DESELECT')
+                
+            bpy.ops.object.mode_set(mode='OBJECT') 
+            for i in mem_v_start:
+                mesh.vertices[i].select=True
+                
+        if setting=='F':
+            black_list = []
+            set_chunks_f = []
+            fl = len(mesh.polygons)
+            for f_ in range(fl):
+                if f_ in black_list: continue
+                f = mesh.polygons[f_]
+                bpy.ops.object.mode_set(mode='OBJECT') 
+                mesh.polygons[f_].select = True
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.select_linked()
+                bpy.ops.object.editmode_toggle()
+                bpy.ops.object.editmode_toggle()
+                bl = [f1.index for f1 in mesh.polygons if f1.select==True]
+                black_list.extend(bl)
+                set_chunks_f.append(bl)
+                    
+                bpy.ops.mesh.select_all(action='DESELECT')
+
+            for i in mem_f_start:
+                mesh.polygons[i].select=True
+            
+            bpy.ops.object.mode_set(mode='EDIT') 
+            #obj['set_chunks_v'] = set_chunks_v
+            #obj['set_chunks_f'] = set_chunks_f      
+            #obj['chunk_key'] = chunk_obj_curr
+    
+    if setting=='V':
+        if not mem_v_start: return
+        
+        count_v = len(mem_v_start)
+        white_list_v = mem_v_start.copy()
+        #set_chunks_v = list(obj['set_chunks_v'])
+        for chunk in set_chunks_v:
+            if count_v == len(chunk) and mem_v_start[0] not in chunk:
+                white_list_v.extend(chunk)
+        
+        bpy.ops.object.mode_set(mode='OBJECT') 
+        for i in white_list_v:
+            mesh.vertices[i].select=True
+        
+        bpy.ops.object.mode_set(mode='EDIT') 
+        bpy.ops.mesh.select_mode(type='VERT') 
+        
+    if setting=='F':
+        if not mem_f_start: return
+        
+        count_f = len(mem_f_start)
+        white_list_f = mem_f_start.copy()
+        #set_chunks_f = list(obj['set_chunks_f'])
+        for chunk in set_chunks_f:
+            if count_f == len(chunk) and mem_f_start[0] not in chunk:
+                white_list_f.extend(chunk)
+            
+        bpy.ops.object.mode_set(mode='OBJECT') 
+        for i in white_list_f:
+            mesh.polygons[i].select=True
+        
+        bpy.ops.object.mode_set(mode='EDIT') 
+        bpy.ops.mesh.select_mode(type='FACE') 
+        
+    if setting=='SF':
+        bm = bmesh.new()
+        bm.from_mesh(mesh)     
+        check_lukap(bm)
+        
+        lifaces = [f.index for f in bm.faces if f.select==True]
+        lifs = []
+        
+        for finst in lifaces:
+            face_inst = bm.faces[finst]
+            area = face_inst.calc_area()
+            perim = face_inst.calc_perimeter()
+            k = area/perim
+            
+            for face in bm.faces:
+                if face.index in lifaces: continue
+                area2 = face.calc_area()
+                perim2 = face.calc_perimeter()
+                sigma = sqrt(area2/area)
+                k2 = area2/perim2
+                k_ = k2/sigma
+                
+                if abs(k_-k)<maloe:
+                    lifs.append(face.index)
+                
+                
+        bpy.ops.object.mode_set(mode='OBJECT') 
+        for i in lifs:
+            mesh.polygons[i].select=True
+        
+        bm.free()
+        bpy.ops.object.mode_set(mode='EDIT') 
+        bpy.ops.mesh.select_mode(type='FACE')
+
+
+def  intersection(start1, end1, start2, end2, out_intersection):
+    dir1 = end1 - start1
+    dir2 = end2 - start2
+
+    #считаем уравнения прямых проходящих через отрезки
+    a1 = -dir1.y
+    b1 = +dir1.x
+    d1 = -(a1*start1.x + b1*start1.y)
+
+    a2 = -dir2.y
+    b2 = +dir2.x
+    d2 = -(a2*start2.x + b2*start2.y)
+
+    #подставляем концы отрезков, для выяснения в каких полуплоскотях они
+    seg1_line2_start = a2*start1.x + b2*start1.y + d2
+    seg1_line2_end = a2*end1.x + b2*end1.y + d2
+
+    seg2_line1_start = a1*start2.x + b1*start2.y + d1
+    seg2_line1_end = a1*end2.x + b1*end2.y + d1
+
+    u = seg1_line2_start / (seg1_line2_start - seg1_line2_end)
+    out_intersection =  start1 + u*dir1
+
+    return out_intersection
+    
+
+def get_active_edge(bm):
+    result = None
+    elem, el = bm_vert_active_get(bm)
+    if elem != None:
+        mode_ = str(el)[3:4]
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_mode(type='EDGE') 
+        bm.edges[elem].verts[1]
+        elem, el = bm_vert_active_get(bm)
+        if elem != None:
+            result=[bm.edges[elem].verts[0].index,bm.edges[elem].verts[1].index]
+            
+        if mode_=='V':
+            bpy.ops.mesh.select_mode(type='VERT') 
+        elif mode_=='E':
+            bpy.ops.mesh.select_mode(type='EDGE') 
+        elif mode_=='F':
+            bpy.ops.mesh.select_mode(type='FACE') 
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+    return result          
+    
+
+def corner_corner(active, to_active):
+    obj = bpy.context.active_object
+    me = obj.data
+    
+    bm = bmesh.new()
+    bm.from_mesh(me) 
+    check_lukap(bm)
+    
+    loop1 = get_active_edge(bm)
+    if not loop1:
+        print_error2('It should be active loop','01 corner_corner')
+        bm.free()
+        return False
+    
+    sel_edges = [e for e in bm.edges if e.select and e.verts[0].index not in loop1]
+    loops = [[e.verts[0].index, e.verts[1].index] for e in sel_edges]
+    if len(loops)==0:
+        print_error2('It should be many loops','02 corner_corner')
+        bm.free()
+        return False
+    
+    for loop2 in loops:
+        verts = me.vertices
+        v1 = verts[loop1[0]].co
+        v2 = verts[loop1[1]].co
+        v3 = verts[loop2[0]].co
+        v4 = verts[loop2[1]].co
+        
+        out_intersection = Vector()
+        p_cross = intersection(v1, v2, v3, v4, out_intersection)
+        if not p_cross:
+            print_error2('lines do not intersect!','03 corner_corner')
+            bm.free()
+            return False
+        
+        l1 = (p_cross-v1).length
+        l2 = (p_cross-v2).length
+        i1 = 0
+        i1_= 1
+        if l2<l1: 
+            i1 = 1
+            i1_= 0
+        
+        l1 = (p_cross-v3).length
+        l2 = (p_cross-v4).length
+        i2 = 0
+        i2_= 1
+        if l2<l1: 
+            i2 = 1
+            i2_= 0
+        
+        v2 = me.vertices[loop1[i1]].co
+        v1 = me.vertices[loop1[i1_]].co
+        vec1 = v2-v1
+        ll = sqrt(abs((p_cross.x-v1[0])**2+(p_cross.y-v1[1])**2))
+        kl = ll/sqrt(abs((v2.x-v1[0])**2+(v2.y-v1[1])**2))
+        zz1 = v1+vec1*kl
+        
+        v4 = me.vertices[loop2[i2]].co
+        v3 = me.vertices[loop2[i2_]].co
+        vec2 = v4-v3
+        ll = sqrt(abs((p_cross.x-v3[0])**2+(p_cross.y-v3[1])**2))
+        kl = ll/sqrt(abs((v4.x-v3[0])**2+(v4.y-v3[1])**2))
+        zz2 = v3+vec2*kl
+        
+        if (active or to_active) and loop1:
+            if me.vertices[loop1[i1]].index in loop1:
+                if active:
+                    me.vertices[loop1[i1]].co = zz1
+                else:
+                    me.vertices[loop2[i2]].co = zz2
+            else:
+                if active:
+                    me.vertices[loop2[i2]].co = zz2
+                else:
+                    me.vertices[loop1[i1]].co = zz1
+        else:
+            me.vertices[loop1[i1]].co = zz1
+            me.vertices[loop2[i2]].co = zz2
+    
+    bm.free()
+    return True
+    
+    
+def corner_extend(active, to_active):
+    obj = bpy.context.active_object
+    me = obj.data
+    
+    bm = bmesh.new()
+    bm.from_mesh(me) 
+    check_lukap(bm)
+    
+    loop1 = get_active_edge(bm)
+    if not loop1:
+        print_error2('It should be active loop','01 corner_extend')
+        bm.free()
+        return False
+    
+    sel_edges = [e for e in bm.edges if e.select and e.verts[0].index not in loop1]
+    loops = [[e.verts[0].index, e.verts[1].index] for e in sel_edges]
+    if len(loops)==0:
+        print_error2('It should be many loops','02 corner_extend')
+        bm.free()
+        return False
+    
+    for loop2 in loops:
+        verts = me.vertices
+        v1 = verts[loop1[0]].co
+        v2 = verts[loop1[1]].co
+        v3 = verts[loop2[0]].co
+        v4 = verts[loop2[1]].co
+        p_cross = intersect_line_line(v1, v2, v3, v4)
+        
+        l1 = (p_cross[0]-v1).length
+        l2 = (p_cross[0]-v2).length
+        i1 = 0
+        if l2<l1: i1 = 1
+        
+        l1 = (p_cross[1]-v3).length
+        l2 = (p_cross[1]-v4).length
+        i2 = 0
+        if l2<l1: i2 = 1
+        
+        if (active or to_active) and loop1:
+            if me.vertices[loop1[i1]].index in loop1:
+                if active:
+                    me.vertices[loop1[i1]].co = p_cross[0]
+                else:
+                    me.vertices[loop2[i2]].co = p_cross[1]
+            else:
+                if active:
+                    me.vertices[loop2[i2]].co = p_cross[1]
+                else:
+                    me.vertices[loop1[i1]].co = p_cross[0]
+        else:
+            me.vertices[loop1[i1]].co = p_cross[0]
+            me.vertices[loop2[i2]].co = p_cross[1]
+    
+    bm.free()
+    return True
     
 
 ############## PlyCams Render #################
@@ -3574,6 +4193,9 @@ class LayoutSSPanel(bpy.types.Panel):
     
     bpy.types.Scene.AxesProperty = bpy.props.EnumProperty(items=axe_select)
     bpy.types.Scene.ProjectsProperty = bpy.props.EnumProperty(items=project_select)
+    bpy.types.Scene.path_obj = bpy.props.StringProperty(name="Path")
+    bpy.types.Scene.corner_obj = bpy.props.StringProperty(name="Corner")
+    bpy.types.Scene.linear_obj = bpy.props.StringProperty(name="Linear")
     
     @classmethod
     def poll(cls, context):
@@ -3615,7 +4237,7 @@ class LayoutSSPanel(bpy.types.Panel):
             row = col_top.row(align=True)
             row.prop(lt, 'spread_z', text = 'Spread Z')
             row = col_top.row(align=True)
-            row.prop(lt, 'relation', text = 'Relation')
+            row.prop(lt, 'relation', text = 'Uniform')
             box = box.box().column()
             row = box.row(align=True)
             row.prop(lt, 'shape_spline', text = 'Shape spline')
@@ -3631,7 +4253,6 @@ class LayoutSSPanel(bpy.types.Panel):
         else:
             split.prop(lt, "display_align", text="Aligner", icon='RIGHTARROW')
             
-        
         if lt.display_align and context.mode == 'EDIT_MESH':
             box = col.column(align=True).box().column()
             col_top = box.column(align=True)
@@ -3656,11 +4277,40 @@ class LayoutSSPanel(bpy.types.Panel):
             row = col_top.row(align=True)
             row.prop(context.scene,'ProjectsProperty', text = 'Projection')
         
+        if context.mode == 'OBJECT':
+            split = col.split()
+            if lt.display_railer:
+                split.prop(lt, "display_railer", text="Railer", icon='DOWNARROW_HLT')
+            else:
+                split.prop(lt, "display_railer", text="Railer", icon='RIGHTARROW')
+
+            if lt.display_railer:
+                box = col.column(align=True).box().column()
+                col_top = box.column(align=True)
+                row = col_top.row(align=True)
+                
+                row.prop(context.scene,'path_obj', icon = 'OBJECT_DATAMODE')
+                row.operator("object.railer_operator", icon = 'EYEDROPPER', text='').type_op = 1
+                row = col_top.row(align=True)
+                row.prop(context.scene,'corner_obj', icon = 'OBJECT_DATAMODE')
+                row.operator("object.railer_operator", icon = 'EYEDROPPER', text='').type_op = 2
+                row = col_top.row(align=True)
+                row.prop(context.scene,'linear_obj', icon = 'OBJECT_DATAMODE')
+                row.operator("object.railer_operator", icon = 'EYEDROPPER', text='').type_op = 3
+                
+                col_top = box.column(align=True)
+                row = col_top.row(align=True)
+                row.prop(lt,'railer_dist', text = 'dist')
+                
+                col_top = box.column(align=True)
+                row = col_top.row(align=True)
+                row.operator("object.railer_operator", text = 'Build').type_op = 4
+                
         split = col.split()
         if lt.disp_3drotor:
-            split.prop(lt, "disp_3drotor", text="3D Rotor", icon='DOWNARROW_HLT')
+            split.prop(lt, "disp_3drotor", text="3D Rotor/Scaler", icon='DOWNARROW_HLT')
         else:
-            split.prop(lt, "disp_3drotor", text="3D Rotor", icon='RIGHTARROW')
+            split.prop(lt, "disp_3drotor", text="3D Rotor/Scaler", icon='RIGHTARROW')
             
         if lt.disp_3drotor:
             box = col.column(align=True).box().column()
@@ -3668,6 +4318,17 @@ class LayoutSSPanel(bpy.types.Panel):
             row = col_top.row(align=True)
             row.operator("mesh.rotor_operator", text = 'Store key').type_op = 1
             row = col_top.row(align=True)
+            row.label(text='Scaler')
+            row = col_top.row(align=True)
+            split = col_top.split(percentage=0.5)
+            left_op = split.operator("mesh.rotor_operator", text="", icon='TRIA_LEFT')
+            left_op.type_op = 5
+            left_op.sign_op = -1
+            right_op = split.operator("mesh.rotor_operator", text="", icon='TRIA_RIGHT')
+            right_op.type_op = 5
+            right_op.sign_op = 1
+            row = col_top.row(align=True)
+            row.label(text='Rotor')
             split = col_top.split(percentage=0.5)
             left_op = split.operator("mesh.rotor_operator", text="", icon='TRIA_LEFT')
             left_op.type_op = 0
@@ -3792,9 +4453,9 @@ class LayoutSSPanel(bpy.types.Panel):
         
         split = col.split()
         if lt.disp_matExtrude:
-            split.prop(lt, "disp_matExtrude", text="AutoExtrude", icon='DOWNARROW_HLT')
+            split.prop(lt, "disp_matExtrude", text="WallExtrude", icon='DOWNARROW_HLT')
         else:
-            split.prop(lt, "disp_matExtrude", text="AutoExtrude", icon='RIGHTARROW')
+            split.prop(lt, "disp_matExtrude", text="WallExtrude", icon='RIGHTARROW')
         
         if lt.disp_matExtrude:
             box = col.column(align=True).box().column()
@@ -3848,69 +4509,15 @@ class LayoutSSPanel(bpy.types.Panel):
             row = col_top.row(align=True)
             row.prop(lt, 'fedge_edges', text = 'edges')
             row = col_top.row(align=True)
-            row.prop(lt, 'fedge_three', text = 'nonquad')
+            row.prop(lt, 'fedge_three', text = 'ngons')
+            row = col_top.row(align=True)
+            row.prop(lt, 'fedge_tris', text = 'tris')
+            row = col_top.row(align=True)
+            row.prop(lt, 'fedge_snm', text = 'non manifold')
             row = col_top.row(align=True)
             split = row.split(0.4, True)
             split.prop(lt, 'fedge_zerop', text = 'area')
             split.prop(lt, 'fedge_WRONG_AREA', text = '')
-            
-        split = col.split()
-        if lt.disp_misc:
-            split.prop(lt, "disp_misc", text="Misc", icon='DOWNARROW_HLT')
-        else:
-            split.prop(lt, "disp_misc", text="Misc", icon='RIGHTARROW')
-        
-        if lt.disp_misc:
-            box = col.column(align=True).box().column()
-            col_top = box.column(align=True)
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='MatchProp').type_op=13
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Mats all to active').type_op=8
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Mats supress RGB').type_op=4
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Mats Unclone').type_op=11
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Mats Purgeout').type_op=12
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Matname HVS set').type_op=9
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Matname HVS del').type_op=10
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Matnodes switch').type_op=7
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Obj select modified').type_op=6
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Obj ignore instances').type_op=0
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Obj filter dupes').type_op=2
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Curve select 2D').type_op=1
-            row = col_top.row(align=True)
-            row.operator("object.misc", text='Curve swap 2D/3D').type_op=3
-            row = col_top.row(align=True)
-            row.operator("mesh.modal_cheredator", text='Ed reduce x2')
-        
-        if context.mode == 'EDIT_MESH':
-            split = col.split()
-            if lt.disp_eap:
-                split.prop(lt, "disp_eap", text="Extrude Along Path", icon='DOWNARROW_HLT')
-            else:
-                split.prop(lt, "disp_eap", text="Extrude Along Path", icon='RIGHTARROW')
-            
-            if lt.disp_eap:
-                box = col.column(align=True).box().column()
-                col_top = box.column(align=True)
-                row = col_top.split(0.60, align = True)
-                row.label('Path:')
-                row.operator('eap.op0_id', text = 'Store')
-                row = col_top.split(0.60, align = True)
-                row.label('Start point:')
-                row.operator('eap.op1_id', text = 'Store')
-                col_top = box.column(align=True)
-                row = col_top.row(align=True)
-                row.operator('eap.op2_id', text = 'Extrude')
         
         split = col.split(percentage=0.15)
         if lt.disp_obj:
@@ -3947,10 +4554,151 @@ class LayoutSSPanel(bpy.types.Panel):
             layout.prop(lt, "axis_forward_setting")
             layout.prop(lt, "axis_up_setting")
             layout.prop(lt, "image_search_setting")
+         
+        
+        split = col.split(percentage=0.15)
+        if lt.disp_chunks:
+            split.prop(lt, "disp_chunks", text="", icon='DOWNARROW_HLT')
+        else:
+            split.prop(lt, "disp_chunks", text="", icon='RIGHTARROW')
+        
+        split.operator("mesh.sel_chunks", text='Select Chunks')
+        if lt.disp_chunks:
+            box = col.column(align=True).box().column()
+            layout = box.column(align=True)
+
+            layout.prop(lt, "chunks_clamp", text='clamp')
+            layout.prop(lt, "chunks_setting", text='Variant')
+        
+        
+        split = col.split()
+        if lt.disp_corner:
+            split.prop(lt, "disp_corner", text="Corner Edges", icon='DOWNARROW_HLT')
+        else:
+            split.prop(lt, "disp_corner", text="Corner Edges", icon='RIGHTARROW')
+        
+        if lt.disp_corner:
+            box = col.column(align=True).box().column()
+            layout = box.column(align=True)
+            layout.operator("mesh.corner", text='Corner').type_op=0
+            layout.operator("mesh.corner", text='Extend').type_op=1
+            coner_act = lt.corner_active_edge
+            coner_to_act = lt.to_corner_active_edge
+            row = layout.row(align=True)
+            if coner_to_act: 
+                row.active =False
+                lt.corner_active_edge = False
+            row.prop(lt, "corner_active_edge", text='Only active edge')
+            row = layout.row(align=True)
+            if coner_act: 
+                row.active =False
+                lt.to_corner_active_edge = False
+            row.prop(lt, "to_corner_active_edge", text='To active edge')
+        
+        
+        split = col.split()
+        if lt.disp_reduce:
+            split.prop(lt, "disp_reduce", text="Ed reduce x2", icon='DOWNARROW_HLT')
+        else:
+            split.prop(lt, "disp_reduce", text="Ed reduce x2", icon='RIGHTARROW')
+        
+        if lt.disp_reduce:
+            box = col.column(align=True).box().column()
+            row = box.column(align=True)
+            row.operator("mesh.modal_cheredator", text='reduce loop x2').type_op=0
+            row.operator("mesh.modal_cheredator", text='run reduce loop').type_op=1
+        
+        
+        split = col.split()
+        if lt.disp_sel:
+            split.prop(lt, "disp_sel", text="Set Edges Length", icon='DOWNARROW_HLT')
+        else:
+            split.prop(lt, "disp_sel", text="Set Edges Length", icon='RIGHTARROW')
+        
+        if lt.disp_sel:
+            box = col.column(align=True).box().column()
+            row = box.column(align=True)
+            row.operator("mesh.setedgslen", text='Set from MID').type_op=0
+            row.operator("mesh.setedgslen", text='Set to cursor').type_op=1
+            row.prop(lt, "active_length_ratio", text='Active length Ratio')
             
             
         split = col.split()
-        split.operator("scene.render_me", text='Render')
+        split.operator("scene.render_me", text='Batch Render')
+        
+        split = col.split()
+        if lt.disp_zmj100:
+            split.prop(lt, "disp_zmj100", text="Integrated addons", icon='DOWNARROW_HLT')
+        else:
+            split.prop(lt, "disp_zmj100", text="Integrated addons", icon='RIGHTARROW')
+        
+        if lt.disp_zmj100:
+            box = col.column(align=True).box().column()
+            col_top = box.column(align=True)
+            if lt.disp_eap:
+                col_top.prop(lt, "disp_eap", text="ZMJ Extrude Along Path", icon='DOWNARROW_HLT')
+            else:
+                col_top.prop(lt, "disp_eap", text="ZMJ Extrude Along Path", icon='RIGHTARROW')
+            
+            if lt.disp_eap:
+                box = col_top.column(align=True).box().column()
+                box_ = box.box().column()
+                row = box_.row(align=True)
+                row = row.split(0.60, align = True)
+                row.label('Path:')
+                row.operator('eap.op0_id', text = 'Store')
+                row = box_.split(0.60, align = True)
+                row.label('Start point:')
+                row.operator('eap.op1_id', text = 'Store')
+                row = box_.split(0.60, align = True)
+                row.label('Both:')
+                row.operator('eap.op3_id', text = 'Store')
+                row = box_.row(align=True)
+                row.operator('eap.op2_id', text = 'Extrude')
+            
+            col_top = box.column(align=True)
+            row = col_top.row(align=True)
+            row.operator('f.op0_id', text = 'ZMJ Fillet')
+        
+        split = col.split()
+        if lt.disp_misc:
+            split.prop(lt, "disp_misc", text="Misc", icon='DOWNARROW_HLT')
+        else:
+            split.prop(lt, "disp_misc", text="Misc", icon='RIGHTARROW')
+        
+        if lt.disp_misc:
+            box = col.column(align=True).box().column()
+            col_top = box.column(align=True)
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='MatchProp').type_op=13
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Mats all to active').type_op=8
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Mats selected to active').type_op=14
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Mats suppress RGB').type_op=4
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Mats Unclone').type_op=11
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Mats Purgeout').type_op=12
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Matname HVS set').type_op=9
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Matname HVS del').type_op=10
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Matnodes switch').type_op=7
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Obj select modified').type_op=6
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Obj ignore instances').type_op=0
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Obj filter dupes').type_op=2
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Curve select 2D').type_op=1
+            row = col_top.row(align=True)
+            row.operator("object.misc", text='Curve swap 2D/3D').type_op=3
+            #row = col_top.row(align=True)
+            #row.operator("mesh.modal_cheredator", text='Ed reduce x2')
         
         split = col.split()
         split.operator("script.paul_update_addon", text = 'Auto update')
@@ -3971,6 +4719,17 @@ class D1_fedge(bpy.types.Operator):
     def make_edges(self, edges):
         for e in edges:
             if e.is_loose:
+                return True
+        return False
+    
+    def make_non_manifold(self, data):
+        edit_mode_in()
+        bpy.ops.mesh.select_mode(type='EDGE')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.mesh.select_non_manifold()
+        edit_mode_out()
+        for e in data.edges:
+            if e.select:
                 return True
         return False
     
@@ -4030,6 +4789,26 @@ class D1_fedge(bpy.types.Operator):
                     selected_hide = True
             bpy.ops.object.editmode_toggle()
         return selected_show, selected_hide
+    
+    def non_manifold(self, obj,selected_hide,selected_show):
+        # stage one edges
+        config = bpy.context.window_manager.paul_manager
+        if not config.fedge_snm:
+            return selected_show, selected_hide
+        if not selected_show:
+            edit_mode_out()
+            edit_mode_in()
+            bpy.ops.mesh.select_mode(type='EDGE')
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.mesh.select_non_manifold()
+            edit_mode_out()
+            for edg in obj.data.edges:
+                if edg.select and not edg.hide:
+                    selected_show = True
+                elif edg.select and edg.hide:
+                    selected_hide = True
+            edit_mode_in()
+        return selected_show, selected_hide
 
     def zero(self, obj,selected_hide,selected_show):
         #stage area 0
@@ -4060,17 +4839,36 @@ class D1_fedge(bpy.types.Operator):
             bpy.ops.mesh.select_all(action='DESELECT')
             bpy.ops.object.editmode_toggle()
             for pol in obj.data.polygons:
-                if len(pol.vertices) != 4 and not pol.hide:
+                if len(pol.vertices) > 4 and not pol.hide:
                     pol.select = True
                     selected_show = True
-                elif len(pol.vertices) != 4 and pol.hide:
+                elif len(pol.vertices) > 4 and pol.hide:
                     selected_hide = True
             bpy.ops.object.editmode_toggle()
         return selected_show, selected_hide
 
-    def select_loose_objt(self):
+    def tris(self, obj,selected_hide,selected_show):
+        #stage three polygons
         config = bpy.context.window_manager.paul_manager
-        objects = bpy.context.selected_objects
+        if not config.fedge_tris:
+            return selected_show, selected_hide
+        if not selected_show:
+            bpy.ops.mesh.select_mode(type='FACE')
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.object.editmode_toggle()
+            for pol in obj.data.polygons:
+                if len(pol.vertices) == 3 and not pol.hide:
+                    pol.select = True
+                    selected_show = True
+                elif len(pol.vertices) == 3 and pol.hide:
+                    selected_hide = True
+            bpy.ops.object.editmode_toggle()
+        return selected_show, selected_hide
+    
+    def select_loose_objt(self):
+        #print('enter in select_loose_objt')
+        config = bpy.context.window_manager.paul_manager
+        objects = [o for o in bpy.context.selected_objects]
         if not objects:
             print_error2('Fedge founds no objects selected. '+ \
                 'Select objects or enter edit mode.', '01 fedge')
@@ -4086,6 +4884,7 @@ class D1_fedge(bpy.types.Operator):
             if obj.type != 'MESH':
                 continue
             data = obj.data
+            
             # zero-verts objs
             if config.fedge_empty:
                 if not len(data.vertices):
@@ -4107,30 +4906,59 @@ class D1_fedge(bpy.types.Operator):
                 if self.make_edges(data.edges):
                     dosel(obj,False)
             # triangles
-            if config.fedge_three:
+            if config.fedge_tris:
                 for p in data.polygons:
                     if len(p.vertices) == 3:
                         dosel(obj,False)
-            #print(obj.name, obj.select)
-                
+            # ngons
+            if config.fedge_three:
+                for p in data.polygons:
+                    if len(p.vertices) > 4:
+                        dosel(obj,False)
+            # non manifold
+            if config.fedge_snm:
+                if self.make_non_manifold(data):
+                    dosel(obj,False)
+            
     def select_loose_edit(self):
         obj = bpy.context.active_object
         selected_show = False
         selected_hide = False
 
-
+        mess_info = ''
         # stage two verts
         selected_show, selected_hide = self.verts(obj,selected_hide,selected_show)
+        if selected_show: 
+            mess_info = 'verts'
+            
         # stage one edges
         selected_show, selected_hide = self.edges(obj,selected_hide,selected_show)
+        if selected_show and not mess_info: 
+            mess_info = 'edges'
+            
         #stage three polygons
         selected_show, selected_hide = self.three(obj,selected_hide,selected_show)
+        if selected_show and not mess_info:  
+            mess_info = 'ngons'
+            
+        selected_show, selected_hide = self.tris(obj,selected_hide,selected_show)
+        if selected_show and not mess_info: 
+            mess_info = 'tris'
+        
+        selected_show, selected_hide = self.non_manifold(obj,selected_hide,selected_show)
+        if selected_show and not mess_info: 
+            mess_info = 'non manifold'
+                
         #stage area 0
         selected_show, selected_hide = self.zero(obj,selected_hide,selected_show)
+        if selected_show and not mess_info: 
+            mess_info = 'zero area'
+        
         # object mode if mesh clean
-        if selected_show:
+        if mess_info:
+            mess_info = 'FEDGE: ' + mess_info
             self.report({'INFO'}, \
-                'FEDGE: Found something')
+                mess_info)
         elif selected_hide:
             self.report({'INFO'}, \
                 'FEDGE: Nothing found (but hidden)')
@@ -4145,6 +4973,284 @@ class D1_fedge(bpy.types.Operator):
         elif bpy.context.mode == 'EDIT_MESH':
             self.select_loose_edit()
         return {'FINISHED'}
+
+
+def selFromMid(alr=False):
+    bpy.ops.object.mode_set(mode='OBJECT') 
+    bpy.ops.object.mode_set(mode='EDIT') 
+    config = bpy.context.window_manager.paul_manager
+    step_len = config.step_len
+    obj = bpy.context.active_object
+    me = obj.data
+    me.update()
+    
+    bm = bmesh.new()
+    bm.from_mesh(me) 
+    check_lukap(bm)
+    
+    act_ = get_active_edge(bm)
+    if not act_:
+        print_error2('DIST is not in store','02 selFromMid')
+        bm.free()
+        return False
+        
+    act = bm.verts[act_[0]].co - bm.verts[act_[1]].co
+    ko_ = step_len/act.length
+    
+    sel_edges = [e for e in bm.edges if e.select]
+    for se in sel_edges:
+        v1 = se.verts[0]
+        v2 = se.verts[1]
+        
+        vec = v2.co-v1.co
+        if vec.length==0:
+            print_error2('Zero-length edge','01 selFromMid')
+            bm.free()
+            return False
+        
+        koef = ko_ if alr else step_len/vec.length
+        vec_c = vec/2 + v1.co
+        vec_ = vec*koef/2
+        v1.co = vec_c-vec_
+        v2.co = vec_c+vec_
+    
+    bpy.ops.object.mode_set(mode='OBJECT') 
+    bm.to_mesh(me)
+    bm.free()
+    bpy.ops.object.mode_set(mode='EDIT') 
+    return True
+    
+
+def selToCursor(alr=False):
+    bpy.ops.object.mode_set(mode='OBJECT') 
+    bpy.ops.object.mode_set(mode='EDIT') 
+    config = bpy.context.window_manager.paul_manager
+    step_len = config.step_len
+    obj = bpy.context.active_object
+    me = obj.data
+    me.update()
+    
+    bm = bmesh.new()
+    bm.from_mesh(me) 
+    check_lukap(bm)
+    
+    cur3d =  bpy.context.scene.cursor_location
+    
+    act_ = get_active_edge(bm)
+    if not act_:
+        print_error2('DIST is not in store','02 selToCursor')
+        bm.free()
+        return False
+    
+    act = bm.verts[act_[0]].co - bm.verts[act_[1]].co
+    ko_ = step_len/act.length
+    
+    sel_edges = [e for e in bm.edges if e.select]
+    for se in sel_edges:
+        v1 = se.verts[0]
+        v2 = se.verts[1]
+        
+        v1_glob = obj.matrix_world * v1.co 
+        v2_glob = obj.matrix_world * v2.co
+        
+        v1_d = (v1_glob-cur3d).length
+        v2_d = (v2_glob-cur3d).length
+        v_a = v1 if v1_d<=v2_d else v2
+        v_b = v1 if v_a is v2 else v2
+        
+        vec = v_a.co-v_b.co
+        if vec.length==0:
+            print_error2('Zero-length edge','01 selToCursor')
+            bm.free()
+            return False
+        
+        koef = ko_ if alr else step_len/vec.length
+        vec_ = vec*koef
+        v_a.co = v_b.co+vec_
+    
+    bpy.ops.object.mode_set(mode='OBJECT') 
+    bm.to_mesh(me)
+    bm.free()
+    bpy.ops.object.mode_set(mode='EDIT') 
+    return True
+
+
+def getChoseSelection(collection, prop=None):
+    res = prop
+    for c in collection:
+        if c.select:
+            if hasattr(c,'name'):
+                res = c.name
+            elif hasattr(c,'index'):
+                res = c.index
+    
+    prop = res
+    return res
+
+
+def main_railer(dist=1, z_up=False, follow_path=False, flat=False):
+    def getDeltaVec(v1,v2, dist_l, norm = True):
+        v = v2-v1
+        if norm:
+            v.normalize()
+        v = v*dist
+        if flat and z_up:
+            l = v.length
+            v_ = mathutils.Vector((v.x,v.y, 0))
+            l_ = v_.length
+            k = l/l_
+            v = v*k
+        return mathutils.Vector(v)
+    
+    scn = bpy.context.scene
+    if scn.path_obj   not in scn.objects or \
+       scn.corner_obj not in scn.objects or \
+       scn.linear_obj not in scn.objects:
+           print_error2('Non-existent objects','main_railer 00')
+           return False
+       
+    obj_path = scn.objects[scn.path_obj]
+    obj_corner = scn.objects[scn.corner_obj]
+    obj_linear = scn.objects[scn.linear_obj]
+    
+    
+    if not obj_path.type=='CURVE':
+        print_error2('Path should be the curve','main_railer 01')
+        return False
+    
+    if not obj_corner.type=='MESH' or not obj_linear.type=='MESH':
+        print_error2('Corner and Linear should be the curve','main_railer 02')
+        return False
+    
+    for spline in obj_path.data.splines:
+        corners = [p.co for p in spline.points]
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.ops.object.select_pattern(pattern=obj_corner.name)
+        
+        bm = bmesh.new()
+        bm.from_mesh(obj_corner.data) 
+        check_lukap(bm)
+        geom_ = bm.verts[:] + bm.edges[:] + bm.faces[:]
+        
+        bm_l = bmesh.new()
+        bm_l.from_mesh(obj_linear.data) 
+        check_lukap(bm_l)
+        geom_l = bm_l.verts[:] + bm_l.edges[:] + bm_l.faces[:]
+        c0 = obj_path.matrix_world * corners[0]
+        c0 = Vector((c0.x,c0.y,c0.z))
+        
+        vec_1 = mathutils.Vector((1,0,0))
+        vec_top = mathutils.Vector((0,0,1))
+        
+        for vec in corners:
+            location = obj_path.matrix_world * vec
+            location = Vector((location.x,location.y,location.z))
+            
+            dir = location-c0
+            dist_c = dir.length
+            count = int(dist_c // dist)
+            dist_l0 = dist_c % dist /2
+                            
+            mat_rot = vec_1.rotation_difference(dir).to_matrix().to_4x4()
+            if z_up:
+                vec_nor = mat_rot * vec_top
+                mat_top_rot = vec_nor.rotation_difference(vec_top).to_matrix().to_4x4()
+                mat_rot = mat_top_rot * mat_rot
+            
+            bpy.ops.object.select_all(action='DESELECT')
+            bpy.ops.object.select_pattern(pattern=obj_linear.name)
+            
+            if not follow_path:
+                mat_rot = mathutils.Matrix()
+            
+            sum_l = 0
+            if dist_c>0:
+                for i in range(count):
+                    if i==0:
+                        dist_l = dist_l0
+                    else:
+                        dist_l = dist
+                    
+                    dvec = getDeltaVec(c0,location, dist_l, True)   
+                    sum_l += dvec.length
+                    if sum_l>dist_c:
+                        break 
+                    
+                    loc = c0+dvec
+                    ret_l = bmesh.ops.duplicate(bm_l, geom=geom_l)
+                    geom_dup_l = ret_l['geom']
+                    verts_dupe_l = [ele for ele in geom_dup_l
+                           if isinstance(ele, bmesh.types.BMVert)]
+                    del ret_l
+                    
+                    bmesh.ops.rotate(
+                        bm_l,
+                        verts=verts_dupe_l,
+                        cent=(0.0, 0.0, 0.0),
+                        matrix=mat_rot)
+                    
+                    bmesh.ops.translate(
+                        bm_l,
+                        verts=verts_dupe_l,
+                        vec=loc)
+                
+                    c0 = loc
+            
+            c0 = location
+            
+            if dist_c==0 and len(corners)>1 and follow_path:
+                c1 = obj_path.matrix_world * corners[1]
+                c1 = Vector((c1.x,c1.y,c1.z))
+                dir = c1-location
+                mat_rot = vec_1.rotation_difference(dir).to_matrix().to_4x4()
+                
+                if z_up:
+                    vec_nor = mat_rot * vec_top
+                    mat_top_rot = vec_nor.rotation_difference(vec_top).to_matrix().to_4x4()
+                    mat_rot = mat_top_rot * mat_rot
+                
+            bpy.ops.object.select_all(action='DESELECT')
+            bpy.ops.object.select_pattern(pattern=obj_corner.name)
+            
+            ret = bmesh.ops.duplicate(bm, geom=geom_)
+            geom_dup = ret['geom']
+            verts_dupe = [ele for ele in geom_dup
+                   if isinstance(ele, bmesh.types.BMVert)]
+            del ret
+            
+            bmesh.ops.rotate(
+                        bm,
+                        verts=verts_dupe,
+                        cent=(0.0, 0.0, 0.0),
+                        matrix=mat_rot)
+            
+            bmesh.ops.translate(
+                bm,
+                verts=verts_dupe,
+                vec=location)
+            
+        bmesh.ops.delete(bm, geom=geom_, context=1)
+        bmesh.ops.delete(bm_l, geom=geom_l, context=1)
+            
+        #Corners
+        me = bpy.data.meshes.new("Mesh")
+        bm.to_mesh(me)
+        bm.free()
+        
+        scene = bpy.context.scene
+        obj = bpy.data.objects.new("Object", me)
+        scene.objects.link(obj)
+        obj.location = obj_path.location
+        
+        #Linears
+        me = bpy.data.meshes.new("Mesh")
+        bm_l.to_mesh(me)
+        bm_l.free()
+        
+        scene = bpy.context.scene
+        obj = bpy.data.objects.new("Object", me)
+        scene.objects.link(obj)
+        obj.location = obj_path.location
 
 
 class DisableDubleSideOperator(bpy.types.Operator):
@@ -4320,6 +5426,8 @@ class MiscOperator(bpy.types.Operator):
             matsPurgeout()
         elif self.type_op==13:
             matchProp()
+        elif self.type_op==14:
+            selected_mats_to_active()
         return {'FINISHED'}
 
 
@@ -4379,6 +5487,8 @@ class AlignOperator(bpy.types.Operator):
             self.dist_x = Vector(config.vec_store).x
             self.dist_y = Vector(config.vec_store).y
             self.dist_z = Vector(config.vec_store).z
+            self.report({'INFO'}, \
+                'dist: '+str(round(config.step_len,4)))
         elif self.type_op==0:
             main_align()
         elif self.type_op==2:
@@ -4404,6 +5514,103 @@ class AlignOperator(bpy.types.Operator):
         self.dist = config.step_len
         return {'FINISHED'}
 
+
+class RailerOperator(bpy.types.Operator):
+    bl_idname = "object.railer_operator"
+    bl_label = "Railer operator"
+    bl_options = {'REGISTER', 'UNDO'} 
+    
+    type_op = bpy.props.IntProperty(name = 'type_op', default = 0, options = {'HIDDEN'})
+    z_up = BoolProperty(name='Z up')
+    follow_path = BoolProperty(name='Follow path')
+    flat_dist = BoolProperty(name='Flat dist')
+    dist = FloatProperty(name='dist')
+    
+    def draw(self, context):
+        layout = self.layout
+        col_top = layout.box().column(align=True)
+        row = col_top.row(align=True)
+        row.prop(self,'dist')
+        row = col_top.row(align=True)
+        row.prop(self, 'z_up')
+        if self.z_up:
+            row = col_top.row(align=True)
+            row.prop(self,'flat_dist')
+        
+        row = col_top.row(align=True)
+        row.prop(self,'follow_path')
+        
+    
+    def __init__(self):
+        config = bpy.context.window_manager.paul_manager
+        self.dist = config.railer_dist
+    
+    def execute(self, context):
+        config = bpy.context.window_manager.paul_manager
+        scn = context.scene
+        objects = scn.objects
+        config.railer_dist = self.dist
+        
+        if self.type_op==1:
+            scn.path_obj=getChoseSelection(objects)
+            
+        elif self.type_op==2:
+            scn.corner_obj=getChoseSelection(objects)
+            
+        elif self.type_op==3:
+            scn.linear_obj=getChoseSelection(objects)
+            
+        elif self.type_op==4:
+            main_railer(dist=self.dist, z_up=self.z_up, \
+                follow_path=self.follow_path, flat = self.flat_dist)
+            
+        return {'FINISHED'}
+    
+    
+    
+    
+    
+    
+
+
+class ChunksOperator(bpy.types.Operator):
+    bl_idname = "mesh.sel_chunks"
+    bl_label = "Select Chunks"
+    bl_options = {'REGISTER', 'UNDO'} 
+    
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None
+
+    def execute(self, context):
+        config = bpy.context.window_manager.paul_manager
+        m = config.chunks_clamp
+        s = config.chunks_setting
+        Select_chunks(maloe=m, setting = s)        
+        return {'FINISHED'}
+
+
+class CornerOperator(bpy.types.Operator):
+    bl_idname = "mesh.corner"
+    bl_label = "Corner"
+    bl_options = {'REGISTER', 'UNDO'} 
+    type_op = bpy.props.IntProperty(name = 'type_op', default = 0, options = {'HIDDEN'})
+    
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None
+
+    def execute(self, context):
+        config = bpy.context.window_manager.paul_manager
+        active = config.corner_active_edge
+        to_active = config.to_corner_active_edge
+        mode_orig = bpy.context.object.mode
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        if self.type_op==0: 'corner_corner',corner_corner(active, to_active)
+        elif self.type_op==1: 'corner_extend',corner_extend(active, to_active)
+        bpy.ops.object.mode_set(mode = mode_orig)
+        return {'FINISHED'}
+    
 
 class OffsetOperator(bpy.types.Operator):
     bl_idname = "mesh.offset_operator"
@@ -4542,9 +5749,6 @@ class RotorOperator(bpy.types.Operator):
                     for obj_a_name in l_obj:
                         bpy.context.scene.objects[obj_a_name].select=True
                     bpy.context.scene.objects.active = bpy.data.objects[ao]
-                    
-                elif bpy.context.mode=='EDIT_MESH':                    
-                    bpy.ops.mesh.duplicate()
                 
             x = config.step_angle * self.sign_op
             if bpy.context.mode=='OBJECT':
@@ -4608,6 +5812,9 @@ class RotorOperator(bpy.types.Operator):
             bpy.ops.object.select_all(action='DESELECT')
             bpy.ops.object.select_pattern(pattern=act_obj.name)
             bpy.context.scene.objects.active = bpy.data.objects[act_obj.name]
+        
+        elif self.type_op==5:
+            scaler_get(self.sign_op)
             
         else:
             pass
@@ -4619,7 +5826,27 @@ class RotorOperator(bpy.types.Operator):
     
     
     
+class SelOperator(bpy.types.Operator):
+    bl_idname = "mesh.setedgslen"
+    bl_label = "Set Edges Length"
+    bl_options = {'REGISTER', 'UNDO'} 
     
+    type_op = bpy.props.IntProperty(name = 'type_op', default = 0, options = {'HIDDEN'})
+    
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None and \
+              context.active_object.type=='MESH'
+
+    def execute(self, context):
+        config = bpy.context.window_manager.paul_manager
+        if self.type_op==0:     
+            selFromMid(config.active_length_ratio)
+        
+        elif self.type_op==1:   
+            selToCursor(config.active_length_ratio)
+        
+        return {'FINISHED'}    
     
     
 
@@ -4633,6 +5860,7 @@ class paul_managerProps(bpy.types.PropertyGroup):
     display_align = bpy.props.BoolProperty(name = 'display_align')
     display_offset = bpy.props.BoolProperty(name = 'display_offset')
     display_3dmatch = bpy.props.BoolProperty(name = 'display_3dmatch')
+    display_railer = bpy.props.BoolProperty(name = 'display_railer')
     
     spread_x = bpy.props.BoolProperty(name = 'spread_x', default = False)
     spread_y = bpy.props.BoolProperty(name = 'spread_y', default = False)
@@ -4655,6 +5883,7 @@ class paul_managerProps(bpy.types.PropertyGroup):
     instance = bpy.props.BoolProperty(name="instance")
     flip_match = bpy.props.BoolProperty(name="flip_match")
     step_angle = bpy.props.FloatProperty(name="step_angle")
+    railer_dist = bpy.props.FloatProperty(name="Dist", default=1.0)
     
     shift_lockX = bpy.props.BoolProperty(name = 'shift_lockX', default = False)
     shift_lockY = bpy.props.BoolProperty(name = 'shift_lockY', default = False)
@@ -4692,14 +5921,34 @@ class paul_managerProps(bpy.types.PropertyGroup):
     disp_coll = bpy.props.BoolProperty(name = 'disp_coll', default = False)
     disp_3drotor = bpy.props.BoolProperty(name = 'disp_3drotor', default = False)
     disp_obj = bpy.props.BoolProperty(name = 'disp_obj', default = False)
+    disp_chunks = bpy.props.BoolProperty(name = 'disp_chunks', default = False)
+    disp_corner = bpy.props.BoolProperty(name = 'disp_corner', default = False)
+    disp_reduce = bpy.props.BoolProperty(name = 'disp_reduce', default = False)
+    disp_sel = bpy.props.BoolProperty(name = 'disp_sel', default = False)
+    disp_zmj100 = bpy.props.BoolProperty(name = 'disp_zmj100', default = False)
     
     fedge_verts = BoolProperty(name='verts', default=True)
     fedge_edges = BoolProperty(name='edges', default=True)
     fedge_zerop = BoolProperty(name='zerop', default=True)
     fedge_empty = BoolProperty(name='empty', default=True)
     fedge_three = BoolProperty(name='three', default=True)
+    fedge_tris = BoolProperty(name='tris', default=True)
+    fedge_snm = BoolProperty(name='fedge_snm', default=True)
     fedge_WRONG_AREA = bpy.props.FloatProperty(name="WRONG_AREA", default=0.02, precision=4)
+    corner_active_edge = BoolProperty(name='coner_active_edge', default=False)
+    to_corner_active_edge = BoolProperty(name='to_coner_active_edge', default=False)
+    active_length_ratio = BoolProperty(name='active_length_ratio', default=False)
     
+    chunks_clamp = bpy.props.IntProperty(name="chunks_clamp", default=1, \
+    min=1, max=100, step=1, subtype='FACTOR')
+    chunks_setting = EnumProperty(
+            name="Chunks settings",
+            items=(('V', "vertices", ""),
+                   ('F', "faces", ""),
+                   ('SF', "semantic faces", ""),
+                   ),
+            default='SF',
+            )
     
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
@@ -4818,6 +6067,7 @@ class CheredatorModalOperator(bpy.types.Operator):
     bl_label = "Cheredator"
     bl_options = {'REGISTER', 'UNDO'}  
     steps = bpy.props.IntProperty(options = {'HIDDEN'}) 
+    type_op = bpy.props.IntProperty(name = 'type_op', default = 0, options = {'HIDDEN'})
         
     def execute(self, context):
         context.scene['cheredator'] = cheredator_fantom(self)
@@ -4825,6 +6075,9 @@ class CheredatorModalOperator(bpy.types.Operator):
     
     def modal(self, context, event):
         #context.area.tag_redraw()
+        if self.type_op==0:
+            cheredator(2)
+        
         if event.type == 'WHEELDOWNMOUSE':  
             self.steps += 1
             self.execute(context)
@@ -4838,7 +6091,7 @@ class CheredatorModalOperator(bpy.types.Operator):
             bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
             cheredator(self.steps)
             return {'FINISHED'}
-        elif event.type in ('RIGHTMOUSE', 'ESC') or not context.scene['cheredator']:  # Cancel
+        elif self.type_op==0 or event.type in ('RIGHTMOUSE', 'ESC') or not context.scene['cheredator']:  # Cancel
             bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
             return {'CANCELLED'}
  
@@ -4915,7 +6168,6 @@ class ThisScriptUpdateAddon(bpy.types.Operator):
     
     def execute(self, context):
         script_paths = os.path.normpath(os.path.dirname(__file__))
-        
         os.curdir = os.path.dirname(os.path.join(script_paths,'addons'))
         os.chdir(os.curdir)
 
@@ -4935,12 +6187,12 @@ class ThisScriptUpdateAddon(bpy.types.Operator):
 
 
 
-classes = [eap_op0, eap_op1, eap_op2, \
+classes = [eap_op0, eap_op1, eap_op2, eap_op3, ChunksOperator, f_op0, \
     RenderMe, ExportSomeData, RotorOperator, DisableDubleSideOperator, ImportMultipleObjs, \
     MatExrudeOperator, GetMatsOperator, CrossPolsOperator, SSOperator, SpreadOperator, \
     AlignOperator, Project3DLoopOperator, BarcOperator, LayoutSSPanel, MessageOperator, \
     OffsetOperator, MiscOperator, paul_managerProps, ThisScriptUpdateAddon, \
-    CheredatorModalOperator, D1_fedge]
+    CheredatorModalOperator, D1_fedge, CornerOperator, SelOperator, RailerOperator]
 
 
 addon_keymaps = []  

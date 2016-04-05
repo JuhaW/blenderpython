@@ -18,14 +18,14 @@
 
 bl_info = {
     "name": "Mira Tools",
-    "author": "Paul Geraskin",
-    "version": (0, 1, 0),
+    "author": "Paul Geraskin, Marvin K. Breuer",
+    "version": (0, 3, 0),
     "blender": (2, 74, 0),
     "location": "3D Viewport",
-    "description": "Mira Tool",
+    "description": "Mira Tools",
     "warning": "",
-    "wiki_url": "",
-    "tracker_url": "",
+    "wiki_url": "https://github.com/mifth/mifthtools/wiki/Mira-Tools",
+    "tracker_url": "https://github.com/mifth/mifthtools/issues",
     "category": "Tools"}
 
 
@@ -40,7 +40,7 @@ if "bpy" in locals():
     imp.reload(mi_deform)
     imp.reload(mi_linear_deformer)
     imp.reload(mi_curve_guide)
-    imp.reload(mi_extrude)
+    imp.reload(mi_draw_extrude)
     imp.reload(mi_poly_loop)
 else:
     from . import mi_curve_test
@@ -52,7 +52,7 @@ else:
     from . import mi_deform
     from . import mi_gui
     from . import mi_noise
-    from . import mi_extrude
+    from . import mi_draw_extrude
     from . import mi_poly_loop
 
 
@@ -96,7 +96,7 @@ def register():
 
     bpy.types.Scene.mi_extrude_settings = PointerProperty(
         name="Extrude Variables",
-        type=mi_extrude.MI_ExtrudeSettings,
+        type=mi_draw_extrude.MI_ExtrudeSettings,
         description="Extrude Settings"
     )
 
@@ -112,6 +112,9 @@ def register():
         description="Curve Guide Settings"
     )
 
+    # alternative gui
+    bpy.types.WindowManager.mirawindow = bpy.props.PointerProperty(type = mi_gui.DropdownMiraToolProps)
+
 def unregister():
     import bpy
 
@@ -123,6 +126,9 @@ def unregister():
     del bpy.types.Scene.mi_extrude_settings
     del bpy.types.Scene.mi_ldeformer_settings
     del bpy.types.Scene.mi_curguide_settings
+
+    del bpy.types.WindowManager.mirawindow
+
     bpy.utils.unregister_module(__name__)
 
 

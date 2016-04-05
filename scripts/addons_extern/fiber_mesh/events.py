@@ -79,7 +79,7 @@ def traceFromPolygon(object_name, polygon_index, entry):
                 # Original bounce type, no sub-sampling.
                 for i in range(bounce_number):
                     end += noise(ang_noise)
-                    hit, nor, index = ob.ray_cast(start, end * dist)
+                    hit, nor, index = ob.ray_cast(start, end * dist)[-3:]
                     if index == -1: break
                     start = hit - nor / 10000
                     end = end.reflect(nor).normalized()
@@ -91,7 +91,7 @@ def traceFromPolygon(object_name, polygon_index, entry):
                         rnd = noise(ang_noise)
                         end += rnd
                         try:
-                            hit, nor, index = ob.ray_cast(start, end * dist)
+                            hit, nor, index = ob.ray_cast(start, end * dist)[-3:]
                         except:
                             index = -1
                         if index != -1:

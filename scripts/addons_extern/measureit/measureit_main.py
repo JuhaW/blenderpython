@@ -128,7 +128,7 @@ class MeasureitProperties(bpy.types.PropertyGroup):
     glview = bpy.props.BoolProperty(name="glview",
                                     description="Measure visible/hide",
                                     default=True)
-    glspace = bpy.props.FloatProperty(name='glspace', min=-10, max=10, default=0.1,
+    glspace = bpy.props.FloatProperty(name='glspace', min=-100, max=100, default=0.1,
                                       precision=3,
                                       description='Distance to display measure')
     glwidth = bpy.props.IntProperty(name='glwidth', min=1, max=10, default=1,
@@ -570,7 +570,7 @@ def add_item(box, idx, segment):
 # ------------------------------------------------------------------
 class MeasureitMainPanel(bpy.types.Panel):
     bl_idname = "measureit_main_panel"
-    bl_label = "Measureit"
+    bl_label = "Tools"
     bl_space_type = 'VIEW_3D'
     bl_region_type = "TOOLS"
     bl_category = 'Measureit'
@@ -586,7 +586,22 @@ class MeasureitMainPanel(bpy.types.Panel):
         # Tool Buttons
         # ------------------------------
         box = layout.box()
-        box.label("Tools", icon='MODIFIER')
+        # ------------------------------
+        # Display Buttons
+        # ------------------------------
+        row = box.row()
+        if context.window_manager.measureit_run_opengl is False:
+            icon = 'PLAY'
+            txt = 'Show'
+        else:
+            icon = "PAUSE"
+            txt = 'Hide'
+
+        row.operator("measureit.runopenglbutton", text=txt, icon=icon)
+        row.prop(scene, "measureit_gl_ghost", text="", icon='GHOST_ENABLED')
+
+        # Tools
+        box = layout.box()
         row = box.row()
         row.operator("measureit.addsegmentbutton", text="Segment", icon="ALIGN")
         row.prop(scene, "measureit_sum", text="Sum")
@@ -615,6 +630,55 @@ class MeasureitMainPanel(bpy.types.Panel):
         row = box.row()
         row.operator("measureit.addareabutton", text="Area", icon="MESH_GRID")
 
+        # ------------------------------
+        # Debug data
+        # ------------------------------
+        box = layout.box()
+        row = box.row(False)
+        if scene.measureit_debug is False:
+            row.prop(scene, "measureit_debug", icon="TRIA_RIGHT", icon_only=True,
+                     text="Mesh Debug", emboss=False)
+        else:
+            row.prop(scene, "measureit_debug", icon="TRIA_DOWN", icon_only=True,
+                     text="Mesh Debug", emboss=False)
+
+            row = box.row()
+            row.prop(scene, "measureit_debug_vertices", icon="LOOPSEL")
+            row.prop(scene, "measureit_debug_location", icon="EMPTY_DATA")
+            row.prop(scene, "measureit_debug_faces", icon="FACESEL")
+            row = box.row()
+            row.prop(scene, "measureit_debug_select", icon="GHOST_ENABLED")
+            row.prop(scene, "measureit_debug_normals", icon="MAN_TRANS")
+            if scene.measureit_debug_normals is True:
+                row.prop(scene, "measureit_debug_normal_size")
+                row.prop(scene, "measureit_debug_normal_details")
+            row = box.row()
+            row.prop(scene, 'measureit_debug_color', text="")
+            row.prop(scene, 'measureit_debug_color2', text="")
+            row.prop(scene, 'measureit_debug_color3', text="")
+            row = box.row()
+            row.prop(scene, 'measureit_debug_font', text="Font")
+            row.prop(scene, 'measureit_debug_width', text="Thickness")
+            row.prop(scene, 'measureit_debug_precision', text="Precision")
+
+
+# ------------------------------------------------------------------
+# Define panel class for conf functions.
+# ------------------------------------------------------------------
+class MeasureitConfPanel(bpy.types.Panel):
+    bl_idname = "measureit_conf_panel"
+    bl_label = "Configuration"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = "TOOLS"
+    bl_category = 'Measureit'
+
+    # ------------------------------
+    # Draw UI
+    # ------------------------------
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+
         # Configuration data
         box = layout.box()
         row = box.row()
@@ -631,24 +695,26 @@ class MeasureitMainPanel(bpy.types.Panel):
         row = box.row()
         row.prop(scene, "measureit_font_size")
 
-        # ------------------------------
-        # Display Buttons
-        # ------------------------------
-        row = box.row()
-        if context.window_manager.measureit_run_opengl is False:
-            icon = 'PLAY'
-            txt = 'Show'
-        else:
-            icon = "PAUSE"
-            txt = 'Hide'
-        row.operator("measureit.runopenglbutton", text=txt, icon=icon)
-        row.prop(scene, "measureit_gl_ghost", text="", icon='GHOST_ENABLED')
 
-        # ------------------------------
+# ------------------------------------------------------------------
+# Define panel class for render functions.
+# ------------------------------------------------------------------
+class MeasureitRenderPanel(bpy.types.Panel):
+    bl_idname = "measureit_render_panel"
+    bl_label = "Render"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = "TOOLS"
+    bl_category = 'Measureit'
+
+    # ------------------------------
+    # Draw UI
+    # ------------------------------
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+
         # Render settings
-        # ------------------------------
         box = layout.box()
-        box.label("Render", icon='RENDER_STILL')
         row = box.row()
         row.prop(scene, "measureit_render_type")
         row = box.row()
@@ -1717,7 +1783,7 @@ class AddNoteButton(bpy.types.Operator):
 class RunHintDisplayButton(bpy.types.Operator):
     bl_idname = "measureit.runopenglbutton"
     bl_label = "Display hint data manager"
-    bl_description = "Display aditional information in the viewport"
+    bl_description = "Main control for enabling or disabling the display of measurements in the viewport"
     bl_category = 'Measureit'
 
     _handle = None  # keep function handler
@@ -1804,7 +1870,7 @@ def draw_main(context):
     # Enable GL drawing
     bgl.glEnable(bgl.GL_BLEND)
     # ---------------------------------------
-    # Generate all OpenGL calls
+    # Generate all OpenGL calls for measures
     # ---------------------------------------
     for myobj in objlist:
         if myobj.hide is False:
@@ -1816,6 +1882,17 @@ def draw_main(context):
                             op = myobj.MeasureGenerator[0]
                             draw_segments(context, myobj, op, region, rv3d)
                         break
+    # ---------------------------------------
+    # Generate all OpenGL calls for debug
+    # ---------------------------------------
+    if scene.measureit_debug is True:
+        selobj = bpy.context.selected_objects
+        for myobj in selobj:
+            if scene.measureit_debug_vertices is True:
+                draw_vertices(context, myobj, region, rv3d)
+            if scene.measureit_debug_faces is True or scene.measureit_debug_normals is True:
+                draw_faces(context, myobj, region, rv3d)
+
     # -----------------------
     # restore opengl defaults
     # -----------------------

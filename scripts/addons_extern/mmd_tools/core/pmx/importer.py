@@ -3,6 +3,7 @@ import os
 import collections
 import logging
 import time
+import re
 
 import bpy
 import mathutils
@@ -12,6 +13,7 @@ import mmd_tools.core.pmx as pmx
 from mmd_tools.core.material import FnMaterial
 from mmd_tools import utils
 from mmd_tools import bpyutils
+from mmd_tools.core.vmd.importer import VMDImporter
 
 
 class PMXImporter:
@@ -234,46 +236,64 @@ class PMXImporter:
         boneNameTable = self.__createEditBones(self.__armObj, pmxModel.bones)
         pose_bones = self.__sortPoseBonesByBoneIndex(self.__armObj.pose.bones, boneNameTable)
         self.__boneTable = pose_bones
-        for i, p_bone in sorted(enumerate(pmxModel.bones), key=lambda x: x[1].transform_order):
+        for i, pmx_bone in sorted(enumerate(pmxModel.bones), key=lambda x: x[1].transform_order):
+            # variable p_bone renamed to pmx_bone to avoid confusion with Pose Bones
             b_bone = pose_bones[i]
-            b_bone.mmd_bone.name_e = p_bone.name_e
-            b_bone.mmd_bone.transform_order = p_bone.transform_order
-            b_bone.mmd_bone.is_visible = p_bone.visible
-            b_bone.mmd_bone.is_controllable = p_bone.isControllable
+            b_bone.mmd_bone.name_e = pmx_bone.name_e
+            b_bone.mmd_bone.transform_order = pmx_bone.transform_order
+            b_bone.mmd_bone.is_visible = pmx_bone.visible
+            b_bone.mmd_bone.is_controllable = pmx_bone.isControllable
 
-            if isinstance(p_bone.displayConnection, int):
-                b_bone.mmd_bone.is_tip = (p_bone.displayConnection == -1)
-            else:
+            if pmx_bone.displayConnection == -1 or pmx_bone.displayConnection == [0.0, 0.0, 0.0]:                
+                b_bone.mmd_bone.is_tip = True
+                logging.debug('bone %s is a tip bone', pmx_bone.name)
+            elif not isinstance(pmx_bone.displayConnection, int):
                 b_bone.mmd_bone.use_tail_location = True
+                logging.debug('bone %s is using a vector tail', pmx_bone.name)
+            else:
+                logging.debug('bone %s is not using a vector tail and is not a tip bone. DisplayConnection: %s', 
+                              pmx_bone.name, str(pmx_bone.displayConnection))
+                
+            if pmx_bone.axis is not None and pmx_bone.parent != -1:
+                #The twist bones (type 8 in PMD) are special, without this the tail will not be displayed during export
+                pose_bones[pmx_bone.parent].mmd_bone.use_tail_location = True
+                                
+            #Movable bones should have a tail too
+            if pmx_bone.isMovable and pmx_bone.visible:
+                b_bone.mmd_bone.use_tail_location = True
+            
+            #Some models don't have correct tail bones, let's try to fix it
+            if re.search(u'先$', pmx_bone.name):
+                b_bone.mmd_bone.is_tip = True
 
-            b_bone.bone.hide = b_bone.mmd_bone.is_tip or not p_bone.visible
+            b_bone.bone.hide = b_bone.mmd_bone.is_tip or not pmx_bone.visible
 
-            if not p_bone.isRotatable:
+            if not pmx_bone.isRotatable:
                 b_bone.lock_rotation = [True, True, True]
 
-            if not p_bone.isMovable:
+            if not pmx_bone.isMovable:
                 b_bone.lock_location = [True, True, True]
 
-            if p_bone.isIK:
-                if p_bone.target != -1:
-                    self.__applyIk(i, p_bone, pose_bones)
+            if pmx_bone.isIK:
+                if pmx_bone.target != -1:
+                    self.__applyIk(i, pmx_bone, pose_bones)
 
-            if p_bone.hasAdditionalRotate or p_bone.hasAdditionalLocation:
-                bone_index, influ = p_bone.additionalTransform
+            if pmx_bone.hasAdditionalRotate or pmx_bone.hasAdditionalLocation:
+                bone_index, influ = pmx_bone.additionalTransform
                 mmd_bone = b_bone.mmd_bone
-                mmd_bone.has_additional_rotation = p_bone.hasAdditionalRotate
-                mmd_bone.has_additional_location = p_bone.hasAdditionalLocation
+                mmd_bone.has_additional_rotation = pmx_bone.hasAdditionalRotate
+                mmd_bone.has_additional_location = pmx_bone.hasAdditionalLocation
                 mmd_bone.additional_transform_influence = influ
                 mmd_bone.additional_transform_bone =  pose_bones[bone_index].name
 
-            if p_bone.localCoordinate is not None:
+            if pmx_bone.localCoordinate is not None:
                 b_bone.mmd_bone.enabled_local_axes = True
-                b_bone.mmd_bone.local_axis_x = p_bone.localCoordinate.x_axis
-                b_bone.mmd_bone.local_axis_z = p_bone.localCoordinate.z_axis
+                b_bone.mmd_bone.local_axis_x = pmx_bone.localCoordinate.x_axis
+                b_bone.mmd_bone.local_axis_z = pmx_bone.localCoordinate.z_axis
 
-            if p_bone.axis is not None:
+            if pmx_bone.axis is not None:
                 b_bone.mmd_bone.enabled_fixed_axis = True
-                b_bone.mmd_bone.fixed_axis=p_bone.axis
+                b_bone.mmd_bone.fixed_axis=pmx_bone.axis
 
             if b_bone.mmd_bone.is_tip:
                 b_bone.lock_rotation = [True, True, True]
@@ -433,12 +453,21 @@ class PMXImporter:
 
     def __importVertexMorphs(self):
         pmxModel = self.__model
-
+        mmd_root = self.__rig.rootObject().mmd_root
         utils.selectAObject(self.__meshObj)
         bpy.ops.object.shape_key_add()
-
+        categories = {
+            0: 'SYSTEM',
+            1: 'EYEBROW',
+            2: 'EYE',
+            3: 'MOUTH',
+            }
         for morph in filter(lambda x: isinstance(x, pmx.VertexMorph), pmxModel.morphs):
             shapeKey = self.__meshObj.shape_key_add(morph.name)
+            vtx_morph = mmd_root.vertex_morphs.add()
+            vtx_morph.name = morph.name
+            vtx_morph.name_e = morph.name_e
+            vtx_morph.category = categories.get(morph.category, 'OTHER')
             for md in morph.offsets:
                 shapeKeyPoint = shapeKey.data[md.index]
                 offset = mathutils.Vector(md.offset) * self.TO_BLE_MATRIX
@@ -446,35 +475,50 @@ class PMXImporter:
 
     def __importMaterialMorphs(self):
         mmd_root = self.__rig.rootObject().mmd_root
+        categories = {
+            0: 'SYSTEM',
+            1: 'EYEBROW',
+            2: 'EYE',
+            3: 'MOUTH',
+            }
         for morph in [x for x in self.__model.morphs if isinstance(x, pmx.MaterialMorph)]:
             mat_morph = mmd_root.material_morphs.add()
             mat_morph.name = morph.name
             mat_morph.name_e = morph.name_e
-            mat_morph.category = morph.category
+            mat_morph.category = categories.get(morph.category, 'OTHER')
             for morph_data in morph.offsets:
                 data = mat_morph.data.add()
                 data.material = self.__materialTable[morph_data.index].name
+                data.offset_type = ['MULT', 'ADD'][morph_data.offset_type]
                 data.diffuse_color = morph_data.diffuse_offset
                 data.specular_color = morph_data.specular_offset
                 data.ambient_color = morph_data.ambient_offset
                 data.edge_color = morph_data.edge_color_offset
-                data.edge_size = morph_data.edge_size_offset
+                data.edge_weight = morph_data.edge_size_offset
                 data.texture_factor = morph_data.texture_factor
                 data.sphere_texture_factor = morph_data.sphere_texture_factor
                 data.toon_texture_factor = morph_data.toon_texture_factor
 
     def __importBoneMorphs(self):
         mmd_root = self.__rig.rootObject().mmd_root
+        categories = {
+            0: 'SYSTEM',
+            1: 'EYEBROW',
+            2: 'EYE',
+            3: 'MOUTH',
+            }
         for morph in [x for x in self.__model.morphs if isinstance(x, pmx.BoneMorph)]:
             bone_morph = mmd_root.bone_morphs.add()
             bone_morph.name = morph.name
             bone_morph.name_e = morph.name_e
-            bone_morph.category = morph.category
+            bone_morph.category = categories.get(morph.category, 'OTHER')
             for morph_data in morph.offsets:
-                data = bone_morph.data.add()
-                data.bone = self.__boneTable[morph_data.index].name
-                data.location = morph_data.location_offset
-                data.rotation = morph_data.rotation_offset
+                data = bone_morph.data.add()    
+                bl_bone = self.__boneTable[morph_data.index]            
+                data.bone = bl_bone.name
+                mat = VMDImporter.makeVMDBoneLocationToBlenderMatrix(bl_bone)
+                data.location = mat * mathutils.Vector(morph_data.location_offset) * self.__scale
+                data.rotation = VMDImporter.convertVMDBoneRotationToBlender(bl_bone, morph_data.rotation_offset)
 
     def __importDisplayFrames(self):
         pmxModel = self.__model

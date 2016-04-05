@@ -21,9 +21,11 @@
 
 
 #====================Version History====================
-#   1.0 Initial release.
-#   1.1 Added error message handling and processing.
-#   1.2 Added seamless handling of  modules/addons using '__name__' 
+#   1.0     Initial release.
+#   1.1     Added error message handling and processing.
+#   1.2     Added seamless handling of  modules/addons using '__name__' 
+#   1.3     Added option to set the number of scriipts from the panels. 
+#             Quieted down the 'Cancel' icon.
 #====================================================
 
 
@@ -31,7 +33,7 @@
 bl_info = {
            "name": "Script Runner",
            "author": "Christopher Barrett  (www.goodspiritgraphics.com)",
-           "version": (1, 2),
+           "version": (1, 3),
            "blender": (2, 68, 0),
            "api": 58537,
            "location": "File > Import > Run Script (.py), & '3D View Tool Shelf', & 'Text Editor Tool Shelf'.",
@@ -39,7 +41,7 @@ bl_info = {
            "warning": "",
            "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Import-Export/Script_Runner",
            "tracker_url": "",
-           "category": "Import-Export"
+           "category": "Development"
           }
 
 
@@ -63,13 +65,13 @@ from bpy.props import EnumProperty, StringProperty,BoolProperty, IntProperty, Fl
 
 
 
-
 #------------------------------Preferences
 
 class ScriptRunnerAddonPreferences(AddonPreferences):
     bl_idname = __name__ 
     
     error_msg_verbose = BoolProperty(name="error_msg_verbose", default = False)
+    display_num_scripts = BoolProperty(name="display_num_scripts", default = True)
     display_3d = BoolProperty(name="display_3d", default = True)
     display_text_editor = BoolProperty(name="display_text_editor", default = True)
     num_scripts = IntProperty(name="Number of Scripts", description = "Set to the number of scripts to display in the panel", min = 1, max = 10, default = 2)
@@ -87,11 +89,10 @@ class ScriptRunnerAddonPreferences(AddonPreferences):
     
     def draw(self, context):
         user_settings = bpy.context.user_preferences.addons[__name__].preferences
-        
+  
         layout = self.layout
         split = layout.split()
-            
-                
+                        
         #-----Column 1
         col1 = split.column()
         row = col1.row()
@@ -108,7 +109,9 @@ class ScriptRunnerAddonPreferences(AddonPreferences):
         row.label("Number of Script Slots to Display:")
         row = col2.row()
         row.prop(self, "num_scripts", text="Scripts", slider = False)
-
+        row = col2.row()
+        row.prop(self,  "display_num_scripts", text="Display scripts slider on panels", toggle = False)
+        
         #-----Column 3
         col3 = split.column()
         row = col3.row()
@@ -139,7 +142,13 @@ class ScriptRunnerAddonPreferences(AddonPreferences):
         row = box.row()
         row.label("File #10:  " + user_settings.script9_path)
         row = box.row()
-		
+
+        
+def draw_scripts_slider(self, context):
+    self.layout.prop(context.user_preferences.addons['script_runner'].preferences, "num_scripts",  text="Scripts")
+
+
+
 #-------------------------------Panels
 
 class ScriptRunnerPanel1(bpy.types.Panel):
@@ -148,20 +157,24 @@ class ScriptRunnerPanel1(bpy.types.Panel):
     bl_region_type = "UI"
     bl_context = "WINDOW"
     bl_options = {'DEFAULT_CLOSED'}
-    
+           
     
     def draw(self, context):
         user_settings = bpy.context.user_preferences.addons[__name__].preferences
         
-        layout = self.layout; 
         
+        if user_settings.display_num_scripts: 
+            #Copy the slider from the addon user preferences.
+            draw_scripts_slider(self, context)
+        
+        layout = self.layout; 
         
         #Script 1
         row = layout.row(align = True)
         slot_0_load = row.operator("object.script_load", text = "", icon='FILESEL')
         slot_0_load.script_slot = 1
         
-        slot_0_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+        slot_0_clear = row.operator("object.script_clear", text = "", icon='X')
         slot_0_clear.script_slot = 0
 
         if user_settings.script0_path != "": 
@@ -179,7 +192,7 @@ class ScriptRunnerPanel1(bpy.types.Panel):
             slot_1_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_1_load.script_slot = 2
             
-            slot_1_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_1_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_1_clear.script_slot = 1
             
             if user_settings.script1_path != "": 
@@ -197,7 +210,7 @@ class ScriptRunnerPanel1(bpy.types.Panel):
             slot_2_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_2_load.script_slot = 3
             
-            slot_2_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_2_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_2_clear.script_slot = 2
             
             if user_settings.script2_path != "": 
@@ -215,7 +228,7 @@ class ScriptRunnerPanel1(bpy.types.Panel):
             slot_3_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_3_load.script_slot = 4
             
-            slot_3_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_3_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_3_clear.script_slot = 3
             
             if user_settings.script3_path != "": 
@@ -233,7 +246,7 @@ class ScriptRunnerPanel1(bpy.types.Panel):
             slot_4_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_4_load.script_slot = 5
             
-            slot_4_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_4_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_4_clear.script_slot = 4
             
             if user_settings.script4_path != "": 
@@ -251,7 +264,7 @@ class ScriptRunnerPanel1(bpy.types.Panel):
             slot_5_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_5_load.script_slot = 6
             
-            slot_5_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_5_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_5_clear.script_slot = 5
             
             if user_settings.script5_path != "": 
@@ -269,7 +282,7 @@ class ScriptRunnerPanel1(bpy.types.Panel):
             slot_6_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_6_load.script_slot = 7
             
-            slot_6_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_6_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_6_clear.script_slot = 6
             
             if user_settings.script6_path != "": 
@@ -287,7 +300,7 @@ class ScriptRunnerPanel1(bpy.types.Panel):
             slot_7_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_7_load.script_slot = 8
             
-            slot_7_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_7_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_7_clear.script_slot = 7
             
             if user_settings.script7_path != "": 
@@ -305,7 +318,7 @@ class ScriptRunnerPanel1(bpy.types.Panel):
             slot_8_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_8_load.script_slot = 9
             
-            slot_8_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_8_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_8_clear.script_slot = 8
             
             if user_settings.script8_path != "": 
@@ -323,7 +336,7 @@ class ScriptRunnerPanel1(bpy.types.Panel):
             slot_9_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_9_load.script_slot = 10
             
-            slot_9_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_9_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_9_clear.script_slot = 9
             
             if user_settings.script9_path != "": 
@@ -346,15 +359,19 @@ class ScriptRunnerPanel2(bpy.types.Panel):
     def draw(self, context):
         user_settings = bpy.context.user_preferences.addons[__name__].preferences
         
+       
+        if user_settings.display_num_scripts: 
+            #Copy the slider from the addon user preferences.
+            draw_scripts_slider(self, context)
+            
         layout = self.layout; 
-        
-        
+                
         #Script 1
         row = layout.row(align = True)
         slot_0_load = row.operator("object.script_load", text = "", icon='FILESEL')
         slot_0_load.script_slot = 1
         
-        slot_0_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+        slot_0_clear = row.operator("object.script_clear", text = "", icon='X')
         slot_0_clear.script_slot = 0
 
         if user_settings.script0_path != "": 
@@ -372,7 +389,7 @@ class ScriptRunnerPanel2(bpy.types.Panel):
             slot_1_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_1_load.script_slot = 2
             
-            slot_1_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_1_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_1_clear.script_slot = 1
             
             if user_settings.script1_path != "": 
@@ -390,7 +407,7 @@ class ScriptRunnerPanel2(bpy.types.Panel):
             slot_2_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_2_load.script_slot = 3
             
-            slot_2_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_2_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_2_clear.script_slot = 2
             
             if user_settings.script2_path != "": 
@@ -408,7 +425,7 @@ class ScriptRunnerPanel2(bpy.types.Panel):
             slot_3_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_3_load.script_slot = 4
             
-            slot_3_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_3_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_3_clear.script_slot = 3
             
             if user_settings.script3_path != "": 
@@ -426,7 +443,7 @@ class ScriptRunnerPanel2(bpy.types.Panel):
             slot_4_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_4_load.script_slot = 5
             
-            slot_4_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_4_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_4_clear.script_slot = 4
             
             if user_settings.script4_path != "": 
@@ -444,7 +461,7 @@ class ScriptRunnerPanel2(bpy.types.Panel):
             slot_5_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_5_load.script_slot = 6
             
-            slot_5_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_5_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_5_clear.script_slot = 5
             
             if user_settings.script5_path != "": 
@@ -462,7 +479,7 @@ class ScriptRunnerPanel2(bpy.types.Panel):
             slot_6_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_6_load.script_slot = 7
             
-            slot_6_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_6_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_6_clear.script_slot = 6
             
             if user_settings.script6_path != "": 
@@ -480,7 +497,7 @@ class ScriptRunnerPanel2(bpy.types.Panel):
             slot_7_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_7_load.script_slot = 8
             
-            slot_7_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_7_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_7_clear.script_slot = 7
             
             if user_settings.script7_path != "": 
@@ -498,7 +515,7 @@ class ScriptRunnerPanel2(bpy.types.Panel):
             slot_8_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_8_load.script_slot = 9
             
-            slot_8_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_8_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_8_clear.script_slot = 8
             
             if user_settings.script8_path != "": 
@@ -516,7 +533,7 @@ class ScriptRunnerPanel2(bpy.types.Panel):
             slot_9_load = row.operator("object.script_load", text = "", icon='FILESEL')
             slot_9_load.script_slot = 10
             
-            slot_9_clear = row.operator("object.script_clear", text = "", icon='CANCEL')
+            slot_9_clear = row.operator("object.script_clear", text = "", icon='X')
             slot_9_clear.script_slot = 9
             
             if user_settings.script9_path != "": 
@@ -573,7 +590,7 @@ class ScriptRunner(bpy.types.Operator, ImportHelper):
             cache_path = os.path.join( cache_path,  "__pycache__"  )
             error = 2
             old_name = path_leaf(file_path).split(".")[0]
-            new_name = "script_runner_" + ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(20)) + "_" + old_name
+            new_name = "script_runner_" + ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(10)) + "_" + old_name
             error = 3
             new_file_path =  os.path.join( script_path,  new_name + ".py")
             error = 4
@@ -871,7 +888,7 @@ def create_menu(self, context):
    self.layout.operator(ScriptRunner.bl_idname,text="Run Script (.py)");
 
 
-
+    
 def register():
     bpy.utils.register_class(ScriptRunnerAddonPreferences)
     bpy.utils.register_class(ScriptRunner)
@@ -889,10 +906,10 @@ def register():
     bpy.utils.register_class(ScriptRun)
  
     bpy.types.INFO_MT_file_import.append(create_menu);
-
-    checkFiles()
     
-
+    checkFiles()
+  
+    
 def unregister():
         
     try:
@@ -920,9 +937,7 @@ def unregister():
     bpy.utils.unregister_class(ScriptRunnerAddonPreferences) 
        
 
-	
-	
-	
+       
 
 if (__name__ == "__main__"):
    register();

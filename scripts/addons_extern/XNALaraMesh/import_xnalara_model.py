@@ -7,6 +7,7 @@ import os
 import re
 import sys
 import traceback
+import random
 
 from XNALaraMesh import ascii_ops
 from XNALaraMesh import import_xnalara_pose
@@ -20,28 +21,22 @@ from mathutils import *
 import mathutils
 # imported XPS directory
 rootDir = ''
-blenderBoneNames = None
-
-
-class BlenderBoneNames:
-
-    def __init__(self):
-        self.bones = []
+blenderBoneNames = []
 
 
 def newBoneName():
     global blenderBoneNames
-    blenderBoneNames = BlenderBoneNames()
-    return blenderBoneNames
-
-
-def addBoneName(blenderBoneName):
+    blenderBoneNames = []
+def addBoneName(newName):
     global blenderBoneNames
-    blenderBoneNames.bones.append(blenderBoneName)
+    blenderBoneNames.append(newName)
 
 
 def getBoneName(originalIndex):
-    return blenderBoneNames.bones[originalIndex]
+    if originalIndex < len(blenderBoneNames):
+        return blenderBoneNames[originalIndex]
+    else:
+        return None
 
 
 def coordTransform(coords):
@@ -55,13 +50,12 @@ def faceTransform(face):
 
 
 def faceTransformList(faces):
-    transformed = [faceTransform(face) for face in faces]
-    return transformed
+        return map(faceTransform, faces)
 
 
 def uvTransform(uv):
-    u = uv[0] - xpsSettings.uvDisplX
-    v = xpsSettings.uvDisplY - uv[1]
+    u = uv[0] + xpsSettings.uvDisplX
+    v = 1 + xpsSettings.uvDisplY - uv[1]
     return [u, v]
 
 
@@ -70,18 +64,11 @@ def rangeFloatToByte(float):
 
 
 def rangeByteToFloat(byte):
-    return float / 255
+    return byte / 255
 
 
 def uvTransformLayers(uvLayers):
-    return [uvTransform(uv) for uv in uvLayers]
-
-
-def getArmature():
-    selected_obj = bpy.context.selected_objects
-    armature_obj = next(
-        (obj for obj in selected_obj if obj.type == 'ARMATURE'), None)
-    return armature_obj
+    return list(map(uvTransform, uvLayers))
 
 
 def makeImageFilepath(textureFilename):
@@ -109,11 +96,27 @@ def newTextureSlot(materialData):
     return textureSlot
 
 
+def randomColor():
+    randomR = random.random()
+    randomG = random.random()
+    randomB = random.random()
+    return (randomR, randomG, randomB)
+
+
+def randomColorRanged():
+    r = random.uniform(.5,1)
+    g = random.uniform(.5,1)
+    b = random.uniform(.5,1)
+    return (r, g, b)
+
 def makeMaterial(me_ob, meshInfo):
     meshFullName = meshInfo.name
     textureFilepaths = meshInfo.textures
 
     materialData = bpy.data.materials.new(meshFullName)
+    if xpsSettings.colorizeMesh:
+        color = randomColorRanged()
+        materialData.diffuse_color = color
     materialData.use_transparent_shadows = True
     me_ob.materials.append(materialData)
 
@@ -218,21 +221,29 @@ def setUvTexture(mesh_ob):
                     uv_face.image = currUvTexture
 
 
-def loadImage(textureFilename):
-    textureBasename = os.path.basename(textureFilename)
-    fileRoot, fileExt = os.path.splitext(textureBasename)
+def loadImage(textureFilepath):
+    textureFilename = os.path.basename(textureFilepath)
+    fileRoot, fileExt = os.path.splitext(textureFilename)
 
-    print("Loading Texture: " + textureBasename)
-    if (os.path.exists(textureFilename)):
-        image = bpy.data.images.load(filepath=textureFilename)
-        print("Texture load complete: " + textureBasename)
-    else:
-        print("Warning. Texture not found " + textureBasename)
-        image = bpy.data.images.new(
-            name=textureBasename, width=1024, height=1024, alpha=True,
-            float_buffer=False)
-        image.source = 'FILE'
-        image.filepath = textureFilename
+    #Get texture by filename
+    #image = bpy.data.images.get(textureFilename)
+    
+    #Get texture by filepath
+    image = next(
+        (img for img in bpy.data.images if bpy.path.abspath(img.filepath) == textureFilepath), None)
+
+    if image is None:
+        print("Loading Texture: " + textureFilename)
+        if (os.path.exists(textureFilepath)):
+            image = bpy.data.images.load(filepath=textureFilepath)
+            print("Texture load complete: " + textureFilename)
+        else:
+            print("Warning. Texture not found " + textureFilename)
+            image = bpy.data.images.new(
+                name=textureFilename, width=1024, height=1024, alpha=True,
+                float_buffer=False)
+            image.source = 'FILE'
+            image.filepath = textureFilepath
     return image
 
 
@@ -280,7 +291,7 @@ def isModProtected(xpsData):
 
 
 def setMinimumLenght(bone):
-    default_length = 0.01
+    default_length = 0.005
     if bone.length == 0:
         bone.tail = bone.head - Vector((0, .001, 0))
     if bone.length < default_length:
@@ -311,12 +322,6 @@ def connectEditBones(editBones, connectBones):
                 bone.use_connect = connectBones
 
 
-def getAllArmaturesForMesh(mesh_ob):
-    armatures = [modifier.object for modifier in mesh_ob.modifiers
-                 if modifier.type == "ARMATURE"]
-    return armatures
-
-
 def hideBonesByName(armature_objs):
     '''Hide bones that do not affect any mesh'''
     for armature in armature_objs:
@@ -333,14 +338,14 @@ def hideBonesByVertexGroup(armature_objs):
                     modif for modif in obj.modifiers if modif and
                     modif.type == 'ARMATURE' and modif.object == armature]]
 
-        # leafBones = [bone for bone in armature.data.bones
-        #              if not bone.children]
-        rootBones = [bone for bone in armature.data.bones if not bone.parent]
-
         # cycle objects and get all vertex groups
         vertexgroups = set(
-            [vg.name for obj in objs if obj.type == 'MESH'
-             for vg in obj.vertex_groups])
+                [vg.name for obj in objs if obj.type == 'MESH'
+                    for vg in obj.vertex_groups])
+
+        bones = armature.data.bones
+        # leafBones = [bone for bone in bones if not bone.children]
+        rootBones = [bone for bone in bones if not bone.parent]
 
         for bone in rootBones:
             recurBones(bone, vertexgroups, '')
@@ -398,61 +403,72 @@ def hideUnusedBones(armature_objs):
     hideBonesByName(armature_objs)
 
 
+def boneDictRename(filepath, armatureObj):
+    boneDictData = read_ascii_xps.readBoneDict(filepath)
+    renameBonesUsingDict(armatureObj, boneDictData[0])
+    
+
+def boneDictRestore(filepath, armatureObj):
+    boneDictData = read_ascii_xps.readBoneDict(filepath)
+    renameBonesUsingDict(armatureObj, boneDictData[1])
+
+
+def renameBonesUsingDict(armatureObj, boneDict):
+    getbone = armatureObj.data.bones.get
+    for key, value in boneDict.items():
+        bone = getbone(key)
+        if bone:
+            bone.name = value
+
+
 def changeBoneName(boneName, suffix, replace):
     newName = re.sub(suffix, '*side*', boneName, 0, re.I)
     newName = re.sub(' +', ' ', newName, 0, re.I)
     newName = str.strip(newName)
     if boneName != newName:
-        newName = newName + replace
-    return newName
+        newName = '{}{}'.format(newName, replace)
+    return newName.strip()
 
 
 def renameBonesToBlender(armatures_obs):
     currActive = bpy.context.active_object
     for armature in armatures_obs:
-        bpy.context.scene.objects.active = armature
-        bpy.ops.object.mode_set(mode='EDIT')
-        for edit_bones in armature.data.edit_bones:
-            oldName = edit_bones.name
+        for bone in armature.data.bones:
+            oldName = bone.name
             suffix = 'left'
             if re.search(suffix, oldName, re.I):
-                edit_bones.name = changeBoneName(oldName, suffix, '.L')
+                newname = changeBoneName(oldName, suffix, '.L')
+                bone.name = newname
             suffix = 'right'
             if re.search(suffix, oldName, re.I):
-                edit_bones.name = changeBoneName(oldName, suffix, '.R')
-        bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.context.scene.objects.active = currActive
+                newname = changeBoneName(oldName, suffix, '.R')
+                bone.name = newname
 
 
 def renameBonesToXps(armatures_obs):
-    currActive = bpy.context.active_object
     for armature in armatures_obs:
-        bpy.context.scene.objects.active = armature
-        bpy.ops.object.mode_set(mode='EDIT')
         newName = ''
-        for edit_bones in armature.data.edit_bones:
-            oldName = edit_bones.name
+        for bone in armature.data.bones:
+            oldName = bone.name
             suffix = '\.L'
             if re.search(suffix, oldName, re.I):
                 newName = re.sub(suffix, '', oldName, 0, re.I)
                 newName = re.sub(' +', ' ', newName, 0, re.I)
                 newName = re.sub('\*side\*', 'left', newName, 0, re.I)
-                edit_bones.name = newName
+                bone.name = newName.strip()
             suffix = '\.R'
             if re.search(suffix, oldName, re.I):
                 newName = re.sub(suffix, '', oldName, 0, re.I)
                 newName = re.sub(' +', ' ', newName, 0, re.I)
                 newName = re.sub('\*side\*', 'right', newName, 0, re.I)
-                edit_bones.name = newName
-        bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.context.scene.objects.active = currActive
+                bone.name = newName.strip()
 
 
 def importArmature(autoIk):
     bones = xpsData.bones
     armature_ob = None
     if bones:
-        boneCount = len(xpsData.bones)
+        boneCount = len(bones)
         print('Importing Armature', str(boneCount), 'bones')
 
         armature_da = bpy.data.armatures.new("Armature")
@@ -488,18 +504,6 @@ def importArmature(autoIk):
     return armature_ob
 
 
-def calcCenter(coords):
-    sum = None
-    for coord in coords:
-        if sum is None:
-            sum = coord.xyz
-        else:
-            sum += coord.xyz
-    if sum:
-        center = sum / len(coords)
-    return center
-
-
 def boneTailMiddle(editBones, connectBones):
     '''Move bone tail to children middle point'''
     for bone in editBones:
@@ -511,8 +515,7 @@ def boneTailMiddle(editBones, connectBones):
 
         if childBones:
             # Set tail to children middle
-            bone.tail = calcCenter(
-                [childBone.head for childBone in childBones])
+            bone.tail = Vector(map(sum,zip(*(childBone.head.xyz for childBone in childBones))))/len(childBones)
         else:
             # if no child, set tail acording to parent
             if bone.parent is not None:
@@ -536,16 +539,20 @@ def markSelected(ob):
     ob.select = True
 
 
-def makeUvs(mesh_ob, faces, uvData):
+def makeUvs(mesh_da, faces, uvData, vertColors):
     # Create UVLayers
     for i in range(len(uvData[0])):
-        mesh_ob.uv_textures.new(name="UV" + str(i + 1))
-
+        mesh_da.uv_textures.new(name="UV" + str(i + 1))
+    if xpsSettings.vColors:
+        mesh_da.vertex_colors.new()
+    
     # Assign UVCoords
-    for layerIdx, uvLayer in enumerate(mesh_ob.uv_layers):
-        for faceId, face in enumerate(faces):
-            for vertId, faceVert in enumerate(face):
-                loopdId = (faceId * 3) + vertId
+    for faceId, face in enumerate(faces):
+        for vertId, faceVert in enumerate(face):
+            loopdId = (faceId * 3) + vertId
+            if xpsSettings.vColors:
+                mesh_da.vertex_colors[0].data[loopdId].color = vertColors[faceVert]
+            for layerIdx, uvLayer in enumerate(mesh_da.uv_layers):
                 uvCoor = uvData[faceVert][layerIdx]
                 uvLayer.data[loopdId].uv = Vector(uvCoor)
 
@@ -626,8 +633,36 @@ def generateVertexKey(vertex):
     return key
 
 
+def getVertexId(vertex, mapVertexKeys, mergedVertList):
+    vertexKey = generateVertexKey(vertex)
+    vertexID = mapVertexKeys.get(vertexKey)
+    if vertexID:
+        mergedVertList[vertexID].merged = True
+    else:
+        vertexID = len(mergedVertList)
+        mapVertexKeys[vertexKey] = vertexID
+        newVert = copy.copy(vertex)
+        newVert.id = vertexID
+        mergedVertList.append(newVert)
+    return vertexID
+
+def makeVertexDict(vertexDict, mergedVertList, uvLayers, vertColor, vertices):
+    mapVertexKeys = {}
+    uvLayerAppend = uvLayers.append
+    vertColorAppend = vertColor.append
+    vertexDictAppend = vertexDict.append
+    
+    for vertex in vertices:
+        vColor=vertex.vColor
+        uvLayerAppend(list(map(uvTransform, vertex.uv)))
+        vertColorAppend((rangeByteToFloat(vColor[0]),rangeByteToFloat(vColor[1]),rangeByteToFloat(vColor[2])))
+        vertexID = getVertexId(vertex, mapVertexKeys, mergedVertList)
+        # old ID to new ID
+        vertexDictAppend(vertexID)
+
 def importMesh(armature_ob, meshInfo):
     boneCount = len(xpsData.bones)
+    useSeams = xpsSettings.markSeams
     # Create Mesh
     meshFullName = meshInfo.name
     print()
@@ -645,35 +680,43 @@ def importMesh(armature_ob, meshInfo):
     textureFilepaths = meshInfo.textures
 
     mesh_ob = None
-    if len(meshInfo.vertices) >= 3:
-        vertexIdx = [0] * len(meshInfo.vertices)
-        mapVertexKeys = {}
+    vertCount = len(meshInfo.vertices)
+    if vertCount >= 3:
         vertexDict = []
-        vertexData = []
+        mergedVertList = []
         uvLayers = []
-        for vertex in meshInfo.vertices:
-            uvLayers.append(uvTransformLayers(vertex.uv))
-            vertexKey = generateVertexKey(vertex)
-            if vertexKey in mapVertexKeys:
-                vertexID = mapVertexKeys[vertexKey]
-            else:
-                vertexID = len(vertexData)
-                mapVertexKeys[vertexKey] = vertexID
-                newVert = copy.deepcopy(vertex)
-                newVert.id = vertexID
-                vertexData.append(newVert)
-            # old ID to new ID
-            vertexDict.append(vertexID)
+        vertColors = []
+        makeVertexDict(vertexDict, mergedVertList, uvLayers, vertColors, meshInfo.vertices)
 
+        # new ID to riginal ID
+        vertexOrig = [[] for x in range(len(mergedVertList))]
+        for vertId, vert in enumerate(vertexDict):
+            vertexOrig[vert].append(vertId)
+
+        mergedVertices = {}
+        seamEdgesDict = {}
         facesData = []
         for face in meshInfo.faces:
-            facesData.append(
-                (vertexDict[face[0]], vertexDict[face[1]], vertexDict[face[2]]))
+            v1Old = face[0]
+            v2Old = face[1]
+            v3Old = face[2]
+            v1New = vertexDict[v1Old]
+            v2New = vertexDict[v2Old]
+            v3New = vertexDict[v3Old]
+            oldFace = ((v1Old, v2Old, v3Old))
+            facesData.append((v1New, v2New, v3New))
+
+            if (useSeams):
+                if (mergedVertList[v1New].merged
+                        or mergedVertList[v2New].merged
+                        or mergedVertList[v3New].merged):
+
+                    findMergedEdges(seamEdgesDict, vertexDict, mergedVertList, mergedVertices, oldFace)
 
         # merge Vertices of same coord and normal?
         mergeByNormal = True
         if mergeByNormal:
-            vertices = vertexData
+            vertices = mergedVertList
             facesList = facesData
         else:
             vertices = meshInfo.vertices
@@ -681,29 +724,34 @@ def importMesh(armature_ob, meshInfo):
 
         # Create Mesh
         mesh_ob = makeMesh(meshFullName)
+        bpy.context.scene.objects.active = mesh_ob
         mesh_da = mesh_ob.data
 
         coords = []
         normals = []
-        vertColors = []
         vrtxList = []
         nbVrtx = []
 
         for vertex in vertices:
+            unitnormal = Vector(vertex.norm).normalized()
             coords.append(coordTransform(vertex.co))
-            normals.append(coordTransform(vertex.norm))
-            vertColors.append(vertex.vColor)
+            normals.append(coordTransform(unitnormal))
+            # vertColors.append(vertex.vColor)
             # uvLayers.append(uvTransformLayers(vertex.uv))
 
         # Create Faces
-        faces = faceTransformList(facesList)
+        faces = list(faceTransformList(facesList))
         mesh_da.from_pydata(coords, [], faces)
         mesh_da.polygons.foreach_set(
             "use_smooth", [True] * len(mesh_da.polygons))
 
+        #speedup!!!!
+        if xpsSettings.markSeams:
+            markSeams(mesh_da, seamEdgesDict)
+
         # Make UVLayers
         origFaces = faceTransformList(meshInfo.faces)
-        makeUvs(mesh_da, origFaces, uvLayers)
+        makeUvs(mesh_da, origFaces, uvLayers, vertColors)
 
         # Make Material
         makeMaterial(mesh_da, meshInfo)
@@ -743,6 +791,77 @@ def importMesh(armature_ob, meshInfo):
     return mesh_ob
 
 
+def markSeams(mesh_da, seamEdgesDict):
+    #use Dict to speedup search
+    edge_keys = {val: index for index, val in enumerate(mesh_da.edge_keys)}
+    mesh_da.show_edge_seams = True
+    for vert1, list in seamEdgesDict.items():
+        for vert2 in list:
+            edgeIdx = None
+            if vert1 < vert2:
+                edgeIdx = edge_keys[(vert1, vert2)]
+            elif vert2 < vert1:
+                edgeIdx = edge_keys[(vert2, vert1)]
+            if edgeIdx:
+                mesh_da.edges[edgeIdx].use_seam = True
+
+
+def findMergedEdges(seamEdgesDict, vertexDict, mergedVertList, mergedVertices, oldFace):
+    findMergedVert(seamEdgesDict, vertexDict, mergedVertList, mergedVertices, oldFace, oldFace[0])
+    findMergedVert(seamEdgesDict, vertexDict, mergedVertList, mergedVertices, oldFace, oldFace[1])
+    findMergedVert(seamEdgesDict, vertexDict, mergedVertList, mergedVertices, oldFace, oldFace[2])
+
+
+def findMergedVert(seamEdgesDict, vertexDict, mergedVertList, mergedVertices, oldFace, mergedVert):
+    v1Old = oldFace[0]
+    v2Old = oldFace[1]
+    v3Old = oldFace[2]
+    v1New = vertexDict[v1Old]
+    v2New = vertexDict[v2Old]
+    v3New = vertexDict[v3Old]
+    vertX = vertexDict[mergedVert]
+    if (mergedVertList[vertX].merged):
+        # List Merged vertices original Create
+        if (mergedVertices.get(vertX) is None):
+            mergedVertices[vertX]=[]
+
+        # List Merged vertices original Loop
+        for facesList in mergedVertices[vertX]:
+            #Check if original vertices merge
+
+            i = 0
+            matchV1 = False
+            while not matchV1 and i < 3:
+                if ((vertX == vertexDict[facesList[i]]) and mergedVert != facesList[i]):
+                    if (mergedVert != v1Old):
+                        checkEdgePairForSeam(i, seamEdgesDict, vertexDict, vertX, v1Old, facesList)
+                    if (mergedVert != v2Old):
+                        checkEdgePairForSeam(i, seamEdgesDict, vertexDict, vertX, v2Old, facesList)
+                    if (mergedVert != v3Old):
+                        checkEdgePairForSeam(i, seamEdgesDict, vertexDict, vertX, v3Old, facesList)
+                    matchV1 = True
+                i=i+1
+
+        # List Merged vertices original Append
+        mergedVertices[vertX].append((v1Old,v2Old,v3Old))
+
+
+def checkEdgePairForSeam(i, seamEdgesDict, vertexDict, mergedVert, vert, facesList):
+    if (i != 0):
+        makeSeamEdgeDict(0, seamEdgesDict, vertexDict, mergedVert, vert, facesList)
+    if (i != 1):
+        makeSeamEdgeDict(1, seamEdgesDict, vertexDict, mergedVert, vert, facesList)
+    if (i != 2):
+        makeSeamEdgeDict(2, seamEdgesDict, vertexDict, mergedVert, vert, facesList)
+
+
+def makeSeamEdgeDict(i, seamEdgesDict, vertexDict, mergedVert, vert, facesList):
+    if (vertexDict[vert] == vertexDict[facesList[i]]):
+        if (seamEdgesDict.get(mergedVert) is None):
+            seamEdgesDict[mergedVert] = []
+        seamEdgesDict[mergedVert].append(vertexDict[vert])
+
+
 def setArmatureModifier(armature_ob, mesh_ob):
     mod = mesh_ob.modifiers.new(type="ARMATURE", name="Armature")
     mod.use_vertex_groups = True
@@ -755,58 +874,52 @@ def setParent(armature_ob, mesh_ob):
 
 def makeVertexGroups(mesh_ob, vertices):
     '''Make vertex groups and assign weights'''
+    # blender limits vertexGroupNames to 63 chars
+    #armatures = [mesh_ob.find_armature()]
+    armatures = mesh_ob.find_armature()
     for vertex in vertices:
-        for i in range(len(vertex.boneWeights)):
-            boneIdx = vertex.boneWeights[i].id
-            vertexWeight = vertex.boneWeights[i].weight
-            if boneIdx > 0 and vertexWeight != 0:
-                # blender limits vertexGroupNames to 63 chars
-                armatures = getAllArmaturesForMesh(mesh_ob)
-                for armature in armatures:
-                    # use original index to get current bone name in blender
-                    vertexGroupName = getBoneName(boneIdx)
-                    bone = armature.data.bones[vertexGroupName]
-                    vertGroup = mesh_ob.vertex_groups.get(vertexGroupName)
-                    if not vertGroup:
-                        vertGroup = mesh_ob.vertex_groups.new(vertexGroupName)
-                    vertGroup.add([vertex.id], vertexWeight, 'REPLACE')
+        assignVertexGroup(vertex, armatures, mesh_ob)
+
+
+def assignVertexGroup(vert, armature, mesh_ob):
+    for i in range(len(vert.boneWeights)):
+        vertBoneWeight = vert.boneWeights[i]
+        boneIdx = vertBoneWeight.id
+        vertexWeight = vertBoneWeight.weight
+        if vertexWeight != 0:
+            # use original index to get current bone name in blender
+            boneName = getBoneName(boneIdx)
+            if boneName:
+                vertGroup = mesh_ob.vertex_groups.get(boneName)
+                if not vertGroup:
+                    vertGroup = mesh_ob.vertex_groups.new(boneName)
+                vertGroup.add([vert.id], vertexWeight, 'REPLACE')
 
 
 def makeBoneGroups(armature_ob, mesh_ob):
-    import random
     C = bpy.context
     # Use current theme for selecte and active bone colors
     current_theme = C.user_preferences.themes.items()[0][0]
     theme = C.user_preferences.themes[current_theme]
 
     # random bone surface color by mesh
-    bone_pose_surface_color = (
-        random.random(), random.random(), random.random())
+    color = randomColor()
+    bone_pose_surface_color = (color)
     bone_pose_color = theme.view_3d.bone_pose
     bone_pose_active_color = theme.view_3d.bone_pose_active
 
-    # Store scene mode for later
-    previous_mode = C.mode
-    boneNames = mesh_ob.vertex_groups.keys()
+    boneGroup = armature_ob.pose.bone_groups.new(mesh_ob.name)
 
-    bpy.ops.object.mode_set(mode='POSE')
-    boneGroup = getBoneGroup(mesh_ob.name)
+    boneGroup.color_set = 'CUSTOM'
     boneGroup.colors.normal = bone_pose_surface_color
     boneGroup.colors.select = bone_pose_color
     boneGroup.colors.active = bone_pose_active_color
 
-    for boneName in boneNames:
-        armature_ob.pose.bones[boneName].bone_group = boneGroup
-    bpy.ops.object.mode_set(mode=previous_mode)
+    vertexGroups = mesh_ob.vertex_groups.keys()
+    poseBones = armature_ob.pose.bones
+    for boneName in vertexGroups:
+        poseBones[boneName].bone_group = boneGroup
 
-
-def getBoneGroup(name):
-    bpy.ops.pose.group_add()
-    bvhrig = bpy.context.scene.objects.active
-    bvhgroup = bvhrig.pose.bone_groups.active
-    bvhgroup.name = name
-    bvhgroup.color_set = 'CUSTOM'
-    return bvhgroup
 
 if __name__ == "__main__":
 

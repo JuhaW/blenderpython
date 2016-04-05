@@ -16,7 +16,7 @@ bl_info = {
 Light probes sample incoming light at that location and generate 9 \
 coefficients that can be used to quickly simluate that lighting in a real-time \
 game engine.",
-    "category": "Object",
+    "category": "Lighting",
     "author": "Andrew Moffat",
     "version": (1, 0),
     "blender": (2, 7, 1)
@@ -664,8 +664,5 @@ def unregister():
     del bpy.types.Scene.lightprobe
     
 
-try:
-    unregister()
-except:
-    pass
-register()
+if __name__ == "__main__":
+    register()

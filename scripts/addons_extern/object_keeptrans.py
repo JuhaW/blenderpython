@@ -53,11 +53,6 @@ if "bpy" in locals():
 import bpy
 from mathutils import * 
 
-
-
-
-
-
 class DeCouple(bpy.types.Operator):
 	bl_idname = "object.keeptrans"
 	bl_label = "KeepTrans"

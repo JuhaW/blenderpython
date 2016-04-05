@@ -1,4 +1,4 @@
-
+Mostly up to date External addons collection by meta-anrocto
 3d View Dynamic Menu Enables: 
 Dynamic "Spacebar" & "Toolshelf", by meta-androcto
 Materials Utils "Shift/Q", by MichaelW 

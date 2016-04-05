@@ -7,7 +7,7 @@ from . import operators
 from . import panels
 
 bl_info= {
-    "name": "MMD Tools",
+    "name": "mmd_tools",
     "author": "sugiany",
     "version": (0, 5, 0),
     "blender": (2, 70, 0),

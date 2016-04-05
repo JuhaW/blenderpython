@@ -45,7 +45,18 @@ class XpsVertex:
         self.vColor = vColor
         self.uv = uv
         self.boneWeights = boneWeights
+        self.merged = False
 
+    def __copy__(self):
+        return XpsVertex(
+                self.id,
+                self.co[:],
+                self.norm[:],
+                self.vColor[:],
+                self.uv[:],
+                self.boneWeights
+                )
+    
 
 class XpsTexture:
 
@@ -99,6 +110,9 @@ class XpsImportSettings:
             importDefaultPose,
             joinMeshRips,
             joinMeshParts,
+            markSeams,
+            colorizeMesh,
+            vColors,
             connectBones,
             autoIk,
             importNormals):
@@ -108,6 +122,9 @@ class XpsImportSettings:
         self.importDefaultPose = importDefaultPose
         self.joinMeshRips = joinMeshRips
         self.joinMeshParts = joinMeshParts
+        self.markSeams = markSeams
+        self.colorizeMesh = colorizeMesh
+        self.vColors = vColors
         self.connectBones = connectBones
         self.autoIk = autoIk
         self.importNormals = importNormals
@@ -123,6 +140,8 @@ class XpsExportSettings:
             exportOnlySelected,
             expDefPose,
             modProtected,
+            preserveSeams,
+            vColors,
             exportNormals):
         self.filename = filename
         self.uvDisplX = uvDisplX
@@ -130,4 +149,6 @@ class XpsExportSettings:
         self.exportOnlySelected = exportOnlySelected
         self.expDefPose = expDefPose
         self.modProtected = modProtected
+        self.preserveSeams = preserveSeams
+        self.vColors = vColors
         self.exportNormals = exportNormals

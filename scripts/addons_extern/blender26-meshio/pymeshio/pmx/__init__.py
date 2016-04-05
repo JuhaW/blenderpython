@@ -661,6 +661,32 @@ class BoneMorphData(common.Diff):
         self._diff(rhs, 'rotation')
 
 
+class UVMorphData(common.Diff):
+    """pmx uv morph data
+
+    Attributes:
+        vertex_index:
+        position: Vector4
+    """
+    __slots__=[
+            'vertex_index',
+            'uv',
+            ]
+    def __init__(self, vertex_index, uv):
+        self.vertex_index=vertex_index
+        self.uv=uv
+
+    def __eq__(self, rhs):
+        return (
+                self.vertex_index==rhs.vertex_index 
+                and self.uv==rhs.uv
+                )
+
+    def diff(self, rhs):
+        self._diff(rhs, 'vertex_index')
+        self._diff(rhs, 'uv')
+
+
 class MaterialMorphData(common.Diff):
     """pmx mateerial morph data
 
@@ -1053,20 +1079,54 @@ class Model(common.Diff):
             'rigidbodies',
             'joints',
             ]
-    def __init__(self, version=2.0):
+    def __init__(self, version=2.0
+            , name=u'空モデル'
+            , english_name=u'empty model'
+            , comment=u'pymeshioで生成'
+            , english_comment=u'created by pymeshio'
+            ):
         self.path=''
         self.version=version
-        self.name=''
-        self.english_name=''
-        self.comment=''
-        self.english_comment=''
+        self.name=name
+        self.english_name=english_name
+        self.comment=comment
+        self.english_comment=english_comment
         self.vertices=[]
         self.indices=[]
         self.textures=[]
-        self.materials=[]
-        self.bones=[]
+        self.materials=[
+                Material(u'マテリアル'
+                    , u'material'
+                    , common.RGB(0.5, 0.5, 1)
+                    , 1.0
+                    , 1
+                    , common.RGB(1, 1, 1)
+                    , common.RGB(0, 0, 0)
+                    , 0
+                    , common.RGBA(0, 0, 0, 1)
+                    , 0
+                    , -1
+                    , -1
+                    , MATERIALSPHERE_NONE
+                    , 1
+                    , 0
+                    , u"comment"
+                    , 0
+                    )
+                ]
+        self.bones=[
+                Bone(u'センター'
+                    , u'center'
+                    , common.Vector3()
+                    , -1
+                    , 0
+                    , 0
+                    )
+                ]
         self.morphs=[]
-        self.display_slots=[]
+        self.display_slots=[
+                DisplaySlot(u'Root', u'Root', 1, [(0, 0)])
+                ]
         self.rigidbodies=[]
         self.joints=[]
 
