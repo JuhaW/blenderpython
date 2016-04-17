@@ -120,12 +120,19 @@ def register():
 
     bpy.types.VIEW3D_MT_snap.append(menu_func)
 
-
+#    try:
+#       bpy.types.VIEW3D_MT_MirrorMenu.append(menu_func)
+#    except:
+#        pass
 
 def unregister():
 
     bpy.types.VIEW3D_MT_snap.remove(menu_func)
 
+#    try:
+#       bpy.types.VIEW3D_MT_MirrorMenu.remove(menu_func)
+#    except:
+#        pass
 
     for cls in classes:
         bpy.utils.unregister_class(cls)
