@@ -2017,7 +2017,7 @@ def vfeOrigin(context):
     bpy.context.scene.cursor_location[1] = cursorPositionY
     bpy.context.scene.cursor_location[2] = cursorPositionZ
     
-class VIEW3D_MT_SetOriginToSelected(bpy.types.Operator):
+class SetOriginToSelected(bpy.types.Operator):
     '''Tooltip'''
     bl_idname = "object.setorigintoselected"
     bl_label = "Set Origin to Selected"
@@ -2106,7 +2106,7 @@ classes = [
     VIEW3D_Snap_Origin,
     VIEW3D_MT_Shade,
     VIEW3D_MT_ManipulatorMenu1,
-    VIEW3D_MT_SetOriginToSelected
+    SetOriginToSelected
 ]
 
 ## Register Classes ^ & Hotkeys ##
