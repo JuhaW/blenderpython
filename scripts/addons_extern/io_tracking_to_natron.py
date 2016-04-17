@@ -18,9 +18,9 @@ http://italic-anim.blogspot.com
 bl_info = {
     "name": "Tracker to Natron",
     "author": "Italic_",
-    "version": (1, 0),
+    "version": (1, 1),
     "blender": (2, 76, 0),
-    "location": "Clip Editor",
+    "location": "Clip Editor -> Tools",
     "description": "Export tracking data to Natron format",
     "category": "Import-Export"
 }
@@ -56,9 +56,7 @@ class NatronTrackExport(bpy.types.Operator):
                                       % str(activeClipName).split("'")[1])
             openFile = open(exportFile, 'w+')
 
-            markerLen = len(min([[k for k, marker in enumerate(pt.markers)]
-                                 for j, pt in enumerate(ob.tracks)]))
-
+            markerLen = min(len(pt.markers) for j, pt in enumerate(ob.tracks)) - 1
             markerLists = [list() for _ in range(markerLen-1)]
 
             for j, pt in enumerate(ob.tracks):
@@ -66,12 +64,12 @@ class NatronTrackExport(bpy.types.Operator):
                 # print("\t\tMarkers: 1 - %i" % (range(enumerate(pt.markers))))
 
                 for k, marker in enumerate(pt.markers):
-                    print("\t\tMarker: %i" % k)
+                    if 0 < k < markerLen:
+                        print("\t\tMarker: %i" % k)
 
-                    natCoordX = "%.10f" % round(marker.co[0]*activeClipDim[0], 10)
-                    natCoordY = "%.10f" % round(marker.co[1]*activeClipDim[1], 10)
+                        natCoordX = "%.10f" % round(marker.co[0]*activeClipDim[0], 10)
+                        natCoordY = "%.10f" % round(marker.co[1]*activeClipDim[1], 10)
 
-                    if 0 < k <= markerLen:
                         markerLists[k-1].append(natCoordX)
                         markerLists[k-1].append(natCoordY)
 
