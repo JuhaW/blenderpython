@@ -51,7 +51,7 @@ if "bpy" in locals():
     importlib.reload(curve_edit_outline)
     importlib.reload(DialScale)
     importlib.reload(add_iterative_tree)
-    importlib.reload(curve_convert0_7)
+    importlib.reload(curve_convert0_8)
     importlib.reload(bevel_curve)
 
 
@@ -71,7 +71,7 @@ else:
     from . import curve_edit_outline
     from . import DialScale
     from . import add_iterative_tree
-    from . import curve_convert0_7
+    from . import curve_convert0_8
     from . import bevel_curve
 
 import bpy
