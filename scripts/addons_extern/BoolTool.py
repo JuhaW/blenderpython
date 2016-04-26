@@ -10,6 +10,7 @@ bl_info = {
     "category": "Object"}
 
 import bpy
+import bmesh
 import time
 from bpy.app.handlers import persistent
 from bpy.types import Operator, AddonPreferences
@@ -99,7 +100,7 @@ def ConvertToMesh(obj):
 
 # Do the Union, Difference and Intersection Operations with a Brush
 def Operation(context, _operation):
-    useBmesh = bpy.context.user_preferences.addons['BoolTool'].preferences.use_bmesh
+
     useWire = bpy.context.user_preferences.addons['BoolTool'].preferences.use_wire
 
     for selObj in bpy.context.selected_objects:
@@ -133,16 +134,13 @@ def Operation(context, _operation):
                 sliceMod.object = selObj
                 sliceMod.operation = "DIFFERENCE"
                 clone["BoolToolRoot"] = True
-                if useBmesh:
-                    sliceMod.use_bmesh=True
             newMod = actObj.modifiers.new("BTool_" + selObj.name, "BOOLEAN")
             newMod.object = selObj
             if _operation=="SLICE":
                 newMod.operation = "INTERSECT"
             else:
                 newMod.operation = _operation
-            if useBmesh:
-                    newMod.use_bmesh=True
+
             actObj["BoolToolRoot"] = True
             selObj["BoolToolBrush"] = _operation
             selObj["BoolTool_FTransform"] = "False"
@@ -151,7 +149,7 @@ def Operation(context, _operation):
 # Do Direct Union, Difference and Intersection Operations
 def Operation_Direct(context, _operation):
     actObj = context.active_object
-    useBmesh = bpy.context.user_preferences.addons['BoolTool'].preferences.use_bmesh
+
     useWire = bpy.context.user_preferences.addons['BoolTool'].preferences.use_wire
     for selObj in bpy.context.selected_objects:
         if selObj != context.active_object and (selObj.type == "MESH" or selObj.type == "CURVE"):
@@ -170,16 +168,14 @@ def Operation_Direct(context, _operation):
                 sliceMod = clone.modifiers.new("BTool_" + selObj.name, "BOOLEAN") #add mod to clone obj
                 sliceMod.object = selObj
                 sliceMod.operation = "DIFFERENCE"
-                if useBmesh:
-                    sliceMod.use_bmesh=True
+
                 bpy.ops.object.modifier_apply(modifier=sliceMod.name)
+
             newMod = actObj.modifiers.new("BTool_" + selObj.name, "BOOLEAN")
             if _operation=="SLICE":
                 newMod.operation = "INTERSECT"
             else:
                 newMod.operation = _operation
-            if useBmesh:
-                    newMod.use_bmesh=True
             newMod.object = selObj
             bpy.ops.object.modifier_apply(modifier=newMod.name)
             bpy.ops.object.select_all(action='DESELECT')
@@ -1045,8 +1041,7 @@ class BoolTool_Pref(AddonPreferences):
 
     fast_transform = bpy.props.BoolProperty(name="Fast Transformations", default=False, update=UpdateBoolTool_Pref,
                                             description="Replace the Transform HotKeys (G,R,S) for a custom version that can optimize the visualization of Brushes")
-    use_bmesh = bpy.props.BoolProperty(name="Use bmesh", default=True,
-                                            description="use bmesh booleans")
+
     make_vertex_groups = bpy.props.BoolProperty(name="Make Vertex Groups", default=False,
                                                 description="When Apply a Brush to de Object it will create a new vertex group of the new faces")
     make_boundary = bpy.props.BoolProperty(name="Make Boundary", default=False,
@@ -1057,7 +1052,6 @@ class BoolTool_Pref(AddonPreferences):
         layout = self.layout
         layout.label(text="Experimental Features:")
         layout.prop(self, "fast_transform")
-        layout.prop(self, "use_bmesh", text = "Use Bmesh Boolean")
         layout.prop(self, "use_wire", text = "Use Wire Instead Of Bbox ")
         """
         # EXPERIMENTAL
@@ -1188,12 +1182,12 @@ def unregister():
     bpy.utils.unregister_class(BTool_Diff)
     bpy.utils.unregister_class(BTool_Inters)
     bpy.utils.unregister_class(BTool_Slice)
-
+    bpy.utils.unregister_class(BTool_Slice_Direct)
     bpy.utils.unregister_class(BTool_Union_Direct)
     bpy.utils.unregister_class(BTool_Diff_Direct)
     bpy.utils.unregister_class(BTool_Inters_Direct)
 
-    bpy.utils.register_class(BTool_DrawPolyBrush)
+    bpy.utils.unregister_class(BTool_DrawPolyBrush)
 
     # Othes
     bpy.utils.unregister_class(BTool_AllBrushToMesh)
