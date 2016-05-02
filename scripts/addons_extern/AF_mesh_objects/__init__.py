@@ -323,8 +323,8 @@ class INFO_MT_mesh_building_add(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.menu("INFO_MT_mesh_floorwall_add", text="Floors & Walls", icon = "UV_ISLANDSEL")
-        layout.menu("INFO_MT_mesh_beambuilder_add",
-            text="Beam Builder")
+        layout.operator("mesh.add_beam",
+            text="Beam")
         layout.operator("mesh.add_say3d_balcony",
             text="Balcony")
         layout.operator("mesh.add_say3d_sove",
