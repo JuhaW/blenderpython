@@ -104,24 +104,44 @@ def register():
     bpy.types.VIEW3D_MT_edit_mesh_showhide.append(VIEW3D_MT_edit_mesh_showhide.menu)
     bpy.types.VIEW3D_MT_edit_mesh_vertices.append(VIEW3D_MT_edit_mesh_vertices.menu)
     bpy.types.VIEW3D_MT_select_edit_mesh.append(VIEW3D_MT_select_edit_mesh.menu)
+    try:
+        bpy.types.VIEW3D_MT_Object.append(VIEW3D_MT_object.menu)
+        bpy.types.VIEW3D_MT_Select_Object.append(VIEW3D_MT_select_object.menu)
+        bpy.types.VIEW3D_MT_View_Menu.append(VIEW3D_MT_view.menu)
+        bpy.types.VIEW3D_MT_View_Align.append(VIEW3D_MT_view_align.menu)
+        bpy.types.VIEW3D_MT_View_Align_Selected.append(VIEW3D_MT_view_align_selected.menu)
+        bpy.types.VIEW3D_MT_Edit_Mesh.append(VIEW3D_MT_edit_mesh.menu)
+        bpy.types.VIEW3D_MT_Select_Edit_Mesh.append(VIEW3D_MT_select_edit_mesh.menu)
 
+    except:
+        pass
+		
 def unregister():
 
-	bpy.types.VIEW3D_MT_object.remove(VIEW3D_MT_object.menu)
-	bpy.types.VIEW3D_MT_object_apply.remove(VIEW3D_MT_object_apply.menu)
-	bpy.types.VIEW3D_MT_select_object.remove(VIEW3D_MT_select_object.menu)
-	bpy.types.VIEW3D_MT_make_links.remove(VIEW3D_MT_make_links.menu)
-	bpy.types.VIEW3D_MT_object_showhide.remove(VIEW3D_MT_object_showhide.menu)
-	bpy.types.VIEW3D_MT_view.remove(VIEW3D_MT_view.menu)
-	bpy.types.VIEW3D_MT_view_align.remove(VIEW3D_MT_view_align.menu)
-	bpy.types.VIEW3D_MT_view_align_selected.remove(VIEW3D_MT_view_align_selected.menu)
-	bpy.types.VIEW3D_MT_edit_mesh.remove(VIEW3D_MT_edit_mesh.menu)
-	bpy.types.VIEW3D_MT_edit_mesh_delete.remove(VIEW3D_MT_edit_mesh_delete.menu)
-	bpy.types.VIEW3D_MT_edit_mesh_showhide.remove(VIEW3D_MT_edit_mesh_showhide.menu)
-	bpy.types.VIEW3D_MT_edit_mesh_vertices.remove(VIEW3D_MT_edit_mesh_vertices.menu)
-	bpy.types.VIEW3D_MT_select_edit_mesh.remove(VIEW3D_MT_select_edit_mesh.menu)
-
-	bpy.utils.unregister_module(__name__)
+    bpy.types.VIEW3D_MT_object.remove(VIEW3D_MT_object.menu)
+    bpy.types.VIEW3D_MT_object_apply.remove(VIEW3D_MT_object_apply.menu)
+    bpy.types.VIEW3D_MT_select_object.remove(VIEW3D_MT_select_object.menu)
+    bpy.types.VIEW3D_MT_make_links.remove(VIEW3D_MT_make_links.menu)
+    bpy.types.VIEW3D_MT_object_showhide.remove(VIEW3D_MT_object_showhide.menu)
+    bpy.types.VIEW3D_MT_view.remove(VIEW3D_MT_view.menu)
+    bpy.types.VIEW3D_MT_view_align.remove(VIEW3D_MT_view_align.menu)
+    bpy.types.VIEW3D_MT_view_align_selected.remove(VIEW3D_MT_view_align_selected.menu)
+    bpy.types.VIEW3D_MT_edit_mesh.remove(VIEW3D_MT_edit_mesh.menu)
+    bpy.types.VIEW3D_MT_edit_mesh_delete.remove(VIEW3D_MT_edit_mesh_delete.menu)
+    bpy.types.VIEW3D_MT_edit_mesh_showhide.remove(VIEW3D_MT_edit_mesh_showhide.menu)
+    bpy.types.VIEW3D_MT_edit_mesh_vertices.remove(VIEW3D_MT_edit_mesh_vertices.menu)
+    bpy.types.VIEW3D_MT_select_edit_mesh.remove(VIEW3D_MT_select_edit_mesh.menu)
+    try:
+        bpy.types.VIEW3D_MT_Object.remove(VIEW3D_MT_object.menu)
+        bpy.types.VIEW3D_MT_Select_Object.remove(VIEW3D_MT_select_object.menu)
+        bpy.types.VIEW3D_MT_View_Menu.remove(VIEW3D_MT_view.menu)
+        bpy.types.VIEW3D_MT_View_Align.remove(VIEW3D_MT_view_align.menu)
+        bpy.types.VIEW3D_MT_View_Align_Selected.remove(VIEW3D_MT_view_align_selected.menu)
+        bpy.types.VIEW3D_MT_Edit_Mesh.remove(VIEW3D_MT_edit_mesh.menu)
+        bpy.types.VIEW3D_MT_Select_Edit_Mesh.remove(VIEW3D_MT_select_edit_mesh.menu)
+    except:
+        pass
+    bpy.utils.unregister_module(__name__)
 	
 if __name__ == "__main__":
     register()
