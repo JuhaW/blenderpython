@@ -46,6 +46,11 @@ if "bpy" in locals():
     importlib.reload(VIEW3D_MT_edit_mesh_showhide)
     importlib.reload(VIEW3D_MT_edit_mesh_vertices)
     importlib.reload(VIEW3D_MT_select_edit_mesh)
+    importlib.reload(VIEW3D_MT_armature_specials)
+    importlib.reload(VIEW3D_MT_edit_mesh_specials)
+    importlib.reload(VIEW3D_MT_select_object)
+    importlib.reload(VIEW3D_MT_pose_specials)
+    importlib.reload(VIEW3D_MT_object_batch)
 
 else:
     from . import VIEW3D_MT_object
@@ -61,6 +66,11 @@ else:
     from . import VIEW3D_MT_edit_mesh_showhide
     from . import VIEW3D_MT_edit_mesh_vertices
     from . import VIEW3D_MT_select_edit_mesh
+    from . import VIEW3D_MT_armature_specials
+    from . import VIEW3D_MT_edit_mesh_specials
+    from . import VIEW3D_MT_object_specials
+    from . import VIEW3D_MT_pose_specials
+    from . import VIEW3D_MT_object_batch
 
 import bpy
 # Addons Preferences
@@ -104,6 +114,11 @@ def register():
     bpy.types.VIEW3D_MT_edit_mesh_showhide.append(VIEW3D_MT_edit_mesh_showhide.menu)
     bpy.types.VIEW3D_MT_edit_mesh_vertices.append(VIEW3D_MT_edit_mesh_vertices.menu)
     bpy.types.VIEW3D_MT_select_edit_mesh.append(VIEW3D_MT_select_edit_mesh.menu)
+    bpy.types.VIEW3D_MT_armature_specials.append(VIEW3D_MT_armature_specials.menu)
+    bpy.types.VIEW3D_MT_edit_mesh_specials.append(VIEW3D_MT_edit_mesh_specials.menu)
+    bpy.types.VIEW3D_MT_object_specials.append(VIEW3D_MT_object_specials.menu)
+    bpy.types.VIEW3D_MT_pose_specials.append(VIEW3D_MT_pose_specials.menu)
+    bpy.types.VIEW3D_MT_object_specials.append(VIEW3D_MT_object_batch.menu)
     try:
         bpy.types.VIEW3D_MT_Object.append(VIEW3D_MT_object.menu)
         bpy.types.VIEW3D_MT_Select_Object.append(VIEW3D_MT_select_object.menu)
@@ -131,6 +146,11 @@ def unregister():
     bpy.types.VIEW3D_MT_edit_mesh_showhide.remove(VIEW3D_MT_edit_mesh_showhide.menu)
     bpy.types.VIEW3D_MT_edit_mesh_vertices.remove(VIEW3D_MT_edit_mesh_vertices.menu)
     bpy.types.VIEW3D_MT_select_edit_mesh.remove(VIEW3D_MT_select_edit_mesh.menu)
+    bpy.types.VIEW3D_MT_armature_specials.remove(VIEW3D_MT_armature_specials.menu)
+    bpy.types.VIEW3D_MT_edit_mesh_specials.remove(VIEW3D_MT_edit_mesh_specials.menu)
+    bpy.types.VIEW3D_MT_object_specials.remove(VIEW3D_MT_object_specials.menu)
+    bpy.types.VIEW3D_MT_pose_specials.remove(VIEW3D_MT_pose_specials.menu)
+    bpy.types.VIEW3D_MT_object_specials.remove(VIEW3D_MT_object_batch.menu)
     try:
         bpy.types.VIEW3D_MT_Object.remove(VIEW3D_MT_object.menu)
         bpy.types.VIEW3D_MT_Select_Object.remove(VIEW3D_MT_select_object.menu)
