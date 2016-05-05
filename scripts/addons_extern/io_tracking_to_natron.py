@@ -18,7 +18,7 @@ http://italic-anim.blogspot.com
 bl_info = {
     "name": "Tracker to Natron",
     "author": "Italic_",
-    "version": (1, 1),
+    "version": (1, 2),
     "blender": (2, 76, 0),
     "location": "Clip Editor -> Tools",
     "description": "Export tracking data to Natron format",
@@ -30,9 +30,13 @@ import os
 
 
 class NatronTrackExport(bpy.types.Operator):
+    """Export all tracks on active clip to ascii file for Natron to read."""
+
     bl_idname = "track.export_to_natron"
     bl_label = "Export Track Data"
-    bl_description = "Export all tracks on active clip to ascii file for Natron to read"
+    bl_description = (
+        "Export all tracks on active clip to ascii file for Natron to read"
+        )
     bl_options = {'REGISTER'}
 
     def execute(self, context):
@@ -43,9 +47,13 @@ class NatronTrackExport(bpy.types.Operator):
         activeClip = bpy.data.movieclips[activeClipName[0]]
         activeClipDim = activeClip.size[:]
 
+        markerLen = 0
+
         # Keep pathing platform-neutral throughout - use os.path.join()
         blendDir = bpy.path.abspath("//")
-        os.chdir(blendDir)
+        if blendDir == "":
+            self.report({'ERROR'}, "Blend file is not saved")
+            return {'CANCELLED'}
 
         for i, ob in enumerate(activeClip.tracking.objects):
             print("\nTracking Object: %s" % ob.name)
@@ -73,9 +81,11 @@ class NatronTrackExport(bpy.types.Operator):
                         markerLists[k-1].append(natCoordX)
                         markerLists[k-1].append(natCoordY)
 
-            openFile.writelines("_".join(lines) + "\n" for lines in markerLists)
+            openFile.writelines("_".join(lines) + "\n"
+                                for lines in markerLists)
             openFile.close()
 
+        self.report({'INFO'}, "Export complete: %i frames" % (markerLen - 1))
         return {'FINISHED'}
 
 
