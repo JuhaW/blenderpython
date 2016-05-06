@@ -44,7 +44,7 @@ from bl_ui.properties_paint_common import (
     brush_texture_settings,
     brush_texpaint_common,
     brush_mask_texture_settings,
-    )
+)
 import rna_keymap_ui
 
 
@@ -1294,7 +1294,7 @@ class View3dRightClicMenu(Menu):
 
                 col = pie.column(align=True)
                 col.prop(ups, "size", text="Radius", slider=False)
-                col.prop(brush, "strength",  slider=True)
+                col.prop(brush, "strength", slider=True)
 
                 # 7 - TOP - LEFT
                 if bpy.context.tool_settings.sculpt.detail_type_method == 'CONSTANT':
@@ -1437,7 +1437,7 @@ class View3dRightClicMenu(Menu):
 
                 col = pie.column(align=True)
                 col.prop(ups, "size", text="Radius", slider=False)
-                col.prop(brush, "strength",  slider=True)
+                col.prop(brush, "strength", slider=True)
 
                 # 7 - TOP - LEFT
                 sculpt = context.tool_settings.sculpt

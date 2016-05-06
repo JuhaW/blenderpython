@@ -60,14 +60,15 @@ TODO: Add filtering out of external groups, add more built-in lists
 
 """
 
-import bpy, os
+import bpy
+import os
 import bgl
 import blf
 import re
 from bpy.props import *
 from mathutils import Vector, Matrix
 
-#unity_global_scale = 10
+# unity_global_scale = 10
 
 #
 #
@@ -75,30 +76,33 @@ from mathutils import Vector, Matrix
 #
 #
 
+
 def fix_path(path):
     return os.path.normpath(bpy.path.abspath(path))
+
 
 def enable_action_export(context):
     action = context.active_object.animation_data.action
 
     if (action):
-        action['export'] = True;
+        action['export'] = True
 
-def rename (replaceText, withText, target):
-    return re.sub (replaceText, withText, target)
 
-#~ class EnableActionExport(bpy.types.Operator):
-    #~ ''''''
-    #~ bl_idname = "actions.enable_export"
-    #~ bl_label = "Enable Action Export"
+def rename(replaceText, withText, target):
+    return re.sub(replaceText, withText, target)
 
-    #~ @classmethod
-    #~ def poll(cls, context):
-        #~ return context.active_object != None
+# class EnableActionExport(bpy.types.Operator):
+    # ''''''
+    # bl_idname = "actions.enable_export"
+    #  bl_label = "Enable Action Export"
 
-    #~ def execute(self, context):
-        #~ enable_action_export(context)
-        #~ return {'FINISHED'}
+    # @classmethod
+    # def poll(cls, context):
+    # return context.active_object != None
+
+    # def execute(self, context):
+    # enable_action_export(context)
+    # return {'FINISHED'}
 
 #
 #
@@ -106,16 +110,18 @@ def rename (replaceText, withText, target):
 #
 #
 
-def replace (string, what_string, with_string):
-    if (len (what_string) != len (with_string)):
+
+def replace(string, what_string, with_string):
+    if (len(what_string) != len(with_string)):
         return string
 
     result = string
 
-    for i, r in enumerate (what_string):
-        result = result.replace (r, with_string[i])
+    for i, r in enumerate(what_string):
+        result = result.replace(r, with_string[i])
 
     return result
+
 
 def guess_export_path(context):
     filepath = context.blend_data.filepath
@@ -125,14 +131,15 @@ def guess_export_path(context):
 
     filepath = os.path.dirname(filepath)
 
-    filepath = replace (filepath,
-        ["Author", "author"],
-        ["Assets", "assets"])
+    filepath = replace(filepath,
+                       ["Author", "author"],
+                       ["Assets", "assets"])
 
     if context.user_preferences.filepaths.use_relative_paths:
-        context.scene.unity_export_path = bpy.path.relpath (filepath)
+        context.scene.unity_export_path = bpy.path.relpath(filepath)
     else:
-        context.scene.unity_export_path = bpy.path.abspath (filepath)
+        context.scene.unity_export_path = bpy.path.abspath(filepath)
+
 
 class GuessExportPath (bpy.types.Operator):
     ''''''
@@ -144,19 +151,20 @@ class GuessExportPath (bpy.types.Operator):
         guess_export_path(context)
         return {'FINISHED'}
 
-def get_export_path (context, sub_path=""):
+
+def get_export_path(context, sub_path=""):
 
     scene = context.scene
 
-    export_path = "";
+    export_path = ""
 
     if scene.unity_export_path == "":
         filepath = context.blend_data.filepath
-        filename = filepath[filepath.rfind(os.path.sep)+1:filepath.rfind(".blend")]
+        filename = filepath[filepath.rfind(os.path.sep) + 1:filepath.rfind(".blend")]
     else:
         export_path = scene.unity_export_path
 
-    if not export_path.endswith (os.path.sep):
+    if not export_path.endswith(os.path.sep):
         export_path += os.path.sep
 
     if export_path != "":
@@ -178,19 +186,22 @@ def get_export_path (context, sub_path=""):
 # GUESS TEXTURE EXPORT
 #
 #
+
+
 def guess_texture_export_path(context):
     filepath = context.blend_data.filepath
 
     filepath = os.path.dirname(filepath)
 
-    filepath = replace (filepath,
-        ["Author", "author", "models", "Models", "meshes", "Meshes"],
-        ["assets", "assets", "textures", "Textures", "textures", "Textures"])
+    filepath = replace(filepath,
+                       ["Author", "author", "models", "Models", "meshes", "Meshes"],
+                       ["assets", "assets", "textures", "Textures", "textures", "Textures"])
 
     if context.user_preferences.filepaths.use_relative_paths:
-        context.scene.unity_texture_export_path = bpy.path.relpath (filepath)
+        context.scene.unity_texture_export_path = bpy.path.relpath(filepath)
     else:
-        context.scene.unity_texture_export_path = bpy.path.abspath (filepath)
+        context.scene.unity_texture_export_path = bpy.path.abspath(filepath)
+
 
 class GuessTextureExportPath (bpy.types.Operator):
     ''''''
@@ -202,7 +213,8 @@ class GuessTextureExportPath (bpy.types.Operator):
         guess_texture_export_path(context)
         return {'FINISHED'}
 
-def get_texture_export_path (context, sub_path=""):
+
+def get_texture_export_path(context, sub_path=""):
 
     scene = context.scene
 
@@ -210,11 +222,11 @@ def get_texture_export_path (context, sub_path=""):
 
     if scene.unity_texture_export_path == "":
         filepath = context.blend_data.filepath
-        filename = filepath[filepath.rfind(os.path.sep)+1:filepath.rfind(".blend")]
+        filename = filepath[filepath.rfind(os.path.sep) + 1:filepath.rfind(".blend")]
     else:
         texture_export_path = scene.unity_texture_export_path
 
-    if not texture_export_path.endswith (os.path.sep):
+    if not texture_export_path.endswith(os.path.sep):
         texture_export_path += os.path.sep
 
     if texture_export_path != "":
@@ -277,13 +289,13 @@ def export_groups_textures(context, operator):
                     if tex == None or tex.texture == None:
                         continue
 
-                    if tex.texture.type == 'IMAGE' and tex.texture.image != None and images.count (tex.texture.image) < 1:
+                    if tex.texture.type == 'IMAGE' and tex.texture.image != None and images.count(tex.texture.image) < 1:
                         # Update texture if it has no data, it may not have loaded yet
                         if not tex.texture.image.has_data:
-                            tex.texture.image.update ()
+                            tex.texture.image.update()
 
                         if tex.texture.image.has_data:
-                            images.append (tex.texture.image)
+                            images.append(tex.texture.image)
 
         if len(images) == 0:
             print("No textures to export")
@@ -294,22 +306,22 @@ def export_groups_textures(context, operator):
 
         for image in images:
 
-            if image.name.lower ().endswith ("." + image.file_format.lower ()):
+            if image.name.lower().endswith("." + image.file_format.lower()):
                 filename = image.name
             else:
-                filename = image.name + "." + image.file_format.lower ()
+                filename = image.name + "." + image.file_format.lower()
 
-            export_path = get_texture_export_path (context, group.unity_subpath if group.unity_use_subpath else "")
+            export_path = get_texture_export_path(context, group.unity_subpath if group.unity_use_subpath else "")
 
             orig_filepath_raw = image.filepath_raw
 
-            image.filepath_raw = os.path.join (export_path, filename)
-            image.update ()
+            image.filepath_raw = os.path.join(export_path, filename)
+            image.update()
 
-            image.save ()
+            image.save()
 
-            #print (image.name)
-            print ("Saved to: %s" % image.filepath_raw)
+            # print (image.name)
+            print("Saved to: %s" % image.filepath_raw)
 
             image.filepath_raw = orig_filepath_raw
             image.update()
@@ -333,6 +345,8 @@ class ExportGroupsTextures(bpy.types.Operator):
 # EXPORT GROUP ACTIONS OPERATOR
 #
 #
+
+
 def export_actions_to_unity(self, context):
     active = context.active_object
     scene = context.scene
@@ -349,6 +363,7 @@ def export_actions_to_unity(self, context):
         sel.select = True
 
     scene.objects.active = active
+
 
 def export_group_actions(self, context, scene, group):
 
@@ -379,7 +394,7 @@ def export_group_actions(self, context, scene, group):
 
     range_store = [scene.frame_start, scene.frame_end]
 
-    export_path = get_export_path (context, sub_path=group.unity_subpath if group.unity_use_subpath else "")
+    export_path = get_export_path(context, sub_path=group.unity_subpath if group.unity_use_subpath else "")
 
     if (export_path == ""):
         return
@@ -406,7 +421,7 @@ def export_group_actions(self, context, scene, group):
 
             obj.animation_data.action = act
 
-            print (act.name)
+            print(act.name)
 
         namestore = {}
 
@@ -418,7 +433,7 @@ def export_group_actions(self, context, scene, group):
             for i, state in enumerate(store_layers):
                 scene.layers[i] = state
 
-        scene.update ()
+        scene.update()
 
         for obj in group.objects:
 
@@ -430,56 +445,37 @@ def export_group_actions(self, context, scene, group):
                     if obj.unity_use_rename:
 
                         namestore[obj] = obj.name
-                        obj.name = rename (scene.unity_export_name_find, scene.unity_export_name_replace, obj.name)
+                        obj.name = rename(scene.unity_export_name_find, scene.unity_export_name_replace, obj.name)
 
-                        #rename data
+                        # rename data
                         if obj.data is not None:
 
                             namestore[obj.data] = obj.data.name
-                            obj.data.name = rename (scene.unity_export_name_find, scene.unity_export_name_replace, obj.data.name)
+                            obj.data.name = rename(scene.unity_export_name_find, scene.unity_export_name_replace, obj.data.name)
 
         fr = act.frame_range
 
-        scene.frame_start = action.start_frame;
-        scene.frame_end = action.end_frame;
+        scene.frame_start = action.start_frame
+        scene.frame_end = action.end_frame
 
-        export_path = get_export_path (context, sub_path=group.unity_subpath if group.unity_use_subpath else "")
+        export_path = get_export_path(context, sub_path=group.unity_subpath if group.unity_use_subpath else "")
 
         fbx = group.name + "@" + act.name.strip() + ".fbx"
 
         if scene.use_custom_exporter:
-            bpy.ops.export_scene.fbx_yup(filepath=export_path + fbx
-                , use_selection=True
-                # scene
-                , axis_forward='Z'
-                , axis_up='Y'
-                , global_scale=scene.unity_global_scale*100
-                # animation
-                , use_anim_optimize=action.optimize
-                , use_anim_action_all=False)
+            bpy.ops.export_scene.fbx_yup(filepath=export_path + fbx, use_selection=True                                         # scene
+                                         , axis_forward='Z', axis_up='Y', global_scale=scene.unity_global_scale * 100                                         # animation
+                                         , use_anim_optimize=action.optimize, use_anim_action_all=False)
         else:
-            bpy.ops.export_scene.fbx(filepath=export_path + fbx
-              , use_selection=True
-              , batch_mode='OFF'
-              # scene
-              , global_scale=scene.unity_global_scale
-              , axis_forward='-Z'
-              , axis_up='Y'
-              , bake_space_transform=True
-              # objects
-              , use_custom_props=True
-              # animation
-              , bake_anim=True
-              , bake_anim_use_all_actions=False
-              , bake_anim_use_nla_strips=False
-              , bake_anim_simplify_factor=0.0 if action.optimize else 1.0
-              # rig
-              , add_leaf_bones=False
-              , use_armature_deform_only=True
-            )
+            bpy.ops.export_scene.fbx(filepath=export_path + fbx, use_selection=True, batch_mode='OFF'                                     # scene
+                                     , global_scale=scene.unity_global_scale, axis_forward='-Z', axis_up='Y', bake_space_transform=True                                     # objects
+                                     , use_custom_props=True                                     # animation
+                                     , bake_anim=True, bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False, bake_anim_simplify_factor=0.0 if action.optimize else 1.0                                     # rig
+                                     , add_leaf_bones=False, use_armature_deform_only=True
+                                     )
 
         for o in namestore:
-            o.name = namestore[o];
+            o.name = namestore[o]
 
     scene.frame_start = range_store[0]
     scene.frame_end = range_store[1]
@@ -491,6 +487,7 @@ def export_group_actions(self, context, scene, group):
     # Restore original layers
     for i, l in enumerate(store_layers):
         scene.layers[i] = l
+
 
 class ExportActionsForUnity(bpy.types.Operator):
     ''''''
@@ -506,8 +503,11 @@ class ExportActionsForUnity(bpy.types.Operator):
 #   EXPORT GROUPS TO FBX OPERATOR
 #
 #
+
+
 def pure_curve(obj):
     return obj.type == 'CURVE' and obj.data.bevel_depth == 0 and obj.data.extrude == 0 and obj.data.bevel_object == None
+
 
 def collapse_group(argGroup):
     group = bpy.data.groups[argGroup]
@@ -523,7 +523,7 @@ def collapse_group(argGroup):
     head_object = None
 
     for obj in group.objects:
-        if obj.name == group.unity_head and pure_curve (obj):
+        if obj.name == group.unity_head and pure_curve(obj):
             return None
 
     for obj in group.objects:
@@ -535,10 +535,10 @@ def collapse_group(argGroup):
         ob = None
 
         if obj.type in ['CURVE']:
-            #convert curves (and other convertable objects) to meshes
+            # convert curves (and other convertable objects) to meshes
 
             # this is a pure_curve, skip it
-            if pure_curve (obj):
+            if pure_curve(obj):
                 continue
 
             scene.objects.active = obj
@@ -579,6 +579,7 @@ def collapse_group(argGroup):
 
     return head_object
 
+
 def export_groups_to_fbx(context, operator):
     select = []
     active = context.active_object
@@ -607,7 +608,7 @@ def export_groups_to_fbx(context, operator):
         if not group.unity_export or (not use_lib and group.library != None):
             continue
 
-        if group.unity_collapse and group.unity_head in group.objects and pure_curve (group.objects[group.unity_head]):
+        if group.unity_collapse and group.unity_head in group.objects and pure_curve(group.objects[group.unity_head]):
             continue
 
         print(group.name)
@@ -682,13 +683,12 @@ def export_groups_to_fbx(context, operator):
             if obj.unity_use_rename:
 
                 namestore[obj] = obj.name
-                obj.name = rename (scene.unity_export_name_find, scene.unity_export_name_replace, obj.name)
+                obj.name = rename(scene.unity_export_name_find, scene.unity_export_name_replace, obj.name)
 
                 if obj.data is not None:
 
                     namestore[obj.data] = obj.data.name
-                    obj.data.name = rename (scene.unity_export_name_find, scene.unity_export_name_replace, obj.data.name)
-
+                    obj.data.name = rename(scene.unity_export_name_find, scene.unity_export_name_replace, obj.data.name)
 
             if group.unity_disable_blend_shapes and obj.type == 'MESH':
                 mesh = obj.data
@@ -713,43 +713,23 @@ def export_groups_to_fbx(context, operator):
         scene.objects.active = export_objects[0]
         scene.update()
 
-        export_path = get_export_path (context, group.unity_subpath if group.unity_use_subpath else "")
+        export_path = get_export_path(context, group.unity_subpath if group.unity_use_subpath else "")
 
         fbx = group.name + ".fbx"
 
-        print (export_path)
+        print(export_path)
 
         if scene.use_custom_exporter:
-            bpy.ops.export_scene.fbx_yup(filepath=export_path + fbx
-                , use_selection=True
-                # scene
-                , axis_forward='Z'
-                , axis_up='Y'
-                , global_scale=scene.unity_global_scale*100
-                # animation
-                , use_anim=group.unity_animation
-                , use_anim_optimize=group.unity_optimize
-                , use_anim_action_all=False)
+            bpy.ops.export_scene.fbx_yup(filepath=export_path + fbx, use_selection=True                                         # scene
+                                         , axis_forward='Z', axis_up='Y', global_scale=scene.unity_global_scale * 100                                         # animation
+                                         , use_anim=group.unity_animation, use_anim_optimize=group.unity_optimize, use_anim_action_all=False)
         else:
-            bpy.ops.export_scene.fbx(filepath=export_path + fbx
-                , use_selection=True
-                , batch_mode='OFF'
-                # scene
-                , global_scale=scene.unity_global_scale
-                , axis_forward='-Z'
-                , axis_up='Y'
-                , bake_space_transform=True
-                # objects
-                , use_custom_props=True
-                # animation
-                , bake_anim=True
-                , bake_anim_use_all_actions=False
-                , bake_anim_use_nla_strips=False
-                , bake_anim_simplify_factor=0.0 if group.unity_optimize else 1.0
-                # rig
-                , add_leaf_bones=False
-                , use_armature_deform_only=True
-            )
+            bpy.ops.export_scene.fbx(filepath=export_path + fbx, use_selection=True, batch_mode='OFF'                                     # scene
+                                     , global_scale=scene.unity_global_scale, axis_forward='-Z', axis_up='Y', bake_space_transform=True                                     # objects
+                                     , use_custom_props=True                                     # animation
+                                     , bake_anim=True, bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False, bake_anim_simplify_factor=0.0 if group.unity_optimize else 1.0                                     # rig
+                                     , add_leaf_bones=False, use_armature_deform_only=True
+                                     )
         print("'%s' exported." % group.name)
 
         # return objects to previous positions
@@ -777,7 +757,7 @@ def export_groups_to_fbx(context, operator):
             obj.animation_data.action = act
 
         for o in namestore:
-            o.name = namestore[o];
+            o.name = namestore[o]
 
     # restore object selection
     for obj in select:
@@ -787,6 +767,7 @@ def export_groups_to_fbx(context, operator):
 
     for i, l in enumerate(store_layers):
         scene.layers[i] = l
+
 
 class ExportGroupsToFBX(bpy.types.Operator):
     ''''''
@@ -801,6 +782,7 @@ class ExportGroupsToFBX(bpy.types.Operator):
         export_groups_to_fbx(context, self)
         return {'FINISHED'}
 
+
 def group_assign_z_up(context):
     active = context.active_object
 
@@ -808,6 +790,7 @@ def group_assign_z_up(context):
         for obj in group.objects:
             if obj.select:
                 group['z-up'] = 1
+
 
 class GroupAssignZUp(bpy.types.Operator):
     ''''''
@@ -822,6 +805,7 @@ class GroupAssignZUp(bpy.types.Operator):
         group_assign_z_up(context)
         return {'FINISHED'}
 
+
 def dupli_offset_to_selected(context):
     active = context.active_object
 
@@ -829,6 +813,7 @@ def dupli_offset_to_selected(context):
         for obj in group.objects:
             if obj.select:
                 group.dupli_offset = obj.location
+
 
 class DupliOffsetToSelected(bpy.types.Operator):
     ''''''
@@ -843,6 +828,7 @@ class DupliOffsetToSelected(bpy.types.Operator):
         dupli_offset_to_selected(context)
         return {'FINISHED'}
 
+
 def group_name_from_selected(context):
     active = context.active_object
 
@@ -850,6 +836,7 @@ def group_name_from_selected(context):
         for obj in group.objects:
             if obj.select:
                 group.name = obj.name
+
 
 class GroupNameFromSelected(bpy.types.Operator):
     ''''''
@@ -864,6 +851,7 @@ class GroupNameFromSelected(bpy.types.Operator):
         group_name_from_selected(context)
         return {'FINISHED'}
 
+
 def get_export_actions(context):
     scene = context.scene
     active = context.active_object
@@ -877,7 +865,7 @@ def get_export_actions(context):
     actions = bpy.data.actions
 
     filepath = context.blend_data.filepath
-    filename = filepath[filepath.rfind(os.path.sep)+1:filepath.rfind(".blend")]
+    filename = filepath[filepath.rfind(os.path.sep) + 1:filepath.rfind(".blend")]
 
     for group in bpy.data.groups:
         for ob in group.objects:
@@ -887,11 +875,13 @@ def get_export_actions(context):
 
     return {'actions': actions, 'filename': filename}
 
+
 def get_export_groups():
 
     groups = bpy.data.groups
 
     return groups
+
 
 class UnityActionAdd(bpy.types.Operator):
     '''Add an action to the current group'''
@@ -900,11 +890,12 @@ class UnityActionAdd(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.group != None;
+        return context.group != None
 
     def execute(self, context):
-        context.group.unity_actions.add();
+        context.group.unity_actions.add()
         return {'FINISHED'}
+
 
 class UnityActionRemove(bpy.types.Operator):
     '''Remove current action from the current group'''
@@ -913,7 +904,7 @@ class UnityActionRemove(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return hasattr (context, "group") and context.group != None and hasattr(context, "unity_group_action") and context.unity_group_action != None
+        return hasattr(context, "group") and context.group != None and hasattr(context, "unity_group_action") and context.unity_group_action != None
 
     def execute(self, context):
 
@@ -928,6 +919,7 @@ class UnityActionRemove(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class UnityActionObjectAdd(bpy.types.Operator):
     '''Add an action object to the current group action'''
     bl_idname = "group.unity_action_object_add"
@@ -935,11 +927,12 @@ class UnityActionObjectAdd(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.group != None;
+        return context.group != None
 
     def execute(self, context):
-        context.group.unity_action_objects.add();
+        context.group.unity_action_objects.add()
         return {'FINISHED'}
+
 
 class UnityActionObjectRemove(bpy.types.Operator):
     '''Remove group object from current action'''
@@ -948,7 +941,7 @@ class UnityActionObjectRemove(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return hasattr (context, "group") and context.group != None and hasattr(context, "unity_group_action_object") and context.unity_group_action_object != None
+        return hasattr(context, "group") and context.group != None and hasattr(context, "unity_group_action_object") and context.unity_group_action_object != None
 
     def execute(self, context):
 
@@ -962,6 +955,7 @@ class UnityActionObjectRemove(bpy.types.Operator):
             context.group.unity_action_objects.remove(index)
 
         return {'FINISHED'}
+
 
 class UnityActionRangeGuess(bpy.types.Operator):
     '''Guess the frame range of the current action exporter'''
@@ -982,11 +976,12 @@ class UnityActionRangeGuess(bpy.types.Operator):
             context.unity_group_action.end_frame = int(fr[1])
         else:
             if context.unity_group_action.action_name == '' or context.unity_group_action.action_name is None:
-                self.report ({'ERROR_INVALID_INPUT'}, "Action group name is empty")
+                self.report({'ERROR_INVALID_INPUT'}, "Action group name is empty")
             else:
-                self.report ({'ERROR_INVALID_INPUT'}, "Action %s does not exist" % context.unity_group_action.action_name)
+                self.report({'ERROR_INVALID_INPUT'}, "Action %s does not exist" % context.unity_group_action.action_name)
 
         return {'FINISHED'}
+
 
 class UnityActionRangeShow(bpy.types.Operator):
     '''Set the current animation range to the action range'''
@@ -1006,6 +1001,7 @@ class UnityActionRangeShow(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class UNITY_UL_export_groups(bpy.types.UIList):
 
     GROUP_EXTERNAL = 1 << 0
@@ -1016,7 +1012,7 @@ class UNITY_UL_export_groups(bpy.types.UIList):
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
 
-            row = layout.row (align=True)
+            row = layout.row(align=True)
             row.prop(group, 'unity_export', icon='EXPORT', text='')
             row.prop(group, 'unity_use_subpath', icon='DISCLOSURE_TRI_DOWN' if group.unity_use_subpath else 'DISCLOSURE_TRI_RIGHT', text='')
 
@@ -1040,12 +1036,12 @@ class UNITY_UL_export_groups(bpy.types.UIList):
         row = layout.row(align=True)
         scene = context.scene
 
-        #row = row.row(align=True)
+        # row = row.row(align=True)
         row.prop(self, "filter_name", text="")
         icon = 'ZOOM_OUT' if self.use_filter_invert else 'ZOOM_IN'
         row.prop(self, "use_filter_invert", text="", icon=icon)
 
-        #row = layout.row(align=True)
+        # row = layout.row(align=True)
         row.separator()
         row.prop(self, "use_filter_sort_alpha", text='', toggle=True)
         icon = 'TRIA_UP' if self.use_filter_sort_reverse else 'TRIA_DOWN'
@@ -1086,7 +1082,6 @@ class UNITY_UL_export_groups(bpy.types.UIList):
                 else:
                     flt_flags[i] &= ~self.bitflag_filter_item
 
-
         # Reorder by name or average weight.
         if self.use_filter_sort_alpha:
             flt_neworder = helper_funcs.sort_items_by_name(groups, "name")
@@ -1096,11 +1091,13 @@ class UNITY_UL_export_groups(bpy.types.UIList):
 from bpy.types import Menu, Panel, Operator
 from bl_operators.presets import AddPresetBase
 
+
 class UNITY_RENAME_MT_presets(Menu):
     bl_label = "Rename Presets"
     preset_subdir = "unity_export_rename"
     preset_operator = "script.execute_preset"
     draw = Menu.draw_preset
+
 
 class AddPresetUnityRename(AddPresetBase, Operator):
     """Add a Unity Rename Preset"""
@@ -1119,7 +1116,7 @@ class AddPresetUnityRename(AddPresetBase, Operator):
         "scene.unity_export_name_replace",
     ]
 
-    preset_subdir = "unity_export_rename" # make sure it's the same as in your menu class
+    preset_subdir = "unity_export_rename"  # make sure it's the same as in your menu class
 
 
 class UNITY_PT_Scene(bpy.types.Panel):
@@ -1129,7 +1126,7 @@ class UNITY_PT_Scene(bpy.types.Panel):
     bl_context = 'scene'
     bl_default_closed = False
 
-    def draw (self, context):
+    def draw(self, context):
 
         layout = self.layout
         scene = context.scene
@@ -1154,7 +1151,7 @@ class UNITY_PT_Scene(bpy.types.Panel):
         # Export Groups List
 
         col.label("Export Groups", icon='GROUP')
-        #col.prop (scene, "show_all_scenes")
+        # col.prop (scene, "show_all_scenes")
 
         col.template_list('UNITY_UL_export_groups', '', bpy.data, 'groups', scene, 'unity_active_export_group_index', rows=3)
 
@@ -1168,10 +1165,10 @@ class UNITY_PT_Scene(bpy.types.Panel):
 
             if group is not None:
 
-                layout.separator ()
+                layout.separator()
                 box2 = layout.box()
 
-                box2.label (group.unity_subpath + group.name, icon='GROUP')
+                box2.label(group.unity_subpath + group.name, icon='GROUP')
 
                 row = box2.row(align=True)
 
@@ -1180,9 +1177,9 @@ class UNITY_PT_Scene(bpy.types.Panel):
                 if group.unity_use_subpath:
                     row.prop(group, 'unity_subpath', text='', icon='FILE_FOLDER')
 
-                row.prop (group, "name", icon='GROUP', text='')
+                row.prop(group, "name", icon='GROUP', text='')
 
-                #layers
+                # layers
                 col_export_layers = box2.column()
                 col_export_layers.prop(group, 'unity_use_export_layers', text="Export Layers", toggle=True, icon='RENDERLAYERS')
                 if group.unity_use_export_layers:
@@ -1196,10 +1193,10 @@ class UNITY_PT_Scene(bpy.types.Panel):
                 box2.prop_search(group, "unity_static_action", bpy.data, "actions", text='Static Action', icon='ARMATURE_DATA')
 
                 # group actions
-                column_action = box2.column(align=True);
+                column_action = box2.column(align=True)
                 column_action.context_pointer_set("group", group)
 
-                if len (group.unity_actions) > 0:
+                if len(group.unity_actions) > 0:
                     column_action.operator("group.unity_action_add")
 
                 for i, act in enumerate(group.unity_actions):
@@ -1207,9 +1204,9 @@ class UNITY_PT_Scene(bpy.types.Panel):
                     adv_icon = "TRIA_RIGHT"
 
                     if act.expanded:
-                        adv_icon = "TRIA_DOWN";
+                        adv_icon = "TRIA_DOWN"
 
-                    row_action = column_action.row(align=True);
+                    row_action = column_action.row(align=True)
 
                     row_action.prop(act, 'expanded', icon=adv_icon, text='', emboss=False)
 
@@ -1222,30 +1219,31 @@ class UNITY_PT_Scene(bpy.types.Panel):
                     row_action.operator("group.unity_action_remove", text="", icon="X")
 
                     if act.expanded:
-                        row_action = column_action.row (align=True);
+                        row_action = column_action.row(align=True)
                         row_action.context_pointer_set("unity_group_action", act)
-                        row_action.prop (act, "start_frame");
-                        row_action.prop (act, "end_frame");
-                        row_action.operator ("group.unity_action_guess_frame_range", text="", icon='AUTO')
+                        row_action.prop(act, "start_frame")
+                        row_action.prop(act, "end_frame")
+                        row_action.operator("group.unity_action_guess_frame_range", text="", icon='AUTO')
 
                         icon = 'VISIBLE_IPO_OFF'
 
-                        if act.show_frame_range: icon= 'VISIBLE_IPO_ON'
+                        if act.show_frame_range:
+                            icon = 'VISIBLE_IPO_ON'
 
-                        row_action.prop (act, "show_frame_range", text="", icon=icon)
+                        row_action.prop(act, "show_frame_range", text="", icon=icon)
 
                 column_action.operator("group.unity_action_add")
 
                 # group action objects
-                column_action = box2.column(align=True);
+                column_action = box2.column(align=True)
                 column_action.context_pointer_set("group", group)
 
                 for i, obj in enumerate(group.unity_action_objects):
-                    row_action = column_action.row (align=True);
+                    row_action = column_action.row(align=True)
 
                     if obj.object_name in bpy.data.objects:
                         ob = bpy.data.objects[obj.object_name]
-                        row_action.prop (ob, "unity_use_actions", text='', icon='ACTION_TWEAK')
+                        row_action.prop(ob, "unity_use_actions", text='', icon='ACTION_TWEAK')
 
                     row_action.context_pointer_set("unity_group_action_object", obj)
                     row_action.context_pointer_set("group", group)
@@ -1254,17 +1252,16 @@ class UNITY_PT_Scene(bpy.types.Panel):
                     row_action.operator("group.unity_action_object_remove", text="", icon="ZOOMOUT")
 
                 column_action.operator("group.unity_action_object_add")
-                column_action.prop (scene, 'unity_only_export_action_objects', text='Only export action objects', emboss=True, toggle=True);
-
+                column_action.prop(scene, 'unity_only_export_action_objects', text='Only export action objects', emboss=True, toggle=True)
 
                 # show objects
-                col = box2.column (align=True)
+                col = box2.column(align=True)
                 col.prop(group, 'unity_show_objects', icon="TRIA_DOWN" if group.unity_show_objects else "TRIA_RIGHT", emboss=True)
 
                 if group.unity_show_objects:
 
                     for o in group.objects:
-                        row = col.row (align=True)
+                        row = col.row(align=True)
 
                         obj_icon = "OBJECT_DATA"
 
@@ -1275,16 +1272,15 @@ class UNITY_PT_Scene(bpy.types.Panel):
 
                         data_icon = "MESH_DATA"
 
-                        row.prop (o, "unity_export", emboss=True, text='', icon='EXPORT')
-                        row.prop (o, "name", text='', icon=obj_icon)
+                        row.prop(o, "unity_export", emboss=True, text='', icon='EXPORT')
+                        row.prop(o, "name", text='', icon=obj_icon)
 
                         if o.data != None:
-                            row.prop (o.data, "name", text='', icon=data_icon)
+                            row.prop(o.data, "name", text='', icon=data_icon)
 
-                        row.prop (o, "unity_use_rename", text='', icon='FILE_TEXT')
+                        row.prop(o, "unity_use_rename", text='', icon='FILE_TEXT')
 
                     col.prop(group, 'unity_show_objects', icon='TRIA_UP', emboss=True)
-
 
                 # collapse
                 row = box2.row(align=True)
@@ -1301,16 +1297,16 @@ class UNITY_PT_Scene(bpy.types.Panel):
 
                     row.prop_search(group, 'unity_head', group, "objects", text="", icon="OBJECT_DATA")
 
-                    if group.unity_head in group.objects and pure_curve (group.objects[group.unity_head]):
-                        box2.label ("%s is not a valid collapse head" % group.unity_head, icon='ERROR')
-                    #row.prop(group, 'unity_head', text="", icon=icon)
+                    if group.unity_head in group.objects and pure_curve(group.objects[group.unity_head]):
+                        box2.label("%s is not a valid collapse head" % group.unity_head, icon='ERROR')
+                    # row.prop(group, 'unity_head', text="", icon=icon)
 
         # Renaming
-        layout.separator ()
-        box = layout.box ()
+        layout.separator()
+        box = layout.box()
 
-        col2 = box.column (align=True)
-        col2.label ("Renaming", icon='SHORTDISPLAY')
+        col2 = box.column(align=True)
+        col2.label("Renaming", icon='SHORTDISPLAY')
         col2.prop(scene, 'unity_export_name_find', text='', icon='FILTER')
         col2.prop(scene, 'unity_export_name_replace', text='', icon='PASTEDOWN')
 
@@ -1326,14 +1322,12 @@ class UNITY_PT_Scene(bpy.types.Panel):
             group = groups[scene.unity_active_export_group_index]
 
             for o in group.objects:
-                row = col2.row (align=True)
-                row.active=o.unity_use_rename
+                row = col2.row(align=True)
+                row.active = o.unity_use_rename
 
-                row.prop (o, "name", text='')
-                row.label (rename (scene.unity_export_name_find, scene.unity_export_name_replace, o.name))
-                row.prop (o, "unity_use_rename", icon='FILE_TEXT', text='')
-
-
+                row.prop(o, "name", text='')
+                row.label(rename(scene.unity_export_name_find, scene.unity_export_name_replace, o.name))
+                row.prop(o, "unity_use_rename", icon='FILE_TEXT', text='')
 
         # Export
 
@@ -1365,16 +1359,16 @@ class UNITY_PT_Scene(bpy.types.Panel):
 
         # layout
 
-        layout.separator ()
+        layout.separator()
         box = layout.box()
-        #box.label(text='Export')
+        # box.label(text='Export')
 
-        row = box.row ()
+        row = box.row()
 
         row.label("Export path")
         row.prop(scene, 'unity_global_scale', text='Scale')
 
-        row = box.row (align=True)
+        row = box.row(align=True)
 
         row.operator(GuessExportPath.bl_idname, text=(''), icon='AUTO')
         row.prop(scene, 'unity_export_path', text="")
@@ -1384,28 +1378,26 @@ class UNITY_PT_Scene(bpy.types.Panel):
         column = box.column()
         column.enabled = len(groups) > 0
 
-        col = box.column (align=True)
+        col = box.column(align=True)
         col.prop(scene, "use_custom_exporter", toggle=True)
 
-        row = col.row (align=True)
+        row = col.row(align=True)
         row.prop(scene, "unity_use_duplis", toggle=True)
         row.prop(scene, "unity_use_libraries", toggle=True)
 
-        col = box.column ()
+        col = box.column()
 
         col.operator(ExportGroupsToFBX.bl_idname, text='Export %d %s to FBX (Y-Up)' % (num, plural), icon='GROUP')
 
         col.operator(ExportActionsForUnity.bl_idname, text='Export %d %s to FBX (Y-Up)' % (num_actions, plural_actions), icon='ACTION')
 
-
-
         # Export referenced textures
 
-        layout.separator ()
+        layout.separator()
         box = layout.box()
 
         box.label(text='Export Texture Path')
-        row = box.row (align=True)
+        row = box.row(align=True)
         row.operator(GuessTextureExportPath.bl_idname, text=(''), icon='AUTO')
         row.prop(scene, 'unity_texture_export_path', text="")
         row.prop(scene, 'unity_make_path', text='', icon='NEWFOLDER')
@@ -1417,6 +1409,7 @@ class UNITY_PT_Scene(bpy.types.Panel):
 
         col.operator(ExportGroupsTextures.bl_idname, text='Export %d %s Textures' % (num, plural), icon='TEXTURE')
 
+
 class UNITY_PT_Object(bpy.types.Panel):
     bl_label = 'Unity Export Properties'
     bl_space_type = 'PROPERTIES'
@@ -1424,7 +1417,7 @@ class UNITY_PT_Object(bpy.types.Panel):
     bl_context = 'object'
     bl_default_closed = False
 
-    def draw (self, context):
+    def draw(self, context):
 
         layout = self.layout
         scene = context.scene
@@ -1435,11 +1428,13 @@ class UNITY_PT_Object(bpy.types.Panel):
 
 type = bpy.types
 
-def update_frame_range (self, context):
+
+def update_frame_range(self, context):
 
     if self.show_frame_range:
         context.scene.frame_start = self.start_frame
         context.scene.frame_end = self.end_frame
+
 
 class UnityExportAction(bpy.types.PropertyGroup):
     expanded = bpy.props.BoolProperty(name="Expanded", default=False, options={'SKIP_SAVE'})
@@ -1453,8 +1448,10 @@ class UnityExportAction(bpy.types.PropertyGroup):
     end_frame = bpy.props.IntProperty(name="End Frame", default=0, update=update_frame_range)
     show_frame_range = bpy.props.BoolProperty(name="Show range", default=False, update=update_frame_range)
 
+
 class UnityExportActionObject(bpy.types.PropertyGroup):
     object_name = bpy.props.StringProperty(name="Object Name", default="")
+
 
 def register():
 
@@ -1469,7 +1466,7 @@ def register():
     type.Scene.unity_use_duplis = BoolProperty(name='Export Duplis', description='Export Dupli-Types as meshes, disables all Dupli-Types when off', default=False)
     type.Scene.unity_hide_external_groups = BoolProperty(name='Hide External Groups', description='Hide groups that are linked to external files', default=True)
     type.Scene.unity_only_export_action_objects = BoolProperty(name='Only include action objects', description='Only exports objects defined in the action objects list', default=True)
-    type.Scene.unity_forward_axis = EnumProperty(name='Direction', items=(('Z', "Forward", ""),('-Z', "-Forward", "")), default='Z')
+    type.Scene.unity_forward_axis = EnumProperty(name='Direction', items=(('Z', "Forward", ""), ('-Z', "-Forward", "")), default='Z')
     type.Scene.unity_global_scale = FloatProperty(name='Global Scale', default=1, min=0)
     type.Scene.unity_active_export_group_index = IntProperty(name='Active Export Group Index', default=0, min=0)
 
@@ -1525,9 +1522,10 @@ def register():
     type.Group.unity_optimize = BoolProperty(name='Optimize Animation', description='Optimize Animation in this group', default=True)
     type.Group.unity_disable_blend_shapes = BoolProperty(name='Disable Blend Shapes', description='Zero all blend shapes in this group', default=True)
 
+
 def unregister():
-    #del type.Scene.unity_export_path
-    #del type.Action.unity_export
+    # del type.Scene.unity_export_path
+    # del type.Action.unity_export
     bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":

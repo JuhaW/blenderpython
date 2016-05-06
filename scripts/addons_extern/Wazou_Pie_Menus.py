@@ -26,7 +26,8 @@ bl_info = {
     "description": "Custom Pie Menus",
     "category": "Pie Menu"}
 
-import bpy, os
+import bpy
+import os
 from bpy.types import Menu, Header
 from bpy.props import IntProperty, FloatProperty, BoolProperty
 import bmesh

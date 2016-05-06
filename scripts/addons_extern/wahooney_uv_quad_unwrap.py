@@ -31,13 +31,14 @@ bl_info = {
     'author': 'Keith (Wahooney) Boshoff',
     'version': (1, 0, 0),
     'blender': (2, 7, 4),
-    #'location': 'UVs > Normalize UVs',
+    # 'location': 'UVs > Normalize UVs',
     'url': 'http://wahooney.net',
     'category': 'UV'}
 
 import bpy
 import bmesh
 from mathutils import Vector
+
 
 def main(self, context):
 
@@ -53,14 +54,14 @@ def main(self, context):
     f = bm.faces.active
 
     if f is None:
-        self.report ({'INFO'}, "Active face required.")
+        self.report({'INFO'}, "Active face required.")
         return
 
-    if len (f.loops) != 4:
-        self.report ({'INFO'}, "Active face must be exactly 4 vertices.")
+    if len(f.loops) != 4:
+        self.report({'INFO'}, "Active face must be exactly 4 vertices.")
         return
 
-    #get uvs and average edge lengths
+    # get uvs and average edge lengths
     luv1 = f.loops[0][uv_layer]
     luv2 = f.loops[1][uv_layer]
     luv3 = f.loops[2][uv_layer]
@@ -75,20 +76,20 @@ def main(self, context):
 
     c = (luv1.uv + luv2.uv + luv3.uv + luv4.uv) / 4
 
-    #u = 1
-    #v = 1
+    # u = 1
+    # v = 1
 
     if l1 < l2:
-        u = v*(l1/l2)
+        u = v * (l1 / l2)
     else:
-        v = u*(l2/l1)
+        v = u * (l2 / l1)
 
-    #try to fit into old coords
-    luv1.uv = c + Vector ((-u, -v)) / 2
-    luv2.uv = c + Vector ((u, -v)) / 2
-    luv3.uv = c + Vector ((u, v)) / 2
-    luv4.uv = c + Vector ((-u, v)) / 2
-    
+    # try to fit into old coords
+    luv1.uv = c + Vector((-u, -v)) / 2
+    luv2.uv = c + Vector((u, -v)) / 2
+    luv3.uv = c + Vector((u, v)) / 2
+    luv4.uv = c + Vector((-u, v)) / 2
+
     bmesh.update_edit_mesh(me)
 
     # select linked
@@ -96,13 +97,13 @@ def main(self, context):
 
     for f in bm.faces:
         if f.select:
-            selection.append (f)
+            selection.append(f)
 
     if use_linked:
         bpy.ops.mesh.select_linked(limit=True)
 
     # follow active quads
-    bpy.ops.uv.follow_active_quads (mode='LENGTH_AVERAGE')
+    bpy.ops.uv.follow_active_quads(mode='LENGTH_AVERAGE')
 
     # restore selections
     '''
@@ -115,6 +116,7 @@ def main(self, context):
 
 from bpy.props import *
 
+
 class QuadUnwrap (bpy.types.Operator):
     """Unwrap selection from to contiguous uniform quad layout"""
     bl_idname = "uv.quad_unwrap"
@@ -122,7 +124,7 @@ class QuadUnwrap (bpy.types.Operator):
     bl_options = {'UNDO', 'REGISTER'}
 
     use_linked = BoolProperty(name="Quad Linked Faces", description="Apply Quad Unwrap to linked faces",
-            default=False)
+                              default=False)
 
     @classmethod
     def poll(cls, context):
@@ -133,6 +135,7 @@ class QuadUnwrap (bpy.types.Operator):
         return {'FINISHED'}
 
 addon_keymaps = []
+
 
 def register_keymaps():
 
@@ -155,8 +158,8 @@ def register_keymaps():
         kmi = km3d.keymap_items.new("uv.quad_unwrap", 'Q', 'PRESS', ctrl=True, shift=True, alt=False)
         kmi.properties.use_linked = True
 
-        addon_keymaps.append (kmuv)
-        addon_keymaps.append (km3d)
+        addon_keymaps.append(kmuv)
+        addon_keymaps.append(km3d)
 
 
 def unregister_keymaps():
@@ -173,13 +176,15 @@ def unregister_keymaps():
     # clear the list
     del addon_keymaps[:]
 
+
 def register():
     bpy.utils.register_class(QuadUnwrap)
-    register_keymaps ()
+    register_keymaps()
+
 
 def unregister():
     bpy.utils.unregister_class(QuadUnwrap)
-    unregister_keymaps ()
+    unregister_keymaps()
 
 if __name__ == "__main__":
     register()
