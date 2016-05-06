@@ -22,7 +22,7 @@
 bl_info = {
     "name": "Auto Custom Shape",
     "author": "Jacques Duflos",
-    "version": (0,1),
+    "version": (0, 1),
     "blender": (2, 5, 8),
     "api": 36826,
     "location": "Properties > Bone > Create a custom shape (visible on pose or edit mode only)",
@@ -66,9 +66,7 @@ from mathutils import Vector
 
 
 def add_mesh_bone(context, length=1, head_radius=0.1, tail_radius=0.1, mesh_name="Mesh bone"):
-    """
-    This function adds a mesh object in the scene
-    """
+    """This function adds a mesh object in the scene"""
     vertices = [
         Vector((0.10000002384185791, 0.10000002384185791, -0.09999996423721313)),
         Vector((0.10000002384185791, 0.09999996423721313, 0.10000002384185791)),
@@ -162,41 +160,41 @@ def add_mesh_bone(context, length=1, head_radius=0.1, tail_radius=0.1, mesh_name
         Vector((0.04619397595524788, 0.019134171307086945, 0.0))]
 
     edges = [[1, 2], [0, 1], [0, 3], [2, 3], [3, 4], [1, 4], [0, 4], [2, 4],
-        [3, 5], [1, 5], [0, 5], [2, 5], [6, 7], [8, 9], [9, 10], [10, 11],
-        [11, 12], [12, 13], [13, 14], [14, 15], [15, 16], [16, 17], [17, 18],
-        [19, 20], [20, 21], [21, 22], [22, 23], [23, 24], [24, 25], [25, 26],
-        [27, 28], [28, 29], [29, 30], [30, 31], [31, 32], [32, 33], [19, 33],
-        [34, 35], [35, 36], [36, 37], [37, 38], [38, 39], [39, 40], [41, 42],
-        [42, 43], [44, 45], [45, 46], [47, 62], [47, 48], [48, 49], [49, 50],
-        [50, 51], [51, 52], [52, 53], [53, 54], [54, 55], [55, 56], [56, 57],
-        [57, 58], [58, 59], [59, 60], [60, 61], [61, 62], [63, 76], [63, 64],
-        [64, 65], [66, 67], [67, 68], [68, 69], [69, 70], [70, 71], [71, 72],
-        [73, 74], [74, 75], [75, 76], [77, 78], [78, 79], [80, 81], [81, 82],
-        [83, 84], [84, 85], [86, 87], [87, 88], [76, 88], [58, 86], [58, 85],
-        [69, 83], [69, 82], [50, 80], [50, 79], [76, 77], [62, 73], [62, 72],
-        [54, 66], [54, 65], [23, 46], [15, 44], [15, 43], [30, 41], [30, 40],
-        [23, 34], [11, 27], [11, 26], [18, 19], [8, 37], [6, 19], [89, 7], [37,89]]
+             [3, 5], [1, 5], [0, 5], [2, 5], [6, 7], [8, 9], [9, 10], [10, 11],
+             [11, 12], [12, 13], [13, 14], [14, 15], [15, 16], [16, 17], [17, 18],
+             [19, 20], [20, 21], [21, 22], [22, 23], [23, 24], [24, 25], [25, 26],
+             [27, 28], [28, 29], [29, 30], [30, 31], [31, 32], [32, 33], [19, 33],
+             [34, 35], [35, 36], [36, 37], [37, 38], [38, 39], [39, 40], [41, 42],
+             [42, 43], [44, 45], [45, 46], [47, 62], [47, 48], [48, 49], [49, 50],
+             [50, 51], [51, 52], [52, 53], [53, 54], [54, 55], [55, 56], [56, 57],
+             [57, 58], [58, 59], [59, 60], [60, 61], [61, 62], [63, 76], [63, 64],
+             [64, 65], [66, 67], [67, 68], [68, 69], [69, 70], [70, 71], [71, 72],
+             [73, 74], [74, 75], [75, 76], [77, 78], [78, 79], [80, 81], [81, 82],
+             [83, 84], [84, 85], [86, 87], [87, 88], [76, 88], [58, 86], [58, 85],
+             [69, 83], [69, 82], [50, 80], [50, 79], [76, 77], [62, 73], [62, 72],
+             [54, 66], [54, 65], [23, 46], [15, 44], [15, 43], [30, 41], [30, 40],
+             [23, 34], [11, 27], [11, 26], [18, 19], [8, 37], [6, 19], [89, 7], [37, 89]]
     faces = [[2, 3, 4], [3, 0, 4], [0, 1, 4], [1, 2, 4],
-        [3, 2, 5], [0, 3, 5], [1, 0, 5], [2, 1, 5]]
+             [3, 2, 5], [0, 3, 5], [1, 0, 5], [2, 1, 5]]
 
-    vertices=[vec*length for vec in vertices]
+    vertices = [vec * length for vec in vertices]
 
     mesh = bpy.data.meshes.new(mesh_name)
     mesh.vertices.add(len(vertices))
     mesh.edges.add(len(edges))
     mesh.polygons.add(len(mesh.polygons))
-    
+
     for i in range(len(mesh.vertices)):
         mesh.vertices[i].co = vertices[i]
     for i in range(len(mesh.edges)):
-        mesh.edges[i].vertices = edges[i]        
+        mesh.edges[i].vertices = edges[i]
     for i in range(len(mesh.polygons)):
         mesh.polygons[i].vertices = faces[i]
 
     mesh.update()
 
     # add the mesh as an object into the scene with the utility module
-    obj=object_utils.object_data_add(context, mesh)
+    obj = object_utils.object_data_add(context, mesh)
     obj.object.show_wire = True
 
     return {'FINISHED'}
@@ -218,11 +216,11 @@ def main(context, wired=True):
     # if nos != 1 :
     #     bpy.ops.object.mode_set(mode=mode_prec)
     #     return {'CANCELLED'}, str(nos) + " bone(s) selected (select 1 only)"
-    
+
     # First, we save the armature and the selected bone
     larma = context.selected_objects[0]
     larma_name = larma.name
-    for bon in context.selected_pose_bones :
+    for bon in context.selected_pose_bones:
         # los = context.selected_pose_bones[0]
         los = bon
         los_name = los.name
@@ -236,22 +234,22 @@ def main(context, wired=True):
         add_mesh_bone(context, mesh_name=shape_name)
         shape = context.selected_objects[0]
         shape.name = shape_name
-        
+
         # Next step : create a copy location+copy rotation constraint
         CopLoc = shape.constraints.new("COPY_LOCATION")
         # WARNING : larma must be a object and not an armature
         CopLoc.target = larma
         # WARNING : los_name must be a string and not a bone
         CopLoc.subtarget = los_name
-        
+
         CopRot = shape.constraints.new("COPY_ROTATION")
         CopRot.target = larma
         CopRot.subtarget = los_name
-        
+
         shape.scale = (size, size, size)                  # We scale the shape
         larma.pose.bones[los_name].custom_shape = shape   # Apply shape to bone
         #### TODO: use the matrix transformation ####
-        #(object.data.tranansform(matrix))
+        # (object.data.tranansform(matrix))
 
         # Display wires operation moved to the operator class definition
         bpy.ops.object.mode_set(mode='EDIT')
@@ -266,9 +264,9 @@ class BONE_OT_custom_shape(bpy.types.Operator):
     bl_idname = "object.auto_custom_shape"
     bl_label = "Auto custom shape"
     bl_options = {'REGISTER', 'UNDO'}
-#### TODO: fix that goddamned wired option ####
-    #wired = BoolProperty(name="Display wire", default=True)
-    
+    #### TODO: fix that goddamned wired option ####
+    # wired = BoolProperty(name="Display wire", default=True)
+
     # bl_context has nothing to do in a Operator class.
     # bl_context = ENUM in (
     #    mesh_edit, curve_edit, surface_edit, text_edit,
@@ -288,10 +286,10 @@ class BONE_OT_custom_shape(bpy.types.Operator):
             self.report({'INFO'}, issu[1].name + " has been created")
 
             # This doesn't work, wating for fixing
-            #if self.wired:
+            # if self.wired:
             #    issu[1].draw_type = 'WIRE'
             #
-            #issu[2].bone.show_wire = self.wired
+            # issu[2].bone.show_wire = self.wired
 
             return {'FINISHED'}
 
@@ -302,7 +300,7 @@ class BONE_PT_custom_shape(bpy.types.Panel):
     bl_context = "bone"
     bl_label = "Create a custom shape"
     # it seams like only the first panel can be head hidden
-    #bl_options = {'HIDE_HEADER'}
+    # bl_options = {'HIDE_HEADER'}
 
     @classmethod
     def poll(cls, context):

@@ -44,7 +44,7 @@ class RunAction(bpy.types.Operator):
     # ------------------------------
     def execute(self, context):
         # ----------------------
-        # Save old data       
+        # Save old data
         # ----------------------
         scene = context.scene
         selectobject = context.active_object
@@ -53,7 +53,7 @@ class RunAction(bpy.types.Operator):
         savedframe = scene.frame_current
         if scene.use_cursor is False:
             bpy.ops.view3d.snap_cursor_to_selected()
-        
+
         # -------------------------
         # Create empty and parent
         # -------------------------
@@ -72,15 +72,15 @@ class RunAction(bpy.types.Operator):
         savedstate = camera.matrix_world
         camera.parent = myempty
         camera.matrix_world = savedstate
-        
+
         # -------------------------
-        # Now add revolutions 
+        # Now add revolutions
         # (make empty active object)
         # -------------------------
         bpy.ops.object.select_all(False)
         myempty.select = True
         bpy.context.scene.objects.active = myempty
-        # save current configuration     
+        # save current configuration
         savedinterpolation = context.user_preferences.edit.keyframe_new_interpolation_type
         # change interpolation mode
         context.user_preferences.edit.keyframe_new_interpolation_type = 'LINEAR'
@@ -109,7 +109,7 @@ class RunAction(bpy.types.Operator):
             iz = -1
         else:
             iz = 1
-        
+
         xrot = (math.pi * 2) * scene.camera_revol_x * ix
         yrot = (math.pi * 2) * scene.camera_revol_y * iy
         zrot = (math.pi * 2) * scene.camera_revol_z * iz
@@ -122,12 +122,12 @@ class RunAction(bpy.types.Operator):
             xrot *= -1
             yrot *= -1
             zrot = 0
-            
+
         # Dolly zoom
         if scene.dolly_zoom == "2":
             bpy.data.cameras[camera.name].lens = scene.camera_to_lens
             bpy.data.cameras[camera.name].keyframe_insert('lens', frame=((scene.frame_end - scene.frame_start) / 2))
-            
+
         # create last frame
         myempty.rotation_euler = (xrot, yrot, zrot)
         myempty.keyframe_insert(data_path='rotation_euler', frame=scene.frame_end)
@@ -137,10 +137,10 @@ class RunAction(bpy.types.Operator):
                 bpy.data.cameras[camera.name].lens = scene.camera_to_lens  # final
             else:
                 bpy.data.cameras[camera.name].lens = scene.camera_from_lens  # back to init
-                
+
             bpy.data.cameras[camera.name].keyframe_insert('lens', frame=scene.frame_end)
-            
-        # Track constraint   
+
+        # Track constraint
         if scene.track is True:
             bpy.context.scene.objects.active = camera
             bpy.ops.object.constraint_add(type='TRACK_TO')
@@ -151,7 +151,7 @@ class RunAction(bpy.types.Operator):
         # back previous configuration
         context.user_preferences.edit.keyframe_new_interpolation_type = savedinterpolation
         bpy.context.scene.cursor_location = savedcursor
-        
+
         # -------------------------
         # Back to old selection
         # -------------------------
@@ -159,7 +159,7 @@ class RunAction(bpy.types.Operator):
         selectobject.select = True
         bpy.context.scene.objects.active = selectobject
         bpy.context.scene.frame_set(savedframe)
-        
+
         return {'FINISHED'}
 # ------------------------------------------------------
 # UI Class
@@ -215,12 +215,12 @@ class PanelUI(bpy.types.Panel):
                     row.prop(scene, "camera_to_lens")
                 row = layout.row()
                 row.prop(scene, "track")
-                    
+
             else:
                 buf = "No valid object selected"
                 layout.label(buf, icon='MESH_DATA')
-                
-        
+
+
 # ------------------------------------------------------
 # Registration
 # ------------------------------------------------------
@@ -237,7 +237,7 @@ def register():
     bpy.types.Scene.camera_revol_z = bpy.props.FloatProperty(name='Z', min=0, max=25,
                                                              default=1, precision=2,
                                                              description='Number total of revolutions in Z axis')
-    
+
     bpy.types.Scene.inverse_x = bpy.props.BoolProperty(name="-X", description="Inverse rotation", default=False)
     bpy.types.Scene.inverse_y = bpy.props.BoolProperty(name="-Y", description="Inverse rotation", default=False)
     bpy.types.Scene.inverse_z = bpy.props.BoolProperty(name="-Z", description="Inverse rotation", default=False)
@@ -259,7 +259,7 @@ def register():
                                                                description='Start lens value')
     bpy.types.Scene.camera_to_lens = bpy.props.FloatProperty(name='To', min=1, max=500, default=35, precision=3,
                                                              description='End lens value')
-    
+
     bpy.types.Scene.track = bpy.props.BoolProperty(name="Create track constraint",
                                                    description="Add a track constraint to the camera",
                                                    default=False)

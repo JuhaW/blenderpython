@@ -1,5 +1,3 @@
-﻿
-
 bl_info = {
     "name": "Batch Dirtmaps",
     "author": "Greg Zaal",
@@ -23,14 +21,12 @@ def LOG(message):
         print(message)
     else:
         pass
-    
-    
 
 
 def uvmain():
     context = bpy.context
-    scene=context.scene
-    DO_SCALE=scene.ScaleUVs
+    scene = context.scene
+    DO_SCALE = scene.ScaleUVs
     # [(x, y, w, h, [uv, ...]), ...]
     boxes = []
     for objz in context.selected_editable_objects:
@@ -44,7 +40,7 @@ def uvmain():
         mesh_loopuvs = [luv.uv for luv in meshz.uv_layers.active.data]
 
         for island in island_ls:
-            xmin = ymin =  100000000.0
+            xmin = ymin = 100000000.0
             xmax = ymax = -100000000.0
 
             uvs = []
@@ -79,7 +75,6 @@ def uvmain():
             maxdim = max(xmin + w, ymin + h, maxdim)
     else:
         maxdim = 1.0
-
 
     for box in boxes:
         xmin, ymin, w, h, uv_orig = box
@@ -127,7 +122,7 @@ class RENDER_OT_batch_unwrap_bake(Operator):
             bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
     def _create_compat(self, contrast, image, image_ao2_name,
-            image_ao_name, image_inv_ao_name):
+                       image_ao_name, image_inv_ao_name):
         if image + '_AOComp' in bpy.data.materials:
             mat = bpy.data.materials[image + '_AOComp']
         else:
@@ -181,9 +176,9 @@ class RENDER_OT_batch_unwrap_bake(Operator):
 
     def execute(self, context):
         scene = context.scene
-        SQUARE=scene.Square
+        SQUARE = scene.Square
 
-        #use_color_management = scene.render.use_color_management
+        # use_color_management = scene.render.use_color_management
         light_dist = scene.world.light_settings.distance
         old_samples = scene.world.light_settings.samples
         obact = scene.objects.active
@@ -209,7 +204,7 @@ class RENDER_OT_batch_unwrap_bake(Operator):
         image_inv_ao_name = image + "_" + "AOInv"
         image_dirt_name = image + "_" + "DIRT"
         all_image_names = [image_ao2_name, image_ao_name,
-                image_inv_ao_name, image_dirt_name]
+                           image_inv_ao_name, image_dirt_name]
 
         # list of all affecting objects
         LOG("Creating list of objects to be baked")
@@ -236,7 +231,7 @@ class RENDER_OT_batch_unwrap_bake(Operator):
         for name in all_image_names:
             if name not in bpy.data.images:
                 bpy.data.images.new(name=name,
-                        width=resolution_x, height=resolution_y)
+                                    width=resolution_x, height=resolution_y)
             else:
                 img = bpy.data.images[name]
                 img.generated_width = resolution_x
@@ -258,15 +253,15 @@ class RENDER_OT_batch_unwrap_bake(Operator):
             LOG("Unwrapping objects")
             bpy.ops.uv.smart_project(island_margin=0.01, user_area_weight=0)
 
-        #  setup baking settings
-        #scene.render.use_color_management = False
+        # setup baking settings
+        # scene.render.use_color_management = False
         scene.render.bake_type = 'AO'
         scene.render.use_bake_clear = False
         scene.render.use_bake_antialiasing = True
         scene.render.use_bake_normalize = True
         scene.world.light_settings.samples = samples
 
-        ##  batch bake each object
+        # batch bake each object
 
         # bake AO 1
         LOG("Baking AO")
@@ -291,16 +286,16 @@ class RENDER_OT_batch_unwrap_bake(Operator):
 
         self._flip_normals(scene, objects)
 
-        ## bake AO and Inv AO together
-        ### material creation
+        # bake AO and Inv AO together
+        # material creation
         LOG("Creating composite material")
         self._create_compat(contrast, image, image_ao2_name, image_ao_name,
-                image_inv_ao_name)
+                            image_inv_ao_name)
 
         # duplicate for final bake
         LOG("Duplicating and joining objects for final bake")
         bpy.ops.object.duplicate()
-        
+
         # ensure the active object has multires 'WORKAROUND' - bug [#31637]
         for ob in bpy.context.selected_objects:
             if {True for m in ob.modifiers
@@ -338,29 +333,29 @@ class RENDER_OT_batch_unwrap_bake(Operator):
 
         self._teporary_enable(disabled)
 
-        #scene.render.use_color_management = use_color_management
+        # scene.render.use_color_management = use_color_management
         scene.world.light_settings.distance = light_dist
         scene.objects.active = obact
         scene.world.light_settings.samples = old_samples
-        
+
         # delete data
         if del_ao:
-            img_name=image + "_AO"
+            img_name = image + "_AO"
             bpy.data.images[img_name].user_clear()
             bpy.data.images.remove(bpy.data.images[img_name])
         if del_ao2:
-            img_name=image + "_AO2"
+            img_name = image + "_AO2"
             bpy.data.images[img_name].user_clear()
             bpy.data.images.remove(bpy.data.images[img_name])
         if del_inv:
-            img_name=image + "_AOInv"
+            img_name = image + "_AOInv"
             bpy.data.images[img_name].user_clear()
             bpy.data.images.remove(bpy.data.images[img_name])
-        
+
 #        save image
 #       >>> bpy.data.images['batchbake_DIRT'].filepath_raw='C:\\test\\something.tga'
 #       >>> bpy.data.images['batchbake_DIRT'].save()
-        
+
         for ob in objects:
             ob.select = True
 
@@ -380,8 +375,8 @@ class RENDER_PT_batch_bake(Panel):
 
     def draw(self, context):
         scene = context.scene
-        ADVANCED=scene.Advanced
-        SQUARE_ui=scene.Square
+        ADVANCED = scene.Advanced
+        SQUARE_ui = scene.Square
         obact = context.active_object
         me = obact.data if obact.type == 'MESH' else None
 
@@ -395,9 +390,9 @@ class RENDER_PT_batch_bake(Panel):
         else:
             col.prop(scene, "BatchBakeUVMap")
         col.prop(scene, "BatchBakeAutoUnwrap")
-        
+
         split = layout.split()
-        
+
         col = split.column()
         sub = col.column(align=True)
         sub.label(text="Resolution")
@@ -418,117 +413,112 @@ class RENDER_PT_batch_bake(Panel):
         col = layout.column(align=True)
         col.prop(scene, "BatchBakeContrast")
         col.prop(scene, "BatchBakeSamples")
-        
-        box=self.layout.box()
-        
-        col=box.column(align=True)
+
+        box = self.layout.box()
+
+        col = box.column(align=True)
         col.prop(scene, "Advanced", icon="TRIA_DOWN", text="Show Additional Options")
-        
-        #uvs.pack_objects
-        if ADVANCED:            
-            col=box.column()
+
+        # uvs.pack_objects
+        if ADVANCED:
+            col = box.column()
             col.label(text="Pack Selected Objects UVs")
-            row=col.row(align=True)
+            row = col.row(align=True)
             row.prop(scene, "ScaleUVs", text="Fit to 1x1 UV space")
             row.operator("uvs.pack_objects", text="Pack!")
-            
-            col=box.column(align=True)
+
+            col = box.column(align=True)
             col.label(text="Delete Generated Images")
-            row=col.row()
+            row = col.row()
             row.prop(scene, "DelAO", text="Dirt Big")
             row.prop(scene, "DelAO2", text="Dirt Small")
             row.prop(scene, "DelInv", text="Scratch")
 
-        
         layout.operator("render.batch_unwrap_bake", text="Bake!")
-        
-        
-        
-        
-        
+
 
 def register():
     bpy.types.Scene.BatchBakeImage = bpy.props.StringProperty(
-            name="Image",
-            default='batchbake',
-            description="Prefix for name of image data blocks " + \
-                        "crated when baking")
+        name="Image",
+        default='batchbake',
+        description="Prefix for name of image data blocks " +
+        "crated when baking")
 
     bpy.types.Scene.BatchBakeUVMap = bpy.props.StringProperty(
-            name="UV map",
-            default='dirtmap',
-            description="Name of UV map to be used for baking")
+        name="UV map",
+        default='dirtmap',
+        description="Name of UV map to be used for baking")
 
     bpy.types.Scene.BatchBakeAODist = bpy.props.FloatProperty(
-            name="AO Distance",
-            default=1.5,
-            description="Radius for concave/dark areas")
+        name="AO Distance",
+        default=1.5,
+        description="Radius for concave/dark areas")
 
     bpy.types.Scene.BatchBakeInvAODist = bpy.props.FloatProperty(
-            name="Invese AO R",
-            default=0.1,
-            description="Radius for edges/bright areas")
+        name="Invese AO R",
+        default=0.1,
+        description="Radius for edges/bright areas")
 
     bpy.types.Scene.BatchBakeResolX = bpy.props.IntProperty(
-            name="Resolution X",
-            default=1024,
-            min=4,
-            max=30000,
-            description="Resolution in X direction for baking images")
+        name="Resolution X",
+        default=1024,
+        min=4,
+        max=30000,
+        description="Resolution in X direction for baking images")
 
     bpy.types.Scene.BatchBakeResolY = bpy.props.IntProperty(
-            name="Resolution Y",
-            default=1024,
-            min=4,
-            max=30000,
-            description="Resolution in Y direction for baking images")
+        name="Resolution Y",
+        default=1024,
+        min=4,
+        max=30000,
+        description="Resolution in Y direction for baking images")
 
     bpy.types.Scene.BatchBakeAutoUnwrap = bpy.props.BoolProperty(
-            name="Auto Unwrap",
-            default=True,
-            description="Use auto LSCM unwrap")
+        name="Auto Unwrap",
+        default=True,
+        description="Use auto LSCM unwrap")
 
     bpy.types.Scene.BatchBakeContrast = bpy.props.FloatProperty(
-            name="AO Contrast",
-            default=1.25,
-            description="Contrast for final dirtmap")
+        name="AO Contrast",
+        default=1.25,
+        description="Contrast for final dirtmap")
 
     bpy.types.Scene.BatchBakeSamples = bpy.props.IntProperty(
-            name="AO Samples",
-            default=5,
-            min=0,
-            max=1000,
-            description="Number of AO samples when baking")
-            
+        name="AO Samples",
+        default=5,
+        min=0,
+        max=1000,
+        description="Number of AO samples when baking")
+
     bpy.types.Scene.DelAO = bpy.props.BoolProperty(
-            name="Delete AO",
-            default=False,
-            description="Delete first generated AO image")
+        name="Delete AO",
+        default=False,
+        description="Delete first generated AO image")
 
     bpy.types.Scene.DelAO2 = bpy.props.BoolProperty(
-            name="Delete AO2",
-            default=False,
-            description="Delete second generated AO image")
-            
+        name="Delete AO2",
+        default=False,
+        description="Delete second generated AO image")
+
     bpy.types.Scene.DelInv = bpy.props.BoolProperty(
-            name="Delete Inv",
-            default=False,
-            description="Delete generated inverse AO image")
-            
+        name="Delete Inv",
+        default=False,
+        description="Delete generated inverse AO image")
+
     bpy.types.Scene.ScaleUVs = bpy.props.BoolProperty(
-            name="Fit UVs into 1x1 space",
-            default=True,
-            description="Scale all the UVs down/up to fit the 0-1 image space")
-            
+        name="Fit UVs into 1x1 space",
+        default=True,
+        description="Scale all the UVs down/up to fit the 0-1 image space")
+
     bpy.types.Scene.Advanced = bpy.props.BoolProperty(
-            name="Additional Options",
-            default=False,
-            description="Show the less-frequently used options below")
-            
+        name="Additional Options",
+        default=False,
+        description="Show the less-frequently used options below")
+
     bpy.types.Scene.Square = bpy.props.BoolProperty(
-            name="Square",
-            default=True,
-            description="Keep X and Y resolution the same")
+        name="Square",
+        default=True,
+        description="Keep X and Y resolution the same")
 
     bpy.utils.register_module(__name__)
 
@@ -549,7 +539,7 @@ def unregister():
     del bpy.types.Scene.ScaleUVs
     del bpy.types.Scene.Advanced
     del bpy.types.Scene.Square
-    
+
     bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":

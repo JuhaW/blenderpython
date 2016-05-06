@@ -8,7 +8,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "category": "Object"
-    }
+}
 
 
 import bpy
@@ -41,7 +41,7 @@ class PlaceInContainer(bpy.types.Operator):
                                                                       "proportional": 'DISABLED', "proportional_edit_falloff": 'SMOOTH',
                                                                       "proportional_size": 1, "snap": False,
                                                                       "snap_target": 'CLOSEST', "snap_point": (0, 0, 0),
-                                                                      "snap_align": False, "snap_normal":(0, 0, 0),
+                                                                      "snap_align": False, "snap_normal": (0, 0, 0),
                                                                       "gpencil_strokes": False, "texture_space": False,
                                                                       "remove_on_cancel": False, "release_confirm": False})
                 bpy.ops.object.modifier_apply()

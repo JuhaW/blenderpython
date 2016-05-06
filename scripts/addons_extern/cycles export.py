@@ -23,7 +23,7 @@ bl_info = {
     'blender': (2, 7, 4),
     "description": "export scenes as cycles (xml)",
     "category": "Import-Export",
-    "location": "File > Export" }
+    "location": "File > Export"}
 
 import os
 import xml.etree.ElementTree as etree
@@ -35,12 +35,14 @@ from bpy.props import PointerProperty, StringProperty
 import math
 from mathutils import Matrix
 
+
 def strip(root):
     root.text = None
     root.tail = None
 
     for elem in root:
         strip(elem)
+
 
 def write(node, fname):
     strip(node)
@@ -50,25 +52,27 @@ def write(node, fname):
 
     f = open(fname, "w")
     f.write(s)
-    
+
+
 class CyclesXMLSettings(bpy.types.PropertyGroup):
     @classmethod
     def register(cls):
         bpy.types.Scene.cycles_xml = PointerProperty(
-                                        type=cls,
-                                        name="Cycles XML export Settings",
-                                        description="Cycles XML export settings")
+            type=cls,
+            name="Cycles XML export Settings",
+            description="Cycles XML export settings")
         cls.filepath = StringProperty(
-                        name='Filepath',
-                        description='Filepath for the .xml file',
-                        maxlen=256,
-                        default='',
-                        subtype='FILE_PATH')
-                        
+            name='Filepath',
+            description='Filepath for the .xml file',
+            maxlen=256,
+            default='',
+            subtype='FILE_PATH')
+
     @classmethod
     def unregister(cls):
         del bpy.types.Scene.cycles_xml
-        
+
+
 # User Interface Drawing Code
 class RenderButtonsPanel():
     bl_space_type = 'PROPERTIES'
@@ -86,15 +90,17 @@ class PHYSICS_PT_fluid_export(RenderButtonsPanel, bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        
+
         cycles = context.scene.cycles_xml
-        
-        #layout.prop(cycles, "filepath")
+
+        # layout.prop(cycles, "filepath")
         layout.operator("export_mesh.cycles_xml")
+
 
 def matrix_to_str(m):
     m = m.transposed()
     return " ".join([str(i) for v in m for i in v])
+
 
 def output_camera(scene, node):
     x_res = (scene.render.resolution_x * scene.render.resolution_percentage) / 100
@@ -104,13 +110,14 @@ def output_camera(scene, node):
         'width': str(int(x_res)),
         'height': str(int(y_res))})
 
-    cam_matrix = scene.camera.matrix_world  * Matrix.Scale(-1, 4, (0,0,1))
+    cam_matrix = scene.camera.matrix_world * Matrix.Scale(-1, 4, (0, 0, 1))
 
     trans = etree.SubElement(node, 'transform', attrib={
-        'matrix': matrix_to_str(cam_matrix) })
+        'matrix': matrix_to_str(cam_matrix)})
     etree.SubElement(trans, 'camera', attrib={
         'type': 'perspective',
-        'fov': str((bpy.context.scene.camera.data.angle ) / math.pi * 180) })
+        'fov': str((bpy.context.scene.camera.data.angle) / math.pi * 180)})
+
 
 def output_background(world, node):
     if not world.node_tree == None:
@@ -118,9 +125,9 @@ def output_background(world, node):
 
     bg = etree.SubElement(node, 'background')
     etree.SubElement(bg, 'background', attrib={
-    'name': 'bg', 'strength': '1.0', 'color': " ".join([str(x) for x in world.horizon_color])})
+        'name': 'bg', 'strength': '1.0', 'color': " ".join([str(x) for x in world.horizon_color])})
     etree.SubElement(bg, 'connect', attrib={
-    'from': "bg background", 'to': "output surface" })
+        'from': "bg background", 'to': "output surface"})
 
 
 # Export Operator
@@ -129,7 +136,6 @@ class ExportCyclesXML(bpy.types.Operator, ExportHelper):
     bl_label = "Export Cycles XML"
 
     filename_ext = ".xml"
-
 
     def execute(self, context):
         filepath = bpy.path.ensure_ext(self.filepath, ".xml")
@@ -170,13 +176,10 @@ class ExportCyclesXML(bpy.types.Operator, ExportHelper):
                 })
 
                 trans = etree.SubElement(cycles_node, 'transform', attrib={
-            'matrix':  matrix_to_str(object.matrix_world )})
+                    'matrix': matrix_to_str(object.matrix_world)})
 
                 shader_state = etree.SubElement(trans, "state", attrib={
                     'shader': 'point_shader'})
-
-
-
 
                 etree.SubElement(shader_state, 'light', attrib={
                     'type': '0',
@@ -197,7 +200,6 @@ class ExportCyclesXML(bpy.types.Operator, ExportHelper):
             uvs = ""
             P = ""
 
-
             for v in mesh.vertices:
                 P += "%f %f %f  " % (v.co[0], v.co[1], v.co[2])
 
@@ -214,17 +216,17 @@ class ExportCyclesXML(bpy.types.Operator, ExportHelper):
                     uvs += str(uvf.uv1[0]) + " " + str(uvf.uv1[1]) + " "
                     uvs += str(uvf.uv2[0]) + " " + str(uvf.uv2[1]) + " "
                     uvs += str(uvf.uv3[0]) + " " + str(uvf.uv3[1]) + " "
-                    if vcount==4:
+                    if vcount == 4:
                         uvs += " " + str(uvf.uv4[0]) + " " + str(uvf.uv4[1]) + " "
 
                 trans = etree.SubElement(cycles_node, 'transform', attrib={
-                        'matrix': matrix_to_str(object.matrix_world) })
+                    'matrix': matrix_to_str(object.matrix_world)})
                 state = etree.SubElement(trans, 'state', attrib={"shader": "diff"})
                 etree.SubElement(state, 'mesh', attrib={'nverts': nverts.strip(),
-                                                     'name': object.name,
-                                                     'verts': verts.strip(),
-                                                     'P': P,
-                                                     'UV' : uvs.strip()})
+                                                        'name': object.name,
+                                                        'verts': verts.strip(),
+                                                        'P': P,
+                                                        'UV': uvs.strip()})
 
             else:
                 for f in mesh.tessfaces:
@@ -235,12 +237,12 @@ class ExportCyclesXML(bpy.types.Operator, ExportHelper):
                         verts += str(v) + " "
 
                 trans = etree.SubElement(cycles_node, 'transform', attrib={
-                        'matrix': matrix_to_str(object.matrix_world) })
+                    'matrix': matrix_to_str(object.matrix_world)})
                 state = etree.SubElement(trans, 'state', attrib={"shader": "diff"})
                 etree.SubElement(state, 'mesh', attrib={'nverts': nverts.strip(),
-                                                     'name': object.name,
-                                                     'verts': verts.strip(),
-                                                     'P': P})
+                                                        'name': object.name,
+                                                        'verts': verts.strip(),
+                                                        'P': P})
 
         # write to file
         write(cycles_node, filepath)
@@ -248,12 +250,15 @@ class ExportCyclesXML(bpy.types.Operator, ExportHelper):
 
         return {'FINISHED'}
 
+
 def menu_func_export(self, context):
     self.layout.operator(ExportCyclesXML.bl_idname, text="Export Cycles Scene(.xml)")
+
 
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.INFO_MT_file_export.append(menu_func_export)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

@@ -54,7 +54,7 @@ def chunks(lst, n):
     312443/how-do-you-split-a-list-into-evenly-sized-chunks-in-python
     """
     for i in range(0, len(lst), n):
-        yield lst[i:i+n]
+        yield lst[i:i + n]
 
 
 def swap_pair(pair):
