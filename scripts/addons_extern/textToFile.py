@@ -35,7 +35,7 @@
 bl_info = {
     "name": "Text conversion",
     "author": "sambler",
-    "version": (1,0),
+    "version": (1, 0),
     "blender": (2, 65, 0),
     "location": "View3D > Object > Convert text object",
     "description": "Create a text file from the contents of a text object, or set the object contents from a file.",
@@ -47,6 +47,7 @@ bl_info = {
 
 import bpy
 
+
 class textToFile(bpy.types.Operator):
     """text file to text object"""
     bl_idname = "object.text_to_file"
@@ -57,13 +58,14 @@ class textToFile(bpy.types.Operator):
         obj = bpy.context.active_object
         if obj.type == 'FONT':
             if None == bpy.data.texts.get(obj.name):
-                bpy.data.texts.new(name = obj.name)
+                bpy.data.texts.new(name=obj.name)
 
             text_file = bpy.data.texts[obj.name]
             text_file.clear()
             text = obj.data.body
             text_file.write(text)
         return {'FINISHED'}
+
 
 class fileToText(bpy.types.Operator):
     """text object from text file"""
@@ -75,11 +77,12 @@ class fileToText(bpy.types.Operator):
         obj = bpy.context.active_object
         if obj.type == 'FONT':
             if None == bpy.data.texts.get(obj.name):
-                bpy.data.texts.new(name = obj.name)
+                bpy.data.texts.new(name=obj.name)
 
             text_file = bpy.data.texts[obj.name]
             obj.data.body = text_file.as_string()
         return {'FINISHED'}
+
 
 class textConversion(bpy.types.Panel):
     """Panel for quick text conversion"""
@@ -103,6 +106,7 @@ class textConversion(bpy.types.Panel):
         row = layout.row()
         row.operator("object.file_to_text")
 
+
 class textSubMenu(bpy.types.Menu):
     bl_label = "Convert text"
     bl_idname = "OBJECT_MT_convert_text"
@@ -111,8 +115,10 @@ class textSubMenu(bpy.types.Menu):
         self.layout.operator(textToFile.bl_idname)
         self.layout.operator(fileToText.bl_idname)
 
+
 def convertMenu(self, context):
-    self.layout.menu(textSubMenu.bl_idname, icon = 'OUTLINER_DATA_FONT')
+    self.layout.menu(textSubMenu.bl_idname, icon='OUTLINER_DATA_FONT')
+
 
 def register():
     bpy.utils.register_class(textToFile)
@@ -120,6 +126,7 @@ def register():
     bpy.utils.register_class(textConversion)
     bpy.utils.register_class(textSubMenu)
     bpy.types.VIEW3D_MT_object.append(convertMenu)
+
 
 def unregister():
     bpy.types.VIEW3D_MT_object.remove(convertMenu)
@@ -130,4 +137,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

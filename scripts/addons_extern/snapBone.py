@@ -10,6 +10,7 @@ bl_info = {
     "warning": "",
     "category": "Rigging"}
 
+
 def attach(context):
     scn = bpy.context.scene
     ops = bpy.ops
@@ -23,6 +24,7 @@ def attach(context):
             target_ob = obj
     print(edit_ob, target_ob)
     # print(edit_bone, target_bone)
+
     def snap_head(select_head=True):
         bpy.ops.object.editmode_toggle()
         scn.objects.active = target_ob
@@ -35,7 +37,7 @@ def attach(context):
         target_bone.select_tail = not select_head
         # print(target_bone, target_bone.select, target_bone.select_head, target_bone.select_tail)
         bpy.ops.view3d.snap_cursor_to_selected()
-        #snap head to cursor
+        # snap head to cursor
         bpy.ops.object.editmode_toggle()
         scn.objects.active = edit_ob
         target_ob.select = False
@@ -46,10 +48,10 @@ def attach(context):
         edit_bone.select_head = select_head
         edit_bone.select_tail = not select_head
         bpy.ops.view3d.snap_selected_to_cursor(use_offset=False)
-        #set roll
+        # set roll
         edit_bone.roll = target_bone.roll
 
-        #snap cursor to head
+        # snap cursor to head
     snap_head(True)
     snap_head(False)
 

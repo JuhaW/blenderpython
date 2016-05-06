@@ -32,33 +32,33 @@ import bpy
 import math
 
 
+def VertDis(a, b):
+    dst = math.sqrt(pow(a.co.x - b.co.x, 2) +
+                    pow(a.co.y - b.co.y, 2) +
+                    pow(a.co.z - b.co.z, 2))
+    return(dst)
 
-def VertDis (a, b):
-    dst = math.sqrt( pow(a.co.x - b.co.x,2) +
-        pow(a.co.y - b.co.y,2) +
-        pow(a.co.z - b.co.z,2) )  
-    return(dst)      
 
 def OscConstellation(limit):
     actobj = bpy.context.object
     vertlist = []
     edgelist = []
     edgei = 0
-    
+
     for ind, verta in enumerate(actobj.data.vertices[:]):
-        for vertb in actobj.data.vertices[ind:]: 
-            if VertDis(verta,vertb) <= limit:
+        for vertb in actobj.data.vertices[ind:]:
+            if VertDis(verta, vertb) <= limit:
                 vertlist.append(verta.co[:])
                 vertlist.append(vertb.co[:])
-                edgelist.append((edgei,edgei+1))
+                edgelist.append((edgei, edgei + 1))
                 edgei += 2
-                
+
     mesh = bpy.data.meshes.new("rsdata")
-    object=bpy.data.objects.new("rsObject",mesh)
+    object = bpy.data.objects.new("rsObject", mesh)
     bpy.context.scene.objects.link(object)
-    mesh.from_pydata(vertlist,edgelist,[])              
-      
-                
+    mesh.from_pydata(vertlist, edgelist, [])
+
+
 class Oscurart_Constellation (bpy.types.Operator):
     bl_idname = "mesh.constellation"
     bl_label = "Constellation"
@@ -69,20 +69,22 @@ class Oscurart_Constellation (bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return(bpy.context.active_object.type == "MESH" ) 
+        return(bpy.context.active_object.type == "MESH")
 
     def execute(self, context):
         OscConstellation(self.limit)
 
         return {'FINISHED'}
-        
+
 # Registration
+
 
 def add_osc_constellation_button(self, context):
     self.layout.operator(
         Oscurart_Constellation.bl_idname,
         text="Constellation",
         icon="PLUGIN")
+
 
 def register():
     bpy.utils.register_class(Oscurart_Constellation)
@@ -95,4 +97,4 @@ def unregister():
 
 
 if __name__ == '__main__':
-    register()        
+    register()

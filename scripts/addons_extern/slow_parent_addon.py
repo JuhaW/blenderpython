@@ -11,7 +11,8 @@ bl_info = {
     "description": "Some buttons to play with recursive slow parenting",
     "category": "Animation"}
 
-import bpy, random
+import bpy
+import random
 
 bpy.types.WindowManager.copies = bpy.props.IntProperty(name='Number', min=1, max=100, default=50, description='Number of copies')
 bpy.types.WindowManager.offset = bpy.props.IntProperty(name='Time Offset', min=1, max=25, default=2, description='Time Offset in frames')
@@ -28,47 +29,50 @@ bpy.types.WindowManager.addRotX = bpy.props.IntProperty(name='RotX', min=-45, ma
 bpy.types.WindowManager.addRotY = bpy.props.IntProperty(name='RotY', min=-45, max=45, default=0, description='add Rotation Y')
 bpy.types.WindowManager.addRotZ = bpy.props.IntProperty(name='RotZ', min=-45, max=45, default=0, description='add Rotation Z')
 
+
 class SlowPanel(bpy.types.Panel):
     bl_label = 'Slow Parenting Tools'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_category = "Animation"
+
     def draw(self, context):
         wm = context.window_manager
         layout = self.layout
         layout.operator('slow.add_kids', icon="ZOOMIN")
         column = layout.column(align=True)
-        column.prop(wm,'copies')
-        column.prop(wm,'offset')
-        column.prop(wm,'size')
+        column.prop(wm, 'copies')
+        column.prop(wm, 'offset')
+        column.prop(wm, 'size')
         column = layout.column(align=True)
-        column.prop(wm,'extra')
+        column.prop(wm, 'extra')
         if wm.extra:
             row = column.row(align=True)
-            row.prop(wm,'addLocX')
-            row.prop(wm,'addRotX')
+            row.prop(wm, 'addLocX')
+            row.prop(wm, 'addRotX')
             row = column.row(align=True)
-            row.prop(wm,'addLocY')
-            row.prop(wm,'addRotY')
+            row.prop(wm, 'addLocY')
+            row.prop(wm, 'addRotY')
             row = column.row(align=True)
-            row.prop(wm,'addLocZ')
-            row.prop(wm,'addRotZ')
+            row.prop(wm, 'addLocZ')
+            row.prop(wm, 'addRotZ')
         column = layout.column(align=True)
         column.operator('slow.add_noise', icon="AUTO")
         box = column.box()
         row = box.row(align=True)
-        row.prop(wm,'loc')
-        row.prop(wm,'rot')
-        row.prop(wm,'sca')
+        row.prop(wm, 'loc')
+        row.prop(wm, 'rot')
+        row.prop(wm, 'sca')
         layout.operator('slow.reset_start', icon="BACK")
         layout.operator('slow.remove_kids', icon="X")
+
 
 class SlowFamily(bpy.types.Operator):
     bl_idname = 'slow.add_kids'
     bl_label = 'Add Child Copies'
     bl_description = 'Creates a trail of copies recursively parented to this object'
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
         scn = bpy.context.scene
         wm = context.window_manager
@@ -76,10 +80,10 @@ class SlowFamily(bpy.types.Operator):
         if z:
             z.select = True
             for i in range(wm.copies):
-                s = 1 + (wm.size-1) / wm.copies * i
+                s = 1 + (wm.size - 1) / wm.copies * i
                 bpy.ops.object.duplicate()
                 b = bpy.context.active_object
-                b.scale = (s,s,s)
+                b.scale = (s, s, s)
                 b.location[0] += wm.addLocX
                 b.location[1] += wm.addLocY
                 b.location[2] += wm.addLocZ
@@ -98,12 +102,13 @@ class SlowFamily(bpy.types.Operator):
             scn.objects.active = z
         return{'FINISHED'}
 
+
 class RemoveKids(bpy.types.Operator):
     bl_idname = 'slow.remove_kids'
     bl_label = 'Clear Copies'
     bl_description = 'Remove all copies parented to this object'
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
         z = bpy.context.object
         if z:
@@ -111,6 +116,7 @@ class RemoveKids(bpy.types.Operator):
             bpy.ops.object.select_grouped(type='CHILDREN_RECURSIVE')
             bpy.ops.object.delete()
         return{'FINISHED'}
+
 
 class ResetStart(bpy.types.Operator):
     bl_idname = 'slow.reset_start'
@@ -124,6 +130,7 @@ class ResetStart(bpy.types.Operator):
             scn.frame_set(scn.frame_start)
         return{'FINISHED'}
 
+
 class AddNoise(bpy.types.Operator):
     bl_idname = 'slow.add_noise'
     bl_label = 'Auto Animation'
@@ -135,44 +142,50 @@ class AddNoise(bpy.types.Operator):
         wm = context.window_manager
 
         if wm.loc:
-            z.delta_location = (0,0,0)
+            z.delta_location = (0, 0, 0)
             z.keyframe_insert('delta_location', frame=1)
-            for c in [c for c in z.animation_data.action.fcurves if c.data_path=='delta_location']:
-                for m in c.modifiers: c.modifiers.remove(m)
+            for c in [c for c in z.animation_data.action.fcurves if c.data_path == 'delta_location']:
+                for m in c.modifiers:
+                    c.modifiers.remove(m)
                 m = c.modifiers.new('NOISE')
-                m.strength, m.scale, m.phase = 25, 50, random.randint(1,999)
+                m.strength, m.scale, m.phase = 25, 50, random.randint(1, 999)
         else:
             try:
                 z.keyframe_delete('delta_location', frame=1)
-                z.delta_location = (0,0,0)
-            except: pass
+                z.delta_location = (0, 0, 0)
+            except:
+                pass
 
         if wm.rot:
-            z.delta_rotation_euler = (0,0,0)
+            z.delta_rotation_euler = (0, 0, 0)
             z.keyframe_insert('delta_rotation_euler', frame=1)
-            for c in [c for c in z.animation_data.action.fcurves if c.data_path=='delta_rotation_euler']:
-                for m in c.modifiers: c.modifiers.remove(m)
+            for c in [c for c in z.animation_data.action.fcurves if c.data_path == 'delta_rotation_euler']:
+                for m in c.modifiers:
+                    c.modifiers.remove(m)
                 m = c.modifiers.new('NOISE')
-                m.strength, m.scale, m.phase = 15, 100, random.randint(1,999)
+                m.strength, m.scale, m.phase = 15, 100, random.randint(1, 999)
         else:
             try:
                 z.keyframe_delete('delta_rotation_euler', frame=1)
-                z.delta_rotation_euler = (0,0,0)
-            except: pass
+                z.delta_rotation_euler = (0, 0, 0)
+            except:
+                pass
 
         if wm.sca:
-            z.delta_scale = (1,1,1)
+            z.delta_scale = (1, 1, 1)
             z.keyframe_insert('delta_scale', frame=1)
-            for c in [c for c in z.animation_data.action.fcurves if c.data_path=='delta_scale']:
-                for m in c.modifiers: c.modifiers.remove(m)
+            for c in [c for c in z.animation_data.action.fcurves if c.data_path == 'delta_scale']:
+                for m in c.modifiers:
+                    c.modifiers.remove(m)
                 m = c.modifiers.new('NOISE')
-                m.strength, m.scale, m.phase = 5, 25, random.randint(1,999)
+                m.strength, m.scale, m.phase = 5, 25, random.randint(1, 999)
         else:
             try:
                 z.keyframe_delete('delta_scale', frame=1)
-                z.delta_scale = (1,1,1)
-            except: pass
-            
+                z.delta_scale = (1, 1, 1)
+            except:
+                pass
+
         return{'FINISHED'}
 
 
@@ -182,6 +195,7 @@ def register():
     bpy.utils.register_class(RemoveKids)
     bpy.utils.register_class(AddNoise)
     bpy.utils.register_class(ResetStart)
+
 
 def unregister():
     bpy.utils.unregister_class(SlowPanel)

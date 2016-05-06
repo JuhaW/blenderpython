@@ -440,7 +440,7 @@ def check_context_operator(context, op_name, km_hierarchy, addon_prefs, context_
     if space_name in km_hierarchy and km_hierarchy[space_name][0] in context_map:
         return True
     if DEBUG:
-        print ("!!! Operator:", op_name, "not available in context", context.area.type)
+        print("!!! Operator:", op_name, "not available in context", context.area.type)
     return False
 
 
@@ -529,7 +529,7 @@ def get_available_keymaps(self, context, search_name=False):
                 continue
             if (keymap_item.map_type in get_input_types() and poll_op(keymap_item.idname)):
                 if DEBUG:
-                    print (">>> Available:", keymap_item.idname)
+                    print(">>> Available:", keymap_item.idname)
                 # Only show the input types selected
                 mod, opname = keymap_item.idname.split(".")
                 idname_c = "{!s}_OT_{!s}".format(mod.upper(), opname)
@@ -554,7 +554,7 @@ def get_available_keymaps(self, context, search_name=False):
                     if hasattr(keymap_item.properties, "name"):
                         c_op = getattr(keymap_item.properties, "name")
                         if DEBUG:
-                            print (keymap_item.idname, c_op)
+                            print(keymap_item.idname, c_op)
                         if not check_context_operator(context, c_op, km_hierarchy, addon_prefs, ['INFO']):
                             continue
                         else:
@@ -615,7 +615,7 @@ def get_available_keymaps(self, context, search_name=False):
                                 prop not in {"bl_rna", "rna_type"}):
                             attr = getattr(keymap_item.properties, prop, False)
                             if DEBUG and attr:
-                                    args_description += "\n{} {} {!r}".format(prop, op_class.bl_rna.properties[prop].type, attr)
+                                args_description += "\n{} {} {!r}".format(prop, op_class.bl_rna.properties[prop].type, attr)
                             # RNA Warning: Current value "0" matches no enum in 'GROUP_OT_objects_remove', '(null)', 'group'
                             # if (op_class.bl_rna.properties[prop].type == 'ENUM' and
                             #        len(op_class.bl_rna.properties[prop].enum_items) == 0):
@@ -714,11 +714,11 @@ def get_available_keymaps(self, context, search_name=False):
                     and function to allow for alternative keys
                     needs to have menu_enum to work correctly
                     """
-                    #if search_name:
+                    # if search_name:
                     #    sort_key = key_combo  # keymap_item.name + keymap_item.type + modifiers
                     #    print('line 610', sort_key)
-                    #else:
-                    sort_key = name + refine # function_call
+                    # else:
+                    sort_key = name + refine  # function_call
                     # key_combo = "[ " + key_combo + " ]"
                     # If there is already a keymap with the same name and
                     # function then add the key as an alternative only.
@@ -934,20 +934,20 @@ class ShowShortcutsPrefs(AddonPreferences):
         box = col.box()
         box.label(text="Display Settings")
         # box.label(text="Preferences")
-        #  box.prop(self, "show_wm")
-        #  box.label(text="Character used to right justify button text.")
-        #  row1= box.row()
-        #  left = row1.split(.8)
-        #  left.label("Maximum 2 characters")
-        #  left.prop(self, "popup_infill", text = "")
+        # box.prop(self, "show_wm")
+        # box.label(text="Character used to right justify button text.")
+        # row1= box.row()
+        # left = row1.split(.8)
+        # left.label("Maximum 2 characters")
+        # left.prop(self, "popup_infill", text = "")
         box.prop(self, "popup_width", slider=True)
-        #  box.prop(self, "popup_height", slider=True)
+        # box.prop(self, "popup_height", slider=True)
         box.prop(self, "popup_columns", slider=True)
         box = col.box()
         box.label(text="Information")
         box.prop(self, "info_width", slider=True)
         box.prop(self, "characters_per_line", slider=True)
-        #box.prop(self, "show_run")
+        # box.prop(self, "show_run")
         box.label(text="Python " + translate_("Tooltip:"))
         box.prop(self, "show_function")
         box = row.box()
@@ -1002,9 +1002,9 @@ class ShowShortcutsPrefs(AddonPreferences):
         row = box.row()
         row.prop(self, "show_animation")
         row.prop(self, "show_markers")
-        #row = box.row()
-        #row.prop(self, "show_frames")
-        #row.prop(self, "grease_pencil")
+        # row = box.row()
+        # row.prop(self, "show_frames")
+        # row.prop(self, "grease_pencil")
         layout.label(text="Current biggest window width is {:} and height is {:}".format(self.window_dim[0], self.window_dim[1]))
 
 
@@ -1013,23 +1013,23 @@ class ShowShortcutsInfo(bpy.types.Operator):
     bl_idname = "screen.shortcut_info"
     bl_label = "Shortcut Information"
     bl_description = "Shortcut Information"
-    #  bl_options={'INTERNAL'}
+    # bl_options={'INTERNAL'}
     show_info_on = bpy.props.StringProperty()
     info = bpy.props.StringProperty()
-    #  bpy.utils.register_class(KeyMapItem)
-    #  from bpy.types import KeyMapItem
-    #  keymap_item =  bpy.props.CollectionProperty(type=bpy.types.KeyMapItem)
+    # bpy.utils.register_class(KeyMapItem)
+    # from bpy.types import KeyMapItem
+    # keymap_item =  bpy.props.CollectionProperty(type=bpy.types.KeyMapItem)
 
     def execute(self, context):
         return {'RUNNING_MODAL'}
 
-#    def execute(self, context):
-#        return context.window_manager.invoke_popup(self, width=get_user_prefs().info_width)
-#        #  return {'RUNNING_MODAL'}
+    # def execute(self, context):
+    #     return context.window_manager.invoke_popup(self, width=get_user_prefs().info_width)
+    #     # return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self, width=get_user_prefs().info_width)
-        #return self.execute(context)
+        # return self.execute(context)
 
     def draw(self, context):
         layout = self.layout
@@ -1107,10 +1107,10 @@ class ShowShortcuts(bpy.types.Operator):
             else:
                 note = "{} shortcuts for {} {}/{}. {:} :)"
                 r.label(note.format(translate_("Active Operator"),
-                        translate_(nice_text(context.space_data.type)),
-                        translate_(nice_text(context.region.type)),
-                        translate_(nice_text(context.mode)),
-                        len(self.key_maps)))
+                                    translate_(nice_text(context.space_data.type)),
+                                    translate_(nice_text(context.region.type)),
+                                    translate_(nice_text(context.mode)),
+                                    len(self.key_maps)))
             draw_list(self)
         else:
             layout.label("{} {} {}.".format(translate_("No Active Action"), nice_text(context.space_data.type), nice_text(context.region.type)))

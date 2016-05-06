@@ -17,7 +17,6 @@
 # END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {
     "name": "Smart Join",
     "author": "Andrej Ivanis",
@@ -29,7 +28,8 @@ bl_info = {
     "wiki_url": "",
     "category": "Tools"}
 
-import bpy, bmesh
+import bpy
+import bmesh
 from bpy.props import *
 from bpy.app.handlers import persistent
 import mathutils
@@ -43,20 +43,21 @@ def add_to_all_visible_layers(obj, scn):
     if sd and type(sd) is bpy.types.SpaceView3D:
         scn.object_bases[obj.name].layers_from_view(bpy.context.space_data)
 
+
 def add_to_loc_view(obj, scn):
     layers = obj.layers[:]
 
-    add_to_all_visible_layers(obj,scn)
+    add_to_all_visible_layers(obj, scn)
     obj.layers = layers
 
-def duplicate_linked(objects, some_visible_obj = None, visible_only = True):
+
+def duplicate_linked(objects, some_visible_obj=None, visible_only=True):
     context = bpy.context
     scn = bpy.context.scene
     # sel = context.selected_objects
     bpy.ops.object.select_all(action='DESELECT')
     # for o in scn.objects:
     #     o.select = False
-
 
     # link all object not in scene and select them
     to_unlink = []
@@ -82,11 +83,9 @@ def duplicate_linked(objects, some_visible_obj = None, visible_only = True):
         add_to_all_visible_layers(o, scn)
     scn.update()
 
-
     bpy.ops.object.duplicate(linked=True)
     for o in objects:
         rehide(o)
-
 
     for o in to_unlink:
         scn.objects.unlink(o)
@@ -98,19 +97,17 @@ def duplicate_linked(objects, some_visible_obj = None, visible_only = True):
     return sel
 
 
-
-
 def unhide_temp(o):
     if o.hide:
         o.hide = False
         o['hide_temp'] = True
+
 
 def rehide(o):
     ht = o.get('hide_temp')
     if ht:
         del o["hide_temp"]
         o.hide = True
-
 
 
 def join_to_mesh(context, mesh, objects, some_visible_obj):
@@ -122,7 +119,7 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
 
     duplicate_linked(objects, some_visible_obj)
 
-    ## make real recursively in case of dupli groups inside dupli groups
+    # make real recursively in case of dupli groups inside dupli groups
     def doop(o):
         return o.dupli_type != 'NONE'
     while any([doop(o) for o in context.selected_objects]):
@@ -151,7 +148,7 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
         if len(m.materials) == 0:
             m.materials.append(None)
 
-        objcpy = bpy.data.objects.new('copy', object_data = m)
+        objcpy = bpy.data.objects.new('copy', object_data=m)
         scn.objects.link(objcpy)
         objcpy.layers = some_visible_obj.layers
         add_to_loc_view(objcpy, scn)
@@ -160,14 +157,11 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
         newObjs.append(objcpy)
         old_objs.append(obj)
 
-
-
     # set all the sharp angles from autosmooth
     for i, new_mesh in enumerate(applied_meshes):
         o = old_objs[i]
         if o.type != 'MESH':
             continue
-
 
         # make unique UVMap
         # TODO: I won't ever need this probably, but I should keep other maps
@@ -186,16 +180,11 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
 
         correct_normals(new_mesh, o.scale)
 
-
-
-
         if not o.data.use_auto_smooth or (o.data.use_auto_smooth and o.data.auto_smooth_angle == 180) or o.data.is_sjoin:
             pass
         else:
-            #looks like o.data.auto_smooth_angle is in radians although displayed in degrees in GUI
+            # looks like o.data.auto_smooth_angle is in radians although displayed in degrees in GUI
             correct_somoothing(new_mesh, o.data.auto_smooth_angle)
-
-
 
     # delete copied objects and select duplicate ones
     bpy.ops.object.delete(use_global=False)
@@ -203,19 +192,18 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
     for o in newObjs:
         o.select = True
 
-
-    ### clear the mesh geometry
+    # clear the mesh geometry
     # clear_mesh(mesh)
 
-    ## autosmooth on (might not always help)
+    # autosmooth on (might not always help)
     mesh.use_auto_smooth = True
     mesh.auto_smooth_angle = 180
 
-    #create new join object with given mesh
-    j_obj = bpy.data.objects.new(name = 'temp_obj', object_data= mesh)
+    # create new join object with given mesh
+    j_obj = bpy.data.objects.new(name='temp_obj', object_data=mesh)
 
     j_obj.select = True
-    j_obj.location = (0,0,0)
+    j_obj.location = (0, 0, 0)
     j_obj.layers = [True] * 20
     scn.objects.link(j_obj)
     # without this local view won't work
@@ -224,7 +212,7 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
 
     scn.objects.active = j_obj
 
-    ### join to mesh and delete objects if any left
+    # join to mesh and delete objects if any left
     bpy.ops.object.join()
 
     # for o in newObjs:
@@ -237,10 +225,9 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
         if m.users == 0:
             bpy.data.meshes.remove(m)
 
-
     # delete the joined object
     #  it looks like removing the object deletes materials of j_obj.data??? so I make a dummy mesh as a workaround
-    bug_fix = bpy.data.meshes.new(name = 'bug_fix')
+    bug_fix = bpy.data.meshes.new(name='bug_fix')
     j_obj.data = bug_fix
     for o in bpy.context.selected_objects[:]:
         scn.objects.unlink(o)
@@ -249,7 +236,7 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
 
     bpy.data.meshes.remove(bug_fix)
 
-    ## get old selection
+    # get old selection
     for o in sel:
         o.select = True
     scn.objects.active = act
@@ -281,8 +268,6 @@ def correct_normals(mesh, scale):
         bm.free()
 
 
-
-
 def correct_somoothing(mesh, angle):
     bm = bmesh.new()   # create an empty BMesh
     bm.from_mesh(mesh)   # fill it in from a Mesh
@@ -292,6 +277,7 @@ def correct_somoothing(mesh, angle):
     # Finish up, write the bmesh back to the mesh
     bm.to_mesh(mesh)
     bm.free()
+
 
 def bmesh_correct_somoothing(bm, angle):
 
@@ -303,11 +289,6 @@ def bmesh_correct_somoothing(bm, angle):
                 e.smooth = False
 
 
-
-
-
-
-
 ######## CORE ######################
 
 def get_sjmesh(name):
@@ -316,10 +297,12 @@ def get_sjmesh(name):
         return mesh
     return None
 
+
 def get_stored_sjobjects_unsafe(sj_mesh_name):
     return [o for o in bpy.data.objects if o.sjoin_mesh == sj_mesh_name]
 
-def check_fix_rename(sj_mesh, sj_obj = None, scn = None):
+
+def check_fix_rename(sj_mesh, sj_obj=None, scn=None):
 
     # sjoin check performed by update object
 
@@ -330,7 +313,6 @@ def check_fix_rename(sj_mesh, sj_obj = None, scn = None):
         for o in objs:
             o.sjoin_mesh = ''
             o.fake_user = False
-
 
         # mesh is renamed or duplicated, see if there is old mesh with this name to determine
         old_mesh = get_sjmesh(sj_mesh.sjoin_link_name)
@@ -380,8 +362,10 @@ def check_is_sjoin_obj(obj):
 def check_is_expended(obj):
     return check_is_sjoin_obj(obj) and obj.data.expanded_obj == obj.name
 
+
 def check_is_there_expended_obj(mesh):
     return mesh.expanded_obj != ''
+
 
 def get_stored_sjobjects(sj_mesh):
     # check_fix_rename(sj_mesh)
@@ -390,6 +374,7 @@ def get_stored_sjobjects(sj_mesh):
 import mathutils
 
 # def collect_children_no_clear
+
 
 def get_dependent_meshes(data):
     dep = []
@@ -418,14 +403,17 @@ def update_meshes_rec_co(meshes, c):
         update_stored(mesh)
         next_dep += get_dependent_meshes(mesh)
 
-    update_meshes_rec_co(next_dep, c+1)
+    update_meshes_rec_co(next_dep, c + 1)
+
 
 def update_meshes_rec(meshes):
     update_meshes_rec_co(meshes, 0)
 
+
 def update_data_rec(data):
     mashes = get_dependent_meshes(data)
     update_meshes_rec(mashes)
+
 
 def collect_children_unsafe(obj, scn):
     if not obj:
@@ -434,9 +422,7 @@ def collect_children_unsafe(obj, scn):
     clear_mesh(obj.data)
     all_ch = get_all_children(obj)
 
-
     obj.data.sjoin_link_name = obj.data.name
-
 
     for ch in all_ch:
         # unlink_store(ch, obj.data)
@@ -460,11 +446,13 @@ def get_leaf_children(obj):
     else:
         return [x for o in obj.children for x in get_leaf_children(o)]
 
+
 def get_all_children(obj):
     if len(obj.children) == 0:
         return []
     else:
         return list(obj.children) + [x for o in obj.children for x in get_leaf_children(o)]
+
 
 def get_children_hierarchically(obj_list):
     if not obj_list:
@@ -474,11 +462,12 @@ def get_children_hierarchically(obj_list):
     for obj in obj_list:
         next_level += list(obj.children)
 
-
     return get_children_hierarchically(next_level) + obj_list
+
 
 def get_expanded_obj(sj_mesh):
     return bpy.data.objects.get(sj_mesh.expanded_obj)
+
 
 def collapse_expanded(sj_mesh):
     obj = get_expanded_obj(sj_mesh)
@@ -502,19 +491,19 @@ def collect_children(obj, scn):
         if check_is_expended(ch):
             collect_children_unsafe(ch, scn)
 
-
     update_lock = False
-
 
 
 def set_object_expended(j_obj):
     j_obj.data.expanded_obj = j_obj.name
     j_obj.draw_type = 'BOUNDS'
 
+
 def set_object_collapsed(j_obj):
     if j_obj.data.expanded_obj == j_obj.name:
         j_obj.data.expanded_obj = ''
     j_obj.draw_type = 'TEXTURED'
+
 
 def expand_objects(j_obj, scn):
     if j_obj is None:
@@ -525,7 +514,6 @@ def expand_objects(j_obj, scn):
 
     # if there is expended collapse it
     collapse_expanded(j_obj.data)
-
 
     # set current to expended
     set_object_expended(j_obj)
@@ -543,7 +531,6 @@ def expand_objects(j_obj, scn):
     update_lock = False
 
 
-
 def unlink_store(obj, sjoin_mesh):
     obj.use_fake_user = True
     obj.sjoin_mesh = sjoin_mesh.name
@@ -552,6 +539,7 @@ def unlink_store(obj, sjoin_mesh):
 
     for s in obj.users_scene[:]:
         s.objects.unlink(obj)
+
 
 def link_stored(obj, sjoin_object, scn):
     if obj.name not in scn.objects:
@@ -580,6 +568,8 @@ from bpy.app.handlers import persistent
 
 # looks like scene_update will be called by every operator in join_to_mesh update so I need to lock it
 update_lock = False
+
+
 @persistent
 def scene_update(scene):
     # disable edit mode for sjoin objects
@@ -622,6 +612,7 @@ def object_update(obj, scn):
         # recursive update could be added here but it might be slow for large scenes
         # update_lock = False
 
+
 @persistent
 def before_save(dummy):
     # don't save any meshes that have fake user because of sjoin if sjoin is deleted or has 0 users
@@ -635,8 +626,6 @@ def before_save(dummy):
                 o.use_fake_user = sjoin.users != 0
 
 
-
-
 ######## GUI #########################
 
 class ExpandSjoin(bpy.types.Operator):
@@ -644,7 +633,6 @@ class ExpandSjoin(bpy.types.Operator):
     bl_idname = "sjoin.expand"
     bl_label = "Expand Smart Join"
     bl_options = {'REGISTER', 'UNDO'}
-
 
     @classmethod
     def poll(cls, context):
@@ -684,7 +672,6 @@ class CollapseSjoin(bpy.types.Operator):
     bl_label = "Collapse Smart Join"
     bl_options = {'REGISTER', 'UNDO'}
 
-
     @classmethod
     def poll(cls, context):
         ao = context.active_object
@@ -704,6 +691,7 @@ class CollapseSjoin(bpy.types.Operator):
         scn.objects.active = obj
         return {'FINISHED'}
 
+
 class SJoinObjects(bpy.types.Operator):
     """Add To Smart Join"""
     bl_idname = "sjoin.join_add"
@@ -719,11 +707,7 @@ class SJoinObjects(bpy.types.Operator):
         scn = context.scene
         update_lock = True
 
-
         active = context.active_object
-
-
-
 
         # if active is sjoin add others to it
         # TODO: make it work, currently poll is limeted so this isn't called
@@ -756,7 +740,7 @@ class SJoinObjects(bpy.types.Operator):
         active.parent = highest.parent
         '''
 
-        #parerent the selection and merge it
+        # parerent the selection and merge it
         for o in selected:
             if o.parent not in selected:
                 parent_keep_tr(o, active, scn)
@@ -765,7 +749,6 @@ class SJoinObjects(bpy.types.Operator):
         if not check_is_expended(active):
             expand_objects(active, context.scene)
             collect_children(active, scn)
-
 
         update_lock = False
         active.select = True
@@ -780,13 +763,11 @@ def parent_keep_tr(obj, parent, scn):
     obj.matrix_world = w
 
 
-
 class SJoinObjects(bpy.types.Operator):
     """Smart Join"""
     bl_idname = "sjoin.join"
     bl_label = "Smart Join"
     bl_options = {'REGISTER', 'UNDO'}
-
 
     origin_at_cursor = BoolProperty(default=False, name="Origin At Cursor")
 
@@ -796,7 +777,6 @@ class SJoinObjects(bpy.types.Operator):
 
     def execute(self, context):
         update_lock = True
-
 
         active = context.active_object
         selected = context.selected_objects[:]
@@ -809,9 +789,9 @@ class SJoinObjects(bpy.types.Operator):
 
         # create new s_join mesh at the position of active object
         name = active.name + '_sj'
-        j_mesh = bpy.data.meshes.new(name = name)
+        j_mesh = bpy.data.meshes.new(name=name)
         j_mesh.is_sjoin = True
-        j_obj = bpy.data.objects.new(name = name, object_data= j_mesh)
+        j_obj = bpy.data.objects.new(name=name, object_data=j_mesh)
         scn.objects.link(j_obj)
         j_obj.parent = highest.parent
         if self.origin_at_cursor:
@@ -826,8 +806,7 @@ class SJoinObjects(bpy.types.Operator):
         scn.objects.active = j_obj
         set_object_expended(j_obj)
 
-
-        #parerent the selection and merge it
+        # parerent the selection and merge it
         for o in selected:
             if o.parent not in selected:
                 parent_keep_tr(o, j_obj, scn)
@@ -836,7 +815,6 @@ class SJoinObjects(bpy.types.Operator):
 
         collect_children(j_obj, scn)
         update_lock = False
-
 
         return {'FINISHED'}
 
@@ -852,7 +830,7 @@ class SeparateObjects(bpy.types.Operator):
         return bpy.ops.sjoin.expand.poll()
 
     def execute(self, context):
-        #TODO this needs to duplicate objects!!!
+        # TODO this needs to duplicate objects!!!
         active = context.active_object
         data = active.data
         # bpy.ops.sjoin.collapse()
@@ -880,7 +858,7 @@ class UpdateRec(bpy.types.Operator):
         return context.active_object
 
     def execute(self, context):
-        #TODO this needs to duplicate objects!!!
+        # TODO this needs to duplicate objects!!!
         for o in context.selected_objects:
             if o.data:
                 update_data_rec(o.data)
@@ -902,7 +880,7 @@ class ApplySJ(bpy.types.Operator):
         return {'FINISHED'}
 
 """
-class SJ_BasePanel(bpy.types.Panel):   
+class SJ_BasePanel(bpy.types.Panel):
     bl_label = "Smart Join"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
@@ -926,53 +904,51 @@ class SJ_BasePanel(bpy.types.Panel):
         row.operator('sjoin.collapse')
         layout.operator('sjoin.update_rec')
         layout.operator('sjoin.apply')
-"""        
+"""
+
 
 class SCULPTOpsMenu(bpy.types.Menu):
     """Smart Join Menu"""
     bl_label = "Smart Join Menu"
     bl_idname = "group.smartjoin_menu"
-    
+
     def draw(self, context):
         layout = self.layout
-        layout.operator_context = 'INVOKE_REGION_WIN'          
+        layout.operator_context = 'INVOKE_REGION_WIN'
 
         layout.operator('sjoin.join', "SmartJoin", icon="LOCKVIEW_ON")
         layout.operator('sjoin.separate', "Separate All", icon="LOCKVIEW_OFF")
 
-        layout.separator()  
+        layout.separator()
 
         layout.operator('sjoin.join_add', "Add to Smart", icon="PASTEFLIPUP")
 
-        layout.separator()  
+        layout.separator()
 
         layout.operator('sjoin.expand', "Expand Join", icon="PASTEDOWN")
-        layout.operator('sjoin.collapse', "Collapse Join", icon="COPYDOWN")    
+        layout.operator('sjoin.collapse', "Collapse Join", icon="COPYDOWN")
 
-        layout.separator()  
+        layout.separator()
 
         layout.operator('sjoin.update_rec', "Update", icon="LOAD_FACTORY")
-        
+
 ########################################################################################################
 # define classes for registration
-classes = [ExpandSjoin, SJoinObjects, SeparateObjects, UpdateRec, ApplySJ]    
+classes = [ExpandSjoin, SJoinObjects, SeparateObjects, UpdateRec, ApplySJ]
 
 
 def register():
     for c in classes:
         bpy.utils.register_class(c)
 
-
     bpy.utils.register_module(__name__)
     bpy.types.Mesh.is_sjoin = BoolProperty(default=False)
 
     bpy.types.Mesh.sjoin_link_name = StringProperty()
     bpy.types.Mesh.expanded_obj = StringProperty()
-    bpy.types.Object.sjoin_mesh = StringProperty(default = '')
+    bpy.types.Object.sjoin_mesh = StringProperty(default='')
     bpy.app.handlers.scene_update_post.append(scene_update)
     bpy.app.handlers.save_pre.append(before_save)
-
-    
 
 
 def unregister():
@@ -986,8 +962,5 @@ def unregister():
     bpy.utils.unregister_module(__name__)
 
 
-
 if __name__ == "__main__":
     register()
-
-

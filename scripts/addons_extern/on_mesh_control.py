@@ -1,4 +1,4 @@
-# Autor - Vladimir Pylev
+# Author - Vladimir Pylev
 # email - volodya.renderberg@gmail.com
 # blog - http://clinicalfilm.blogspot.ru
 # G+  - https://plus.google.com/u/0/115111937084055806830
@@ -75,16 +75,16 @@ class G(object):
         (0, 0, 1),
         (0, k, k),
         (0, 1, 0),
-        )
+    )
 
     def createMesh(self, name, verts, origin=(0, 0, 0), edges = [], faces = []):
         if not edges:
             for i in range(0, (len(verts) - 1)):
-                edges.append((i, i+1))
+                edges.append((i, i + 1))
             edges = tuple(edges)
 
         # Create mesh and object
-        me = bpy.data.meshes.new(name+'Mesh')
+        me = bpy.data.meshes.new(name + 'Mesh')
         ob = bpy.data.objects.new(name, me)
         ob.location = origin
         ob.show_name = True
@@ -621,7 +621,7 @@ def make_control(context, name, size, radius, vtx_index=False, armature=False):
     vertex_grp = ob.vertex_groups.new(connect_grp_name)
     vertex_grp.add([vertex.index], 1.0, 'REPLACE')
     # -- location constraint
-    #root_pose = armature.pose.bones[root_bone_name]
+    # root_pose = armature.pose.bones[root_bone_name]
     cns = root_pose.constraints.new('COPY_LOCATION')
     cns.target_space = 'WORLD'
     cns.owner_space = 'WORLD'
@@ -742,15 +742,15 @@ def make_control(context, name, size, radius, vtx_index=False, armature=False):
     for v in ob.data.vertices:
         r = radius * 0.05
         k = 20
-        dist = ((v.co[0] - empty_pos[0])**2 + (v.co[1] - empty_pos[1])**2 + (v.co[2] - empty_pos[2])**2)**0.5
+        dist = ((v.co[0] - empty_pos[0]) ** 2 + (v.co[1] - empty_pos[1]) ** 2 + (v.co[2] - empty_pos[2]) ** 2) ** 0.5
         if dist > (r * k):
             vtx_grp.add([v.index], 0.0, 'REPLACE')
         elif dist < r:
             vtx_grp.add([v.index], 1.0, 'REPLACE')
         else:
             a = r
-            b = r*k
-            weight = 1 - (a-dist)/(a-b)
+            b = r * k
+            weight = 1 - (a - dist) / (a - b)
             vtx_grp.add([v.index], weight, 'REPLACE')
     # -- make Hook
     bpy.context.scene.objects.active = ob
@@ -848,15 +848,15 @@ def edit_radius_of_influence(context, radius):
     for v in ob.data.vertices:
         r = radius * 0.05
         k = 20
-        dist = ((v.co[0] - empty_pos[0])**2 + (v.co[1] - empty_pos[1])**2 + (v.co[2] - empty_pos[2])**2)**0.5
+        dist = ((v.co[0] - empty_pos[0]) ** 2 + (v.co[1] - empty_pos[1]) ** 2 + (v.co[2] - empty_pos[2]) ** 2) ** 0.5
         if dist > (r * k):
             vtx_grp.add([v.index], 0.0, 'REPLACE')
         elif dist < r:
             vtx_grp.add([v.index], 1.0, 'REPLACE')
         else:
             a = r
-            b = r*k
-            weight = 1 - (a-dist)/(a-b)
+            b = r * k
+            weight = 1 - (a - dist) / (a - b)
             vtx_grp.add([v.index], weight, 'REPLACE')
 
     return(True, 'Ok!')
@@ -1003,7 +1003,7 @@ def mirror_control(context):
     m_co = (-v.co[0], v.co[1], v.co[2])
 
     # -- get near mirror vertex
-    dist = abs(v.co[0])*2
+    dist = abs(v.co[0]) * 2
     m_v = v
     for vtx in mesh.data.vertices:
         # d = ((vtx.co[0] - m_co[0])**2 + (vtx.co[1] - m_co[1])**2 + (vtx.co[2] - m_co[2])**2)**0.5
@@ -1098,18 +1098,18 @@ def get_dist(co1, co2):
 
 
 classes = [
-    'ONMESH_main_panel',
-    'ONMESH_run_to_group_panel',
-    'ONMESH_to_armatures_panel',
-    'ONMESH_make_control',
-    'ONMESH_to_paint_weight',
-    'ONMESH_edit_radius_of_influence',
-    'ONMESH_to_group_panel',
-    'ONMESH_append_to_group',
-    'ONMESH_mirror_control',
-    'ONMESH_mirror_weight_of_control',
-    'ONMESH_create_to_selected_armatures',
-    'ONMESH_help'
+    ONMESH_main_panel,
+    ONMESH_run_to_group_panel,
+    ONMESH_to_armatures_panel,
+    ONMESH_make_control,
+    ONMESH_to_paint_weight,
+    ONMESH_edit_radius_of_influence,
+    ONMESH_to_group_panel,
+    ONMESH_append_to_group,
+    ONMESH_mirror_control,
+    ONMESH_mirror_weight_of_control,
+    ONMESH_create_to_selected_armatures,
+    ONMESH_help
 ]
 
 

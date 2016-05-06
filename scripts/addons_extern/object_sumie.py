@@ -10,41 +10,42 @@ bl_info = {
     "category": "Object"}
 
 
-
 offset = 0.06
-diffuse = (0.02,0.002,0.002)
+diffuse = (0.02, 0.002, 0.002)
+
+
 def sumie():
     ob = bpy.context.active_object
-    #new object
-    bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'})
-    #new modiyies
+    # new object
+    bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked": False, "mode": 'TRANSLATION'})
+    # new modiyies
     bpy.ops.object.modifier_add(type='SHRINKWRAP')
     bpy.context.object.modifiers["Shrinkwrap"].offset = offset
     bpy.context.object.modifiers["Shrinkwrap"].use_keep_above_surface = True
     bpy.context.object.modifiers["Shrinkwrap"].target = ob
-    
+
     new_name = ob.name + '.sumie'
     ob = bpy.context.active_object
     ob.name = new_name
     ob.data.name = ob.name
-    
+
     normal_inside(True)
 
-    
     mat = sumie_mat()
     mesh = ob.data
     while len(mesh.materials):
         mesh.materials.pop()
     mesh.materials.append(mat)
-    #show effect
+    # show effect
     bpy.context.space_data.show_backface_culling = True
+
 
 def sumie_mat():
     if bpy.data.materials.get('sumie'):
         mat = bpy.data.materials.get('sumie')
 
     else:
-        #new mat
+        # new mat
         mat = bpy.data.materials.new("sumie")
 
         mat.use_nodes = True
@@ -56,33 +57,34 @@ def sumie_mat():
         mat.use_shadows = False
         mat.use_ray_shadow_bias = False
         mat.use_mist = False
-        #diffuse on back side
+        # diffuse on back side
         mat.translucency = 1
         mat.diffuse_color = diffuse
-        #add node to tree
+        # add node to tree
         tree = mat.node_tree
         links = tree.links
         # clear default nodes
         for n in tree.nodes:
             tree.nodes.remove(n)
         geom_node = tree.nodes.new('ShaderNodeGeometry')
-        
+
         mat_node = tree.nodes.new('ShaderNodeMaterial')
-        mat_node.location = 0,400
+        mat_node.location = 0, 400
         mat_node.material = mat
         mat_node.use_specular = False
-        
+
         output_node = tree.nodes.new('ShaderNodeOutput')
-        output_node.location = 300,0
-        
+        output_node.location = 300, 0
+
         links.new(geom_node.outputs[8], output_node.inputs[1])
-        links.new(mat_node.outputs[0],output_node.inputs[0])
+        links.new(mat_node.outputs[0], output_node.inputs[0])
     return mat
 
+
 def normal_inside(inside=False):
-    #recalculate normals
+    # recalculate normals
     bpy.ops.object.editmode_toggle()
-    #for some hide mesh
+    # for some hide mesh
     bpy.ops.mesh.reveal()
     bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.mesh.normals_make_consistent(inside=inside)
@@ -116,10 +118,11 @@ class Sumie(bpy.types.Operator):
     def poll(cls, context):
         obj = context.active_object
         return (obj and obj.type == 'MESH')
-        
+
     def execute(self, context):
         sumie()
         return {'FINISHED'}
+
 
 class NormalInsdie(bpy.types.Operator):
     bl_idname = 'mesh.normals_outside'
@@ -130,11 +133,10 @@ class NormalInsdie(bpy.types.Operator):
     def poll(cls, context):
         obj = context.active_object
         return (obj and obj.type == 'MESH')
-        
+
     def execute(self, context):
         normal_inside(False)
         return {'FINISHED'}
-        
 
 
 def menu_func(self, context):
@@ -146,7 +148,9 @@ def register():
     bpy.types.VIEW3D_MT_object_specials.append(menu_func)
 
 
-
 def unregister():
     bpy.utils.unregister_module(__name__)
     bpy.types.VIEW3D_MT_object_specials.remove(menu_func)
+
+if __name__ == "__main__":
+    register()

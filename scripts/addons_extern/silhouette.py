@@ -78,7 +78,7 @@ bpy.app.handlers.render_post.append(render_end_handler)
 def split_formula(txt):
     # for example:
     # Resolution #bpy.data.scenes[bpy.context.scene.name].render.resolution_x#
-    #  by #bpy.data.scenes[bpy.context.scene.name].render.resolution_y#
+    # by #bpy.data.scenes[bpy.context.scene.name].render.resolution_y#
     while txt.find("#") > -1:
         idx = txt.index("#")
         initial = txt[0:idx]

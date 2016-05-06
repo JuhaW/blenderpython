@@ -98,6 +98,8 @@ LMT = [('ASC', 'Active Scene', 'Active Scene'),
        ('AOB', 'Active Object', 'Active Object')]
 
 # Driver Tools PropertyGroup
+
+
 class DT_props(bpy.types.PropertyGroup):
     limit = bpy.props.EnumProperty(items=LMT, name="Limit", description="Limit operator to active Scene or Object.", default='ASC')
     didtr = bpy.props.EnumProperty(items=IDT, name="Driver Target ID Type", default='OBJECT')
@@ -108,6 +110,7 @@ class DT_props(bpy.types.PropertyGroup):
 
 # ----------------------------------------------------------------
 # Replace Driver Targets
+
 
 def op_rdt(self, context):
 
@@ -121,7 +124,7 @@ def op_rdt(self, context):
         if hasattr(context.scene, 'animation_data'):                   # ad check
             AD_dir.append(context.scene.animation_data)                # ad scene
         for ob in context.scene.objects:                               # loop obs
-            #print(ob)                                                 # debug
+            # print(ob)                                                 # debug
             if hasattr(ob, 'animation_data'):                          # ad check
                 AD_dir.append(ob.animation_data)                       # ad object
             if hasattr(ob.data, 'animation_data'):                     # ad check
@@ -210,25 +213,26 @@ def op_rdt(self, context):
                     for d in ad.drivers:
                         for dv in d.driver.variables:
                             for dt in dv.targets:
-                                dvs+=1                                       # targets processed count
+                                dvs += 1                                       # targets processed count
                                 if dt.id_type == didtr and dt.id == didr:    # compare IDT and ID
                                     dt.id = didw                             # replace ID
-                                    dvr+=1                                   # targets replaced count
+                                    dvr += 1                                   # targets replaced count
                                     print("")
-                                    print("Replaced Driver Target: "+str(d.id_data))
-                                    print(str(d.data_path)+": "+str(d.array_index))
+                                    print("Replaced Driver Target: " + str(d.id_data))
+                                    print(str(d.data_path) + ": " + str(d.array_index))
 
             print("")
-            self.report({"INFO"},"Replaced "+str(dvr)+" of "+str(dvs)+" driver targets. See console for more info.")
+            self.report({"INFO"}, "Replaced " + str(dvr) + " of " + str(dvs) + " driver targets. See console for more info.")
 
     # ----------------------------------------------------------------
+
 
 class OT_RDT(bpy.types.Operator):
     """Replace Driver Target ID's"""
     bl_idname = "scene.replace_driver_targets"
     bl_label = "Replace Driver Targets"
     bl_options = {'REGISTER', 'UNDO'}
-    #bl_options = {'REGISTER', 'UNDO', 'PRESET'}
+    # bl_options = {'REGISTER', 'UNDO', 'PRESET'}
 
     @classmethod
     def poll(cls, context):
@@ -242,6 +246,7 @@ class OT_RDT(bpy.types.Operator):
 
 # ----------------------------------------------------------------
 # Panel
+
 
 class PT_RDT(bpy.types.Panel):
 
@@ -292,11 +297,13 @@ class PT_RDT(bpy.types.Panel):
 # ----------------------------------------------------------------
 # Register
 
+
 def register():
     bpy.utils.register_class(DT_props)
     bpy.types.Scene.DT = bpy.props.PointerProperty(type=DT_props)
     bpy.utils.register_class(OT_RDT)
     bpy.utils.register_class(PT_RDT)
+
 
 def unregister():
     bpy.utils.unregister_class(PT_RDT)
@@ -308,4 +315,3 @@ if __name__ == "__main__":
     register()
 
 # ----------------------------------------------------------------
-

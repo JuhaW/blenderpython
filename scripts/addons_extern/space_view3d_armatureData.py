@@ -22,8 +22,8 @@ bl_info = {'name': 'Armature Data Panel',
            'blender': (2, 66, 0),
            'location': '3D View > Properties Panel',
            'warning': 'Work in Progress',
-           #'wiki_url': '',
-           #'tracker_url': '',
+           # 'wiki_url': '',
+           # 'tracker_url': '',
            'description': "Quickly access many of the most commonly used armatu"
                           "re options within the 3D View",
            'category': 'Rigging'}
@@ -115,17 +115,18 @@ import bpy
 #
 # ##### END VERSION BLOCK #####
 
-  # PEP8 Compliant
+# PEP8 Compliant
 
 ###############
 ## OPERATORS ##
 ###############
-  # Imports
+# Imports
 from bpy.types import Operator
 from mathutils import Matrix
 
+# Custom Shape to Bone (OT)
 
-  # Custom Shape to Bone (OT)
+
 class POSE_OT_custom_shape_to_bone(Operator):
     """
     Align currently assigned custom bone shape on a visible scene layer to
@@ -146,7 +147,7 @@ class POSE_OT_custom_shape_to_bone(Operator):
     def execute(self, context):
         """ Execute the operator. """
         useGlobalUndo = context.user_preferences.edit.use_global_undo
-       
+
         try:
             context.user_preferences.edit.use_global_undo = False
             customShapeToBone = bpy.context.window_manager.customShapeToBoneUI
@@ -190,17 +191,17 @@ class POSE_OT_custom_shape_to_bone(Operator):
 
             if customShapeToBone.nameCustomShape:
                 customShapeName = activeBone.name
-                
+
                 if customShapeToBone.addArmatureName:
-                   customShapeName = (activeArmature.name +
-                                      customShapeToBone.separateName +
-                                      customShapeName)
+                    customShapeName = (activeArmature.name +
+                                       customShapeToBone.separateName +
+                                       customShapeName)
                 else:
                     pass
-                
+
                 customShape.name = (customShapeToBone.prefixShapeName +
-                                    customShapeName)        
-                
+                                    customShapeName)
+
                 if customShapeToBone.prefixShapeDataName:
                     customShape.data.name = (customShapeToBone.prefixShapeName +
                                              customShapeName)
@@ -212,25 +213,26 @@ class POSE_OT_custom_shape_to_bone(Operator):
             self.report({'WARNING'}, "Must assign a custom bone shape!")
         finally:
             context.user_preferences.edit.use_global_undo = useGlobalUndo
-        
+
         return {'FINISHED'}
 
-###############
-## INTERFACE ##
-###############
-  # Imports
+#############
+# INTERFACE #
+#############
+# Imports
 from bpy.types import PropertyGroup, Panel
 from bpy.props import *
 
+# Armature Data PropertyGroup
 
-  # Armature Data PropertyGroup
+
 class armatureData(PropertyGroup):
     """
     UI property group for the add-on "Armature Data Panel & Custom Bone Shapes"
     (space_view3d_armatureData.py)
-    
+
     Options to adjust how the panel is displayed.
-    
+
     bpy > types > WindowManager > armatureDataUI
     bpy > context > window_manager > armatureDataUI
     """
@@ -241,19 +243,19 @@ class armatureData(PropertyGroup):
     deformOptions = BoolProperty(name='Deform Options', description="Display th"
                                  "e deform options for this bone.",
                                  default=False)
-    shapeToBoneOptions = BoolProperty(name='Shape to Bone Options', description=
-                                      "Display additional options for the custo"
+    shapeToBoneOptions = BoolProperty(name='Shape to Bone Options', description="Display additional options for the custo"
                                       "m shape to bone operator.",
                                       default=False)
-                                
+
+
 class customShapeToBone(PropertyGroup):
     """
     UI property group for the add-on "Armature Data Panel & Custom Bone Shapes"
     (space_view3d_armatureData.py)
-    
+
     Parameters for the custom shape to bone operator that effect how it will
     behave.
-    
+
     bpy > types > WindowManager > customShapeToBone
     bpy > context > window_manager > customShapeToBone
     """
@@ -279,15 +281,15 @@ class customShapeToBone(PropertyGroup):
                                        "g the custom shapes name.",
                                        default=False)
     addArmatureName = BoolProperty(name='Include Armature Name', description="I"
-                                  "nclude the armature name when renaming the c"
-                                  "ustom shape.", default=False)
+                                   "nclude the armature name when renaming the c"
+                                   "ustom shape.", default=False)
     separateName = StringProperty(name='Separator', description="Separate the n"
                                   "ame of the armature and the name of the bone"
                                   " with this character.", default='_')
-    
-    
 
   # Armature Data (PT)
+
+
 class VIEW3D_PT_armature_data(Panel):  # TODO: Account for linked armatures.
     """ Armatur Data Panel. """
     bl_space_type = 'VIEW_3D'
@@ -310,7 +312,7 @@ class VIEW3D_PT_armature_data(Panel):  # TODO: Account for linked armatures.
         """ Armature data panel body. """
         layout = self.layout
         column = layout.column(align=True)
-        
+
         armatureData = context.window_manager.armatureDataUI
         customShapeToBone = context.window_manager.customShapeToBoneUI
 
@@ -318,7 +320,7 @@ class VIEW3D_PT_armature_data(Panel):  # TODO: Account for linked armatures.
         activeBone = context.active_bone
         activePoseBone = activeArmature.pose.bones[activeBone.name]
 
-  # Armature Options
+        # Armature Options
         if context.mode in 'POSE':
             row = column.row()
             row.prop(activeArmature.data, 'pose_position', expand=True)
@@ -357,7 +359,7 @@ class VIEW3D_PT_armature_data(Panel):  # TODO: Account for linked armatures.
         else:
             pass
 
-  # Bone Options
+        # Bone Options
         if not armatureData.displayMode:
             column = layout.column(align=True)
             column.prop(activeBone, 'layers', text="")
@@ -392,7 +394,7 @@ class VIEW3D_PT_armature_data(Panel):  # TODO: Account for linked armatures.
                 pass
 
             column = layout.column(align=True)
-            
+
             row = column.row()
             row.scale_y = 1.25
             if armatureData.deformOptions:
@@ -404,49 +406,49 @@ class VIEW3D_PT_armature_data(Panel):  # TODO: Account for linked armatures.
             if armatureData.deformOptions:
                 box = layout.column(align=True).box().column(align=True)
                 box.enabled = activeBone.use_deform
-                
-#                box = box.column(align=True)
-#                box.label(text="Envelope:")
-                
+
+                # box = box.column(align=True)
+                # box.label(text="Envelope:")
+
                 box = box.column(align=True)
                 box.prop(activeBone, 'envelope_distance', text="Distance")
-                
+
                 box = box.column(align=True)
                 box.prop(activeBone, 'envelope_weight', text="Weight")
-                
+
                 box = box.column(align=True)
                 box.prop(activeBone, 'use_envelope_multiply', text="Multiply",
                          toggle=True)
-                         
-#                box = box.column(align=True)
-#                box.label(text="Radius:")
-                
+
+                # box = box.column(align=True)
+                # box.label(text="Radius:")
+
                 box.separator()
-                
+
                 box = box.column(align=True)
                 box.prop(activeBone, 'head_radius', text="Head")
-                
+
                 box = box.column(align=True)
                 box.prop(activeBone, 'tail_radius', text="tail")
-                
-#                box = box.column(align=True)
-#                box.label(text="Curved Bones:")
-                
+
+                # box = box.column(align=True)
+                # box.label(text="Curved Bones:")
+
                 box.separator()
-                
+
                 box = box.column(align=True)
                 box.prop(activeBone, 'bbone_segments', text="Segments")
-                
+
                 box = box.column(align=True)
                 box.prop(activeBone, 'bbone_in', text="Ease In")
-                
+
                 box = box.column(align=True)
                 box.prop(activeBone, 'bbone_out', text="Ease Out")
-            
+
             else:
                 pass
 
-# Custom Bone Shape
+            # Custom Bone Shape
             if context.mode in 'POSE':
                 column = layout.column(align=True)
 
@@ -462,9 +464,9 @@ class VIEW3D_PT_armature_data(Panel):  # TODO: Account for linked armatures.
                     row = column.row()
                     row.prop(activeBone, 'show_wire', toggle=True)
                     row.prop(activeBone, 'hide', toggle=True)
-    
+
                     column = layout.column(align=True)
-                    
+
                     row = column.row()
                     row.scale_y = 1.25
                     if armatureData.shapeToBoneOptions:
@@ -502,13 +504,11 @@ class VIEW3D_PT_armature_data(Panel):  # TODO: Account for linked armatures.
             pass
 
 
+############
+# REGISTER #
+############
 
-##############
-## REGISTER ##
-##############
-
-
-  # Register
+# Register
 def register():
     """ Register """
     registerModule = bpy.utils.register_module
@@ -518,14 +518,15 @@ def register():
     registerModule(__name__)
     windowManager.armatureDataUI = pointerProperty(type=armatureData)
     windowManager.customShapeToBoneUI = pointerProperty(type=customShapeToBone)
-    
+
     armatureDataProps = bpy.context.window_manager.armatureDataUI
     customShapeToBoneProps = bpy.context.window_manager.customShapeToBoneUI
     armatureDataProps.name = "Armature Data Panel Properties"
     customShapeToBoneProps.name = 'Custom Shape to Bone Properties'
 
+# Unregister
 
-  # Unregister
+
 def unregister():
     """ Unregister """
     unregisterModule = bpy.utils.unregister_module

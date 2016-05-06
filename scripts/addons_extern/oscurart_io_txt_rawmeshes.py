@@ -19,7 +19,7 @@
 bl_info = {
     "name": "Export Import txt raw meshes.",
     "author": "Oscurart",
-    "version": (1,4),
+    "version": (1, 4),
     "blender": (2, 6, 4),
     "api": 48400,
     "location": "Import/Export > Raw Meshes",
@@ -30,15 +30,15 @@ bl_info = {
     "category": "Import-Export"}
 
 
-
-
 import bpy
 import sys
 
-## FUNCION EXPORTADORA ------------------------------------------------
-def ot_export_raw_meshes (context, filepath, WHOLE):
+# FUNCION EXPORTADORA ------------------------------------------------
+
+
+def ot_export_raw_meshes(context, filepath, WHOLE):
     for objeto in bpy.context.selected_objects:
-        
+
         if sys.platform.startswith("w"):
             print("PLATFORM: WINDOWS")
             SYSBAR = "\\"
@@ -47,115 +47,110 @@ def ot_export_raw_meshes (context, filepath, WHOLE):
             SYSBAR = "/"
 
         if WHOLE == True:
-            FILEOUTPUT = "%s%s%s.txt" % (filepath.rpartition(SYSBAR)[0],SYSBAR,objeto.name) 
+            FILEOUTPUT = "%s%s%s.txt" % (filepath.rpartition(SYSBAR)[0], SYSBAR, objeto.name)
         else:
-            FILEOUTPUT = "%s%s%s_%s" % (filepath.rpartition(SYSBAR)[0],SYSBAR,objeto.name,filepath.rpartition(SYSBAR)[-1])
-            
-        open(FILEOUTPUT,"w")
-        FILE=open(  FILEOUTPUT,"w")
-        EDGELISTA=[]    
-                       
-        VERTICESLISTA = [ tuple(VERT.co) for VERT in objeto.data.vertices[:]]   
-        FACELISTA = [FACE.vertices[:] for FACE in objeto.data.polygons[:]]   
-        UVLISTA = [[DATA.uv[:] for DATA in LAYER.data[:]] for LAYER in objeto.data.uv_layers[:] ] 
-                
-        MIXLIST=[]
+            FILEOUTPUT = "%s%s%s_%s" % (filepath.rpartition(SYSBAR)[0], SYSBAR, objeto.name, filepath.rpartition(SYSBAR)[-1])
+
+        open(FILEOUTPUT, "w")
+        FILE = open(FILEOUTPUT, "w")
+        EDGELISTA = []
+
+        VERTICESLISTA = [tuple(VERT.co) for VERT in objeto.data.vertices[:]]
+        FACELISTA = [FACE.vertices[:] for FACE in objeto.data.polygons[:]]
+        UVLISTA = [[DATA.uv[:] for DATA in LAYER.data[:]] for LAYER in objeto.data.uv_layers[:]]
+
+        MIXLIST = []
         MIXLIST.append(VERTICESLISTA)
         MIXLIST.append(EDGELISTA)
         MIXLIST.append(FACELISTA)
-        MIXLIST.append(UVLISTA)        
-        
+        MIXLIST.append(UVLISTA)
+
         FILE.writelines(str(MIXLIST))
         # CIERRO ARCHIVO
-        FILE.close() 
-                  
+        FILE.close()
 
     return {'FINISHED'}
 
 
+# FUNCION IMPORTADORA ------------------------------------------------
+def ot_import_raw_meshes(context, filepath, WHOLE):
+    FILEOUTPUT = filepath
+    ARCHIVO = open(FILEOUTPUT, "r")
+    PYRAW = ARCHIVO.readlines(0)
+    VERTLIST = []
+    PYDATA = eval(PYRAW[0])
 
-
-## FUNCION IMPORTADORA ------------------------------------------------
-def ot_import_raw_meshes (context, filepath, WHOLE):
-    FILEOUTPUT=filepath
-    ARCHIVO=open(FILEOUTPUT,"r")
-    PYRAW=ARCHIVO.readlines(0)
-    VERTLIST=[]
-    PYDATA=eval(PYRAW[0])
-    
     if sys.platform.startswith("w"):
         print("PLATFORM: WINDOWS")
         SYSBAR = "\\"
     else:
         print("PLATFORM:LINUX")
-        SYSBAR = "/"    
-        
-    objeto=filepath.rpartition(SYSBAR)[-1].rpartition(".")[0]
+        SYSBAR = "/"
+
+    objeto = filepath.rpartition(SYSBAR)[-1].rpartition(".")[0]
 
     # CREO DATA
-    MESH=bpy.data.meshes.new(objeto+"data")
-    OBJETO=bpy.data.objects.new(objeto,MESH)    
-    
+    MESH = bpy.data.meshes.new(objeto + "data")
+    OBJETO = bpy.data.objects.new(objeto, MESH)
+
     MESH.from_pydata(
         PYDATA[0],
         PYDATA[1],
         PYDATA[2]
-    )   
-    
+    )
+
     # LINKEO OBJETO
     bpy.context.scene.objects.link(OBJETO)
-    MESH.update()    
+    MESH.update()
 
     # CREAMOS UVS
     # OBJETO ACTIVO
-    bpy.context.scene.objects.active=OBJETO
-    OBJETO.select=1
-    
+    bpy.context.scene.objects.active = OBJETO
+    OBJETO.select = 1
+
     for UV in range(len(PYDATA[-1])):
-        bpy.ops.mesh.uv_texture_add()        
-   
-    LAYERINDEX=0
-    #LISTA PARA UVS    
-    for LAYER in PYDATA[-1]: 
-        DATAINDEX=0       
+        bpy.ops.mesh.uv_texture_add()
+
+    LAYERINDEX = 0
+    # LISTA PARA UVS
+    for LAYER in PYDATA[-1]:
+        DATAINDEX = 0
         for UV in LAYER:
-            OBJETO.data.uv_layers[LAYERINDEX].data[DATAINDEX].uv=UV
-            DATAINDEX+=1
-        LAYERINDEX+=1     
-    
-    print("Object : "+str(objeto))
-    
+            OBJETO.data.uv_layers[LAYERINDEX].data[DATAINDEX].uv = UV
+            DATAINDEX += 1
+        LAYERINDEX += 1
+
+    print("Object : " + str(objeto))
+
     # CIERRO EL ARCHIVO
-    ARCHIVO.close()          
-    
+    ARCHIVO.close()
+
     return {'FINISHED'}
 
 
+# CLASES ===============================================================
 
-## CLASES ===============================================================
-
-## IMPORTO LIBRERIAS
+# IMPORTO LIBRERIAS
 from bpy_extras.io_utils import ExportHelper
 
 
-## REGISTRA CLASE DE EXPORTACION -------------------------------
+# REGISTRA CLASE DE EXPORTACION -------------------------------
 class OTExportRawMeshes(bpy.types.Operator, ExportHelper):
     '''This appears in the tooltip of the operator and in the generated docs.'''
     bl_idname = "export.raw_meshes"
     bl_label = "Export Raw Meshes"
     filename_ext = ".txt"
     filter_glob = bpy.props.StringProperty(
-            default="*.txt",
-            options={'HIDDEN'},
-            )
-            
-    use_setting = bpy.props.BoolProperty(
-            name="Whole directory",
-            description="Export the selected objects in this folder",
-            default=True,
-            )
+        default="*.txt",
+        options={'HIDDEN'},
+    )
 
-    
+    use_setting = bpy.props.BoolProperty(
+        name="Whole directory",
+        description="Export the selected objects in this folder",
+        default=True,
+    )
+
     @classmethod
     def poll(cls, context):
         return context.active_object.type == "MESH"
@@ -164,46 +159,48 @@ class OTExportRawMeshes(bpy.types.Operator, ExportHelper):
         return ot_export_raw_meshes(context, self.filepath, self.use_setting)
 
 
-## REGISTRA CLASE DE IMPORTACION -----------------------------------
+# REGISTRA CLASE DE IMPORTACION -----------------------------------
 class OTImportRawMeshes(bpy.types.Operator, ExportHelper):
     '''This appears in the tooltip of the operator and in the generated docs.'''
     bl_idname = "import_scene.raw_meshes"
     bl_label = "Import Raw Meshes"
     filename_ext = ".txt"
     filter_glob = bpy.props.StringProperty(
-            default="*.txt",
-            options={'HIDDEN'},
-            )
-            
+        default="*.txt",
+        options={'HIDDEN'},
+    )
+
     use_setting = bpy.props.BoolProperty(
-            name="Whole directory",
-            description="Import the selected objects in this folder",
-            default=True,
-            )
-    
-      
-            
+        name="Whole directory",
+        description="Import the selected objects in this folder",
+        default=True,
+    )
+
     """
     @classmethod
     def poll(cls, context):
         return context.active_object is not None
     """
+
     def execute(self, context):
         return ot_import_raw_meshes(context, self.filepath, self.use_setting)
 
 
-
 # MENUES DINAMICOS
 def menu_export_raw_meshes(self, context):
-    self.layout.operator(OTExportRawMeshes.bl_idname, text="Raw Meshes", icon ='PLUGIN')
+    self.layout.operator(OTExportRawMeshes.bl_idname, text="Raw Meshes", icon='PLUGIN')
+
+
 def menu_import_raw_meshes(self, context):
-    self.layout.operator(OTImportRawMeshes.bl_idname, text="Raw Meshes", icon ='PLUGIN')
+    self.layout.operator(OTImportRawMeshes.bl_idname, text="Raw Meshes", icon='PLUGIN')
+
 
 def register():
     bpy.utils.register_class(OTExportRawMeshes)
     bpy.utils.register_class(OTImportRawMeshes)
     bpy.types.INFO_MT_file_export.append(menu_export_raw_meshes)
     bpy.types.INFO_MT_file_import.append(menu_import_raw_meshes)
+
 
 def unregister():
     bpy.utils.unregister_class(OTExportRawMeshes)

@@ -47,7 +47,7 @@ def get_default_presets():
             (True, (0.4980020225048065, 0.500000536441803, 0.6000001430511475), (0.20000000298023224, 0.20000000298023224, 0.20000000298023224), (0.5880000591278076, 0.46000003814697266, 0.24800002574920654), ),
             (True, (0.7980005145072937, 0.8379999399185181, 1.0), (0.06599999219179153, 0.0, 0.0), (0.21599984169006348, -0.3920000195503235, -0.21599996089935303), ),
         ],
-        
+
         # by me
         'mshade3': [
             (True, (0.43621575832366943, 0.33640265464782715, 0.31929048895835876), (0.9113942980766296, 0.8065879940986633, 0.5334088206291199), (-0.012820512987673283, 0.44871795177459717, 0.8935815095901489), ),
@@ -74,7 +74,7 @@ def get_default_presets():
             (True, (0.7233469486236572, 0.7233469486236572, 0.7233469486236572), (0.0, 0.0, 0.0), (0.0, 0.9230769276618958, 0.38461539149284363), ),
             (True, (0.1267620027065277, 0.12150080502033234, 0.11475051194429398), (0.0, 0.0, 0.0), (0.012177534401416779, -0.9742027521133423, -0.22534571588039398), ),
         ],
-        
+
         # by Sanctuary
         'bluedawn': [
             (True, (0.26847368478775024, 0.42352432012557983, 0.5927237272262573), (0.4590410590171814, 0.4590410590171814, 0.4590410590171814), (-0.4225352108478546, 0.2816901206970215, 0.8614607453346252), ),
@@ -101,14 +101,14 @@ def get_default_presets():
             (True, (0.2996516525745392, 0.2382955253124237, 0.16581720113754272), (0.18277807533740997, 0.15225152671337128, 0.13868144154548645), (-0.1267605572938919, 0.14084506034851074, 0.9818830490112305), ),
             (True, (0.3464010953903198, 0.27249836921691895, 0.1859419196844101), (0.1282370686531067, 0.10586366057395935, 0.09842190891504288), (-0.7183098196983337, 0.3802816867828369, 0.5825948715209961), ),
         ],
-        
+
         # by 1D_Inc
         'silver': [
             (True, (0.13286477327346802, 0.13286477327346802, 0.13286477327346802), (0.24918273091316223, 0.24918273091316223, 0.24918273091316223), (0.014084506779909134, 0.30985915660858154, 0.9506781101226807), ),
             (True, (0.5551280975341797, 0.46653956174850464, 0.4044328033924103), (0.12526345252990723, 0.12526345252990723, 0.12526345252990723), (0.056338027119636536, 0.014084506779909134, 0.9983123540878296), ),
             (True, (0.5526410937309265, 0.6069087982177734, 0.6601572036743164), (0.06728240847587585, 0.0, 0.0), (-0.2957746386528015, 0.7605633735656738, 0.5779798030853271), ),
         ],
-        
+
         # by Lell
         '3ds_max': [
             (True, (1.0, 1.0, 1.0), (0.45796120166778564, 0.45796120166778564, 0.45796120166778564), (-0.327, -0.422, -0.846), ),
@@ -120,12 +120,12 @@ def get_default_presets():
             (True, (1.0, 1.0, 1.0), (0.45, 0.45, 0.45), (0.543, 0.067, 0.837), ),
             (True, (0.55, 0.55, 0.55), (0.016, 0.016, 0.016), (-0.762, 0.295, 0.576), ),
         ],
-        
+
         # by kanishk2391
         'maya_like': [
             (True, (0.384, 0.384, 0.384), (0.2333, 0.2333, 0.2333), (-0.028169013559818268, 0.563380241394043, 0.8257173895835876), ),
             (True, (0.119, 0.119, 0.119), (0.070, 0.070, 0.070), (-0.43661969900131226, -0.3661971688270569, 0.8217437267303467), ),
-            (True, (0.196, 0.196, 0.196), (0.107, 0.107, 0.107), (-0.2816901206970215, 0.11267605423927307, 0.9528665542602539) , ),
+            (True, (0.196, 0.196, 0.196), (0.107, 0.107, 0.107), (-0.2816901206970215, 0.11267605423927307, 0.9528665542602539), ),
         ],
     }
     return presets
@@ -139,7 +139,7 @@ def setup():
     if(preset_directory not in preset_paths):
         if(not os.path.exists(preset_directory)):
             os.makedirs(preset_directory)
-    
+
     # search for presets, .py file is considered as preset
     def walk(p):
         r = {'files': [], 'dirs': [], }
@@ -148,14 +148,14 @@ def setup():
             r['dirs'].extend(dirs)
             break
         return r
-    
+
     found = []
     for p in preset_paths:
         c = walk(p)
         for f in c['files']:
             if(f.endswith(".py")):
                 found.append(f[:-3])
-    
+
     if(len(found) == 0):
         # nothing found, write default presets
         default_presets = get_default_presets()
@@ -171,17 +171,18 @@ def setup():
                 s += "l{}.diffuse_color = {}{}".format(i, p[i][1], e)
                 s += "l{}.specular_color = {}{}".format(i, p[i][2], e)
                 s += "l{}.direction = {}{}".format(i, p[i][3], e)
-            
+
             with open(os.path.join(preset_directory, "{}.py".format(n)), mode='w', encoding='utf-8') as f:
                 f.write(s)
 
 
 class OpenGLLightsProperties(bpy.types.PropertyGroup):
+
     @classmethod
     def register(cls):
         bpy.types.Scene.opengl_lights_properties = bpy.props.PointerProperty(type=cls)
         cls.edit = bpy.props.BoolProperty(name="Edit", description="", default=False, )
-    
+
     @classmethod
     def unregister(cls):
         del bpy.types.Scene.opengl_lights_properties
@@ -194,7 +195,7 @@ class VIEW3D_OT_opengl_lights_preset_add(AddPresetBase, bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     preset_menu = 'VIEW3D_MT_opengl_lights_presets'
     preset_subdir = 'opengl_lights_presets'
-    
+
     preset_defines = [
         "l0 = bpy.context.user_preferences.system.solid_lights[0]",
         "l1 = bpy.context.user_preferences.system.solid_lights[1]",
@@ -213,7 +214,7 @@ class VIEW3D_MT_opengl_lights_presets(bpy.types.Menu):
     bl_idname = "VIEW3D_MT_opengl_lights_presets"
     preset_subdir = "opengl_lights_presets"
     preset_operator = "script.execute_preset"
-    
+
     draw = bpy.types.Menu.draw_preset
 
 
@@ -223,10 +224,10 @@ class VIEW3D_PT_opengl_lights_panel(bpy.types.Panel):
     bl_context = "scene"
     bl_region_type = 'UI'
     bl_options = {'DEFAULT_CLOSED'}
-    
+
     def draw(self, context):
         system = bpy.context.user_preferences.system
-        
+
         def opengl_lamp_buttons(column, lamp):
             # from space_userpref.py
             split = column.split(percentage=0.1)
@@ -242,29 +243,29 @@ class VIEW3D_PT_opengl_lights_panel(bpy.types.Panel):
             col = split.column()
             col.active = lamp.use
             col.prop(lamp, "direction", text="")
-        
+
         layout = self.layout
-        
+
         p = context.scene.opengl_lights_properties
         layout.prop(p, "edit")
-        
+
         if(p.edit):
             column = layout.column()
-            
+
             split = column.split(percentage=0.1)
             split.label()
             split.label(text="Colors:")
             split.label(text="Direction:")
-            
+
             lamp = system.solid_lights[0]
             opengl_lamp_buttons(column, lamp)
-            
+
             lamp = system.solid_lights[1]
             opengl_lamp_buttons(column, lamp)
-            
+
             lamp = system.solid_lights[2]
             opengl_lamp_buttons(column, lamp)
-        
+
         col = layout.column_flow(align=True)
         row = col.row(align=True)
         row.menu("VIEW3D_MT_opengl_lights_presets", text=bpy.types.VIEW3D_MT_opengl_lights_presets.bl_label)
@@ -274,7 +275,7 @@ class VIEW3D_PT_opengl_lights_panel(bpy.types.Panel):
 
 def register():
     setup()
-    
+
     bpy.utils.register_class(OpenGLLightsProperties)
     bpy.utils.register_class(VIEW3D_OT_opengl_lights_preset_add)
     bpy.utils.register_class(VIEW3D_MT_opengl_lights_presets)

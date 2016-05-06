@@ -21,7 +21,7 @@
 bl_info = {
     "name": "rRMB Menu",
     "author": "Paweł Łyczkowski, Diego Gangl",
-    "version": (0,63),
+    "version": (0, 63),
     "blender": (2, 71, 0),
     "location": "View3D > RMB",
     "description": "Adds an RMB menu.",
@@ -35,34 +35,35 @@ from bpy.props import BoolProperty
 
 import inspect
 
+
 class draw_view3d_rRMB(bpy.types.Menu):
     bl_label = ""
     bl_idname = "VIEW3D_MT_rRMB"
 
     def draw(self, context):
-        
+
         obj = context.active_object
         mode_string = context.mode
         edit_object = context.edit_object
         layout = self.layout
         selected = context.selected_objects
-        
-        #Menus in All Modes
+
+        # Menus in All Modes
 
         layout.operator_context = 'INVOKE_DEFAULT'
 
         layout.operator("view3d.cursor3d", text="Place 3d Cursor", icon="CURSOR")
         layout.menu("VIEW3D_MT_rmovecursor")
-        
-        #Mode Specific Menus
-        
+
+        # Mode Specific Menus
+
         if edit_object:
-            
-            #Edit Mode
-            
+
+            # Edit Mode
+
             if edit_object.type.lower() == "mesh":
-                
-                #Mesh
+
+                # Mesh
 
                 layout.separator()
 
@@ -78,7 +79,7 @@ class draw_view3d_rRMB(bpy.types.Menu):
 
                 if len(selected_verts) > 0:
 
-                    #--- Mesh With Vertices Selected
+                    # --- Mesh With Vertices Selected
 
                     layout.menu("VIEW3D_MT_reditadd")
 
@@ -95,23 +96,23 @@ class draw_view3d_rRMB(bpy.types.Menu):
                     layout.menu("VIEW3D_MT_rmove_mesh_origin")
 
                     layout.separator()
-        
+
                     layout.menu("VIEW3D_MT_redit_mesh_vertices")
                     layout.menu("VIEW3D_MT_redit_mesh_edges")
                     layout.menu("VIEW3D_MT_redit_mesh_faces")
 
                     layout.menu("VIEW3D_MT_redit_mesh_normals")
-                    
+
                     # layout.menu("VIEW3D_MT_edit_mesh_specials")
 
                     layout.separator()
 
-                    layout.operator("mesh.duplicate_move", text = "Duplicate")
+                    layout.operator("mesh.duplicate_move", text="Duplicate")
 
-                    layout.operator_menu_enum("mesh.separate", "type", text = "Separate Into New Object")
-                    
+                    layout.operator_menu_enum("mesh.separate", "type", text="Separate Into New Object")
+
                     layout.menu("VIEW3D_MT_edit_mesh_delete")
-                    
+
                     layout.separator()
 
                     layout.menu("VIEW3D_MT_rshape_keys_vertex_groups")
@@ -121,16 +122,16 @@ class draw_view3d_rRMB(bpy.types.Menu):
                     layout.separator()
 
                     layout.menu("VIEW3D_MT_edit_mesh_clean")
-                    
+
                     layout.menu("VIEW3D_MT_uv_map", text="Unwrap")
-                    
-                    #layout.separator()
-                    
-                    #layout.operator("object.editmode_toggle", text="Exit Edit Mode")
+
+                    # layout.separator()
+
+                    # layout.operator("object.editmode_toggle", text="Exit Edit Mode")
 
                 else:
 
-                    #--- Mesh With Nothing Selected
+                    # --- Mesh With Nothing Selected
 
                     layout.menu("VIEW3D_MT_rcut_nothing_selected")
 
@@ -151,14 +152,12 @@ class draw_view3d_rRMB(bpy.types.Menu):
                     layout.operator("mesh.primitive_grid_add", text="Grid", icon='MESH_GRID')
                     layout.operator("mesh.primitive_monkey_add", text="Monkey", icon='MESH_MONKEY')
 
-
-                
             elif edit_object.type.lower() == "armature":
-                
-                #Armature
-                
+
+                # Armature
+
                 arm = edit_object.data
-                
+
                 layout.separator()
 
                 layout.menu("VIEW3D_MT_rarmature_transform")
@@ -196,20 +195,20 @@ class draw_view3d_rRMB(bpy.types.Menu):
 
                 layout.menu("VIEW3D_MT_edit_armature_parent")
 
-                #layout.separator()
+                # layout.separator()
 
-                #layout.menu("VIEW3D_MT_bone_options_toggle", text="Bone Settings")
-                
-                #layout.separator()
-                
-                #layout.operator("object.editmode_toggle", text="Exit Edit Mode")
-                
+                # layout.menu("VIEW3D_MT_bone_options_toggle", text="Bone Settings")
+
+                # layout.separator()
+
+                # layout.operator("object.editmode_toggle", text="Exit Edit Mode")
+
             elif edit_object.type.lower() == "curve":
-                
-                #Curve
-                
+
+                # Curve
+
                 layout.separator()
-                
+
                 layout.menu("VIEW3D_MT_transform")
                 layout.menu("VIEW3D_MT_mirror")
                 layout.menu("VIEW3D_MT_rsnap")
@@ -237,13 +236,13 @@ class draw_view3d_rRMB(bpy.types.Menu):
                 layout.separator()
 
                 layout.menu("VIEW3D_MT_edit_curve_showhide")
-                
+
             elif edit_object.type.lower() == "font":
-                
-                #Font
-                
+
+                # Font
+
                 layout.separator()
-                
+
                 layout.menu("VIEW3D_MT_edit_text_chars")
 
                 layout.separator()
@@ -256,37 +255,37 @@ class draw_view3d_rRMB(bpy.types.Menu):
                 layout.separator()
 
                 layout.operator("font.insert_lorem")
-            
+
         elif mode_string == 'OBJECT':
 
-            #Object Mode
-            
-            #---Object Mode with Objects selected
-            
-            if len(selected)>0:
+            # Object Mode
+
+            # ---Object Mode with Objects selected
+
+            if len(selected) > 0:
 
                 layout.separator()
 
                 # layout.operator("tools.mydialog")
 
                 layout.menu("VIEW3D_MT_select_object")
-                
+
                 layout.separator()
 
                 layout.menu("VIEW3D_MT_robjectadd")
-                
+
                 layout.separator()
-                
+
                 layout.menu("VIEW3D_MT_robjecttransform")
                 layout.menu("VIEW3D_MT_robject_apply")
                 layout.menu("VIEW3D_MT_robject_clear")
                 layout.menu("VIEW3D_MT_rorigintransform")
-                
-                #layout.menu("VIEW3D_MT_transform_object")
-                #layout.menu("VIEW3D_MT_mirror")
-                #layout.menu("VIEW3D_MT_object_clear")
-                #layout.menu("VIEW3D_MT_object_apply")
-                #layout.menu("VIEW3D_MT_snap")
+
+                # layout.menu("VIEW3D_MT_transform_object")
+                # layout.menu("VIEW3D_MT_mirror")
+                # layout.menu("VIEW3D_MT_object_clear")
+                # layout.menu("VIEW3D_MT_object_apply")
+                # layout.menu("VIEW3D_MT_snap")
 
                 layout.separator()
 
@@ -294,12 +293,12 @@ class draw_view3d_rRMB(bpy.types.Menu):
                 layout.operator("object.move_to_layer", text="Move to Layer")
                 layout.menu("VIEW3D_MT_object_group")
                 layout.menu("VIEW3D_MT_object_parent")
-                
+
                 layout.separator()
 
-                #layout.menu("VIEW3D_MT_object_animation")
+                # layout.menu("VIEW3D_MT_object_animation")
 
-                #layout.separator()
+                # layout.separator()
 
                 layout.operator("object.join")
                 layout.operator("object.rseparate")
@@ -308,9 +307,9 @@ class draw_view3d_rRMB(bpy.types.Menu):
                 layout.operator("view3d.copybuffer", text="Copy")
                 layout.operator("view3d.pastebuffer", text="Paste")
                 layout.operator("object.delete", text="Delete")
-                
+
                 # layout.separator()
-                
+
                 # layout.operator("object.proxy_make", text="Make Proxy...")
                 # layout.menu("VIEW3D_MT_make_links", text="Make Links...")
                 # layout.operator("object.make_dupli_face")
@@ -319,30 +318,30 @@ class draw_view3d_rRMB(bpy.types.Menu):
                 # layout.operator_menu_enum("object.convert", "target")
 
                 layout.separator()
-                
+
                 layout.menu("VIEW3D_MT_robjectdata")
                 layout.menu("VIEW3D_MT_object_track")
                 layout.menu("VIEW3D_MT_object_constraints")
-                
-                #layout.separator()
-                #layout.operator("object.editmode_toggle", text="Enter Edit Mode", icon='EDITMODE_HLT')
 
-                #layout.separator()
+                # layout.separator()
+                # layout.operator("object.editmode_toggle", text="Enter Edit Mode", icon='EDITMODE_HLT')
 
-                #layout.menu("VIEW3D_MT_object_quick_effects")
+                # layout.separator()
 
-                #layout.separator()
+                # layout.menu("VIEW3D_MT_object_quick_effects")
 
-                #layout.menu("VIEW3D_MT_object_game")
+                # layout.separator()
 
-                #layout.separator()
-                
+                # layout.menu("VIEW3D_MT_object_game")
+
+                # layout.separator()
+
             else:
-                
-                #---Object Mode without Objects selected
-                
+
+                # ---Object Mode without Objects selected
+
                 layout.separator()
-                
+
                 layout.menu("VIEW3D_MT_object_showhide")
                 layout.operator("view3d.pastebuffer", text="Paste")
 
@@ -350,12 +349,12 @@ class draw_view3d_rRMB(bpy.types.Menu):
 
                 layout.operator_context = 'EXEC_REGION_WIN'
 
-                #layout.operator_menu_enum("object.mesh_add", "type", text="Mesh", icon='OUTLINER_OB_MESH')
+                # layout.operator_menu_enum("object.mesh_add", "type", text="Mesh", icon='OUTLINER_OB_MESH')
                 layout.menu("INFO_MT_mesh_add", icon='OUTLINER_OB_MESH')
 
-                #layout.operator_menu_enum("object.curve_add", "type", text="Curve", icon='OUTLINER_OB_CURVE')
+                # layout.operator_menu_enum("object.curve_add", "type", text="Curve", icon='OUTLINER_OB_CURVE')
                 layout.menu("INFO_MT_curve_add", icon='OUTLINER_OB_CURVE')
-                #layout.operator_menu_enum("object.surface_add", "type", text="Surface", icon='OUTLINER_OB_SURFACE')
+                # layout.operator_menu_enum("object.surface_add", "type", text="Surface", icon='OUTLINER_OB_SURFACE')
                 layout.menu("INFO_MT_surface_add", icon='OUTLINER_OB_SURFACE')
                 layout.menu("INFO_MT_metaball_add", text="Metaball", icon='OUTLINER_OB_META')
                 layout.operator("object.text_add", text="Text", icon='OUTLINER_OB_FONT')
@@ -381,37 +380,39 @@ class draw_view3d_rRMB(bpy.types.Menu):
                     layout.operator("object.group_instance_add", text="Group Instance...", icon='OUTLINER_OB_EMPTY')
                 else:
                     layout.operator_menu_enum("object.group_instance_add", "group", text="Group Instance", icon='OUTLINER_OB_EMPTY')
-        
+
+
 class VIEW3D_MT_rarmature_autoname(bpy.types.Menu):
     bl_context = "editmode"
     bl_label = "Autoname"
 
     def draw(self, context):
-        
+
         layout = self.layout
-        
+
         layout.operator_context = 'EXEC_AREA'
         layout.operator("armature.autoside_names", text="AutoName Left/Right").type = 'XAXIS'
         layout.operator("armature.autoside_names", text="AutoName Front/Back").type = 'YAXIS'
         layout.operator("armature.autoside_names", text="AutoName Top/Bottom").type = 'ZAXIS'
         layout.operator("armature.flip_names")
-        
+
+
 class VIEW3D_MT_rarmature_transform(bpy.types.Menu):
     bl_context = "editmode"
     bl_label = "Transform"
 
     def draw(self, context):
-        
+
         layout = self.layout
         obj = context.object
-        
+
         # base menu
         layout.operator("transform.translate", text="Grab/Move")
         layout.operator("transform.rotate", text="Rotate")
         layout.operator("transform.resize", text="Scale")
-        
+
         layout.separator()
-        
+
         layout.menu("VIEW3D_MT_rsnap")
         layout.menu("VIEW3D_MT_mirror")
         layout.menu("VIEW3D_MT_edit_armature_roll")
@@ -426,7 +427,7 @@ class VIEW3D_MT_rarmature_transform(bpy.types.Menu):
         layout.operator("object.vertex_random", text="Randomize")
 
         # armature specific
-        
+
         layout.separator()
 
         if obj.type == 'ARMATURE' and obj.mode in {'EDIT', 'POSE'}:
@@ -438,47 +439,48 @@ class VIEW3D_MT_rarmature_transform(bpy.types.Menu):
 
         if context.edit_object and context.edit_object.type == 'ARMATURE':
             layout.operator("armature.align")
-        
+
 
 class VIEW3D_MT_robjecttransform(bpy.types.Menu):
     bl_context = "objectmode"
     bl_label = "Transform"
 
     def draw(self, context):
-        
+
         layout = self.layout
-        
+
         layout.operator("transform.translate", text="Grab/Move")
         layout.operator("transform.rotate", text="Rotate")
         layout.operator("transform.resize", text="Scale")
-        
+
         layout.separator()
-        
+
         layout.menu("VIEW3D_MT_mirror")
         # layout.menu("VIEW3D_MT_object_clear")
         # layout.menu("VIEW3D_MT_object_apply")
         layout.menu("VIEW3D_MT_rsnap")
         layout.operator("object.origin_set", text="Move Geometry to Origin").type = 'GEOMETRY_ORIGIN'
-        
+
         # layout.separator()
-        
+
         # layout.operator_context = 'EXEC_AREA'
         # layout.operator("object.origin_set", text="Geometry to Origin").type = 'GEOMETRY_ORIGIN'
         # layout.operator("object.origin_set", text="Origin to Geometry").type = 'ORIGIN_GEOMETRY'
         # layout.operator("object.origin_set", text="Origin to 3D Cursor").type = 'ORIGIN_CURSOR'
-        
+
         layout.separator()
-        
+
         layout.operator("transform.tosphere", text="To Sphere")
         layout.operator("transform.shear", text="Shear")
         layout.operator("transform.warp", text="Warp")
         layout.operator("transform.push_pull", text="Push/Pull")
-        
+
         if context.edit_object and context.edit_object.type == 'ARMATURE':
             layout.operator("armature.align")
         else:
             layout.operator_context = 'EXEC_REGION_WIN'
-            layout.operator("transform.transform", text="Align to Transform Orientation").mode = 'ALIGN' # XXX see alignmenu() in edit.c of b2.4x to get this working
+            layout.operator("transform.transform", text="Align to Transform Orientation").mode = 'ALIGN'  # XXX see alignmenu() in edit.c of b2.4x to get this working
+
 
 class VIEW3D_MT_robject_clear(bpy.types.Menu):
     bl_label = "Clear Transforms"
@@ -490,6 +492,7 @@ class VIEW3D_MT_robject_clear(bpy.types.Menu):
         layout.operator("object.rotation_clear", text="Rotation")
         layout.operator("object.scale_clear", text="Scale")
         layout.operator("object.origin_clear", text="Location Relative To Parent (Origin)")
+
 
 class VIEW3D_MT_robject_apply(bpy.types.Menu):
     bl_label = "Apply Transforms"
@@ -524,22 +527,23 @@ class VIEW3D_MT_rorigintransform(bpy.types.Menu):
     bl_label = "Move Origin"
 
     def draw(self, context):
-        
+
         layout = self.layout
-        
+
         layout.operator_context = 'EXEC_AREA'
-        #layout.operator("object.origin_set", text="Geometry to Origin").type = 'GEOMETRY_ORIGIN'
+        # layout.operator("object.origin_set", text="Geometry to Origin").type = 'GEOMETRY_ORIGIN'
         layout.operator("object.origin_set", text="Move Origin to Geometry").type = 'ORIGIN_GEOMETRY'
         layout.operator("object.origin_set", text="Move Origin to 3D Cursor").type = 'ORIGIN_CURSOR'
+
 
 class VIEW3D_MT_robjectdata(bpy.types.Menu):
     bl_context = "objectmode"
     bl_label = "Object Data"
 
     def draw(self, context):
-        
+
         layout = self.layout
-        
+
         layout.operator("object.proxy_make", text="Make Proxy")
         layout.menu("VIEW3D_MT_make_links", text="Make Links")
         layout.operator("object.make_dupli_face")
@@ -548,39 +552,40 @@ class VIEW3D_MT_robjectdata(bpy.types.Menu):
         layout.operator("object.duplicates_make_real")
         layout.operator_menu_enum("object.convert", "target")
 
-            
+
 class VIEW3D_MT_rmovecursor(bpy.types.Menu):
     bl_context = "view_3d"
     bl_label = "Move 3d Cursor"
 
     def draw(self, context):
-        
+
         layout = self.layout
-        
+
         layout.operator("view3d.snap_cursor_to_selected", text="To Selected")
         layout.operator("view3d.snap_cursor_to_center", text="To Center")
         layout.operator("view3d.snap_cursor_to_grid", text="To Grid")
         layout.operator("view3d.snap_cursor_to_active", text="To Active")
-        
+
+
 class VIEW3D_MT_rsnap(bpy.types.Menu):
     bl_context = "view_3d"
     bl_label = "Snap Selected"
 
     def draw(self, context):
-        
+
         layout = self.layout
-        
+
         layout.operator("view3d.snap_selected_to_grid", text="To Grid")
         layout.operator("view3d.snap_selected_to_cursor", text="To Cursor").use_offset = False
         layout.operator("view3d.snap_selected_to_cursor", text="To Cursor (Offset)").use_offset = True
-        
-        
+
+
 class VIEW3D_MT_rcut(bpy.types.Menu):
     bl_context = "editmode"
     bl_label = "Cut"
 
     def draw(self, context):
-        
+
         layout = self.layout
 
         layout.menu("VIEW3D_MT_rsubdivide")
@@ -596,7 +601,7 @@ class VIEW3D_MT_rcut(bpy.types.Menu):
         op = layout.operator("mesh.knife_tool", text="Knife Selected")
         op.use_occlude_geometry = False
         op.only_selected = True
-        
+
         layout.separator()
 
         layout.operator("mesh.bisect", text="Plane Cut")
@@ -607,18 +612,19 @@ class VIEW3D_MT_rcut(bpy.types.Menu):
 
         layout.operator("mesh.rip_move")
         layout.operator("mesh.rip_move_fill")
-        layout.operator("mesh.edge_split", text = "Rip Along Selected Edges")
+        layout.operator("mesh.edge_split", text="Rip Along Selected Edges")
 
         layout.separator()
 
-        layout.operator("mesh.split", text = "Separate")
+        layout.operator("mesh.split", text="Separate")
+
 
 class VIEW3D_MT_rcut_nothing_selected(bpy.types.Menu):
     bl_context = "editmode"
     bl_label = "Cut"
 
     def draw(self, context):
-        
+
         layout = self.layout
 
         # layout.menu("VIEW3D_MT_rsubdivide")
@@ -634,7 +640,7 @@ class VIEW3D_MT_rcut_nothing_selected(bpy.types.Menu):
         # op = layout.operator("mesh.knife_tool", text="Knife Selected")
         # op.use_occlude_geometry = False
         # op.only_selected = True
-        
+
         # layout.separator()
 
         # layout.operator("mesh.bisect", text="Plane Cut")
@@ -653,7 +659,7 @@ class VIEW3D_MT_rcreate(bpy.types.Menu):
     bl_label = "Create"
 
     def draw(self, context):
-        
+
         layout = self.layout
 
         layout.operator("mesh.edge_face_add")
@@ -667,7 +673,7 @@ class VIEW3D_MT_rcreate(bpy.types.Menu):
 
         layout.separator()
 
-        layout.operator("mesh.fill", text = "Fill With Triangles")
+        layout.operator("mesh.fill", text="Fill With Triangles")
         layout.operator("mesh.fill_grid")
 
 
@@ -676,7 +682,7 @@ class VIEW3D_MT_rdeform(bpy.types.Menu):
     bl_label = "Deform"
 
     def draw(self, context):
-        
+
         layout = self.layout
 
         layout.operator("transform.tosphere", text="To Sphere")
@@ -687,10 +693,10 @@ class VIEW3D_MT_rdeform(bpy.types.Menu):
         layout.operator("object.vertex_warp", text="Warp")
 
         layout.separator()
-        
-        layout.operator("mesh.vertices_smooth", text = "Relax")
+
+        layout.operator("mesh.vertices_smooth", text="Relax")
         layout.operator("object.vertex_random")
-        layout.operator("mesh.noise", text = "Displace With Texture")
+        layout.operator("mesh.noise", text="Displace With Texture")
 
 
 class VIEW3D_MT_rtransform(bpy.types.Menu):
@@ -698,7 +704,7 @@ class VIEW3D_MT_rtransform(bpy.types.Menu):
     bl_label = "Transform"
 
     def draw(self, context):
-        
+
         layout = self.layout
 
         layout.operator("transform.translate", text="Grab/Move")
@@ -725,7 +731,7 @@ class VIEW3D_MT_rsubdivide(bpy.types.Menu):
     bl_label = "Subdivide"
 
     def draw(self, context):
-        
+
         layout = self.layout
 
         layout.operator("mesh.subdivide", text="Simple").smoothness = 0.0
@@ -733,7 +739,8 @@ class VIEW3D_MT_rsubdivide(bpy.types.Menu):
 
         layout.separator()
 
-        layout.operator("mesh.unsubdivide", text = "Unsubdivide")
+        layout.operator("mesh.unsubdivide", text="Unsubdivide")
+
 
 class VIEW3D_MT_redit_mesh_vertices(bpy.types.Menu):
     bl_label = "Vertices"
@@ -777,6 +784,7 @@ class VIEW3D_MT_redit_mesh_vertices(bpy.types.Menu):
         # layout.menu("VIEW3D_MT_vertex_group")
         # layout.menu("VIEW3D_MT_hook")
 
+
 class VIEW3D_MT_redit_mesh_edges(bpy.types.Menu):
     bl_label = "Edges"
 
@@ -806,7 +814,6 @@ class VIEW3D_MT_redit_mesh_edges(bpy.types.Menu):
 
         layout.operator("mesh.bevel").vertex_only = False
         layout.operator("transform.edge_bevelweight")
-
 
         layout.separator()
 
@@ -869,7 +876,7 @@ class VIEW3D_MT_redit_mesh_faces(bpy.types.Menu):
         layout.operator("mesh.poke")
         layout.operator("mesh.quads_convert_to_tris")
         layout.operator("mesh.tris_convert_to_quads")
-        layout.operator("mesh.beautify_fill", text = "Rearrange Triangles (Beautify)")
+        layout.operator("mesh.beautify_fill", text="Rearrange Triangles (Beautify)")
 
         # layout.separator()
 
@@ -908,12 +915,12 @@ class VIEW3D_MT_rshape_keys_vertex_groups(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        layout.operator("object.vertex_group_blend", text = "Blur Weights")
+        layout.operator("object.vertex_group_blend", text="Blur Weights")
 
         layout.separator()
 
-        layout.operator("mesh.blend_from_shape", text = "Morph to Shape Key")
-        layout.operator("mesh.shape_propagate_to_all", text = "Propagate Shape To Other Shape Keys")
+        layout.operator("mesh.blend_from_shape", text="Morph to Shape Key")
+        layout.operator("mesh.shape_propagate_to_all", text="Propagate Shape To Other Shape Keys")
 
         layout.separator()
 
@@ -923,8 +930,8 @@ class VIEW3D_MT_rshape_keys_vertex_groups(bpy.types.Menu):
 
         layout.operator_menu_enum("mesh.sort_elements", "type", text="Sort Elements...")
 
-        layout.operator("transform.translate", text = "Move Texture Space").texture_space = True
-        layout.operator("transform.resize", text = "Scale Texture Space").texture_space = True
+        layout.operator("transform.translate", text="Move Texture Space").texture_space = True
+        layout.operator("transform.resize", text="Scale Texture Space").texture_space = True
 
 
 class VIEW3D_MT_redit_mesh_normals(bpy.types.Menu):
@@ -953,7 +960,7 @@ class VIEW3D_MT_rsymmetry(bpy.types.Menu):
         layout = self.layout
 
         layout.operator("mesh.symmetrize")
-        layout.operator("mesh.symmetry_snap")   
+        layout.operator("mesh.symmetry_snap")
 
 
 class VIEW3D_MT_rselect_edit_mesh(bpy.types.Menu):
@@ -974,7 +981,7 @@ class VIEW3D_MT_rselect_edit_mesh(bpy.types.Menu):
         layout.operator("mesh.shortest_path_select", text="Shortest Path")
 
         layout.separator()
-        
+
         layout.operator("mesh.loop_multi_select", text="Edge Loop").ring = False
         layout.operator("mesh.loop_multi_select", text="Edge Ring").ring = True
 
@@ -985,12 +992,12 @@ class VIEW3D_MT_rselect_edit_mesh(bpy.types.Menu):
 
         layout.operator("mesh.select_more", text="More")
         layout.operator("mesh.select_less", text="Less")
-        
+
         layout.separator()
 
         layout.operator("mesh.select_mirror", text="Mirror")
         layout.operator("mesh.select_axis", text="Side of Active")
-        
+
         layout.separator()
 
         # numeric
@@ -1018,6 +1025,7 @@ class VIEW3D_MT_rselect_edit_mesh(bpy.types.Menu):
         layout.operator_menu_enum("mesh.select_similar", "type", text="Similar")
         layout.operator("mesh.select_ungrouped", text="Ungrouped Verts")
 
+
 class VIEW3D_MT_rmove_mesh_origin(bpy.types.Menu):
 
     bl_label = "Move Origin/Orientation"
@@ -1039,6 +1047,7 @@ class VIEW3D_MT_rmove_mesh_origin(bpy.types.Menu):
 
             layout.operator("object.ralign_orientation_to_selection_warning", text="Align Orientation To Selection")
 
+
 class VIEW3D_MT_rmove_mesh_origin_nothing_selected(bpy.types.Menu):
 
     bl_label = "Move Origin"
@@ -1048,9 +1057,9 @@ class VIEW3D_MT_rmove_mesh_origin_nothing_selected(bpy.types.Menu):
 
         layout.operator("object.rmove_mesh_origin_to_cursor")
         layout.operator("object.rmove_mesh_origin_to_center")
-        
-        
-#------------------- OPERATORS ------------------------------   
+
+
+# ------------------- OPERATORS ------------------------------
 
 
 class RMoveMeshOriginToSelection(bpy.types.Operator):
@@ -1065,7 +1074,7 @@ class RMoveMeshOriginToSelection(bpy.types.Operator):
         return context.active_object is not None
 
     def execute(self, context):
-        
+
         bpy.ops.object.editmode_toggle()
 
         selected = context.selected_objects
@@ -1073,28 +1082,29 @@ class RMoveMeshOriginToSelection(bpy.types.Operator):
         objects = bpy.data.objects
         bpy.ops.object.select_all(action='DESELECT')
         context.active_object.select = True
-    
+
         storeCursorX = context.space_data.cursor_location.x
         storeCursorY = context.space_data.cursor_location.y
         storeCursorZ = context.space_data.cursor_location.z
-        
+
         bpy.ops.object.editmode_toggle()
-        
+
         bpy.ops.view3d.snap_cursor_to_selected()
-        
+
         bpy.ops.object.editmode_toggle()
-        
+
         bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
-        
+
         context.space_data.cursor_location.x = storeCursorX
         context.space_data.cursor_location.y = storeCursorY
         context.space_data.cursor_location.z = storeCursorZ
-        
+
         for obj in selected:
             obj.select = True
         bpy.ops.object.editmode_toggle()
 
         return {'FINISHED'}
+
 
 class RMoveMeshOriginToCursor(bpy.types.Operator):
     '''Tooltip'''
@@ -1107,7 +1117,7 @@ class RMoveMeshOriginToCursor(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        
+
         bpy.ops.object.editmode_toggle()
 
         selected = context.selected_objects
@@ -1115,14 +1125,15 @@ class RMoveMeshOriginToCursor(bpy.types.Operator):
         objects = bpy.data.objects
         bpy.ops.object.select_all(action='DESELECT')
         context.active_object.select = True
-        
+
         bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-        
+
         for obj in selected:
             obj.select = True
         bpy.ops.object.editmode_toggle()
 
         return {'FINISHED'}
+
 
 class RMoveMeshOriginToCenter(bpy.types.Operator):
     '''Tooltip'''
@@ -1135,7 +1146,7 @@ class RMoveMeshOriginToCenter(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        
+
         bpy.ops.object.editmode_toggle()
 
         selected = context.selected_objects
@@ -1143,7 +1154,7 @@ class RMoveMeshOriginToCenter(bpy.types.Operator):
         objects = bpy.data.objects
         bpy.ops.object.select_all(action='DESELECT')
         context.active_object.select = True
-        
+
         bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
 
         for obj in selected:
@@ -1152,6 +1163,7 @@ class RMoveMeshOriginToCenter(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class RSeparate(bpy.types.Operator):
     '''Tooltip'''
     bl_description = "Divide mesh."
@@ -1159,11 +1171,11 @@ class RSeparate(bpy.types.Operator):
     bl_label = "Separate"
     bl_options = {'REGISTER', 'UNDO'}
 
-    separate_by = bpy.props.EnumProperty(name = "Separate By:",
-        items = (('loose_parts', "Loose Parts", "Separates by loose parts."),
-            ('material', "Material", "Separates by material.")),
-        description = "Choose the separation criteria.",
-        default = 'loose_parts')
+    separate_by = bpy.props.EnumProperty(name="Separate By:",
+                                         items=(('loose_parts', "Loose Parts", "Separates by loose parts."),
+                                                ('material', "Material", "Separates by material.")),
+                                         description = "Choose the separation criteria.",
+                                         default = 'loose_parts')
 
     origin_to_center = bpy.props.BoolProperty(name="Move Origins To Centers", default=False)
 
@@ -1196,6 +1208,7 @@ class RSeparate(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class RAlignOrientationToSelection(bpy.types.Operator):
     '''Tooltip'''
     bl_description = "Align object's orientation to the selected elements."
@@ -1219,15 +1232,15 @@ class RAlignOrientationToSelection(bpy.types.Operator):
         storeCursorY = context.space_data.cursor_location.y
         storeCursorZ = context.space_data.cursor_location.z
 
-        #Create custom orientation
+        # Create custom orientation
         bpy.context.space_data.transform_orientation = 'NORMAL'
         bpy.ops.transform.create_orientation(name="rOrientation", use=True, overwrite=True)
         bpy.ops.view3d.snap_cursor_to_selected()
 
-        #Exit to Object Mode
+        # Exit to Object Mode
         bpy.ops.object.editmode_toggle()
 
-        #1st Layer visibility
+        # 1st Layer visibility
         first_layer_was_off = False
 
         if bpy.context.scene.layers[0] != True:
@@ -1235,24 +1248,23 @@ class RAlignOrientationToSelection(bpy.types.Operator):
             first_layer_was_off = True
             bpy.context.scene.layers[0] = True
 
-
-        #Add empty aligned to the orientation
+        # Add empty aligned to the orientation
         bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.object.empty_add(type='PLAIN_AXES', view_align=False, layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
         empty = context.selected_objects
         bpy.ops.transform.transform(mode='ALIGN', value=(0, 0, 0, 0), axis=(0, 0, 0), constraint_axis=(False, False, False), constraint_orientation='rOrientation', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
-        #Copy Rotation from empty
+        # Copy Rotation from empty
         obj.select = True
         SetLocalTransformRotation(context)
 
-        #Delete empty
+        # Delete empty
         bpy.ops.object.select_all(action='DESELECT')
         for obj in empty:
             obj.select = True
         bpy.ops.object.delete()
 
-        #Restore state
+        # Restore state
         bpy.ops.object.select_all(action='DESELECT')
         for obj in selected:
             obj.select = True
@@ -1269,14 +1281,15 @@ class RAlignOrientationToSelection(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class RAlignOrientationToSelectionWarning(bpy.types.Operator):
 
     bl_idname = "object.ralign_orientation_to_selection_warning"
     bl_label = "You can't change the orientation of multi-user objects."
     bl_options = {"UNDO", "INTERNAL"}
 
-    #Trivia: Properties can be defined here in such a dialog. Example:
-    #string_prop = bpy.props.StringProperty(name="String Prop")
+    # Trivia: Properties can be defined here in such a dialog. Example:
+    # string_prop = bpy.props.StringProperty(name="String Prop")
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
@@ -1285,12 +1298,13 @@ class RAlignOrientationToSelectionWarning(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class VIEW3D_MT_reditadd(bpy.types.Menu):
     bl_context = "editmode"
     bl_label = "Add"
 
     def draw(self, context):
-        
+
         layout = self.layout
 
         layout.operator("mesh.primitive_plane_add", text="Plane", icon='MESH_PLANE')
@@ -1305,22 +1319,23 @@ class VIEW3D_MT_reditadd(bpy.types.Menu):
         layout.operator("mesh.primitive_grid_add", text="Grid", icon='MESH_GRID')
         layout.operator("mesh.primitive_monkey_add", text="Monkey", icon='MESH_MONKEY')
 
+
 class VIEW3D_MT_robjectadd(bpy.types.Menu):
     bl_context = "editmode"
     bl_label = "Add"
 
     def draw(self, context):
-        
+
         layout = self.layout
 
         layout.operator_context = 'EXEC_REGION_WIN'
 
-        #layout.operator_menu_enum("object.mesh_add", "type", text="Mesh", icon='OUTLINER_OB_MESH')
+        # layout.operator_menu_enum("object.mesh_add", "type", text="Mesh", icon='OUTLINER_OB_MESH')
         layout.menu("INFO_MT_mesh_add", icon='OUTLINER_OB_MESH')
 
-        #layout.operator_menu_enum("object.curve_add", "type", text="Curve", icon='OUTLINER_OB_CURVE')
+        # layout.operator_menu_enum("object.curve_add", "type", text="Curve", icon='OUTLINER_OB_CURVE')
         layout.menu("INFO_MT_curve_add", icon='OUTLINER_OB_CURVE')
-        #layout.operator_menu_enum("object.surface_add", "type", text="Surface", icon='OUTLINER_OB_SURFACE')
+        # layout.operator_menu_enum("object.surface_add", "type", text="Surface", icon='OUTLINER_OB_SURFACE')
         layout.menu("INFO_MT_surface_add", icon='OUTLINER_OB_SURFACE')
         layout.menu("INFO_MT_metaball_add", text="Metaball", icon='OUTLINER_OB_META')
         layout.operator("object.text_add", text="Text", icon='OUTLINER_OB_FONT')
@@ -1348,7 +1363,7 @@ class VIEW3D_MT_robjectadd(bpy.types.Menu):
             layout.operator_menu_enum("object.group_instance_add", "group", text="Group Instance", icon='OUTLINER_OB_EMPTY')
 
 
-#------------------- FUNCTIONS ------------------------------ 
+# ------------------- FUNCTIONS ------------------------------
 
 
 def SetLocalTransformRotation(context):
@@ -1356,128 +1371,128 @@ def SetLocalTransformRotation(context):
     context.space_data.use_pivot_point_align = False
     context.space_data.transform_orientation = 'LOCAL'
     amount_selected = len(bpy.context.selected_objects)
-    
+
     if amount_selected >= 1:
-    
+
         empty_exists, source_empty = GetSourceEmpty(context)
-  
+
         if amount_selected > 1:
-        
+
             # bpy.ops.object.transform_apply works on all the selected objects, but we don't want that.
-            #So deselect all first, and later reselect all again.
+            # So deselect all first, and later reselect all again.
             original_selected_objects = bpy.context.selected_objects
-            
+
             for i in bpy.context.selected_objects:
                 i.select = False
 
-            #Loop through all the objects which were previously selected 
+            # Loop through all the objects which were previously selected
             for i in original_selected_objects:
 
-                #Only set the object if the current object is not the active object at the same time
+                # Only set the object if the current object is not the active object at the same time
                 if context.active_object != i:
-                
+
                     i.select = True
-                    
+
                     i.rotation_mode = 'QUATERNION'
-                    
-                    #Store the start rotation of the selected object
+
+                    # Store the start rotation of the selected object
                     rotation_before = i.matrix_world.to_quaternion()
-                    
-                    #Remove any parents. If an Object is a child of another object, the
-                    #Local Transform orientation settings will be messed up
+
+                    # Remove any parents. If an Object is a child of another object, the
+                    # Local Transform orientation settings will be messed up
                     RemoveParent(context, i)
 
-                    #Align the rotation of the selected object with the rotation of the active object
+                    # Align the rotation of the selected object with the rotation of the active object
                     bpy.ops.transform.transform(mode='ALIGN')
-                    
-                    #Store the rotation of the selected object after it has been rotated
+
+                    # Store the rotation of the selected object after it has been rotated
                     rotation_after = i.matrix_world.to_quaternion()
-                    
-                    #Calculate the difference in rotation from before to after the rotation
+
+                    # Calculate the difference in rotation from before to after the rotation
                     rotation_difference = rotation_before.rotation_difference(rotation_after)
 
-                    #Rotate the object the opposite way as done with the ALIGN function
+                    # Rotate the object the opposite way as done with the ALIGN function
                     i.rotation_quaternion = rotation_difference.inverted()
-                    
-                    
-                    obj = context.active_object 
+
+                    obj = context.active_object
                     context.scene.objects.active = i
                     obj.select = False
-                    
-                   
-                    #Align the local rotation of all the selected objects with the global world orientation 
-                    bpy.ops.object.transform_apply(rotation = True)
-                    
+
+                    # Align the local rotation of all the selected objects with the global world orientation
+                    bpy.ops.object.transform_apply(rotation=True)
+
                     obj.select = True
                     context.scene.objects.active = obj
-                    
-                    #Set the roation of the selected object to the rotation of the active object
+
+                    # Set the roation of the selected object to the rotation of the active object
                     i.rotation_quaternion = context.active_object.matrix_world.to_quaternion()
-                    
-                    #Deselect again
+
+                    # Deselect again
                     i.select = False
-                    
-            #restore selected objects
+
+            # restore selected objects
             for i in original_selected_objects:
-                i.select = True        
+                i.select = True
 
         if(amount_selected == 1) and (empty_exists == True) and IsMatrixRightHanded(source_empty.matrix_world):
-        
-            context.active_object.rotation_mode = 'QUATERNION' 
-            
-            #Store the start rotation of the selected object
+
+            context.active_object.rotation_mode = 'QUATERNION'
+
+            # Store the start rotation of the selected object
             rotation_before = context.active_object.matrix_world.to_quaternion()
-            
+
             RemoveParent(context, context.active_object)
-   
-            obj = context.active_object        
-            source_empty.select = True 
+
+            obj = context.active_object
+            source_empty.select = True
             context.scene.objects.active = source_empty
-            
-            #Align the rotation of the selected object with the rotation of the active object
+
+            # Align the rotation of the selected object with the rotation of the active object
             bpy.ops.transform.transform(mode='ALIGN')
-            
-            #Set the Object to active
+
+            # Set the Object to active
             source_empty.select = False
-            context.scene.objects.active = obj 
-            
-            #Store the rotation of the selected object after it has been rotated
+            context.scene.objects.active = obj
+
+            # Store the rotation of the selected object after it has been rotated
             rotation_after = context.active_object.matrix_world.to_quaternion()
-            
-            #Calculate the difference in rotation from before to after the rotation
+
+            # Calculate the difference in rotation from before to after the rotation
             rotation_difference = rotation_before.rotation_difference(rotation_after)
 
-            #Rotate the object the opposite way as done with the ALIGN function
+            # Rotate the object the opposite way as done with the ALIGN function
             context.active_object.rotation_quaternion = rotation_difference.inverted()
 
-            #Align the local rotation of the selected object with the global world orientation 
-            bpy.ops.object.transform_apply(rotation = True)
+            # Align the local rotation of the selected object with the global world orientation
+            bpy.ops.object.transform_apply(rotation=True)
 
-            #Set the rotation of the selected object to the rotation of the active object
+            # Set the rotation of the selected object to the rotation of the active object
             context.active_object.rotation_quaternion = source_empty.matrix_world.to_quaternion()
+
 
 def GetSourceEmpty(context):
 
     amount_selected = len(bpy.context.selected_objects)
-    
+
     if amount_selected >= 1:
-    
+
         if amount_selected == 1:
-    
-            #Check whether the active object has an empty 
+
+            # Check whether the active object has an empty
             name = "Empty." + context.active_object.name
             try:
                 obj = bpy.data.objects[name]
             except KeyError:
                 return False, bpy.ops.object
-            else:        
+            else:
                 return True, obj
-                
+
         if amount_selected > 1:
             return True, context.active_object
-            
+
     else:
         return False, bpy.ops.object
+
 
 def IsMatrixRightHanded(mat):
 
@@ -1485,21 +1500,22 @@ def IsMatrixRightHanded(mat):
     y = mat.col[1].to_3d()
     z = mat.col[2].to_3d()
     check_vector = x.cross(y)
-    
-    #If the coordinate system is right handed, the angle between z and check_vector
-    #should be 0, but we will use 0.1 to take rounding errors into account
+
+    # If the coordinate system is right handed, the angle between z and check_vector
+    # should be 0, but we will use 0.1 to take rounding errors into account
     angle = z.angle(check_vector)
-    
+
     if angle <= 0.1:
         return True
     else:
         errorStorage.SetError(ErrorMessage.not_right_handed)
         return False
 
+
 def RemoveParent(context, obj):
 
-    #Remove any parents. If an Object is a child of another object, the
-    #Local Transform orientation settings will be messed up if it is changed
+    # Remove any parents. If an Object is a child of another object, the
+    # Local Transform orientation settings will be messed up if it is changed
     active_obj = context.active_object
     bpy.context.scene.objects.active = obj
     bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
@@ -1520,6 +1536,7 @@ def is_node_category(obj):
     else:
         return True
 
+
 def debug_print_node_cats():
     """ This is a debug function to find the node category menu classes """
 
@@ -1529,7 +1546,7 @@ def debug_print_node_cats():
     node_cats['ShaderNodeTree_old'] = []
     node_cats['TextureNodeTree'] = []
 
-    for name,value in inspect.getmembers(bpy.types, is_node_category):
+    for name, value in inspect.getmembers(bpy.types, is_node_category):
         if name.find('_CMP_') > 0:
             node_cats['CompositorNodeTree'].append(name)
         elif name.find('_SH_NEW_') > 0:
@@ -1541,6 +1558,7 @@ def debug_print_node_cats():
 
     print(node_cats)
 
+
 def is_group_in_selected(selected_nodes):
     """ Function to test if there's a group in the selected nodes """
 
@@ -1551,62 +1569,63 @@ def is_group_in_selected(selected_nodes):
         if node.bl_idname in groups:
             result = True
 
-    return result        
+    return result
 
 
 # Build the nodes categories for the add menu
 node_categories = {}
 node_categories['CompositorNodeTree'] = [
-    'NODE_MT_category_CMP_INPUT', 
+    'NODE_MT_category_CMP_INPUT',
     'NODE_MT_category_CMP_OUTPUT',
-    'NODE_MT_category_CMP_OP_COLOR', 
-    'NODE_MT_category_CMP_CONVERTOR', 
-    'NODE_MT_category_CMP_OP_FILTER', 
-    'NODE_MT_category_CMP_OP_VECTOR', 
-    'NODE_MT_category_CMP_MATTE', 
-    'NODE_MT_category_CMP_DISTORT', 
-    'NODE_MT_category_CMP_GROUP', 
-    'NODE_MT_category_CMP_LAYOUT', 
+    'NODE_MT_category_CMP_OP_COLOR',
+    'NODE_MT_category_CMP_CONVERTOR',
+    'NODE_MT_category_CMP_OP_FILTER',
+    'NODE_MT_category_CMP_OP_VECTOR',
+    'NODE_MT_category_CMP_MATTE',
+    'NODE_MT_category_CMP_DISTORT',
+    'NODE_MT_category_CMP_GROUP',
+    'NODE_MT_category_CMP_LAYOUT',
 ]
 
 node_categories['ShaderNodeTree_old'] = [
-    'NODE_MT_category_SH_INPUT', 
+    'NODE_MT_category_SH_INPUT',
     'NODE_MT_category_SH_OUTPUT'
-    'NODE_MT_category_SH_OP_COLOR', 
-    'NODE_MT_category_SH_OP_VECTOR', 
-    'NODE_MT_category_SH_CONVERTOR', 
-    'NODE_MT_category_SH_GROUP', 
-    'NODE_MT_category_SH_LAYOUT', 
+    'NODE_MT_category_SH_OP_COLOR',
+    'NODE_MT_category_SH_OP_VECTOR',
+    'NODE_MT_category_SH_CONVERTOR',
+    'NODE_MT_category_SH_GROUP',
+    'NODE_MT_category_SH_LAYOUT',
 ]
 
 node_categories['ShaderNodeTree'] = [
-    'NODE_MT_category_SH_NEW_INPUT', 
-    'NODE_MT_category_SH_NEW_OUTPUT', 
-    'NODE_MT_category_SH_NEW_SHADER', 
+    'NODE_MT_category_SH_NEW_INPUT',
+    'NODE_MT_category_SH_NEW_OUTPUT',
+    'NODE_MT_category_SH_NEW_SHADER',
     'NODE_MT_category_SH_NEW_TEXTURE',
-    'NODE_MT_category_SH_NEW_OP_COLOR', 
-    'NODE_MT_category_SH_NEW_OP_VECTOR', 
-    'NODE_MT_category_SH_NEW_CONVERTOR', 
-    'NODE_MT_category_SH_NEW_SCRIPT', 
-    'NODE_MT_category_SH_NEW_GROUP', 
-    'NODE_MT_category_SH_NEW_LAYOUT', 
+    'NODE_MT_category_SH_NEW_OP_COLOR',
+    'NODE_MT_category_SH_NEW_OP_VECTOR',
+    'NODE_MT_category_SH_NEW_CONVERTOR',
+    'NODE_MT_category_SH_NEW_SCRIPT',
+    'NODE_MT_category_SH_NEW_GROUP',
+    'NODE_MT_category_SH_NEW_LAYOUT',
 ]
 
 node_categories['TextureNodeTree'] = [
-    'NODE_MT_category_TEX_INPUT', 
-    'NODE_MT_category_TEX_OUTPUT', 
-    'NODE_MT_category_TEX_OP_COLOR', 
-    'NODE_MT_category_TEX_PATTERN', 
+    'NODE_MT_category_TEX_INPUT',
+    'NODE_MT_category_TEX_OUTPUT',
+    'NODE_MT_category_TEX_OP_COLOR',
+    'NODE_MT_category_TEX_PATTERN',
     'NODE_MT_category_TEX_TEXTURE',
-    'NODE_MT_category_TEX_CONVERTOR', 
-    'NODE_MT_category_TEX_DISTORT', 
-    'NODE_MT_category_TEX_GROUP', 
-    'NODE_MT_category_TEX_LAYOUT', 
+    'NODE_MT_category_TEX_CONVERTOR',
+    'NODE_MT_category_TEX_DISTORT',
+    'NODE_MT_category_TEX_GROUP',
+    'NODE_MT_category_TEX_LAYOUT',
 ]
+
 
 class NODE_MT_rRMB(bpy.types.Menu):
     """ Right-click Menu for the Nodes Editor """
-    
+
     bl_label = ""
     bl_idname = "NODE_MT_rRMB"
 
@@ -1622,7 +1641,6 @@ class NODE_MT_rRMB(bpy.types.Menu):
         use_nodes = context.space_data.id.use_nodes
         tree_type = context.space_data.tree_type
 
-
         if selected:
 
             layout.menu("NODE_MT_add")
@@ -1637,12 +1655,10 @@ class NODE_MT_rRMB(bpy.types.Menu):
                 layout.operator("node.delete_reconnect", text="Delete and Reconnect")
                 layout.operator("node.duplicate_move")
 
-
             # FRAME
             layout.separator()
             layout.operator("node.join", text="Add to Frame")
             layout.operator("node.detach", text="Remove from Frame")
-
 
             # SELECT
             layout.separator()
@@ -1677,9 +1693,10 @@ class NODE_MT_rRMB(bpy.types.Menu):
             layout.operator("node.select_all").action = 'TOGGLE'
             layout.menu("NODE_MT_rRMB_select", text="Select")
 
+
 class NODE_MT_rRMB_select(bpy.types.Menu):
     """ Select submenu for the node editor"""
-    
+
     bl_label = ""
     bl_idname = "NODE_MT_rRMB_select"
 
@@ -1697,18 +1714,20 @@ class NODE_MT_rRMB_select(bpy.types.Menu):
 #  TEXT EDITOR
 # =============================================================================
 
+
 def rRMB_Text_Editor_append(self, context):
     layout = self.layout
-    
+
     layout.operator("text.comment", icon="NONE", text="Comment")
     layout.operator("text.uncomment", icon="NONE", text="Uncomment")
-    #layout.separator()
-    #layout.operator("text.convert_whitespace", type='SPACES', icon="NONE", text="Convert whitespaces to Spaces")
-    #layout.operator("text.convert_whitespace", type='TABS', icon="NONE", text="Convert whitespaces to Tabs")
+    # layout.separator()
+    # layout.operator("text.convert_whitespace", type='SPACES', icon="NONE", text="Convert whitespaces to Spaces")
+    # layout.operator("text.convert_whitespace", type='TABS', icon="NONE", text="Convert whitespaces to Tabs")
+
 
 def rRMB_Text_Editor_prepend(self, context):
     layout = self.layout
-    
+
     layout.separator()
     layout.operator("text.autocomplete", icon="NONE", text="Text Auto Complete")
     layout.separator()
@@ -1719,6 +1738,7 @@ def rRMB_Text_Editor_prepend(self, context):
 # =============================================================================
 #  HEADER MENU
 # =============================================================================
+
 
 class HEADER_OT_rRMB_Join(bpy.types.Operator):
     """Join 2 areas, click on the second area to join"""
@@ -1750,9 +1770,7 @@ class HEADER_OT_rRMB_Join(bpy.types.Operator):
         context.area.header_text_set("Click on the editor to remove")
         context.window_manager.modal_handler_add(self)
 
-
         return {'RUNNING_MODAL'}
-
 
 
 class HEADER_MT_rRMB(bpy.types.Menu):
@@ -1760,7 +1778,6 @@ class HEADER_MT_rRMB(bpy.types.Menu):
 
     bl_label = "Header"
     bl_idname = "HEADER_MT_rRMB"
-
 
     def draw(self, context):
         layout = self.layout
@@ -1774,14 +1791,13 @@ class HEADER_MT_rRMB(bpy.types.Menu):
         layout.operator("area.join_area")
 
         layout.operator_context = 'EXEC_DEFAULT'
-        layout.operator("screen.area_split", text="Split Vertically").direction="VERTICAL"
-        layout.operator("screen.area_split", text="Split Horizontally").direction="HORIZONTAL"
+        layout.operator("screen.area_split", text="Split Vertically").direction = "VERTICAL"
+        layout.operator("screen.area_split", text="Split Horizontally").direction = "HORIZONTAL"
 
         layout.operator_context = 'INVOKE_DEFAULT'
         layout.separator()
         layout.operator("screen.area_dupli")
         layout.operator("screen.screen_full_area")
-   
 
 
 # =============================================================================
@@ -1789,12 +1805,12 @@ class HEADER_MT_rRMB(bpy.types.Menu):
 # =============================================================================
 
 def update_Prefs(self, context):
-    
+
     bpy.types.TEXT_MT_toolbox.remove(rRMB_Text_Editor_append)
     bpy.types.TEXT_MT_toolbox.remove(rRMB_Text_Editor_prepend)
-    
+
     wm = bpy.context.window_manager
-    
+
     if wm.keyconfigs.addon:
         for km in addon_keymaps:
             for kmi in km.keymap_items:
@@ -1803,16 +1819,16 @@ def update_Prefs(self, context):
             wm.keyconfigs.addon.keymaps.remove(km)
 
     addon_keymaps.clear()
-    
+
     kc = wm.keyconfigs.addon
-    
+
     if kc:
 
-        #------------3d View
+        # ------------3d View
         if self.use_3D_View_prop:
             km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
 
-            #Direct Menu Call
+            # Direct Menu Call
             kmi = km.keymap_items.new('wm.call_menu', 'ACTIONMOUSE', 'PRESS')
             kmi.properties.name = "VIEW3D_MT_rRMB"
 
@@ -1820,7 +1836,7 @@ def update_Prefs(self, context):
             kmi = km.keymap_items.new('view3d.cursor3d', 'RIGHTMOUSE', 'PRESS', alt=True)
             addon_keymaps.append(km)
 
-        #------------Node Editor
+        # ------------Node Editor
         if self.use_Node_Editor_prop:
             km = kc.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
 
@@ -1832,12 +1848,12 @@ def update_Prefs(self, context):
             kmi.properties.name = "NODE_MT_rRMB"
             addon_keymaps.append(km)
 
-        #------------Text Editor
+        # ------------Text Editor
         if self.use_in_Text_Editor_prop:
             bpy.types.TEXT_MT_toolbox.append(rRMB_Text_Editor_append)
             bpy.types.TEXT_MT_toolbox.prepend(rRMB_Text_Editor_prepend)
-        
-        #------------Header
+
+        # ------------Header
         print("Hi!")
         if self.use_in_Header_prop:
             km = kc.keymaps.new(name='Header')
@@ -1847,19 +1863,20 @@ def update_Prefs(self, context):
             kmi.properties.name = "HEADER_MT_rRMB"
             addon_keymaps.append(km)
 
+
 class rRMB_User_Prefs(bpy.types.AddonPreferences):
     bl_idname = __name__
-    
+
     use_3D_View_prop = BoolProperty(name="3D View", description="Use Addon in 3D Viewport", default=True, update=update_Prefs)
     use_Node_Editor_prop = BoolProperty(name="Node Editor", description="Use Addon in Node Editor", default=True, update=update_Prefs)
     Node_Editor_switch_buttons_prop = BoolProperty(name="Inverted buttons in Node Editor", description="Switch mouse buttons in Node Editor", default=False, update=update_Prefs)
     use_in_Header_prop = BoolProperty(name="Header", description="Use Addon in Editor Headers", default=True, update=update_Prefs)
-    use_in_Text_Editor_prop =  BoolProperty(name="Text Editor", description="Use Addon in Text Editor", default=True, update=update_Prefs)
+    use_in_Text_Editor_prop = BoolProperty(name="Text Editor", description="Use Addon in Text Editor", default=True, update=update_Prefs)
 
     def draw(self, context):
         layout = self.layout
         col = layout.column()
-        
+
         col.prop(self, "use_3D_View_prop")
         row = col.row(align=False)
         row.prop(self, "use_Node_Editor_prop")
@@ -1867,26 +1884,27 @@ class rRMB_User_Prefs(bpy.types.AddonPreferences):
         col.prop(self, "use_in_Text_Editor_prop")
         col.prop(self, "use_in_Header_prop")
 
-#------------------- REGISTER ------------------------------   
+# ------------------- REGISTER ------------------------------
 
 addon_keymaps = []
 
+
 def register():
-    
+
     bpy.utils.register_module(__name__)
-    
+
     bpy.types.TEXT_MT_toolbox.append(rRMB_Text_Editor_append)
     bpy.types.TEXT_MT_toolbox.prepend(rRMB_Text_Editor_prepend)
-    
+
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
 
-        #------------3d View
+        # ------------3d View
 
         km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
 
-        #Direct Menu Call
+        # Direct Menu Call
         kmi = km.keymap_items.new('wm.call_menu', 'ACTIONMOUSE', 'PRESS')
         kmi.properties.name = "VIEW3D_MT_rRMB"
 
@@ -1894,7 +1912,7 @@ def register():
         kmi = km.keymap_items.new('view3d.cursor3d', 'RIGHTMOUSE', 'PRESS', alt=True)
         addon_keymaps.append(km)
 
-        #------------Node Editor
+        # ------------Node Editor
 
         km = kc.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
 
@@ -1903,27 +1921,28 @@ def register():
         kmi.properties.name = "NODE_MT_rRMB"
         addon_keymaps.append(km)
 
-        #------------Header
+        # ------------Header
 
         km = kc.keymaps.new(name='Header')
 
         # Header Menu
         kmi = km.keymap_items.new('wm.call_menu', 'ACTIONMOUSE', 'PRESS')
         kmi.properties.name = "HEADER_MT_rRMB"
-        addon_keymaps.append(km)      
+        addon_keymaps.append(km)
+
 
 def unregister():
-    
+
     bpy.utils.unregister_module(__name__)
-    
+
     bpy.types.TEXT_MT_toolbox.remove(rRMB_Text_Editor_append)
     bpy.types.TEXT_MT_toolbox.remove(rRMB_Text_Editor_prepend)
 
     # bpy.app.handlers.scene_update_post.remove(sceneupdate_handler)
     # bpy.app.handlers.load_post.remove(load_handler)
-    
+
     wm = bpy.context.window_manager
-    
+
     if wm.keyconfigs.addon:
         for km in addon_keymaps:
             for kmi in km.keymap_items:
@@ -1932,7 +1951,6 @@ def unregister():
             wm.keyconfigs.addon.keymaps.remove(km)
 
     addon_keymaps.clear()
-        
+
 if __name__ == "__main__":
     register()
-

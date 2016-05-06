@@ -29,30 +29,30 @@ bl_info = {
 
 
 import bpy
-from bpy.props import EnumProperty,BoolProperty
+from bpy.props import EnumProperty, BoolProperty
+
 
 class RestrictObject(bpy.types.Operator):
     """Restrict Object visability"""
     bl_idname = "object.restrict_object"
     bl_label = "Restrict Object"
-    bl_options = {'UNDO','REGISTER'}
-    
-    Operation_boolean =  BoolProperty(name="Disable", description="Disable selected property based on the other selected property", default=True)
-    Operation_list =     EnumProperty(items = [('Viewport visibility', 'Viewport visibility', 'viewport visibility'), 
-                                      ('Viewport selection', 'Viewport selection', 'viewport selection'),
-                                      ('Rendering','Rendering','Rendering')],
-                             name="Property",
-                             description="Select the property you want to change",
-                             default="Rendering")   
-    Original_boolean =  BoolProperty(name="Disabled", description="The original property", default= True)
-    Property_list =     EnumProperty(items = [('Viewport visibility', 'Viewport visibility', 'viewport visibility'), 
-                                      ('Viewport selection', 'Viewport selection', 'viewport selection'),
-                                      ('Rendering','Rendering','Rendering')],
-                             name="Original property",
-                             description="Select the property in which the operation will be based on",
-                             default="Viewport visibility")   
-    
-    
+    bl_options = {'UNDO', 'REGISTER'}
+
+    Operation_boolean = BoolProperty(name="Disable", description="Disable selected property based on the other selected property", default=True)
+    Operation_list = EnumProperty(items=[('Viewport visibility', 'Viewport visibility', 'viewport visibility'),
+                                         ('Viewport selection', 'Viewport selection', 'viewport selection'),
+                                         ('Rendering', 'Rendering', 'Rendering')],
+                                  name="Property",
+                                  description="Select the property you want to change",
+                                  default="Rendering")
+    Original_boolean = BoolProperty(name="Disabled", description="The original property", default=True)
+    Property_list = EnumProperty(items=[('Viewport visibility', 'Viewport visibility', 'viewport visibility'),
+                                        ('Viewport selection', 'Viewport selection', 'viewport selection'),
+                                        ('Rendering', 'Rendering', 'Rendering')],
+                                 name="Original property",
+                                 description="Select the property in which the operation will be based on",
+                                 default="Viewport visibility")
+
     def execute(self, context):
 
         op_dict = {
@@ -80,21 +80,21 @@ class RestrictObjectPanel(bpy.types.Panel):
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = 'scene'
-    
-    
+
     def draw(self, context):
         layout = self.layout
-        layout.operator(RestrictObject.bl_idname, text = "Restrict object", icon = 'FILE_REFRESH')
+        layout.operator(RestrictObject.bl_idname, text="Restrict object", icon='FILE_REFRESH')
 
 
 def register():
     bpy.utils.register_class(RestrictObject)
     bpy.utils.register_class(RestrictObjectPanel)
-    
+
+
 def unregister():
     bpy.utils.unregister_class(RestrictObject)
     bpy.utils.unregister_class(RestrictObjectPanel)
-    
-    
+
+
 if __name__ == "__main__":
     register()
