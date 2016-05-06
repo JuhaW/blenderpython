@@ -52,7 +52,6 @@ from mathutils import Vector
 import random
 
 """
-
 create_wires is a module to create wires between two object.
 
 Usage:
@@ -60,13 +59,11 @@ Usage:
     faces it will use all faces of the object (which may result in weird
     connections). On these faces it selects two random points to connect
     the wire to. There are several settings to tweak the wires.
-
 """
 
 
 def check_materials(ob1, ob2):
     """
-
     check_materials(ob1, ob2)
 
     Check if and which materials of ob1 are also on ob2.
@@ -78,7 +75,6 @@ def check_materials(ob1, ob2):
         Returns:
             A list with the material names that are both in ob1 and ob2.
             (An empty list if no matching materials are found.)
-
     """
 
     if len(ob1.material_slots) > 0:
@@ -92,7 +88,6 @@ def check_materials(ob1, ob2):
 
 def get_random_point(ob, self, material=None):
     """
-
     get_random_point(ob)
 
     Get a random point in space on the (selected) faces of an object.
@@ -105,7 +100,6 @@ def get_random_point(ob, self, material=None):
         Returns:
             The coordinate of the random point in world space as a vector and
             the material of the face on which the point lies.
-
     """
 
     faces_opt = self.faces
@@ -142,11 +136,11 @@ def get_random_point(ob, self, material=None):
                     while ob.material_slots[face.material_index].material != material:
                         face = faces[random.randrange(len(faces))]
                         i += 1
-                        if i > 100: # Just to make sure we don't get stuck in this while loop.
-                            #raise ValueError("Didn't find a face in object '%s' with material '%s'." % (ob.name, material.name))
+                        if i > 100:  # Just to make sure we don't get stuck in this while loop.
+                            # raise ValueError("Didn't find a face in object '%s' with material '%s'." % (ob.name, material.name))
                             break
         else:
-            #raise ValueError("Didn't find a face in object '%s' with material '%s'." % (ob.name, material.name))
+            # raise ValueError("Didn't find a face in object '%s' with material '%s'." % (ob.name, material.name))
             pass
 
     vert1_index = face.vertices[0]    # Returns index number of vertex.
@@ -180,7 +174,6 @@ def get_random_point(ob, self, material=None):
 
 def wire_points(**kwargs):
     """
-
     wire_points(**kwargs)
 
     Creates one or more wires (bezier curves) between two points.
@@ -209,7 +202,6 @@ def wire_points(**kwargs):
 
         Returns:
             A list with lists of x,y,z coordinates for curve points, [[x,y,z],[x,y,z],...n]
-
     """
 
     # Pull out the variables.
@@ -234,7 +226,7 @@ def wire_points(**kwargs):
     mid_point[2] += (-drape)    # drape, on z-axis
     mid_point[2] += (random.random() * -drape_random)   # drape_random, on z-axis
     # Calculate the vector perpendicular to curve_vec and the z-axis (up).
-    curve_vec_norm = curve_vec.normalized() # Get normalized curve_vec.
+    curve_vec_norm = curve_vec.normalized()  # Get normalized curve_vec.
     z_vec = Vector((0.0, 0.0, 1.0))         # Vector for z-axis.
     perp_vec = curve_vec_norm.cross(z_vec)  # Perpendicular vector is cross product.
     # Random value between -1.0 and 1.0.
@@ -256,20 +248,18 @@ def wire_points(**kwargs):
     end_point_left += - (curve_vec * start_drape_random * random.random())
 
     curve_points = [
-                    start_point,
-                    mid_point,
-                    end_point,
-                    start_point_right,
-                    end_point_left,
-                    ]
+        start_point,
+        mid_point,
+        end_point,
+        start_point_right,
+        end_point_left,
+    ]
 
     return curve_points
 
 
 def create_wire(curve_points, num, self, curve_mat, curve_object=None):
-
     """
-
     create_wire(curve_points, self, curve_object=None)
 
     Creates one or more wires (bezier curves) between two points.
@@ -281,7 +271,6 @@ def create_wire(curve_points, num, self, curve_mat, curve_object=None):
 
         Returns:
             The (newly created) wire object.
-
     """
 
     midpoint_tangent = self.midpoint_tangent
@@ -327,13 +316,13 @@ def create_wire(curve_points, num, self, curve_mat, curve_object=None):
                 for slot in new_obj.material_slots:
                     if slot.material == curve_mat:
                         new_spline.material_index = curve_mat
-            #if mat_index:
+            # if mat_index:
             #    new_spline.material_index = mat_index
 
         # First check if the object has the passed material.
-        #if len(new_obj.material_slots) > 0:
-            #for slot in new_obj.material_slots:
-                #if slot.material == curve_mat:
+        # if len(new_obj.material_slots) > 0:
+            # for slot in new_obj.material_slots:
+                # if slot.material == curve_mat:
                     # If the material is found on the object, check if the
                     # face has this material.
 
@@ -377,9 +366,7 @@ def create_wire(curve_points, num, self, curve_mat, curve_object=None):
 
 
 def main(context, self):
-
     """
-
     main(context, self)
 
     The main function of add_curve_wires. This handles the real creation of the wire(s).
@@ -390,14 +377,13 @@ def main(context, self):
 
         Returns:
             A list of the created wire object(s).
-
     """
 
     # Get the selected objects.
-    #try:
+    # try:
     # Make sure exactly TWO objects are selected.
     #    ob1, ob2 = bpy.context.selected_objects
-    #except ValueError:
+    # except ValueError:
     #    raise ValueError("You have to select exactly TWO mesh objects.")
     if len(bpy.context.selected_objects) != 2:
         raise ValueError("You have to select exactly TWO mesh objects.")
@@ -423,7 +409,7 @@ def main(context, self):
 
     # If use_mat, check if objects have matching materials.
     # If not, ignore this setting.
-    #match_mats = check_materials(ob1, ob2)
+    # match_mats = check_materials(ob1, ob2)
 
     # Make num_wires amount of wires, so put this in a for loop.
     curve_object = None
@@ -435,34 +421,34 @@ def main(context, self):
         curve_mat = material
         end_point, material, mat_index = get_random_point(ob2, self, material)
         curve_points = wire_points(
-                                   start_point=start_point,
-                                   end_point=end_point,
-                                   start_drape=start_drape,
-                                   start_drape_random=start_drape_random,
-                                   drape=drape,
-                                   drape_random=drape_random,
-                                   midpoint_u=midpoint_u,
-                                   midpoint_random_u=midpoint_random_u,
-                                   midpoint_v=midpoint_v,
-                                   midpoint_random_v=midpoint_random_v,
-                                  )
+            start_point=start_point,
+            end_point=end_point,
+            start_drape=start_drape,
+            start_drape_random=start_drape_random,
+            drape=drape,
+            drape_random=drape_random,
+            midpoint_u=midpoint_u,
+            midpoint_random_u=midpoint_random_u,
+            midpoint_v=midpoint_v,
+            midpoint_random_v=midpoint_random_v,
+        )
 
         # Create the object.
         if self.one_object:
             curve_object = create_wire(
-                                       curve_points,
-                                       0,
-                                       self,
-                                       curve_mat,
-                                       curve_object,
-                                       )
+                curve_points,
+                0,
+                self,
+                curve_mat,
+                curve_object,
+            )
         else:
             curve_object = create_wire(
-                                       curve_points,
-                                       i,
-                                       self,
-                                       curve_mat,
-                                       )
+                curve_points,
+                i,
+                self,
+                curve_mat,
+            )
         if not curve_object in new_objects:
             new_objects.append(curve_object)
 
@@ -482,158 +468,158 @@ class Wires(bpy.types.Operator):
             self.num_wires = 50
 
     name = StringProperty(
-                          name="Name",
-                          description="The (base)name of the wire object(s)",
-                          default="wire",
-                          )
+        name="Name",
+        description="The (base)name of the wire object(s)",
+        default="wire",
+    )
     seed = IntProperty(
-                       name="Seed",
-                       description="The seed to drive the random values",
-                       default=2105,
-                       min=1
-                       )
+        name="Seed",
+        description="The seed to drive the random values",
+        default=2105,
+        min=1
+    )
     num_wires = IntProperty(
-                            name="Amount",
-                            description="The number of wires to create",
-                            default=1,
-                            min=1,
-                            max=1000,
-                            soft_max=100,
-                           )
+        name="Amount",
+        description="The number of wires to create",
+        default=1,
+        min=1,
+        max=1000,
+        soft_max=100,
+    )
     one_object = BoolProperty(
-                              name="One object",
-                              description="Create the wires in one object instead of one object per wire",
-                              default=True,
-                              )
+        name="One object",
+        description="Create the wires in one object instead of one object per wire",
+        default=True,
+    )
     assign_mats = BoolProperty(
-                               name="Assign materials",
-                               description="Assign the material from the connected face of the active object to the wire(s)",
-                               default=False,
-                               )
+        name="Assign materials",
+        description="Assign the material from the connected face of the active object to the wire(s)",
+        default=False,
+    )
     faces_items = [
-                   ("SELECTED", "Selected", "Use only the selected faces (all faces if nothing is selected)"),
-                   ("ALL", "All", "Use all the faces of the object."),
-                   ]
+        ("SELECTED", "Selected", "Use only the selected faces (all faces if nothing is selected)"),
+        ("ALL", "All", "Use all the faces of the object."),
+    ]
     faces = EnumProperty(
-                         name="Use faces",
-                         description="Choose which faces to use",
-                         items=faces_items,
-                         )
+        name="Use faces",
+        description="Choose which faces to use",
+        items=faces_items,
+    )
     use_mat = BoolProperty(
-                           name="Use materials",
-                           description="Connect the wire(s) to faces with the same material (if possible)",
-                           default=False
-                           )
+        name="Use materials",
+        description="Connect the wire(s) to faces with the same material (if possible)",
+        default=False
+    )
     start_drape = FloatProperty(
-                                name="Start drape",
-                                description="How much the wire(s) start(s) hanging at the end points",
-                                default=0.0,
-                                min=-10.0,
-                                max=10.0,
-                                soft_min=0.0,
-                                soft_max=0.5,
-                                step=1,
-                                )
+        name="Start drape",
+        description="How much the wire(s) start(s) hanging at the end points",
+        default=0.0,
+        min=-10.0,
+        max=10.0,
+        soft_min=0.0,
+        soft_max=0.5,
+        step=1,
+    )
     start_drape_random = FloatProperty(
-                                 name="Random start drape",
-                                 description="The amount of random start drape",
-                                 default=0.0,
-                                 min=-10.0,
-                                 max=10.0,
-                                 soft_min=0.0,
-                                 soft_max=0.5,
-                                 step=1,
-                                 )
+        name="Random start drape",
+        description="The amount of random start drape",
+        default=0.0,
+        min=-10.0,
+        max=10.0,
+        soft_min=0.0,
+        soft_max=0.5,
+        step=1,
+    )
     drape = FloatProperty(
-                          name="Drape",
-                          description="The drape of the wire(s) (how much the wire(s) hang(s)",
-                          default=1.0,
-                          soft_min=-10.0,
-                          soft_max=10.0,
-                          step=10,
-                          )
+        name="Drape",
+        description="The drape of the wire(s) (how much the wire(s) hang(s)",
+        default=1.0,
+        soft_min=-10.0,
+        soft_max=10.0,
+        step=10,
+    )
     drape_random = FloatProperty(
-                                 name="Random drape",
-                                 description="The amount of random drape",
-                                 default=0.5,
-                                 soft_min=-10.0,
-                                 soft_max=10.0,
-                                 step=1,
-                                 )
+        name="Random drape",
+        description="The amount of random drape",
+        default=0.5,
+        soft_min=-10.0,
+        soft_max=10.0,
+        step=1,
+    )
     midpoint_tangent = FloatProperty(
-                                     name="Tangent",
-                                     description="The 'shallowness' of the curve of the midpoint",
-                                     default=1.0,
-                                     min=-10.0,
-                                     max=10.0,
-                                     soft_min=0.0,
-                                     soft_max=2.0,
-                                     step=1,
-                                     )
+        name="Tangent",
+        description="The 'shallowness' of the curve of the midpoint",
+        default=1.0,
+        min=-10.0,
+        max=10.0,
+        soft_min=0.0,
+        soft_max=2.0,
+        step=1,
+    )
     midpoint_u = FloatProperty(
-                               name="Offset U",
-                               description="The offset of the midpoint along the wire(s)",
-                               default=0.0,
-                               soft_min=-10.0,
-                               soft_max=10.0,
-                               step=1,
-                               )
+        name="Offset U",
+        description="The offset of the midpoint along the wire(s)",
+        default=0.0,
+        soft_min=-10.0,
+        soft_max=10.0,
+        step=1,
+    )
     midpoint_random_u = FloatProperty(
-                                      name="Random U",
-                                      description="The random offset of the midpoint along the wire(s)",
-                                      default=0.0,
-                                      min=0.0,
-                                      soft_max=10.0,
-                                      step=1,
-                                      )
+        name="Random U",
+        description="The random offset of the midpoint along the wire(s)",
+        default=0.0,
+        min=0.0,
+        soft_max=10.0,
+        step=1,
+    )
     midpoint_v = FloatProperty(
-                               name="Offset V",
-                               description="The offset of the midpoint perpendicular to the wire(s)",
-                               default=0.0,
-                               soft_min=-10.0,
-                               soft_max=10.0,
-                               step=1,
-                               )
+        name="Offset V",
+        description="The offset of the midpoint perpendicular to the wire(s)",
+        default=0.0,
+        soft_min=-10.0,
+        soft_max=10.0,
+        step=1,
+    )
     midpoint_random_v = FloatProperty(
-                                      name="Random V",
-                                      description="The random offset of the midpoint perpendicular to the wire(s)",
-                                      default=0.0,
-                                      min=0.0,
-                                      soft_max=10.0,
-                                      step=1,
-                                      )
+        name="Random V",
+        description="The random offset of the midpoint perpendicular to the wire(s)",
+        default=0.0,
+        min=0.0,
+        soft_max=10.0,
+        step=1,
+    )
     wire_bevel_depth = FloatProperty(
-                                     name="Thickness",
-                                     description="The thickness of the wire(s)",
-                                     default=0.01,
-                                     min=0.0001,
-                                     soft_max=1.0,
-                                     step=1,
-                                     )
+        name="Thickness",
+        description="The thickness of the wire(s)",
+        default=0.01,
+        min=0.0001,
+        soft_max=1.0,
+        step=1,
+    )
     wire_bevel_resolution = IntProperty(
-                                        name="V resolution",
-                                        description="The resolution of the cross section(s)",
-                                        default=1,
-                                        min=0,
-                                        max=32,
-                                        soft_max=10,
-                                        )
+        name="V resolution",
+        description="The resolution of the cross section(s)",
+        default=1,
+        min=0,
+        max=32,
+        soft_max=10,
+    )
     wire_resolution = IntProperty(
-                                  name="Preview U",
-                                  description="The preview resolution of the wire(s)",
-                                  default=12,
-                                  min=1,
-                                  max=64,
-                                  soft_max=32,
-                                  )
+        name="Preview U",
+        description="The preview resolution of the wire(s)",
+        default=12,
+        min=1,
+        max=64,
+        soft_max=32,
+    )
     wire_render_resolution = IntProperty(
-                                         name="Render U",
-                                         description="The render resolution of the wire(s) (0 means: is the same as Preview U",
-                                         default=0,
-                                         min=0,
-                                         max=64,
-                                         soft_max=32,
-                                         )
+        name="Render U",
+        description="The render resolution of the wire(s) (0 means: is the same as Preview U",
+        default=0,
+        min=0,
+        max=64,
+        soft_max=32,
+    )
 
     # Draw
     def draw(self, context):
@@ -646,7 +632,7 @@ class Wires(bpy.types.Operator):
         box.prop(self, 'seed')
         if self.num_wires > 1:
             box.prop(self, 'one_object')
-        #box.prop(self, 'assign_mats')
+        # box.prop(self, 'assign_mats')
         box = layout.box()
         box.label(text="Connection options:")
         box.row().prop(self, 'faces', expand=True)
@@ -679,14 +665,14 @@ class Wires(bpy.types.Operator):
     # Execute
     def execute(self, context):
         # Turn off undo. Copied this from curveaceous_galore. Don't know why this is.
-        #bpy.context.user_preferences.edit.use_global_undo = True
-        #bpy.context.user_preferences.edit.use_global_undo = False
+        # bpy.context.user_preferences.edit.use_global_undo = True
+        # bpy.context.user_preferences.edit.use_global_undo = False
 
         # Run main function.
         main(context, self)
 
         # Restore pre-operator undo state.
-        #bpy.context.user_preferences.edit.use_global_undo = True
+        # bpy.context.user_preferences.edit.use_global_undo = True
 
         return {'FINISHED'}
 

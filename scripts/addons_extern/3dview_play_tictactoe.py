@@ -21,20 +21,18 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {"name": "Play Tic-Tac-Toe",
            "description": "Play tic-tac-toe in the viewport!",
            "author": "Quentin Wenger (Matpi)",
            "version": (1, 0),
            "blender": (2, 75, 0),
-           "location": "Custom Render Engine -> Play Tic-Tac-Toe, then "\
+           "location": "Custom Render Engine -> Play Tic-Tac-Toe, then "
                        "'Start' in the menu.",
            "warning": "",
            "wiki_url": "",
            "tracker_url": "",
            "category": "System"
            }
-
 
 
 import bpy
@@ -54,7 +52,7 @@ init = [False]
 class TicTacToePlay(bpy.types.RenderEngine):
     bl_idname = 'tictactoe_renderer'
     bl_label = 'Play Tic-Tac-Toe!'
-    #bl_use_preview = True
+    # bl_use_preview = True
 
     def view_draw(self, context):
         if game[0]:
@@ -65,13 +63,13 @@ class TicTacToePlay(bpy.types.RenderEngine):
             game[0] = TicTacToeGame()
             """if not init[0]:
                 bpy.app.handlers.scene_update_post.append(addBootstrap)"""
-            
-        
+
     def view_update(self, context):
         pass
-        
+
     def render(self, scene):
         pass
+
 
 class TicTacToeOperator(bpy.types.Operator):
     bl_idname = "view3d.modal_operator_tictactoe"
@@ -88,9 +86,9 @@ class TicTacToeOperator(bpy.types.Operator):
         context.region_data.update()
         context.region.tag_redraw()
         return {'PASS_THROUGH'}
-        
+
     def invoke(self, context, event):
-        #if context.space_data.type == 'VIEW_3D':
+        # if context.space_data.type == 'VIEW_3D':
         context.space_data.viewport_shade = 'RENDERED'
         context.window_manager.modal_handler_add(self)
         init[0] = True
@@ -100,27 +98,29 @@ class TicTacToeOperator(bpy.types.Operator):
             self.report({'WARNING'}, "Active space must be a View3d")
             return {'CANCELLED'}
         """
-    
+
+
 class TicTacToeOperator(bpy.types.Operator):
     bl_idname = "view3d.modal_operator_tictactoe_restart"
     bl_label = "Tic Tac Toe Operator Restart"
     bl_options = {'INTERNAL'}
-        
+
     def execute(self, context):
         if game[0]:
             game[0].start()
         return {'FINISHED'}
 
+
 class TicTacToeGame(object):
 
     NONE = 0
-    
+
     PLAYER = 1
     COMPUTER = 2
 
     # filling factor for drawing items into cells
     FACTOR = 0.8
-    EMPTY_FACTOR = (1.0 - FACTOR)/2.0
+    EMPTY_FACTOR = (1.0 - FACTOR) / 2.0
 
     # scale factor for the board into the viewport
     BOARD_FACTOR = 0.8
@@ -160,7 +160,7 @@ class TicTacToeGame(object):
             if self.round == self.PLAYER:
                 if self.mouse_coords:
                     x, y = self.mouse_coords
-                    
+
                     w = context.region.width
                     h = context.region.height
 
@@ -169,11 +169,10 @@ class TicTacToeGame(object):
                     if i != -1:
                         self.playPlayer(i, j)
 
-
             elif self.round == self.COMPUTER:
                 self.playComputer()
                 self.mouse_coords = None
-                    
+
             self.checkWins()
 
             if self.winner != self.NONE:
@@ -190,18 +189,18 @@ class TicTacToeGame(object):
             # just hide the cursor...
             context.space_data.cursor_location = [0.0, 0.0, 10.0]
             context.space_data.region_3d.view_matrix = Matrix.Identity(4)
-            
+
             w = context.region.width
             h = context.region.height
-            
+
             x1, x2, x3, x4, y1, y2, y3, y4 = self.grid(w, h)
-                       
+
             bgl.glMatrixMode(bgl.GL_PROJECTION)
             bgl.glLoadIdentity()
             bgl.gluOrtho2D(0, w, 0, h)
             bgl.glMatrixMode(bgl.GL_MODELVIEW)
             bgl.glLoadIdentity()
-            
+
             bgl.glColor3f(*self.COLOR_BOARD)
             bgl.glLineWidth(2.0)
             bgl.glBegin(bgl.GL_LINES)
@@ -215,7 +214,7 @@ class TicTacToeGame(object):
 
             xs = (x1, x2, x3, x4)
             ys = (y1, y2, y3, y4)
-            
+
             bgl.glLineWidth(8.0)
             bgl.glBegin(bgl.GL_LINES)
             for i in range(3):
@@ -257,22 +256,22 @@ class TicTacToeGame(object):
     def drawO(self, xa, xb, ya, yb):
         bgl.glColor3f(*self.COLOR_O)
         r = xb - xa
-        bgl.glVertex3f(xa + r*self.EMPTY_FACTOR, (ya + yb)/2.0, 0.0)
-        bgl.glVertex3f((xa + xb)/2.0, yb - r*self.EMPTY_FACTOR, 0.0)
-        bgl.glVertex3f((xa + xb)/2.0, yb - r*self.EMPTY_FACTOR, 0.0)
-        bgl.glVertex3f(xb - r*self.EMPTY_FACTOR, (ya + yb)/2.0, 0.0)
-        bgl.glVertex3f(xb - r*self.EMPTY_FACTOR, (ya + yb)/2.0, 0.0)
-        bgl.glVertex3f((xa + xb)/2.0, ya + r*self.EMPTY_FACTOR, 0.0)
-        bgl.glVertex3f((xa + xb)/2.0, ya + r*self.EMPTY_FACTOR, 0.0)
-        bgl.glVertex3f(xa + r*self.EMPTY_FACTOR, (ya + yb)/2.0, 0.0)
+        bgl.glVertex3f(xa + r * self.EMPTY_FACTOR, (ya + yb) / 2.0, 0.0)
+        bgl.glVertex3f((xa + xb) / 2.0, yb - r * self.EMPTY_FACTOR, 0.0)
+        bgl.glVertex3f((xa + xb) / 2.0, yb - r * self.EMPTY_FACTOR, 0.0)
+        bgl.glVertex3f(xb - r * self.EMPTY_FACTOR, (ya + yb) / 2.0, 0.0)
+        bgl.glVertex3f(xb - r * self.EMPTY_FACTOR, (ya + yb) / 2.0, 0.0)
+        bgl.glVertex3f((xa + xb) / 2.0, ya + r * self.EMPTY_FACTOR, 0.0)
+        bgl.glVertex3f((xa + xb) / 2.0, ya + r * self.EMPTY_FACTOR, 0.0)
+        bgl.glVertex3f(xa + r * self.EMPTY_FACTOR, (ya + yb) / 2.0, 0.0)
 
     def drawX(self, xa, xb, ya, yb):
         bgl.glColor3f(*self.COLOR_X)
         r = xb - xa
-        bgl.glVertex3f(xa + r*self.EMPTY_FACTOR, ya + r*self.EMPTY_FACTOR, 0.0)
-        bgl.glVertex3f(xb - r*self.EMPTY_FACTOR, yb - r*self.EMPTY_FACTOR, 0.0)
-        bgl.glVertex3f(xa + r*self.EMPTY_FACTOR, yb - r*self.EMPTY_FACTOR, 0.0)
-        bgl.glVertex3f(xb - r*self.EMPTY_FACTOR, ya + r*self.EMPTY_FACTOR, 0.0)
+        bgl.glVertex3f(xa + r * self.EMPTY_FACTOR, ya + r * self.EMPTY_FACTOR, 0.0)
+        bgl.glVertex3f(xb - r * self.EMPTY_FACTOR, yb - r * self.EMPTY_FACTOR, 0.0)
+        bgl.glVertex3f(xa + r * self.EMPTY_FACTOR, yb - r * self.EMPTY_FACTOR, 0.0)
+        bgl.glVertex3f(xb - r * self.EMPTY_FACTOR, ya + r * self.EMPTY_FACTOR, 0.0)
 
     def coordsToCell(self, x, y, w, h):
         x1, x2, x3, x4, y1, y2, y3, y4 = self.grid(w, h)
@@ -283,7 +282,7 @@ class TicTacToeGame(object):
                 break
         else:
             i = -1
-            
+
         for j0, y0 in enumerate((y1, y2, y3, y4)):
             if y <= y0:
                 j = j0 - 1
@@ -294,38 +293,38 @@ class TicTacToeGame(object):
         if i == -1 or j == -1:
             i = -1
             j = -1
-        
+
         return i, j
 
     def grid(self, w, h):
         wh_min = min(w, h)
 
-        cx = w/2.0
-        cy = h/2.0
-        r = wh_min/2.0
+        cx = w / 2.0
+        cy = h / 2.0
+        r = wh_min / 2.0
 
-        x1 = cx - r*self.BOARD_FACTOR
-        x4 = cx + r*self.BOARD_FACTOR
+        x1 = cx - r * self.BOARD_FACTOR
+        x4 = cx + r * self.BOARD_FACTOR
 
-        y1 = cy - r*self.BOARD_FACTOR
-        y4 = cy + r*self.BOARD_FACTOR
+        y1 = cy - r * self.BOARD_FACTOR
+        y4 = cy + r * self.BOARD_FACTOR
 
-        x2 = x1 + (x4 - x1)/3.0
-        y2 = y1 + (y4 - y1)/3.0
-        x3 = x4 + (x1 - x4)/3.0
-        y3 = y4 + (y1 - y4)/3.0
+        x2 = x1 + (x4 - x1) / 3.0
+        y2 = y1 + (y4 - y1) / 3.0
+        x3 = x4 + (x1 - x4) / 3.0
+        y3 = y4 + (y1 - y4) / 3.0
 
         return x1, x2, x3, x4, y1, y2, y3, y4
 
     def fontPosition(self, w, h):
         wh_min = min(w, h)
 
-        cx = w/2.0
-        cy = h/2.0
-        r = wh_min*self.BOARD_FACTOR/2.0
+        cx = w / 2.0
+        cy = h / 2.0
+        r = wh_min * self.BOARD_FACTOR / 2.0
 
         x = cx - r
-        y = (cy - r)/3.0
+        y = (cy - r) / 3.0
 
         return x, y
 
@@ -358,26 +357,26 @@ class TicTacToeGame(object):
 
         for x1, y1, x2, y2, x3, y3 in self.LINES:
             if (self.board[x1][y1]
-                == self.board[x2][y2]
-                == self.COMPUTER
-                and self.board[x3][y3]
-                == self.NONE):
+                    == self.board[x2][y2]
+                    == self.COMPUTER
+                    and self.board[x3][y3]
+                    == self.NONE):
                 x = x3
                 y = y3
                 break
             elif (self.board[x1][y1]
-                == self.board[x3][y3]
-                == self.COMPUTER
-                and self.board[x2][y2]
-                == self.NONE):
+                  == self.board[x3][y3]
+                  == self.COMPUTER
+                  and self.board[x2][y2]
+                  == self.NONE):
                 x = x2
                 y = y2
                 break
             elif (self.board[x3][y3]
-                == self.board[x2][y2]
-                == self.COMPUTER
-                and self.board[x1][y1]
-                == self.NONE):
+                  == self.board[x2][y2]
+                  == self.COMPUTER
+                  and self.board[x1][y1]
+                  == self.NONE):
                 x = x1
                 y = y1
                 break
@@ -385,26 +384,26 @@ class TicTacToeGame(object):
         else:
             for x1, y1, x2, y2, x3, y3 in self.LINES:
                 if (self.board[x1][y1]
-                    == self.board[x2][y2]
-                    == self.PLAYER
-                    and self.board[x3][y3]
-                    == self.NONE):
+                        == self.board[x2][y2]
+                        == self.PLAYER
+                        and self.board[x3][y3]
+                        == self.NONE):
                     x = x3
                     y = y3
                     break
                 elif (self.board[x1][y1]
-                    == self.board[x3][y3]
-                    == self.PLAYER
-                    and self.board[x2][y2]
-                    == self.NONE):
+                      == self.board[x3][y3]
+                      == self.PLAYER
+                      and self.board[x2][y2]
+                      == self.NONE):
                     x = x2
                     y = y2
                     break
                 elif (self.board[x3][y3]
-                    == self.board[x2][y2]
-                    == self.PLAYER
-                    and self.board[x1][y1]
-                    == self.NONE):
+                      == self.board[x2][y2]
+                      == self.PLAYER
+                      and self.board[x1][y1]
+                      == self.NONE):
                     x = x1
                     y = y1
                     break
@@ -426,9 +425,9 @@ class TicTacToeGame(object):
         # would probably be more complicated, this check is not that hard...
         for x1, y1, x2, y2, x3, y3 in self.LINES:
             if (self.board[x1][y1]
-                == self.board[x2][y2]
-                == self.board[x3][y3]
-                != self.NONE):
+                    == self.board[x2][y2]
+                    == self.board[x3][y3]
+                    != self.NONE):
                 self.winner = self.board[x1][y1]
                 break
 
@@ -448,11 +447,12 @@ class TicTacToeBootstrapOperator(bpy.types.Operator):
                     bpy.ops.view3d.modal_operator_tictactoe('INVOKE_DEFAULT')
                     return {'FINISHED'}
         return {'PASS_THROUGH'}
-        
+
     def invoke(self, context, event):
         context.window_manager.event_timer_add(0.1, context.window)
         context.window_manager.modal_handler_add(self)
-        return {'RUNNING_MODAL'}"""
+        return {'RUNNING_MODAL'}
+"""
 """
 def addBootstrap(dummy):
     if not init[0]:
@@ -465,7 +465,6 @@ def addBootstrap(dummy):
 """
 
 
-
 def displayTicTacToeOps(self, context):
     layout = self.layout
 
@@ -475,17 +474,18 @@ def displayTicTacToeOps(self, context):
         else:
             layout.operator("view3d.modal_operator_tictactoe", icon='PLAY', text="Start")
 
+
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.VIEW3D_HT_header.prepend(displayTicTacToeOps)
-    
-    
+
+
 def unregister():
     if game[0]:
         game[0].finish()
     bpy.types.VIEW3D_HT_header.remove(displayTicTacToeOps)
     bpy.utils.unregister_module(__name__)
-    
+
 
 if __name__ == "__main__":
     register()

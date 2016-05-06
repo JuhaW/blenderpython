@@ -21,7 +21,6 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {"name": "Synchronize 3D Views",
            "description": "Make orientations of 3D Views dependent of each other",
            "author": "Quentin Wenger (Matpi)",
@@ -33,8 +32,6 @@ bl_info = {"name": "Synchronize 3D Views",
            "tracker_url": "",
            "category": "3D View"
            }
-
-
 
 import bpy
 
@@ -55,6 +52,7 @@ def getWindowRegions(context):
                     break
     return regions
 """
+
 
 def getWindowRegionsAndRegions3D(context):
     regions = []
@@ -84,13 +82,12 @@ def getWindowRegionsIDs(context):
     return ids
 
 
-
 def syncViews(dummy):
 
     children_regions_3d = []
     parent_region_3d = None
 
-    #for region in getWindowRegions(bpy.context):
+    # for region in getWindowRegions(bpy.context):
     data = getWindowRegionsAndRegions3D(bpy.context)
 
     data_dict = dict((region.id, region_3d)
@@ -107,7 +104,6 @@ def syncViews(dummy):
     if parent_region_3d is not None:
         for region_3d in children_regions_3d:
             region_3d.view_matrix = parent_region_3d.view_matrix
-
 
 
 def updateSyncingStatus(self, context):
@@ -139,7 +135,6 @@ def updateSyncingStatus(self, context):
         else:
             if syncViews in bpy.app.handlers.scene_update_pre:
                 bpy.app.handlers.scene_update_pre.remove(syncViews)
-        
 
 
 class ViewSyncingCollectionGroup(bpy.types.PropertyGroup):
@@ -152,7 +147,6 @@ class ViewSyncingCollectionGroup(bpy.types.PropertyGroup):
     region_id = bpy.props.IntProperty()
 
 
-
 class ViewSyncingPanel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -162,7 +156,7 @@ class ViewSyncingPanel(bpy.types.Panel):
         layout = self.layout
 
         layout.label(text="Views Syncing:")
-        
+
         region_id = getCurrentWindowRegion(context).id
 
         index = None
@@ -185,11 +179,11 @@ class ViewSyncingPanel(bpy.types.Panel):
                 expand=True)
 
 
-
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.Screen.view_sync_coll = bpy.props.CollectionProperty(
         type=ViewSyncingCollectionGroup)
+
 
 def unregister():
     del bpy.types.Screen.view_sync_coll
@@ -197,7 +191,7 @@ def unregister():
     if syncViews in bpy.app.handlers.scene_update_pre:
         bpy.app.handlers.scene_update_pre.remove(syncViews)
     bpy.utils.unregister_module(__name__)
-    
+
 
 if __name__ == "__main__":
     register()

@@ -65,7 +65,7 @@ def save_projects(dummy):
     # Save project list to a JSON file
     projects_file = bpy.utils.script_path_user() + os.sep + "ADTProjects.json"
     project_list = bpy.context.scene.project_list
-    
+
     # Don't save if there aren't any addons
     if len(bpy.context.scene.project_list) is not 0:
         projects = []
@@ -100,12 +100,14 @@ def get_files(context, ending=""):
 
     return project_files
 
+
 def get_file_names(file_paths):
     file_names = []
     for file in file_paths:
         file_names.append(os.path.basename(file))
-        
+
     return file_names
+
 
 def close_files(context, all):
     # Closes files
@@ -129,40 +131,41 @@ def close_files(context, all):
                         bpy.ops.text.unlink()
             break
 
+
 def is_project_valid(context):
     # Checks if addon has a bl_info
     # If a package, check for __init__.py
     # Returns a list
     info = []
     mainfile = ""
-    
+
     project = context.scene.project_list[context.scene.project_list_index]
     path = bpy.path.abspath(project.location)
-    
+
     # Determine whether it is a multifile addon and get mainfile name
     if os.path.isdir(path):
         if '__init__.py' not in os.listdir(path):
             info.append("missing __init__.py")
-            
+
         else:
             mainfile = path + os.sep + '__init__.py'
             found = False
-            
+
             with open(mainfile) as f:
                 for line in iter(f):
                     l = line.replace(' ', '')
                     if l.startswith('bl_info'):
                         found = True
                         break
-            
+
             if not found:
                 info.append('missing bl_info')
     else:
         mainfile = path
-        
+
         if os.path.basename(path) == "__init__.py":
             info.append("__init__.py is only for packages")
-    
+
         found = False
         with open(mainfile) as f:
             for line in iter(f):
@@ -170,12 +173,13 @@ def is_project_valid(context):
                 if l.startswith('bl_info'):
                     found = True
                     break
-                
+
         if not found:
             info.append('missing bl_info')
-                
-    #return info
+
+    # return info
     return []
+
 
 def zip_project(location, files, path, name):
     # Saves specified folder to specified location as a zip file
@@ -185,11 +189,11 @@ def zip_project(location, files, path, name):
         zip.write(path + file, name + os.sep + file)
 
     zip.close()
-    
+
 
 #######################################################################################
 # UI
-#######################################################################################            
+#######################################################################################
 
 class AddonDevelopmentProjectPanel(Panel):
     """ Creates a panel in the text editor """
@@ -210,13 +214,13 @@ class AddonDevelopmentProjectPanel(Panel):
 
         row = layout.row(align=True)
         row.operator('addon_dev_tool.new_addon')
-        #row.operator('addon_dev_tool.new_script')
+        # row.operator('addon_dev_tool.new_script')
         row.operator('addon_dev_tool.delete_project')
 
         # Only if a valid project is selected
         if list_index >= 0 and len(project_list) > 0:
             item = project_list[list_index]
-            
+
             if not os.path.exists(item.location):
                 layout.prop(item, 'location', icon='ERROR')
             else:
@@ -244,7 +248,7 @@ class AddonDevelopmentProjectPanel(Panel):
                     col.operator('addon_dev_tool.remove_addon')
                 else:
                     row.operator('addon_dev_tool.run_script')
-                    
+
                 row = layout.row()
                 row.operator('addon_dev_tool.export')
 
@@ -254,7 +258,6 @@ class AddonDevelopmentProjectPanel(Panel):
                     box = layout.box()
                     for i in info:
                         box.label(text=i)
-                
 
     def draw_header(self, context):
         """ Just for fun """
@@ -276,6 +279,7 @@ class Project(PropertyGroup):
 
 
 class AddonProjectUIList(UIList):
+
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         addon_icon = 'FILE_TEXT'
         script_icon = 'FILE_SCRIPT'
@@ -290,8 +294,8 @@ class AddonProjectUIList(UIList):
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label("", icon=addon_icon)
-            
-            
+
+
 #######################################################################################
 # OPERATORS
 #######################################################################################
@@ -388,12 +392,12 @@ class ADTNewProjectFile(Operator, ExportHelper):
     bl_options = {'REGISTER', 'UNDO'}
 
     filename_ext = ".py"
-    
+
 #    @classmethod
 #    def poll(self, context):
 #        # Make sure it is a multi file addon
 #        location = context.scene.project_list[context.scene.project_list_index].location
-#        
+#
 #        if os.path.isdir(location):
 #            return True
 
@@ -483,7 +487,7 @@ class ADTRefreshFiles(Operator):
 
                         if file.is_modified:
                             bpy.ops.text.reload()
-                            
+
         self.report({'INFO'}, "Loaded external changes")
 
         return {'FINISHED'}
@@ -494,7 +498,7 @@ class ADTInstallAddon(Operator):
     bl_idname = 'addon_dev_tool.install_addon'
     bl_description = "Install and enable the addon"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     @classmethod
     def poll(self, context):
         i = is_project_valid(context)
@@ -511,9 +515,9 @@ class ADTInstallAddon(Operator):
         if os.path.isdir(path):
             if path.endswith(os.sep):
                 addon_name = os.path.basename(path.rstrip(os.sep))
-                
+
                 zip_project(temp + os.sep + addon_name + ".zip", project_files, path, addon_name)
-                
+
                 print(addon_name)
 
                 bpy.ops.wm.addon_install(overwrite=True, filepath=temp + os.sep + addon_name + ".zip")
@@ -529,7 +533,7 @@ class ADTInstallAddon(Operator):
 
             bpy.ops.wm.addon_install(overwrite=True, filepath=path)
             bpy.ops.wm.addon_enable(module=os.path.splitext(addon_name)[0])
-        
+
         self.report({'INFO'}, "Installed addon {0}".format(project.name))
         return {'FINISHED'}
 
@@ -545,12 +549,12 @@ class ADTRemoveAddon(Operator):
         project = context.scene.project_list[context.scene.project_list_index]
         path = project.location
         addon_name = ""
-        
+
         if os.path.isdir(path):
             addon_name = os.path.basename(path.rstrip(os.sep))
         elif os.path.isfile(path):
             addon_name = os.path.basename(path)
-            
+
         addon_name = os.path.splitext(addon_name)[0]
 
         return addon_name in bpy.context.user_preferences.addons.keys()
@@ -559,28 +563,28 @@ class ADTRemoveAddon(Operator):
         project = context.scene.project_list[context.scene.project_list_index]
         path = project.location
         addon_name = ""
-        
+
         if os.path.isdir(path):
             addon_name = os.path.basename(path.rstrip(os.sep))
         elif os.path.isfile(path):
             addon_name = os.path.basename(path)
-            
+
         addon_name = os.path.splitext(addon_name)[0]
 
         bpy.ops.wm.addon_remove(module=addon_name)
         print(addon_name)
-        
+
         self.report({'INFO'}, "Uninstalled addon {0}".format(addon_name))
 
         return {'FINISHED'}
-    
+
 
 class ADTExport(Operator, ExportHelper):
     bl_label = "Export For Distribution"
     bl_idname = 'addon_dev_tool.export'
     bl_description = "Export the file"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     filename_ext = ".zip"
 
     def execute(self, context):
@@ -593,13 +597,13 @@ class ADTExport(Operator, ExportHelper):
         if os.path.isdir(path):
             if path.endswith(os.sep):
                 addon_name = os.path.basename(path.rstrip(os.sep))
-                
+
                 zip_project(self.filepath, project_files, path, addon_name)
 
         # Otherwise, get the name of the file
         elif os.path.isfile(path):
             addon_name = os.path.basename(path)
-            
+
             zip = zipfile.ZipFile(self.filepath, 'w')
 
             for file in project_files:
@@ -607,9 +611,8 @@ class ADTExport(Operator, ExportHelper):
 
             zip.close()
 
-            
         self.report({'INFO'}, "Exported addon {0}".format(project.name))
-        return {'FINISHED'}  
+        return {'FINISHED'}
 
 
 def register():
@@ -630,3 +633,6 @@ def unregister():
 
     bpy.app.handlers.load_post.remove(get_projects)
     bpy.app.handlers.scene_update_pre.remove(save_projects)
+
+if __name__ == "__main__":
+    register()
