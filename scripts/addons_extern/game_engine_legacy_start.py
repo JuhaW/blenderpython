@@ -21,7 +21,6 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {"name": "Start Game Engine (Legacy)",
            "description": "Start the BGE in any render context with the P-key, like in pre-2.73 Blender Versions",
            "author": "Quentin Wenger (Matpi)",
@@ -35,11 +34,7 @@ bl_info = {"name": "Start Game Engine (Legacy)",
            }
 
 
-
-
 import bpy
-
-
 
 
 class VIEW3D_OT_legacy_game_start(bpy.types.Operator):
@@ -49,7 +44,6 @@ class VIEW3D_OT_legacy_game_start(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return context.mode == 'OBJECT'
-
 
     def execute(self, context):
 
@@ -66,17 +60,15 @@ class VIEW3D_OT_legacy_game_start(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
 def register():
     bpy.utils.register_class(VIEW3D_OT_legacy_game_start)
 
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
-    
+
     if kc:
         km = kc.keymaps.new(name='Object Mode')
         kmi = km.keymap_items.new('view3d.legacy_game_start', 'P', 'PRESS')
-        
 
 
 def unregister():
@@ -84,7 +76,7 @@ def unregister():
 
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
-    
+
     if kc:
         km = kc.keymaps['Object Mode']
         for kmi in km.keymap_items:

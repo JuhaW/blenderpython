@@ -65,23 +65,23 @@ def dp_create_dynamic_parent_obj(context):
 
     if parent_obj.type == 'ARMATURE':
         last_constraint.subtarget = parent_obj.data.bones.active.name
-        last_constraint.name = "DP_"+last_constraint.target.name+"."+last_constraint.subtarget
+        last_constraint.name = "DP_" + last_constraint.target.name + "." + last_constraint.subtarget
     else:
-        last_constraint.name = "DP_"+last_constraint.target.name
+        last_constraint.name = "DP_" + last_constraint.target.name
 
     override = context.copy()
     override['constraint'] = bpy.context.active_pose_bone.constraints[last_constraint.name]
-    bpy.ops.constraint.childof_set_inverse(override, constraint=""+last_constraint.name+"", owner='OBJECT')
+    bpy.ops.constraint.childof_set_inverse(override, constraint="" + last_constraint.name + "", owner='OBJECT')
 
-    fcrv = obj.animation_data.action.fcurves.new(data_path='constraints["'+last_constraint.name+'"].influence')
+    fcrv = obj.animation_data.action.fcurves.new(data_path='constraints["' + last_constraint.name + '"].influence')
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
+    scn.frame_current = curr_frame - 1
     obj.constraints[last_constraint.name].influence = 0
-    obj.keyframe_insert(data_path='constraints["'+last_constraint.name+'"].influence')
+    obj.keyframe_insert(data_path='constraints["' + last_constraint.name + '"].influence')
 
     scn.frame_current = curr_frame
     obj.constraints[last_constraint.name].influence = 1
-    obj.keyframe_insert(data_path='constraints["'+last_constraint.name+'"].influence')
+    obj.keyframe_insert(data_path='constraints["' + last_constraint.name + '"].influence')
 
     return True
 
@@ -107,23 +107,23 @@ def dp_create_dynamic_parent_pbone(context):
 
     if parent_obj.type == 'ARMATURE':
         last_constraint.subtarget = parent_obj.data.bones.active.name
-        last_constraint.name = "DP_"+last_constraint.target.name+"."+last_constraint.subtarget
+        last_constraint.name = "DP_" + last_constraint.target.name + "." + last_constraint.subtarget
     else:
-        last_constraint.name = "DP_"+last_constraint.target.name
+        last_constraint.name = "DP_" + last_constraint.target.name
 
     override = context.copy()
     override['constraint'] = bpy.context.active_pose_bone.constraints[last_constraint.name]
-    bpy.ops.constraint.childof_set_inverse(override, constraint=""+last_constraint.name+"", owner='BONE')
+    bpy.ops.constraint.childof_set_inverse(override, constraint="" + last_constraint.name + "", owner='BONE')
 
-    fcrv = obj_obj.animation_data.action.fcurves.new(data_path='constraints["'+last_constraint.name+'"].influence')
+    fcrv = obj_obj.animation_data.action.fcurves.new(data_path='constraints["' + last_constraint.name + '"].influence')
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
+    scn.frame_current = curr_frame - 1
     obj.constraints[last_constraint.name].influence = 0
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].constraints["'+last_constraint.name+'"].influence')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].constraints["' + last_constraint.name + '"].influence')
 
     scn.frame_current = curr_frame
     obj.constraints[last_constraint.name].influence = 1
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].constraints["'+last_constraint.name+'"].influence')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].constraints["' + last_constraint.name + '"].influence')
 
     return True
 
@@ -135,17 +135,17 @@ def dp_disable_dynamic_parent_obj():
     last_constraint = obj.constraints[-1]
 
     for fcrv in obj.animation_data.action.fcurves:
-        if fcrv.data_path == "constraints["+last_constraint.name+"].influence":
+        if fcrv.data_path == "constraints[" + last_constraint.name + "].influence":
             fcurve = fcrv
 
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
+    scn.frame_current = curr_frame - 1
     obj.constraints[last_constraint.name].influence = 1
-    obj.keyframe_insert(data_path='constraints["'+last_constraint.name+'"].influence')
+    obj.keyframe_insert(data_path='constraints["' + last_constraint.name + '"].influence')
 
     scn.frame_current = curr_frame
     obj.constraints[last_constraint.name].influence = 0
-    obj.keyframe_insert(data_path='constraints["'+last_constraint.name+'"].influence')
+    obj.keyframe_insert(data_path='constraints["' + last_constraint.name + '"].influence')
 
     loc_old = obj.location
     rot_old = obj.rotation_euler
@@ -157,7 +157,7 @@ def dp_disable_dynamic_parent_obj():
     fcurves = obj.animation_data.action.fcurves
 
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
+    scn.frame_current = curr_frame - 1
     obj.keyframe_insert(data_path='location')
     obj.keyframe_insert(data_path='rotation_euler')
     obj.keyframe_insert(data_path='scale')
@@ -181,17 +181,17 @@ def dp_disable_dynamic_parent_pbone():
     last_constraint = obj.constraints[-1]
 
     for fcrv in obj_obj.animation_data.action.fcurves:
-        if fcrv.data_path == 'pose.bones["'+obj.name+'"].constraints["'+last_constraint.name+'"].influence':
+        if fcrv.data_path == 'pose.bones["' + obj.name + '"].constraints["' + last_constraint.name + '"].influence':
             fcurve = fcrv
 
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
+    scn.frame_current = curr_frame - 1
     obj.constraints[last_constraint.name].influence = 1
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].constraints["'+last_constraint.name+'"].influence')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].constraints["' + last_constraint.name + '"].influence')
 
     scn.frame_current = curr_frame
     obj.constraints[last_constraint.name].influence = 0
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].constraints["'+last_constraint.name+'"].influence')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].constraints["' + last_constraint.name + '"].influence')
 
     loc_old = obj.location
     rot_old = obj.rotation_quaternion
@@ -202,16 +202,16 @@ def dp_disable_dynamic_parent_pbone():
     fcurves = obj_obj.animation_data.action.fcurves
 
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].location')
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].rotation_quaternion')
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].scale')
+    scn.frame_current = curr_frame - 1
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].location')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].rotation_quaternion')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].scale')
 
     scn.frame_current = curr_frame
     obj.matrix = final_matrix
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].location')
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].rotation_quaternion')
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].scale')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].location')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].rotation_quaternion')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].scale')
 
     return True
 

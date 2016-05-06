@@ -85,6 +85,8 @@ CYCLES_SHADERS = (
 
 # -----------------------------------------------------------------------------
 # Misc utils.
+
+
 def gen_ext_filter_ui_items():
     return tuple((k, name.format(", ".join("." + e for e in exts)) if "{}" in name else name, desc)
                  for k, (exts, name, desc) in EXT_FILTER.items())
@@ -140,7 +142,7 @@ def auto_align_nodes(node_tree):
             node.location.x = to_node.location.x - x_gap
             node.location.y = to_node.location.y
             node.location.y -= i * y_gap
-            node.location.y += (len(from_nodes)-1) * y_gap / (len(from_nodes))
+            node.location.y += (len(from_nodes) - 1) * y_gap / (len(from_nodes))
             align(node, nodes, links)
 
     align(to_node, nodes, links)
@@ -162,7 +164,7 @@ class IMPORT_OT_image_to_plane(Operator, AddObjectHelper):
     bl_idname = "import_image.to_plane"
     bl_label = "Import Images as Planes"
     bl_options = {'REGISTER', 'UNDO'}
-    #TODO: good place to have this?
+    # TODO: good place to have this?
     anim_counter = 0
 
     # -----------
@@ -180,19 +182,17 @@ class IMPORT_OT_image_to_plane(Operator, AddObjectHelper):
     # --------
     # Options.
     align = BoolProperty(name="Align Planes", default=True, description="Create Planes in a row")
-    
-    #Callback to set as False the align option when the animate one is enabled
+
+    # Callback to set as False the align option when the animate one is enabled
     def update_animate(self, context):
         if self.animate:
             self.align = False
 
-    
     animate = BoolProperty(name="Animate Planes", default=False, description="Display only one plane at the time to create an animation. 'Align' options should be disabled to be able to see the animation.", update=update_animate)
     animate_duration = IntProperty(name="Animation duration per frame", min=1, soft_min=1, default=4, description="In an animation each frame will be shown this number of frames.")
 
     align_offset = FloatProperty(name="Offset", min=0, soft_min=0, default=0.1, description="Space between Planes")
-    
-    
+
     # Callback which will update File window's filter options accordingly to extension setting.
     def update_extensions(self, context):
         is_cycles = context.scene.render.engine == 'CYCLES'
@@ -311,7 +311,7 @@ class IMPORT_OT_image_to_plane(Operator, AddObjectHelper):
         elif engine == 'CYCLES':
             box = layout.box()
             box.label("Material Settings: (Cycles)", icon='MATERIAL')
-            box.prop(self, 'shader', expand = True)
+            box.prop(self, 'shader', expand=True)
             box.prop(self, 'overwrite_node_tree')
 
         box = layout.box()
@@ -364,7 +364,7 @@ class IMPORT_OT_image_to_plane(Operator, AddObjectHelper):
             return
 
         planes = tuple(self.create_image_plane(context, mat) for mat in materials)
-        
+
         if self.animate:
             for plane in planes:
                 self.animate_plane(plane)
@@ -417,76 +417,73 @@ class IMPORT_OT_image_to_plane(Operator, AddObjectHelper):
 
         material.game_settings.use_backface_culling = False
         material.game_settings.alpha_blend = 'ALPHA'
-        
+
         return plane
 
-
-
-
     def animate_plane(self, plane):
-        
+
         global PLANE_COUNTER
         DURATION = self.animate_duration
-        
-        print ("animating plane: %s"% plane)
-        
-        #we are going to animate the layer visibility and render-ability.
 
-        #stores the previous interpolation default
-        keyinter = bpy.context.user_preferences.edit.keyframe_new_interpolation_type 
-        
-        #sets the new interpolation type to linear
+        print("animating plane: %s" % plane)
+
+        # we are going to animate the layer visibility and render-ability.
+
+        # stores the previous interpolation default
+        keyinter = bpy.context.user_preferences.edit.keyframe_new_interpolation_type
+
+        # sets the new interpolation type to linear
         bpy.context.user_preferences.edit.keyframe_new_interpolation_type = "CONSTANT"
-        
-        #references the plane
+
+        # references the plane
         ob = plane
-        
-        #create animation data
+
+        # create animation data
         ob.animation_data_create()
-        
-        #creates a new action for the object, if needed
-        actionname = "Plane import animation for %s"% ob.name
+
+        # creates a new action for the object, if needed
+        actionname = "Plane import animation for %s" % ob.name
         if not actionname in bpy.data.actions:
             ob.animation_data.action = bpy.data.actions.new(actionname)
         else:
             ob.animation_data.action = bpy.data.actions[actionname]
-        
-        #add a new fcurve for the "hide" property 
-        if not "hide" in [ x.data_path for x in ob.animation_data.action.fcurves ]:
+
+        # add a new fcurve for the "hide" property
+        if not "hide" in [x.data_path for x in ob.animation_data.action.fcurves]:
             fcu = ob.animation_data.action.fcurves.new(data_path="hide")
         else:
-            fcu = [ x for x in ob.animation_data.action.fcurves if x.data_path == 'hide' ][0]
-            
-        #add a new fcurve for the "hide render" property  
-        if not "hide_render" in [ x.data_path for x in ob.animation_data.action.fcurves ]:
+            fcu = [x for x in ob.animation_data.action.fcurves if x.data_path == 'hide'][0]
+
+        # add a new fcurve for the "hide render" property
+        if not "hide_render" in [x.data_path for x in ob.animation_data.action.fcurves]:
             fcu2 = ob.animation_data.action.fcurves.new(data_path="hide_render")
         else:
-            fcu2 = [ x for x in ob.animation_data.action.fcurves if x.data_path == 'hide_render' ][0]
-        
-        #add 2 points 
+            fcu2 = [x for x in ob.animation_data.action.fcurves if x.data_path == 'hide_render'][0]
+
+        # add 2 points
         fcu.keyframe_points.add(3)
         fcu2.keyframe_points.add(3)
-        
-        #set interpolation to constant
+
+        # set interpolation to constant
         fcu.keyframe_points[0].interpolation = "CONSTANT"
         fcu.keyframe_points[1].interpolation = "CONSTANT"
         fcu.keyframe_points[2].interpolation = "CONSTANT"
         fcu2.keyframe_points[0].interpolation = "CONSTANT"
         fcu2.keyframe_points[1].interpolation = "CONSTANT"
-        fcu2.keyframe_points[2].interpolation = "CONSTANT"        
+        fcu2.keyframe_points[2].interpolation = "CONSTANT"
 
-        #sets the first point: visible
+        # sets the first point: visible
         fcu.keyframe_points[0].co = 0, 1
-        fcu.keyframe_points[1].co = self.anim_counter * DURATION + 1, 0        
-        fcu.keyframe_points[2].co = (self.anim_counter + 1) * DURATION + 1 , 1
+        fcu.keyframe_points[1].co = self.anim_counter * DURATION + 1, 0
+        fcu.keyframe_points[2].co = (self.anim_counter + 1) * DURATION + 1, 1
 
         fcu2.keyframe_points[0].co = 0, 1
-        fcu2.keyframe_points[1].co = self.anim_counter * DURATION + 1 , 0
+        fcu2.keyframe_points[1].co = self.anim_counter * DURATION + 1, 0
         fcu2.keyframe_points[2].co = (self.anim_counter + 1) * DURATION + 1, 1
-        
+
         self.anim_counter = self.anim_counter + 1
-        
-        #recovers the previous interpolation setting
+
+        # recovers the previous interpolation setting
         bpy.context.user_preferences.edit.keyframe_new_interpolation_type = keyinter
 
     def align_planes(self, planes):
@@ -575,7 +572,7 @@ class IMPORT_OT_image_to_plane(Operator, AddObjectHelper):
         material.use_shadeless = self.use_shadeless
         material.use_transparent_shadows = self.use_transparent_shadows
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Cycles
     def create_cycles_material(self, image):
         name_compat = bpy.path.display_name_from_filepath(image.filepath)

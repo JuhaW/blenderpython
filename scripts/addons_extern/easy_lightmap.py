@@ -19,7 +19,6 @@ bl_info = {
 
 
 class General(object):
-    
     is_baking_started = False
     original_color = None
     textures_use = []
@@ -29,7 +28,6 @@ class General(object):
 
 
 class EasyLightMapProperties(bpy.types.PropertyGroup):
-
     bake_path = StringProperty(
         name="Bake folder:", default="", subtype="DIR_PATH", description="Path for saving baked maps.")
     image_w = IntProperty(name="Width", default=1024, min=1, description="Image width")
@@ -39,7 +37,6 @@ class EasyLightMapProperties(bpy.types.PropertyGroup):
 
 
 class EasyLightMapPrepare(bpy.types.Operator):
-
     bl_idname = "object.easy_light_map_prepare"
     bl_label = "Only Prepare For Baking"
     bl_description = "Create two uv layers if there is not any then add an empty texture slot for baking."
@@ -105,7 +102,6 @@ class EasyLightMapPrepare(bpy.types.Operator):
 
 
 class EasyLightMapBake(bpy.types.Operator):
-
     bl_idname = "object.easy_light_map_bake"
     bl_label = "Bake It!"
     bl_description = "Bake light map into new texture and add it into object material."
@@ -113,8 +109,8 @@ class EasyLightMapBake(bpy.types.Operator):
     settings = None
     selected_object = None
     material = None
-    #original_color = None
-    #textures_use = []
+    # original_color = None
+    # textures_use = []
 
     @classmethod
     def poll(cls, context):
@@ -200,7 +196,6 @@ class EasyLightMapBake(bpy.types.Operator):
 
 
 class EasyLightMapPanel(bpy.types.Panel):
-
     bl_idname = "RENDER_PT_easy_light_map"
     bl_label = "Easy Light Map"
     bl_region_type = "WINDOW"
@@ -228,7 +223,6 @@ class EasyLightMapPanel(bpy.types.Panel):
         layout.separator()
         layout.operator(EasyLightMapPrepare.bl_idname, text="Only Prepare For Baking")
         layout.operator(EasyLightMapBake.bl_idname, text="Bake it!")
-
 
 
 def check_uv_layers(selected_object):
@@ -279,7 +273,6 @@ def scene_update(context):
 
             # Remove handler
             bpy.app.handlers.scene_update_post.remove(scene_update)
-
 
 
 def register():

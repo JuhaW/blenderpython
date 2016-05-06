@@ -31,7 +31,8 @@ bl_info = {
     'warning': '',
     'wiki_url': '',
     'tracker_url': '',
-    'category': 'Mesh' }
+    'category': 'Mesh'
+}
 
 # ------ ------
 import bpy
@@ -41,20 +42,29 @@ from bpy.props import BoolProperty, PointerProperty
 from math import degrees
 
 # ------ ------
+
+
 def edit_mode_out():
-    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.mode_set(mode='OBJECT')
+
 
 def edit_mode_in():
-    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.object.mode_set(mode='EDIT')
+
 
 def get_adj_v_(list_):
-        tmp = {}
-        for i in list_:
-                try:             tmp[i[0]].append(i[1])
-                except KeyError: tmp[i[0]] = [i[1]]
-                try:             tmp[i[1]].append(i[0])
-                except KeyError: tmp[i[1]] = [i[0]]
-        return tmp
+    tmp = {}
+    for i in list_:
+        try:
+            tmp[i[0]].append(i[1])
+        except KeyError:
+            tmp[i[0]] = [i[1]]
+        try:
+            tmp[i[1]].append(i[0])
+        except KeyError:
+            tmp[i[1]] = [i[0]]
+    return tmp
+
 
 def f_1(frst, list_, last):      # edge chain
     fi = frst
@@ -73,6 +83,7 @@ def f_1(frst, list_, last):      # edge chain
             break
     return tmp
 
+
 def f_2(frst, list_):      # edge loop
     fi = frst
     tmp = [frst]
@@ -90,16 +101,19 @@ def f_2(frst, list_):      # edge loop
             break
     return tmp
 
+
 def is_loop_(list_fl):
     return True if len(list_fl) == 0 else False
+
 
 def e_no_(bme, indx, p, p1):
     tmp1 = (bme.verts[indx].co).copy()
     tmp1[0] += 0.1
     tmp1[1] += 0.1
     tmp1[2] += 0.1
-    ip1 = intersect_point_line( tmp1, p, p1)[0]
+    ip1 = intersect_point_line(tmp1, p, p1)[0]
     return tmp1 - ip1
+
 
 def get_lc_(bme, list_eks):
     list_ = [set(ek) for ek in list_eks]
@@ -115,9 +129,11 @@ def get_lc_(bme, list_eks):
                 break
         else:
             count += 1
-    return{i:[ek for ek in list_eks if not s.isdisjoint(ek)] for i, s in enumerate((s for s in list_ if s))}
+    return{i: [ek for ek in list_eks if not s.isdisjoint(ek)] for i, s in enumerate((s for s in list_ if s))}
 
 # ------ ------
+
+
 def f_(bme, dict_0, list_fl, loop, list_2, list_1):
 
     n1 = len(list_2)
@@ -175,7 +191,7 @@ def f_(bme, dict_0, list_fl, loop, list_2, list_1):
                     dict_1[list_2[j]].append(bme.verts[-1].index)
 
     # -- -- -- --
-    list_4 = [[v.index for v in e.verts] for e in bme.edges if e.select and e.is_valid ]
+    list_4 = [[v.index for v in e.verts] for e in bme.edges if e.select and e.is_valid]
     n2 = len(list_4)
 
     for t in range(n2):
@@ -184,19 +200,25 @@ def f_(bme, dict_0, list_fl, loop, list_2, list_1):
             bme.faces.index_update()
 
 # ------ ------
+
+
 class eap_p_group0(bpy.types.PropertyGroup):
-    b = BoolProperty( name = '', default = False )
+    b = BoolProperty(name='', default=False)
 
 # ------ ------
+
+
 class eap_buf():
     list_ek = []      # path
     list_sp = []      # start point
 
 # ------ panel 0 ------
+
+
 class eap_p0(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-    #bl_idname = 'eap_p0_id'
+    # bl_idname = 'eap_p0_id'
     bl_label = 'Extrude Along Path'
     bl_context = 'mesh_edit'
     bl_options = {'DEFAULT_CLOSED'}
@@ -204,23 +226,25 @@ class eap_p0(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         box = layout.box()
-        row = box.split(0.60, align = True)
+        row = box.split(0.60, align=True)
         row.label('Start point:')
-        row.operator('eap.op1_id', text = 'Store')
-        row1 = box.split(0.60, align = True)
+        row.operator('eap.op1_id', text='Store')
+        row1 = box.split(0.60, align=True)
         row1.label('Path:')
-        row1.operator('eap.op0_id', text = 'Store')
-        #box.prop(context.scene.eap_custom_props, 'b', text = 'Delete path')
-        row2 = layout.split(0.80, align = False)
-        row2.operator('eap.op2_id', text = 'Extrude')
-        row2.operator('eap.op3_id', text = '?')
+        row1.operator('eap.op0_id', text='Store')
+        # box.prop(context.scene.eap_custom_props, 'b', text = 'Delete path')
+        row2 = layout.split(0.80, align=False)
+        row2.operator('eap.op2_id', text='Extrude')
+        row2.operator('eap.op3_id', text='?')
 
 # ------ operator 0 ------
+
+
 class eap_op0(bpy.types.Operator):
     bl_idname = 'eap.op0_id'
     bl_label = '....'
     bl_options = {'INTERNAL'}
-    
+
     @classmethod
     def poll(cls, context):
         return (context.active_object and context.active_object.type == 'MESH' and context.mode == 'EDIT_MESH')
@@ -240,11 +264,13 @@ class eap_op0(bpy.types.Operator):
         return {'FINISHED'}
 
 # ------ operator 1 ------
+
+
 class eap_op1(bpy.types.Operator):
     bl_idname = 'eap.op1_id'
     bl_label = '....'
     bl_options = {'INTERNAL'}
-    
+
     @classmethod
     def poll(cls, context):
         return (context.active_object and context.active_object.type == 'MESH' and context.mode == 'EDIT_MESH')
@@ -264,6 +290,8 @@ class eap_op1(bpy.types.Operator):
         return {'FINISHED'}
 
 # ------ operator 2 ------
+
+
 class eap_op2(bpy.types.Operator):
     bl_idname = 'eap.op2_id'
     bl_label = 'Extrude Along Path'
@@ -307,14 +335,14 @@ class eap_op2(bpy.types.Operator):
                         edit_mode_in()
                         return {'CANCELLED'}
                     else:
-                        list_2 = [ v.index for v in bme.verts if v.select and v.is_valid ]      # <----- list of vertices to be extruded
+                        list_2 = [v.index for v in bme.verts if v.select and v.is_valid]      # <----- list of vertices to be extruded
                         if len(list_2) == 0:
                             self.report({'INFO'}, 'Nothing selected unable to continue.')
                             edit_mode_in()
                             return {'CANCELLED'}
                         else:
                             list_fl = [i for i in dict_1 if (len(dict_1[i]) == 1)]
-        
+
                             loop = is_loop_(list_fl)
                             # -- -- -- --
                             if loop:
@@ -327,7 +355,7 @@ class eap_op2(bpy.types.Operator):
                                     return {'CANCELLED'}
                                 elif eap_buf.list_sp[0] in list_fl:
                                     list_1 = f_1(eap_buf.list_sp[0], eap_buf.list_ek, list_fl[1] if eap_buf.list_sp[0] == list_fl[0] else list_fl[0])
-        
+
                             # -- -- -- --
                             f_(bme, dict_0, list_fl, loop, list_2, list_1)
 
@@ -341,6 +369,8 @@ class eap_op2(bpy.types.Operator):
         return {'FINISHED'}
 
 # ------ operator 3 ------
+
+
 class eap_op3(bpy.types.Operator):
     bl_idname = 'eap.op3_id'
     bl_label = ''
@@ -358,9 +388,11 @@ class eap_op3(bpy.types.Operator):
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_popup(self, width = 400)
+        return context.window_manager.invoke_popup(self, width=400)
 
 # ------ operator 4 ------
+
+
 class eap_op4(bpy.types.Operator):
     bl_idname = 'eap.op4_id'
     bl_label = ''
@@ -375,16 +407,20 @@ class eap_op4(bpy.types.Operator):
         return {'FINISHED'}
 
 # ------ ------
-class_list = [ eap_p0, eap_op0, eap_op1, eap_op2, eap_op3, eap_op4, eap_p_group0 ]
-               
+class_list = [eap_p0, eap_op0, eap_op1, eap_op2, eap_op3, eap_op4, eap_p_group0]
+
 # ------ register ------
+
+
 def register():
     for c in class_list:
         bpy.utils.register_class(c)
 
-    bpy.types.Scene.eap_custom_props = PointerProperty(type = eap_p_group0)
+    bpy.types.Scene.eap_custom_props = PointerProperty(type=eap_p_group0)
 
 # ------ unregister ------
+
+
 def unregister():
     for c in class_list:
         bpy.utils.unregister_class(c)

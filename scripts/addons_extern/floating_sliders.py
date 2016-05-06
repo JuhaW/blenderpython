@@ -67,19 +67,19 @@ def locator(context, x_offset, y_offset, slider_width, slider_height):
     bone = context.active_pose_bone
     locmat = context.active_object.matrix_world * bone.matrix
     location = view3d_utils.location_3d_to_region_2d(
-    region, rv3d, locmat.to_translation())
+        region, rv3d, locmat.to_translation())
     x0 = int(1 * location[0])
     y0 = int(1 * location[1])
     items = (
         item for item in bone.keys()
-            if not item.startswith('_') and type(bone[item]) is float)
+        if not item.startswith('_') and type(bone[item]) is float)
     x_start = x0 + x_offset
     y_start = y0 + y_offset
     y_min = y_start - slider_height // 2
     y_max = y_start + slider_height // 2
     x_end = x_start + slider_width
-    return (x0, y0, x_start, x_end, y_start, y_min, y_max, bone, items)          
-    
+    return (x0, y0, x_start, x_end, y_start, y_min, y_max, bone, items)
+
 
 def draw_callback(x_offset, y_offset, slider_width, slider_height):
     ''' draw sliders on the screen conditionally '''
@@ -99,15 +99,14 @@ def draw_callback(x_offset, y_offset, slider_width, slider_height):
                     context, x_offset, y_offset, slider_width, slider_height)
             bgl.glEnable(bgl.GL_BLEND)
 
-            font_id = 0  # XXX, need to find out how best to get this.           
+            font_id = 0  # XXX, need to find out how best to get this.
 
             for index, prop in enumerate(items):
                 animated, keyframed = is_animated(context, prop)
                 prop_min = bone["_RNA_UI"][prop]["min"]
                 prop_max = bone["_RNA_UI"][prop]["max"]
                 offset = index * 40
-                
-                
+
                 bgl.glColor4f(1.0, 1.0, 1.0, 0.5)
                 # draw some text
                 blf.position(font_id, x_end + 10, y_start - offset, 0)
@@ -115,16 +114,16 @@ def draw_callback(x_offset, y_offset, slider_width, slider_height):
                 if animated:
                     color = key_color if keyframed else anim_color
                     bgl.glColor4f(color[0], color[1], color[2], 0.9)
-                blf.draw(font_id, '{} {:.3f}'.format(prop,bone[prop]))
+                blf.draw(font_id, '{} {:.3f}'.format(prop, bone[prop]))
 
                 bgl.glColor4f(1.0, 1.0, 1.0, 0.5)
                 bgl.glLineWidth(1)
-                
+
                 bgl.glBegin(bgl.GL_LINE_STRIP)
-                bgl.glVertex2i(x_start, y_start - offset )
+                bgl.glVertex2i(x_start, y_start - offset)
                 bgl.glVertex2i(x_end, y_start - offset)
                 bgl.glEnd()
-                
+
                 bgl.glLineWidth(2)
 
                 bgl.glBegin(bgl.GL_LINE_STRIP)
@@ -136,17 +135,17 @@ def draw_callback(x_offset, y_offset, slider_width, slider_height):
                 bgl.glVertex2i(x_end, y_min - offset)
                 bgl.glVertex2i(x_end, y_max - offset)
                 bgl.glEnd()
-                
+
                 bgl.glColor4f(1.0, 0.0, 0.0, 0.8)
                 bgl.glLineWidth(3)
-                
+
                 bgl.glBegin(bgl.GL_LINE_STRIP)
                 percent = (bone[prop] - prop_min) / (prop_max - prop_min)
                 value = x_start + int(percent * slider_width)
                 bgl.glVertex2i(value - 2, y_start - 2 - offset)
                 bgl.glVertex2i(value + 2, y_start - 2 - offset)
                 bgl.glVertex2i(value + 2, y_start + 2 - offset)
-                bgl.glVertex2i(value - 2, y_start + 2 - offset)       
+                bgl.glVertex2i(value - 2, y_start + 2 - offset)
                 bgl.glEnd()
             # restore opengl defaults
             bgl.glLineWidth(1)
@@ -159,9 +158,9 @@ def set_value(context, bone, prop, x_mouse, x_start, x_end):
     old_value = bone[prop]
     prop_min = bone["_RNA_UI"][prop]["min"]
     prop_max = bone["_RNA_UI"][prop]["max"]
-    raw_value = ( x_mouse - x_start ) / (x_end - x_start)
+    raw_value = (x_mouse - x_start) / (x_end - x_start)
     value = prop_min + raw_value * (prop_max - prop_min)
-    value = min(prop_max, max(prop_min, value)) # limit by minmax
+    value = min(prop_max, max(prop_min, value))  # limit by minmax
     if value != old_value:
         bone[prop] = value
     if abs(value - old_value) >= 0.005:
@@ -193,7 +192,7 @@ class EditProps(bpy.types.Operator):
         ('click', 'click', 'click'),
         ('press', 'press', 'press'),
         ('tweak', 'tweak', 'tweak')))
-    
+
     @classmethod
     def poll(cls, context):
         return context.area.type == 'VIEW_3D' and context.mode == 'POSE'
@@ -201,7 +200,7 @@ class EditProps(bpy.types.Operator):
     def modal(self, context, event):
         if context.mode != 'POSE' or not context.active_pose_bone:
             fallback_interaction(context)
-            return {'PASS_THROUGH', 'CANCELLED'}            
+            return {'PASS_THROUGH', 'CANCELLED'}
         context.area.tag_redraw()
         x_offset = 20
         y_offset = -20
@@ -218,11 +217,11 @@ class EditProps(bpy.types.Operator):
             for index, prop in enumerate(items):
                 offset = index * 40
                 if y_mouse > y_min - offset and y_mouse < y_max - offset and \
-                  x_mouse >= x_start and x_mouse <= x_end:
+                        x_mouse >= x_start and x_mouse <= x_end:
                     set_value(context, bone, prop, x_mouse, x_start, x_end)
                     self.properties.myprop = prop
                     self.properties.in_some_slider = True
-                    self.properties.slider_index  = index
+                    self.properties.slider_index = index
                     break
 
         if self.properties.in_some_slider:
@@ -230,7 +229,7 @@ class EditProps(bpy.types.Operator):
             set_value(context, bone, prop, x_mouse, x_start, x_end)
         else:
             fallback_interaction(context)
-            return {'PASS_THROUGH', 'CANCELLED'}            
+            return {'PASS_THROUGH', 'CANCELLED'}
 
         if event.type == 'LEFTMOUSE' and event.value == 'RELEASE':
             return {'FINISHED'}
@@ -252,11 +251,11 @@ class EditProps(bpy.types.Operator):
 class BasicMenu(bpy.types.Menu):
     bl_idname = "POSE_MT_Keyframe_Slider"
     bl_label = "Keyframe:"
-    
+
     @classmethod
     def poll(cls, context):
         return context.mode == 'POSE'
-        
+
     def draw(self, context):
         global active_prop, keyframed, animated
         layout = self.layout
@@ -287,7 +286,7 @@ class KeyframeProp(bpy.types.Operator):
     bl_options = {'UNDO'}
     operation = bpy.props.EnumProperty(items=[
         ('insert_keyframe', 'Insert Keyframe', 'Insert Keyframe at frame'),
-        ('delete_keyframe', 'Delete Keyframe', 'Delete Current Keyframe')])    
+        ('delete_keyframe', 'Delete Keyframe', 'Delete Current Keyframe')])
 
     @classmethod
     def poll(cls, context):
@@ -296,7 +295,7 @@ class KeyframeProp(bpy.types.Operator):
     def invoke(self, context, event):
         global active_prop, animated, keyframed
         object = context.active_object
-        
+
         x_offset = 20
         y_offset = -20
         slider_width = 100
@@ -310,15 +309,15 @@ class KeyframeProp(bpy.types.Operator):
         for index, prop in enumerate(items):
             offset = index * 40
             if y_mouse > y_min - offset and y_mouse < y_max - offset and \
-              x_mouse >= x_start and x_mouse <= x_end:
+                    x_mouse >= x_start and x_mouse <= x_end:
                 self.properties.myprop = prop
                 # check if bone is animated
-                animated , keyframed = is_animated(context, prop)
-                active_prop = prop  
+                animated, keyframed = is_animated(context, prop)
+                active_prop = prop
                 bpy.ops.wm.call_menu(name=BasicMenu.bl_idname)
                 return {'FINISHED'}
         return {'PASS_THROUGH', 'CANCELLED'}
-    
+
     def draw(self, context):
         pass
 
@@ -358,8 +357,8 @@ def register():
         EditProps.bl_idname, 'LEFTMOUSE', 'PRESS', head=True)
     kmi = km.keymap_items.new(
         KeyframeProp.bl_idname, 'RIGHTMOUSE', 'PRESS', head=True)
-        
-    
+
+
 def unregister():
     global handle
 
@@ -370,11 +369,11 @@ def unregister():
                 for kmi in km.keymap_items:
                     if kmi.idname in (EditProps.bl_idname, KeyframeProp.bl_idname):
                         km.keymap_items.remove(kmi)
-                
+
     bpy.types.SpaceView3D.draw_handler_remove(handle, 'WINDOW')
     bpy.utils.unregister_class(EditProps)
     bpy.utils.unregister_class(KeyframeProp)
     bpy.utils.unregister_class(BasicMenu)
-    
+
 if __name__ == '__main__':
     register()

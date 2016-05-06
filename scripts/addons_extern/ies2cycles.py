@@ -37,7 +37,8 @@ import os
 
 from math import pi
 from operator import add, truediv
-      
+
+
 def clamp(x, min, max):
     if x < min:
         return min
@@ -48,6 +49,8 @@ def clamp(x, min, max):
 # Temperature to RGB
 # OSL version:
 # http://blenderartists.org/forum/showthread.php?270332&amp;p=2268693#post2268693
+
+
 def t2rgb(t):
     if t <= 6500:
         a = [0, -2902.1955373783176, -8257.7997278925690]
@@ -74,14 +77,14 @@ def simple_interp(k, x, y):
 def gen_rig_object(name, data):
     mesh = bpy.data.meshes.new('lamp rig ' + name)
     bm = bmesh.new()
-    
+
     scale = 1.0
-    
+
     first = bm.verts.new((0, 0, data[0][0] * scale))
     last = bm.verts.new((0, 0, -data[0][-1] * scale))
-    
-    v_angles = [pi * (i+1)/(len(data[0])-1) for i in range(len(data[0])-2)]
-    h_angles = [2 * pi * i/(len(data)) for i in range(len(data))]
+
+    v_angles = [pi * (i + 1) / (len(data[0]) - 1) for i in range(len(data[0]) - 2)]
+    h_angles = [2 * pi * i / (len(data)) for i in range(len(data))]
 
     for h_angle, angle_data in zip(h_angles, data):
         verts = []
@@ -89,25 +92,25 @@ def gen_rig_object(name, data):
             vec = mathutils.Vector((0.0, 0.0, 1.0))
             vec.rotate(mathutils.Euler((v_angle, 0.0, h_angle - pi / 2), 'XYZ'))
             verts.append(bm.verts.new((vec * value * scale)))
-    
-        for i in range(len(verts)-1):
-            bm.edges.new((verts[i], verts[i+1]))
-    
+
+        for i in range(len(verts) - 1):
+            bm.edges.new((verts[i], verts[i + 1]))
+
         bm.edges.new((first, verts[0]))
         bm.edges.new((last, verts[-1]))
-    
+
     bm.to_mesh(mesh)
     mesh.update()
-    
+
     ob = bpy.data.objects.new('lamp rig ' + name, mesh)
     ob.location = bpy.context.scene.cursor_location
     bpy.context.scene.objects.link(ob)
-    
+
     return ob.name
 
 
 def reinterpolate_line(x_data, y_data, new_width):
-    new_x_data = [i/(new_width-1) for i in range(new_width)]
+    new_x_data = [i / (new_width - 1) for i in range(new_width)]
     new_y_data = [simple_interp(k, x_data, y_data) for k in new_x_data]
     return new_y_data
 
@@ -125,13 +128,13 @@ def gen_vcurves_rig(name, x_data, y_data, cone_type):
 def reinterpolate_2d(data, size, h_type):
     if h_type == 'TYPE90' or h_type == 'TYPE180':
         data += list(reversed(data))[1:]
-    
+
     if h_type == 'TYPE90':
         data += list(reversed(data))[1:]
-    
+
     if len(data) == 1:
         data = [data[0]] * 2
-    
+
     for length in size:
         x_data = [i / (len(data[0]) - 1) for i in range(len(data[0]))]
         for i in range(len(data)):
@@ -151,7 +154,7 @@ def gen_2d_rig(name, data, cone_type, h_type):
 def read_lamp_data(log, filename, generate_rig, multiplier, image_format, color_temperature):
     # log({'INFO'}, 'Start IES import')
     rig_name = ''
-    
+
     version_table = {
         'IESNA:LM-63-1986': 1986,
         'IESNA:LM-63-1991': 1991,
@@ -159,7 +162,7 @@ def read_lamp_data(log, filename, generate_rig, multiplier, image_format, color_
         'IESNA:LM-63-1995': 1995,
         'IESNA:LM-63-2002': 2002,
     }
-    
+
     name = os.path.splitext(os.path.split(filename)[1])[0]
 
     file = open(filename, 'rt', encoding='cp1252')
@@ -231,9 +234,8 @@ def read_lamp_data(log, filename, generate_rig, multiplier, image_format, color_
         lamp_cone_type = 'TYPE180'
     else:
         log({'INFO'}, "Lamps with vertical angles (%d-%d) are not supported" %
-                       (v_angs[0], v_angs[-1]))
+            (v_angs[0], v_angs[-1]))
         lamp_cone_type = 'TYPE180'
-
 
     if len(h_angs) == 1 or abs(h_angs[0] - h_angs[-1]) == 360:
         lamp_h_type = 'TYPE360'
@@ -243,9 +245,9 @@ def read_lamp_data(log, filename, generate_rig, multiplier, image_format, color_
         lamp_h_type = 'TYPE90'
     else:
         log({'INFO'}, "Lamps with horizontal angles (%d-%d) are not supported" %
-                       (h_angs[0], h_angs[-1]))
+            (h_angs[0], h_angs[-1]))
         lamp_h_type = 'TYPE360'
-        
+
     # print(h_angs, lamp_h_type)
 
     # read candela values
@@ -260,16 +262,16 @@ def read_lamp_data(log, filename, generate_rig, multiplier, image_format, color_
         # scale vertical angles to [0, 1] range
         x_rig_data = [x / v_angs[-1] for x in v_angs]
         x_data = [0.5 + 0.5 * x for x in x_rig_data]
-        
+
         # approximate multidimentional lamp data to single dimention
         y_data = [sum(x) / len(x) for x in zip(*candela_2d)]
         y_data_max = max(y_data)
-        
+
         intensity = max(500, min(y_data_max * multiplier * candela_mult, 5000))
-        
+
         lamp_rig_y_data = [y / y_data_max for y in y_data]
         lamp_y_data = [0.5 + 0.5 * y for y in lamp_rig_y_data]
-        
+
         lamp_data = list(zip(x_data, lamp_y_data))
         if generate_rig:
             rig_name = gen_vcurves_rig(name, x_rig_data, lamp_rig_y_data, lamp_cone_type)
@@ -306,24 +308,24 @@ def read_lamp_data(log, filename, generate_rig, multiplier, image_format, color_
 
     if not h_same:
         log({'INFO'}, "Different offsets for horizontal angles!")
-        
+
     # normalize candela values
     maxval = max([max(row) for row in candela_2d])
     candela_2d = [[val / maxval for val in row] for row in candela_2d]
-    
+
     # generate rig object
     if generate_rig:
         rig_name = gen_2d_rig(name, candela_2d, lamp_cone_type, lamp_h_type)
 
     # add extra left and right rows to bypass cycles repeat of uv coordinates
     candela_2d = [[line[0]] + list(line) + [line[-1]] for line in candela_2d]
-    
+
     if len(candela_2d) > 1:
         candela_2d = [candela_2d[0]] + candela_2d + [candela_2d[-1]]
 
     # flatten 2d array to 1d
     candela_values = [y for x in candela_2d for y in x]
-    
+
     intensity = max(500, min(maxval * multiplier * candela_mult, 5000))
 
     if image_format == 'PNG':
@@ -409,12 +411,12 @@ def add_h_angles(nt, x, y, out, lamp_h_type):
     if lamp_h_type == 'TYPE90' or lamp_h_type == 'TYPE180':
         repeat_times = 4 if lamp_h_type == 'TYPE90' else 2
         nj.inputs[1].default_value = pi / repeat_times
-    
+
         nk = nt.nodes.new('ShaderNodeMath')
         nk.operation = 'MULTIPLY'
         nt.links.new(nj.outputs[0], nk.inputs[0])
         nk.inputs[1].default_value = -1.0
-        
+
         nl = nt.nodes.new('ShaderNodeMath')
         nl.operation = 'MAXIMUM'
         nt.links.new(nj.outputs[0], nl.inputs[0])
@@ -427,16 +429,16 @@ def add_h_angles(nt, x, y, out, lamp_h_type):
 
 def add_uv_mapping_node(nt, input, output, img_size):
     nt_map = nt.nodes.new('ShaderNodeMapping')
-    
+
     for i in range(2):
         nt_map.translation[i] = 1 / (img_size[i] - 2)
         nt_map.scale[i] = (img_size[i] - 2) / img_size[i]
-    
+
     nt.links.new(nt_map.inputs[0], input)
     nt.links.new(nt_map.outputs[0], output)
 
 
-def add_img(name, intensity, lamp_cone_type, lamp_h_type, image_format, 
+def add_img(name, intensity, lamp_cone_type, lamp_h_type, image_format,
             color_temperature, filepath=None, lamp_data=None, rig_name=None):
     if image_format != 'VCURVES':
         img = bpy.data.images[name]
@@ -445,16 +447,16 @@ def add_img(name, intensity, lamp_cone_type, lamp_h_type, image_format,
         img.save()
 
     nt = bpy.data.node_groups.new("Lamp " + name, 'ShaderNodeTree')
-    
+
     nt.inputs.new('NodeSocketVector', "Vector")
     nt.inputs.new('NodeSocketFloat', "Strength")
     nt.inputs.new('NodeSocketFloat', "Size")
-    
+
     nt.outputs.new('NodeSocketFloat', "Intensity")
-    
+
     nt_input = nt.nodes.new('NodeGroupInput')
     nt_output = nt.nodes.new('NodeGroupOutput')
-    
+
     n0 = nt.nodes.new('ShaderNodeSeparateRGB')
 
     ne = nt.nodes.new('ShaderNodeMath')
@@ -491,29 +493,29 @@ def add_img(name, intensity, lamp_cone_type, lamp_h_type, image_format,
         nt_data_out = nt_data_sep.outputs[0]
     else:  # image-based
         nt_combine = nt.nodes.new('ShaderNodeCombineRGB')
-        
+
         # use (x+a)*b cascade for Nx1 images
         if img.size[1] == 1:
             scale_coords(nt, ni.outputs[0], nt_combine.inputs[0], img.size[0])
         else:
             nt.links.new(ni.outputs[0], nt_combine.inputs[0])
-        
+
         if img.size[1] > 1:
             add_h_angles(nt, n0.outputs[0], n0.outputs[1], nt_combine.inputs[1], lamp_h_type)
-        
+
         nt_data = nt.nodes.new('ShaderNodeTexImage')
         nt_data.image = img
         nt_data.color_space = 'NONE'
-        
+
         if img.size[1] > 1:
             add_uv_mapping_node(nt, nt_combine.outputs[0], nt_data.inputs[0], img.size)
         else:
             nt.links.new(nt_combine.outputs[0], nt_data.inputs[0])
-        
+
         nt_data_out = nt_data.outputs[0]
 
     nt.links.new(n0.inputs[0], nt_input.outputs[0])
-    
+
     nt_intensity = nt.nodes.new('ShaderNodeMath')
     nt_intensity.operation = 'MULTIPLY'
     nt.links.new(nt_input.outputs[1], nt_intensity.inputs[0])
@@ -547,27 +549,26 @@ def add_img(name, intensity, lamp_cone_type, lamp_h_type, image_format,
 
     lnt_grp = lnt.nodes.new('ShaderNodeGroup')
     lnt_grp.node_tree = nt
-    
-    
+
     for node in lnt.nodes:
         if node.bl_idname == 'ShaderNodeEmission':
             emission_node = node
             break
-    
+
     emission_node.inputs[0].default_value = t2rgb(color_temperature)
     lnt.links.new(emission_node.inputs[1], lnt_grp.outputs[0])
-    
+
     lnt_grp.inputs[1].default_value = intensity
     lnt_grp.inputs[2].default_value = 1.0
 
     lnt_map = lnt.nodes.new('ShaderNodeMapping')
     lnt_map.rotation[0] = pi
     lnt.links.new(lnt_grp.inputs[0], lnt_map.outputs[0])
-    
+
     if rig_name:
         lampdata["rigged_ies"] = True
         rig_object = bpy.data.objects[rig_name]
-        
+
         # add RGBA color drivers
         fcurves = lnt.driver_add(emission_node.inputs[0].path_from_id("default_value"))
         for i, fcurve in enumerate(fcurves):
@@ -575,16 +576,16 @@ def add_img(name, intensity, lamp_cone_type, lamp_h_type, image_format,
             var.targets[0].id = rig_object
             var.targets[0].data_path = '["ies_settings"]["color"][%d]' % i
             fcurve.driver.type = 'SUM'
-        
+
         rig_object.ies_settings.color = t2rgb(color_temperature)[0:3]
-        
+
         # add factor -> intensity driver
         strength_fc = lnt.driver_add(lnt_grp.inputs[1].path_from_id("default_value"))
         strength_fc.driver.type = 'SUM'
         strength_var = strength_fc.driver.variables.new()
         strength_var.targets[0].id = rig_object
         strength_var.targets[0].data_path = '["ies_settings"]["strength_mult"]'
-        
+
         # add size -> intensity driver
         strength_fc = lnt.driver_add(lnt_grp.inputs[2].path_from_id("default_value"))
         strength_fc.driver.type = 'SUM'
@@ -592,15 +593,15 @@ def add_img(name, intensity, lamp_cone_type, lamp_h_type, image_format,
         strength_var.type = 'TRANSFORMS'
         strength_var.targets[0].id = rig_object
         strength_var.targets[0].transform_type = 'SCALE_Z'
-        
+
         # set and recalculate intensity
         rig_object.ies_settings.strength_mult = intensity
-        
+
         # add rotation drivers
         fcurves = lnt.driver_add(lnt_map.path_from_id('rotation'))
         fc_types = ['ROT_X', 'ROT_Y', 'ROT_Z']
         fc_coeffs = [[0.0, 1.0], [0.0, 1.0], [pi, -1.0]]
-        
+
         for fcurve, trans_type, coeffs in zip(fcurves, fc_types, fc_coeffs):
             v = fcurve.driver.variables.new()
             v.type = 'TRANSFORMS'
@@ -608,18 +609,17 @@ def add_img(name, intensity, lamp_cone_type, lamp_h_type, image_format,
             v.targets[0].transform_type = trans_type
             fcurve.driver.type = 'SUM'
             fcurve.modifiers[0].coefficients = coeffs
-            
+
         # recalculate driver data by changing rig angle
         rig_object.rotation_euler.x = pi
-        
 
     lnt_geo = lnt.nodes.new('ShaderNodeNewGeometry')
     lnt.links.new(lnt_map.inputs[0], lnt_geo.outputs[1])
 
     lamp = bpy.data.objects.new("Lamp " + name, lampdata)
-    
+
     bpy.context.scene.objects.link(lamp)
-    
+
     for ob in bpy.data.objects:
         ob.select = False
 
@@ -676,6 +676,7 @@ temperature_prop_items = (
 
 temperature_prop_default = 'T6500'
 
+
 class ImportIES(Operator, ImportHelper):
     """Import IES lamp data and generate a node group for cycles"""
     bl_idname = "import_lamp.ies"
@@ -688,7 +689,7 @@ class ImportIES(Operator, ImportHelper):
         description="Generate rig for lamp",
         default=True,
     )
-    
+
     lamp_strength = FloatProperty(
         name="Strength",
         description="Multiplier for lamp strength",
@@ -709,7 +710,7 @@ class ImportIES(Operator, ImportHelper):
     )
 
     def execute(self, context):
-        return read_lamp_data(self.report, self.filepath, self.generate_rig, 
+        return read_lamp_data(self.report, self.filepath, self.generate_rig,
                               self.lamp_strength, self.image_format,
                               int(self.color_temperature[1:]))
 
@@ -762,7 +763,7 @@ def menu_func(self, context):
 
 # Rig panel and data
 class IesRigSettings(bpy.types.PropertyGroup):
-    strength_mult = bpy.props.FloatProperty(name="Strength Multiplier", 
+    strength_mult = bpy.props.FloatProperty(name="Strength Multiplier",
                                             default=1, min=0, max=1e4)
     color = bpy.props.FloatVectorProperty(name="Color", subtype="COLOR")
 
@@ -771,14 +772,14 @@ class IesRigPanel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Lamp Properties"
-    
+
     @classmethod
     def poll(self, context):
         try:
             return context.active_object.children[0].data['rigged_ies']
         except:
             return False
-        
+
     def draw(self, context):
         ob = context.active_object
         self.layout.prop(ob.ies_settings, "strength_mult")
@@ -791,7 +792,7 @@ registered_classes = [IesRigSettings, IesRigPanel, ImportIES, ExportLampEXR]
 def register():
     for cls in registered_classes:
         bpy.utils.register_class(cls)
-    
+
     bpy.types.Object.ies_settings = bpy.props.PointerProperty(type=IesRigSettings)
     bpy.types.INFO_MT_file_import.append(menu_func)
 
