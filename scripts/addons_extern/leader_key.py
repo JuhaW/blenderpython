@@ -3,15 +3,15 @@ import bpy
 
 
 bl_info = {
-    'name'        : 'Leader Key',
-    'location'    : ('Add shortcut to ui.leaderkey '
-                     'or access through search menu.'),
-    'description' : 'Vim like <leader> key functionality for blender',
-    'author'      : 'Adam Wolski(miniukof@gmail.com)',
-    'wiki_url'    : 'https://github.com/miniukof/bl-leader_key',
-    'version'     : (0, 0, 1),
-    'blender'     : (2, 76, 11),
-    'category'    : 'User Interface',
+    'name': 'Leader Key',
+    'location': ('Add shortcut to ui.leaderkey '
+                 'or access through search menu.'),
+    'description': 'Vim like <leader> key functionality for blender',
+    'author': 'Adam Wolski(miniukof@gmail.com)',
+    'wiki_url': 'https://github.com/miniukof/bl-leader_key',
+    'version': (0, 0, 1),
+    'blender': (2, 76, 11),
+    'category': 'User Interface',
 }
 
 
@@ -92,7 +92,7 @@ KEYSTR_DESC = ('String of characters to be used as key binding. For ex: '
                ' in A, B, C keys in sequence would lead to calling bound '
                'function. You can use all the keys that blender outputs in '
                'event.type, except mouse movement:\n{}'
-              ).format(' '.join(EVENTS))
+               ).format(' '.join(EVENTS))
 FUNC_DESC = 'Function to be used by this key binding.'
 CTYPE_DESC = 'Type of area in which this key binding is to be used in.'
 CMODE_DESC = 'Mode in which this key binding is to be used in.'
@@ -123,7 +123,7 @@ class LeaderKey(bpy.types.Operator):
         for i in range(addon_prefs.bindings_number):
             exec(('self.bindings.append({0}.kstr{1},'
                   '{0}.func{1}, {0}.ctype{1}, {0}.cmode{1})'
-                 ).format('addon_prefs', i))
+                  ).format('addon_prefs', i))
         self.timestart = time()
         wm = context.window_manager
         self._timer = wm.event_timer_add(0.001, context.window)
@@ -270,6 +270,10 @@ def register():
     bpy.utils.register_class(LeaderKeyPreferences)
     bpy.utils.register_class(LeaderKey)
 
+
 def unregister():
     bpy.utils.unregister_class(LeaderKey)
     bpy.utils.unregister_class(LeaderKeyPreferences)
+
+if __name__ == "__main__":
+    register()

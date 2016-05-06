@@ -3,9 +3,9 @@
 # Author: Lapineige                                                                                  #
 # License: GPL v3                                                                                    #
 ######################################################################################################
-  
-  
-############# Add-on description (used by Blender)
+
+
+# Add-on description (used by Blender)
 
 bl_info = {
     "name": "Multiple camera rendering",
@@ -14,11 +14,11 @@ bl_info = {
     "version": (2, 1),
     "blender": (2, 7, 1),
     "location": "Properties > Render > Multiple Camera Render",
-    "warning": "", 
+    "warning": "",
     "wiki_url": "http://www.le-terrier-de-lapineige.over-blog.com",
     "tracker_url": "http://blenderlounge.fr/forum/viewtopic.php?f=18&t=622",
     "category": "Render"}
-############# 
+
 
 import bpy
 from os.path import isdir
@@ -27,7 +27,9 @@ bpy.types.Scene.MultiOutputDir = bpy.props.StringProperty(subtype='DIR_PATH', de
 bpy.types.Scene.MultiOutputFile = bpy.props.StringProperty(subtype='FILE_NAME', default='Render_', description='Render file name suffix. Can be empty')
 bpy.types.Scene.MultiOutputNameMode = bpy.props.EnumProperty(items=[('0', 'Number', "Use a counter as suffix", 1), ('1', 'Name', "Use the camera's name as suffix", 2)], description="Suffix type for the render images")
 
-############### Operator
+# Operator
+
+
 class MultiCameraRender(bpy.types.Operator):
     """ Render with all camera selected """
     bl_idname = "render.multiple_camera_render"
@@ -51,21 +53,23 @@ class MultiCameraRender(bpy.types.Operator):
                 count += 1
                 context.scene.camera = obj
                 bpy.ops.render.render()
-                #print('Rendering with camera: ' + obj.name)
+                # print('Rendering with camera: ' + obj.name)
                 render = bpy.data.images['Render Result'].copy()
                 if int(context.scene.MultiOutputNameMode):
-                    #print('File created: "' + context.scene.MultiOutputFile + obj.name + bpy.context.scene.render.file_extension + '"')
+                    # print('File created: "' + context.scene.MultiOutputFile + obj.name + bpy.context.scene.render.file_extension + '"')
                     render.save_render(context.scene.MultiOutputDir + context.scene.MultiOutputFile + obj.name + bpy.context.scene.render.file_extension)
                 else:
-                    #print('File created: "' + context.scene.MultiOutputFile + str(count) + bpy.context.scene.render.file_extension + '"')
+                    # print('File created: "' + context.scene.MultiOutputFile + str(count) + bpy.context.scene.render.file_extension + '"')
                     render.save_render(context.scene.MultiOutputDir + context.scene.MultiOutputFile + str(count) + bpy.context.scene.render.file_extension)
-        
+
         self.report({'INFO'}, str(count) + " files created at: " + context.scene.MultiOutputDir)
         context.area.type = previous
-        #print()
+        # print()
         return {'FINISHED'}
 
-#################### Panel
+# Panel
+
+
 class MultiCameraRendering(bpy.types.Panel):
     """ Label with some options for add-on Multi-Camera Rendering """
     bl_label = "Multi-Camera Render"
@@ -86,7 +90,8 @@ class MultiCameraRendering(bpy.types.Panel):
 def register():
     bpy.utils.register_class(MultiCameraRender)
     bpy.utils.register_class(MultiCameraRendering)
-    
+
+
 def unregister():
     bpy.utils.unregister_class(MultiCameraRender)
     bpy.utils.unregister_class(MultiCameraRendering)
@@ -94,4 +99,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

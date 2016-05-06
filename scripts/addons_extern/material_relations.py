@@ -24,21 +24,24 @@ bl_info = {
     "blender": (2, 68, 0),
     "location": "Material Panel",
     "description": "Display the objects that use the selected material.",
-    "category": "Material"}
+    "category": "Material"
+}
 
 
 import bpy
-#------------------------------------------------------
+# ------------------------------------------------------
 # Action class
-#------------------------------------------------------
+# ------------------------------------------------------
+
+
 class RunAction(bpy.types.Operator):
     bl_idname = "object.select_material"
     bl_label = "Select"
     bl_description = "Select objects with current material"
 
-    #------------------------------
+    # ------------------------------
     # Execute
-    #------------------------------
+    # ------------------------------
     def execute(self, context):
         # Get current material
         currentMaterial = bpy.context.object.active_material
@@ -47,20 +50,22 @@ class RunAction(bpy.types.Operator):
             for slot in obj.material_slots:
                 if slot.material == currentMaterial:
                     obj.select = True
-        
+
         return {'FINISHED'}
-#------------------------------------------------------
+# ------------------------------------------------------
 # UI Class
-#------------------------------------------------------
+# ------------------------------------------------------
+
+
 class PanelUI(bpy.types.Panel):
     bl_label = "Material relationship"
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    bl_context = "material"    
-    
-    #------------------------------
+    bl_context = "material"
+
+    # ------------------------------
     # Draw UI
-    #------------------------------
+    # ------------------------------
     def draw(self, context):
         layout = self.layout
         if (bpy.context.object.active_material is not None):
@@ -77,36 +82,34 @@ class PanelUI(bpy.types.Panel):
             for obj in bpy.data.objects:
                 for slot in obj.material_slots:
                     if slot.material == currentMaterial:
-                        objList.append(obj)  
+                        objList.append(obj)
             # Display result
             row.label(currentMaterial.name + "  (" + str(len(objList)) + " relationship)", icon='MATERIAL_DATA')
 
-            
             box = layout.box()
             for obj in bpy.data.objects:
                 for slot in obj.material_slots:
                     if slot.material == currentMaterial:
-                        objList.append(obj)  
+                        objList.append(obj)
                         row = box.row()
                         buf = obj.name
                         if (len(obj.material_slots) > 1):
                             buf = buf + "  (" + str(len(obj.material_slots)) + " materials)"
-                        
-                        row.label(buf, icon='OBJECT_DATAMODE')          
-            
+
+                        row.label(buf, icon='OBJECT_DATAMODE')
 
         else:
             buf = "** No selected material **"
             layout.label(buf, icon='MATERIAL_DATA')
-                
-        
-#------------------------------------------------------
+
+
+# ------------------------------------------------------
 # Registration
-#------------------------------------------------------
+# ------------------------------------------------------
 def register():
     bpy.utils.register_class(RunAction)
     bpy.utils.register_class(PanelUI)
-    
+
 
 def unregister():
     bpy.utils.unregister_class(RunAction)

@@ -30,44 +30,43 @@ bl_info = {
     "support": "COMMUNITY"}
 
 
-
-import bpy, os
+import bpy
+import os
 from bpy.props import IntProperty, StringProperty
 
-import os, subprocess
+import os
+import subprocess
 
 
 def generate_parts(s_frame, e_frame, number_of_threads):
-    #lista de tramos que se han de renderizar
+    # lista de tramos que se han de renderizar
     tramos = []
     counter = s_frame
 
     duration = e_frame - s_frame
 
-    part = int(duration/number_of_threads)
+    part = int(duration / number_of_threads)
 
     print("-------------------------")
-    
+
     for i in range(number_of_threads):
-        if i < number_of_threads-1:
-            #print(counter, counter+part, counter+part-counter)
-            tramo = (counter, counter+part-1)
+        if i < number_of_threads - 1:
+            # print(counter, counter+part, counter+part-counter)
+            tramo = (counter, counter + part - 1)
         else:
-            #print(counter, e_frame, e_frame-counter)
+            # print(counter, e_frame, e_frame-counter)
             tramo = (counter, e_frame)
-        counter = counter+part
+        counter = counter + part
         tramos.append(tramo)
-        print("{} a {} ({} frames)".format(tramo[0],tramo[1], tramo[1]-tramo[0]+1))
-    #print(tramos)
+        print("{} a {} ({} frames)".format(tramo[0], tramo[1], tramo[1] - tramo[0] + 1))
+    # print(tramos)
 
     return tramos
 
 
 def generate_scripts():
-    
 
     return {'FINISHED'}
-
 
 
 class GenerateMegaRenderOperator(bpy.types.Operator):
@@ -80,7 +79,7 @@ class GenerateMegaRenderOperator(bpy.types.Operator):
         return context.scene.sequence_editor
 
     def execute(self, context):
-        
+
         preferences = context.user_preferences
         prefs = preferences.addons['mega_render_operator'].preferences
 
@@ -99,9 +98,9 @@ class GenerateMegaRenderOperator(bpy.types.Operator):
 
         tramos = generate_parts(s_frame, e_frame, number_of_threads)
 
-        #generate_scripts(tra, blenderpath, blendfile, sce, scriptfilename)
+        # generate_scripts(tra, blenderpath, blendfile, sce, scriptfilename)
 
-        #tramos, blendfile, sce, scriptfilename
+        # tramos, blendfile, sce, scriptfilename
 
         # generate the script
         log_file = bpy.path.abspath("//render.log")
@@ -111,22 +110,22 @@ class GenerateMegaRenderOperator(bpy.types.Operator):
             text_file.write(("\n(\necho '#Rendering part {}'\nSTART_RENDER=$(date +'%s')\n").format(i))
             text_file.write("RESULT=$({} {} -b -S {} -s {} -e {} -a 2>&1".format(blenderpath, blendfile, sce.name, j[0], j[1]))
             text_file.write(" | grep 'Saved\|Append\|not an anim\|unknown fileformat') \nEND_RENDER=$(date +'%s')\nRENDERING_SECS=$(($END_RENDER-$START_RENDER))\nLINEAS=$(echo \"$RESULT\" | wc -l)\n")
-            text_file.write("if [ $LINEAS -eq {} ];then\n".format(j[1]-j[0]+1))
-            text_file.write("   echo \"#Finished frame {} to {} in $(printf '%dh:%dm:%ds' $(($RENDERING_SECS/3600)) $(($RENDERING_SECS%3600/60)) $(($RENDERING_SECS%60)))\"\nelse\n".format(j[0],j[1])) 
+            text_file.write("if [ $LINEAS -eq {} ];then\n".format(j[1] - j[0] + 1))
+            text_file.write("   echo \"#Finished frame {} to {} in $(printf '%dh:%dm:%ds' $(($RENDERING_SECS/3600)) $(($RENDERING_SECS%3600/60)) $(($RENDERING_SECS%60)))\"\nelse\n".format(j[0], j[1]))
             text_file.write("   RESULT=$(echo \"$RESULT\" | sed -n '/\\(unknown fileformat\\|not an anim\\)/{N;p;}')\n")
-            text_file.write("   RESULT=$(echo \"$RESULT\" | sed 's/Saved/Error on rendered image/;s/Append/Error on/;s/Time.*//;s/.*unknown fileformat/unknown fileformat/')\n")   
-            text_file.write("   echo \"$RESULT\" | sed '/Error/G' >> {}\n".format(log_file))   
+            text_file.write("   RESULT=$(echo \"$RESULT\" | sed 's/Saved/Error on rendered image/;s/Append/Error on/;s/Time.*//;s/.*unknown fileformat/unknown fileformat/')\n")
+            text_file.write("   echo \"$RESULT\" | sed '/Error/G' >> {}\n".format(log_file))
 
             text_file.write("   echo \"#One or more errors were found\\nplease see render.log for details\"\nfi\n )")
             text_file.write("| zenity --progress --pulsate --no-cancel --title='Part {}'".format(i))
 
-            if i < len(tramos)-1:
-                print(i, len(tramos)-1)
+            if i < len(tramos) - 1:
+                print(i, len(tramos) - 1)
                 text_file.write(" & \n")
         text_file.close()
 
-        print("script done")        
-       
+        print("script done")
+
         return {'FINISHED'}
 
 
@@ -145,9 +144,9 @@ class LaunchMegaRenderOperator(bpy.types.Operator):
         preferences = context.user_preferences
         prefs = preferences.addons['mega_render_operator'].preferences
         scriptfilename = bpy.path.abspath(prefs.scriptfilename)
-        command = "sh "+scriptfilename
+        command = "sh " + scriptfilename
         print("ejecutando {}".format(scriptfilename))
-        subprocess.call(command,shell=True)
+        subprocess.call(command, shell=True)
 
         return {'FINISHED'}
 
@@ -158,7 +157,7 @@ class MegaRenderPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PTMultiThread"
     bl_space_type = 'SEQUENCE_EDITOR'
     bl_region_type = 'UI'
-    
+
     @classmethod
     def poll(self, context):
         return context.scene.sequence_editor
@@ -175,12 +174,11 @@ class MegaRenderPanel(bpy.types.Panel):
 
         layout = self.layout
         row = layout.row(align=True)
-        row.label("______ megarender :)")    
+        row.label("______ megarender :)")
         row.prop(prefs, "number_of_threads", text="threads")
         layout = self.layout
         layout.operator("sequencer.generatemegarenderoperator", text="generate")
         layout.operator("sequencer.launchmegarenderoperator", text="launch render")
-        
 
 
 class MegaRenderAddon(bpy.types.AddonPreferences):
@@ -201,21 +199,21 @@ class MegaRenderAddon(bpy.types.AddonPreferences):
         name="number of threads",
         description="number of threads",
         default=8,
-        min = 1, max = 64)
+        min=1, max=64)
 
-    def draw(self, context):   
+    def draw(self, context):
         layout = self.layout
         layout.prop(self, "blenderpath")
         layout.prop(self, "scriptfilename")
         layout.prop(self, "number_of_threads")
-            
+
 
 def register():
     bpy.utils.register_class(MegaRenderAddon)
     bpy.utils.register_class(LaunchMegaRenderOperator)
     bpy.utils.register_class(GenerateMegaRenderOperator)
     bpy.utils.register_class(MegaRenderPanel)
-  
+
 
 def unregister():
     bpy.utils.unregister_class(LaunchMegaRenderOperator)

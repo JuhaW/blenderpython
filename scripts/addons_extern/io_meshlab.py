@@ -34,12 +34,15 @@ from subprocess import Popen
 import os
 from extensions_framework import util as efutil
 
+
 def realpath(path):
     return os.path.realpath(efutil.filesystem_path(path))
-    
+
 original_objects = []
 
-#-------------------------------------------
+# -------------------------------------------
+
+
 class SCENE_OT_MLExport(bpy.types.Operator):
     bl_idname = "export_applink.meshlab"
     bl_label = "Export to MeshLab"
@@ -48,24 +51,24 @@ class SCENE_OT_MLExport(bpy.types.Operator):
 
     def execute(self, context):
         scene = context.scene
-        
+
         export_path = realpath(scene.ML_export_path)
         if not os.path.exists(export_path):
             os.mkdir(export_path)
         print("Exporting mesh to ", export_path)
-        #save list of original objects for later
+        # save list of original objects for later
         global original_objects
         for i in bpy.context.selected_objects:
             original_objects.append(i.name)
-            
-        #MeshLab executable path    
+
+        # MeshLab executable path
         ML_exec_path = scene.ML_exec_path
         obj_export_name = os.path.join(export_path, context.object.name) + '.obj'
         bpy.ops.export_scene.obj(filepath=obj_export_name, use_selection=True, use_mesh_modifiers=True, use_edges=True, use_normals=True, use_materials=True, path_mode='ABSOLUTE')
-       
-        #commands for opening MeshLab
+
+        # commands for opening MeshLab
         args = (ML_exec_path, obj_export_name)
-        
+
         try:
             Popen(args, cwd=export_path, bufsize=-1, shell=False)
         except PermissionError:
@@ -73,40 +76,44 @@ class SCENE_OT_MLExport(bpy.types.Operator):
             pass
 
         return {'FINISHED'}
-    
-#-------------------------------------------
+
+# -------------------------------------------
+
+
 class SCENE_OT_MLImport(bpy.types.Operator):
     bl_idname = "import_applink.meshlab"
     bl_label = "Import from MeshLab"
     bl_description = "Import selected objects from MeshLab."
     bl_options = {'UNDO'}
-    
+
     def execute(self, context):
         import_path = realpath(scene.ML_export_path)
-        
+
         import_obj = ""
         for obj in os.listdir(import_path):
             if obj[-4:] == '.obj':
                 import_obj = obj
                 break
-        
+
         import_objs = os.path.join(import_path, import_obj)
-        
-        #move the object to the last render layer rather than deleting, 
-        #in case the operations in ML didn't go as expected
+
+        # move the object to the last render layer rather than deleting,
+        # in case the operations in ML didn't go as expected
         bpy.ops.object.move_to_layer(layers=(False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True))
-        
+
         bpy.ops.import_scene.obj(filepath=import_obj)
-        
+
         return {'FINISHED'}
-    
-#----------------------------------------------
+
+# ----------------------------------------------
+
+
 class SCENE_OT_Delete_Orig(bpy.types.Operator):
     bl_idname = "del_orig.meshlab"
     bl_label = "Delete Original Objects"
     bl_description = "Delete the original high poly objects from the scene."
     bl_options = {'UNDO'}
-    
+
     def execute(self, context):
         for object in scene.objects:
             object.select = False
@@ -115,16 +122,18 @@ class SCENE_OT_Delete_Orig(bpy.types.Operator):
                 print('deleting ', bpy.data.objects[obj])
                 bpy.data.objects[obj].select = True
             bpy.ops.object.delete()
-        
+
         import_path = realpath(scene.ML_export_path)
-        
-        #clean-up
+
+        # clean-up
         for i in os.listdir(import_path):
             os.remove(import_path + '\\' + i)
 
         return {'FINISHED'}
 
-#--------------------------------------
+# --------------------------------------
+
+
 class SCENE_PT_MLPanel(bpy.types.Panel):
     bl_idname = "MeshLab_Panel"
     bl_label = "MeshLab Import - Export"
@@ -132,7 +141,7 @@ class SCENE_PT_MLPanel(bpy.types.Panel):
     bl_region_type = "WINDOW"
     bl_context = "scene"
     bl_options = {'DEFAULT_CLOSED'}
-           
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
@@ -141,7 +150,7 @@ class SCENE_PT_MLPanel(bpy.types.Panel):
         layout.operator("export_applink.meshlab", icon='MESHLAB')
 
         split = layout.split()
-        col = split.column() 
+        col = split.column()
         col.label(text="Import the mesh from MeshLab:")
         col.operator("import_applink.meshlab", icon='BLENDER')
 
@@ -152,16 +161,16 @@ class SCENE_PT_MLPanel(bpy.types.Panel):
         layout.separator()
         layout.prop(scene, "ML_exec_path")
         layout.prop(scene, "ML_export_path")
-    
+
+
 def register():
     bpy.utils.register_module(__name__)
-    bpy.types.Scene.ML_exec_path = bpy.props.StringProperty(name = "MeshLab Path", subtype = "FILE_PATH")
-    bpy.types.Scene.ML_export_path = bpy.props.StringProperty(name = "MeshLab Export Path", subtype = "DIR_PATH")
-    
+    bpy.types.Scene.ML_exec_path = bpy.props.StringProperty(name="MeshLab Path", subtype="FILE_PATH")
+    bpy.types.Scene.ML_export_path = bpy.props.StringProperty(name="MeshLab Export Path", subtype="DIR_PATH")
+
+
 def unregister():
     bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":
     register()
-    
-

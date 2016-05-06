@@ -36,7 +36,7 @@ class NatronTrackExport(bpy.types.Operator):
     bl_label = "Export Track Data"
     bl_description = (
         "Export all tracks on active clip to ascii file for Natron to read"
-        )
+    )
     bl_options = {'REGISTER'}
 
     def execute(self, context):
@@ -65,7 +65,7 @@ class NatronTrackExport(bpy.types.Operator):
             openFile = open(exportFile, 'w+')
 
             markerLen = min(len(pt.markers) for j, pt in enumerate(ob.tracks)) - 1
-            markerLists = [list() for _ in range(markerLen-1)]
+            markerLists = [list() for _ in range(markerLen - 1)]
 
             for j, pt in enumerate(ob.tracks):
                 print("\tTrack: %i" % j)
@@ -75,11 +75,11 @@ class NatronTrackExport(bpy.types.Operator):
                     if 0 < k < markerLen:
                         print("\t\tMarker: %i" % k)
 
-                        natCoordX = "%.10f" % round(marker.co[0]*activeClipDim[0], 10)
-                        natCoordY = "%.10f" % round(marker.co[1]*activeClipDim[1], 10)
+                        natCoordX = "%.10f" % round(marker.co[0] * activeClipDim[0], 10)
+                        natCoordY = "%.10f" % round(marker.co[1] * activeClipDim[1], 10)
 
-                        markerLists[k-1].append(natCoordX)
-                        markerLists[k-1].append(natCoordY)
+                        markerLists[k - 1].append(natCoordX)
+                        markerLists[k - 1].append(natCoordY)
 
             openFile.writelines("_".join(lines) + "\n"
                                 for lines in markerLists)
