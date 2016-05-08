@@ -27,6 +27,7 @@ bl_info = {
 
 import bpy
 import os
+from pathlib import Path
 
 
 class NatronTrackExport(bpy.types.Operator):
@@ -47,25 +48,25 @@ class NatronTrackExport(bpy.types.Operator):
         activeClip = bpy.data.movieclips[activeClipName[0]]
         activeClipDim = activeClip.size[:]
 
-        markerLen = 0
-
-        # Keep pathing platform-neutral throughout - use os.path.join()
         blendDir = bpy.path.abspath("//")
+
         if blendDir == "":
             self.report({'ERROR'}, "Blend file is not saved")
             return {'CANCELLED'}
 
-        for i, ob in enumerate(activeClip.tracking.objects):
-            print("\nTracking Object: %s" % ob.name)
+        markerLen = 0
 
-            os.makedirs(os.path.join(blendDir, "track_data", ob.name), exist_ok=True)
-            ob_dir = os.path.join(blendDir, "track_data", ob.name)
-            exportFile = os.path.join(ob_dir, "%s.naa"
+        for i, ob in enumerate(activeClip.tracking.objects):
+            track_dir = str(Path(blendDir) / "track_data" / ob.name)
+            os.makedirs(track_dir, exist_ok=True)
+            exportFile = os.path.join(track_dir, "%s.naa"
                                       % str(activeClipName).split("'")[1])
             openFile = open(exportFile, 'w+')
 
             markerLen = min(len(pt.markers) for j, pt in enumerate(ob.tracks)) - 1
             markerLists = [list() for _ in range(markerLen - 1)]
+
+            print("\nTracking Object: %s" % ob.name)
 
             for j, pt in enumerate(ob.tracks):
                 print("\tTrack: %i" % j)
