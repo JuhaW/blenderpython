@@ -21,11 +21,11 @@
 bl_info = {
     "name": "AF: Edit Tools",
     "author": "various",
-    "version": (0, 1, 0),
-    "blender": (2, 7, 0),
+    "version": (0, 1),
+    "blender": (2, 76, 0),
     "location": "View3D > Toolshelf > Tools & Specials (W-key)",
     "description": "Add extra mesh edit tools",
-    "warning": "Dev version mesh extra tools in addons contrib",
+    "warning": "",
     "wiki_url": "",
     "tracker_url": "",
     "category": "Addon Factory"}

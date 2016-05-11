@@ -34,9 +34,11 @@ bl_info = {
 if "bpy" in locals():
     import importlib
     importlib.reload(DATA_PT_modifiers)
+    importlib.reload(mirror_tools)
 
 else:
     from . import DATA_PT_modifiers
+    from . import mirror_tools
 
 import bpy
 

@@ -106,6 +106,7 @@ class TextCounter_Props(bpy.types.PropertyGroup):
     
     def form_up(self, context):
         textcounter_update_val(context.object, context.scene)
+
     def form_get(self):
         f=0
         s=0

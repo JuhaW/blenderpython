@@ -39,13 +39,17 @@ from math import *
 from bpy.props import IntProperty, BoolProperty, FloatProperty, EnumProperty, PointerProperty, StringProperty, CollectionProperty
 from bpy.types import PropertyGroup
 
+#from . import AF_measure_tools
+from . import border_lines
+from . import icon_tools
+from . import index_visualizer
+from . import mesh_check
+from . import mesh_statistics
+from . import opengl_lights
+from . import view_manage_tool
 from . import VIEW3D_PT_view3d_cursor
 from . import VIEW3D_PT_view3d_name
 from . import VIEW3D_PT_view3d_shading
-from . import border_lines
-from . import mesh_statistics
-from . import mesh_check
-
 
 bl_info = {
     "name": "AF: Properties Panels",
@@ -62,12 +66,17 @@ bl_info = {
 
 
 sub_modules = [
+#    AF_measure_tools,
+    border_lines,
+    icon_tools,
+    index_visualizer,
+    mesh_check,
+    mesh_statistics,
+    opengl_lights,
+    view_manage_tool,
     VIEW3D_PT_view3d_cursor,
     VIEW3D_PT_view3d_name,
     VIEW3D_PT_view3d_shading,
-    border_lines,
-    mesh_statistics,
-    mesh_check,
     ]
 
 

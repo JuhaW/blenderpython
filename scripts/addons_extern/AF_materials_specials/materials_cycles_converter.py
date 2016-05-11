@@ -397,13 +397,6 @@ def AutoNode(active=False):
                             t.location = -0, 300
                             links.new(t.outputs[0], shout.inputs[2])
                             links.new(shtext.outputs[0], t.inputs[0])
-
-                        if tex.texture_coords == 'UV':
-                            if tex.uv_layer:
-                                shuvmap = TreeNodes.nodes.new('ShaderNodeUVMap')
-                                shuvmap.uv_map = tex.uv_layer
-                                links.new(shuvmap.outputs[0], shtext.inputs[0])
-
     bpy.context.scene.render.engine = 'CYCLES'
 
 class mllock(bpy.types.Operator):

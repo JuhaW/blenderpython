@@ -34,9 +34,11 @@ if "bpy" in locals():
     import importlib
     importlib.reload(materials_cycles_converter)
     importlib.reload(material_converter)
+    importlib.reload(texture_rename)
 else:
     from . import materials_cycles_converter
     from . import material_converter
+    from . import texture_rename
 
 import bpy
 from bpy.props import StringProperty, BoolProperty, EnumProperty
@@ -932,6 +934,11 @@ class VIEW3D_MT_master_material(bpy.types.Menu):
 							icon='UNPINNED')
 
 			layout.separator()
+			layout.operator("object.rename",
+							text='Rename Image As Texture',
+							icon='TEXTURE')
+
+			layout.separator()
 			layout.label(text="Switch To Blender Render")
 			layout.operator("ml.restore", text='BI Nodes Off', icon='APPEND_BLEND')
 			layout.operator("xps_tools.restore_bi_materials_all", text='BI Nodes On', icon='APPEND_BLEND')
@@ -953,7 +960,10 @@ class VIEW3D_MT_master_material(bpy.types.Menu):
 			layout.operator("view3d.fake_user_set",
 							text='Set Fake User',
 							icon='UNPINNED')
-
+			layout.separator()
+			layout.operator("object.rename",
+							text='Rename Image As Texture',
+							icon='TEXTURE')
 			self.layout.separator()
 			layout.operator("view3d.material_to_texface",
 							text="Material to Texface",
@@ -987,7 +997,10 @@ def menu_func(self, context):
         layout.operator("view3d.fake_user_set",
                         text='Set Fake User',
                         icon='UNPINNED')
-
+        layout.separator()
+        layout.operator("object.rename",
+                        text='Rename Image As Texture',
+                        icon='TEXTURE')
         layout.separator()
         layout.label(text="Switch To Blender Render")
         layout.operator("ml.restore", text='BI Nodes Off', icon='APPEND_BLEND')
@@ -1009,7 +1022,10 @@ def menu_func(self, context):
         layout.operator("view3d.fake_user_set",
                         text='Set Fake User',
                         icon='UNPINNED')
-
+        layout.separator()
+        layout.operator("object.rename",
+                        text='Rename Image As Texture',
+                        icon='TEXTURE')
         self.layout.separator()
         layout.operator("view3d.material_to_texface",
                         text="Material to Texface",

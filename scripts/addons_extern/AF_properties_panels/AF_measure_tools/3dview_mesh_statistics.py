@@ -31,8 +31,9 @@ bl_info = {"name": "Mesh Statistics",
            "warning": "",
            "wiki_url": "",
            "tracker_url": "",
-           "category": "Panel"
+           "category": "3D View"
            }
+
 
 
 import bpy
@@ -40,7 +41,7 @@ from mathutils import Matrix, Vector
 from mathutils.geometry import area_tri#, tessellate_polygon
 from bpy_extras.mesh_utils import ngon_tessellate, edge_face_count
 from bgl import glBegin, glPointSize, glColor3f, glVertex3f, glEnd, GL_POINTS
-from .utils import AddonPreferences, SpaceProperty
+
 
 handle = []
 do_draw = [False]
@@ -564,17 +565,10 @@ class MeshStatisticsPanel(bpy.types.Panel):
                     row = box.row()
                     row.prop(stat, "reference_point")
             
-classes = [
-    MeshStatisticsCollectionGroup,
-    COMToEmptyOperator,
-    RefreshOperator,
-    MeshStatisticsPanel,
-    ]        
+        
 
 def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-
+    bpy.utils.register_module(__name__)
     bpy.types.WindowManager.mesh_statistics = bpy.props.PointerProperty(
         type=MeshStatisticsCollectionGroup)
     bpy.app.handlers.scene_update_post.append(updateScene)
@@ -582,9 +576,6 @@ def register():
         handle[:] = [bpy.types.SpaceView3D.draw_handler_add(drawCallback, (), 'WINDOW', 'POST_VIEW')]
 
 def unregister():
-    for cls in classes:
-        bpy.utils.unregister_class(cls)
-
     del bpy.types.WindowManager.mesh_statistics
     # to be sure...
     if updateScene in bpy.app.handlers.scene_update_post:
@@ -592,7 +583,7 @@ def unregister():
     if handle:
         bpy.types.SpaceView3D.draw_handler_remove(handle[0], 'WINDOW')
         handle[:] = []
-
+    bpy.utils.unregister_module(__name__)
     
 
 if __name__ == "__main__":
