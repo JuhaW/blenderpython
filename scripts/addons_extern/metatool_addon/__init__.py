@@ -18,7 +18,7 @@
 # ##### END GPL LICENSE BLOCK #####
 
 bl_info = {
-    "name": "MKB_Tools",
+    "name": "MetaTool ",
     "author": "mkbreuer / multi authors for addon",
     "version": (0, 1, 6),
     "blender": (2, 7, 4),

@@ -43,7 +43,7 @@ from bpy.types import AddonPreferences
 from bpy.props import *
 from .scripts import settings as PropertyGroup
 from .scripts.interface import button, icon, menu, panel
-from .scripts.operator import auto, batch, copy, icon, settings, text
+from .scripts.operator import active, auto, batch, copy, shortcuts, select, settings, text
 
 # addon
 addon = bpy.context.user_preferences.addons.get(__name__)
@@ -55,17 +55,10 @@ class preferences(AddonPreferences):
   '''
   bl_idname = __name__
 
-  # experimental
-  experimental = BoolProperty(
-    name = 'Experimental Features',
-    description = 'Enable experimental features for this addon',
-    default = False
-  )
-
   # location
   location = EnumProperty(
     name = 'Panel Location',
-    description = 'The 3D view shelf to use. (Save user settings and restart Blender)',
+    description = 'The 3D view shelf to use. (Requires Restart)',
     items = [
       ('TOOLS', 'Tool Shelf', 'Places the Name panel in the tool shelf under the tab labeled \'Name\''),
       ('UI', 'Property Shelf', 'Places the Name panel in the property shelf.')
@@ -78,11 +71,9 @@ class preferences(AddonPreferences):
     # layout
     layout = self.layout
 
-    # experimental
-    layout.prop(self, 'experimental')
-
-    # label
-    layout.label(text='Location:')
+    # enable popups
+    # layout.prop(self, 'dialogues')
+    # layout.prop(self, 'popups')
 
     # row
     row = layout.row()
@@ -99,7 +90,7 @@ class preferences(AddonPreferences):
     # prop.url = ''
 
     prop = split.operator('wm.url_open', text='BlenderArtists')
-    prop.url = 'http://blenderartists.org/forum/showthread.php?272086'
+    prop.url = 'http://blenderartists.org/forum/showthread.php?272086-Addon-Item-Panel-amp-Batch-Naming-1-5'
 
     # prop = split.operator('wm.url_open', text='BlendSwap')
     # prop.url = 'http://www.blendswap.com/blends/view/82472'
@@ -124,10 +115,10 @@ def register():
         bpy.utils.unregister_class(panel.UIName)
       else:
         # remove blender default panel
-        # try:
-        #   bpy.utils.unregister_class(bpy.types.VIEW3D_PT_view3d_name)
-        # except:
-        #   pass
+        try:
+          bpy.utils.unregister_class(bpy.types.VIEW3D_PT_view3d_name)
+        except:
+          pass
         bpy.utils.unregister_class(panel.toolsName)
     except:
       bpy.utils.unregister_class(panel.UIName)

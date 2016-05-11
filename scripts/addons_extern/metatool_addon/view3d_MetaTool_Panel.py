@@ -8254,7 +8254,6 @@ def unregister():
         
     bpy.types.VIEW3D_MTK_toSpecial.remove(menu_func) #class id of Specialmenu
 
-    bpy.utils.unregister_module(__name__)
     
     try:
         del bpy.types.WindowManager.metawindowtool
