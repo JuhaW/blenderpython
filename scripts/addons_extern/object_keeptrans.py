@@ -35,88 +35,90 @@ Save as Default (Optional).
 
 
 bl_info = {
-    "name": "KeepTrans",
-    "author": "Gert De Roost",
-    "version": (0, 3, 0),
-    "blender": (2, 6, 5),
-    "location": "View3D > Tools",
-    "description": "Remove ChildOf constraint and keep transforms",
-    "warning": "",
-    "wiki_url": "",
-    "tracker_url": "",
-    "category": "Object"}
+	"name": "KeepTrans",
+	"author": "Gert De Roost",
+	"version": (0, 3, 0),
+	"blender": (2, 6, 5),
+	"location": "View3D > Tools",
+	"description": "Remove ChildOf constraint and keep transforms",
+	"warning": "",
+	"wiki_url": "",
+	"tracker_url": "",
+	"category": "Object"}
 
 if "bpy" in locals():
     import imp
 
 
 import bpy
-from mathutils import *
-
+from mathutils import * 
 
 class DeCouple(bpy.types.Operator):
-    bl_idname = "object.keeptrans"
-    bl_label = "KeepTrans"
-    bl_description = "Remove ChildOf constraint and keep transforms"
-    bl_options = {"REGISTER", "UNDO"}
+	bl_idname = "object.keeptrans"
+	bl_label = "KeepTrans"
+	bl_description = "Remove ChildOf constraint and keep transforms"
+	bl_options = {"REGISTER", "UNDO"}
+	
+	@classmethod
+	def poll(cls, context):
+		obj = context.active_object
+		return (obj and context.mode == 'OBJECT')
 
-    @classmethod
-    def poll(cls, context):
-        obj = context.active_object
-        return (obj and context.mode == 'OBJECT')
-
-    def invoke(self, context, event):
-        self.save_global_undo = bpy.context.user_preferences.edit.use_global_undo
-        bpy.context.user_preferences.edit.use_global_undo = False
-
-        do_keeptrans(self)
-
-        bpy.context.user_preferences.edit.use_global_undo = self.save_global_undo
-        return {'FINISHED'}
+	def invoke(self, context, event):
+		self.save_global_undo = bpy.context.user_preferences.edit.use_global_undo
+		bpy.context.user_preferences.edit.use_global_undo = False
+		
+		do_keeptrans(self)
+		
+		bpy.context.user_preferences.edit.use_global_undo = self.save_global_undo
+		return {'FINISHED'}
 
 
 def panel_func(self, context):
-    self.layout.label(text="KeepTrans:")
-    self.layout.operator("object.keeptrans", text="KeepTrans")
+	self.layout.label(text="KeepTrans:")
+	self.layout.operator("object.keeptrans", text="KeepTrans")
 
 
 def register():
-    bpy.utils.register_module(__name__)
-    bpy.types.VIEW3D_PT_tools_objectmode.append(panel_func)
+	bpy.utils.register_module(__name__)
+	bpy.types.VIEW3D_PT_tools_objectmode.append(panel_func)
 
 
 def unregister():
-    bpy.utils.unregister_module(__name__)
-    bpy.types.VIEW3D_PT_tools_objectmode.remove(panel_func)
+	bpy.utils.unregister_module(__name__)
+	bpy.types.VIEW3D_PT_tools_objectmode.remove(panel_func)
 
 
 if __name__ == "__main__":
-    register()
+	register()
+
+
+
 
 
 def do_keeptrans(self):
 
-    scn = bpy.context.scene
-    ob = bpy.context.active_object
-    parent = ob.parent
-    childof = None
-    for c in ob.constraints:
-        if c.type == "CHILD_OF":
-            childof = c
-            break
-    if childof == None:
-        return
-    tar = childof.target
-    if parent:
-        bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
-        ob.constraints.remove(childof)
-        parent.select = 1
-        scn.objects.active = parent
-        bpy.ops.object.parent_set(type='OBJECT', xmirror=False, keep_transform=True)
-        parent.select = 0
-        ob.select = 1
-        scn.objects.active = ob
-    else:
-        ob.constraints.remove(childof)
-        ob.parent = tar
-        bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+	scn = bpy.context.scene
+	ob = bpy.context.active_object
+	parent = ob.parent
+	childof = None
+	for c in ob.constraints:
+		if c.type == "CHILD_OF":
+			childof = c
+			break
+	if childof == None:
+		return
+	tar = childof.target
+	if parent:
+		bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+		ob.constraints.remove(childof)
+		parent.select = 1
+		scn.objects.active = parent
+		bpy.ops.object.parent_set(type='OBJECT', xmirror=False, keep_transform=True)
+		parent.select = 0
+		ob.select = 1
+		scn.objects.active = ob
+	else:
+		ob.constraints.remove(childof)
+		ob.parent = tar
+		bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')

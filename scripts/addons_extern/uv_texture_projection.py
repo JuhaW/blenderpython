@@ -91,7 +91,7 @@ class TPError(Exception):
 
     def report(self, obj):
         obj.report(self.err_level, self.err_str)
-
+    
 
 def memorize_view_3d_mode(fn):
     def __memorize_view_3d_mode(*args, **kwargs):
@@ -135,12 +135,12 @@ def get_canvas(context, magnitude):
     PAD_Y = 20
     width = context.region.width
     height = context.region.height
-
+    
     center_x = width * 0.5
     center_y = height * 0.5
     len_x = (width - PAD_X * 2.0) * magnitude
     len_y = (height - PAD_Y * 2.0) * magnitude
-
+    
     x0 = int(center_x - len_x * 0.5)
     y0 = int(center_y - len_y * 0.5)
     x1 = int(center_x + len_x * 0.5)
@@ -155,11 +155,11 @@ def rect_to_rect2(rect):
         rect.y0,
         rect.x1 - rect.x0,
         rect.y1 - rect.y0
-    )
+        )
 
 
 def region_to_canvas(region, rg_vec, canvas):
-    """Convert screen region to canvas"""
+    """Convert screen region to canvas"""  
     cv_rect = rect_to_rect2(canvas)
     cv_vec = mathutils.Vector()
     cv_vec.x = (rg_vec.x - cv_rect.x) / cv_rect.width
@@ -169,31 +169,31 @@ def region_to_canvas(region, rg_vec, canvas):
 
 class TPTextureRenderer(bpy.types.Operator):
     """Rendering texture"""
-
+    
     bl_idname = "uv.tp_texture_renderer"
     bl_label = "Texture renderer"
 
     __handle = None
     __timer = None
-
+    
     @staticmethod
     def handle_add(self, context):
         TPTextureRenderer.__handle = bpy.types.SpaceView3D.draw_handler_add(
             TPTextureRenderer.draw_texture,
             (self, context), 'WINDOW', 'POST_PIXEL')
-
+    
     @staticmethod
     def handle_remove(self, context):
         if TPTextureRenderer.__handle is not None:
             bpy.types.SpaceView3D.draw_handler_remove(
                 TPTextureRenderer.__handle, 'WINDOW')
             TPTextureRenderer.__handle = None
-
+    
     @staticmethod
     def draw_texture(self, context):
         wm = context.window_manager
         sc = context.scene
-
+        
         # no texture is selected
         if sc.tex_image == "None":
             return
@@ -205,7 +205,7 @@ class TPTextureRenderer(bpy.types.Operator):
             [rect.x0, rect.y1],
             [rect.x1, rect.y1],
             [rect.x1, rect.y0]
-        ]
+            ]
         tex_coords = [[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0]]
 
         # get texture to be renderred
@@ -223,7 +223,7 @@ class TPTextureRenderer(bpy.types.Operator):
                 bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MAG_FILTER, bgl.GL_LINEAR)
             bgl.glTexEnvi(
                 bgl.GL_TEXTURE_ENV, bgl.GL_TEXTURE_ENV_MODE, bgl.GL_MODULATE)
-
+        
         # render texture
         bgl.glBegin(bgl.GL_QUADS)
         bgl.glColor4f(1.0, 1.0, 1.0, sc.tex_transparency)
@@ -235,7 +235,7 @@ class TPTextureRenderer(bpy.types.Operator):
 
 class TPStartTextureProjection(bpy.types.Operator):
     """Start Texture Projection"""
-
+    
     bl_idname = "uv.tp_start_texture_projection"
     bl_label = "Start Texture Projection"
     bl_description = "Start Texture Projection."
@@ -253,7 +253,7 @@ class TPStartTextureProjection(bpy.types.Operator):
 
 class TPStopTextureProjection(bpy.types.Operator):
     """Stop Texture Projection"""
-
+    
     bl_idname = "uv.tp_stop_texture_projection"
     bl_label = "Stop Texture Projection"
     bl_description = "Stop Texture Projection."
@@ -271,7 +271,7 @@ class TPStopTextureProjection(bpy.types.Operator):
 
 class TPProjectTexture(bpy.types.Operator):
     """Project texture."""
-
+    
     bl_idname = "uv.tp_project_texture"
     bl_label = "Project Texture"
     bl_description = "Project Texture"
@@ -280,7 +280,7 @@ class TPProjectTexture(bpy.types.Operator):
     def execute(self, context):
         mem = View3DModeMemory()
         sc = context.scene
-
+        
         try:
             if sc.tex_image == "None":
                 raise TPError({'WARNING'}, "You must select texture.")
@@ -302,7 +302,7 @@ class TPProjectTexture(bpy.types.Operator):
             else:
                 raise TPError(
                     {'WARNING'}, "Could not find any 'VIEW_3D' spaces.")
-
+            
             # get faces to be texture projected
             obj = bpy.context.active_object
             world_mat = obj.matrix_world
@@ -314,7 +314,7 @@ class TPProjectTexture(bpy.types.Operator):
                         region,
                         space.region_3d,
                         world_mat * obj.data.vertices[v].co
-                    ))
+                        ))
             # transform screen region to canvas
             for f in sel_faces:
                 for l in f.loc:
@@ -338,7 +338,7 @@ class TPProjectTexture(bpy.types.Operator):
 
 class TPMagnitudeUp(bpy.types.Operator):
     """Up texture magnitude."""
-
+    
     bl_idname = "uv.tp_magnitude_up"
     bl_label = "Magnitude UP"
     bl_description = "Up texture magnitude"
@@ -354,7 +354,7 @@ class TPMagnitudeUp(bpy.types.Operator):
 
 class TPMagnitudeDown(bpy.types.Operator):
     """Down texture magnitude."""
-
+    
     bl_idname = "uv.tp_magnitude_down"
     bl_label = "Magnitude DOWN"
     bl_description = "Down texture magnitude"
@@ -385,7 +385,7 @@ class OBJECT_PT_TP(bpy.types.Panel):
     bl_label = "Texture Projection"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-
+    
     def draw(self, context):
         sc = context.scene
         layout = self.layout
@@ -448,7 +448,7 @@ def register():
         (TPProjectTexture.bl_idname, "P", "PRESS", True, True, False),
         (TPStartTextureProjection.bl_idname, "S", "PRESS", True, True, False),
         (TPStopTextureProjection.bl_idname, "T", "PRESS", True, True, False)
-    ]
+        ]
     if kc:
         km = kc.keymaps.new(name="3D View", space_type="VIEW_3D")
         for (idname, key, event, ctrl, alt, shift) in key_assign_list:

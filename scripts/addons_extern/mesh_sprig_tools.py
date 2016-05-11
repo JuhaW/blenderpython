@@ -796,7 +796,7 @@ class GrabPointFromActiveLocal(GrabFromGeometryBase):
     bl_label = "Grab Local Coordinates From Active Point"
     bl_description = (
         "Grabs local coordinates from selected vertex in edit mode"
-    )
+        )
     bl_options = {'REGISTER', 'UNDO'}
     vert_attribs_to_set = ('point',)
     multiply_by_world_matrix = False
@@ -903,7 +903,7 @@ class GrabAllVertsLineLocal(GrabFromGeometryBase):
     bl_label = "Grab Line from Selected Verts"
     bl_description = (
         "Grabs line coordinates from selected vertices in edit mode"
-    )
+        )
     bl_options = {'REGISTER', 'UNDO'}
     vert_attribs_to_set = ('line_start', 'line_end')
     multiply_by_world_matrix = False
@@ -1531,7 +1531,7 @@ class ScaleMatchEdgeBase(bpy.types.Operator):
                     'Divide by zero error: zero length edge encountered'
                 )
                 return {'CANCELLED'}
-            scale_factor = dest_edge.length / src_edge.length
+            scale_factor = dest_edge.length/src_edge.length
 
             if self.target == 'OBJECT':
                 bpy.context.active_object.scale = [
@@ -1543,13 +1543,13 @@ class ScaleMatchEdgeBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                        scale_check[0] != scale_check[2]):
+                            scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                         )
+                        )
                     )
                     return {'CANCELLED'}
 
@@ -1717,13 +1717,13 @@ class PointMatchBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                        scale_check[0] != scale_check[2]):
+                            scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                         )
+                        )
                     )
                     return {'CANCELLED'}
 
@@ -1857,13 +1857,13 @@ class VectorSlideBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                        scale_check[0] != scale_check[2]):
+                            scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                         )
+                        )
                     )
                     return {'CANCELLED'}
 
@@ -2043,13 +2043,13 @@ class AxisRotateBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                        scale_check[0] != scale_check[2]):
+                            scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                         )
+                        )
                     )
                     return {'CANCELLED'}
 
@@ -2242,13 +2242,13 @@ class MakeCollinearBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                        scale_check[0] != scale_check[2]):
+                            scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                         )
+                        )
                     )
                     return {'CANCELLED'}
 
@@ -2257,7 +2257,7 @@ class MakeCollinearBase(bpy.types.Operator):
                 src_mesh.from_mesh(bpy.context.active_object.data)
 
                 loc_src_pivot_coords = inverse_active * mathutils.Vector(
-                    prims[active_item.mcl_src_line].line_start
+                        prims[active_item.mcl_src_line].line_start
                 )
                 inverted_loc_src_pivot_coords = loc_src_pivot_coords.copy()
                 inverted_loc_src_pivot_coords.negate()
@@ -2483,13 +2483,13 @@ class MakeCoplanarBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                        scale_check[0] != scale_check[2]):
+                            scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                         )
+                        )
                     )
                     return {'CANCELLED'}
 
@@ -3445,7 +3445,7 @@ class SPRIGGui(bpy.types.Panel):
 
                 # Todo, add scale match edge mods
                 if (active_item.transf_type != 'SCALEMATCHEDGE' and
-                        active_item.transf_type != 'AXISROTATE'):
+                                active_item.transf_type != 'AXISROTATE'):
                     item_info_col.label('Transformation Modifiers:')
                     item_mods_box = item_info_col.box()
                     mods_row_1 = item_mods_box.row()
@@ -3627,133 +3627,144 @@ def specials_menu_items(self, context):
     self.layout.separator()
 
 
-classes = [
-    SPRIGPrimitive,
-    SPRIGData,
-    AddListItem,
-    ChangeTypeBaseClass,
-    ChangeTypeToPointPrim,
-    ChangeTypeToLinePrim,
-    ChangeTypeToPlanePrim,
-    ChangeTypeToCalcPrim,
-    ChangeTypeToTransfPrim,
-    ChangeTransfBaseClass,
-    ChangeTransfToPointMatch,
-    ChangeTransfToVectorSlide,
-    ChangeTransfToScaleMatchEdge,
-    ChangeTransfToAxisRotate,
-    ChangeTransfToMkCollinear,
-    ChangeTransfToMkCoplanar,
-    GrabFromGeometryBase,
-    GrabFromCursorBase,
-    SendCoordToCursorBase,
-    GrabPointFromCursor,
-    GrabPointFromActiveLocal,
-    GrabPointFromActiveGlobal,
-    SendPointToCursor,
-    GrabLineStartFromCursor,
-    GrabLineStartFromActiveLocal,
-    GrabLineStartFromActiveGlobal,
-    SendLineStartToCursor,
-    GrabLineEndFromCursor,
-    GrabLineEndFromActiveLocal,
-    GrabLineEndFromActiveGlobal,
-    SendLineEndToCursor,
-    GrabPlaneAFromCursor,
-    GrabPlaneAFromActiveLocal,
-    GrabPlaneAFromActiveGlobal,
-    SendPlaneAToCursor,
-    GrabPlaneBFromCursor,
-    GrabPlaneBFromActiveLocal,
-    GrabPlaneBFromActiveGlobal,
-    SendPlaneBToCursor,
-    GrabPlaneCFromCursor,
-    GrabPlaneCFromActiveLocal,
-    GrabPlaneCFromActiveGlobal,
-    SendPlaneCToCursor,
-    GrabAllVertsLineLocal,
-    GrabAllVertsLineGlobal,
-    GrabAllVertsPlaneLocal,
-    GrabAllVertsPlaneGlobal,
-    SwapPointsBase,
-    SwapLinePoints,
-    SwapPlaneAPlaneB,
-    SwapPlaneAPlaneC,
-    SwapPlaneBPlaneC,
-    SetOtherComponentsBase,
-    ZeroOtherPointX,
-    ZeroOtherPointY,
-    ZeroOtherPointZ,
-    ZeroOtherLineStartX,
-    ZeroOtherLineStartY,
-    ZeroOtherLineStartZ,
-    ZeroOtherLineEndX,
-    ZeroOtherLineEndY,
-    ZeroOtherLineEndZ,
-    ZeroOtherPlanePointAX,
-    ZeroOtherPlanePointAY,
-    ZeroOtherPlanePointAZ,
-    ZeroOtherPlanePointBX,
-    ZeroOtherPlanePointBY,
-    ZeroOtherPlanePointBZ,
-    ZeroOtherPlanePointCX,
-    ZeroOtherPlanePointCY,
-    ZeroOtherPlanePointCZ,
-    OneOtherPointX,
-    OneOtherPointY,
-    OneOtherPointZ,
-    OneOtherLineStartX,
-    OneOtherLineStartY,
-    OneOtherLineStartZ,
-    OneOtherLineEndX,
-    OneOtherLineEndY,
-    OneOtherLineEndZ,
-    OneOtherPlanePointAX,
-    OneOtherPlanePointAY,
-    OneOtherPlanePointAZ,
-    OneOtherPlanePointBX,
-    OneOtherPlanePointBY,
-    OneOtherPlanePointBZ,
-    OneOtherPlanePointCX,
-    OneOtherPlanePointCY,
-    OneOtherPlanePointCZ,
-    PointMatchBase,
-    PointMatchObject,
-    PointMatchMeshSelected,
-    PointMatchWholeMesh,
-    MakeCoplanarBase,
-    MakeCoplanarObject,
-    MakeCoplanarMeshSelected,
-    MakeCoplanarWholeMesh,
-    ScaleMatchEdgeBase,
-    ScaleMatchEdgeObject,
-    ScaleMatchEdgeMeshSelected,
-    ScaleMatchEdgeWholeMesh,
-    AxisRotateBase,
-    AxisRotateObject,
-    AxisRotateMeshSelected,
-    AxisRotateWholeMesh,
-    MakeCollinearBase,
-    MakeCollinearObject,
-    MakeCollinearMeshSelected,
-    MakeCollinearWholeMesh,
-    VectorSlideBase,
-    VectorSlideObject,
-    VectorSlideMeshSelected,
-    VectorSlideWholeMesh,
-    SPRIGList,
-    RemoveListItem,
-    SPRIGGui,
-    SpecialsAddFromActiveBase,
-    SpecialsAddPointFromActiveGlobal,
-    SpecialsAddLineFromActiveGlobal,
-    SpecialsAddPlaneFromActiveGlobal
-]
-
-
 def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
+    # Make custom classes available inside blender via bpy.types
+    bpy.utils.register_class(SPRIGPrimitive)
+    bpy.utils.register_class(SPRIGData)
+    bpy.utils.register_class(AddListItem)
+    bpy.utils.register_class(ChangeTypeBaseClass)
+    bpy.utils.register_class(ChangeTypeToPointPrim)
+    bpy.utils.register_class(ChangeTypeToLinePrim)
+    bpy.utils.register_class(ChangeTypeToPlanePrim)
+    bpy.utils.register_class(ChangeTypeToCalcPrim)
+    bpy.utils.register_class(ChangeTypeToTransfPrim)
+    bpy.utils.register_class(ChangeTransfBaseClass)
+    bpy.utils.register_class(ChangeTransfToPointMatch)
+    bpy.utils.register_class(ChangeTransfToVectorSlide)
+    bpy.utils.register_class(ChangeTransfToScaleMatchEdge)
+    bpy.utils.register_class(ChangeTransfToAxisRotate)
+
+    bpy.utils.register_class(ChangeTransfToMkCollinear)
+    bpy.utils.register_class(ChangeTransfToMkCoplanar)
+
+    bpy.utils.register_class(GrabFromGeometryBase)
+    bpy.utils.register_class(GrabFromCursorBase)
+    bpy.utils.register_class(SendCoordToCursorBase)
+
+    bpy.utils.register_class(GrabPointFromCursor)
+    bpy.utils.register_class(GrabPointFromActiveLocal)
+    bpy.utils.register_class(GrabPointFromActiveGlobal)
+    bpy.utils.register_class(SendPointToCursor)
+
+    bpy.utils.register_class(GrabLineStartFromCursor)
+    bpy.utils.register_class(GrabLineStartFromActiveLocal)
+    bpy.utils.register_class(GrabLineStartFromActiveGlobal)
+    bpy.utils.register_class(SendLineStartToCursor)
+    bpy.utils.register_class(GrabLineEndFromCursor)
+    bpy.utils.register_class(GrabLineEndFromActiveLocal)
+    bpy.utils.register_class(GrabLineEndFromActiveGlobal)
+    bpy.utils.register_class(SendLineEndToCursor)
+
+    bpy.utils.register_class(GrabPlaneAFromCursor)
+    bpy.utils.register_class(GrabPlaneAFromActiveLocal)
+    bpy.utils.register_class(GrabPlaneAFromActiveGlobal)
+    bpy.utils.register_class(SendPlaneAToCursor)
+    bpy.utils.register_class(GrabPlaneBFromCursor)
+    bpy.utils.register_class(GrabPlaneBFromActiveLocal)
+    bpy.utils.register_class(GrabPlaneBFromActiveGlobal)
+    bpy.utils.register_class(SendPlaneBToCursor)
+    bpy.utils.register_class(GrabPlaneCFromCursor)
+    bpy.utils.register_class(GrabPlaneCFromActiveLocal)
+    bpy.utils.register_class(GrabPlaneCFromActiveGlobal)
+    bpy.utils.register_class(SendPlaneCToCursor)
+
+    bpy.utils.register_class(GrabAllVertsLineLocal)
+    bpy.utils.register_class(GrabAllVertsLineGlobal)
+    bpy.utils.register_class(GrabAllVertsPlaneLocal)
+    bpy.utils.register_class(GrabAllVertsPlaneGlobal)
+
+    bpy.utils.register_class(SwapPointsBase)
+    bpy.utils.register_class(SwapLinePoints)
+    bpy.utils.register_class(SwapPlaneAPlaneB)
+    bpy.utils.register_class(SwapPlaneAPlaneC)
+    bpy.utils.register_class(SwapPlaneBPlaneC)
+
+    bpy.utils.register_class(SetOtherComponentsBase)
+    bpy.utils.register_class(ZeroOtherPointX)
+    bpy.utils.register_class(ZeroOtherPointY)
+    bpy.utils.register_class(ZeroOtherPointZ)
+    bpy.utils.register_class(ZeroOtherLineStartX)
+    bpy.utils.register_class(ZeroOtherLineStartY)
+    bpy.utils.register_class(ZeroOtherLineStartZ)
+    bpy.utils.register_class(ZeroOtherLineEndX)
+    bpy.utils.register_class(ZeroOtherLineEndY)
+    bpy.utils.register_class(ZeroOtherLineEndZ)
+    bpy.utils.register_class(ZeroOtherPlanePointAX)
+    bpy.utils.register_class(ZeroOtherPlanePointAY)
+    bpy.utils.register_class(ZeroOtherPlanePointAZ)
+    bpy.utils.register_class(ZeroOtherPlanePointBX)
+    bpy.utils.register_class(ZeroOtherPlanePointBY)
+    bpy.utils.register_class(ZeroOtherPlanePointBZ)
+    bpy.utils.register_class(ZeroOtherPlanePointCX)
+    bpy.utils.register_class(ZeroOtherPlanePointCY)
+    bpy.utils.register_class(ZeroOtherPlanePointCZ)
+    bpy.utils.register_class(OneOtherPointX)
+    bpy.utils.register_class(OneOtherPointY)
+    bpy.utils.register_class(OneOtherPointZ)
+    bpy.utils.register_class(OneOtherLineStartX)
+    bpy.utils.register_class(OneOtherLineStartY)
+    bpy.utils.register_class(OneOtherLineStartZ)
+    bpy.utils.register_class(OneOtherLineEndX)
+    bpy.utils.register_class(OneOtherLineEndY)
+    bpy.utils.register_class(OneOtherLineEndZ)
+    bpy.utils.register_class(OneOtherPlanePointAX)
+    bpy.utils.register_class(OneOtherPlanePointAY)
+    bpy.utils.register_class(OneOtherPlanePointAZ)
+    bpy.utils.register_class(OneOtherPlanePointBX)
+    bpy.utils.register_class(OneOtherPlanePointBY)
+    bpy.utils.register_class(OneOtherPlanePointBZ)
+    bpy.utils.register_class(OneOtherPlanePointCX)
+    bpy.utils.register_class(OneOtherPlanePointCY)
+    bpy.utils.register_class(OneOtherPlanePointCZ)
+
+    bpy.utils.register_class(PointMatchBase)
+    bpy.utils.register_class(PointMatchObject)
+    bpy.utils.register_class(PointMatchMeshSelected)
+    bpy.utils.register_class(PointMatchWholeMesh)
+
+    bpy.utils.register_class(MakeCoplanarBase)
+    bpy.utils.register_class(MakeCoplanarObject)
+    bpy.utils.register_class(MakeCoplanarMeshSelected)
+    bpy.utils.register_class(MakeCoplanarWholeMesh)
+
+    bpy.utils.register_class(ScaleMatchEdgeBase)
+    bpy.utils.register_class(ScaleMatchEdgeObject)
+    bpy.utils.register_class(ScaleMatchEdgeMeshSelected)
+    bpy.utils.register_class(ScaleMatchEdgeWholeMesh)
+
+    bpy.utils.register_class(AxisRotateBase)
+    bpy.utils.register_class(AxisRotateObject)
+    bpy.utils.register_class(AxisRotateMeshSelected)
+    bpy.utils.register_class(AxisRotateWholeMesh)
+
+    bpy.utils.register_class(MakeCollinearBase)
+    bpy.utils.register_class(MakeCollinearObject)
+    bpy.utils.register_class(MakeCollinearMeshSelected)
+    bpy.utils.register_class(MakeCollinearWholeMesh)
+
+    bpy.utils.register_class(VectorSlideBase)
+    bpy.utils.register_class(VectorSlideObject)
+    bpy.utils.register_class(VectorSlideMeshSelected)
+    bpy.utils.register_class(VectorSlideWholeMesh)
+
+    bpy.utils.register_class(SPRIGList)
+    bpy.utils.register_class(RemoveListItem)
+    bpy.utils.register_class(SPRIGGui)
+
+    bpy.utils.register_class(SpecialsAddFromActiveBase)
+    bpy.utils.register_class(SpecialsAddPointFromActiveGlobal)
+    bpy.utils.register_class(SpecialsAddLineFromActiveGlobal)
+    bpy.utils.register_class(SpecialsAddPlaneFromActiveGlobal)
 
     # Extend the scene class here to include the addon data
     bpy.types.Scene.sprig_data = bpy.props.PointerProperty(type=SPRIGData)
@@ -3768,8 +3779,141 @@ def unregister():
     bpy.types.VIEW3D_MT_edit_mesh_specials.remove(specials_menu_items)
 
     # Remove custom classes from blender's bpy.types
-    for cls in classes:
-        bpy.utils.unregister_class(cls)
+    bpy.utils.unregister_class(SPRIGPrimitive)
+    bpy.utils.unregister_class(SPRIGData)
+    bpy.utils.unregister_class(AddListItem)
+    bpy.utils.unregister_class(ChangeTypeBaseClass)
+    bpy.utils.unregister_class(ChangeTypeToPointPrim)
+    bpy.utils.unregister_class(ChangeTypeToLinePrim)
+    bpy.utils.unregister_class(ChangeTypeToPlanePrim)
+    bpy.utils.unregister_class(ChangeTypeToCalcPrim)
+    bpy.utils.unregister_class(ChangeTypeToTransfPrim)
+    bpy.utils.unregister_class(ChangeTransfBaseClass)
+    bpy.utils.unregister_class(ChangeTransfToPointMatch)
+    bpy.utils.unregister_class(ChangeTransfToVectorSlide)
+    bpy.utils.unregister_class(ChangeTransfToScaleMatchEdge)
+    bpy.utils.unregister_class(ChangeTransfToAxisRotate)
+    bpy.utils.unregister_class(ChangeTransfToMkCollinear)
+    bpy.utils.unregister_class(ChangeTransfToMkCoplanar)
+
+    bpy.utils.unregister_class(GrabFromGeometryBase)
+    bpy.utils.unregister_class(GrabFromCursorBase)
+    bpy.utils.unregister_class(SendCoordToCursorBase)
+
+    bpy.utils.unregister_class(GrabPointFromCursor)
+    bpy.utils.unregister_class(GrabPointFromActiveLocal)
+    bpy.utils.unregister_class(GrabPointFromActiveGlobal)
+    bpy.utils.unregister_class(SendPointToCursor)
+
+    bpy.utils.unregister_class(GrabLineStartFromCursor)
+    bpy.utils.unregister_class(GrabLineStartFromActiveLocal)
+    bpy.utils.unregister_class(GrabLineStartFromActiveGlobal)
+    bpy.utils.unregister_class(SendLineStartToCursor)
+    bpy.utils.unregister_class(GrabLineEndFromCursor)
+    bpy.utils.unregister_class(GrabLineEndFromActiveLocal)
+    bpy.utils.unregister_class(GrabLineEndFromActiveGlobal)
+    bpy.utils.unregister_class(SendLineEndToCursor)
+
+    bpy.utils.unregister_class(GrabPlaneAFromCursor)
+    bpy.utils.unregister_class(GrabPlaneAFromActiveLocal)
+    bpy.utils.unregister_class(GrabPlaneAFromActiveGlobal)
+    bpy.utils.unregister_class(SendPlaneAToCursor)
+    bpy.utils.unregister_class(GrabPlaneBFromCursor)
+    bpy.utils.unregister_class(GrabPlaneBFromActiveLocal)
+    bpy.utils.unregister_class(GrabPlaneBFromActiveGlobal)
+    bpy.utils.unregister_class(SendPlaneBToCursor)
+    bpy.utils.unregister_class(GrabPlaneCFromCursor)
+    bpy.utils.unregister_class(GrabPlaneCFromActiveLocal)
+    bpy.utils.unregister_class(GrabPlaneCFromActiveGlobal)
+    bpy.utils.unregister_class(SendPlaneCToCursor)
+
+    bpy.utils.unregister_class(GrabAllVertsLineLocal)
+    bpy.utils.unregister_class(GrabAllVertsLineGlobal)
+    bpy.utils.unregister_class(GrabAllVertsPlaneLocal)
+    bpy.utils.unregister_class(GrabAllVertsPlaneGlobal)
+
+    bpy.utils.unregister_class(SwapPointsBase)
+    bpy.utils.unregister_class(SwapLinePoints)
+    bpy.utils.unregister_class(SwapPlaneAPlaneB)
+    bpy.utils.unregister_class(SwapPlaneAPlaneC)
+    bpy.utils.unregister_class(SwapPlaneBPlaneC)
+
+    bpy.utils.unregister_class(SetOtherComponentsBase)
+    bpy.utils.unregister_class(ZeroOtherPointX)
+    bpy.utils.unregister_class(ZeroOtherPointY)
+    bpy.utils.unregister_class(ZeroOtherPointZ)
+    bpy.utils.unregister_class(ZeroOtherLineStartX)
+    bpy.utils.unregister_class(ZeroOtherLineStartY)
+    bpy.utils.unregister_class(ZeroOtherLineStartZ)
+    bpy.utils.unregister_class(ZeroOtherLineEndX)
+    bpy.utils.unregister_class(ZeroOtherLineEndY)
+    bpy.utils.unregister_class(ZeroOtherLineEndZ)
+    bpy.utils.unregister_class(ZeroOtherPlanePointAX)
+    bpy.utils.unregister_class(ZeroOtherPlanePointAY)
+    bpy.utils.unregister_class(ZeroOtherPlanePointAZ)
+    bpy.utils.unregister_class(ZeroOtherPlanePointBX)
+    bpy.utils.unregister_class(ZeroOtherPlanePointBY)
+    bpy.utils.unregister_class(ZeroOtherPlanePointBZ)
+    bpy.utils.unregister_class(ZeroOtherPlanePointCX)
+    bpy.utils.unregister_class(ZeroOtherPlanePointCY)
+    bpy.utils.unregister_class(ZeroOtherPlanePointCZ)
+    bpy.utils.unregister_class(OneOtherPointX)
+    bpy.utils.unregister_class(OneOtherPointY)
+    bpy.utils.unregister_class(OneOtherPointZ)
+    bpy.utils.unregister_class(OneOtherLineStartX)
+    bpy.utils.unregister_class(OneOtherLineStartY)
+    bpy.utils.unregister_class(OneOtherLineStartZ)
+    bpy.utils.unregister_class(OneOtherLineEndX)
+    bpy.utils.unregister_class(OneOtherLineEndY)
+    bpy.utils.unregister_class(OneOtherLineEndZ)
+    bpy.utils.unregister_class(OneOtherPlanePointAX)
+    bpy.utils.unregister_class(OneOtherPlanePointAY)
+    bpy.utils.unregister_class(OneOtherPlanePointAZ)
+    bpy.utils.unregister_class(OneOtherPlanePointBX)
+    bpy.utils.unregister_class(OneOtherPlanePointBY)
+    bpy.utils.unregister_class(OneOtherPlanePointBZ)
+    bpy.utils.unregister_class(OneOtherPlanePointCX)
+    bpy.utils.unregister_class(OneOtherPlanePointCY)
+    bpy.utils.unregister_class(OneOtherPlanePointCZ)
+
+    bpy.utils.unregister_class(PointMatchBase)
+    bpy.utils.unregister_class(PointMatchObject)
+    bpy.utils.unregister_class(PointMatchMeshSelected)
+    bpy.utils.unregister_class(PointMatchWholeMesh)
+
+    bpy.utils.unregister_class(MakeCoplanarBase)
+    bpy.utils.unregister_class(MakeCoplanarObject)
+    bpy.utils.unregister_class(MakeCoplanarMeshSelected)
+    bpy.utils.unregister_class(MakeCoplanarWholeMesh)
+
+    bpy.utils.unregister_class(MakeCollinearBase)
+    bpy.utils.unregister_class(MakeCollinearObject)
+    bpy.utils.unregister_class(MakeCollinearMeshSelected)
+    bpy.utils.unregister_class(MakeCollinearWholeMesh)
+
+    bpy.utils.unregister_class(AxisRotateBase)
+    bpy.utils.unregister_class(AxisRotateObject)
+    bpy.utils.unregister_class(AxisRotateMeshSelected)
+    bpy.utils.unregister_class(AxisRotateWholeMesh)
+
+    bpy.utils.unregister_class(ScaleMatchEdgeBase)
+    bpy.utils.unregister_class(ScaleMatchEdgeObject)
+    bpy.utils.unregister_class(ScaleMatchEdgeMeshSelected)
+    bpy.utils.unregister_class(ScaleMatchEdgeWholeMesh)
+
+    bpy.utils.unregister_class(VectorSlideBase)
+    bpy.utils.unregister_class(VectorSlideObject)
+    bpy.utils.unregister_class(VectorSlideMeshSelected)
+    bpy.utils.unregister_class(VectorSlideWholeMesh)
+
+    bpy.utils.unregister_class(SPRIGList)
+    bpy.utils.unregister_class(RemoveListItem)
+    bpy.utils.unregister_class(SPRIGGui)
+
+    bpy.utils.unregister_class(SpecialsAddFromActiveBase)
+    bpy.utils.unregister_class(SpecialsAddPointFromActiveGlobal)
+    bpy.utils.unregister_class(SpecialsAddLineFromActiveGlobal)
+    bpy.utils.unregister_class(SpecialsAddPlaneFromActiveGlobal)
 
 
 if __name__ == "__main__":

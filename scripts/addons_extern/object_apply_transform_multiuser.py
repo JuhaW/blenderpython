@@ -18,20 +18,19 @@
 # ***** END GPL LICENCE BLOCK *****
 
 bl_info = {
-    "name": "Apply Transform MultiUser",
-    "author": "Hidesato Ikeya",
-    "version": (1, 2),
-    "blender": (2, 68, 0),
-    "location": "View3D > CTRL-A > Multiuser",
-    "description": "Apply transform to multi user objects",
-    "warning": "",
-    "wiki_url": "",
-    "tracker_url": "",
-    "category": "Object"}
+        "name": "Apply Transform MultiUser",
+        "author": "Hidesato Ikeya",
+        "version": (1, 2),
+        "blender": (2, 68, 0),
+        "location": "View3D > CTRL-A > Multiuser",
+        "description": "Apply transform to multi user objects",
+        "warning": "",
+        "wiki_url": "",
+        "tracker_url": "",
+        "category": "Object"}
 
 import bpy
 from mathutils import *
-
 
 class ApplyTransformMultiUser(bpy.types.Operator):
     bl_idname = "object.apply_transform_multiuser"
@@ -49,7 +48,7 @@ class ApplyTransformMultiUser(bpy.types.Operator):
     remove_original = bpy.props.BoolProperty(
         name="Remove Original Data", default=True,
         description="Remove original data if it is used by no user.")
-
+    
     location = bpy.props.BoolProperty(name="Location", default=False)
     rotation = bpy.props.BoolProperty(name="Rotation", default=False)
     scale = bpy.props.BoolProperty(name="Scale", default=False)
@@ -120,12 +119,10 @@ class ApplyTransformMultiUser(bpy.types.Operator):
 
         if self.remove_original and orig_data.users == 0:
             context.blend_data.meshes.remove(orig_data)
-
+        
         return {'FINISHED'}
-
     def invoke(self, context, event):
         return self.execute(context)
-
 
 class ApplyTransformMultiUserMenu(bpy.types.Menu):
     bl_label = "MultiUser"
@@ -153,16 +150,13 @@ class ApplyTransformMultiUserMenu(bpy.types.Menu):
         s.scale = True
         s.rotation = False
 
-
 def draw_item(self, context):
     self.layout.menu(ApplyTransformMultiUserMenu.bl_idname)
-
 
 def register():
     bpy.utils.register_class(ApplyTransformMultiUser)
     bpy.utils.register_class(ApplyTransformMultiUserMenu)
     bpy.types.VIEW3D_MT_object_apply.append(draw_item)
-
 
 def unregister():
     bpy.utils.unregister_class(ApplyTransformMultiUser)

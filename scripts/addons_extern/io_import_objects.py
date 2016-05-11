@@ -57,54 +57,55 @@ class ImportObs(bpy.types.Operator, ImportHelper):
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
     directory = StringProperty(
-        maxlen=1024,
-        subtype='DIR_PATH',
-        options={'HIDDEN', 'SKIP_SAVE'})
+            maxlen=1024,
+            subtype='DIR_PATH',
+            options={'HIDDEN', 'SKIP_SAVE'})
     files = CollectionProperty(
-        type=bpy.types.OperatorFileListElement,
-        options={'HIDDEN', 'SKIP_SAVE'})
+            type=bpy.types.OperatorFileListElement,
+            options={'HIDDEN', 'SKIP_SAVE'})
 
     filename_ext = ".obj"
     filter_glob = StringProperty(default="*.obj", options={'HIDDEN'})
     replace_existing = BoolProperty(
-        name="Replace objects",
-        description="Replace objects already present in the scene",
-        default=True)
+            name="Replace objects",
+            description="Replace objects already present in the scene",
+            default=True)
     copy_location = BoolProperty(
-        name="Location",
-        description="Copy the location from the old to the new object",
-        default=True)
+            name="Location",
+            description="Copy the location from the old to the new object",
+            default=True)
     copy_rotation = BoolProperty(
-        name="Rotation",
-        description="Copy the rotation from the old to the new object",
-        default=True)
+            name="Rotation",
+            description="Copy the rotation from the old to the new object",
+            default=True)
     copy_scale = BoolProperty(
-        name="Scale",
-        description="Copy the scale from the old to the new object",
-        default=True)
+            name="Scale",
+            description="Copy the scale from the old to the new object",
+            default=True)
     copy_modifiers_options = BoolProperty(
-        name="Preserve modifiers",
-        description="Copy the modifiers from the replaced object to the "
-        "newly imported one",
-        default=True)
+            name="Preserve modifiers",
+            description="Copy the modifiers from the replaced object to the "\
+                        "newly imported one",
+            default=True)
     material_options = EnumProperty(
-        name="Materials",
-        items=[("scene",
-                "Scene",
-                "Use the materials that are now assigned to the objects "
-                "(if they already exist), else don't assign materials"),
-               ("obj",
-                "From file",
-                "Use the materials from the OBJ"),
-               ("ignore",
-                "No Materials",
-                "Don't assign materials")],
-        description="Select which materials to use for the imported models",
-        default='scene')
+            name="Materials",
+            items=[("scene",
+                    "Scene",
+                    "Use the materials that are now assigned to the objects "\
+                    "(if they already exist), else don't assign materials"),
+                   ("obj",
+                    "From file",
+                    "Use the materials from the OBJ"),
+                   ("ignore",
+                    "No Materials",
+                    "Don't assign materials")],
+            description="Select which materials to use for the imported models",
+            default='scene')
     is_apply_rotation = BoolProperty(
-        name="Apply rotation",
-        description="Apply rotation after import",
-        default=False)
+            name="Apply rotation",
+            description="Apply rotation after import",
+            default=False)
+
 
     def draw(self, context):
         layout = self.layout
@@ -209,7 +210,7 @@ class ImportObs(bpy.types.Operator, ImportHelper):
             imported_object.name = imported_object.data.name = name
         else:
             print("File: {f} appears to be empty...".format(f=f))
-
+        
         return name
 
     def is_replace_object(self, name, imported_object):

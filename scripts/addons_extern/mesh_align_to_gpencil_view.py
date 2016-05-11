@@ -41,9 +41,9 @@ import math
 class AlignSelectionToGpencilAddonPrefs(bpy.types.AddonPreferences):
     bl_idname = __name__
     clear_strokes = bpy.props.BoolProperty(
-        name="Clear Strokes On Execute",
-        description="Clear grease pencil strokes after executing",
-        default=False)
+            name = "Clear Strokes On Execute",
+            description = "Clear grease pencil strokes after executing",
+            default = False)
 
     def draw(self, context):
         layout = self.layout
@@ -59,11 +59,11 @@ class AlignUVsToGpencil(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     influence = FloatProperty(
-        name="Influence",
-        description="Influence",
-        min=0.0, max=1.0,
-        default=1.0,
-    )
+            name="Influence",
+            description="Influence",
+            min=0.0, max=1.0,
+            default=1.0,
+            )
 
     def execute(self, context):
         align_uvs(context, self.influence)
@@ -103,7 +103,8 @@ def align_uvs(context, influence):
     bmesh.update_edit_mesh(me, True)
 
     if context.user_preferences.addons[__name__].preferences.clear_strokes:
-        editor.grease_pencil.layers[-1].active_frame.clear()
+       editor.grease_pencil.layers[-1].active_frame.clear()
+
 
 
 class AlignSelectionToGPencil(bpy.types.Operator):
@@ -113,11 +114,11 @@ class AlignSelectionToGPencil(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     influence = FloatProperty(
-        name="Influence",
-        description="Influence",
-        min=0.0, max=1.0,
-        default=1.0,
-    )
+            name="Influence",
+            description="Influence",
+            min=0.0, max=1.0,
+            default=1.0,
+            )
 
     def execute(self, context):
 
@@ -175,16 +176,16 @@ class AlignSelectionToGPencil(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if len(bpy.data.grease_pencil) is 0:
-            return False
-        elif len(bpy.data.grease_pencil[-1].layers) is 0:
-            return False
-        elif bpy.data.grease_pencil[-1].layers[-1].active_frame is None:
-            return False
-        elif len(bpy.data.grease_pencil[-1].layers[-1].active_frame.strokes) is 0:
-            return False
-        else:
-            return True
+       if len(bpy.data.grease_pencil) is 0:
+           return False
+       elif len(bpy.data.grease_pencil[-1].layers) is 0:
+           return False
+       elif bpy.data.grease_pencil[-1].layers[-1].active_frame is None:
+           return False
+       elif len(bpy.data.grease_pencil[-1].layers[-1].active_frame.strokes) is 0:
+           return False
+       else:
+           return True
 
 
 def align_bones_posemode(context, influence):
@@ -208,14 +209,15 @@ def align_bones_posemode(context, influence):
     for p_bone in selected_p_bones:
         p_bone.bone.select = False
 
-    for r in range(0, 5):
+
+    for r in range(0,5):
         for i, p_bone in enumerate(selected_p_bones):
             p_bone.bone.select = True
             closest_segment = get_closest_segment(p_bone_tails_2d[i], gpencil_to_screenpos(context), context)
 
             side = is_left(closest_segment[0], closest_segment[1], p_bone_tails_2d[i])
             determinator = side
-
+            
             nearest_point = get_nearest_interpolated_point_on_stroke(p_bone_tails_2d[i], gpencil_to_screenpos(context), context)
 
             # print("\nSide is", side)
@@ -236,8 +238,8 @@ def align_bones_posemode(context, influence):
     for p_bone in selected_p_bones:
         p_bone.bone.select = True
 
-        # newcoord = obj.matrix_world.inverted() * region_to_location(nearest_point, obj.matrix_world * p_bone.tail)
-        # p_bone.bone.tail = p_bone.tail.lerp(newcoord, influence)
+        #newcoord = obj.matrix_world.inverted() * region_to_location(nearest_point, obj.matrix_world * p_bone.tail)
+        #p_bone.bone.tail = p_bone.tail.lerp(newcoord, influence)
 
 
 def is_left(point_a, point_b, point_c):
@@ -305,7 +307,7 @@ def align_vertices_proportional(context, influence):
     for selected_vert in selected_verts:
         for vert in bm.verts:
             if not vert.select:
-                dist = (vert.co - selected_vert.co).length
+                dist = (vert.co - selected_vert.co).length 
                 if dist <= prop_size:
                     # print("\nVertex:", vert.index, "\nDist: ", dist, "\nProp_size:", prop_size)
                     unselected_verts_within_radius.append(vert)
@@ -350,32 +352,32 @@ def align_vertices_proportional(context, influence):
         # print("\nVertex", v.index, "\nDistance", distance)
 
         proportional_influence = 0
-
+        
         # These are grabbed almost directly from the Blender source. Should work as expected.
         # SHARP
         if prop_falloff == 0:
             proportional_influence = distance * distance
-
+        
         # SMOOTH
         if prop_falloff == 1:
             proportional_influence = 3.0 * distance * distance - 2.0 * distance * distance * distance
-
+        
         # ROOT
         if prop_falloff == 2:
             proportional_influence = math.sqrt(distance)
-
+        
         # LINEAR
         if prop_falloff == 3:
             proportional_influence = distance
-
+        
         # CONSTANT
         if prop_falloff == 4:
             proportional_influence = 1.0
-
+        
         # SPHERE
         if prop_falloff == 5:
             proportional_influence = math.sqrt(2 * distance - distance * distance)
-
+        
         # RANDOM
         if prop_falloff == 6:
             proportional_influence = mathutils.noise.random() * distance
@@ -399,8 +401,9 @@ def align_vertices_proportional(context, influence):
     for edge in bm.edges:
         edge.normal_update()
 
+
     # Push bmesh changes back to the actual mesh datablock.
-    bmesh.update_edit_mesh(me, True)
+    bmesh.update_edit_mesh(me, True)    
 
 
 def align_vertices(context, influence):
@@ -455,8 +458,8 @@ def align_curves(context, influence):
         selected_points = []
         for spline in splines:
             for point in spline.points:
-                if point.select:
-                    selected_points.append(point)
+               if point.select:
+                   selected_points.append(point)
 
         points_local_3d = [p.co for p in selected_points]
         points_world_2d = vectors_to_screenpos(context, points_local_3d, obj.matrix_world)
@@ -475,8 +478,8 @@ def align_curves(context, influence):
         selected_bezier_points = []
         for spline in splines:
             for point in spline.bezier_points:
-                if point.select_control_point:
-                    selected_bezier_points.append(point)
+               if point.select_control_point:
+                   selected_bezier_points.append(point)
 
         bezier_points_local_3d = [p.co for p in selected_bezier_points]
         bezier_points_world_2d = vectors_to_screenpos(context, bezier_points_local_3d, obj.matrix_world)
@@ -489,8 +492,8 @@ def align_curves(context, influence):
                 return{'CANCELLED'}
 
             p.co = p.co.lerp(newcoord.to_4d(), influence)
-            p.handle_left = obj.matrix_world.inverted() * region_to_location(get_nearest_interpolated_point_on_stroke(p.handle_left, gpencil_to_screenpos(context), context), obj.matrix_world * p.handle_left)
-            p.handle_right = obj.matrix_world.inverted() * region_to_location(get_nearest_interpolated_point_on_stroke(p.handle_right, gpencil_to_screenpos(context), context), obj.matrix_world * p.handle_right)
+            p.handle_left = obj.matrix_world.inverted() * region_to_location(get_nearest_interpolated_point_on_stroke(p.handle_left, gpencil_to_screenpos(context), context), obj.matrix_world * p.handle_left) 
+            p.handle_right = obj.matrix_world.inverted() * region_to_location(get_nearest_interpolated_point_on_stroke(p.handle_right, gpencil_to_screenpos(context), context), obj.matrix_world * p.handle_right) 
 
 
 def align_objects(context, influence):
@@ -529,8 +532,8 @@ def get_nearest_interpolated_point_on_stroke(vertex_2d, points_2d, context):
     for i, gpoint_2d in enumerate(points_2d):
         # Variables used to find points relative to the current point (i),
         # clamped to avoid out of range errors.
-        previous_point = clamp(0, len(points_2d) - 1, i - 1)
-        next_point = clamp(0, len(points_2d) - 1, i + 1)
+        previous_point = clamp(0, len(points_2d)-1, i - 1)
+        next_point = clamp(0, len(points_2d)-1, i + 1)
 
         # Gets the absolute (non-negative) distance from the
         # current vertex to the current grease pencil point.
@@ -585,8 +588,8 @@ def get_closest_segment(vertex_2d, points_2d, context):
     point_lower = 0.0
     coord_interpolated = 0
     for i, gpoint_2d in enumerate(points_2d):
-        previous_point = clamp(0, len(points_2d) - 1, i - 1)
-        next_point = clamp(0, len(points_2d) - 1, i + 1)
+        previous_point = clamp(0, len(points_2d)-1, i - 1)
+        next_point = clamp(0, len(points_2d)-1, i + 1)
 
         distance = abs(vertex_2d[a] - gpoint_2d[a])
 
@@ -687,7 +690,6 @@ class AlignSelectionToGpencilBUTTON(bpy.types.Panel):
         layout = self.layout
         layout.operator("bear.align_to_gpencil")
 
-
 class AlignUVsToGpencilBUTTON(bpy.types.Panel):
     bl_category = "Tools"
     bl_label = "Gpencil Align"
@@ -701,7 +703,6 @@ class AlignUVsToGpencilBUTTON(bpy.types.Panel):
 
 classes = [AlignSelectionToGpencilAddonPrefs, AlignSelectionToGPencil, AlignSelectionToGpencilBUTTON, AlignUVsToGpencil, AlignUVsToGpencilBUTTON]
 addon_keymaps = []
-
 
 def register():
     for c in classes:
@@ -720,7 +721,7 @@ def unregister():
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-
+    
     for c in reversed(classes):
         bpy.utils.unregister_class(c)
 

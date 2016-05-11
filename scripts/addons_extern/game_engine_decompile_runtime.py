@@ -22,8 +22,8 @@ bl_info = {
     "version": (1, 0),
     "blender": (2, 74, 0),
     "location": "File > Import",
-    "description": "Retrieve a .blend file from a bundled "
-                   "BlenderPlayer runtime, even from another platform.",
+    "description": "Retrieve a .blend file from a bundled BlenderPlayer runtime, "
+                   "even from another platform.",
     "warning": "",
     "wiki_url": "",
     "category": "Game Engine",
@@ -33,7 +33,6 @@ import bpy
 import os
 import sys
 import tempfile
-from bpy.props import *
 
 
 def OpenBlend(input_path, use_temp_dir, load_file, to_clipboard, report=print):
@@ -43,7 +42,7 @@ def OpenBlend(input_path, use_temp_dir, load_file, to_clipboard, report=print):
     if not os.path.isfile(input_path):
         report({'ERROR'}, "The executable file could not be found! .blend file not retrieved.")
         return
-
+    
     # Get the binary file
     file = open(input_path, 'rb')
     input_d = file.read()
@@ -53,7 +52,7 @@ def OpenBlend(input_path, use_temp_dir, load_file, to_clipboard, report=print):
     if not input_d[-8:] == b"BRUNTIME":
         report({'ERROR'}, "Could not retrieve the data, file format not correct!")
         return
-
+    
     # Create a new file for the .blend
     if use_temp_dir:
         temp_fd, blend_path = tempfile.mkstemp(suffix=".blend")
@@ -61,17 +60,18 @@ def OpenBlend(input_path, use_temp_dir, load_file, to_clipboard, report=print):
     else:
         blend_path = os.path.splitext(input_path)[0] + ".blend"
         output = open(blend_path, "wb")
-
+    
+    
     # Retrieve the offset
     offset_raw = struct.unpack("4B", input_d[-12:-8])
-    offset = sum(v << (24, 16, 8, 0)[i] for i, v in enumerate(offset_raw))
-
+    offset = sum(v<<(24, 16, 8, 0)[i] for i, v in enumerate(offset_raw))
+    
     # Write the blend data from the runtime
     print("Writing .blend...", end=" ")
     output.write(input_d[offset:-12])
-
+    
     output.close()
-
+    
     print("done")
 
     if to_clipboard:
@@ -82,6 +82,9 @@ def OpenBlend(input_path, use_temp_dir, load_file, to_clipboard, report=print):
 
     else:
         report({'INFO'}, ".blend file saved at %s." % blend_path)
+    
+
+from bpy.props import *
 
 
 class RetrieveFromRuntime(bpy.types.Operator):
@@ -90,29 +93,29 @@ class RetrieveFromRuntime(bpy.types.Operator):
     bl_options = {'REGISTER'}
 
     # it should even be possible to use runtimes from other platforms!
-    # ext = '.app' if sys.platform == 'darwin' else os.path.splitext(bpy.app.binary_path)[-1]
-    # filter_glob = StringProperty(default="*%s" % ext, options={'HIDDEN'})
-
+    #ext = '.app' if sys.platform == 'darwin' else os.path.splitext(bpy.app.binary_path)[-1]
+    #filter_glob = StringProperty(default="*%s" % ext, options={'HIDDEN'})
+    
     filepath = StringProperty(
         subtype='FILE_PATH'
-    )
+        )
     tempdir = BoolProperty(
         name="Use temporary location",
         description="Places the created .blend file in a temporary location "
                     "rather than in the same folder as the runtime",
         default=False
-    )
+        )
     loadfile = BoolProperty(
         name="Load file",
         description="Loads the created .blend file in the current Blender session; "
                     "This is not recommended if the runtime has been created with a previous version of Blender",
         default=False
-    )
+        )
     toclipboard = BoolProperty(
         name="Copy path to clipboard",
         description="Copies the path of the created .blend file to the clipboard",
         default=False
-    )
+        )
 
     def execute(self, context):
         import time
@@ -124,7 +127,7 @@ class RetrieveFromRuntime(bpy.types.Operator):
                   self.toclipboard,
                   self.report
                   )
-        print("Finished in %.4fs" % (time.clock() - start_time))
+        print("Finished in %.4fs" % (time.clock()-start_time))
         return {'FINISHED'}
 
     def invoke(self, context, event):

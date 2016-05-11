@@ -23,8 +23,8 @@ import bpy
 bl_info = {
     "name": "Copy Custom Properties",
     "author": "scorpion81",
-    "version": (1, 0, 5),
-    "blender": (2, 7, 3),
+    "version": ( 1, 0, 5 ),
+    "blender": ( 2, 7, 3 ),
     "location": "Object / Armature > Custom Properties Copy > Copy Custom Properties",
     "description": "Copies custom properties from active object to selected objects",
     "warning": "",
@@ -33,84 +33,74 @@ bl_info = {
     "category": "Object"
 }
 
-
 def testpose(ob):
     return hasattr(ob, "pose") and ob.pose is not None
-
 
 def testdata(ob):
     return hasattr(ob, "data") and ob.data is not None
 
-
 def testbone(ob):
     return testdata(ob) and hasattr(ob.data, "bones") and ob.data.bones is not None
 
-
 def testeditbone(ob):
     return testdata(ob) and hasattr(ob.data, "edit_bones") and ob.data.edit_bones is not None
-
 
 def set_prop_bones(bones, data):
     i = 0
     if len(data) > 0:
         for bone in enumerate(bones, i):
             if len(data[i]) > 2:
-                name = data[i][0]
-                value = data[i][1]
-                rna = data[i][2]
-                set_prop(bone[1], name, value, rna)
-
+       	       name = data[i][0]
+               value = data[i][1]
+               rna = data[i][2]
+               set_prop(bone[1], name, value, rna)
 
 def getPropBones(bones):
-    ret = []
+    ret = []	
     for bone in bones:
-        ret.append(getProps(bone))
+       ret.append(getProps(bone))
 
-    return ret
-
+    return ret		
 
 def set_prop(ob, name, value, rna):
-    # need to build own dict if missing
+    #need to build own dict if missing
     if ob is None:
         return
     if '_RNA_UI' not in ob.keys():
         ob['_RNA_UI'] = {}
-
+        
     ob['_RNA_UI'][name] = rna
     ob[name] = value
-
-
+    
 def getRNA(ob, name):
-    # min max description settings, thanks to batFINGER !
-    try:
+    #min max description settings, thanks to batFINGER !
+    try: 
         rna = ob['_RNA_UI'][name]
         min = rna['min']
         max = rna['max']
         desc = rna['description']
-
+        
     except KeyError:
         min = 0.0
         max = 1.0
         desc = ""
-
+    
     return {'min': min, 'max': max, 'description': desc}
 
-
 def getProps(ob):
-    # object custom properties
+    #object custom properties
     if ob is None:
         return tuple()
-    names = list(set(ob.keys()) - set(('cycles_visibility', '_RNA_UI')))
+    names = list(set(ob.keys()) - set(('cycles_visibility', '_RNA_UI')))    
     values = [(name, ob[name], getRNA(ob, name)) for name in names]
-
+                
     return values
-
 
 class CopyCustomProperties(bpy.types.Operator):
     """Copy Custom Properties from Active to Selected objects"""
     bl_idname = "object.custom_property_copy"
     bl_label = "Copy Custom Properties"
-
+    
     @classmethod
     def poll(cls, context):
         return context.active_object is not None
@@ -118,36 +108,35 @@ class CopyCustomProperties(bpy.types.Operator):
     def execute(self, context):
         active = bpy.context.active_object
         selected = bpy.context.selected_objects
-
+        
         [[set_prop(ob, name, value, rna) for (name, value, rna) in getProps(active)] for ob in selected]
         [[set_prop(ob.data, name, value, rna) for (name, value, rna) in getProps(active.data)] for ob in selected if testdata(ob)]
 
-        # armature bone handling, can only copy as many bone data sets as bones are available in active object, and catch "missing" bones in dest. objects
+        #armature bone handling, can only copy as many bone data sets as bones are available in active object, and catch "missing" bones in dest. objects
         [[set_prop_bones(ob.data.bones, data) for (data) in getPropBones(active.data.bones)] for ob in selected if testbone(ob)]
         [[set_prop_bones(ob.data.edit_bones, data) for (data) in getPropBones(active.data.edit_bones)] for ob in selected if testeditbone(ob)]
         [[set_prop_bones(ob.pose.bones, data) for (data) in getPropBones(active.pose.bones)] for ob in selected if testpose(ob)]
 
         return {'FINISHED'}
 
-
 class CopyCustomPropertiesBone(bpy.types.Operator):
     """Copy Custom Properties from Active to Selected Bones"""
     bl_idname = "object.custom_property_copy_bone"
     bl_label = "Copy Custom Properties Bone"
-
+    
     @classmethod
     def poll(cls, context):
         return context.active_object is not None
 
     def execute(self, context):
-
-        try:
+        
+        try: 
             active_p = bpy.context.active_pose_bone
             selected_p = bpy.context.selected_pose_bones
             [[set_prop(bo, name, value, rna) for (name, value, rna) in getProps(active_p)] for bo in selected_p]
         except Exception:
             pass
-
+		
         try:
             active_e = bpy.context.active_editable_bone
             selected_e = bpy.context.selected_editable_bones
@@ -159,11 +148,10 @@ class CopyCustomPropertiesBone(bpy.types.Operator):
             active = bpy.context.active_bone
             selected = bpy.context.selected_bones
             [[set_prop(bo, name, value, rna) for (name, value, rna) in getProps(active)] for bo in selected]
-        except Exception:
+        except Exception: 
             pass
 
         return {'FINISHED'}
-
 
 class CopyPanel(bpy.types.Panel):
     """Creates a Custom Property Panel in the Object properties window"""
@@ -176,7 +164,6 @@ class CopyPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         layout.operator("object.custom_property_copy")
-
 
 class CopyPanelBone(bpy.types.Panel):
     """Creates a Custom Property Panel in the Object properties window"""

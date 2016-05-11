@@ -30,7 +30,7 @@
 bl_info = {
     "name": "Mesh Summary",
     "author": "sambler",
-    "version": (1, 0),
+    "version": (1,0),
     "blender": (2, 66, 0),
     "location": "Properties > Scene > Object Info Panel",
     "description": "Summarize details about the mesh objects in this file.",
@@ -45,27 +45,25 @@ import bmesh
 from bpy.props import IntProperty, BoolProperty
 from operator import itemgetter
 
-
 class MeshSummaryPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     display_limit = IntProperty(name="Display limit",
-                                description="Maximum number of items to list",
-                                default=5, min=2, max=20)
+                        description="Maximum number of items to list",
+                        default=5, min=2, max=20)
     calculate_modifier_verts = BoolProperty(name="Calculate mod. vertices",
-                                            description="Calculate vertex count after applying modifiers.",
-                                            default=False)
+                        description="Calculate vertex count after applying modifiers.",
+                        default=False)
 
     def draw(self, context):
         layout = self.layout
         col = layout.column()
 
         row = col.row()
-        row.prop(self, "calculate_modifier_verts")
+        row.prop(self,"calculate_modifier_verts")
         row = col.row()
         row.prop(self, "display_limit")
-        col = row.column()  # this stops the button stretching
-
+        col = row.column() # this stops the button stretching
 
 def us(qty):
     """
@@ -73,14 +71,13 @@ def us(qty):
     eg turn 12345678 into 12.3M
     """
 
-    if qty < 1000:
+    if qty<1000:
         return str(qty)
 
-    for suf in ['K', 'M', 'G', 'T', 'P', 'E']:
+    for suf in ['K','M','G','T','P','E']:
         qty /= 1000
-        if qty < 1000:
+        if qty<1000:
             return "%3.1f%s" % (qty, suf)
-
 
 class Properties_meshinfo(bpy.types.Panel):
     bl_label = "Mesh Information"
@@ -97,7 +94,7 @@ class Properties_meshinfo(bpy.types.Panel):
         if len(meshes) == 1:
             row.label(text="1 Mesh object in this scene.", icon='OBJECT_DATA')
         else:
-            row.label(text=us(len(meshes)) + " Mesh objects in this scene.", icon='OBJECT_DATA')
+            row.label(text=us(len(meshes))+" Mesh objects in this scene.", icon='OBJECT_DATA')
             row = layout.row()
             if len(meshes) > prefs.display_limit:
                 row.label(text="Top %d mesh objects." % prefs.display_limit)
@@ -105,15 +102,15 @@ class Properties_meshinfo(bpy.types.Panel):
                 row.label(text="Top %d mesh objects." % len(meshes))
 
         row = layout.row()
-        row.prop(prefs, "calculate_modifier_verts")
+        row.prop(prefs,"calculate_modifier_verts")
         if len(meshes) > 0:
             dataCols = []
             row = layout.row()
-            dataCols.append(row.column())  # name
-            dataCols.append(row.column())  # verts
-            dataCols.append(row.column())  # verts after modifiers
-            dataCols.append(row.column())  # edges
-            dataCols.append(row.column())  # faces
+            dataCols.append(row.column()) # name
+            dataCols.append(row.column()) # verts
+            dataCols.append(row.column()) # verts after modifiers
+            dataCols.append(row.column()) # edges
+            dataCols.append(row.column()) # faces
 
             topMeshes = [(o, o.name, len(o.data.vertices), len(o.data.edges), len(o.data.polygons)) for o in meshes]
             topMeshes = sorted(topMeshes, key=itemgetter(2), reverse=True)[:prefs.display_limit]
@@ -138,7 +135,7 @@ class Properties_meshinfo(bpy.types.Panel):
                     detailRow = dataCols[2].row()
                     bm = bmesh.new()
                     bm.from_object(mo[0], context.scene)
-                    detailRow.label(text="(" + us(len(bm.verts)) + ")")
+                    detailRow.label(text="("+us(len(bm.verts))+")")
                     bm.free()
                 detailRow = dataCols[3].row()
                 detailRow.label(text=us(mo[3]))
@@ -158,11 +155,9 @@ class Properties_meshinfo(bpy.types.Panel):
             totRow = dataCols[4].row()
             totRow.label(text=us(fTotal))
 
-
 def register():
     bpy.utils.register_class(MeshSummaryPreferences)
     bpy.utils.register_class(Properties_meshinfo)
-
 
 def unregister():
     bpy.utils.unregister_class(MeshSummaryPreferences)

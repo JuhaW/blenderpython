@@ -18,20 +18,19 @@
 # ***** END GPL LICENCE BLOCK *****
 
 bl_info = {
-    "name": "Normalize Deform Weight",
-    "author": "Hidesato Ikeya",
-    "version": (1, 1),
-    "blender": (2, 68, 0),
-    "location": "View3D > ToolShelf > Normalize Deform",
-    "description": "Normalize vertex weight to which vertices belongs"
-    "deformed by active armature",
-    "warning": "",
-    "wiki_url": "",
-    "tracker_url": "",
-    "category": "Mesh"}
+        "name": "Normalize Deform Weight",
+        "author": "Hidesato Ikeya",
+        "version": (1, 1),
+        "blender": (2, 68, 0),
+        "location": "View3D > ToolShelf > Normalize Deform",
+        "description": "Normalize vertex weight to which vertices belongs"
+                       "deformed by active armature",
+        "warning": "",
+        "wiki_url": "",
+        "tracker_url": "",
+        "category": "Mesh"}
 
 import bpy
-
 
 class _Base:
     bl_options = {'REGISTER', 'UNDO'}
@@ -51,7 +50,7 @@ class _Base:
 
         path = repr(context.active_pose_bone)
         # path should be "bpy.data.objects['ArmatureName'].pose.bones['BoneName']"
-        armature_name = path[path.find("[") + 2:path.find("]") - 1]
+        armature_name = path[path.find("[")+2:path.find("]")-1]
         armature = context.scene.objects[armature_name]
 
         deform_bones = set()
@@ -66,7 +65,7 @@ class _Base:
                 if group.lock_weight:
                     locked_deform_groups.add(group.index)
                 elif self.lock_active and \
-                        group.index == obj.vertex_groups.active_index:
+                   group.index == obj.vertex_groups.active_index:
                     locked_deform_groups.add(group.index)
                 else:
                     deform_groups.add(group.index)
@@ -106,13 +105,10 @@ class VertexWeightNormalizeDeform(_Base, bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return context.mode == 'PAINT_WEIGHT'
-
     def execute(self, context):
         return self._normalize(context, False)
-
     def invoke(self, context, event):
         return self.execute(context)
-
 
 class VertexWeightNormalizeDeformSelected(_Base, bpy.types.Operator):
     bl_idname = 'mesh.vertex_weight_normalize_deform_selected'
@@ -122,11 +118,9 @@ class VertexWeightNormalizeDeformSelected(_Base, bpy.types.Operator):
     def poll(cls, context):
         me = context.weight_paint_object.data
         return context.mode == 'PAINT_WEIGHT' and \
-            (me.use_paint_mask or me.use_paint_mask_vertex)
-
+                (me.use_paint_mask or me.use_paint_mask_vertex)
     def execute(self, context):
         return self._normalize(context, True)
-
     def invoke(self, context, event):
         return self.execute(context)
 
@@ -145,7 +139,6 @@ def register():
     bpy.utils.register_class(VertexWeightNormalizeDeform)
     bpy.utils.register_class(VertexWeightNormalizeDeformSelected)
     bpy.types.VIEW3D_PT_tools_weightpaint.append(panel_draw)
-
 
 def unregister():
     bpy.utils.unregister_class(VertexWeightNormalizeDeform)

@@ -81,7 +81,6 @@ def material_in_cur_scene(mat):
                     return True
     return False
 
-
 def material_on_sel_obj(mat):
     selection = bpy.context.selected_objects
     for obj in selection:
@@ -90,7 +89,6 @@ def material_on_sel_obj(mat):
                 if slot.material == mat:
                     return True
     return False
-
 
 def material_on_vis_layer(mat):
     settings = bpy.context.window_manager.matalogue_settings
@@ -109,7 +107,6 @@ def material_on_vis_layer(mat):
                     return True
     return False
 
-
 def get_materials():
     settings = bpy.context.window_manager.matalogue_settings
     materials = []
@@ -126,7 +123,6 @@ def get_materials():
 
     return materials
 
-
 def dummy_object(delete=False):
     ''' Return the existing dummy object, or create one if it doesn't exist. '''
     scene = bpy.context.scene
@@ -136,7 +132,7 @@ def dummy_object(delete=False):
             if "Matalogue Dummy Object" in obj.name:
                 scene.objects.unlink(obj)
         return "DONE"
-
+    
     dummy = None
     previous_dummy = [obj for obj in bpy.data.objects if obj.name == "Matalogue Dummy Object"]
     if previous_dummy:
@@ -153,7 +149,7 @@ def dummy_object(delete=False):
 
     if len(dummy.material_slots) == 0:
         bpy.ops.object.material_slot_add()
-
+        
     return dummy
 
 
@@ -166,7 +162,7 @@ class TLGoToMat(bpy.types.Operator):
     'Show the nodes for this material'
     bl_idname = 'matalogue.goto_mat'
     bl_label = 'Go To Material'
-    mat = bpy.props.StringProperty(default="")
+    mat = bpy.props.StringProperty(default = "")
 
     def execute(self, context):
         dummy_object(delete=True)
@@ -207,8 +203,8 @@ class TLGoToGroup(bpy.types.Operator):
     'Show the nodes inside this group'
     bl_idname = 'matalogue.goto_group'
     bl_label = 'Go To Group'
-    tree_type = bpy.props.StringProperty(default="")
-    tree = bpy.props.StringProperty(default="")
+    tree_type = bpy.props.StringProperty(default = "")
+    tree = bpy.props.StringProperty(default = "")
 
     def execute(self, context):
         try:  # Go up one group as many times as possible - error will occur when the top level is reached
@@ -228,8 +224,8 @@ class TLGoToLight(bpy.types.Operator):
     'Show the nodes for this material'
     bl_idname = 'matalogue.goto_light'
     bl_label = 'Go To Material'
-    light = bpy.props.StringProperty(default="")
-    world = bpy.props.BoolProperty(default=False)
+    light = bpy.props.StringProperty(default = "")
+    world = bpy.props.BoolProperty(default = False)
 
     def execute(self, context):
         dummy_object(delete=True)
@@ -250,7 +246,7 @@ class TLGoToComp(bpy.types.Operator):
     'Show the nodes for this material'
     bl_idname = 'matalogue.goto_comp'
     bl_label = 'Go To Composite'
-    scene = bpy.props.StringProperty(default="")
+    scene = bpy.props.StringProperty(default = "")
 
     def execute(self, context):
         context.space_data.tree_type = 'CompositorNodeTree'
@@ -289,15 +285,15 @@ class MatalogueMaterials(bpy.types.Panel):
                 icon_val = layout.icon(mat)
             except:
                 icon_val = 1
-                print("WARNING [Mat Panel]: Could not get icon value for %s" % name)
+                print ("WARNING [Mat Panel]: Could not get icon value for %s" % name)
             if mat.users:
-                op = col.operator('matalogue.goto_mat', text=name, emboss=(mat == context.space_data.id), icon_value=icon_val)
+                op = col.operator('matalogue.goto_mat', text=name, emboss=(mat==context.space_data.id), icon_value=icon_val)
                 op.mat = name
             else:
                 row = col.row(align=True)
-                op = row.operator('matalogue.goto_mat', text=name, emboss=(mat == context.space_data.id), icon_value=icon_val)
+                op = row.operator('matalogue.goto_mat', text=name, emboss=(mat==context.space_data.id), icon_value=icon_val)
                 op.mat = name
-                op = row.operator('matalogue.goto_mat', text="", emboss=(mat == context.space_data.id), icon='ERROR')
+                op = row.operator('matalogue.goto_mat', text="", emboss=(mat==context.space_data.id), icon='ERROR')
                 op.mat = name
 
         if not materials:
@@ -343,7 +339,7 @@ class MatalogueGroups(bpy.types.Panel):
 
         # col.label("Shader Groups")
         for g in shader_groups:
-            op = col.operator('matalogue.goto_group', text=g.name, emboss=(context.space_data.path[-1].node_tree.name == g.name), icon='NODETREE')
+            op = col.operator('matalogue.goto_group', text=g.name, emboss=(context.space_data.path[-1].node_tree.name==g.name), icon='NODETREE')
             op.tree_type = "ShaderNodeTree"
             op.tree = g.name
 
@@ -353,7 +349,7 @@ class MatalogueGroups(bpy.types.Panel):
 
         # col.label("Compositing Groups")
         for g in comp_groups:
-            op = col.operator('matalogue.goto_group', text=g.name, emboss=(context.space_data.path[-1].node_tree.name == g.name), icon='NODETREE')
+            op = col.operator('matalogue.goto_group', text=g.name, emboss=(context.space_data.path[-1].node_tree.name==g.name), icon='NODETREE')
             op.tree_type = "CompositorNodeTree"
             op.tree = g.name
 
@@ -379,12 +375,12 @@ class MatalogueLighting(bpy.types.Panel):
         for light in lights:
             if light.data.use_nodes:
                 name = light.name
-                op = col.operator('matalogue.goto_light', text=name, emboss=(light.data == context.space_data.id), icon='LAMP_%s' % light.data.type)
+                op = col.operator('matalogue.goto_light', text=name, emboss=(light.data==context.space_data.id), icon='LAMP_%s' % light.data.type)
                 op.light = name
                 op.world = False
 
         if context.scene.world.use_nodes:
-            op = col.operator('matalogue.goto_light', text="World", emboss=(context.scene.world == context.space_data.id), icon='WORLD')
+            op = col.operator('matalogue.goto_light', text="World", emboss=(context.scene.world==context.space_data.id), icon='WORLD')
             op.world = True
 
 
@@ -403,7 +399,7 @@ class MatalogueCompositing(bpy.types.Panel):
 
         for sc in scenes:
             name = sc.name
-            op = col.operator('matalogue.goto_comp', text=name, emboss=(sc == context.space_data.id), icon='SCENE_DATA')
+            op = col.operator('matalogue.goto_comp', text=name, emboss=(sc==context.space_data.id), icon='SCENE_DATA')
             op.scene = name
 
 
@@ -415,7 +411,6 @@ def register():
     bpy.utils.register_module(__name__)
 
     bpy.types.WindowManager.matalogue_settings = bpy.props.PointerProperty(type=MatalogueSettings)
-
 
 def unregister():
     del bpy.types.WindowManager.matalogue_settings

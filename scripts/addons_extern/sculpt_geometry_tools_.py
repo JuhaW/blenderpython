@@ -26,8 +26,6 @@ import bpy
 #
 
 # Base class for edit mode operators
-
-
 class SculptEditBase(bpy.types.Operator):
     bl_idname = "sculpt.geometry_edit_base"
     bl_label = "NONE"
@@ -36,8 +34,8 @@ class SculptEditBase(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return context.active_object is not None \
-            and context.active_object.mode == 'SCULPT' \
-            and "Multires" not in context.active_object.modifiers
+               and context.active_object.mode == 'SCULPT' \
+               and "Multires" not in context.active_object.modifiers
 
     def execute(self, context):
         wm = context.window_manager
@@ -68,8 +66,6 @@ class SculptEditBase(bpy.types.Operator):
         return result
 
 # Base class for operators that apply modifiers
-
-
 class SculptModifierOperator(bpy.types.Operator):
     bl_idname = "sculpt.geometry_modifier_base"
     bl_label = "NONE"
@@ -84,8 +80,8 @@ class SculptModifierOperator(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return context.active_object is not None \
-            and context.active_object.mode == 'SCULPT' \
-            and 'Multires' not in context.active_object.modifiers
+               and context.active_object.mode == 'SCULPT' \
+               and 'Multires' not in context.active_object.modifiers
 
     def create_modifier(self, context):
         pass
@@ -163,7 +159,6 @@ class SculptEditBeautifyOperator(SculptEditBase):
         bpy.ops.mesh.select_all(action='DESELECT')
         return {'FINISHED'}
 
-
 class SculptEditSmoothOperator(SculptEditBase):
     """Applies smoothing to non-masked vertices"""
     bl_idname = "sculpt.geometry_smooth_vertices"
@@ -176,7 +171,6 @@ class SculptEditSmoothOperator(SculptEditBase):
         bpy.ops.mesh.vertices_smooth()
         bpy.ops.mesh.select_all(action='DESELECT')
         return {'FINISHED'}
-
 
 class SculptSubdivideOperator(SculptEditBase):
     """Subdivides non-masked faces"""
@@ -191,7 +185,6 @@ class SculptSubdivideOperator(SculptEditBase):
         bpy.ops.mesh.select_all(action='DESELECT')
         return {'FINISHED'}
 
-
 class SculptSubdivideSmoothOperator(SculptEditBase):
     """Subdivides non-masked faces"""
     bl_idname = "sculpt.geometry_subdivide_faces_smooth"
@@ -204,6 +197,7 @@ class SculptSubdivideSmoothOperator(SculptEditBase):
         bpy.ops.mesh.subdivide(smoothness=1.0)
         bpy.ops.mesh.select_all(action='DESELECT')
         return {'FINISHED'}
+
 
 
 class SculptDecimateOperator(SculptModifierOperator):
@@ -244,7 +238,6 @@ class SculptDecimateOperator(SculptModifierOperator):
 
         layout.label(text=("Face Count: %d") % self.md.face_count, translate=False)
 
-
 class SculptSmoothOperator(SculptModifierOperator):
     """Smooth vertices"""
     bl_idname = "sculpt.geometry_smooth"
@@ -275,7 +268,6 @@ class SculptSmoothOperator(SculptModifierOperator):
         col = split.column()
         col.prop(self.md, "factor")
         col.prop(self.md, "iterations")
-
 
 class SculptLaplacianSmoothOperator(SculptModifierOperator):
     """Laplacian Smooth"""
@@ -314,7 +306,6 @@ class SculptLaplacianSmoothOperator(SculptModifierOperator):
         col.separator()
         col.prop(self.md, "use_volume_preserve")
         col.prop(self.md, "use_normalized")
-
 
 class SculptDisplaceModifier(SculptModifierOperator):
     """Displace geometry"""
@@ -364,7 +355,6 @@ class SculptDisplaceModifier(SculptModifierOperator):
         row = layout.row()
         row.prop(self.md, "mid_level")
         row.prop(self.md, "strength")
-
 
 class SculptGeometryPanel(bpy.types.Panel):
     """UI panel for the various Sculpt->Edit->Sculpt buttons"""
@@ -416,9 +406,9 @@ class SculptGeometryPanel(bpy.types.Panel):
 def register():
     bpy.utils.register_module(__name__)
 
-
 def unregister():
     bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":
     register()
+
