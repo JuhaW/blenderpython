@@ -38,8 +38,12 @@ class ToolsPanelDelaunay(bpy.types.Panel):
 	bl_region_type = "TOOLS"
 
 	def draw(self, context):
+		layout = self.layout
+		layout.label('Constellation')
 		self.layout.operator("delaunay.triangulation")
 		self.layout.operator("voronoi.tesselation")
+		layout.label('Constellation')
+		layout.operator("mesh.constellation", text ="Cross Section")
 
 class OBJECT_OT_TriangulateButton(bpy.types.Operator):
 	bl_idname = "delaunay.triangulation" #name used to refer to this operator (button)

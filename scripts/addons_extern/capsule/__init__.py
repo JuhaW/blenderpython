@@ -34,7 +34,6 @@ bl_info = {
     "author": "Crocadillian/Takanu @ Polarised Games, with assistance from Atom, Linusy, Meta-Androcto, CoDEManX",
     "version": (0,86),
     "blender": (2, 7, 1),
-    "api": 39347,
     "location": "3D View > Object Mode > Tools > Capsule",
     "description": "Provides workflow tools for non-destructive, streamlined game and CG asset development",
     "warning": "Beta",

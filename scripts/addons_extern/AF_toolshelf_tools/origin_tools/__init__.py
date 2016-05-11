@@ -17,7 +17,7 @@ bl_info = {
     "warning": "", 
     "wiki_url": "http://www.le-terrier-de-lapineige.over-blog.com",
     "tracker_url": "http://www.le-terrier-de-lapineige.over-blog.com",
-    "category": "Object"}
+    "category": "Panel"}
 ############# 
 from .utils import AddonPreferences, SpaceProperty, operator_call
 

@@ -25,7 +25,7 @@ bl_info = {
     "description": "Add Align Options",
     "warning": "",
     "wiki_url": "",
-    "category": "Object",
+    "category": "Panel",
 }
 
 from .utils import AddonPreferences, SpaceProperty

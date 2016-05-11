@@ -39,10 +39,13 @@ from bpy.types import PropertyGroup
 from . import align_tools
 from . import analyse_dicom_3d_models
 from . import auto_mirror
+from . import black_hole
 from . import display_tools
 from . import navigation
-from . import toolshelf_menu
 from . import origin_tools
+from . import select_tools
+from . import toolshelf_menu
+from . import transform_extend
 
 
 bl_info = {
@@ -62,10 +65,13 @@ sub_modules = [
     align_tools,
     analyse_dicom_3d_models,
     auto_mirror,
+    black_hole,
     display_tools,
     navigation,
-    toolshelf_menu,
     origin_tools,
+    select_tools,
+    toolshelf_menu,
+    transform_extend
     ]
 
 

@@ -57,9 +57,7 @@ class cust_normals_panel(bpy.types.Panel):
 	@classmethod
 	def poll(self, context):
 		return context.active_object != None
-		#	if context.active_object.type == 'MESH':
-		return True
-		#return False
+
 	
 	def draw(self, context):
 		editsplit = False

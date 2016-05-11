@@ -32,6 +32,13 @@ bl_info = {
 	'link': '',
 	"category": "Add Mesh"}
 
+if "bpy" in locals():
+    import importlib
+    importlib.reload(oscurart_constellation)
+
+else:
+    from . import oscurart_constellation
+
 import bpy
 from .delaunayVoronoiBlender import ToolsPanelDelaunay
 
