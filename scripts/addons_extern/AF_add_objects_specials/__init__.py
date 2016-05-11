@@ -50,6 +50,8 @@ if "bpy" in locals():
     importlib.reload(advanced_camera_rigs)
     importlib.reload(trilighting)
     importlib.reload(copy2)
+    importlib.reload(MakeStruts)
+    importlib.reload(Random_Box_Structure)
 
 else:
     from . import scene_camera
@@ -70,6 +72,8 @@ else:
     from . import advanced_camera_rigs
     from . import trilighting
     from . import copy2
+    from . import MakeStruts
+    from . import Random_Box_Structure
 
 import bpy
 
@@ -135,6 +139,10 @@ class INFO_MT_quick_tools_add(bpy.types.Menu):
         layout.operator('object.pixelate', icon='MESH_GRID')
         layout.operator("ball.rope",
             text="Wrecking Ball", icon='PHYSICS')
+        layout.operator("mesh.generate_struts",
+            text="Struts", icon='GRID')
+        layout.operator("object.make_structure",
+            text="Random Boxes", icon='SEQ_SEQUENCER')
 
 
 class INFO_MT_scene_elements_add(bpy.types.Menu):

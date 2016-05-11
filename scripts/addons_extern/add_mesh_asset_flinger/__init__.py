@@ -21,8 +21,8 @@
 
 bl_info = {
         "name": "Asset Flinger",
-        "version": (0, 2, 0),
-        "blender": (2, 77, 0),
+        "version": (0, 1),
+        "blender": (2, 70, 0),
         "location": "View3D > Add > Mesh > Asset Flinger",
         "description": "Simple Mesh Importer",
         "category": "Add Mesh"}
