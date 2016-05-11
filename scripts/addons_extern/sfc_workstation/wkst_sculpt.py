@@ -27,28 +27,8 @@ from bpy import*
 
 
 ###########  Menu  #######################
-
-
-class LoadBrushesMenu(bpy.types.Menu):
-    """Load Brushes"""
-    bl_label = "Load Brushes"
-    bl_idname = "wkst_menu.load_brushes"
-    
-    def draw(self, context):
-        layout = self.layout
-        layout.operator_context = 'INVOKE_REGION_WIN'
-
-        layout.label("Load Brushes", icon ="TRIA_DOWN")
-        
-        layout.separator()
-
-        layout.operator('texture.load_single_brush', text='Single Brush', icon ="IMAGE_COL")
-        layout.operator('texture.load_brushes', text='Brushes from Folder', icon ="FILE_FOLDER")
-
-
-
 class DecimateFreeze_Menu(bpy.types.Menu):
-    """Decimate Freeze / do not editing"""
+    """Decimate Freeze"""
     bl_label = "Decimate Freeze"
     bl_idname = "object.decimatefreeze_menu"
     
@@ -95,7 +75,7 @@ class BooleanOpsMenu(bpy.types.Menu):
 
 
 class GPencil_Menu(bpy.types.Menu):
-    """Grease Pencil Menu"""
+    """GPencil_Menu"""
     bl_label = "GPencil_Menu"
     bl_idname = "draw.gpencil_menu"
     
@@ -103,7 +83,6 @@ class GPencil_Menu(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         
-
         if context.mode == 'OBJECT':
             layout.operator("grease.execution", text="Grease Cut", icon='SCULPTMODE_HLT')  
 
@@ -122,18 +101,9 @@ class GPencil_Menu(bpy.types.Menu):
         layout.prop(context.tool_settings, "grease_pencil_source","")
         layout.prop(context.tool_settings, "use_grease_pencil_sessions", text="Continuous", icon ="LOCKED")
         layout.prop(context.gpencil_data, "use_stroke_edit_mode", text="Enable Editing", icon='EDIT', toggle=True)
-        
-        #if context.active_gpencil_layer: 
-            #layout.separator()
 
-            #layout.prop(context.active_gpencil_layer, "info", "", icon="INFO")
-            
-            #layout.prop(context.gpencil_data.layers, "active_index")
-            #layout.operator("gpencil.layer_add", icon='ZOOMIN', text="Add Layer")
-           # layout.operator("gpencil.layer_remove", icon='ZOOMOUT', text="Del. Layer")
-       
         layout.separator()
-        
+
         layout.operator("boolean.purge_pencils", text='Purge Pencils',  icon = 'PANEL_CLOSE')   
 
 
@@ -164,46 +134,6 @@ class SCULPTOpsMenu(bpy.types.Menu):
          
         layout.operator("sculpt.geometry_beautify_faces", text="Beautify")
 
-
-
-
-#############################################################
-
-
-class Registry_Addon(bpy.types.Operator):
-    """Enable Quickset Brush"""
-    bl_idname = "enable.quicksetbrush"
-    bl_label = "Enable"
-
-    def execute(self, context):
-        bpy.ops.wm.addon_enable(module="sfc_retopo_quicksetbrush")
-        return {'FINISHED'}
-    
-class Unregistry_Addon(bpy.types.Operator):
-    """Disable Quickset Brush"""
-    bl_idname = "disable.quicksetbrush"
-    bl_label = "Disable"
-
-    def execute(self, context):
-        bpy.ops.wm.addon_disable(module="sfc_retopo_quicksetbrush")        
-        return {'FINISHED'}
-    
-
-
-class QuickBrushMenu(bpy.types.Menu):
-    """Quickset Brush for Right Mouse Button"""
-    bl_label = "Quickset Brush Menu"
-    bl_idname = "wkst_menu.quick_brush"
-
-    def draw(self, context):
-        layout = self.layout
-
-        layout.label("Quickset Brush / RMB", icon ="TRIA_DOWN")
-        
-        layout.separator()
-                
-        layout.operator("enable.quicksetbrush", icon='CHECKBOX_HLT')
-        layout.operator("disable.quicksetbrush", icon='CHECKBOX_DEHLT')
 
 
 

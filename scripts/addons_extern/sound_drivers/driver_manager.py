@@ -63,7 +63,7 @@ class SoundDriver():
             else:
                 box.operator("object.speaker_add")
             return None
-        elif context.scene.speaker is None:
+        elif sp is None:
             box = layout.box()
             box.label("NO CONTEXT SPEAKER")
             box.menu("speaker.select_contextspeaker")
@@ -85,12 +85,20 @@ class SoundDriver():
         eds = [edr.driver_gui(scene)]
         for ed in eds:
             action = bpy.data.actions.get(ed.action)
-            action_box = layout.box()
             if ed is None:
-                action_box.label("NO GUI")
+                layout.label("NO GUI")
                 return
             #if True:
+
+            speaker_box = layout.box()
+            speaker_box.label("Context Speaker")
+            if sp:
+                text = "%s (%s)" % (sp.name, sp.sound.name)
+                speaker_box.menu("speaker.select_contextspeaker", text=text)
+            else:
+                speaker_box.menu("speaker.select_contextspeaker")
             if 'ACTION' in ed.gui_types:
+                action_box = layout.box()
                 sa = getAction(sp)
                 # TODO get the draw method from SoundActionPanel
                 row = action_box.row()
@@ -118,14 +126,14 @@ class SoundDriver():
             row.label("SoundDriver", icon='SOUND')
             #REFACTO CORRECTO
             row = box.row()
+            a = bpy.data.actions.get(ed.action)
+            #row.label(a.get("channel_name","AA"))
             row.prop(ed, "channel")
             '''
             op = row.operator("driver.sound_action")
             op.dindex = self.index 
             op.channel = "AA"
             '''
-            a = sp.animation_data.action # REFACTO OUT
-            a = bpy.data.actions.get(ed.action)
             if a is None or "channel_name" not in a.keys():
                 row = box.row()
                 row.label("ERROR WITH ACTION", icon='ERROR')
@@ -138,6 +146,7 @@ class SoundDriver():
             #cf = row.column_flow(columns=cols, align=True)
 
             chs = [(i, "%s%d" % (cn, i)) for i in range(channels)]
+            chs = [(i, fc.data_path.strip('["]')) for i, fc in enumerate(a.fcurves)]
             for i, ch in chs:
                 if not i % cols:
                     row = box.row()
@@ -146,11 +155,12 @@ class SoundDriver():
                 #col.scale_y = 0.5
                 # col.label(ch.name)
                 channel = ed.channels.get(ch)
+                channel_number = int(ch.strip(cn))
 
                 if channel is not None:
-                    col.prop(channel, 'value', text=str(i), toggle=True)
+                    col.prop(channel, 'value', text=str(channel_number), toggle=True)
                 else:
-                    op = col.operator("driver.sound_channel_activate", text="%d" % i)
+                    op = col.operator("driver.sound_channel_activate", text="%d" % channel_number)
                     op.channel = ch
                     op.dindex = self.index
 
@@ -934,7 +944,7 @@ class SoundDriver():
                                           path[-1],
                                           slider=True)
                                 else:
-                                    col2.label("YY%s = %.2f" % (dp, mo))
+                                    col2.prop(target.id, target.data_path)
                             except:
                                 col2.label("XX%s = %.2f" % (dp, mo))
                     except:

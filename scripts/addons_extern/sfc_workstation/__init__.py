@@ -22,7 +22,7 @@ bl_info = {
     "description" : "A collection of tools for modeling and retopology",
     "location" : "3D View > Tool Shelf > SFC Retopo",
     "author" : "SFC & UI: Brett Fedack / Multi Addon-Authors (see bl_infos) / SFC-Retopo_Collection & UI: Marvin.K.Breuer",
-    "version" : (1, 0),
+    "version" : (1, 1),
     "blender" : (2, 76, 0),
     "category" : "Tools"
 }
@@ -50,7 +50,8 @@ if "bpy" in locals():
     imp.reload(copy_attributes)      
     imp.reload(copy_mifth_cloning)      
     imp.reload(copy_replicator)           
-
+    imp.reload(copy_toall) 
+    
     imp.reload(curve_action)      
     imp.reload(curve_outline)      
     imp.reload(curve_split)      
@@ -129,11 +130,11 @@ if "bpy" in locals():
 
     imp.reload(rename_tools)      
 
-    #imp.reload(sculpt_brush_quickset)      
+    imp.reload(sculpt_brush_quickset)      
     imp.reload(sculpt_geometry_tools)      
     imp.reload(sculpt_ice_tools)      
     imp.reload(sculpt_mask_tools)      
-    imp.reload(sculpt_osc_grease_project)      
+    imp.reload(sculpt_grease_project)      
     imp.reload(sculpt_tools)      
     imp.reload(sculpt_zero_brush)      
 
@@ -170,6 +171,7 @@ else:
     from . import copy_attributes      
     from . import copy_mifth_cloning      
     from . import copy_replicator         
+    from . import copy_toall        
 
     from . import curve_action      
     from . import curve_outline      
@@ -249,11 +251,11 @@ else:
 
     from . import rename_tools      
 
-    #from . import sculpt_brush_quickset     
+    from . import sculpt_brush_quickset     
     from . import sculpt_geometry_tools     
     from . import sculpt_ice_tools      
     from . import sculpt_mask_tools      
-    from . import sculpt_osc_grease_project      
+    from . import sculpt_grease_project      
     from . import sculpt_tools      
     from . import sculpt_zero_brush      
 
@@ -279,6 +281,7 @@ import add_tubetool
 import copy_attributes      
 import copy_mifth_cloning      
 import copy_replicator           
+import copy_toall          
 
 import curve_action      
 import curve_outline      
@@ -357,11 +360,11 @@ import place_simple_align
 
 import rename_tools      
 
-#import sculpt_brush_quickset      
+import sculpt_brush_quickset      
 import sculpt_geometry_tools      
 import sculpt_ice_tools      
 import sculpt_mask_tools      
-import sculpt_osc_grease_project      
+import sculpt_grease_project      
 import sculpt_tools      
 import sculpt_zero_brush      
 
@@ -389,6 +392,7 @@ def register():
    copy_attributes.register()     
    copy_mifth_cloning.register()     
    copy_replicator.register()          
+   copy_toall.register()          
 
    curve_action.register()     
    curve_outline.register()     
@@ -467,11 +471,11 @@ def register():
 
    rename_tools.register()     
 
-   #sculpt_brush_quickset.register()     
+   sculpt_brush_quickset.register()     
    sculpt_geometry_tools.register()     
    sculpt_ice_tools.register()     
    sculpt_mask_tools.register()     
-   sculpt_osc_grease_project.register()     
+   sculpt_grease_project.register()     
    sculpt_tools.register()     
    sculpt_zero_brush.register()     
    
@@ -482,7 +486,6 @@ def register():
    ui_display_tools.register()     
    ui_mesh_check.register()    
     
-
 
    bpy.utils.register_module(__name__)       
 
@@ -496,6 +499,7 @@ def unregister():
    copy_attributes.unregister()   
    copy_mifth_cloning.unregister()   
    copy_replicator.unregister()     
+   copy_toall.unregister()     
 
    curve_action.unregister()   
    curve_outline.unregister()   
@@ -574,11 +578,11 @@ def unregister():
 
    rename_tools.unregister()   
 
-   #sculpt_brush_quickset.unregister()   
+   sculpt_brush_quickset.unregister()   
    sculpt_geometry_tools.unregister()   
    sculpt_ice_tools.unregister()   
    sculpt_mask_tools.unregister()   
-   sculpt_osc_grease_project.unregister()   
+   sculpt_grease_project.unregister()   
    sculpt_tools.unregister()   
    sculpt_zero_brush.unregister()   
    
@@ -588,8 +592,7 @@ def unregister():
    ui_border_lines.unregister()   
    ui_display_tools.unregister()   
    ui_mesh_check.unregister()   
-   
-   
+      
 
    bpy.utils.unregister_module(__name__)
 

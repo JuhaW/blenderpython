@@ -33,7 +33,7 @@ def draw_mesh_brush_ui(layout):
         row = box.row()
 
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'TRIA_RIGHT', emboss = False
+            "wm.context_toggle", text = "", icon = 'TRIA_RIGHT', emboss = True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
         row.label("Mesh Sculpt Brush")
@@ -44,7 +44,7 @@ def draw_mesh_brush_ui(layout):
         row = box.row()
 
         op = row.operator( 
-            "wm.context_toggle", text = "", icon = 'TRIA_DOWN', emboss = False
+            "wm.context_toggle", text = "", icon = 'TRIA_DOWN', emboss = True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
         row.label("Mesh Sculpt Brush") 

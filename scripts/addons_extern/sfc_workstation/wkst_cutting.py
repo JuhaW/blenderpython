@@ -41,12 +41,12 @@ class WKST_Subdivide(bpy.types.Menu):
         
         layout.label("Subdivide Mesh", icon ="MESH_ICOSPHERE")
                    
-        layout.operator("mesh.subdivide",text="1").number_cuts=1
-        layout.operator("mesh.subdivide",text="2").number_cuts=2
-        layout.operator("mesh.subdivide",text="3").number_cuts=3
-        layout.operator("mesh.subdivide",text="4").number_cuts=4
-        layout.operator("mesh.subdivide",text="5").number_cuts=5
-        layout.operator("mesh.subdivide",text="6").number_cuts=6
+        layout.operator("mesh.subdivide",text="1 cut").number_cuts=1
+        layout.operator("mesh.subdivide",text="2 cuts").number_cuts=2
+        layout.operator("mesh.subdivide",text="3 cuts").number_cuts=3
+        layout.operator("mesh.subdivide",text="4 cuts").number_cuts=4
+        layout.operator("mesh.subdivide",text="5 cuts").number_cuts=5
+        layout.operator("mesh.subdivide",text="6 cuts").number_cuts=6
 
         layout.separator()
 
@@ -309,6 +309,42 @@ class PositivZCut_obm(bpy.types.Operator):
         return {'FINISHED'}
 
 
+#Create Hole 
+class CreateHole(bpy.types.Operator):                  
+    """This Operator create a hole on a selection"""                   
+    bl_idname = "object.createhole"                     
+    bl_label = "Create Hole"   
+    bl_options = {'REGISTER', 'UNDO'}     
+
+    @classmethod                                     
+    def poll(cls, context):                         
+        return context.active_object is not None 
+
+    divide = bpy.props.IntProperty(name="Subdivide", description="How often?", default=0, min=0, soft_max=5, step=1)  
+    size = bpy.props.IntProperty(name="Size", description="How often?", default=1, min=1, soft_max=10, step=1)  
+    inset = bpy.props.IntProperty(name="Inset", description="How often?", default=1, min=1, soft_max=10, step=1)  
+    close = bpy.props.BoolProperty(name="Close Hole",  description="close or open Hole", default=True)  
+
+    def execute(self, context):                     
+
+        for i in range(self.divide):
+            bpy.ops.mesh.subdivide(number_cuts=1)
+              
+        bpy.ops.mesh.extrude_region_move()
+
+        for i in range(self.size):        
+            bpy.ops.transform.resize(value=(0.8, 0.8, 0.8))
+
+        bpy.ops.mesh.looptools_circle()
+
+        bpy.ops.mesh.extrude_region_move()
+
+        for i in range(self.inset):
+            bpy.ops.transform.resize(value=(0.8, 0.8, 0.8))
+
+        for i in range(self.close):
+            bpy.ops.mesh.delete(type='FACE')
+        return {'FINISHED'}
 
 ########################################
 

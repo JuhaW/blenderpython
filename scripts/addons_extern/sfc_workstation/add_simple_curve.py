@@ -1243,9 +1243,10 @@ class BezierDivide(bpy.types.Operator):
 
 
 ##------------------------------------------------------------
+"""
 # Fillet tools panel
 class SimpleEdit(bpy.types.Panel):
-    ''''''
+   
     bl_idname = "OBJECT_PT_simple_edit"
     bl_label = "Simple edit"
     bl_description = "Simple edit"
@@ -1304,7 +1305,7 @@ class SimpleEdit(bpy.types.Panel):
                 layout = self.layout
                 row = layout.row()
                 simple_divide = row.operator("curve.bezier_spline_divide", text='Divide')
-
+"""
 ##------------------------------------------------------------
 #location update
 def StartLocationUpdate(self, context):

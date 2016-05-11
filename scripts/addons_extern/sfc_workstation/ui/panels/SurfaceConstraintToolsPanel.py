@@ -25,16 +25,16 @@ from ..layouts.mesh_brush.mesh_brush_ui import draw_mesh_brush_ui
 from ..layouts.shrinkwrap.shrinkwrap_ui import draw_shrinkwrap_ui
 from ..layouts.surface_constraint.surface_constraint_ui import (draw_surface_constraint_ui)
 from ..layouts.smooth_vertices.smooth_vertices_ui import (draw_smooth_vertices_ui)
-from ..layouts.retopo_curve.retopo_curve_ui import (draw_retopo_curve_ui)
-from ..layouts.retopo_tools.retopo_tools_ui import (draw_retopo_tools_ui)
+from ..layouts.retopo_object.retopo_object_ui import (draw_retopo_object_ui)   
+from ..layouts.retopo_edit.retopo_edit_ui import (draw_retopo_edit_ui)   
+from ..layouts.retopo_sculpt.retopo_sculpt_ui import (draw_retopo_sculpt_ui)   
 from ..layouts.retopo_lattice.retopo_lattice_ui import (draw_retopo_lattice_ui)
-
-
+from ..layouts.retopo_curve.retopo_curve_ui import (draw_retopo_curve_ui)
 
 def draw_A_history_tools(layout):
 
-     box=layout.box().column(True)       
-     row=box.row(align=True)
+     box = layout.box().column(1)       
+     row = box.row(1)
      row.operator('wm.path_open',  text = '', icon = 'FILESEL').filepath = "C:\\Users\Public\Documents"
      row.operator("view3d.ruler", text="Ruler")   
      row.operator("ed.undo_history", text="History")
@@ -63,13 +63,21 @@ class SurfaceConstraintToolsPanel(bpy.types.Panel):
 
 
 ###-----### Objectmode Panel ###      
-        if context.mode == 'OBJECT':
-            
+        if context.mode == 'OBJECT':    
+              
+                     
             # 1 #
-            draw_retopo_tools_ui(self, context, layout)
+            draw_retopo_object_ui(self, context, layout)
             
-            # 2 #        
-            draw_surface_constraint_ui(layout)
+            
+            # 2 #  
+            
+            obj = context.active_object  
+            if obj:
+                obj_type = obj.type
+
+                if obj_type in {'MESH'}:                   
+                    draw_surface_constraint_ui(layout)
             
 
             obj = context.active_object  
@@ -95,30 +103,33 @@ class SurfaceConstraintToolsPanel(bpy.types.Panel):
                      row = box.row(1) 
                      row.operator("object.convert",text="Convert to Mesh", icon = "OUTLINER_DATA_MESH").target="MESH"                 
 
-            
 
-
-       
 
 
 ###-----### Editmode Panel ###      
         if context.mode == 'EDIT_MESH':
             
-            # 1 #
-            draw_retopo_tools_ui(self, context, layout)
             
+            # 1 #
+            draw_retopo_edit_ui(self, context, layout)
+            
+
             # 2 #                                    
             draw_shrinkwrap_ui(layout)
+            
             
             # 3 #
             draw_smooth_vertices_ui(layout)
             
+            
             # 4 #
             draw_mesh_brush_ui(layout)
+            
             
             # 5 # 
             draw_surface_constraint_ui(layout)         
             
+
             box = layout.box()
             row = box.row(1)        
             row.prop(bpy.context.scene, "Preserve_Location_Rotation_Scale","",icon="NDOF_DOM")
@@ -135,6 +146,7 @@ class SurfaceConstraintToolsPanel(bpy.types.Panel):
 
 
 
+
 ###-----### LATTCIEmode Panel ###      
         if context.mode == 'EDIT_LATTICE':
             
@@ -142,11 +154,14 @@ class SurfaceConstraintToolsPanel(bpy.types.Panel):
             draw_retopo_lattice_ui(self, context, layout)
 
 
+
+
 ###-----### Sculptmode Panel ###      
         if context.mode == 'SCULPT':
             
             # 1 #
-            draw_retopo_tools_ui(self, context, layout)
+            draw_retopo_sculpt_ui(self, context, layout)
+
 
 
         draw_A_history_tools(layout)               

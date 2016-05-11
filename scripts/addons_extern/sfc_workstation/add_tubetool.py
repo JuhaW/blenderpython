@@ -27,8 +27,8 @@ bl_info = {
     "author": "Dealga McArdle",
     "version": (0, 0, 4),
     "blender": (2, 7, 4),
-    "location": "specials menu",
-    "description": "Adds curve with endpoints on two selected polygons",
+    "location": "specials menu (key W)",
+    "description": "Adds curve with endpoints on two arbitrary polygons",
     "wiki_url": "",
     "tracker_url": "",
     "category": "Mesh"}
@@ -43,9 +43,9 @@ from bpy.props import (
 
 
 class TubeCallbackOps(bpy.types.Operator):
-    
+
     bl_idname = "object.tube_callback"
-    bl_label = "Tube Callback"
+    bl_label = "Tube Callback (private)"
     bl_options = {"INTERNAL"}
 
     current_name = StringProperty(default='')
@@ -209,7 +209,7 @@ def update_simple_tube(oper, context):
 
 
 class AddSimpleTube(bpy.types.Operator):
-    """create a curve with endpoints between two selected polygons"""
+
     bl_idname = "mesh.add_curvebased_tube"
     bl_label = "Add Simple Tube"
     bl_options = {'REGISTER', 'UNDO'}

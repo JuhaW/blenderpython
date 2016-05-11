@@ -53,19 +53,16 @@ class WKST_Transform_Menu(bpy.types.Menu):
             layout.separator()
 
             layout.operator("transform.tosphere", "to Sphere") 
+            layout.operator("transform.push_pull", text="Push/Pull")
             layout.operator("transform.shrink_fatten", text="Shrink Fatten") 
-                       
+            layout.operator('mesh.rot_con', 'Face-Rotation')
+
             layout.separator()
 
             layout.operator("transform.shear", text="Shear")
             layout.operator("transform.bend", text="Bend")
             layout.operator("transform.vertex_warp", text="Warp")
             layout.operator("transform.vertex_random", text="Randomize")
-
-            layout.separator()
-
-            layout.operator("mesh.face_make_planar", "Planar Faces")
-            layout.operator('mesh.rot_con', 'Face-Rotation')
 
             layout.separator()
 

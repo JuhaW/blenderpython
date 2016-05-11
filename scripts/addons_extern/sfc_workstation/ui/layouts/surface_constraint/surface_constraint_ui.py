@@ -25,11 +25,11 @@ def draw_surface_constraint_ui(layout):
     props = addon.preferences.surface_constraint
 
     if not props.settings_ui_is_visible:
-        box = layout.box()
+        box = layout.box().column(align = True)
         row = box.row()
 
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'TRIA_RIGHT', emboss = False
+            "wm.context_toggle", text = "", icon = 'TRIA_RIGHT', emboss = True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
         row.label("Surface Constraint")
@@ -38,11 +38,11 @@ def draw_surface_constraint_ui(layout):
         )
     else:
         col = layout.column(align = True)
-        box = col.box()
+        box = col.box().column(align = True)
         row = box.row()
 
         op = row.operator( 
-            "wm.context_toggle", text = "", icon = 'TRIA_DOWN', emboss = False
+            "wm.context_toggle", text = "", icon = 'TRIA_DOWN', emboss = True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
         row.label("Surface Constraint") 
@@ -65,7 +65,7 @@ def draw_surface_constraint_ui(layout):
             if props.target not in props.available_targets:
                 props.target = str()
 
-        box = col.box()
+        box = col.box().column(align = True)
         col = box.column(align = True)
         row = col.row(align = True)
         subrow = row.row(align = True)

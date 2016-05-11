@@ -76,6 +76,11 @@ class WKST_CurveEdit_Menu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout    
 
+
+        layout.prop(context.object.data, "dimensions", "")    
+
+        layout.separator()
+
         if context.mode == 'OBJECT':
             layout.operator("curve.smoothspline", "Smooth", icon ="SMOOTHCURVE")            
  

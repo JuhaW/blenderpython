@@ -58,19 +58,20 @@ class WKST_WIRE_Menu(bpy.types.Menu):
 
         layout.operator("object.wire_all", text="Wire all", icon='WIRE')
 
-        #if context.mode == 'OBJECT':
-        layout.separator()
+        if context.mode == 'OBJECT':
+            layout.separator()
 
-        layout.operator("view3d.display_wire_on", "Wire Single on", icon = 'MESH_GRID')
-        layout.operator("view3d.display_wire_off", "Wire Single off", icon = 'MESH_PLANE')              
+            layout.operator("view3d.display_wire_on", "Wire Single on", icon = 'MESH_GRID')
+            layout.operator("view3d.display_wire_off", "Wire Single off", icon = 'MESH_PLANE')              
 
-        layout.separator()
-         
-        op = layout.operator("super_grouper.change_selected_objects", text="Wire Shade", icon='GHOST_ENABLED')
-        op.sg_objects_changer = 'WIRE_SHADE'
+            layout.separator()
+             
+            op = layout.operator("super_grouper.change_selected_objects", text="Wire Shade", icon='GHOST_ENABLED')
+            op.sg_objects_changer = 'WIRE_SHADE'
 
-        op = layout.operator("super_grouper.change_selected_objects", text="Material Shade", icon='GHOST_DISABLED')
-        op.sg_objects_changer = 'MATERIAL_SHADE'
+            op = layout.operator("super_grouper.change_selected_objects", text="Material Shade", icon='GHOST_DISABLED')
+            op.sg_objects_changer = 'MATERIAL_SHADE'
+
 
 
 ####### Shading Menu ###################
@@ -91,8 +92,28 @@ class WKST_SHADE_Menu(bpy.types.Menu):
                     
         else:
             layout.operator("mesh.faces_shade_flat", text="Flat", icon="MESH_CIRCLE")  
-            layout.operator("mesh.faces_shade_smooth", text="Smooth", icon="SMOOTH")
+            layout.operator("mesh.faces_shade_smooth", text="Smooth", icon="SMOOTH")            
 
+            layout.separator()
+
+            layout.operator("mesh.mark_seam", icon = "UV_EDGESEL").clear = False
+            layout.operator("mesh.mark_seam", text="Clear Seam").clear = True
+
+            layout.separator()
+
+            layout.operator("mesh.mark_sharp", icon = "SNAP_EDGE").clear = False
+            layout.operator("mesh.mark_sharp", text="Clear Sharp").clear = True
+
+            layout.separator()
+
+            layout.operator("transform.edge_crease")
+            layout.operator("transform.edge_bevelweight")
+
+            layout.separator()
+
+            if bpy.app.build_options.freestyle and not context.scene.render.use_shading_nodes:
+                layout.operator("mesh.mark_freestyle_edge").clear = False
+                layout.operator("mesh.mark_freestyle_edge", text="Clear Freestyle Edge").clear = True
 
 
 
@@ -165,6 +186,24 @@ class WKST_MESH_CHECK_Menu(bpy.types.Menu):
 
 
 ####### Mesh Display Menu ##################
+
+class WKST_EXT_Meshdisplay_Menu(bpy.types.Menu):
+    """Mesh Display"""
+    bl_label = "Mesh Display"
+    bl_idname = "wkst_ext_menu.meshdisplay"
+     
+    def draw(self, context):
+        layout = self.layout 
+        layout.prop(context.object, "show_x_ray", text="X-Ray", icon ="META_CUBE")
+        layout.prop(context.space_data, "show_backface_culling", text="Backface", icon ="OUTLINER_OB_LATTICE") 
+                    
+        if context.mode == 'EDIT_MESH':
+                     
+            layout.prop(context.space_data, "show_occlude_wire", text="Hidden", icon ="OUTLINER_DATA_LATTICE")              
+            layout.prop(context.space_data, "use_occlude_geometry", text="Limit 2 Visible", icon='ORTHO') 
+
+
+
 
 class WKST_Meshdisplay_Menu(bpy.types.Menu):
     """Mesh Display"""

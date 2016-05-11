@@ -461,7 +461,7 @@ def SG_select_objects(scene, ids):
 
 class SG_toggle_select(bpy.types.Operator):
 
-    """Toggle Select"""
+    """Draw a line with the mouse"""
     bl_idname = "super_grouper.toggle_select"
     bl_label = "Toggle Select"
     bl_description = "Toggle Select"
@@ -490,7 +490,7 @@ bpy.utils.register_class(SG_toggle_select)
 
 class SG_toggle_visibility(bpy.types.Operator):
 
-    """Toggle Visibility"""
+    """Draw a line with the mouse"""
     bl_idname = "super_grouper.toggle_visibility"
     bl_label = "Toggle Visibility"
     bl_description = "Toggle Visibility"
@@ -567,7 +567,7 @@ def sg_is_object_in_s_groups(groups_prop_values, obj):
 class SG_change_grouped_objects(bpy.types.Operator):
     bl_idname = "super_grouper.change_grouped_objects"
     bl_label = "Change Grouped"
-    bl_description = "change object and grouped display"
+    bl_description = "Change Grouped"
     bl_options = {'REGISTER', 'UNDO'}
 
     sg_group_changer = EnumProperty(
@@ -630,7 +630,7 @@ bpy.utils.register_class(SG_change_grouped_objects)
 class SG_change_selected_objects(bpy.types.Operator):
     bl_idname = "super_grouper.change_selected_objects"
     bl_label = "Change Selected"
-    bl_description = "change object and grouped display"
+    bl_description = "Change Selected"
     bl_options = {'REGISTER', 'UNDO'}
 
     sg_objects_changer = EnumProperty(
@@ -836,6 +836,24 @@ def check_same_ids():
     check_scenes = None
     all_obj_list = None
     other_ids = None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

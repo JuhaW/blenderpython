@@ -88,7 +88,7 @@ class WKST_Extrude(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        layout.operator("mesh.push_pull_face", text = "PushPull", icon="SNAP_FACE") 
+        layout.operator("mesh.push_pull_face", text = "PushPull") 
         
         layout.separator() 
 
@@ -97,25 +97,26 @@ class WKST_Extrude(bpy.types.Menu):
 
         layout.separator()         
         
-        layout.operator("mesh.fill_grid", "Grid Fill", icon="MESH_GRID")
+        layout.operator("mesh.fill_grid", "Grid Fill")
 
         layout.separator() 
         
-        layout.operator("mesh.fill", text="Fill", icon="CLIPUV_HLT")
+        layout.operator("mesh.fill", text="Fill")
         layout.operator("mesh.beautify_fill", text="Beautify")
  
-        layout.separator()        
-        layout.operator("mesh.poke", text="Poke", icon="X")
+        layout.separator()
+        
+        layout.operator("mesh.fill_holes", text="Fill Holes") 
         layout.operator("mesh.close_faces", "Close Faces")  
 
         layout.separator()         
            
-        layout.operator('faceinfillet.op0_id', text = 'Face Fillet', icon="CLIPUV_DEHLT")                        
+        layout.operator('faceinfillet.op0_id', text = 'Face Fillet')                        
         layout.operator("fillet.op0_id",  text="Edge Fillet")
 
         layout.separator()        
-
-        layout.operator("mesh.fill_holes", text="Fill Holes", icon="EDITMODE_VEC_HLT") 
+        layout.operator("mesh.poke", text="Poke")
+        layout.operator("mesh.beautify_fill", text="Beautify")
 
  
 
@@ -129,7 +130,7 @@ class WKST_Extrude_Offset(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        mov = layout.operator('mesh.offset_edges', text='Edge Move', icon="SNAP_PEEL_OBJECT")
+        mov = layout.operator('mesh.offset_edges', text='Edge Move')
         mov.geometry_mode = 'move'
 
         off = layout.operator('mesh.offset_edges', text='Edge Offset')
@@ -140,19 +141,18 @@ class WKST_Extrude_Offset(bpy.types.Menu):
 
         layout.separator()  
 
-        layout.operator("mesh.spin", icon="MOD_SIMPLEDEFORM")
+        layout.operator("mesh.spin")
         layout.operator("mesh.screw") 
         layout.operator('object.mextrude', text = 'Multi')
 
         layout.separator() 
 
-        layout.operator("mesh.solidify", text="Solidify", icon="MOD_SOLIDIFY")
-        layout.operator("mesh.wireframe", text="Wire Frame")  
-        
+        layout.operator("mesh.wireframe", text="Wire")  
+        layout.operator("mesh.solidify", text="Solidify")
 
         layout.separator() 
          
-        layout.operator("mesh.extrude_along_curve", text="Along Curve", icon="ANIM_DATA")  
+        layout.operator("mesh.extrude_along_curve", text="Along Curve")  
 
 
 
@@ -232,29 +232,6 @@ class Wire_All(bpy.types.Operator):
                              
         return {'FINISHED'} 
 
-
-    
-#Create Hole
-class CreateHole(bpy.types.Operator):                  
-    """This Operator create a hole on a selection"""                   
-    bl_idname = "object.createhole"                     
-    bl_label = "Create Hole"   
-    bl_options = {'REGISTER', 'UNDO'}     
-
-    @classmethod                                     
-    def poll(cls, context):                         
-        return context.active_object is not None 
-
-    def execute(self, context):                     
-        
-        bpy.ops.mesh.extrude_region_move()
-        bpy.ops.transform.resize(value=(0.6, 0.6, 0.6))
-        bpy.ops.mesh.looptools_circle()
-        bpy.ops.mesh.extrude_region_move()
-        bpy.ops.transform.resize(value=(0.8, 0.8, 0.8))
-        bpy.ops.mesh.delete(type='FACE')
-        return {'FINISHED'} 
-    
 
 
 #Double Threshold 0.001

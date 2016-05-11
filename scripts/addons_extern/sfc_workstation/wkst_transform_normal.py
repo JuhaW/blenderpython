@@ -54,7 +54,7 @@ class WKST_N_Transform_Menu(bpy.types.Menu):
             
             layout.separator()
             
-            layout.operator("mesh.align_normal", "Align 2 Normal")
+            layout.operator('mesh.rot_con', 'Face-Rotation')
 
 
 

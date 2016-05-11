@@ -3,6 +3,10 @@ from bpy.types import Operator
 from bpy.props import StringProperty
 from bpy.types import Menu, Panel, UIList
 from bpy.props import *
+import os
+
+root = bpy.utils.script_path_user()
+sep = os.sep
 
 from bl_ui.properties_paint_common import (
         UnifiedPaintPanel,
@@ -35,7 +39,8 @@ def initViewOptions(scn):
     scn['Ikb'] = False
     return
 
-#initier les boutons bool dans la scène
+
+#init bool button  in scene
 initViewOptions(bpy.context.scene)
 
 
@@ -69,7 +74,7 @@ class VIEW3D_PT_brush(Panel, View3DPaintPanelBrush):
 
         
         
-        # Particle Mode #
+        # Particle Mode 
         if context.particle_edit_object:
             tool = settings.tool
 
@@ -95,7 +100,7 @@ class VIEW3D_PT_brush(Panel, View3DPaintPanelBrush):
                 layout.prop(brush, "puff_mode", expand=True)
                 layout.prop(brush, "use_puff_volume")
 
-        # Sculpt Mode #
+        # Sculpt Mode 
         elif context.sculpt_object and brush:
             capabilities = brush.sculpt_capabilities
 
@@ -165,7 +170,7 @@ class View3DPaintPanel(UnifiedPaintPanel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
 
-# Used in both the View3D toolbar and texture properties
+#toolbar and texture properties
 def brushoption_texture_settings(layout, brush, sculpt):
     tex_slot = brush.texture_slot
 
@@ -268,11 +273,11 @@ class VIEW3D_Alpha_brush_texture(Panel, View3DPaintPanel):
         
  
 
-#fonction changer de brosse
+#fonction switch brush 
 def setB(Bname):
     bpy.context.tool_settings.sculpt.brush = bpy.data.brushes[Bname]
 
-#operateur changer de brosse
+#operator switch brush 
 class OperatorRemplacer(bpy.types.Operator):
     bl_idname = "object.operator_remplacer"
     bl_label = "Change broshes"
@@ -285,14 +290,14 @@ class OperatorRemplacer(bpy.types.Operator):
             print("Hello world from %s!" % self.chemin)
             Bname = self.chemin
         
-        #executer fonction changer de brosse
+        #execut fonction switch brush 
         setB(Bname)
   
         return {'FINISHED'}
 
 
 
-#ajouter ds liste bouton et icone
+#Add button in list & icone
 def buldB(listebrush = []): 
     #build the sculpt brush list
     for items in bpy.data.brushes:
@@ -309,12 +314,13 @@ def buldI(nameI = []):
             nameI.append(items.sculpt_tool)
     return nameI
 
-#charger le script main_brush.py
+    
+#Load script main_brush.py
 def execscript(listebrush = []):
-    lien = str(bpy.utils.script_path_user()) + "\\addons_extern\\sculpt_brushes\\main_brush.py"
+    lien = root + sep + "addons" + sep + "sculpt_brushes" + sep + "main_brush.py"
     bpy.ops.script.python_file_run( filepath = lien )
 
-#operateur charger main_brush.py
+#operator Load main_brush.py
 class ReloadOperator(bpy.types.Operator):
     """Tooltip"""
     bl_idname = "object.reload_operator"
@@ -325,12 +331,12 @@ class ReloadOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-#charger le script loadik.py
+#Load script loadik.py
 def execscriptik():
-    lien = str(bpy.utils.script_path_user()) + "\\addons_extern\\sculpt_brushes\\loadik.py"
+    lien = root + sep + "addons" + sep + "sculpt_brushes" + sep + "loadik.py"
     bpy.ops.script.python_file_run( filepath = lien )
 
-#operateur charger loadik.py
+#operator Load loadik.py
 class LoadikOperator(bpy.types.Operator):
     """Tooltip"""
     bl_idname = "object.loadik_operator"
@@ -341,7 +347,7 @@ class LoadikOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-#liste bouton
+#list button
 liste = buldB()
 nameIcon = buldI()
 
@@ -349,7 +355,7 @@ globalID = int(len(nameIcon))-1
 countBrush = str(len(liste)) + ' : Brushes '
 
 def ikexist():
-    #verifier l'existance de brosse IK ds les data
+    #Ask if IK in data brushes
     ikbrushexist = False  
     for item in bpy.data.brushes:
         if item.name.endswith("IK"):
@@ -357,7 +363,7 @@ def ikexist():
     return ikbrushexist  
 
 
-#layout afichage de brosse
+#layout brushes
 class BrushPanel(bpy.types.Panel):
     bl_label = "Brushes"
     bl_idname = "Brushes"
@@ -374,7 +380,7 @@ class BrushPanel(bpy.types.Panel):
             #option IK Brushes  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             customIc = 'MOD_CAST'
             sub = row.row()
-            sub.scale_x = 1.8
+            sub.scale_x = 1.1
             
             if ikexist() == False:
                 sub.operator("object.loadik_operator", icon = 'MOD_CAST')
@@ -382,74 +388,57 @@ class BrushPanel(bpy.types.Panel):
             if ikexist():
                 sub.operator("object.loadik_operator", text = 'Remove IK Brushes', icon = 'MOD_CAST')
                 
-            row.operator("object.reload_operator", icon = 'FILE_REFRESH')
-            
-            split = layout.split(align=True)
-            index = 0
-          
-     
-            #bouton
-            for items in liste:
-                col = split.column(align=True)
-                col.label(text=countBrush, icon = 'SCULPTMODE_HLT')
-                
-                dataIcon = bpy.types.UILayout.bl_rna.functions['prop'].parameters['icon'].enum_items.keys()
-                
-                while index <= int(len(nameIcon)/2):
-                    
-                    nom = nameIcon[index]
-                    Bname = liste[index]
-                    nomIco = 'BRUSH_' + nom 
-                    
-                    if nomIco in dataIcon:
-                        if bpy.data.brushes[Bname].use_custom_icon:
-                            col.operator("object.operator_remplacer", text = Bname[0:8], icon = customIc, emboss=False ).chemin = Bname
-                        else:
-                            col.operator("object.operator_remplacer", text = Bname[0:8], icon = nomIco, emboss=False ).chemin = Bname
-                    
-                    else:
-                        if nomIco == 'BRUSH_DRAW':
-                            if bpy.data.brushes[Bname].use_custom_icon:
-                                col.operator("object.operator_remplacer", text = Bname[0:8], icon = customIc, emboss=False ).chemin = Bname
-                            else:
-                                col.operator("object.operator_remplacer", text = Bname[0:8], icon = 'BRUSH_SCULPT_DRAW', emboss=False ).chemin = Bname
-                        
-                    
-                    if index <= globalID:
-                        index += 1
-                        
-                #Midel list    
-                col = split.column(align=True)
-                col.label(text="")
-                
-                for items in nameIcon:
-                    
-                    print ("INDEX____NAMEICON/2   :" + str(index)+ "---------" + str(len(nameIcon)))
-                    
-                    nom = nameIcon[index]
-                    Bname = liste[index]
-                    nomIco = 'BRUSH_' + nom
+            row.operator("object.reload_operator", text=countBrush, icon = 'FILE_REFRESH')
 
-                    
-                    
-                    if nomIco in dataIcon:
-                        if bpy.data.brushes[Bname].use_custom_icon:
-                            col.operator("object.operator_remplacer", text = Bname[0:8], icon = customIc, emboss=False ).chemin = Bname
-                        else:
-                            col.operator("object.operator_remplacer", text = Bname[0:8], icon = nomIco, emboss=False ).chemin = Bname
-                    
+            
+            #button xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            index=0
+            dataIcon = bpy.types.UILayout.bl_rna.functions['prop'].parameters['icon'].enum_items.keys()
+            
+            #Start list
+            row = layout.row()
+            
+            split = layout.split(align=False)
+            col = split.column(align=True)
+
+            while index < int(len(liste)/2)+1:
+                nom = nameIcon[index]
+                Bname = liste[index]
+                nomIco = 'BRUSH_' + nom 
+                if nomIco in dataIcon:
+                    if bpy.data.brushes[Bname].use_custom_icon:
+                        col.operator("object.operator_remplacer", text = Bname[0:10], icon = customIc, emboss=False ).chemin = Bname
                     else:
-                        if nomIco == 'BRUSH_DRAW':
-                            if bpy.data.brushes[Bname].use_custom_icon:
-                                col.operator("object.operator_remplacer", text = Bname[0:8], icon = customIc, emboss=False ).chemin = Bname
-                            else:
-                                col.operator("object.operator_remplacer", text = Bname[0:8], icon = 'BRUSH_SCULPT_DRAW', emboss=False ).chemin = Bname
-                        
-                    
-                    if index <= globalID:
-                        index += 1
+                        col.operator("object.operator_remplacer", text = Bname[0:10], icon = nomIco, emboss=False ).chemin = Bname
+                else:
+                    if nomIco == 'BRUSH_DRAW':
+                        if bpy.data.brushes[Bname].use_custom_icon:
+                            col.operator("object.operator_remplacer", text = Bname[0:10], icon = customIc, emboss=False ).chemin = Bname
+                        else:
+                            col.operator("object.operator_remplacer", text = Bname[0:10], icon = 'BRUSH_SCULPT_DRAW', emboss=False ).chemin = Bname
+                index += 1
+
+            #End list    
+            col = split.column(align=False)
+            while index >= int(len(liste)/2) and index <= globalID:
+                nom = nameIcon[index]
+                Bname = liste[index]
+                nomIco = 'BRUSH_' + nom 
+                if nomIco in dataIcon:
+                    if bpy.data.brushes[Bname].use_custom_icon:
+                        col.operator("object.operator_remplacer", text = Bname[0:10], icon = customIc, emboss=False ).chemin = Bname
+                    else:
+                        col.operator("object.operator_remplacer", text = Bname[0:10], icon = nomIco, emboss=False ).chemin = Bname
+                else:
+                    if nomIco == 'BRUSH_DRAW':
+                        if bpy.data.brushes[Bname].use_custom_icon:
+                            col.operator("object.operator_remplacer", text = Bname[0:10], icon = customIc, emboss=False ).chemin = Bname
+                        else:
+                            col.operator("object.operator_remplacer", text = Bname[0:10], icon = 'BRUSH_SCULPT_DRAW', emboss=False ).chemin = Bname
+                index += 1
+
         
-        #if active mode # to Sculpt    
+        #if active mode != to Sculpt    
         else:
             layout = self.layout
             row = layout.row()

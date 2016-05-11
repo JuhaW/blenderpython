@@ -467,7 +467,7 @@ class UnFreeze_Selected(bpy.types.Operator):
 class VIEW3D_MTK_FreezeAll(bpy.types.Menu):
     """(Un-) Freeze all by Type"""
     bl_label = "(Un-) Freeze"
-    bl_idname = "wkst_freezeall"
+    bl_idname = "wkst.freezeall"
 
     def draw(self, context):
         layout = self.layout

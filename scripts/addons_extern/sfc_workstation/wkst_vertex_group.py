@@ -49,7 +49,7 @@ class VIEW3D_WKST_VertexGroupMenu(bpy.types.Menu):
         settings = context.tool_settings
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        
+
         layout.prop(context.object, "vertex_groups", icon="INFO")
         layout.prop(context.object.vertex_groups, "active_index")
 
@@ -81,7 +81,14 @@ class VIEW3D_WKST_VertexGroupMenu(bpy.types.Menu):
         layout.menu("MESH_MT_vertex_group_specials", icon='TRIA_RIGHT', text="Vertex Group Specials")	
 
 
+        #layout.separator() 
 
+        #layout.operator("object.vertex_group_move", icon='TRIA_UP', text="Index UP").direction = 'UP'
+        #layout.operator("object.vertex_group_move", icon='TRIA_DOWN', text="Index DOWN").direction = 'DOWN'        
+		
+
+        
+        	
 
 ######  Registry  #######################################
 

@@ -132,7 +132,7 @@ class SINGLEPLANE_Y(bpy.types.Operator):
     
 
 class SINGLEPLANE_Z(bpy.types.Operator):
-    """Add a horizontal Plane in Editmode"""
+    """Add a vertical Plane in Editmode"""
     bl_idname = "mesh.singleplane_z"
     bl_label = "Single Plane"
 

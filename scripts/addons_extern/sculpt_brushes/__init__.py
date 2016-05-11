@@ -7,8 +7,8 @@
 bl_info = {
     "name": "Sculpt Broshes",
     "author": "IK3D",
-    "version": (0, 6),
-    "location": "View 3D > Sculpt mod > Tool",
+    "version": (0, 7),
+    "location": "View 3D > Sculpt mod > Brushes",
     "description": "UI Palette sculpt brush",
     "category": "Sculpting"}
     
@@ -20,15 +20,18 @@ if "bpy" in locals():
 
 import bpy
 from bpy.props import *
+import os
+
+root = bpy.utils.script_path_user()
+sep = os.sep
 
 
-
-#charger le script main_brush.py
+#Load script main_brush.py
 def execscript():
-    lien = str(bpy.utils.script_path_user()) + "\\addons_extern\\sculpt_brushes\\main_brush.py"
+    lien = root + sep + "addons" + sep + "sculpt_brushes" + sep + "main_brush.py"
     bpy.ops.script.python_file_run( filepath = lien )
 
-#operateur charger main_brush.py
+#operateur Load main_brush.py
 class ReloadOperator(bpy.types.Operator):
     """Tooltip"""
     bl_idname = "object.reload_operator"
@@ -43,13 +46,13 @@ class ReloadOperator(bpy.types.Operator):
         return {'FINISHED'}
 
     
-#charger le script main_brush.py
+#Load script main_brush.py
 def gosculpt():
     bpy.ops.script.python_file_run( filepath = lien )
 
 
  
-#layout afichage de brosse
+#layout 
 class BrushPanel(bpy.types.Panel):
     bl_label = "Brushes"
     bl_idname = "Brushes"
