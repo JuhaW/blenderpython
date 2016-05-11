@@ -153,68 +153,6 @@ class CreateBoundingBox(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class CreateMultiBoundingBox(bpy.types.Operator):
-    """Create a mesh cube that encompasses all selected objects"""
-    bl_idname = "mesh.multi_boundbox_add"
-    bl_label = "Create Multi Bounding Box"
-    bl_description = "Create a bounding box around each selected object"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    # generic transform props
-    view_align = BoolProperty(
-            name="Align to View",
-            default=False,
-            )
-    location = FloatVectorProperty(
-            name="Location",
-            subtype='TRANSLATION',
-            )
-    rotation = FloatVectorProperty(
-            name="Rotation",
-            subtype='EULER',
-            )
-
-    @classmethod
-    def poll(cls, context):
-        if len(context.selected_objects) == 0:
-            return False
-        return True
-
-    def execute(self, context):
-
-        workobjs = [o.name for o in bpy.context.selected_objects]
-        faces = [(0, 1, 2, 3),
-                 (4, 7, 6, 5),
-                 (0, 4, 5, 1),
-                 (1, 5, 6, 2),
-                 (2, 6, 7, 3),
-                 (4, 0, 3, 7),
-                ]
-
-        for objname in workobjs:
-            obj = bpy.data.objects[objname]
-            mesh = bpy.data.meshes.new("BoundingBox")
-            bm = bmesh.new()
-            for v_co in obj.bound_box:
-                bm.verts.new(v_co)
-
-            for f_idx in faces:
-                bm.verts.ensure_lookup_table()
-                bm.faces.new([bm.verts[i] for i in f_idx])
-
-            bm.to_mesh(mesh)
-            mesh.update()
-
-            self.location = obj.location
-            self.rotation = obj.rotation_euler
-            bbox = object_utils.object_data_add(context, mesh, operator=None)
-            # does a bounding box need to display more than the bounds??
-            bbox.object.draw_type = 'BOUNDS'
-            bbox.object.scale = obj.scale
-            bbox.object.hide_render = True
-
-        return {'FINISHED'}
-
 def menu_boundbox(self, context):
     self.layout.operator(CreateBoundingBox.bl_idname, text=CreateBoundingBox.bl_label, icon="PLUGIN")
 

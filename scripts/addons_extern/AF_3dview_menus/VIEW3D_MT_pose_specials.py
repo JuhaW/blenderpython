@@ -760,16 +760,16 @@ class BoneNameMenu(bpy.types.Menu):
 	bl_description = "Feature on the bone name menu."
 	
 	def draw(self, context):
-		self.layout.operator(CopyBoneName.bl_idname, icon="PLUGIN")
-		self.layout.operator(RenameBoneRegularExpression.bl_idname, icon="PLUGIN")
+		self.layout.operator(CopyBoneName.bl_idname, icon="COPY_ID")
+		self.layout.operator(RenameBoneRegularExpression.bl_idname, icon="COPY_ID")
 		self.layout.separator()
-		self.layout.operator(RemoveBoneNameSerialNumbers.bl_idname, icon="PLUGIN")
+		self.layout.operator(RemoveBoneNameSerialNumbers.bl_idname, icon="COPY_ID")
 		self.layout.separator()
-		self.layout.operator(RenameBoneNameEnd.bl_idname, text="Bone name replacing \"XXX_R = &gt; XXX. R \'", icon="PLUGIN").reverse = False
-		self.layout.operator(RenameBoneNameEnd.bl_idname, text="Bone name replacing \"XXX. R = &gt; XXX_R \"", icon="PLUGIN").reverse = True
+		self.layout.operator(RenameBoneNameEnd.bl_idname, text="Bone name replacing \"XXX_R = &gt; XXX. R \'", icon="COPY_ID").reverse = False
+		self.layout.operator(RenameBoneNameEnd.bl_idname, text="Bone name replacing \"XXX. R = &gt; XXX_R \"", icon="COPY_ID").reverse = True
 		self.layout.separator()
-		self.layout.operator(RenameBoneNameEndJapanese.bl_idname, text="Bone name replacing \"XXX_R = &gt; right XXX\"", icon="PLUGIN").reverse = False
-		self.layout.operator(RenameBoneNameEndJapanese.bl_idname, text="Bone name replacing \"XXX right = &gt; XXX_R\"", icon="PLUGIN").reverse = True
+		self.layout.operator(RenameBoneNameEndJapanese.bl_idname, text="Bone name replacing \"XXX_R = &gt; right XXX\"", icon="COPY_ID").reverse = False
+		self.layout.operator(RenameBoneNameEndJapanese.bl_idname, text="Bone name replacing \"XXX right = &gt; XXX_R\"", icon="COPY_ID").reverse = True
 
 class SpecialsMenu(bpy.types.Menu):
 	bl_idname = "VIEW3D_MT_pose_specials_specials"
@@ -777,29 +777,29 @@ class SpecialsMenu(bpy.types.Menu):
 	bl_description = "Handling special functions menu."
 	
 	def draw(self, context):
-		self.layout.operator(SplineGreasePencil.bl_idname, icon="PLUGIN")
+		self.layout.operator(SplineGreasePencil.bl_idname, icon="GREASEPENCIL")
 		self.layout.separator()
-		self.layout.operator(CreateCustomShape.bl_idname, icon="PLUGIN")
-		self.layout.operator(CreateWeightCopyMesh.bl_idname, icon="PLUGIN")
-		self.layout.operator(SetSlowParentBone.bl_idname, icon="PLUGIN")
-		self.layout.operator(SetRigidBodyBone.bl_idname, icon="PLUGIN")
-		self.layout.operator(SetIKRotationLimitByPose.bl_idname, icon="PLUGIN")
+		self.layout.operator(CreateCustomShape.bl_idname, icon="MESH_DATA")
+		self.layout.operator(CreateWeightCopyMesh.bl_idname, icon="MESH_DATA")
+		self.layout.operator(SetSlowParentBone.bl_idname, icon="ROTACTIVE")
+		self.layout.operator(SetRigidBodyBone.bl_idname, icon="CONSTRAINT_BONE")
+		self.layout.operator(SetIKRotationLimitByPose.bl_idname, icon="ROTATE")
 
 
 # Menu
 def menu(self, context):
 
 	self.layout.separator()
-	self.layout.label(text= "Experimantal")
-	self.layout.menu(BoneNameMenu.bl_idname, icon="PLUGIN")
+	self.layout.label(text= "Extended")
+	self.layout.menu(BoneNameMenu.bl_idname, icon="COPY_ID")
 	self.layout.separator()
-	self.layout.operator(CopyConstraintsMirror.bl_idname, icon="PLUGIN")
+	self.layout.operator(CopyConstraintsMirror.bl_idname, icon="POSE_DATA")
 	self.layout.separator()
 	text = "Pause position, switching current (rest position)"
 	if (context.object.data.pose_position == 'POSE'):
 		text = "Pose position switch pose position (current)"
-	self.layout.operator(TogglePosePosition.bl_idname, text=text, icon="PLUGIN")
+	self.layout.operator(TogglePosePosition.bl_idname, text=text, icon="POSE_DATA")
 	self.layout.separator()
-	self.layout.menu(SpecialsMenu.bl_idname, icon="PLUGIN")
+	self.layout.menu(SpecialsMenu.bl_idname, icon="SOLO_OFF")
 
 

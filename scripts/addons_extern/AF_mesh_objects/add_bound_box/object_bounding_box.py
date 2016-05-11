@@ -278,7 +278,7 @@ class ObjectMinBoundBox(bpy.types.Operator):
     """Find approximate minimum bounding box of object"""
     bl_idname = "object.min_bounds"
     bl_label = "Min Bounding Box"
-
+    bl_options = {'REGISTER', 'UNDO'}
     # generic transform props
     sample_vis = BoolProperty(
             name="Visualize Sample",

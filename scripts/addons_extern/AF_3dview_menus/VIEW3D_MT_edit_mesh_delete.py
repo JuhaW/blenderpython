@@ -25,8 +25,8 @@ class DeleteBySelectMode(bpy.types.Operator):
 
 class DeleteHideMesh(bpy.types.Operator):
 	bl_idname = "mesh.delete_hide_mesh"
-	bl_label = "Remove the covering"
-	bl_description = "Delete all are mesh"
+	bl_label = "Remove Hudden"
+	bl_description = "Delete all mesh"
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	def execute(self, context):

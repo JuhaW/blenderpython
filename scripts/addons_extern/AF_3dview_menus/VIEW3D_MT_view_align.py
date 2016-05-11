@@ -167,7 +167,7 @@ class SnapMeshViewAndCursor(bpy.types.Operator):
 def menu(self, context):
 
 		self.layout.separator()
-		self.layout.label(text= "Experimental")
+		self.layout.label(text= "Extended")
 		self.layout.operator(ResetView.bl_idname)
 		self.layout.operator(ResetViewAndCursor.bl_idname)
 		self.layout.separator()

@@ -48,11 +48,8 @@ if "bpy" in locals():
     importlib.reload(add_curve_ivygen)
     importlib.reload(curve_simplify)
     importlib.reload(add_surface_plane_cone)
-    importlib.reload(curve_edit_outline)
     importlib.reload(DialScale)
     importlib.reload(add_iterative_tree)
-    importlib.reload(curve_convert0_8)
-    importlib.reload(bevel_curve)
 
 
 else:
@@ -68,11 +65,8 @@ else:
     from . import add_curve_ivygen
     from . import curve_simplify
     from . import add_surface_plane_cone
-    from . import curve_edit_outline
     from . import DialScale
     from . import add_iterative_tree
-    from . import curve_convert0_8
-    from . import bevel_curve
 
 import bpy
 
@@ -125,8 +119,6 @@ class INFO_MT_curve_extras_add(bpy.types.Menu):
         layout.label(text="Curve Utils")
         layout.operator("curve.simplify",
             text="Simplify Curves")
-        layout.operator("object.curve_outline",
-            text="Outline")
         layout.operator("curve.dial_scale",
             text="Dial/Scale")
 
@@ -150,7 +142,7 @@ def menu(self, context):
 	self.layout.separator()
 	layout.label(text="Curve Utils")
 	self.layout.operator("curve.simplify", text="Curve Simplify", icon="CURVE_DATA")
-	self.layout.operator("object.curve_outline", text="Curve Outline", icon="CURVE_DATA")
+
 
 def menu_surface(self, context):
 
@@ -191,10 +183,7 @@ class CurveObjectPrefs(bpy.types.AddonPreferences):
             layout.label(text="Curve Wires: String a wire between 2 objects")
             layout.label(text="Dial Scale: Clock Face or Scale")
             layout.label(text="Curve Simplify: Simplify Curves")
-            layout.label(text="Curve Outline: Create duplicate curve outline")
             layout.label(text="Tubes & Pipes: Create Solid Tubes & Pipes(panel)")
-            layout.label(text="Curve Converter: Curve to Mesh re-editing(panel)")
-            layout.label(text="Bevel Curve Tool(panel)")
 
 def register():
     bpy.utils.register_module(__name__)

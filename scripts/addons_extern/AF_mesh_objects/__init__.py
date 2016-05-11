@@ -36,6 +36,7 @@ from .bookGen import utils
 from .add_mesh_castle import __init__
 from .add_mesh_castle import Castle
 
+
 bl_info = {
     "name": "AF: Mesh Objects",
     "author": "Multiple Authors",
@@ -76,9 +77,11 @@ if "bpy" in locals():
     importlib.reload(add_dual_mesh)
     importlib.reload(add_mesh_grating)
     importlib.reload(add_mesh_propeller)
-    importlib.reload(basket_arch)
     importlib.reload(add_mesh_curved_plane)
     importlib.reload(add_mesh_beam_builder)
+    importlib.reload(add_mesh_backdrop)
+    importlib.reload(add_mesh_curlicue)
+    importlib.reload(add_ArToKi_House)
 
 else:
     from . import add_mesh_star
@@ -107,9 +110,11 @@ else:
     from . import add_dual_mesh
     from . import add_mesh_grating
     from . import add_mesh_propeller
-    from . import basket_arch
     from . import add_mesh_curved_plane
     from . import add_mesh_beam_builder
+    from . import add_mesh_backdrop
+    from . import add_mesh_curlicue
+    from . import add_ArToKi_House
 
 import bpy
 
@@ -219,8 +224,10 @@ class INFO_MT_mesh_extras_add(bpy.types.Menu):
             text="Menger Sponge")
         layout.operator("mesh.fractal_dome",
             text="Fractal Dome")
-        layout.operator("mesh.basketarch",
-            text="Basket Arch")
+        layout.operator("mesh.backdrop",
+            text="Backdrop")
+        layout.operator("mesh.curlicue",
+            text="Curlicue")
 
 
 class INFO_MT_mesh_torus_add(bpy.types.Menu):
@@ -342,6 +349,7 @@ class INFO_MT_mesh_building_add(bpy.types.Menu):
         layout.operator("mesh.add_castle",
             text="Castle")
         layout.operator("window.run_action", text="Window (editable)", icon="MOD_LATTICE")
+        layout.operator("mesh.primitive_house_add", text="ArToKi House", icon="MOD_LATTICE")
 
 # Define "Extras" menu
 def menu(self, context):

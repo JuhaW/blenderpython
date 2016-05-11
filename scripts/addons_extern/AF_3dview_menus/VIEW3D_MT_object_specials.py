@@ -1,10 +1,10 @@
-# 3Dビュー > オブジェクトモード > 「W」キー
+# Based on work by 
 
 import bpy, bmesh, mathutils
 import re, random
 
 ################
-# オペレーター #
+# Operators
 ################
 
 class VertexGroupTransferWeightObjmode(bpy.types.Operator):
@@ -171,12 +171,12 @@ class VertexGroupAverageAll(bpy.types.Operator):
 		return {'FINISHED'}
 
 ##########################
-# オペレーター(特殊処理) #
+# Experimental #
 ##########################
 
 class CreateVertexToMetaball(bpy.types.Operator):
 	bl_idname = "object.create_vertex_to_metaball"
-	bl_label = "Top hook metaballs"
+	bl_label = "Metaballs to Vert"
 	bl_description = "Have made new metaballs to the vertices of the selected mesh object"
 	bl_options = {'REGISTER', 'UNDO'}
 	
@@ -229,7 +229,7 @@ class CreateVertexToMetaball(bpy.types.Operator):
 
 class AddGreasePencilPathMetaballs(bpy.types.Operator):
 	bl_idname = "object.add_grease_pencil_path_metaballs"
-	bl_label = "Grease pencil to metaballs"
+	bl_label = "Grease Pencil to Metaballs"
 	bl_description = "The blobby align with active grease pencil"
 	bl_options = {'REGISTER', 'UNDO'}
 	
@@ -467,7 +467,7 @@ class CreateSolidifyEdge(bpy.types.Operator):
 			for n in mtl.node_tree.nodes:
 				if (n.bl_idname == 'ShaderNodeOutput'):
 					link_output = n.inputs[1]
-			mtl.node_tree.links.new(link_input, link_output)
+#			mtl.node_tree.links.new(link_input, link_output)
 			
 			slot_index = len(obj.material_slots)
 			bpy.ops.object.material_slot_add()
@@ -491,13 +491,13 @@ class CreateSolidifyEdge(bpy.types.Operator):
 		return context.window_manager.invoke_props_dialog(self)
 
 ##################################
-# オペレーター(レンダリング制限) #
+# Render Show Hide #
 ##################################
 
 class SetRenderHide(bpy.types.Operator):
 	bl_idname = "object.set_render_hide"
 	bl_label = "Limit the choice of rendering"
-	bl_description = "The setting does not render the selected object"
+	bl_description = "Hide the selected object"
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	reverse = bpy.props.BoolProperty(name="Does not render", default=True)
@@ -540,7 +540,7 @@ class SyncRenderHide(bpy.types.Operator):
 		return {'FINISHED'}
 
 ##########################
-# オペレーター(選択制限) #
+# Select #
 ##########################
 
 class AllResetHideSelect(bpy.types.Operator):
@@ -609,13 +609,13 @@ class SetHideSelect(bpy.types.Operator):
 		return {'FINISHED'}
 
 ################################
-# オペレーター(オブジェクト名) #
+# Name #
 ################################
 
 class RenameObjectRegularExpression(bpy.types.Operator):
 	bl_idname = "object.rename_object_regular_expression"
-	bl_label = "Replace object names in regular expressions"
-	bl_description = "Name of the currently selected object in the regular expression replace"
+	bl_label = "Replace object(s) Name"
+	bl_description = "Name selected object(s) Rename & Numerical Suffix (Multi Object)"
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	pattern = bpy.props.StringProperty(name="Replacement front (in regular expressions)", default="")
@@ -637,7 +637,7 @@ class RenameObjectRegularExpression(bpy.types.Operator):
 
 class EqualizeObjectNameAndDataName(bpy.types.Operator):
 	bl_idname = "object.equalize_objectname_and_dataname"
-	bl_label = "To the same object and data names"
+	bl_label = "Match Object & Data Name"
 	bl_description = "The same object and data names for selected objects"
 	bl_options = {'REGISTER', 'UNDO'}
 	
@@ -781,7 +781,7 @@ class ParentSetApplyModifiers(bpy.types.Operator):
 
 class CreateRopeMesh(bpy.types.Operator):
 	bl_idname = "object.create_rope_mesh"
-	bl_label = "Create a mesh of rope-like curve to"
+	bl_label = "Mesh Tube from Curve"
 	bl_description = "Creates a mesh like rope along the curve object is active or snake new"
 	bl_options = {'REGISTER', 'UNDO'}
 	
@@ -826,8 +826,8 @@ class CreateRopeMesh(bpy.types.Operator):
 
 class MoveBevelObject(bpy.types.Operator):
 	bl_idname = "object.move_bevel_object"
-	bl_label = "Bevel object section moved"
-	bl_description = "Curve beveled objects that move and cross section of you curve"
+	bl_label = "Move Bevel Object To Target Curve"
+	bl_description = "Align Curve beveled objects"
 	bl_options = {'REGISTER', 'UNDO'}
 	
 	items = [
@@ -953,22 +953,22 @@ class MoveBevelObject(bpy.types.Operator):
 		return {'FINISHED'}
 
 ################
-# サブメニュー #
+# Render #
 ################
 
 class RenderHideMenu(bpy.types.Menu):
 	bl_idname = "VIEW3D_MT_object_specials_render_hide"
-	bl_label = "Rendering limits"
-	bl_description = "Menu object rendering limits involved."
+	bl_label = "Render Show/Hide"
+	bl_description = "Options to limit objects render visibility"
 	
 	def draw(self, context):
-		self.layout.operator(SetRenderHide.bl_idname, text="Limit the choice of rendering", icon="PLUGIN").reverse = True
+		self.layout.operator(SetRenderHide.bl_idname, text="Selected > Hide", icon="RENDERLAYERS").reverse = True
 		self.layout.operator('object.isolate_type_render')
 		self.layout.separator()
-		self.layout.operator(SetRenderHide.bl_idname, text="Allow the choice of rendering", icon="PLUGIN").reverse = False
+		self.layout.operator(SetRenderHide.bl_idname, text="Selected > Unhide", icon="RENDERLAYERS").reverse = False
 		self.layout.operator('object.hide_render_clear_all')
 		self.layout.separator()
-		self.layout.operator(SyncRenderHide.bl_idname, icon="PLUGIN")
+		self.layout.operator(SyncRenderHide.bl_idname, icon="RENDERLAYERS")
 
 class HideSelectMenu(bpy.types.Menu):
 	bl_idname = "VIEW3D_MT_object_specials_hide_select"
@@ -976,10 +976,10 @@ class HideSelectMenu(bpy.types.Menu):
 	bl_description = "Menu selection limits of object"
 	
 	def draw(self, context):
-		self.layout.operator(SetHideSelect.bl_idname, text="Limit the choice of selecting", icon="PLUGIN").reverse = True
-		self.layout.operator(SetUnselectHideSelect.bl_idname, icon="PLUGIN").reverse = True
+		self.layout.operator(SetHideSelect.bl_idname, text="Limit the choice of selecting", icon="RESTRICT_SELECT_OFF").reverse = True
+		self.layout.operator(SetUnselectHideSelect.bl_idname, icon="RESTRICT_SELECT_OFF").reverse = True
 		self.layout.separator()
-		self.layout.operator(AllResetHideSelect.bl_idname, icon="PLUGIN").reverse = False
+		self.layout.operator(AllResetHideSelect.bl_idname, icon="RESTRICT_SELECT_OFF").reverse = False
 
 class ObjectNameMenu(bpy.types.Menu):
 	bl_idname = "VIEW3D_MT_object_specials_object_name"
@@ -987,8 +987,8 @@ class ObjectNameMenu(bpy.types.Menu):
 	bl_description = "Is the object name of the menu"
 	
 	def draw(self, context):
-		self.layout.operator(RenameObjectRegularExpression.bl_idname, icon="PLUGIN")
-		self.layout.operator(EqualizeObjectNameAndDataName.bl_idname, icon="PLUGIN")
+		self.layout.operator(RenameObjectRegularExpression.bl_idname, icon="COPY_ID")
+		self.layout.operator(EqualizeObjectNameAndDataName.bl_idname, icon="COPY_ID")
 
 class ObjectColorMenu(bpy.types.Menu):
 	bl_idname = "VIEW3D_MT_object_specials_object_color"
@@ -996,8 +996,8 @@ class ObjectColorMenu(bpy.types.Menu):
 	bl_description = "Relationship between object color menu."
 	
 	def draw(self, context):
-		self.layout.operator(ApplyObjectColor.bl_idname, icon="PLUGIN")
-		self.layout.operator(ClearObjectColor.bl_idname, icon="PLUGIN")
+		self.layout.operator(ApplyObjectColor.bl_idname, icon="MATSPHERE")
+		self.layout.operator(ClearObjectColor.bl_idname, icon="MATSPHERE")
 
 class ParentMenu(bpy.types.Menu):
 	bl_idname = "VIEW3D_MT_object_specials_parent"
@@ -1005,16 +1005,16 @@ class ParentMenu(bpy.types.Menu):
 	bl_description = "Is the menu of the parent-child relationship"
 	
 	def draw(self, context):
-		self.layout.operator(ParentSetApplyModifiers.bl_idname, icon="PLUGIN", text="Modifiers apply = &gt; + vertex (triangle)").type = 'VERTEX_TRI'
+		self.layout.operator(ParentSetApplyModifiers.bl_idname, icon="ROTACTIVE", text="Modifiers apply").type = 'VERTEX_TRI'
 
 class CurveMenu(bpy.types.Menu):
 	bl_idname = "view3d_mt_object_specials_curve"
-	bl_label = "Relationship between curves"
-	bl_description = "Operation of curve relationships"
+	bl_label = "Curve Extra"
+	bl_description = "Curve Extra"
 	
 	def draw(self, context):
-		self.layout.operator(CreateRopeMesh.bl_idname, icon="PLUGIN")
-		self.layout.operator(MoveBevelObject.bl_idname, icon="PLUGIN")
+		self.layout.operator(CreateRopeMesh.bl_idname, icon="OUTLINER_DATA_CURVE")
+		self.layout.operator(MoveBevelObject.bl_idname, icon="OUTLINER_DATA_CURVE")
 
 class SpecialsMenu(bpy.types.Menu):
 	bl_idname = "VIEW3D_MT_object_specials_specials"
@@ -1022,11 +1022,11 @@ class SpecialsMenu(bpy.types.Menu):
 	bl_description = "Processing special action menu."
 	
 	def draw(self, context):
-		self.layout.operator(CreateVertexToMetaball.bl_idname, icon="PLUGIN")
-		self.layout.operator(AddGreasePencilPathMetaballs.bl_idname, icon="PLUGIN")
+		self.layout.operator(CreateVertexToMetaball.bl_idname, icon="META_BALL")
+		self.layout.operator(AddGreasePencilPathMetaballs.bl_idname, icon="META_BALL")
 		self.layout.separator()
-		self.layout.operator(CreateMeshImitateArmature.bl_idname, icon="PLUGIN")
-		self.layout.operator(CreateVertexGroupsArmature.bl_idname, icon="PLUGIN")
+		self.layout.operator(CreateMeshImitateArmature.bl_idname, icon="ARMATURE_DATA")
+		self.layout.operator(CreateVertexGroupsArmature.bl_idname, icon="ARMATURE_DATA")
 		self.layout.separator()
 		self.layout.operator(CreateSolidifyEdge.bl_idname, icon="PLUGIN")
 
@@ -1035,20 +1035,20 @@ class SpecialsMenu(bpy.types.Menu):
 def menu(self, context):
 
 	self.layout.separator()
-	self.layout.label(text= "Experimantal")
-	self.layout.menu(RenderHideMenu.bl_idname, icon="PLUGIN")
-	self.layout.menu(HideSelectMenu.bl_idname, icon="PLUGIN")
+	self.layout.label(text= "Extended")
+	self.layout.menu(RenderHideMenu.bl_idname, icon="RENDERLAYERS")
+	self.layout.menu(HideSelectMenu.bl_idname, icon="RESTRICT_SELECT_OFF")
 	self.layout.separator()
-	self.layout.menu(ObjectNameMenu.bl_idname, icon="PLUGIN")
-	self.layout.menu(ObjectColorMenu.bl_idname, icon="PLUGIN")
-	self.layout.menu(ParentMenu.bl_idname, icon="PLUGIN")
+	self.layout.menu(ObjectNameMenu.bl_idname, icon="COPY_ID")
+	self.layout.menu(ObjectColorMenu.bl_idname, icon="MATSPHERE")
+	self.layout.menu(ParentMenu.bl_idname, icon="ROTACTIVE")
 	self.layout.separator()
-	self.layout.menu(CurveMenu.bl_idname, icon="PLUGIN")
+	self.layout.menu(CurveMenu.bl_idname, icon="OUTLINER_DATA_CURVE")
 	self.layout.separator()
-	self.layout.operator(ToggleSmooth.bl_idname, icon="PLUGIN")
+	self.layout.operator(ToggleSmooth.bl_idname, icon="IMAGE_ALPHA")
 	self.layout.separator()
-	self.layout.operator(VertexGroupTransfer.bl_idname, icon="PLUGIN")
-	self.layout.operator(VertexGroupAverageAll.bl_idname, icon="PLUGIN")
+	self.layout.operator(VertexGroupTransfer.bl_idname, icon="OUTLINER_DATA_MESH")
+	self.layout.operator(VertexGroupAverageAll.bl_idname, icon="OUTLINER_DATA_MESH")
 	self.layout.separator()
-	self.layout.menu(SpecialsMenu.bl_idname, icon="PLUGIN")
+	self.layout.menu(SpecialsMenu.bl_idname, icon="SOLO_OFF")
 

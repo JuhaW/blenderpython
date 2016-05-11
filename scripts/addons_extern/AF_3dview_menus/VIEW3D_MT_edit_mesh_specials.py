@@ -180,13 +180,13 @@ class SelectedVertexGroupAverage(bpy.types.Operator):
 def menu(self, context):
 
 	self.layout.separator()
-	self.layout.label(text= "Experimantal")
-	self.layout.operator(SelectTopShape.bl_idname, icon="PLUGIN")
+	self.layout.label(text= "Extended")
+	self.layout.operator(SelectTopShape.bl_idname, icon="RESTRICT_SELECT_OFF")
 	self.layout.separator()
-	self.layout.prop(context.object.data, "use_mirror_x", icon="PLUGIN", text="X axis mirror edit")
-	self.layout.operator(ToggleMirrorModifier.bl_idname, icon="PLUGIN")
-	self.layout.operator(ToggleShowCage.bl_idname, icon="PLUGIN")
+	self.layout.prop(context.object.data, "use_mirror_x", icon="MOD_MIRROR", text="X axis mirror edit")
+	self.layout.operator(ToggleMirrorModifier.bl_idname, icon="MOD_MIRROR")
+	self.layout.operator(ToggleShowCage.bl_idname, icon="LATTICE_DATA")
 	self.layout.separator()
-	self.layout.operator(SelectedVertexGroupAverage.bl_idname, icon="PLUGIN")
-	self.layout.operator(PaintSelectedVertexColor.bl_idname, icon="PLUGIN")
+	self.layout.operator(SelectedVertexGroupAverage.bl_idname, icon="GROUP_VERTEX")
+	self.layout.operator(PaintSelectedVertexColor.bl_idname, icon="GROUP_VCOL")
 

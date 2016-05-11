@@ -152,11 +152,11 @@ class RenameOppositeBone(bpy.types.Operator):
 def menu(self, context):
 
 	self.layout.separator()
-	self.layout.label(text= "Experimantal")
-	self.layout.prop(context.object.data, "use_mirror_x", icon="PLUGIN", text="X axis mirror edit")
-	self.layout.operator(CreateMirror.bl_idname, icon="PLUGIN")
-	self.layout.operator(RenameOppositeBone.bl_idname, icon="PLUGIN")
+	self.layout.label(text= "Extended")
+	self.layout.prop(context.object.data, "use_mirror_x", icon="MOD_MIRROR", text="X axis mirror edit")
+	self.layout.operator(CreateMirror.bl_idname, icon="MOD_MIRROR")
+	self.layout.operator(RenameOppositeBone.bl_idname, icon="COPY_ID")
 	self.layout.separator()
-	self.layout.operator(CopyBoneName.bl_idname, icon="PLUGIN")
-	self.layout.operator(RenameBoneRegularExpression.bl_idname, icon="PLUGIN")
+	self.layout.operator(CopyBoneName.bl_idname, icon="COPY_ID")
+	self.layout.operator(RenameBoneRegularExpression.bl_idname, icon="COPY_ID")
 
