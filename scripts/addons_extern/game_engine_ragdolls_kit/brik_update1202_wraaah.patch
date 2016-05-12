@@ -1,0 +1,1604 @@
+Index: __init__.py
+===================================================================
+--- __init__.py	(revision 2801)
++++ __init__.py	(working copy)
+@@ -1,6 +1,7 @@
+ # ***** BEGIN GPL LICENSE BLOCK *****
+ #
+ # Script copyright (C) Marcus Jenkins (Blenderartists user name FunkyWyrm)
++# Modified by Kees Brouwer (Blenderartists user name Wraaah)
+ #
+ # This program is free software; you can redistribute it and/or
+ # modify it under the terms of the GNU General Public License
+@@ -44,14 +45,47 @@
+ import bpy
+ 
+ ################################################################################
++
+ ##### REGISTER #####
+ def register():
++    #Register brik add-on
+     bpy.utils.register_module(__name__)
++
++    #Set-up gui menu properties using the bpy.types.Scene type
++    scnType = bpy.types.Scene
++    
++    FloatProperty = bpy.props.FloatProperty
++    scnType.brik_ragdoll_mass = FloatProperty( name = "Ragdoll mass", 
++                                               default = 80.0, min = 0.05, max= 99999,
++                                               description = "The total mass of the ragdoll rigid body structure created with BRIK",  
++                                               update = brik.calc_ragdoll_mass)
++                                    
++    # triplet setup.... ( return value, name, description )
++    EnumProperty = bpy.props.EnumProperty
++    menu_options = [  ( "All", "All", "Use all armature bones" ) ]
++    #enumProp = EnumProperty( name = "Bone selection", items = menu_options, 
++    enumProp = EnumProperty( name = "Bone selection", items = brik_bone_list, 
++                    description = "Use the bones from the selected bone group" )
++  
++    scnType.brik_bone_groups = enumProp
+     pass
+ 
+ def unregister():
+     bpy.utils.unregister_module(__name__)
+     pass
+     
++def brik_bone_list(self, context):
++    ob = bpy.context.object
++    group_list = [  ( "All", "All", "Use all armature bones" ) ]
++    if ob.type == 'ARMATURE':
++        #Select bone groups
++        ob_pose = ob.pose
++        bone_groups = ob_pose.bone_groups
++        for item in bone_groups:
++            group_list = group_list + [(item.name, item.name, "Use bones in selected bone group")]
++            
++    return group_list
++
+ if __name__ == "__main__":
+     register()
++    
+Index: brik.py
+===================================================================
+--- brik.py	(revision 2801)
++++ brik.py	(working copy)
+@@ -3,6 +3,7 @@
+ # ***** BEGIN GPL LICENSE BLOCK *****
+ #
+ # Script copyright (C) Marcus Jenkins (Blenderartists user name FunkyWyrm)
++# Modified by Kees Brouwer (Blenderartists user name Wraaah)
+ #
+ # This program is free software; you can redistribute it and/or
+ # modify it under the terms of the GNU General Public License
+@@ -76,19 +77,20 @@
+     bl_context = 'objectmode'
+     bl_label = 'brik'
+     
++    
+     #Draws the panel header in the tools pane
+     def draw_header(self, context):
+         layout = self.layout
+         layout.label(text='', icon='CONSTRAINT_BONE')
+-    
++        
+     #Draws the brik panel in the tools pane
+     def draw(self, context):
+-        
+         ob = bpy.context.object
+-
++        scn = bpy.context.scene
+         layout = self.layout
+ 
+         col = layout.column()
++        
+         if ob:
+             col.prop(ob, 'name', text = 'Selected', icon = 'OUTLINER_OB_'+str(ob.type))
+     
+@@ -96,23 +98,39 @@
+     
+             box = layout.box()
+             box.label(text = 'Create or remove?')
++                
+             
+             if ob.type == 'ARMATURE':
++                brik_structure = 'brik_structure_created' in ob.keys() and ob['brik_structure_created']
++                hitboxes = 'brik_hit_boxes_created' in ob.keys() and ob['brik_hit_boxes_created']
++                
++                col.label(text = 'BRIK structure settings')
++                row = col.row()
++                col.prop( scn, "brik_ragdoll_mass" )      
++                col.prop( scn, "brik_bone_groups" )   
++                
+                 col = box.column(align=True)
+-                col.operator('object.brik_create_structure', text = 'Create structure')
++                row = col.row()
++                row.active = not(brik_structure)
++                row.operator('object.brik_create_structure', text = 'Create structure')
+                 
+                 row = col.row()
+-                remove_structure_active = 'brik_structure_created' in ob.keys() and ob['brik_structure_created']
+-                row.active = remove_structure_active
++                row.active = brik_structure
+                 row.operator('object.brik_destroy_structure', text = 'Remove structure')
+                 
+-                col = box.column(align = True)
+-                col.operator('object.brik_create_hit_boxes', text = 'Create hit boxes')
++                row = col.row()
++                row.active = not(hitboxes)
++#                col = box.column(align = True)
++                row.operator('object.brik_create_hit_boxes', text = 'Create hit boxes')
+                 
+                 row = col.row()
+-                remove_hit_boxes_active = 'brik_hit_boxes_created' in ob.keys() and ob['brik_hit_boxes_created']
+-                row.active = remove_hit_boxes_active
++                row.active = hitboxes
+                 row.operator('object.brik_remove_hit_boxes', text = 'Remove hit boxes')
++                
++                row = col.row()
++                row.active = hitboxes and brik_structure
++                row.operator('object.brik_link_structure', text = 'Link objects')
++                
+             else:
+                 box.label(text='Select armature')
+                 
+@@ -129,6 +147,39 @@
+                 
+         else:
+             col.label(text='Select an object')
++            
++        def test_func(operator):
++            print(operator)
++            
++class brik_link_structure(bpy.types.Operator):
++    bl_label = 'brik link structure operator'
++    bl_idname = 'object.brik_link_structure'
++    bl_description = 'Links the object data of the hitboxes and corresponding rigid bodies'
++    bl_options = {'REGISTER', 'UNDO'}
++    
++    def draw(self, context):
++        #No menu options available
++        pass
++    #Create links
++    def execute(self, context):
++        armature = bpy.context.active_object
++        driver_dict = armature['brik_bone_driver_dict']
++        hitbox_dict = armature['brik_bone_hit_box_dict']
++        objects = bpy.data.objects
++        for bone_name in hitbox_dict:
++            hitbox = objects[hitbox_dict[bone_name]]
++#            print(driver_dict, bone_name, objects)
++            driver_box = objects[driver_dict[bone_name]]
++            #select hitbox
++            bpy.ops.object.select_name(name = hitbox_dict[bone_name], extend = False)
++            #select driver_box
++            bpy.ops.object.select_name(name = driver_dict[bone_name], extend = True)
++            #create link
++            bpy.ops.object.make_links_data(type='OBDATA')
++        #return original selection
++        bpy.ops.object.select_name(name = armature.name, extend = False)
++        
++        return{'FINISHED'}
+ 
+ class brik_create_structure(bpy.types.Operator):
+     bl_label = 'brik create structure operator'
+@@ -160,6 +211,11 @@
+                                 description='Add all created objects to a group',\
+                                 default=True)
+                                 
++    invisible = BoolProperty(name='Invisible',\
++                                description='Make boxes invisible for rendering',\
++                                default=True)
++
++                                
+     box_type = EnumProperty(name="Box type",
+         description="Shape that rigid body objects are created from.",
+         items=[ \
+@@ -175,69 +231,82 @@
+     
+     #Create the rigid body boxes
+     def create_boxes(self, armature):
+-        bones_dict = armature.pose.bones      #Dictionary of posebones
+-        bones = bones_dict.values()
+-        armature = bpy.context.object
++        bones = bone_group_list(armature)
+         
+         RB_dict = {}            #Dictionary of rigid body objects
+         
+         armature['brik_bone_driver_dict'] = {}
+         armature['brik_armature_locator_name'] = ''
+         
+-        #All deforming bones have boxes created for them
++        #All deforming bones within selected group(s) have boxes created for them
+         for bone in bones:
+-            if bone.bone.use_deform:
+-                #print(self.box_type)
+-                box = None
+-                volume = 0.0
+-                #Create boxes that do not exist
+-                if self.box_type == 'BONE':
+-                    box, volume = create_box(self.prefix, self.driver_length, self.driver_width, armature, bone)
+-                elif self.box_type == 'BBONE':
+-                    box, volume = create_box_bbone(self.prefix, armature, bone)
+-                elif self.box_type == 'ENVELOPE':
+-                    box, volume = create_box_envelope(self.prefix, armature, bone)
+-                #box = create_box(self.prefix, self.driver_length, self.driver_width, armature, bone)
+-                RB_dict[box.name] = box
+-                armature['brik_bone_driver_dict'][bone.name] = box.name
++
++            box = None
++            #Create boxes that do not exist
++            if self.box_type == 'BONE':
++                box, volume = create_box(self.prefix, self.driver_length, self.driver_width, armature, bone)
++            elif self.box_type == 'BBONE':
++                box, volume = create_box_bbone(self.prefix, armature, bone)
++            elif self.box_type == 'ENVELOPE':
++                box, volume = create_box_envelope(self.prefix, armature, bone)
+             
+-                #Orientate and position the box
+-                self.position_box(armature, bone, box)
+-                box['brik_bone_name'] = bone.name
+-                
+-                #### Contributed by Wraaah #########
+-                box.game.physics_type = 'RIGID_BODY'
+-                box.game.mass = volume * 1.5 #Density I used was 1.5
+-                ##############################
++            RB_dict[box.name] = box
++            armature['brik_bone_driver_dict'][bone.name] = box.name
++        
++            #Orientate and position the box
++            position_box(armature, bone, box)
++            box['brik_bone_name'] = bone.name
++            
++            #### Contributed by Wraaah #########
++#            box.game.physics_type = 'RIGID_BODY'
++            box.game.mass = volume
++            box.hide_render = self.invisible
++            ##############################
+         return RB_dict
+     
+     def make_bone_constraints(self, armature, RB_dict):
+-        bones_dict = armature.pose.bones
++        bones = bone_group_list(armature)
++        #bones_dict = armature.pose.bones
+         
+-        for bone in bones_dict:
++        #for bone in bones_dict:
++        for bone in bones:
+             if not 'brik_copy_rot' in bone.constraints:
+                 constraint = bone.constraints.new(type='COPY_ROTATION')
+                 constraint.name = 'brik_copy_rot'
+                 constraint.target = RB_dict[armature['brik_bone_driver_dict'][bone.name]]
++                #Enable posing armature after creating brik structure
++                constraint.influence = 0.0
+             if not 'brik_copy_loc' in bone.constraints:
+-                if not bone.parent:
++            #Check if copy loc is needed
++                use_copy_loc = False
++                #rigid_body_name = rigid_bodies[bone_name]
++                if bone.parent:
++                    if bones.count(bone.parent) == 0:
++                        use_copy_loc = True
++                else:
++                    use_copy_loc = True
++
++                if use_copy_loc:
++                    RB_object = RB_dict[armature['brik_bone_driver_dict'][bone.name]]
++                    loc_targ_name = RB_object.name + "_loc"
+                     #print(bone.head, bone.tail)
+-                    if armature['brik_armature_locator_name'] == '':
++                    if bpy.data.objects.get(loc_targ_name, False):
++                        locator = bpy.data.objects[loc_targ_name]
++                        locator.location = (0.0,-bone.length/2,0.0)
++                        locator.parent = RB_object
++                    else:
+                         bpy.ops.object.add(type='EMPTY')
+                         locator = bpy.context.object
+-                        locator.name = 'brik_'+armature.name+'_loc'
++                        locator.name = loc_targ_name
+                         locator.location = (0.0,-bone.length/2,0.0)
+-                        locator.parent = RB_dict[armature['brik_bone_driver_dict'][bone.name]]
+-                        armature['brik_armature_locator_name'] = locator.name
+-                        bpy.ops.object.select_all(action='DESELECT')
++                        locator.parent = RB_object
++                        #bpy.ops.object.select_all(action='DESELECT')
+                         bpy.ops.object.select_name(name=armature.name, extend=False)
+-                    else:
+-                        locator = bpy.data.objects['brik_armature_locator_name']
+-                        locator.location = (0.0,-bone.length/2,0.0)
+-                        locator.parent = RB_dict[armature['brik_bone_driver_dict'][bone.name]]
+                     constraint = bone.constraints.new(type='COPY_LOCATION')
+                     constraint.name = 'brik_copy_loc'
+                     constraint.target = locator
++                    #Enable posing armature after creating brik structure
++                    constraint.influence = 0.0
+     
+     def reshape_boxes(self, armature):
+         '''
+@@ -270,13 +339,6 @@
+                 vert.co = Vector(verts[count])
+                 count += 1
+     
+-    #Orient the box to the bone and set the box object centre to the bone location
+-    def position_box(self, armature, bone, box):
+-        scene = bpy.context.scene
+-        
+-        #Set the box to the bone orientation and location
+-        box.matrix_world = bone.matrix
+-        box.location = armature.location+bone.bone.head_local+(bone.bone.tail_local-bone.bone.head_local)/2
+     
+     #Set up the objects for rigid body physics and create rigid body joints.
+     def make_RB_constraints(self, armature, RB_dict):
+@@ -328,6 +390,7 @@
+                 boxObj['brik_joint_target'] = 'None'
+     
+     def add_boxes_to_group(self, armature, RB_dict):
++ 
+         #print("Adding boxes to group")
+         group_name = self.prefix+armature.name+"_Group"
+         if not group_name in bpy.data.groups:
+@@ -339,21 +402,28 @@
+         for box in RB_dict:
+             if not box in group.objects:
+                 group.objects.link(bpy.context.scene.objects[box])
++            box_loc = box + "_loc"
++            print(box_loc)
++            if bpy.context.scene.objects.get(box_loc, None):
++                if not box_loc in group.objects:
++                    group.objects.link(bpy.context.scene.objects[box_loc])
+         
++        armature["ragdoll_group"] = group.name
+         return
+     
+     #Armature and mesh need to be set to either no collision or ghost. No collision
+     #is much faster.
++    #=> also affects Hitboxes & armature collision shape, need to be fixed/reconsidered
+     def set_armature_physics(self, armature):
+         armature.game.physics_type = 'NO_COLLISION'
+-        for child in armature.children:
+-            if hasattr(armature, "['brik_hit_boxes_created']"):
+-                if child.name in armature['brik_bone_hit_box_dict'].values():
+-                    continue
+-                else:
+-                    child.game.physics_type = 'NO_COLLISION'
+-            else:
+-                child.game.physics_type = 'NO_COLLISION'
++#        for child in armature.children:
++#            if hasattr(armature, "['brik_hit_boxes_created']"):
++#                if child.name in armature['brik_bone_hit_box_dict'].values():
++#                    continue
++#                else:
++#                    child.game.physics_type = 'NO_COLLISION'
++#            else:
++#                child.game.physics_type = 'NO_COLLISION'
+                 
+ 
+     #The ui of the create operator that appears when the operator is called
+@@ -363,6 +433,7 @@
+         box = layout.box()
+         box.prop(self.properties, 'prefix')
+         box.prop(self.properties, 'add_to_group')
++        box.prop(self.properties, 'invisible')
+         box.prop(self.properties, 'box_type')
+         if self.box_type == 'BONE':
+             box.prop(self.properties, 'driver_length')
+@@ -394,6 +465,8 @@
+             
+             if self.add_to_group:
+                 self.add_boxes_to_group(armature, RB_dict)
++
++        calc_ragdoll_mass(self, context)
+         
+         return{'FINISHED'}
+ 
+@@ -415,18 +488,25 @@
+         armature = context.object
+         scene = context.scene
+         
++        bpy.ops.object.select_all(action='DESELECT')        
+         #Clean up all created objects, their meshes and bone constraints
+         for bone_name in armature['brik_bone_driver_dict']:
+             driver = scene.objects[armature['brik_bone_driver_dict'][bone_name]]
+             #Unlink and remove the mesh
+-            mesh = driver.data
+-            driver.data = None
+-            mesh.user_clear()
+-            bpy.data.meshes.remove(mesh)
++#            mesh = driver.data
++#            driver.data = None
++#            mesh.user_clear()
++#            bpy.data.meshes.remove(mesh)
++            bpy.ops.object.select_name( name = armature['brik_bone_driver_dict'][bone_name], extend = True)
++            objects = bpy.data.objects
++            driver_loc = objects.get(driver.name + "_loc", None)
++            if driver_loc:
++                bpy.ops.object.select_name( name = driver_loc.name, extend = True)
++            
+             #Unlink and remove the object
+-            scene.objects.unlink(driver)
+-            driver.user_clear()
+-            bpy.data.objects.remove(driver)
++#            scene.objects.unlink(driver)
++#            driver.user_clear()
++#            bpy.data.objects.remove(driver)
+             
+             #Remove bone constraints
+             bone = armature.pose.bones[bone_name]
+@@ -435,13 +515,17 @@
+                 bone.constraints.remove(const)
+             if 'brik_copy_loc' in bone.constraints:
+                 const = bone.constraints['brik_copy_loc']
++                locator = const.target
+                 bone.constraints.remove(const)
+         
+-        #Remove armature locator
+-        locator = bpy.data.objects[armature['brik_armature_locator_name']]
+-        scene.objects.unlink(locator)
+-        locator.user_clear()
+-        bpy.data.objects.remove(locator)
++                #Remove armature locator
++                #locator = bpy.data.objects[armature['brik_armature_locator_name']]
++#                scene.objects.unlink(locator)
++#                locator.user_clear()
++#                bpy.data.objects.remove(locator)
++        bpy.ops.object.delete(use_global=False)
++        bpy.ops.object.select_all(action='DESELECT')        
++        scene.objects.active = armature
+         
+         #Remove driver group
+         group_name = armature['brik_prefix']+armature.name+'_Group'
+@@ -450,7 +534,7 @@
+             bpy.data.groups.remove(group)
+         
+         #Remove custom properties
+-        del armature['brik_armature_locator_name']
++        #del armature['brik_armature_locator_name']
+         del armature['brik_structure_created']
+         del armature['brik_bone_driver_dict']
+         del armature['brik_prefix']
+@@ -485,6 +569,13 @@
+             prop.name = 'brik_init_ragdoll'
+             prop.type = 'BOOL'
+             prop.value = True
++            #Add groups if needed
++            hitbox_group = armature["hitbox_group"]
++            if not(bpy.data.objects.get(hitbox_group, None)):
++                bpy.ops.object.group_instance_add(group=hitbox_group)
++            ragdoll_group = armature["ragdoll_group"]
++            if not(bpy.data.objects.get(ragdoll_group, None)):
++                bpy.ops.object.group_instance_add(group=ragdoll_group)
+             
+             #Logic to spawn the rigid body boxes
+             bpy.ops.logic.sensor_add(type='PROPERTY', name='brik_use_changed_sens', object=armature.name)
+@@ -500,6 +591,7 @@
+             bpy.ops.logic.actuator_add(type='EDIT_OBJECT', name='brik_spawn_boxes_act', object=armature.name)
+             act = armature.game.actuators[-1]
+             act.mode = 'ADDOBJECT'
++            act.object = (bpy.data.objects.get(ragdoll_group, None))
+             
+             cont.link(sens, act)
+             
+@@ -524,14 +616,15 @@
+             sens = armature.game.sensors[-1]
+             sens.property = 'brik_use_ragdoll'
+             sens.value = 'True'
+-            sens.use_pulse_true_level = True
++#            sens.use_pulse_true_level = True
+             
+             bpy.ops.logic.controller_add(type='LOGIC_AND', name='brik_use_cont', object=armature.name)
+             cont = armature.game.controllers[-1]
+             
+-            bpy.ops.logic.actuator_add(type='ARMATURE', name='brik_use_act', object=armature.name)
++            bpy.ops.logic.actuator_add(type='ACTION', name='brik_use_act', object=armature.name)
+             act = armature.game.actuators[-1]
+-            act.mode = 'RUN'
++            act.type = 'ARMATURE'
++#            act.mode = 'RUN'
+             
+             cont.link(sens, act)
+     
+@@ -539,19 +632,37 @@
+         print('SETTING UP SPAWN LOGIC')
+         scene = bpy.context.scene
+         
++        spawn_ob_name = armature.name + "_spawn"
+         #Need to use data to avoid naming conflicts
+-        if not 'brik_spawn_location' in bpy.data.objects:
++        if not spawn_ob_name in bpy.data.objects:
+             bpy.ops.object.add()
+             spawn_object = bpy.context.object
+-            spawn_object.name = 'brik_spawn_location'
++            spawn_object.name = spawn_ob_name
++
++            bpy.ops.object.game_property_new()
++            prop = spawn_object.game.properties[-1]
++            prop.name = "armature_name"
++            prop.type = 'STRING'
++#            prop.value = armature.name
+         else:
+-            spawn_object = bpy.data.objects['brik_spawn_location']
+-        
++            spawn_object = bpy.data.objects[spawn_ob_name]
++            
+         bpy.ops.object.select_all(action='DESELECT')
+         bpy.ops.object.select_name(name=armature.name, extend=False)
+-        
++
++        prop = spawn_object.game.properties["armature_name"]
++        prop.value = armature.name
++
+         spawn_object.game.show_state_panel = False
+         
++        #Add groups if needed
++        hitbox_group = armature["hitbox_group"]
++        if not(bpy.data.objects.get(hitbox_group, None)):
++            bpy.ops.object.group_instance_add(group=hitbox_group)
++        ragdoll_group = armature["ragdoll_group"]
++        if not(bpy.data.objects.get(ragdoll_group, None)):
++            bpy.ops.object.group_instance_add(group=ragdoll_group)
++        
+         #Quick and dirty check to see if the spawn logic is already set up.
+         if not 'brik_spawn_cont' in spawn_object.game.controllers:
+             #The logic to spawn the mob
+@@ -566,6 +677,7 @@
+             
+             bpy.ops.logic.actuator_add(type='EDIT_OBJECT', name='brik_spawn_act', object=spawn_object.name)
+             act = spawn_object.game.actuators[-1]
++            act.object = bpy.data.objects.get(hitbox_group, None)
+             
+             cont.link(sens, act)
+             
+@@ -665,13 +777,14 @@
+         armature = context.object
+         
+         self.set_up_armature_logic(armature)
++        #Is ray property required?
++        #bones = bone_group_list(armature)
++        #for bone_name in bones:
++        #    self.set_up_hit_box_logic(armature, bone_name)
++        self.set_up_spawn_logic(armature)
+         
+-        for bone_name in armature['brik_optimal_order']:
+-            self.set_up_hit_box_logic(armature, bone_name)
+         
+-        self.set_up_spawn_logic(armature)
+         
+-        
+         return{'FINISHED'}
+ 
+ class brik_write_game_file(bpy.types.Operator):
+@@ -681,8 +794,10 @@
+     bl_options = {'REGISTER', 'UNDO'} 
+     
+     #Find the most efficient order to calculate bone rotations in the game engine
++    #Not used
+     def calculate_structure(self, armature):
+-        boneDict = armature.pose.bones
++        bones = bone_group_list(armature)
++#        boneDict = armature.pose.bones
+         
+         boneChainsDict = {}
+         maxLength = 0       #This is the length of the longest chain of bones
+@@ -705,7 +820,8 @@
+         optimalBoneOrder = self.find_optimal_bone_order(boneChainsDict, maxLength)
+         
+         return optimalBoneOrder, boneChainsDict
+-        
++    
++    #Not used
+     def find_optimal_bone_order(self, boneChainsDict, maxLength):
+         tempBoneChainsOrder = []
+         
+@@ -732,7 +848,8 @@
+     all be done internally. =D
+     '''
+     
+-    def save_structure_data(self, armature, optimalBoneOrder, boneChainsDict):
++#    def save_structure_data(self, armature, optimalBoneOrder, boneChainsDict):
++    def save_structure_data(self, armature, bones):
+         
+         prefix = armature['brik_prefix']
+         #Create or clear the text file for this armature
+@@ -748,58 +865,81 @@
+         
+         dataFile.write(armature.name+"\n")
+         
++        dataFile.write("'' Bone : Hitbox : Rigid body : Location constraint (optional)\n")
+         #Write bone data to the file
+-        for bone_name in optimalBoneOrder:
+-            #Write bone name and rigid body box for this bone
+-            #If the bone is part of a chain (not the root bone)
+-            dataFile.write(bone_name+"\n")
++        rigid_bodies = armature['brik_bone_driver_dict']
++        hitboxes = armature['brik_bone_hit_box_dict']
++        for bone in bones:
++            #How to first bone => also copy locations needs to be activated
++            bone_name = bone.name
++            hitbox_name = hitboxes[bone_name]
++            rigid_body_name = rigid_bodies[bone_name]
++            text_str = " : ".join([bone_name, hitbox_name, rigid_body_name])
+             
+-            box_name = armature['brik_bone_driver_dict'][bone_name]
+-            dataFile.write(box_name+"\n")
+-            
+-            if len(boneChainsDict[bone_name])>1:
+-                parent_bone_name = boneChainsDict[bone_name][1]
+-                joint_target_name = armature['brik_bone_driver_dict'][parent_bone_name]
+-                dataFile.write(joint_target_name+"\n")
++            if bone.parent:
++                if bones.count(bone.parent) == 0:
++                    text_str = text_str + " : " + rigid_bodies[bone_name] + "_loc"
+             else:
+-                dataFile.write("None\n")
++                text_str = text_str + " : " + rigid_bodies[bone_name] + "_loc"
++
++            dataFile.write(text_str +"\n")
++        dataFile.write("'' 6DOF constraints\n")
++        dataFile.write("'' 6DOF parameters are optional, if not defined default values are used\n")
++        id_num = 1
++        for bone in bones:
++            if bone.parent:
++                bone_name = bone.name
++                bone_parent = bone.parent
++                parent_name = bone_parent.name
++                ob = rigid_bodies[bone_name]
++                targ = rigid_bodies[parent_name]
+             
+-            #Write hit box name for this bone
+-            if 'brik_bone_hit_box_dict' in armature.keys():
+-                hit_box_name = armature['brik_bone_hit_box_dict'][bone_name]
+-                dataFile.write(hit_box_name+"\n")
+-            else:
+-                dataFile.write('None\n')
+-            
+-            obj = bpy.data.objects[armature['brik_bone_driver_dict'][bone_name]]
+-            
+-            if not obj['brik_joint_target'] == 'None':
+-                #Write rigid body joint position to file
+-                pos_x = obj['joint_position_x']
+-                pos_y = obj['joint_position_y']
+-                pos_z = obj['joint_position_z']
+-                itemString = str(pos_x)+"\n"+str(pos_y)+"\n"+str(pos_z)+"\n"
+-                dataFile.write(itemString)
+-                #############################################
+-                #Should no longer need to do this.
+-				
+-                #Write rigid body joint limits to the file
+-                max_x = obj['rot_max_x']
+-                max_y = obj['rot_max_y']
+-                max_z = obj['rot_max_z']
+-                itemString = str(max_x)+"\n"+str(max_y)+"\n"+str(max_z)+"\n"
+-                dataFile.write(itemString)
+-                min_x = obj['rot_min_x']
+-                min_y = obj['rot_min_y']
+-                min_z = obj['rot_min_z']
+-                itemString = str(min_x)+"\n"+str(min_y)+"\n"+str(min_z)+"\n"
+-                dataFile.write(itemString)
+-                
+-            
++                #6DOF name
++#                dataFile.write("constraint_name = 6DOF" + str(id_num) + "\n")
++                dataFile.write("constraint_name = 6DOF_" + ob + "_" + targ + "\n")
++                id_num = id_num + 1
++                #ob name
++                dataFile.write("object = " + ob + "\n")
++                #targ name
++                dataFile.write("target = " + targ + "\n")
++                #optional
++                #x,y,z point, default 0.0
++                pivot_y = - bone.length * 0.5
++                dataFile.write("pivot_y = " + str(pivot_y) + "\n")
++                #Rx,Ry,Rz point, default 0.0
++                #min/max x,y,z limit, default 0.0
++                #min/max Rx,Ry,Rz limit, default off & Rx,Ry,Rz spring, default off
++                if bone.use_ik_limit_x == True:
++                    Rx_min = str(bone.ik_min_x)
++                    dataFile.write("Rx_min = " + Rx_min + "\n")
++                    Rx_max = str(bone.ik_max_x)
++                    dataFile.write("Rx_max = " + Rx_max + "\n")
++                    if bone.ik_stiffness_x != 0:
++                        Rx_spring = str(bone.ik_stiffness_x)
++                        dataFile.write("Rx_spring = " + Rx_spring + "\n")
++                if bone.use_ik_limit_y == True:
++                    Ry_min = str(bone.ik_min_y)
++                    dataFile.write("Ry_min = " + Ry_min + "\n")
++                    Ry_max = str(bone.ik_max_y)
++                    dataFile.write("Ry_max = " + Ry_max + "\n")
++                    if bone.ik_stiffness_y != 0:
++                        Ry_spring = str(bone.ik_stiffness_y)
++                        dataFile.write("Ry_spring = " + Ry_spring + "\n")
++                if bone.use_ik_limit_z == True:
++                    Rz_min = str(bone.ik_min_z)
++                    dataFile.write("Rz_min = " + Rz_min + "\n")
++                    Rz_max = str(bone.ik_max_z)
++                    dataFile.write("Rz_max = " + Rz_max + "\n")
++                    if bone.ik_stiffness_z != 0:
++                        Rz_spring = str(bone.ik_stiffness_z)
++                        dataFile.write("Rz_spring = " + Rz_spring + "\n")
++                #x,y,z spring, default off
++                #motors..., default off
+         dataFile.write("'''")
+         
+         return
+     
++    #Not used
+     def store_joint_data(self, armature):
+         '''
+         Joint data is stored on the rigid body objects themselves. This will not be
+@@ -839,13 +979,14 @@
+     def execute(self, context):
+         armature = context.object
+         
+-        optimalBoneOrder, boneChainsDict = self.calculate_structure(armature)
++        bones = bone_group_list(armature)
++#        optimalBoneOrder, boneChainsDict = self.calculate_structure(armature)
+         
+-        armature['brik_optimal_order'] = optimalBoneOrder
++#        armature['brik_optimal_order'] = optimalBoneOrder
+         
+-        self.store_joint_data(armature)
++#        self.store_joint_data(armature)
+         
+-        self.save_structure_data(armature, optimalBoneOrder, boneChainsDict)
++        self.save_structure_data( armature, bones)
+         
+         armature['brik_file_written'] = True
+         
+@@ -861,7 +1002,7 @@
+     hit_box_prefix = StringProperty(name='Hit box prefix',\
+                             description='Prefix to be appended to the bone name that defines the hit box',\
+                             default='HIT')
+-    
++   
+     hit_box_length = FloatProperty(name='Hit box length',\
+                               description='Length of a hit box as a proportion of bone length.',\
+                               min=0.05,\
+@@ -879,63 +1020,70 @@
+     add_to_group = BoolProperty(name='Add to group',\
+                                 description='Add hit boxes to a group',\
+                                 default=True)
++                                
++    invisible = BoolProperty(name='Invisible',\
++                                description='Make boxes invisible for rendering',\
++                                default=True)
++                                
++    box_type = EnumProperty(name="Box type",
++        description="Shape that hitbox objects are created from.",
++        items=[ \
++          ('BONE', "Bone",
++              "Plain bone dimensions are used."),
++          ('ENVELOPE', "Envelope",
++              "Bone envelope dimensions are used."),
++          ('BBONE', "BBone",
++              "BBone dimensions are used. "\
++              "(BBones can be scaled using Ctrl+Alt+S in armature edit mode.)"),
++          ],
++        default='BBONE')
+     
+     #Create the hit boxes
+-    def create_hit_boxes(self, hit_box_prefix):
+-        bones_dict = bpy.context.object.pose.bones      #Dictionary of posebones
+-        bones = bones_dict.values()
+-        armature = bpy.context.object
+-        scene = bpy.context.scene
+-        
++    def create_hit_boxes(self, armature):
++        bones = bone_group_list(armature)
+         hit_box_dict = {}
++        scn = bpy.context.scene
+         
+-        #I hate this next line. Eugh. :S
+-        if 'brik_hit_boxes_created' in armature.keys() and armature['brik_hit_boxes_created'] == True:
+-            #Modify boxes that exist
+-            for bone_name in armature['brik_bone_hit_box_dict']:
+-                bone = bones_dict[bone_name]
+-                hit_box = self.reshape_hit_box(armature, bone)
+-                
+-                #Orientate and position the box
+-                #self.position_hit_box(armature, bone, hit_box)
+-                hit_box['brik_bone_name'] = bone.name
+-                
+-                self.parent_to_bone(armature, hit_box, bone_name)
+-                
+-                hit_box.game.physics_type = 'STATIC'
+-                hit_box.game.use_ghost = True
+-                    
+-                hit_box_dict[hit_box.name] = hit_box
++        armature['brik_bone_hit_box_dict'] = {}
++#        armature['brik_bone_driver_dict'] = {}
++#        armature['brik_armature_locator_name'] = ''
+         
+-        else:
++        #All deforming bones within selected group(s) have boxes created for them
++        for bone in bones:
++
++            box = None
++            #Create boxes that do not exist
++            if self.box_type == 'BONE':
++                hit_box, volume = create_box(self.hit_box_prefix, self.hit_box_length, self.hit_box_width, armature, bone)
++            elif self.box_type == 'BBONE':
++                hit_box, volume = create_box_bbone(self.hit_box_prefix, armature, bone)
++            elif self.box_type == 'ENVELOPE':
++                hit_box, volume = create_box_envelope(self.hit_box_prefix, armature, bone)
++            
++            hit_box_dict[hit_box.name] = hit_box
++ #            RB_dict[box.name] = box
++            armature['brik_bone_hit_box_dict'][bone.name] = hit_box.name
++#            armature['brik_bone_driver_dict'][bone.name] = box.name
+         
+-            armature['brik_bone_hit_box_dict'] = {}
+-                
+-            #All bones have hit boxes created for them
+-            for bone in bones:
+-                if bone.bone.use_deform:
+-                    #Create boxes that do not exist
+-                    hit_box,volume = create_box_envelope(self.hit_box_prefix, armature, bone)
+-                    #hit_box = create_box(self.hit_box_prefix, self.hit_box_length, self.hit_box_width, armature, bone)
+-                    armature['brik_bone_hit_box_dict'][bone.name] = hit_box.name
+-                
+-                    #Orientate and position the box
+-                    #self.position_hit_box(armature, bone, hit_box)
+-                    hit_box['brik_bone_name'] = bone.name
+-                    
+-                    self.parent_to_bone(armature, hit_box, bone.name)
+-                
+-                    hit_box.game.physics_type = 'STATIC'
+-                    hit_box.game.use_ghost = True
+-                    
+-                    hit_box_dict[hit_box.name] = hit_box
+-        
++            #Orientate and position the hitbox
++            self.parent_to_bone(armature, hit_box, bone.name)
++#            position_box(armature, bone, hit_box)
++#=> do not set location rotation, they are relative to the parent bone thus need to be zero delta
++
++            hit_box['brik_bone_name'] = bone.name
++            
++            hit_box.game.physics_type = 'STATIC'
++            hit_box.game.use_ghost = True
++            hit_box.hide_render = self.invisible
++
++            hit_box.game.mass = volume
+         return hit_box_dict
+         
+     #Reshape an existing box based on parameter changes.
+     #I introduced this as an attempt to improve responsiveness. This should
+     #eliminate the overhead from creating completely new meshes or objects on
+     #each refresh.
++    #NOT USED
+     def reshape_hit_box(self, armature, bone):
+         #print('RESHAPING BOX')
+         armature_object = bpy.context.object
+@@ -968,10 +1116,19 @@
+             group = bpy.data.groups.new(group_name)
+         else:
+             group = bpy.data.groups[group_name]
+-        for bone_name in armature['brik_bone_hit_box_dict']:
+-            hit_box_name = armature['brik_bone_hit_box_dict'][bone_name]
++
++        bone_hitbox = armature['brik_bone_hit_box_dict']
++        #Add armature to group
++#        bone_hitbox["brik_armature_group"] = armature.name
++        for bone_name in bone_hitbox:
++            hit_box_name = bone_hitbox[bone_name]
+             if not hit_box_name in group.objects:
+                 group.objects.link(bpy.data.objects[hit_box_name])
++        #Add armature to group
++        if not armature.name in group.objects:
++            group.objects.link( armature )
++
++        armature["hitbox_group"] = group.name
+         
+         return
+         
+@@ -989,9 +1146,12 @@
+ 
+         box = layout.box()
+         box.prop(self.properties, 'hit_box_prefix')
+-        box.prop(self.properties, 'hit_box_length')
+-        box.prop(self.properties, 'hit_box_width')
+         box.prop(self.properties, 'add_to_group')
++        box.prop(self.properties, 'invisible')
++        box.prop(self.properties, 'box_type')
++        if self.box_type == 'BONE':
++            box.prop(self.properties, 'hit_box_length')
++            box.prop(self.properties, 'hit_box_width')
+     
+     #The main part of the create operator
+     def execute(self, context):
+@@ -1000,7 +1160,7 @@
+         
+         armature = context.object
+         
+-        hit_box_dict = self.create_hit_boxes(self.hit_box_prefix)
++        hit_box_dict = self.create_hit_boxes(armature)
+         
+         if self.add_to_group:
+             self.add_hit_boxes_to_group(armature)
+@@ -1023,16 +1183,17 @@
+     '''
+     
+     def remove_hit_box(self, scene, bone_name, armature):
++        #Function crashes with linked objects
+         hit_box = scene.objects[armature['brik_bone_hit_box_dict'][bone_name]]
+         #Unlink and remove the mesh
+-        mesh = hit_box.data
+-        hit_box.data = None
+-        mesh.user_clear()
+-        bpy.data.meshes.remove(mesh)
++#        mesh = hit_box.data
++#        hit_box.data = None
++#        mesh.user_clear()
++#        bpy.data.meshes.remove(mesh)
+         #Unlink and remove the object
+-        scene.objects.unlink(hit_box)
+-        hit_box.user_clear()
+-        bpy.data.objects.remove(hit_box)
++#        scene.objects.unlink(hit_box)
++#        hit_box.user_clear()
++#        bpy.data.objects.remove(hit_box)
+     
+     def draw(self, context):
+         pass
+@@ -1040,8 +1201,15 @@
+     def execute(self, context):
+         armature = context.object
+         scene = context.scene
++ 
++        bpy.ops.object.select_all(action='DESELECT')        
+         for bone_name in armature['brik_bone_hit_box_dict']:
+-            self.remove_hit_box(scene, bone_name, armature)
++            #hit_box = scene.objects[armature['brik_bone_hit_box_dict'][bone_name]]
++            bpy.ops.object.select_name( name = armature['brik_bone_hit_box_dict'][bone_name], extend = True)
++#            self.remove_hit_box(scene, bone_name, armature)
++        bpy.ops.object.delete(use_global=False)
++        bpy.ops.object.select_all(action='DESELECT')        
++        scene.objects.active = armature
+         
+         group_name = armature['brik_hit_box_prefix']+armature.name+"_Group"
+         if group_name in bpy.data.groups:
+@@ -1054,3 +1222,21 @@
+         return{'FINISHED'}
+     
+   
++def calc_ragdoll_mass(self, context):
++    armature = context.object
++    set_mass = context.scene.brik_ragdoll_mass
++    brik_structure_created = armature.get('brik_structure_created', False)
++    if brik_structure_created:
++        RB_dict = armature['brik_bone_driver_dict']
++        objects = bpy.data.objects
++        tot_mass = 0
++        for bone in RB_dict:
++            box_name = RB_dict[bone]
++            ob = objects[box_name]
++            tot_mass = tot_mass + ob.game.mass
++        mass_scale = set_mass / tot_mass
++        for bone in RB_dict:
++            box_name = RB_dict[bone]
++            ob = objects[box_name]
++            ob.game.mass = ob.game.mass * mass_scale
++    return None
+\ No newline at end of file
+Index: brik_funcs.py
+===================================================================
+--- brik_funcs.py	(revision 2801)
++++ brik_funcs.py	(working copy)
+@@ -3,6 +3,7 @@
+ # ***** BEGIN GPL LICENSE BLOCK *****
+ #
+ # Script copyright (C) Marcus Jenkins (Blenderartists user name FunkyWyrm)
++# Modified by Kees Brouwer (Blenderartists user name Wraaah)
+ #
+ # This program is free software; you can redistribute it and/or
+ # modify it under the terms of the GNU General Public License
+@@ -125,3 +126,42 @@
+     volume = x*y*z
+     
+     return(obj, volume)
++
++#Function to select only the correct bones from an armature
++#so only deform bones in the selected bone group(s)
++def bone_group_list(armature):
++    bones = armature.pose.bones
++    scn = bpy.context.scene
++    bone_groups = scn.brik_bone_groups
++    
++    #Check if bone is part of the selected bone group(s)
++    bone_list = []
++    for bone in bones:
++        use_bone = True
++        #Check bone group membership
++        if bone_groups != "All":
++            if bone.bone_group:
++                if bone.bone_group.name != bone_groups:
++                    use_bone = False
++            else:
++                use_bone = False
++        #Check deform bone
++        if bone.bone.use_deform == False:
++            use_bone = False
++            
++        if use_bone == True:
++            bone_list = bone_list + [bone]
++        
++    #Return list of bones to be used
++    return bone_list
++
++#Orient the box to the bone and set the box object centre to the bone location
++def position_box( armature, bone, box):
++    #scene = bpy.context.scene
++    
++    #Set the box to the bone orientation and location
++    box.matrix_world = bone.matrix
++    box.location = armature.location + ( bone.bone.head_local + bone.bone.tail_local ) / 2
++
++
++        
+Index: templates/brik_init_ragdoll.py
+===================================================================
+--- templates/brik_init_ragdoll.py	(revision 2801)
++++ templates/brik_init_ragdoll.py	(working copy)
+@@ -3,6 +3,7 @@
+ # ***** BEGIN MIT LICENSE BLOCK *****
+ #
+ #Script Copyright (c) 2010 Marcus P. Jenkins (Blenderartists user name FunkyWyrm)
++# Modified by Kees Brouwer (Blenderartists user name Wraaah)
+ #
+ #Permission is hereby granted, free of charge, to any person obtaining a copy
+ #of this software and associated documentation files (the "Software"), to deal
+@@ -80,106 +81,157 @@
+     
+     
+     #########################
+-    hidden_armature = hidden_objects[armature.name]
++#    hidden_armature = hidden_objects[armature.name]
+     #########################
+     
+     
+-    spawn_point = armature['spawn_point']
+-    spawn_id = armature['spawn_id']
++#    spawn_point = armature['spawn_point']
++#    spawn_id = armature['spawn_id']
+     
+     if armature['brik_use_ragdoll'] and armature['brik_init_ragdoll']:
+ 
+         print('#########################')
+         print('SPAWNING RIGID BODY OBJECTS')
++        spawn_boxes_act.instantAddObject()
++        scene = bge.logic.getCurrentScene()
++        objects = scene.objects
++        objects.reverse()
+         
+-        for bone_name in armature['optimal_order']:
+-            box_name = armature['bone_box_dict'][bone_name]
+-            print('ADDING '+box_name)
+-            spawn_boxes_act.object = box_name
+-            spawn_boxes_act.instantAddObject()
+-            box = spawn_boxes_act.objectLastCreated
++        #Expand existing group
++        group_objects = armature["group"]
++        
++        group = spawn_boxes_act.object
++        for ob in objects:
++            group_objects[ob.name] = ob
++            ob["pivot"] = armature
++            if ob.name == group.name:
++                #Stop for loop once group start point is found
++                break
++                
++#        armature_name = spawn_empty["armature_name"]
++#        armature = group_objects[ armature_name ]
++        armature["group"] = group_objects
++
++        #Set up constraints
++        constraints = armature["constraints"]
++        for constraint in constraints:
++            settings = constraints[constraint]
++            constraint_name = settings.get("constraint_name", None)
++            print("Create 6DOF constraint")
++            print(constraint_name)
++            object = group_objects[ settings.get("object", None) ]
++            object_id = object.getPhysicsId()
++            target = group_objects[ settings.get("target", None) ]
++            target_id = target.getPhysicsId()
++            print(object)
++            print(target)
+             
+-            hidden_box = hidden_objects[box_name]
++            piv_x = float( settings.get("pivot_x", 0.0) )           
++            piv_y = float( settings.get("pivot_y", 0.0) )            
++            piv_z = float( settings.get("pivot_z", 0.0) )           
++
++            piv_Rx = float( settings.get("pivot_Rx", 0.0) )           
++            piv_Ry = float( settings.get("pivot_Ry", 0.0) )           
++            piv_Rz = float( settings.get("pivot_Rz", 0.0) )           
++                
++            constraint_type = 12 #6DoF joint
++            flag = 128 #No collision with joined object.
++            joint = bge.constraints.createConstraint(object_id, target_id, constraint_type, piv_x, piv_y, piv_z, piv_Rx, piv_Ry, piv_Rz, flag)
++            joint.setParam(0, float( settings.get("x_min", 0.0) ), float( settings.get("x_max", 0.0) ) )
++            joint.setParam(1, float( settings.get("y_min", 0.0) ), float( settings.get("y_max", 0.0) ) )
++            joint.setParam(2, float( settings.get("z_min", 0.0) ), float( settings.get("z_max", 0.0) ) )
++            #Parameters 3 = limit x rotation, 4 = limit y rotation, 5 = limit z rotation
++            if settings.get("Rx_min", None):
++                joint.setParam(3, float( settings.get("Rx_min", 0.0) ), float( settings.get("Rx_max", 0.0) ) )
++            if settings.get("Ry_min", None):
++                joint.setParam(4, float( settings.get("Ry_min", 0.0) ), float( settings.get("Ry_max", 0.0) ) )
++            if settings.get("Rz_min", None):
++                joint.setParam(5, float( settings.get("Rz_min", 0.0) ), float( settings.get("Rz_max", 0.0) ) )
++                
++            #Translational motor
++            #setParam(type, vel, maxForce)
++            if settings.get("x_mot", None):
++                joint.setParam(6, float( settings.get("x_mot", 0.0) ), float( settings.get("x_mot_max", 999.0) ) )
++            if settings.get("y_mot", None):
++                joint.setParam(7, float( settings.get("y_mot", 0.0) ), float( settings.get("y_mot_max", 999.0) ) )
++            if settings.get("z_mot", None):
++                joint.setParam(8, float( settings.get("z_mot", 0.0) ), float( settings.get("z_mot_max", 999.0) ) )
++            #Rotational motor
++            #setParam(type, angVel, maxForce)
++            if settings.get("Rx_mot", None):
++                joint.setParam(9, float( settings.get("Rx_mot", 0.0) ), float( settings.get("Rx_mot_max", 999.0) ) )
++            if settings.get("Ry_mot", None):
++                joint.setParam(10, float( settings.get("Ry_mot", 0.0) ), float( settings.get("Ry_mot_max", 999.0) ) )
++            if settings.get("Rz_mot", None):
++                joint.setParam(11, float( settings.get("Rz_mot", 0.0) ), float( settings.get("Rz_mot_max", 999.0) ) )
++
++            #Translational spring
++            #setParam(type, stiffness, reset)
++            if settings.get("x_spring", None):
++                joint.setParam(12, float( settings.get("x_spring", 0.0) ), float( settings.get("x_spring_reset", 0) ) )
++            if settings.get("y_spring", None):
++                joint.setParam(13, float( settings.get("y_spring", 0.0) ), float( settings.get("y_spring_reset", 0) ) )
++            if settings.get("z_spring", None):
++                joint.setParam(14, float( settings.get("z_spring", 0.0) ), float( settings.get("z_spring_reset", 0) ) )
++            #Rotational spring
++            #setParam(type, stiffness, reset)
++            if settings.get("Rx_spring", None):
++                joint.setParam(15, float( settings.get("Rx_spring", 0.0) ), float( settings.get("Rx_spring_reset", 0) ) )
++            if settings.get("Ry_spring", None):
++                joint.setParam(16, float( settings.get("Ry_spring", 0.0) ), float( settings.get("Ry_spring_reset", 0) ) )
++            if settings.get("Rz_spring", None):
++                joint.setParam(17, float( settings.get("Rz_spring", 0.0) ), float( settings.get("Rz_spring_reset", 0) ) )
+             
+-            #Since the boxes are added to the armature, it is probably not necessary to store spawn info...
+-            box['spawn_point'] = spawn_point
+-            box['spawn_id'] = spawn_id
++            #Store joint in object, can be used to change the parameter settings
++            #For example when a joint is broken you can widen the angle rotations
++            #Also possible to sever the joint completely but CLEAR THE VARIABLE FIRST
++            #BEFORE REMOVING THE JOINT else BGE CRASHES
++            object[constraint_name] = joint
++
++        #Copy hitbox positions + remove hitboxes, activate armature constraints
++        bone_hitbox = armature["bone_hitbox"] 
++        bone_rigidbody = armature["bone_rigidbody"]
++        bone_loc = armature["bone_loc"]
++        
++        for bone_name in bone_hitbox:
++            hitbox = group_objects[ bone_hitbox[ bone_name ] ]
++            rigidbody = group_objects[ bone_rigidbody[ bone_name ] ]
+             
+-            #Add the box to a dictionary on the armature so it can be located in brik_use_doll_0_3.py
+-            armature['driver_dict'][box_name] = box
++            rigidbody.worldPosition = hitbox.worldPosition
++            rigidbody.worldOrientation = hitbox.worldOrientation
+             
+-            #Set the  drivers to the location and orientation of the hit boxes
+-            hit_box_name = armature['bone_hit_box_dict'][bone_name]
+-            hit_box = armature.children[hit_box_name]
+-            box.worldPosition = hit_box.worldPosition
+-            box.worldOrientation = hit_box.worldOrientation
++            #Set up the copy rotation bone constraint for this driver
++            print('######################')
++            print('SETTING UP ROT BONE CONSTRAINTS FOR '+rigidbody.name)
++            print('BONE NAME ' + bone_name)
++            constraint_rot = armature.constraints[bone_name+":brik_copy_rot"]
++            constraint_rot.target = rigidbody
++            constraint_rot.enforce = 1.0
+             
+-            '''
+-            I have absolutely NO idea why these next two lines are necessary...
+-            Without these lines, object rotation appears to be set to the identity.
+-            Damned weird stuff. =S
+-            Update... these lines screw things up in version 35733 but leaving them for now
+-            '''
+-            #box.suspendDynamics()
+-            #box.restoreDynamics()
++            copy_loc_target = bone_loc.get(bone_name, None)
++            if copy_loc_target:
++                #Set up the copy location constraint 
++                constraint_loc = armature.constraints[bone_name+':brik_copy_loc']
++                constraint_loc.target = group_objects[ copy_loc_target ]
++                constraint_loc.enforce = 1.0
+             
+-            #Set up the rigid body joints for the newly spawned objects.
+-            if not box['joint_target'] == 'None':
+-                #Set up the rigid body joints for the newly spawned objects.
+-                joint_target = armature['driver_dict'][box['joint_target']]
+-                box_id = box.getPhysicsId()
+-                joint_target_id = joint_target.getPhysicsId()
+-                constraint_type = 12 #6DoF joint
+-                flag = 128 #No collision with joined object.
+-                pos = box['joint_position']
+-                joint_rotation = [0.0, 0.0, 0.0]
+-                joint = bge.constraints.createConstraint(box_id, joint_target_id, constraint_type, pos[0], pos[1], pos[2], 0.0, 0.0, 0.0, flag)
+-                #Parameters 3 = limit x rotation, 4 = limit y rotation, 5 = limit z rotation
+-                joint.setParam(3, *box['limit_rotation_x'])
+-                joint.setParam(4, *box['limit_rotation_y'])
+-                joint.setParam(5, *box['limit_rotation_z'])
+-                
+-                #Set up the copy rotation bone constraint for this driver
+-                print('######################')
+-                print('SETTING UP ROT BONE CONSTRAINTS FOR '+box.name)
+-                print('BONE NAME '+box['bone_name'])
+-                constraint_rot = armature.constraints[box['bone_name']+':brik_copy_rot']
+-                constraint_rot.target = box
+-            else:
+-                print('######################')
+-                print('SETTING UP LOC/ROT BONE CONSTRAINTS FOR '+box.name)
+-                print('BONE NAME '+box['bone_name'])
+-                #Set up the copy rotation constraint for this driver
+-                constraint_rot = armature.constraints[box['bone_name']+':brik_copy_rot']
+-                constraint_rot.target = box
+-                print(constraint_rot)
+-                
+-                #Set up the copy location constraint for the empty parented to this driver
+-                copy_loc_target = box.children['brik_'+armature.name+'_loc']
+-                constraint_loc = armature.constraints[box['bone_name']+':brik_copy_loc']
+-                constraint_loc.target = copy_loc_target
+-                print(constraint_loc)
++            rigidbody.worldLinearVelocity = hitbox.worldLinearVelocity
++            rigidbody.worldAngularVelocity = hitbox.worldAngularVelocity
+             
+-            box.worldLinearVelocity = hit_box.worldLinearVelocity
+-            box.worldAngularVelocity = hit_box.worldAngularVelocity
++            hitbox.endObject()
+             
+-            hit_box.endObject()
+-            
+-        for act in armature.actuators:
++        #for act in armature.actuators:
+             #There appears to be no direct way of checking that an actuator is an action actuator.
+             #act.type would be nice.
+-            if hasattr(act, 'action'):
+-                if not act.name == 'brik_use_act':
+-                    init_ragdoll_controller.deactivate(act)
+-                
++        #    if hasattr(act, 'action'):
++        #        if not act.name == 'brik_use_act':
++        #            init_ragdoll_controller.deactivate(act)
++        #==> Why needed?
++        
+         #Needed to prevent brik_use_changed_sens second pulse from re-triggering the script.
+         armature['brik_init_ragdoll'] = False
+             
+-        if debug == True:
+-            for bone_name in armature['optimal_order']:
+-                box_name = armature['bone_box_dict'][bone_name]
+-                driver = armature['driver_dict'][box_name]
+-                print(driver.name, driver['spawn_point'], driver['spawn_id'])
++        #if debug == True:
+     
+ if __name__ == '__main__':
+     main()
+Index: templates/brik_load.py
+===================================================================
+--- templates/brik_load.py	(revision 2801)
++++ templates/brik_load.py	(working copy)
+@@ -3,6 +3,7 @@
+ # ***** BEGIN MIT LICENSE BLOCK *****
+ #
+ #Script Copyright (c) 2010 Marcus P. Jenkins (Blenderartists user name FunkyWyrm)
++# Modified by Kees Brouwer (Blenderartists user name Wraaah)
+ #
+ #Permission is hereby granted, free of charge, to any person obtaining a copy
+ #of this software and associated documentation files (the "Software"), to deal
+@@ -62,39 +63,7 @@
+ import bge
+ import mathutils
+ from mathutils import Vector, Quaternion
+-
+-class Data:
+-    ARMATURE            = 0
+-    BASE                = 1
+-    BONE                = 2
+-
+-class Arm:
+-    NAME                = 0
+-
+-class Base:
+-    BONE_NAME           = 0
+-    BOX_NAME            = 1
+-    JOINT_TARGET_NAME   = 2
+-    HIT_BOX_NAME        = 3
+-
+-class Box:
+-    BONE_NAME           = 0
+-    BOX_NAME            = 1
+-    JOINT_TARGET_NAME   = 2
+-    HIT_BOX_NAME        = 3
+-    JOINT_POSITION_X    = 4
+-    JOINT_POSITION_Y    = 5
+-    JOINT_POSITION_Z    = 6
+-    ###################################################
+-    #should no longer need to do this.
+-    JOINT_LIMIT_MAX_X   = 7
+-    JOINT_LIMIT_MAX_Y   = 8
+-    JOINT_LIMIT_MAX_Z   = 9
+-    JOINT_LIMIT_MIN_X   = 10
+-    JOINT_LIMIT_MIN_Y   = 11
+-    JOINT_LIMIT_MIN_Z   = 12
+     
+-
+ scene = bge.logic.getCurrentScene()
+ cont = bge.logic.getCurrentController()
+ 
+@@ -105,128 +74,68 @@
+ def load_data(data_cont):
+ 
+     data_file = data_cont.script
+-    #print(data_file)
+-    bone_dict = {}
+-    optimal_order = []
+-    armature_data = []
+-    bone_data = []
+-    bone_name = ''
++    #remove whitespaces
++    data_file = data_file.replace(" ", "")
++    lines = data_file.splitlines(False)
+     
+-    line = ''
+-    data_count = 0
+-    item_count = 0
+-    for char in data_file:
+-        if not char == '\n':
+-            line += char
+-        else:
+-            if line == "'''":   #Ignore the first and last lines with the triple quote.
+-                line = ''
+-            else:
+-                #Store armature data for later assignment to the armature.
+-                if data_count == Data.ARMATURE:
+-                    if not item_count == Arm.NAME:
+-                        armature_data.append(line)
+-                        line = ''
+-                        item_count += 1
+-                    elif item_count == Arm.NAME:    #The last item for the armature.
+-                        armature_data.append(line)
+-                        line = ''
+-                        item_count = 0
+-                        data_count += 1
+-                #Store data for objects associated with the base bone. This is unique
+-                #since it does not need to deal with a parent.
+-                elif data_count == Data.BASE:
+-                    if item_count == Base.BONE_NAME:
+-                        bone_name = line
+-                        bone_data.append(line)
+-                        optimal_order.append(line)
+-                        line = ''
+-                        item_count += 1
+-                    elif not item_count == Base.HIT_BOX_NAME:
+-                        bone_data.append(line)
+-                        line = ''
+-                        item_count += 1
+-                    elif item_count == Base.HIT_BOX_NAME: #The last item for the base bone.
+-                        bone_data.append(line)
+-                        bone_dict[bone_name] = bone_data
+-                        line = ''
+-                        bone_name = ''
+-                        bone_data = []
+-                        item_count = 0
+-                        data_count +=1
+-                #Store data for objects associated with all other bones in turn.
+-                elif data_count == Data.BONE:
+-                    if item_count == Box.BONE_NAME:
+-                        bone_name = line
+-                        optimal_order.append(line)
+-                        bone_data.append(line)
+-                        line = ''
+-                        item_count += 1
+-                    elif not item_count == Box.JOINT_LIMIT_MIN_Z:
+-                        bone_data.append(line)
+-                        line = ''
+-                        item_count += 1
+-                    elif item_count == Box.JOINT_LIMIT_MIN_Z:   #The last item for this bone.
+-                        bone_data.append(line)
+-                        bone_dict[bone_name] = bone_data
+-                        line = ''
+-                        bone_name = ''
+-                        bone_data = []
+-                        item_count = 0
+-    #Armature data assignment
+-    armature = objects[armature_data[Arm.NAME]]
++    bone_hitbox = {}
++    bone_rigidbody = {}
++    bone_loc = {}
++    constraint_settings = {}
++    constraint_settings["constraint_name"] = ""
++    constraints = {}
+     
+-    armature['optimal_order'] = optimal_order
+-    armature['bone_box_dict'] = {}
+-    armature['bone_hit_box_dict'] = {}
+-    
+-    #Assignment of bone data and associated objects.
+-    for key in optimal_order:
+-        data = bone_dict[key]
+-        if len(data) == 4:      #The number of data items in the Base class
+-            box = objects[data[Base.BOX_NAME]]
+-            box['joint_target'] = data[Base.JOINT_TARGET_NAME]
+-            box['bone_name'] = data[Base.BONE_NAME]
+-            box['hit_box_name'] = data[Base.HIT_BOX_NAME]
+-            hit_box = objects[data[Base.HIT_BOX_NAME]]
+-            hit_box['bone_name'] = data[Base.BONE_NAME]
+-            armature['bone_box_dict'][box['bone_name']] = box.name
+-            armature['bone_hit_box_dict'][box['bone_name']] = hit_box.name
+-        else:
+-            box = objects[data[Box.BOX_NAME]]
+-            box['joint_target'] = data[Box.JOINT_TARGET_NAME]
+-            box['bone_name'] = data[Box.BONE_NAME]
+-            box['hit_box_name'] = data[Box.HIT_BOX_NAME]
+-            box['joint_position'] = [float(data[Box.JOINT_POSITION_X]),\
+-                                     float(data[Box.JOINT_POSITION_Y]),\
+-                                     float(data[Box.JOINT_POSITION_Z])]
+-            #############################################
+-            #should no longer need to do this
+-            box['limit_rotation_x'] = [float(data[Box.JOINT_LIMIT_MIN_X]),\
+-                                       float(data[Box.JOINT_LIMIT_MAX_X])]
+-            box['limit_rotation_y'] = [float(data[Box.JOINT_LIMIT_MIN_Y]),\
+-                                       float(data[Box.JOINT_LIMIT_MAX_Y])]
+-            box['limit_rotation_z'] = [float(data[Box.JOINT_LIMIT_MIN_Z]),\
+-                                       float(data[Box.JOINT_LIMIT_MAX_Z])]
+-            
+-            hit_box = objects[data[Box.HIT_BOX_NAME]]
+-            hit_box['bone_name'] = data[Box.BONE_NAME]
+-            armature['bone_box_dict'][box['bone_name']] = box.name
+-            armature['bone_hit_box_dict'][box['bone_name']] = hit_box.name
++    for line in lines:
+         
+-    #Set the spawn point to spawn this armature.
+-    spawn_point['mob_object'] = armature.name
++        if (len(line) == 0) or (line.count("''") != 0):
++            #ignore short lines or lines (starting) with ''
++            pass
++        elif line.count(":") != 0:
++            #bone, hitbox, rigidbody link
++            items = line.split(":")
++            bone_name = items[0]
++            bone_hitbox[bone_name] = items[1]
++            bone_rigidbody[bone_name] = items[2]
++            if len(items) == 4:
++                bone_loc[bone_name] = items[3]
++            
++        elif line.count("=") == 1:
++            #Constraint settings
++            par, value = line.split("=")
++            if par == "constraint_name":
++                prev_name = constraint_settings["constraint_name"]
++                if prev_name != "":
++                    #save previous constraint
++                    constraints[prev_name] = constraint_settings
++                    
++                    constraint_settings = {}
++            constraint_settings[par] = value
++            
++        else:
++            #main settings
++            armature_name = line
++    #save last constraint
++    constraints[constraint_settings["constraint_name"]] = constraint_settings
++
++    return bone_hitbox, bone_rigidbody, bone_loc, constraints, armature_name
++#    spawn_point['mob_object'] = armature.name
+     
+ def main():
+-    mob_total = spawn_point['brik_mob_count']
++#    mob_total = spawn_point['brik_mob_count']
+             
+-    for count in range(0, mob_total+1):
++#    for count in range(0, mob_total+1):
+     
+-        for cont in spawn_point.controllers:
+-            if cont.name[:-8] == 'brik_ragdoll_data_'+str(count):
+-                data_cont = cont
++    for cont in spawn_point.controllers:
++#       #if cont.name[:-8] == 'brik_ragdoll_data_'+str(count):
++        if cont.name[:] == 'brik_ragdoll_data_0':#removed -8,Wraaah
++            data_cont = cont
+                 
+-        load_data(data_cont)
+-
++            bone_hitbox, bone_rigidbody, bone_loc, constraints, armature_name = load_data(data_cont)
++            armature = objects[armature_name]
++            armature["bone_hitbox"] = bone_hitbox
++            armature["bone_rigidbody"] = bone_rigidbody
++            armature["bone_loc"] = bone_loc
++            armature["constraints"] = constraints
++        
+ if __name__ == '__main__':
+     main()
+Index: templates/brik_spawn.py
+===================================================================
+--- templates/brik_spawn.py	(revision 2801)
++++ templates/brik_spawn.py	(working copy)
+@@ -3,6 +3,7 @@
+ # ***** BEGIN MIT LICENSE BLOCK *****
+ #
+ #Script Copyright (c) 2010 Marcus P. Jenkins (Blenderartists user name FunkyWyrm)
++# Modified by Kees Brouwer (Blenderartists user name Wraaah)
+ #
+ #Permission is hereby granted, free of charge, to any person obtaining a copy
+ #of this software and associated documentation files (the "Software"), to deal
+@@ -40,6 +41,7 @@
+ def main():
+ 
+     cont = bge.logic.getCurrentController()
++    #Best replace sensor with message?
+     sens = cont.sensors['brik_Tab_sens']
+     
+     if sens.getKeyStatus(sens.key) == 1:
+@@ -48,26 +50,47 @@
+         
+         spawn_act = cont.actuators['brik_spawn_act']
+         
+-        scene = bge.logic.getCurrentScene()
+-        objects = scene.objects
+-        hidden_objects = scene.objectsInactive
++        #scene = bge.logic.getCurrentScene()
++        #objects = scene.objects
++        #hidden_objects = scene.objectsInactive
+         
+         spawn_empty = cont.owner
+         
+-        mob_object = hidden_objects[spawn_empty['mob_object']]
++        #mob_object = hidden_objects[spawn_empty['mob_object']]
+         #mob_object = hidden_objects['Armature.001']
+         
+-        spawn_act.object = mob_object.name
++        #spawn_act.object = mob_object.name
+         spawn_act.instantAddObject()
+-        last_spawned = spawn_act.objectLastCreated
++        scene = bge.logic.getCurrentScene()
++        objects = scene.objects
++        objects.reverse()
++
++        group_objects = {}
++        group = spawn_act.object
++        for ob in objects:
++            group_objects[ob.name] = ob
++#            ob["pivot"] = "test_pivot"
++            if ob.name == group.name:
++                #Stop for loop once group start point is found
++                break
++                
++        armature_name = spawn_empty["armature_name"]
++        armature = group_objects[ armature_name ]
++        armature["group"] = group_objects
++        
++        for ob_name in group_objects:
++            ob = group_objects[ob_name]
++            ob["pivot"] = armature
++            
++#        last_spawned = spawn_act.objectLastCreated
+         #print(dir(last_spawned))
+-        spawn_empty['added_objects'].append(last_spawned)
+-        spawn_empty['add_count'] += 1
++#        spawn_empty['added_objects'].append(last_spawned)
++#        spawn_empty['add_count'] += 1
+         
+         #This is used to identify which spawn point the spawned object was added by.
+-        last_spawned['spawn_point'] = spawn_empty.name
++#        last_spawned['spawn_point'] = spawn_empty.name
+         #This is a unique Id used to identify the added object.
+-        last_spawned['spawn_id'] = spawn_empty['add_count']
++#        last_spawned['spawn_id'] = spawn_empty['add_count']
+         #This is the dictionary of drivers that are unique to the added object.
+         '''
+         Originally this dictionary was defined in the brik_load.py script, but since
+@@ -77,4 +100,4 @@
+         Defining the dictionary after the objects are added to the scene ensures that
+         they each have a unique dictionary.
+         '''
+-        last_spawned['driver_dict'] = {}
++#        last_spawned['driver_dict'] = {}
