@@ -11,30 +11,32 @@ bl_info = {
 
 import bpy
 
+
 class paint_on_node_image(bpy.types.Operator):
     bl_idname = "node.paint_on_node_image"
     bl_label = "Paint on Active Image Node"
     bl_options = {'UNDO'}
 
     def execute(self, context):
-      if context.active_node:
-          active_node = context.active_node
+        if context.active_node:
+            active_node = context.active_node
 
-          if active_node.bl_idname == "ShaderNodeTexImage":
-            bpy.context.scene.tool_settings.image_paint.canvas = active_node.image
+            if active_node.bl_idname == "ShaderNodeTexImage":
+                bpy.context.scene.tool_settings.image_paint.canvas = active_node.image
 
-      return {'FINISHED'}
-        
+        return {'FINISHED'}
+
 addon_keymaps = []
+
 
 def register():
     bpy.utils.register_class(paint_on_node_image)
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
-      km = kc.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
-      kmi = km.keymap_items.new("node.paint_on_node_image", 'ACTIONMOUSE', 'CLICK')
-      addon_keymaps.append((km, kmi))
+        km = kc.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
+        kmi = km.keymap_items.new("node.paint_on_node_image", 'ACTIONMOUSE', 'CLICK')
+        addon_keymaps.append((km, kmi))
 
 
 def unregister():
@@ -42,7 +44,7 @@ def unregister():
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    
-    
+
+
 if __name__ == "__main__":
     register()

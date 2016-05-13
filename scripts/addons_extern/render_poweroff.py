@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-   
+# -*- coding: utf-8 -*-
 import bpy
 
 bl_info = {
@@ -28,6 +28,7 @@ $openssl s_client -starttls smtp -crlf -connect smtp.gmail.com:25
 и после этого почта уходила в мир без проблем
 '''
 
+
 @persistent
 def render_complete_handler_nt(dummy):
     sender = 'email@yandex.ru'
@@ -41,14 +42,15 @@ def render_complete_handler_nt(dummy):
     """
 
     try:
-        smtpObj = smtplib.SMTP_SSL( 'smtp.yandex.ru' , 465, timeout=120 )
+        smtpObj = smtplib.SMTP_SSL('smtp.yandex.ru', 465, timeout=120)
         smtpObj.login("login", "passwd")
-        smtpObj.sendmail(sender, receivers, message)         
+        smtpObj.sendmail(sender, receivers, message)
         smtpObj.quit()
-        print ("Successfully sent email")
+        print("Successfully sent email")
     except:
-        print ("Error: unable to send email")
-    os.system("shutdown /s") # shutdown command here for linux 'poweroff'
+        print("Error: unable to send email")
+    os.system("shutdown /s")  # shutdown command here for linux 'poweroff'
+
 
 def register():
     bpy.app.handlers.render_complete.append(render_complete_handler_nt)

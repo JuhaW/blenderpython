@@ -30,7 +30,7 @@
 bl_info = {
     "name": "Save File Prefix",
     "author": "sambler",
-    "version": (1,0),
+    "version": (1, 0),
     "blender": (2, 71, 0),
     "location": "File->Save Prefixed Blendfile",
     "description": "Add a prefix to the filename before saving.",
@@ -42,30 +42,35 @@ bl_info = {
 
 import bpy
 import os
-import time, datetime
+import time
+import datetime
+
 
 class PrefixSavePreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     prefix = bpy.props.StringProperty(name="Prefix calculation",
-                    description="Python string that calculates the file prefix.",
-                    default="timestamp().strftime('%Y_%m_%d_%H_%M_%S') + '_'")
+                                      description="Python string that calculates the file prefix.",
+                                      default="timestamp().strftime('%Y_%m_%d_%H_%M_%S') + '_'")
 
     def draw(self, context):
         layout = self.layout
         col = layout.column()
 
         row = col.row()
-        row.prop(self,"prefix")
+        row.prop(self, "prefix")
+
 
 def timestamp():
     # convienience function that is available to the user in their calculations
     return datetime.datetime.fromtimestamp(time.time())
 
+
 def fn_prefix(context):
     user_preferences = context.user_preferences
     addon_prefs = user_preferences.addons[__name__].preferences
     return eval(addon_prefs.prefix)
+
 
 class PrefixFileSave(bpy.types.Operator):
     """Set a filename prefix before saving the file"""
@@ -77,10 +82,12 @@ class PrefixFileSave(bpy.types.Operator):
         outpath = os.path.dirname(bpy.path.abspath(bpy.data.filepath))
         print(os.path.join(outpath, outname))
         return bpy.ops.wm.save_mainfile(filepath=os.path.join(outpath, outname),
-                    check_existing=True)
+                                        check_existing=True)
+
 
 def menu_save_prefix(self, context):
     self.layout.operator(PrefixFileSave.bl_idname, text=PrefixFileSave.bl_label, icon="FILE_TICK")
+
 
 def register():
     bpy.utils.register_module(__name__)
@@ -98,6 +105,7 @@ def register():
 
         # add a keymap for our save operator
         kmi = win_keymaps.keymap_items.new(PrefixFileSave.bl_idname, 'S', 'PRESS', ctrl=True)
+
 
 def unregister():
 
@@ -117,4 +125,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

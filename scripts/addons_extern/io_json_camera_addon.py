@@ -29,9 +29,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "category": "Import-Export",
-    }
-
-
+}
 
 
 import bpy
@@ -59,71 +57,80 @@ def camExport(context, filepath):
         camdata["shift_x"] = ob.data.shift_x
         camdata["shift_y"] = ob.data.shift_y
         # sequence
-        for fr in range(fs,fe+1):
+        for fr in range(fs, fe + 1):
             bpy.context.scene.frame_set(fr)
-            camdata["location"][fr] = (fr,ob.matrix_world.to_translation()[:])
-            camdata["rotation_euler"][fr] = (fr,list(map(degrees,ob.matrix_world.to_euler()[:])))
-            camdata["scale"][fr] = (fr,ob.matrix_world.to_scale()[:])
+            camdata["location"][fr] = (fr, ob.matrix_world.to_translation()[:])
+            camdata["rotation_euler"][fr] = (fr, list(map(degrees, ob.matrix_world.to_euler()[:])))
+            camdata["scale"][fr] = (fr, ob.matrix_world.to_scale()[:])
     else:
-        print("Select Camera first") 
-    #exporta    
+        print("Select Camera first")
+    # exporta
     with open(filepath, "w") as file:
-        json.dump(camdata, file, ensure_ascii=False) 
+        json.dump(camdata, file, ensure_ascii=False)
     return {'FINISHED'}
 
-#importa -------------------------------------------   
+# importa -------------------------------------------
+
 
 def camImport(context, filepath):
     print(filepath)
     with open(filepath, "r") as file:
-        ndata = json.load(file)        
+        ndata = json.load(file)
     cam = bpy.data.cameras.new("camarita")
-    object = bpy.data.objects.new("objetito",cam)
+    object = bpy.data.objects.new("objetito", cam)
     bpy.context.scene.objects.link(object)
-    #bake srt
+    # bake srt
     for frame in ndata['location']:
-        bpy.context.scene.frame_set(int(frame))    
-        object.location = ndata['location'][frame][1] 
+        bpy.context.scene.frame_set(int(frame))
+        object.location = ndata['location'][frame][1]
         object.keyframe_insert("location", frame=int(frame))
-        object.rotation_euler= list(map(radians,ndata['rotation_euler'][frame][1]))
-        object.keyframe_insert("rotation_euler", frame=int(frame))   
-        object.scale = ndata['scale'][frame][1] 
-        object.keyframe_insert("scale", frame=int(frame))  
-    #setcam especificaciones    
+        object.rotation_euler = list(map(radians, ndata['rotation_euler'][frame][1]))
+        object.keyframe_insert("rotation_euler", frame=int(frame))
+        object.scale = ndata['scale'][frame][1]
+        object.keyframe_insert("scale", frame=int(frame))
+    # setcam especificaciones
     object.name = ndata["name"]
-    object.data.lens = ndata["lens"]   
-    object.data.sensor_width = ndata["sensor_width"]   
+    object.data.lens = ndata["lens"]
+    object.data.sensor_width = ndata["sensor_width"]
     object.data.sensor_height = ndata["sensor_height"]
     object.data.shift_x = ndata["shift_x"]
     object.data.shift_y = ndata["shift_y"]
-    object.data.draw_size = ndata["draw_size"]    
+    object.data.draw_size = ndata["draw_size"]
     return {'FINISHED'}
 
-#clases ------------------------------------------------
+# clases ------------------------------------------------
+
+
 class ExportSomeData(bpy.types.Operator, ExportHelper):
-    bl_idname = "export_json.camera" 
+    bl_idname = "export_json.camera"
     bl_label = "Export Json Camera"
     filename_ext = ".json"
     filter_glob = bpy.props.StringProperty(
-            default="*.json",
-            options={'HIDDEN'},
-            )
+        default="*.json",
+        options={'HIDDEN'},
+    )
+
     def execute(self, context):
         return camExport(context, self.filepath)
 
+
 class ImportSomeData(bpy.types.Operator, ImportHelper):
-    bl_idname = "import_json.camera" 
+    bl_idname = "import_json.camera"
     bl_label = "Import Json Camera"
     filename_ext = ".json"
     filter_glob = bpy.props.StringProperty(
-            default="*.json",
-            options={'HIDDEN'},
-            )
+        default="*.json",
+        options={'HIDDEN'},
+    )
+
     def execute(self, context):
         return camImport(context, self.filepath)
 
+
 def register():
     bpy.utils.register_module(__name__)
+
+
 def unregister():
     bpy.utils.unregister_module(__name__)
 if __name__ == "__main__":

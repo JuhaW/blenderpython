@@ -11,11 +11,13 @@ bl_info = {
     "description": "Parents each selected object to the faces of a new mesh.",
     "category": "Object"}
 
-import bpy, mathutils as m
+import bpy
+import mathutils as m
 
 bpy.types.WindowManager.scale = bpy.props.IntProperty(name="Scale", description="Scale factor of new faces", min=1, max=100, default=5)
 bpy.types.WindowManager.rotate = bpy.props.BoolProperty(name='Oriented Faces', default=False, description='Get faces orientation from object Z axis')
 bpy.types.WindowManager.single = bpy.props.BoolProperty(name='Use Single Vertex', default=False, description='Parent each object to a single vertex instead of 3 vertices')
+
 
 class MeshParent(bpy.types.Operator):
     bl_idname = 'object.parent_tri'
@@ -41,7 +43,8 @@ class MeshParent(bpy.types.Operator):
         try:
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.context.tool_settings.mesh_select_mode = [True, False, False]
-        except: pass
+        except:
+            pass
         bpy.ops.object.mode_set()
 
         # list objects and tris coords
@@ -62,7 +65,7 @@ class MeshParent(bpy.types.Operator):
                 nube.append(dd + dd1 * wm.scale)
                 nube.append(dd + dd2 * wm.scale)
                 nube.append(dd + dd3 * wm.scale)
-                caras.append([c*3, c*3+1, c*3+2])
+                caras.append([c * 3, c * 3 + 1, c * 3 + 2])
 
         # mesh from the list of coords
         malla = bpy.data.meshes.new('puntos')
@@ -73,9 +76,9 @@ class MeshParent(bpy.types.Operator):
         malla.from_pydata(nube, [], caras)
         malla.update()
 
-        bpy.ops.object.select_all(action = 'DESELECT')
+        bpy.ops.object.select_all(action='DESELECT')
         bpy.context.scene.objects.active = padre
-        
+
         bpy.ops.object.editmode_toggle()
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.editmode_toggle()
@@ -87,7 +90,7 @@ class MeshParent(bpy.types.Operator):
                 malla.vertices[c].select = True
             else:
                 for n in range(3):
-                    malla.vertices[c*3+n].select = True
+                    malla.vertices[c * 3 + n].select = True
             bpy.ops.object.editmode_toggle()
             bpy.ops.object.vertex_parent_set()
             bpy.ops.mesh.select_all(action='DESELECT')
@@ -96,6 +99,7 @@ class MeshParent(bpy.types.Operator):
 
         padre.select = True
         return {'FINISHED'}
+
 
 class PanelMP(bpy.types.Panel):
     bl_label = 'Parent to Mesh'
@@ -108,13 +112,15 @@ class PanelMP(bpy.types.Panel):
         column = layout.column()
         column.operator('object.parent_tri')
         if not wm.single:
-            column.prop(wm,'scale')
-            column.prop(wm,'rotate')
-        column.prop(wm,'single')
+            column.prop(wm, 'scale')
+            column.prop(wm, 'rotate')
+        column.prop(wm, 'single')
+
 
 def register():
     bpy.utils.register_class(MeshParent)
     bpy.utils.register_class(PanelMP)
+
 
 def unregister():
     bpy.utils.unregister_class(MeshParent)

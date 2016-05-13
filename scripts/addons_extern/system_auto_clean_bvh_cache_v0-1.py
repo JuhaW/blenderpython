@@ -6,7 +6,7 @@
 # License: GPL v3                                                                                    #
 ######################################################################################################
 
-############# Add-on description (used by Blender)
+# Add-on description (used by Blender)
 
 bl_info = {
     "name": "Auto Clean BVH Cache",
@@ -27,6 +27,7 @@ from bpy.app.handlers import persistent
 import atexit
 ##############
 
+
 class AutoCleanBVHCachePreferencesPanel(bpy.types.AddonPreferences):
     """ """
     bl_idname = __name__
@@ -42,8 +43,9 @@ class AutoCleanBVHCachePreferencesPanel(bpy.types.AddonPreferences):
         layout.label(text="BVH cache directory: {0}".format(config_path))
         layout.operator("file.clean_bvh_cache")
 
-        #layout.prop(self, "")
+        # layout.prop(self, "")
         return {'FINISHED'}
+
 
 class CleanBVHCache(bpy.types.Operator):
     bl_idname = "file.clean_bvh_cache"
@@ -59,10 +61,11 @@ class CleanBVHCache(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 @persistent
 def clean_bvh_cache_handler(dummy):
     bpy.ops.file.clean_bvh_cache()
-    
+
 
 """
 def clean_on_exit():
@@ -71,6 +74,7 @@ atexit.register(clean_on_exit)
 """
 
 ##############
+
 
 def register():
     bpy.utils.register_class(CleanBVHCache)

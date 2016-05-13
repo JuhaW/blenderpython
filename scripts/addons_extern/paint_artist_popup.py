@@ -22,21 +22,21 @@
 # <pep8 compliant>
 
 bl_info = {"name": "Artist Paint Popup",
-            "author": "CDMJ, Spirou4D",
-            "version": (1, 0),
-            "blender": (2, 76, 0),
-            "location": "",
-            "description": "shortcut menu for Artist Panel addon",
-            "warning": "",
-            "wiki_url": "",
-            "category": "Paint"}
+           "author": "CDMJ, Spirou4D",
+           "version": (1, 0),
+           "blender": (2, 76, 0),
+           "location": "",
+           "description": "shortcut menu for Artist Panel addon",
+           "warning": "",
+           "wiki_url": "",
+           "category": "Paint"}
 
 import bpy
 from bpy.types import   AddonPreferences,\
-                        Menu,\
-                        Panel,\
-                        UIList,\
-                        Operator
+    Menu,\
+    Panel,\
+    UIList,\
+    Operator
 import math
 import os
 SEP = os.sep
@@ -58,7 +58,7 @@ class canvasPopup(Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self,
-                                                        width=240)
+                                                          width=240)
 
     def execute(self, context):
         return {'FINISHED'}
@@ -76,57 +76,56 @@ class canvasPopup(Operator):
         box = trunk.box()
         col = box.column()
         col.operator("artist_paint.trace_selection",
-                    text = "Mask from Gpencil",
-                    icon = 'OUTLINER_OB_MESH')
+                     text="Mask from Gpencil",
+                     icon='OUTLINER_OB_MESH')
 
         row = col.row(align=True)
         row.operator("artist_paint.curve_2dpoly",
-                    text = "Make Vector Mask",
-                    icon = 'PARTICLE_POINT')
+                     text="Make Vector Mask",
+                     icon='PARTICLE_POINT')
         row.operator("artist_paint.curve_unwrap",
-                    text = "",
-                    icon = 'OUTLINER_OB_MESH')
+                     text="",
+                     icon='OUTLINER_OB_MESH')
         col.operator("artist_paint.inverted_mask",
-                    text = "Mesh Mask Inversion",
-                    icon = 'MOD_TRIANGULATE')
+                     text="Mesh Mask Inversion",
+                     icon='MOD_TRIANGULATE')
 
         col.prop(ipaint, "use_stencil_layer",
-                                text="Use stencil mask")
+                 text="Use stencil mask")
 
         if ipaint.use_stencil_layer == True:
             col.template_ID(ipaint, "stencil_image")
             col.operator("image.new", text="New").\
-                                gen_context = 'PAINT_STENCIL'
+                gen_context = 'PAINT_STENCIL'
             col.prop(ipaint, "invert_stencil",
-                                text="Invert the mask")
-        trunk.separator()                             #empty line
+                     text="Invert the mask")
+        trunk.separator()  # empty line
         trunk.label("Mirrors / Rotations")
         box = trunk.box()
-        col = box.column(align = True)
-        col.prop(context.scene, "ArtistPaint_Bool01" ,
-                                    text="Canvas Frame Constraint")
+        col = box.column(align=True)
+        col.prop(context.scene, "ArtistPaint_Bool01",
+                 text="Canvas Frame Constraint")
         row = col.row(align=True)
         row.operator("artist_paint.canvas_horizontal",
-                text="Flip Horizontal",icon='ARROW_LEFTRIGHT')
+                     text="Flip Horizontal", icon='ARROW_LEFTRIGHT')
         row.operator("artist_paint.canvas_vertical",
-                text = "Flip Vertical", icon = 'FILE_PARENT')
+                     text="Flip Vertical", icon='FILE_PARENT')
         row = col.row(align=True)
-        col.separator()                             #empty line
+        col.separator()  # empty line
         row = col.row(align=True)
-        buttName_1 = "Rotate " +_strAngle+"° CCW"
-        buttName_2 = "-"+buttName_1
+        buttName_1 = "Rotate " + _strAngle + "° CCW"
+        buttName_2 = "-" + buttName_1
         row.operator("artist_paint.rotate_ccw_15",
-                text = buttName_1, icon = 'TRIA_LEFT')
+                     text=buttName_1, icon='TRIA_LEFT')
         row.operator("artist_paint.rotate_cw_15",
-                text = buttName_2, icon = 'TRIA_RIGHT')
+                     text=buttName_2, icon='TRIA_RIGHT')
         row = col.row(align=True)
         row.operator("artist_paint.rotate_ccw_90",
-                text = "Rotate 90° CCW", icon = 'PREV_KEYFRAME')
+                     text="Rotate 90° CCW", icon='PREV_KEYFRAME')
         row.operator("artist_paint.rotate_cw_90",
-                text = "Rotate 90° CW", icon = 'NEXT_KEYFRAME')
+                     text="Rotate 90° CW", icon='NEXT_KEYFRAME')
         col.operator("artist_paint.canvas_resetrot",
-                text = "Reset Rotation", icon = 'CANCEL')
-
+                     text="Reset Rotation", icon='CANCEL')
 
 
 def register():
@@ -134,10 +133,11 @@ def register():
 
     km_list = ['Image Paint']
     for i in km_list:
-        #bpy.context.window_manager.keyconfigs.default.keymaps
+        # bpy.context.window_manager.keyconfigs.default.keymaps
         sm = bpy.context.window_manager
         km = sm.keyconfigs.default.keymaps[i]
         kmi = km.keymap_items.new('artist_paint.popup', 'V', 'PRESS')
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)
@@ -146,10 +146,9 @@ def unregister():
     for i in km_list:
         sm = bpy.context.window_manager
         km = sm.keyconfigs.default.keymaps[i]
-        for kmi in (kmi for kmi in km.keymap_items \
-                            if (kmi.idname == "artist_paint.popup")):
+        for kmi in (kmi for kmi in km.keymap_items
+                    if (kmi.idname == "artist_paint.popup")):
             km.keymap_items.remove(kmi)
-
 
 
 if __name__ == "__main__":

@@ -49,7 +49,7 @@ class EdgeEqualizeBase(bpy.types.Operator):
         self.selected_edges = []
         self.edge_lengths = []
         self.active_edge_length = None
-        
+
     @staticmethod
     def _get_active_edge_length(bm):
         """
@@ -74,11 +74,11 @@ class EdgeEqualizeBase(bpy.types.Operator):
         me = ob.data
         bm = bmesh.new()
         bm.from_mesh(me)
-        
+
         if len(me.edges) < 1:
             self.report({'ERROR'}, "This mesh has no edges!")
             return
-        
+
         active_edge_length = self._get_active_edge_length(bm)
         if active_edge_length:
             self.active_edge_length = active_edge_length
@@ -102,9 +102,8 @@ class EdgeEqualizeBase(bpy.types.Operator):
         length = self._get_target_length()
         if length is None:
             return {'CANCELLED'}
-        
-        self.scale = length
 
+        self.scale = length
 
         return self.execute(context)
 
@@ -115,7 +114,7 @@ class EdgeEqualizeBase(bpy.types.Operator):
             mesh = bmesh.new()
             mesh.from_mesh(obj.data)
             # --- Check if select_mode is 'EDGE'
-            if context.scene.tool_settings.mesh_select_mode [1]:
+            if context.scene.tool_settings.mesh_select_mode[1]:
                 return True
         return False
 

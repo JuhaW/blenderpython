@@ -28,9 +28,8 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "category": "Object",
-    }
+}
 #########################################################################################################
-
 
 
 import bpy
@@ -42,7 +41,6 @@ class ReboolPrefs(bpy.types.AddonPreferences):
 
     bpy.types.Scene.Enable_Tab_01 = bpy.props.BoolProperty(default=False)
     bpy.types.Scene.Enable_Tab_02 = bpy.props.BoolProperty(default=False)
-    
 
     def draw(self, context):
         layout = self.layout
@@ -52,8 +50,8 @@ class ReboolPrefs(bpy.types.AddonPreferences):
             row = layout.row()
             layout.label(text="Rebool Operator")
             layout.label(text="Select objects to difference and intercept between them")
-            
-        layout.prop(context.scene, "Enable_Tab_02", text="URL's", icon="URL")   
+
+        layout.prop(context.scene, "Enable_Tab_02", text="URL's", icon="URL")
         if context.scene.Enable_Tab_02:
             row = layout.row()
             row.operator("wm.url_open", text="pixivores.com").url = "http://pixivores.com"
@@ -76,12 +74,12 @@ def main(context):
                 obj.select = False
 
     bpy.ops.object.select_all(action='TOGGLE')
-            
+
     for obj in BoolObj:
         bpy.context.scene.objects.active = bpy.data.objects[obj]
         bpy.data.objects[obj].draw_type = "SOLID"
         bpy.data.objects[obj].select = True
-        bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "constraint_axis":(False, False, False), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
+        bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked": False, "mode": 'TRANSLATION'}, TRANSFORM_OT_translate={"value": (0, 0, 0), "constraint_axis": (False, False, False), "constraint_orientation": 'GLOBAL', "mirror": False, "proportional": 'DISABLED', "proportional_edit_falloff": 'SMOOTH', "proportional_size": 1, "snap": False, "snap_target": 'CLOSEST', "snap_point": (0, 0, 0), "snap_align": False, "snap_normal": (0, 0, 0), "gpencil_strokes": False, "texture_space": False, "remove_on_cancel": False, "release_confirm": False})
         LastObjectCreated = bpy.context.active_object.name
 
         for mb in LastObj.modifiers:
@@ -110,7 +108,7 @@ def main(context):
         bpy.ops.object.select_all(action='TOGGLE')
 
     bpy.data.objects[LastObjectCreated].select = True
-        
+
 #########################################################################################################
 
 
@@ -137,7 +135,7 @@ addon_keymaps = []
 
 #########################################################################################################
 def register():
-    bpy.utils.register_class(ReboolPrefs) 
+    bpy.utils.register_class(ReboolPrefs)
 
     bpy.utils.register_class(ReboolOperator)
     # add keymap entry
@@ -151,14 +149,13 @@ def register():
 
 #########################################################################################################
 def unregister():
-    bpy.utils.unregister_class(ReboolPrefs) 
+    bpy.utils.unregister_class(ReboolPrefs)
 
    # remove keymap entry
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    
- 
+
     bpy.utils.unregister_class(ReboolOperator)
 #########################################################################################################
 
@@ -166,4 +163,3 @@ def unregister():
 #########################################################################################################
 if __name__ == "__main__":
     register()
-

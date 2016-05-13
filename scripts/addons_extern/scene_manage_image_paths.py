@@ -42,6 +42,7 @@ TODOs:
     Reload images
 '''
 
+
 class MIPProps(bpy.types.PropertyGroup):
     source = bpy.props.StringProperty(
         name="Source",
@@ -69,11 +70,13 @@ def file_exists(path):
 
     return os.path.exists(path)
 
+
 def all_rel_to_abs():
     images = get_images()
     for img in images:
         if img.filepath.startswith('//'):
             img.filepath = bpy.path.abspath(img.filepath)
+
 
 class MIPFindReplace(bpy.types.Operator):
     """Tooltip"""  # TODO
@@ -88,6 +91,7 @@ class MIPFindReplace(bpy.types.Operator):
         for img in images:
             img.filepath = img.filepath.replace(props.source, props.target)
         return {'FINISHED'}
+
 
 class MIPCopy(bpy.types.Operator):
     """Tooltip"""  # TODO
@@ -107,8 +111,9 @@ class MIPCopy(bpy.types.Operator):
                 if not os.path.exists(new_path_root):
                     os.makedirs(new_path_root)
                 img.filepath = new_path
-                copyfile (old_path, new_path)
+                copyfile(old_path, new_path)
         return {'FINISHED'}
+
 
 class MIPImagePathsPanel(bpy.types.Panel):
     """Creates a Panel in the Object properties window"""
@@ -119,7 +124,7 @@ class MIPImagePathsPanel(bpy.types.Panel):
     bl_context = "scene"
 
     def draw(self, context):
-        print ("draw!", time())
+        print("draw!", time())
         layout = self.layout
         images = get_images()
         props = context.scene.mip_props
@@ -143,6 +148,7 @@ def register():
     bpy.utils.register_module(__name__)
 
     bpy.types.Scene.mip_props = bpy.props.PointerProperty(type=MIPProps)
+
 
 def unregister():
     del bpy.types.Scene.mip_props

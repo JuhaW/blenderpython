@@ -38,19 +38,21 @@ from os import path
 from glob import glob
 
 # Actual import operator.
+
+
 class ImportCaches(bpy.types.Operator, ImportHelper):
     '''Import cache(s)'''
     bl_idname = "import_scene.caches"
     bl_label = "Import cache(s)"
     bl_options = {'PRESET', 'UNDO'}
-    
+
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
     directory = StringProperty(maxlen=1024,
-        subtype='DIR_PATH',
-        options={'HIDDEN', 'SKIP_SAVE'})
+                               subtype='DIR_PATH',
+                               options={'HIDDEN', 'SKIP_SAVE'})
     files = CollectionProperty(type=bpy.types.OperatorFileListElement,
-        options={'HIDDEN', 'SKIP_SAVE'})
+                               options={'HIDDEN', 'SKIP_SAVE'})
 
     filename_ext = ".pc2;.mdd"
     filter_glob = StringProperty(default="*.pc2;*.mdd", options={'HIDDEN'})
@@ -63,11 +65,10 @@ class ImportCaches(bpy.types.Operator, ImportHelper):
     cache_method = EnumProperty(
         name="",
         items=[('shape', "Shapekeys", "As shapekeys"),
-            ('mod', "Modifier", "Mesh Cache Modifier")],
+               ('mod', "Modifier", "Mesh Cache Modifier")],
         description="How to import the pointcache(s)",
         default='mod')
-    
-    
+
     def execute(self, context):
         d = self.properties.directory
         fils = self.properties.files
@@ -85,7 +86,7 @@ class ImportCaches(bpy.types.Operator, ImportHelper):
             for i, f in enumerate(import_files):
                 # Determine the name of the object from the filename.
                 name, ext = path.splitext(path.split(f)[1])
-                print("Importing {ob} ({num} of {total})...".format(ob=name, num=i+1, total=len(import_files)))
+                print("Importing {ob} ({num} of {total})...".format(ob=name, num=i + 1, total=len(import_files)))
                 for ob in bpy.data.objects:
                     if ob.name == name:
                         # Found the object, make it the active scene object.
@@ -101,7 +102,7 @@ class ImportCaches(bpy.types.Operator, ImportHelper):
                             if not mc_mod:
                                 mc_mod = ob.modifiers.new(name="Mesh Cache", type='MESH_CACHE')
                                 # Dirty hack to move the mesh cache modifier to the top of the stack
-                                for i in range(len(ob.modifiers)-1):
+                                for i in range(len(ob.modifiers) - 1):
                                     bpy.ops.object.modifier_move_up(modifier=mc_mod.name)
                             # Determine to use relative path or not.
                             if context.blend_data.filepath and self.use_relative_path:
@@ -138,8 +139,7 @@ class ImportCaches(bpy.types.Operator, ImportHelper):
                 context.scene.objects.active = cache_objects[-1]
 
         return {'FINISHED'}
-    
-    
+
     def draw(self, context):
         layout = self.layout
         col = layout.column()
@@ -157,15 +157,15 @@ def menu_func_import(self, context):
 
 def register():
     bpy.utils.register_module(__name__)
-    
+
     bpy.types.INFO_MT_file_import.append(menu_func_import)
 
 
 def unregister():
     bpy.utils.unregister_module(__name__)
-    
+
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
-    
+
 
 if __name__ == "__main__":
     register()

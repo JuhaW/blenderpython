@@ -319,18 +319,18 @@ class Markers_Delete_Closest(bpy.types.Operator):
             if (idx == 0):
                 # cursor before all markers, remove first
                 markerName = nameMarker(1)
-            elif (idx == (len(markers)-1)):
+            elif (idx == (len(markers) - 1)):
                 # cursor after all markers, remove last
                 markerName = nameMarker(-2)
             else:
                 # cursor on a marker, remove current or
                 # cursor between markers, remove closest
-                sum1 = markers[idx] - markers[idx-1]
-                sum2 = markers[idx+1] - markers[idx]
+                sum1 = markers[idx] - markers[idx - 1]
+                sum2 = markers[idx + 1] - markers[idx]
                 if (sum1 < sum2):
-                    markerName = nameMarker(idx-1)
+                    markerName = nameMarker(idx - 1)
                 else:
-                    markerName = nameMarker(idx+1)
+                    markerName = nameMarker(idx + 1)
 
             marker.remove(marker[markerName])
 
@@ -371,7 +371,7 @@ class Markers_Goto_Left(bpy.types.Operator):
 
             if (idx != 0):
                 # if cursor is not before markers
-                scene.frame_current = markers[idx-1]
+                scene.frame_current = markers[idx - 1]
                 return {'FINISHED'}
             else:
                 scene.frame_current = scene.frame_preview_start
@@ -408,9 +408,9 @@ class Markers_Goto_Right(bpy.types.Operator):
 
             idx = markers.index(currentFrame)
 
-            if (idx != len(markers)-1):
+            if (idx != len(markers) - 1):
                 # if cursor is not after markers
-                scene.frame_current = markers[idx+1]
+                scene.frame_current = markers[idx + 1]
                 return {'FINISHED'}
             else:
                 scene.frame_current = scene.frame_end
@@ -552,10 +552,10 @@ class Scene_Toggle(bpy.types.Operator):
             else:
                 index += 1
 
-        if (index == (len(bpy.data.scenes)-1)):
+        if (index == (len(bpy.data.scenes) - 1)):
             screen.scene = bpy.data.scenes[0]
         else:
-            screen.scene = bpy.data.scenes[index+1]
+            screen.scene = bpy.data.scenes[index + 1]
 
         return {'FINISHED'}
 
@@ -648,7 +648,7 @@ class Strips_Channel_Up(bpy.types.Operator):
     def execute(self, context):
         selectedStrips = bpy.context.selected_sequences
 
-        myRange = range(len(selectedStrips)-1, -1, -1)
+        myRange = range(len(selectedStrips) - 1, -1, -1)
         for i in myRange:
             selectedStrips[i].channel += 1
 
@@ -700,7 +700,7 @@ class Strips_Concatenate_Selected(bpy.types.Operator):
 
             list.sort()
 
-            base = list[0][0] + list[0][1] # 1st strip start + duration
+            base = list[0][0] + list[0][1]  # 1st strip start + duration
             for i in list[1:]:
                 strip = bpy.context.scene.sequence_editor.sequences_all[i[2]]
                 gap = (strip.frame_start + strip.frame_offset_start) - base
@@ -726,8 +726,8 @@ class Timeline_Adjust_End(bpy.types.Operator):
 
         lastFrame = 0
         for sequence in scene.sequence_editor.sequences:
-                if (sequence.frame_final_end > lastFrame):
-                    lastFrame = sequence.frame_final_end - 1
+            if (sequence.frame_final_end > lastFrame):
+                lastFrame = sequence.frame_final_end - 1
 
         scene.frame_end = lastFrame
         scene.frame_preview_end = lastFrame
@@ -873,7 +873,7 @@ class Timeline_View_Selected_Context(bpy.types.Operator):
         '''sequencer = bpy.ops.sequencer
         sequencer.view_zoom_ratio(ratio=0.02)
         sequencer.view_selected()'''
-        
+
         sequencer = bpy.ops.sequencer
         sequencer.view_all_preview()
         sequencer.view_selected()
@@ -954,7 +954,7 @@ class Timeline_ZoomOutXY(bpy.types.Operator):
             mouse = True
             preferences.view.use_zoom_to_mouse = False
 
-        #bpy.ops.view2d.zoom(deltax=-150.0, deltay=-100.0)
+        # bpy.ops.view2d.zoom(deltax=-150.0, deltay=-100.0)
         bpy.ops.view2d.zoom(deltax=-150.0, deltay=-2.0)
 
         if (mouse is True):
@@ -987,7 +987,7 @@ class Timeline_ZoomToCursor(bpy.types.Operator):
                 strip.select = True
 
         sequencer.view_selected()
-        #sequencer.view_zoom_ratio(ratio=0.02)
+        # sequencer.view_zoom_ratio(ratio=0.02)
 
         sequencer.select_all(action='DESELECT')
 

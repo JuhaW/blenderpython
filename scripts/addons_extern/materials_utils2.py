@@ -15,7 +15,7 @@
 #  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 # ##### END GPL LICENSE BLOCK #####
-#  (c) 2015 meta-androcto, parts based on work by Saidenka, Materials Utils by MichaleW Materials 
+#  (c) 2015 meta-androcto, parts based on work by Saidenka, Materials Utils by MichaleW Materials
 
 bl_info = {
     "name": "Materials Utils2",
@@ -25,13 +25,14 @@ bl_info = {
     "location": "Materials Specials Menu/Shift Q",
     "description": "Extended Specials: Materials Properties",
     "warning": "",
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"\
-        "/Py/Scripts",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"
+    "/Py/Scripts",
     "tracker_url": "https://developer.blender.org/maniphest/task/create/?project=3&type=Bug",
     "category": "Addon Factory"}
 
 import bpy
 from bpy.props import StringProperty, BoolProperty, EnumProperty
+
 
 def fake_user_set(fake_user='ON', materials='UNUSED'):
     if materials == 'ALL':
@@ -46,7 +47,7 @@ def fake_user_set(fake_user='ON', materials='UNUSED'):
             objs = bpy.context.selected_objects
         elif materials == 'SCENE':
             objs = bpy.context.scene.objects
-        else: # materials == 'USED'
+        else:  # materials == 'USED'
             objs = bpy.data.objects
             # Maybe check for users > 0 instead?
 
@@ -54,7 +55,7 @@ def fake_user_set(fake_user='ON', materials='UNUSED'):
         for ob in objs:
             if hasattr(ob.data, "materials"):
                 for mat in ob.data.materials:
-                    if mat.library is None: #and not in mats:
+                    if mat.library is None: # and not in mats:
                         mats.append(mat)
         """
         mats = (mat for ob in objs if hasattr(ob.data, "materials") for mat in ob.data.materials if mat.library is None)
@@ -77,7 +78,7 @@ def replace_material(m1, m2, all_objects=False, update_selection=False):
     matrep = bpy.data.materials.get(m2)
 
     if matorg != matrep and None not in (matorg, matrep):
-        #store active object
+        # store active object
         scn = bpy.context.scene
 
         if all_objects:
@@ -105,25 +106,25 @@ def replace_material(m1, m2, all_objects=False, update_selection=False):
                 if update_selection and not match:
                     ob.select = False
 
-    #else:
+    # else:
     #    print('Replace material: nothing to replace')
 
 
 def select_material_by_name(find_mat_name):
-    #in object mode selects all objects with material find_mat_name
-    #in edit mode selects all polygons with material find_mat_name
+    # in object mode selects all objects with material find_mat_name
+    # in edit mode selects all polygons with material find_mat_name
 
     find_mat = bpy.data.materials.get(find_mat_name)
 
     if find_mat is None:
         return
 
-    #check for editmode
+    # check for editmode
     editmode = False
 
     scn = bpy.context.scene
 
-    #set selection mode to polygons
+    # set selection mode to polygons
     scn.tool_settings.mesh_select_mode = False, False, True
 
     actob = bpy.context.active_object
@@ -146,16 +147,16 @@ def select_material_by_name(find_mat_name):
                     else:
                         ob.select = False
 
-            #deselect non-meshes
+            # deselect non-meshes
             else:
                 ob.select = False
 
     else:
-        #it's editmode, so select the polygons
+        # it's editmode, so select the polygons
         ob = actob
         ms = ob.material_slots
 
-        #same material can be on multiple slots
+        # same material can be on multiple slots
         slot_indeces = []
         i = 0
         # found = False  # UNUSED
@@ -179,7 +180,7 @@ def mat_to_texface():
     # assigns the first image in each material to the polygons in the active
     # uvlayer for all selected objects
 
-    #check for editmode
+    # check for editmode
     editmode = False
 
     actob = bpy.context.active_object
@@ -189,12 +190,12 @@ def mat_to_texface():
 
     for ob in bpy.context.selected_editable_objects:
         if ob.type == 'MESH':
-            #get the materials from slots
+            # get the materials from slots
             ms = ob.material_slots
 
-            #build a list of images, one per material
+            # build a list of images, one per material
             images = []
-            #get the textures from the mats
+            # get the textures from the mats
             for m in ms:
                 if m.material is None:
                     continue
@@ -210,25 +211,25 @@ def mat_to_texface():
                             break
 
                 if not gotimage:
-#                    print('noimage on', m.name)
+                    #                    print('noimage on', m.name)
                     images.append(None)
 
             # now we have the images applythem to the uvlayer
 
             me = ob.data
-            #got uvs?
+            # got uvs?
             if not me.uv_textures:
                 scn = bpy.context.scene
                 scn.objects.active = ob
                 bpy.ops.mesh.uv_texture_add()
                 scn.objects.active = actob
 
-            #get active uvlayer
-            for t in  me.uv_textures:
+            # get active uvlayer
+            for t in me.uv_textures:
                 if t.active:
                     uvtex = t.data
                     for f in me.polygons:
-                        #check that material had an image!
+                        # check that material had an image!
                         if images[f.material_index] is not None:
                             uvtex[f.index].image = images[f.material_index]
                         else:
@@ -241,10 +242,10 @@ def mat_to_texface():
 
 
 def assignmatslots(ob, matlist):
-    #given an object and a list of material names
-    #removes all material slots form the object
-    #adds new ones for each material in matlist
-    #adds the materials to the slots as well.
+    # given an object and a list of material names
+    # removes all material slots form the object
+    # adds new ones for each material in matlist
+    # adds the materials to the slots as well.
 
     scn = bpy.context.scene
     ob_active = bpy.context.active_object
@@ -265,7 +266,7 @@ def assignmatslots(ob, matlist):
 
 
 def cleanmatslots():
-    #check for edit mode
+    # check for edit mode
     editmode = False
     actob = bpy.context.active_object
     if actob.mode == 'EDIT':
@@ -278,15 +279,15 @@ def cleanmatslots():
         if ob.type == 'MESH':
             mats = ob.material_slots.keys()
 
-            #check the polygons on the mesh to build a list of used materials
+            # check the polygons on the mesh to build a list of used materials
             usedMatIndex = []  # we'll store used materials indices here
             faceMats = []
             me = ob.data
             for f in me.polygons:
-                #get the material index for this face...
+                # get the material index for this face...
                 faceindex = f.material_index
 
-                #indices will be lost: Store face mat use by name
+                # indices will be lost: Store face mat use by name
                 currentfacemat = mats[faceindex]
                 faceMats.append(currentfacemat)
 
@@ -295,18 +296,18 @@ def cleanmatslots():
                 for m in usedMatIndex:
                     if m == faceindex:
                         found = 1
-                        #break
+                        # break
 
                 if found == 0:
-                #add this index to the list
+                    # add this index to the list
                     usedMatIndex.append(faceindex)
 
-            #re-assign the used mats to the mesh and leave out the unused
+            # re-assign the used mats to the mesh and leave out the unused
             ml = []
             mnames = []
             for u in usedMatIndex:
                 ml.append(mats[u])
-                #we'll need a list of names to get the face indices...
+                # we'll need a list of names to get the face indices...
                 mnames.append(mats[u])
 
             assignmatslots(ob, ml)
@@ -374,17 +375,17 @@ def assign_mat(matname="Default"):
                 if m.name == matname:
                     found = True
                     index = i
-                    #make slot active
+                    # make slot active
                     ob.active_material_index = i
                     break
                 i += 1
 
             if not found:
                 index = i
-                #the material is not attached to the object
+                # the material is not attached to the object
                 ob.data.materials.append(target)
 
-            #now assign the material:
+            # now assign the material:
             me = ob.data
             if allpolygons:
                 for f in me.polygons:
@@ -395,16 +396,16 @@ def assign_mat(matname="Default"):
                         f.material_index = index
             me.update()
 
-    #restore the active object
+    # restore the active object
     bpy.context.scene.objects.active = actob
     if editmode:
         bpy.ops.object.mode_set(mode='EDIT')
 
 
 def check_texture(img, mat):
-    #finds a texture from an image
-    #makes a texture if needed
-    #adds it to the material if it isn't there already
+    # finds a texture from an image
+    # makes a texture if needed
+    # adds it to the material if it isn't there already
 
     tex = bpy.data.textures.get(img.name)
 
@@ -413,8 +414,8 @@ def check_texture(img, mat):
 
     tex.image = img
 
-    #see if the material already uses this tex
-    #add it if needed
+    # see if the material already uses this tex
+    # add it if needed
     found = False
     for m in mat.texture_slots:
         if m and m.texture == tex:
@@ -445,7 +446,7 @@ def texface_to_mat():
             for f in ob.data.uv_textures.active.data:
                 if f.image:
                     img = f.image
-                    #build list of unique images
+                    # build list of unique images
                     if img not in unique_images:
                         unique_images.append(img)
                     faceindex.append(unique_images.index(img))
@@ -472,7 +473,7 @@ def texface_to_mat():
         # set up the object material slots
         assignmatslots(ob, matlist)
 
-        #set texface indices to material slot indices..
+        # set texface indices to material slot indices..
         me = ob.data
 
         i = 0
@@ -483,15 +484,17 @@ def texface_to_mat():
     if editmode:
         bpy.ops.object.mode_set(mode='EDIT')
 
+
 def remove_materials():
 
-	for ob in bpy.data.objects:
-		print (ob.name)
-		try:
-			bpy.ops.object.material_slot_remove()
-			print ("removed material from " + ob.name)
-		except:
-			print (ob.name + " does not have materials.")
+    for ob in bpy.data.objects:
+        print(ob.name)
+        try:
+            bpy.ops.object.material_slot_remove()
+            print("removed material from " + ob.name)
+        except:
+            print(ob.name + " does not have materials.")
+
 
 def CyclesNodeOn():
     mats = bpy.data.materials
@@ -501,102 +504,111 @@ def CyclesNodeOn():
 
 ## Operator Classes ##
 
+
 class mlrestore(bpy.types.Operator):
     bl_idname = "cycles.restore"
     bl_label = "Restore Cycles"
     bl_description = "Switch Back to Cycles Nodes"
     bl_register = True
     bl_undo = True
+
     @classmethod
     def poll(cls, context):
         return True
+
     def execute(self, context):
         CyclesNodeOn()
         return {'FINISHED'}
 
-class SetTransparentBackSide(bpy.types.Operator):
-	bl_idname = "material.set_transparent_back_side"
-	bl_label = "Transparent back (BI)."
-	bl_description = "Creates BI nodes transparently mesh background"
-	bl_options = {'REGISTER', 'UNDO'}
-	
-	@classmethod
-	def poll(cls, context):
-		obj = context.active_object
-		if (not obj):
-			return False
-		mat = context.material
-		if (not mat):
-			return False
-		if (mat.node_tree):
-			if (len(mat.node_tree.nodes) == 0):
-				return True
-		if (not mat.use_nodes):
-			return True
-		return False
 
-	def execute(self, context):
-		mat = context.material
-		mat.use_nodes = True
-		if (mat.node_tree):
-			for node in mat.node_tree.nodes:
-				if (node):
-					mat.node_tree.nodes.remove(node)
-		mat.use_transparency = True
-		node_mat = mat.node_tree.nodes.new('ShaderNodeMaterial')
-		node_out = mat.node_tree.nodes.new('ShaderNodeOutput')
-		node_geo = mat.node_tree.nodes.new('ShaderNodeGeometry')
-		node_mat.material = mat
-		node_out.location = [node_out.location[0]+500, node_out.location[1]]
-		node_geo.location = [node_geo.location[0]+150, node_geo.location[1]-150]
-		mat.node_tree.links.new(node_mat.outputs[0], node_out.inputs[0])
-		mat.node_tree.links.new(node_geo.outputs[8], node_out.inputs[1])
-		return {'FINISHED'}
+class SetTransparentBackSide(bpy.types.Operator):
+    bl_idname = "material.set_transparent_back_side"
+    bl_label = "Transparent back (BI)."
+    bl_description = "Creates BI nodes transparently mesh background"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        if (not obj):
+            return False
+        mat = context.material
+        if (not mat):
+            return False
+        if (mat.node_tree):
+            if (len(mat.node_tree.nodes) == 0):
+                return True
+        if (not mat.use_nodes):
+            return True
+        return False
+
+    def execute(self, context):
+        mat = context.material
+        mat.use_nodes = True
+        if (mat.node_tree):
+            for node in mat.node_tree.nodes:
+                if (node):
+                    mat.node_tree.nodes.remove(node)
+        mat.use_transparency = True
+        node_mat = mat.node_tree.nodes.new('ShaderNodeMaterial')
+        node_out = mat.node_tree.nodes.new('ShaderNodeOutput')
+        node_geo = mat.node_tree.nodes.new('ShaderNodeGeometry')
+        node_mat.material = mat
+        node_out.location = [node_out.location[0] + 500, node_out.location[1]]
+        node_geo.location = [node_geo.location[0] + 150, node_geo.location[1] - 150]
+        mat.node_tree.links.new(node_mat.outputs[0], node_out.inputs[0])
+        mat.node_tree.links.new(node_geo.outputs[8], node_out.inputs[1])
+        return {'FINISHED'}
+
 
 class MoveMaterialSlotTop(bpy.types.Operator):
-	bl_idname = "material.move_material_slot_top"
-	bl_label = "Slot to the top"
-	bl_description = "Move the active material slots on top"
-	bl_options = {'REGISTER', 'UNDO'}
-	
-	@classmethod
-	def poll(cls, context):
-		obj = context.active_object
-		if (not obj):
-			return False
-		if (len(obj.material_slots) <= 2):
-			return False
-		if (obj.active_material_index <= 0):
-			return False
-		return True
-	def execute(self, context):
-		activeObj = context.active_object
-		for i in range(activeObj.active_material_index):
-			bpy.ops.object.material_slot_move(direction='UP')
-		return {'FINISHED'}
+    bl_idname = "material.move_material_slot_top"
+    bl_label = "Slot to the top"
+    bl_description = "Move the active material slots on top"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        if (not obj):
+            return False
+        if (len(obj.material_slots) <= 2):
+            return False
+        if (obj.active_material_index <= 0):
+            return False
+        return True
+
+    def execute(self, context):
+        activeObj = context.active_object
+        for i in range(activeObj.active_material_index):
+            bpy.ops.object.material_slot_move(direction='UP')
+        return {'FINISHED'}
+
 
 class MoveMaterialSlotBottom(bpy.types.Operator):
-	bl_idname = "material.move_material_slot_bottom"
-	bl_label = "Slots to the bottom"
-	bl_description = "Move the active material slot at the bottom"
-	bl_options = {'REGISTER', 'UNDO'}
-	
-	@classmethod
-	def poll(cls, context):
-		obj = context.active_object
-		if (not obj):
-			return False
-		if (len(obj.material_slots) <= 2):
-			return False
-		if (len(obj.material_slots)-1 <= obj.active_material_index):
-			return False
-		return True
-	def execute(self, context):
-		activeObj = context.active_object
-		lastSlotIndex = len(activeObj.material_slots) - 1
-		for i in range(lastSlotIndex - activeObj.active_material_index):
-			bpy.ops.object.material_slot_move(direction='DOWN')
-		return {'FINISHED'}
+    bl_idname = "material.move_material_slot_bottom"
+    bl_label = "Slots to the bottom"
+    bl_description = "Move the active material slot at the bottom"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        if (not obj):
+            return False
+        if (len(obj.material_slots) <= 2):
+            return False
+        if (len(obj.material_slots) - 1 <= obj.active_material_index):
+            return False
+        return True
+
+    def execute(self, context):
+        activeObj = context.active_object
+        lastSlotIndex = len(activeObj.material_slots) - 1
+        for i in range(lastSlotIndex - activeObj.active_material_index):
+            bpy.ops.object.material_slot_move(direction='DOWN')
+        return {'FINISHED'}
+
 
 class MATERIAL_OT_link_to_base_names(bpy.types.Operator):
     bl_idname = "material.link_to_base_names"
@@ -642,6 +654,7 @@ class MATERIAL_OT_link_to_base_names(bpy.types.Operator):
 
         slot.material = base_mat
 
+
 class VIEW3D_OT_texface_to_material(bpy.types.Operator):
     """Create texture materials for images assigned in UV editor"""
     bl_idname = "view3d.texface_to_material"
@@ -669,11 +682,11 @@ class VIEW3D_OT_assign_material(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     matname = StringProperty(
-            name='Material Name',
-            description='Name of Material to Assign',
-            default="",
-            maxlen=63,
-            )
+        name='Material Name',
+        description='Name of Material to Assign',
+        default="",
+        maxlen=63,
+    )
 
     @classmethod
     def poll(cls, context):
@@ -690,7 +703,7 @@ class VIEW3D_OT_assign_material(bpy.types.Operator):
 
 class VIEW3D_OT_clean_material_slots(bpy.types.Operator):
     """Removes any material slots from selected objects """ \
-    """that are not used by the mesh"""
+        """that are not used by the mesh"""
     bl_idname = "view3d.clean_material_slots"
     bl_label = "Clean Material Slots (Material Utils)"
     bl_options = {'REGISTER', 'UNDO'}
@@ -718,6 +731,7 @@ class VIEW3D_OT_material_to_texface(bpy.types.Operator):
         mat_to_texface()
         return {'FINISHED'}
 
+
 class VIEW3D_OT_material_remove(bpy.types.Operator):
     """Remove all material slots from active objects"""
     bl_idname = "view3d.material_remove"
@@ -739,10 +753,10 @@ class VIEW3D_OT_select_material_by_name(bpy.types.Operator):
     bl_label = "Select Material By Name (Material Utils)"
     bl_options = {'REGISTER', 'UNDO'}
     matname = StringProperty(
-            name='Material Name',
-            description='Name of Material to Select',
-            maxlen=63,
-            )
+        name='Material Name',
+        description='Name of Material to Select',
+        maxlen=63,
+    )
 
     @classmethod
     def poll(cls, context):
@@ -761,28 +775,28 @@ class VIEW3D_OT_replace_material(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     matorg = StringProperty(
-            name="Original",
-            description="Material to replace",
-            maxlen=63,
-            )
+        name="Original",
+        description="Material to replace",
+        maxlen=63,
+    )
     matrep = StringProperty(name="Replacement",
-            description="Replacement material",
-            maxlen=63,
-            )
+                            description="Replacement material",
+                            maxlen=63,
+                            )
     all_objects = BoolProperty(
-            name="All objects",
-            description="Replace for all objects in this blend file",
-            default=True,
-            )
+        name="All objects",
+        description="Replace for all objects in this blend file",
+        default=True,
+    )
     update_selection = BoolProperty(
-            name="Update Selection",
-            description="Select affected objects and deselect unaffected",
-            default=True,
-            )
+        name="Update Selection",
+        description="Select affected objects and deselect unaffected",
+        default=True,
+    )
 
     # Allow to replace all objects even without a selection / active object
     #@classmethod
-    #def poll(cls, context):
+    # def poll(cls, context):
     #    return context.active_object is not None
 
     def draw(self, context):
@@ -807,23 +821,23 @@ class VIEW3D_OT_fake_user_set(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     fake_user = EnumProperty(
-            name="Fake User",
-            description="Turn fake user on or off",
-            items=(('ON', "On", "Enable fake user"),('OFF', "Off", "Disable fake user")),
-            default='ON'
-            )
+        name="Fake User",
+        description="Turn fake user on or off",
+        items=(('ON', "On", "Enable fake user"), ('OFF', "Off", "Disable fake user")),
+        default='ON'
+    )
 
     materials = EnumProperty(
-            name="Materials",
-            description="Which materials of objects to affect",
-            items=(('ACTIVE', "Active object", "Materials of active object only"),
-                   ('SELECTED', "Selected objects", "Materials of selected objects"),
-                   ('SCENE', "Scene objects", "Materials of objects in current scene"),
-                   ('USED', "Used", "All materials used by objects"),
-                   ('UNUSED', "Unused", "Currently unused materials"),
-                   ('ALL', "All", "All materials in this blend file")),
-            default='UNUSED'
-            )
+        name="Materials",
+        description="Which materials of objects to affect",
+        items=(('ACTIVE', "Active object", "Materials of active object only"),
+               ('SELECTED', "Selected objects", "Materials of selected objects"),
+               ('SCENE', "Scene objects", "Materials of objects in current scene"),
+               ('USED', "Used", "All materials used by objects"),
+               ('UNUSED', "Unused", "Currently unused materials"),
+               ('ALL', "All", "All materials in this blend file")),
+        default='UNUSED'
+    )
 
     def draw(self, context):
         layout = self.layout
@@ -849,8 +863,8 @@ class VIEW3D_MT_assign_material(bpy.types.Menu):
         layout.operator_context = 'INVOKE_REGION_WIN'
         for material_name in bpy.data.materials.keys():
             layout.operator("view3d.assign_material",
-                text=material_name,
-                icon='MATERIAL_DATA').matname = material_name
+                            text=material_name,
+                            icon='MATERIAL_DATA').matname = material_name
 
         layout.operator("view3d.assign_material",
                         text="Add New",
@@ -867,7 +881,7 @@ class VIEW3D_MT_select_material(bpy.types.Menu):
         ob = context.object
         layout.label
         if ob.mode == 'OBJECT':
-            #show all used materials in entire blend file
+            # show all used materials in entire blend file
             for material_name, material in bpy.data.materials.items():
                 if material.users > 0:
                     layout.operator("view3d.select_material_by_name",
@@ -876,12 +890,13 @@ class VIEW3D_MT_select_material(bpy.types.Menu):
                                     ).matname = material_name
 
         elif ob.mode == 'EDIT':
-            #show only the materials on this object
+            # show only the materials on this object
             mats = ob.material_slots.keys()
             for m in mats:
                 layout.operator("view3d.select_material_by_name",
-                    text=m,
-                    icon='MATERIAL_DATA').matname = m
+                                text=m,
+                                icon='MATERIAL_DATA').matname = m
+
 
 class VIEW3D_MT_delete_material(bpy.types.Menu):
     bl_label = "Clean Slots"
@@ -891,7 +906,7 @@ class VIEW3D_MT_delete_material(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.separator()
-        layout.label(text = "Selected Object Only")
+        layout.label(text="Selected Object Only")
         layout.operator("view3d.clean_material_slots",
                         text="Clean Material Slots",
                         icon='CANCEL')
@@ -900,78 +915,79 @@ class VIEW3D_MT_delete_material(bpy.types.Menu):
                         icon='CANCEL')
         self.layout.operator("material.link_to_base_names", icon='CANCEL', text="Merge Base Names")
 
+
 class VIEW3D_MT_master_material(bpy.types.Menu):
-	bl_label = "Material Utils Menu"
+    bl_label = "Material Utils Menu"
 
-	def draw(self, context):
-	# Cycles
-		layout = self.layout
-		layout.operator_context = 'INVOKE_REGION_WIN'
-		if context.scene.render.engine == "CYCLES":
+    def draw(self, context):
+        # Cycles
+        layout = self.layout
+        layout.operator_context = 'INVOKE_REGION_WIN'
+        if context.scene.render.engine == "CYCLES":
 
-			layout.menu("VIEW3D_MT_assign_material", icon='ZOOMIN')
-			layout.menu("VIEW3D_MT_select_material", icon='HAND')
-			layout.operator("view3d.replace_material",
-							text='Replace Material',
-							icon='ARROW_LEFTRIGHT')
+            layout.menu("VIEW3D_MT_assign_material", icon='ZOOMIN')
+            layout.menu("VIEW3D_MT_select_material", icon='HAND')
+            layout.operator("view3d.replace_material",
+                            text='Replace Material',
+                            icon='ARROW_LEFTRIGHT')
 
-			layout.separator()
-			layout.menu("VIEW3D_MT_delete_material", icon="COLOR_RED")
+            layout.separator()
+            layout.menu("VIEW3D_MT_delete_material", icon="COLOR_RED")
 
-			layout.separator()
-			layout.operator("view3d.fake_user_set",
-							text='Set Fake User',
-							icon='UNPINNED')
+            layout.separator()
+            layout.operator("view3d.fake_user_set",
+                            text='Set Fake User',
+                            icon='UNPINNED')
 
+    # Blender Internal
 
-	#Blender Internal
+        elif context.scene.render.engine == "BLENDER_RENDER":
 
-		elif context.scene.render.engine == "BLENDER_RENDER":
+            layout.menu("VIEW3D_MT_assign_material", icon='ZOOMIN')
+            layout.menu("VIEW3D_MT_select_material", icon='HAND')
+            layout.operator("view3d.replace_material",
+                            text='Replace Material',
+                            icon='ARROW_LEFTRIGHT')
 
-			layout.menu("VIEW3D_MT_assign_material", icon='ZOOMIN')
-			layout.menu("VIEW3D_MT_select_material", icon='HAND')
-			layout.operator("view3d.replace_material",
-							text='Replace Material',
-							icon='ARROW_LEFTRIGHT')
+            layout.separator()
+            layout.menu("VIEW3D_MT_delete_material", icon="COLOR_RED")
 
-			layout.separator()
-			layout.menu("VIEW3D_MT_delete_material", icon="COLOR_RED")
+            layout.separator()
+            layout.operator("view3d.fake_user_set",
+                            text='Set Fake User',
+                            icon='UNPINNED')
 
-			layout.separator()
-			layout.operator("view3d.fake_user_set",
-							text='Set Fake User',
-							icon='UNPINNED')
+            self.layout.separator()
+            layout.operator("view3d.material_to_texface",
+                            text="Material to Texface",
+                            icon='MATERIAL_DATA')
+            layout.operator("view3d.texface_to_material",
+                            text="Texface to Material",
+                            icon='TEXTURE_SHADED')
 
-			self.layout.separator()
-			layout.operator("view3d.material_to_texface",
-							text="Material to Texface",
-							icon='MATERIAL_DATA')
-			layout.operator("view3d.texface_to_material",
-							text="Texface to Material",
-							icon='TEXTURE_SHADED')
+        # External render
 
-		#External render
+        else:
 
-		else:
+            layout.menu("VIEW3D_MT_assign_material", icon='ZOOMIN')
+            layout.menu("VIEW3D_MT_select_material", icon='HAND')
+            layout.operator("view3d.replace_material",
+                            text='Replace Material',
+                            icon='ARROW_LEFTRIGHT')
 
-			layout.menu("VIEW3D_MT_assign_material", icon='ZOOMIN')
-			layout.menu("VIEW3D_MT_select_material", icon='HAND')
-			layout.operator("view3d.replace_material",
-							text='Replace Material',
-							icon='ARROW_LEFTRIGHT')
+            layout.separator()
+            layout.menu("VIEW3D_MT_delete_material", icon="COLOR_RED")
 
-			layout.separator()
-			layout.menu("VIEW3D_MT_delete_material", icon="COLOR_RED")
-
-			layout.separator()
-			layout.operator("view3d.fake_user_set",
-							text='Set Fake User',
-							icon='UNPINNED')
+            layout.separator()
+            layout.operator("view3d.fake_user_set",
+                            text='Set Fake User',
+                            icon='UNPINNED')
 
 ### Specials Menu's ###
 
+
 def menu_func(self, context):
-# Cycles
+    # Cycles
     layout = self.layout
     layout.operator_context = 'INVOKE_REGION_WIN'
 
@@ -991,7 +1007,7 @@ def menu_func(self, context):
                         text='Set Fake User',
                         icon='UNPINNED')
 
-#Blender Internal
+# Blender Internal
 
     elif context.scene.render.engine == "BLENDER_RENDER":
         layout.separator()
@@ -1020,7 +1036,7 @@ def menu_func(self, context):
         self.layout.separator()
         self.layout.operator("material.set_transparent_back_side", icon='TEXTURE_DATA', text="Transparent back (BI)")
 
-#External Render
+# External Render
 
     else:
         layout.separator()
@@ -1038,8 +1054,9 @@ def menu_func(self, context):
                         text='Set Fake User',
                         icon='UNPINNED')
 
+
 def menu_move(self, context):
-# Cycles
+    # Cycles
     layout = self.layout
     layout.operator_context = 'INVOKE_REGION_WIN'
 
@@ -1049,6 +1066,7 @@ def menu_move(self, context):
 
 # Register
 
+
 def register():
     bpy.utils.register_module(__name__)
 
@@ -1057,9 +1075,10 @@ def register():
         km = kc.keymaps.new(name="3D View", space_type="VIEW_3D")
         kmi = km.keymap_items.new('wm.call_menu', 'Q', 'PRESS', shift=True)
         kmi.properties.name = "VIEW3D_MT_master_material"
-		
+
     bpy.types.MATERIAL_MT_specials.prepend(menu_move)
     bpy.types.MATERIAL_MT_specials.append(menu_func)
+
 
 def unregister():
 
@@ -1078,4 +1097,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

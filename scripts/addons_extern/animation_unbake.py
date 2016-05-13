@@ -15,6 +15,7 @@ bl_info = {
 import bpy
 from bpy.props import BoolProperty, FloatProperty
 
+
 class Boton(bpy.types.Panel):
     bl_label = 'unBake selected fcurves'
     bl_space_type = 'VIEW_3D'
@@ -54,7 +55,8 @@ class UnBakeA(bpy.types.Operator):
             keys = bpy.data.actions.new(name='KEYS')
             for sam, dat, ind in pts:
                 fcu = keys.fcurves.new(data_path=dat, index=ind)
-                if self.RGB: fcu.color_mode = 'AUTO_RGB'
+                if self.RGB:
+                    fcu.color_mode = 'AUTO_RGB'
                 fcu.keyframe_points.add(len(sam))
                 for i in range(len(sam)):
                     w = fcu.keyframe_points[i]
@@ -90,7 +92,7 @@ class UnBakeB(bpy.types.Operator):
         for c in obj.animation_data.action.fcurves:
             if c.sampled_points and c.select:
                 sam = c.sampled_points
-                cu = bpy.data.curves.new('path','CURVE')
+                cu = bpy.data.curves.new('path', 'CURVE')
                 cu.dimensions = '3D'
                 if self.use_radius:
                     cu.fill_mode = 'FULL'
@@ -98,25 +100,27 @@ class UnBakeB(bpy.types.Operator):
                     cu.resolution_u = 1
                     cu.bevel_depth = 1
                 spline = cu.splines.new('BEZIER')
-                spline.bezier_points.add(len(sam)-1)
-                curva = bpy.data.objects.new('curve',cu)
-                curva.name = c.data_path+' '+str(c.array_index)
+                spline.bezier_points.add(len(sam) - 1)
+                curva = bpy.data.objects.new('curve', cu)
+                curva.name = c.data_path + ' ' + str(c.array_index)
                 context.scene.objects.link(curva)
                 for i in range(len(sam)):
                     w = spline.bezier_points[i]
-                    y = self.scaleY*sam[i].co[1]
+                    y = self.scaleY * sam[i].co[1]
                     if self.use_radius:
                         w.radius = y
                         y = 0
-                    coords = (self.scaleX*sam[i].co[0],y,0)
+                    coords = (self.scaleX * sam[i].co[0], y, 0)
                     w.co = w.handle_left = w.handle_right = coords
-                    
+
         return{'FINISHED'}
+
 
 def register():
     bpy.utils.register_class(Boton)
     bpy.utils.register_class(UnBakeA)
     bpy.utils.register_class(UnBakeB)
+
 
 def unregister():
     bpy.utils.unregister_class(Boton)

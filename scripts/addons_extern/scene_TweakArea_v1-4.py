@@ -7,7 +7,7 @@
 ######################################################################################################
 
 
-############# Add-on description (used by Blender)
+# Add-on description (used by Blender)
 
 bl_info = {
     "name": "Tweak Area",
@@ -25,7 +25,9 @@ bl_info = {
 
 import bpy
 ########################
-###### Preferences Panel
+# Preferences Panel
+
+
 class TweakAreaPreferencePanel(bpy.types.AddonPreferences):
     """ Create a configuration panel in the preferences """
     bl_idname = __name__
@@ -60,11 +62,12 @@ class TweakAreaPreferencePanel(bpy.types.AddonPreferences):
         row.operator('wm.apply_shorcut_as_default', text='Apply Shortcuts')
         return {'FINISHED'}
 
+
 class ApplyShorcutsAsDefault(bpy.types.Operator):
     """  """
     bl_idname = "wm.apply_shorcut_as_default"
     bl_label = "Apply Shorcut As Default"
-    
+
     @classmethod
     def poll(cls, context):
         return __name__ in [addon.module for addon in context.user_preferences.addons]
@@ -72,20 +75,21 @@ class ApplyShorcutsAsDefault(bpy.types.Operator):
     def execute(self, context):
         wm = bpy.context.window_manager
 
-        for name in (TweakArea.bl_idname,SwitchArea.bl_idname):
+        for name in (TweakArea.bl_idname, SwitchArea.bl_idname):
             new_value = wm.keyconfigs['Blender'].keymaps['Window'].keymap_items[name].value
             new_type = wm.keyconfigs['Blender'].keymaps['Window'].keymap_items[name].type
             new_map_type = wm.keyconfigs['Blender'].keymaps['Window'].keymap_items[name].map_type
             wm.keyconfigs['Blender'].keymaps['Window'].keymap_items.remove(wm.keyconfigs['Blender'].keymaps['Window'].keymap_items[name])
             wm.keyconfigs['Blender'].keymaps['Window'].keymap_items.new(name, new_type, new_value)
             if name == TweakArea.bl_idname:
-                context.user_preferences.addons[__name__].preferences.TweakArea_map_type , context.user_preferences.addons[__name__].preferences.TweakArea_type , context.user_preferences.addons[__name__].preferences.TweakArea_value = (new_map_type, new_type, new_value)
+                context.user_preferences.addons[__name__].preferences.TweakArea_map_type, context.user_preferences.addons[__name__].preferences.TweakArea_type, context.user_preferences.addons[__name__].preferences.TweakArea_value = (new_map_type, new_type, new_value)
             elif name == SwitchArea.bl_idname:
-                context.user_preferences.addons[__name__].preferences.SwitchArea_map_type , context.user_preferences.addons[__name__].preferences.SwitchArea_type , context.user_preferences.addons[__name__].preferences.SwitchArea_value = (new_map_type, new_type, new_value)
+                context.user_preferences.addons[__name__].preferences.SwitchArea_map_type, context.user_preferences.addons[__name__].preferences.SwitchArea_type, context.user_preferences.addons[__name__].preferences.SwitchArea_value = (new_map_type, new_type, new_value)
         return {'FINISHED'}
-    
+
 ########################
-###### Tweak Area
+# Tweak Area
+
 
 class TweakArea(bpy.types.Operator):
     """ Join the current area with the selected (by clicking), or divide it """
@@ -95,8 +99,8 @@ class TweakArea(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         if context.screen.show_fullscreen:
-                self.report({'INFO'}, "Impossible to do in fullscreen mode")
-                return False
+            self.report({'INFO'}, "Impossible to do in fullscreen mode")
+            return False
         return True
 
     min_x = bpy.props.IntProperty()
@@ -107,11 +111,11 @@ class TweakArea(bpy.types.Operator):
             self.max_x = event.mouse_x
             self.max_y = event.mouse_y
             if bpy.ops.screen.area_join(min_x=self.min_x, min_y=self.min_y, max_x=self.max_x, max_y=self.max_y) == {'CANCELLED'}:
-                if (min(self.min_x,self.max_x) >= context.area.x) and (min(self.min_y,self.max_y) >= context.area.y) and (max(self.min_x,self.max_x) <= (context.area.x + context.area.width)) and (max(self.min_y,self.max_y) <= (context.area.y + context.area.height)):
+                if (min(self.min_x, self.max_x) >= context.area.x) and (min(self.min_y, self.max_y) >= context.area.y) and (max(self.min_x, self.max_x) <= (context.area.x + context.area.width)) and (max(self.min_y, self.max_y) <= (context.area.y + context.area.height)):
                     if abs(self.min_x - self.max_x) > abs(self.min_y - self.max_y):
-                        bpy.ops.screen.area_split(direction='VERTICAL', factor=(self.max_x - context.area.x)/(context.area.width), mouse_x=self.min_x, mouse_y=self.min_y)
+                        bpy.ops.screen.area_split(direction='VERTICAL', factor=(self.max_x - context.area.x) / (context.area.width), mouse_x=self.min_x, mouse_y=self.min_y)
                     elif abs(self.min_x - self.max_x) < abs(self.min_y - self.max_y):
-                        bpy.ops.screen.area_split(direction='HORIZONTAL', factor=(self.max_y - context.area.y)/(context.area.height), mouse_x=self.min_x, mouse_y=self.min_y)
+                        bpy.ops.screen.area_split(direction='HORIZONTAL', factor=(self.max_y - context.area.y) / (context.area.height), mouse_x=self.min_x, mouse_y=self.min_y)
                 else:
                     self.report({'INFO'}, "Areas selected can't be merged together")
             bpy.ops.screen.header_toggle_menus()
@@ -128,6 +132,7 @@ class TweakArea(bpy.types.Operator):
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
 
+
 class SwitchArea(bpy.types.Operator):
     """ Join the current area with the selected (by clicking), or divide it """
     bl_idname = "wm.switch_area"
@@ -136,8 +141,8 @@ class SwitchArea(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         if context.screen.show_fullscreen:
-                self.report({'INFO'}, "Impossible to do in fullscreen mode")
-                return False
+            self.report({'INFO'}, "Impossible to do in fullscreen mode")
+            return False
         return True
 
     def modal(self, context, event):
@@ -160,12 +165,12 @@ class SwitchArea(bpy.types.Operator):
 
     def detect_area(self, x, y, context):
         for area in context.screen.areas:
-            h , w= area.height , area.width
-            if (x>=area.x) and (y>=area.y) and (x<=(area.x+w)) and (y<=(area.y+h)):   
+            h, w = area.height, area.width
+            if (x >= area.x) and (y >= area.y) and (x <= (area.x + w)) and (y <= (area.y + h)):
                 return area
 
 
-###################### Registration of all Operators, Panels and Shortcuts
+# Registration of all Operators, Panels and Shortcuts
 
 def register():
     bpy.utils.register_class(TweakAreaPreferencePanel)
@@ -176,19 +181,19 @@ def register():
     # keymap
     wm = bpy.context.window_manager
     if wm.keyconfigs['Blender'].keymaps['Window'].keymap_items.find(TweakArea.bl_idname) == -1:
-        if bpy.context.user_preferences.addons[__name__].preferences.TweakArea_type != '': # need to use both properties for a better security
+        if bpy.context.user_preferences.addons[__name__].preferences.TweakArea_type != '':  # need to use both properties for a better security
             wm.keyconfigs['Blender'].keymaps['Window'].keymap_items.new(TweakArea.bl_idname, bpy.context.user_preferences.addons[__name__].preferences.TweakArea_type, bpy.context.user_preferences.addons[__name__].preferences.TweakArea_value)
             wm.keyconfigs['Blender'].keymaps['Window'].keymap_items.new(SwitchArea.bl_idname, bpy.context.user_preferences.addons[__name__].preferences.SwitchArea_type, bpy.context.user_preferences.addons[__name__].preferences.SwitchArea_value)
         else:
             wm.keyconfigs['Blender'].keymaps['Window'].keymap_items.new(TweakArea.bl_idname, 'BUTTON5MOUSE', 'PRESS')
             wm.keyconfigs['Blender'].keymaps['Window'].keymap_items.new(SwitchArea.bl_idname, 'BUTTON5MOUSE', 'PRESS', ctrl=True)
 
-###################### Unregistration of all Operators, Panels and Shortcuts
-    
+# Unregistration of all Operators, Panels and Shortcuts
+
+
 def unregister():
     bpy.utils.unregister_class(TweakAreaPreferencePanel)
     bpy.utils.unregister_class(ApplyShorcutsAsDefault)
-
 
     # keymap
     wm = bpy.context.window_manager
@@ -196,6 +201,6 @@ def unregister():
     wm.keyconfigs['Blender'].keymaps['Window'].keymap_items.remove(wm.keyconfigs['Blender'].keymaps['Window'].keymap_items[SwitchArea.bl_idname])
     bpy.utils.unregister_class(TweakArea)
     bpy.utils.unregister_class(SwitchArea)
-    
+
 if __name__ == '__main__':
     register()

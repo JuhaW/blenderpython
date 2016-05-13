@@ -37,6 +37,7 @@ import bpy
 from mathutils import Vector
 from math import pi
 
+
 class Slope2VCol(bpy.types.Operator):
     bl_idname = "mesh.slope2vcol"
     bl_label = "Slope2Vcol"
@@ -49,7 +50,7 @@ class Slope2VCol(bpy.types.Operator):
              isinstance(context.scene.objects.active, bpy.types.Object) and
              isinstance(context.scene.objects.active.data, bpy.types.Mesh))
         return p
-        
+
     def execute(self, context):
         bpy.ops.object.mode_set(mode='OBJECT')
         mesh = context.scene.objects.active.data

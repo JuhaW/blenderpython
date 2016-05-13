@@ -52,40 +52,40 @@ class ImportAnim(bpy.types.Operator, ImportHelper):
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
     directory = StringProperty(
-            maxlen=1024,
-            subtype='DIR_PATH',
-            options={'HIDDEN', 'SKIP_SAVE'})
+        maxlen=1024,
+        subtype='DIR_PATH',
+        options={'HIDDEN', 'SKIP_SAVE'})
     files = CollectionProperty(
-            type=bpy.types.OperatorFileListElement,
-            options={'HIDDEN', 'SKIP_SAVE'})
+        type=bpy.types.OperatorFileListElement,
+        options={'HIDDEN', 'SKIP_SAVE'})
     filename_ext = ".anim"
     filter_glob = StringProperty(default="*.anim", options={'HIDDEN'})
     location = BoolProperty(
-            name="Location",
-            description="Import location data",
-            default=True)
+        name="Location",
+        description="Import location data",
+        default=True)
     rotation = BoolProperty(
-            name="Rotation",
-            description="Import rotation data",
-            default=True)
+        name="Rotation",
+        description="Import rotation data",
+        default=True)
     scale = BoolProperty(
-            name="Scale",
-            description="Import scale data",
-            default=False)
+        name="Scale",
+        description="Import scale data",
+        default=False)
     visibility = BoolProperty(
-            name="Visibility",
-            description="Import visibility data",
-            default=True)
+        name="Visibility",
+        description="Import visibility data",
+        default=True)
     only_selected = BoolProperty(
-            name="Only selected",
-            description="Import only animation data for the selected objects",
-            default=False)
+        name="Only selected",
+        description="Import only animation data for the selected objects",
+        default=False)
 
     def draw(self, context):
         layout = self.layout
         col = layout.column()
         col.separator()
-        #col.label("Import options")
+        # col.label("Import options")
         row = col.row(align=True)
         row.prop(self, "location", toggle=True)
         row.prop(self, "rotation", toggle=True)
@@ -110,7 +110,7 @@ def print_progress(progress, min=0, max=100, barlen=50, item=""):
     if max <= min:
         return
     total_len = max - min
-    #print(int(progress * barlen / total_len), end='\r')
+    # print(int(progress * barlen / total_len), end='\r')
     bar_progress = int((progress - min) * barlen / total_len) * "="
     bar_empty = (barlen - int((progress - min) * barlen / total_len)) * " "
     percentage = "".join((str(int((progress - min) / total_len * 100)), "%"))
@@ -135,8 +135,8 @@ def import_anim_file(anim_file):
     with open(anim_file, "rb") as f:
         frame_range = pickle.load(f)
         anim_data = pickle.load(f)
-        #frame_range = eval(f.readline())
-        #anim_data = eval(f.readline())
+        # frame_range = eval(f.readline())
+        # anim_data = eval(f.readline())
         return (frame_range, anim_data)
 
 
@@ -152,7 +152,7 @@ def set_keyframes(obj, frame, loc=None, roo=None, rot=None, scale=None, vis=None
         obj.location = (loc[0], -loc[2], loc[1])
         obj.keyframe_insert('location', frame=frame, group="LocRotScale")
     if rot:
-        #obj.rotation_mode = roo.upper()
+        # obj.rotation_mode = roo.upper()
         obj.rotation_mode = convert_roo(roo)
         obj.rotation_euler = (radians(rot[0]), radians(-rot[2]), radians(rot[1]))
         obj.keyframe_insert('rotation_euler', frame=frame, group="LocRotScale")
@@ -201,7 +201,7 @@ def import_anim_data(anim_file, use_location, use_rotation, use_scale, use_visib
     for i, obj_name in enumerate(anim_data.keys()):
         print_progress(i, max=len(anim_data.keys()) - 1, item=obj_name)
         if obj_name in obj_list:
-            #print("Processing {obj}...".format(obj=obj_name))
+            # print("Processing {obj}...".format(obj=obj_name))
             obj = bpy.data.objects[obj_name]
             create_action(obj)
             for info in anim_data[obj_name]:
@@ -212,7 +212,7 @@ def import_anim_data(anim_file, use_location, use_rotation, use_scale, use_visib
                               rot=rot * use_rotation,
                               scale=scale * use_scale,
                               vis=vis,
-                              use_visibility = use_visibility)
+                              use_visibility=use_visibility)
         else:
             if not only_selected:
                 print("Skipping {obj}, did not find it in the current scene...".format(obj=obj_name))

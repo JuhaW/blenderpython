@@ -46,6 +46,7 @@ UVR = [('R0', '0', '0'),
        ('R180', '180', '180'),
        ('R270', '270', '270')]
 
+
 class UPT_props(bpy.types.PropertyGroup):
 
     # static settings
@@ -147,26 +148,26 @@ class OT_PT(bpy.types.Operator):
 
         # UV map
 
-        uvt = [[0.0,0.0],[1.0,0.0],[1.0,1.0],[0.0,1.0]]
+        uvt = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]]
 
         # UV map based on offset
 
-        tx0 = tile_w*(self.TLXO)
-        tx1 = tile_w*(self.TLXO+1)
-        tx2 = tile_w*(self.TLXO+1)
-        tx3 = tile_w*(self.TLXO)
+        tx0 = tile_w * (self.TLXO)
+        tx1 = tile_w * (self.TLXO + 1)
+        tx2 = tile_w * (self.TLXO + 1)
+        tx3 = tile_w * (self.TLXO)
 
-        ty0 = tile_h*(self.TLYO)
-        ty1 = tile_h*(self.TLYO)
-        ty2 = tile_h*(self.TLYO+1)
-        ty3 = tile_h*(self.TLYO+1)
+        ty0 = tile_h * (self.TLYO)
+        ty1 = tile_h * (self.TLYO)
+        ty2 = tile_h * (self.TLYO + 1)
+        ty3 = tile_h * (self.TLYO + 1)
 
         # Add border
 
-        uva = [[tx0+(tile_border_w),ty0+(tile_border_h)],
-               [tx1-(tile_border_w),ty1+(tile_border_h)],
-               [tx2-(tile_border_w),ty2-(tile_border_h)],
-               [tx3+(tile_border_w),ty3-(tile_border_h)]]
+        uva = [[tx0 + (tile_border_w), ty0 + (tile_border_h)],
+               [tx1 - (tile_border_w), ty1 + (tile_border_h)],
+               [tx2 - (tile_border_w), ty2 - (tile_border_h)],
+               [tx3 + (tile_border_w), ty3 - (tile_border_h)]]
 
         # Mirror
 
@@ -202,31 +203,31 @@ class OT_PT(bpy.types.Operator):
 
                 if self.TLRT == 'R0':
                     layer.data[layer_id].uv = uvt[0]
-                    layer.data[layer_id+1].uv = uvt[1]
-                    layer.data[layer_id+2].uv = uvt[2]
-                    layer.data[layer_id+3].uv = uvt[3]
+                    layer.data[layer_id + 1].uv = uvt[1]
+                    layer.data[layer_id + 2].uv = uvt[2]
+                    layer.data[layer_id + 3].uv = uvt[3]
 
                 if self.TLRT == 'R90':
                     layer.data[layer_id].uv = uvt[1]
-                    layer.data[layer_id+1].uv = uvt[2]
-                    layer.data[layer_id+2].uv = uvt[3]
-                    layer.data[layer_id+3].uv = uvt[0]
+                    layer.data[layer_id + 1].uv = uvt[2]
+                    layer.data[layer_id + 2].uv = uvt[3]
+                    layer.data[layer_id + 3].uv = uvt[0]
 
                 if self.TLRT == 'R180':
                     layer.data[layer_id].uv = uvt[2]
-                    layer.data[layer_id+1].uv = uvt[3]
-                    layer.data[layer_id+2].uv = uvt[0]
-                    layer.data[layer_id+3].uv = uvt[1]
+                    layer.data[layer_id + 1].uv = uvt[3]
+                    layer.data[layer_id + 2].uv = uvt[0]
+                    layer.data[layer_id + 3].uv = uvt[1]
 
                 if self.TLRT == 'R270':
                     layer.data[layer_id].uv = uvt[3]
-                    layer.data[layer_id+1].uv = uvt[0]
-                    layer.data[layer_id+2].uv = uvt[1]
-                    layer.data[layer_id+3].uv = uvt[2]
+                    layer.data[layer_id + 1].uv = uvt[0]
+                    layer.data[layer_id + 2].uv = uvt[1]
+                    layer.data[layer_id + 3].uv = uvt[2]
 
             layer_id += p.loop_total
 
-        bpy.ops.object.mode_set(mode = pmode)
+        bpy.ops.object.mode_set(mode=pmode)
 
         return {'FINISHED'}
 
@@ -316,6 +317,7 @@ def register():
     bpy.utils.register_module(__name__)
     bpy.types.Scene.UPT = bpy.props.PointerProperty(type=UPT_props)
 
+
 def unregister():
     del bpy.types.Scene.UPT
     bpy.utils.unregister_module(__name__)
@@ -324,4 +326,3 @@ if __name__ == "__main__":
     register()
 
 # ----------------------------------------------------------------
-

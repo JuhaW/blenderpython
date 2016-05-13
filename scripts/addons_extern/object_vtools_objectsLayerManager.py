@@ -9,7 +9,7 @@ bl_info = {
                    "limitations. Only viewport visualization, not related to "
                    "render process.",
     "category": "Object",
-    }
+}
 
 
 import bpy
@@ -18,10 +18,10 @@ import bpy
 from bpy.props import (
     StringProperty, BoolProperty, IntProperty, FloatProperty,
     FloatVectorProperty, EnumProperty, PointerProperty
-    )
+)
 from bpy.types import (
     Panel, Operator, AddonPreferences, PropertyGroup
-    )
+)
 
 # --------- CALLBACKS ------------------#
 
@@ -144,8 +144,8 @@ class VTOOLS_OP_removeObjectLayer(bpy.types.Operator):
                 if obj.objectLayerManager.name == layerName:
                     obj.objectLayerManager.name = ""
 
-            if idSelected == (len(bpy.context.scene.objectsLayerManager)-1):
-                bpy.context.scene.objectsLayerManager_ID_index = bpy.context.scene.objectsLayerManager_ID_index-1
+            if idSelected == (len(bpy.context.scene.objectsLayerManager) - 1):
+                bpy.context.scene.objectsLayerManager_ID_index = bpy.context.scene.objectsLayerManager_ID_index - 1
 
             newLayer = bpy.context.scene.objectsLayerManager.remove(idSelected)
 
@@ -288,6 +288,7 @@ class objectlayerManagerProps(bpy.types.PropertyGroup):
 
 
 class VTOOLS_UIL_objectsLayerManagerUI(bpy.types.UIList):
+
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         drawItem = True
         showVisibleLayers = bpy.context.scene.objectsLayerManager_showVisibleLayers
@@ -329,9 +330,9 @@ class VTOOLS_UIL_objectsLayerManagerUI(bpy.types.UIList):
 
         if showVisibleLayers:
             for layer in layers:
-                if not bpy.context.scene.layers[layer.linkedLayerId-1]:
+                if not bpy.context.scene.layers[layer.linkedLayerId - 1]:
                     drawItem = False
-                    flt_neworder.append(layersCount-1-nonVisibleCount)
+                    flt_neworder.append(layersCount - 1 - nonVisibleCount)
                     nonVisibleCount += 1
 
                 else:

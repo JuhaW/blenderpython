@@ -7,7 +7,7 @@
 ######################################################################################################
 
 
-############# Add-on description (used by Blender)
+# Add-on description (used by Blender)
 
 bl_info = {
     "name": "Renamer",
@@ -25,8 +25,9 @@ import bpy
 
 bpy.types.Scene.source_name = bpy.props.StringProperty()
 bpy.types.Scene.new_name = bpy.props.StringProperty()
-bpy.types.Scene.rename_mode = bpy.props.EnumProperty(items =[('objects','Object',"",1),('materials','Material',"",2),('textures','Texture',"",3),('meshes','Mesh',"",4),('lamps','Lamp',"",5),('scenes','Scene',"",6),('worlds','World',"",7)])
-bpy.types.Scene.only_selection= bpy.props.BoolProperty(default=False)
+bpy.types.Scene.rename_mode = bpy.props.EnumProperty(items=[('objects', 'Object', "", 1), ('materials', 'Material', "", 2), ('textures', 'Texture', "", 3), ('meshes', 'Mesh', "", 4), ('lamps', 'Lamp', "", 5), ('scenes', 'Scene', "", 6), ('worlds', 'World', "", 7)])
+bpy.types.Scene.only_selection = bpy.props.BoolProperty(default=False)
+
 
 class Rename(bpy.types.Operator):
     """  """
@@ -40,15 +41,16 @@ class Rename(bpy.types.Operator):
     def execute(self, context):
         source_name = context.scene.source_name
         new_name = context.scene.new_name
-        
+
         if context.scene.rename_mode == 'objects' and context.scene.only_selection:
             to_rename_list = bpy.data.objects
             for foo in to_rename_list:
                 if source_name in foo.name and foo.select:
-                    foo.name = foo.name[:foo.name.index(source_name)] + new_name + foo.name[foo.name.index(source_name)+len(source_name):]
+                    foo.name = foo.name[:foo.name.index(source_name)] + new_name + foo.name[foo.name.index(source_name) + len(source_name):]
         else:
-            exec('to_rename_list = bpy.data.' + context.scene.rename_mode +'\n' +'for foo in to_rename_list:' +'\n'+ '    if source_name in foo.name:'+'\n'+'        foo.name = foo.name[:foo.name.index(source_name)] + new_name + foo.name[foo.name.index(source_name)+len(source_name):]')
+            exec('to_rename_list = bpy.data.' + context.scene.rename_mode + '\n' + 'for foo in to_rename_list:' + '\n' + '    if source_name in foo.name:' + '\n' + '        foo.name = foo.name[:foo.name.index(source_name)] + new_name + foo.name[foo.name.index(source_name)+len(source_name):]')
         return {'FINISHED'}
+
 
 class SwitchName(bpy.types.Operator):
     """  """
@@ -60,8 +62,9 @@ class SwitchName(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        context.scene.new_name , context.scene.source_name = context.scene.source_name , context.scene.new_name
+        context.scene.new_name, context.scene.source_name = context.scene.source_name, context.scene.new_name
         return {'FINISHED'}
+
 
 class RenamePanel(bpy.types.Panel):
     """ """
@@ -86,7 +89,6 @@ def register():
     bpy.utils.register_class(RenamePanel)
     bpy.utils.register_class(Rename)
     bpy.utils.register_class(SwitchName)
-
 
 
 def unregister():

@@ -21,7 +21,7 @@ bl_info = {
     "name": "Create MT",
     "category": "Object",
     "author": "Pixivore",
-    "version": (1,0,0),
+    "version": (1, 0, 0),
     "blender": (2, 77, 0),
     "description": "Multiple tools to create objects.",
 }
@@ -45,27 +45,26 @@ def draw_callback_px(self, context):
     region = context.region
 
     # Tente de positionner le texte au milieu de la fenetre (à refaire)
-    xt = int(region.width/2.0)
+    xt = int(region.width / 2.0)
     yt = 70
-    
-        
-    # Position et affichage du texte du mode en cours avec les infos dessous (Voir pour mieux centrer le texte)        
+
+    # Position et affichage du texte du mode en cours avec les infos dessous (Voir pour mieux centrer le texte)
     blf.position(font_id, xt - blf.dimensions(font_id, "CREATE")[0], 65 + yt, 0)
     blf.size(font_id, 20, 82)
     bgl.glColor4f(0.900, 0.4, 0.00, 1.0)
     blf.draw(font_id, "CREATE")
-    
+
     bgl.glLineWidth(2)
     bgl.glColor4f(0.900, 0.4, 0.00, 1.0)
     bgl.glBegin(bgl.GL_LINE_STRIP)
     bgl.glVertex2i(int(xt - blf.dimensions(font_id, "CREATE")[0] + 0), 55 + yt)
     bgl.glVertex2i(int(xt - blf.dimensions(font_id, "CREATE")[0] + 200), 55 + yt)
     bgl.glEnd()
-    
+
     # Selon le mode, l'ecriture change de largeur donc le centre est décalé. Ca permet de "réparer" les erreurs.
     xt = xt - blf.dimensions(font_id, "CREATE")[0]
-        
-    # Affichage des infos        
+
+    # Affichage des infos
     blf.size(font_id, 20, 50)
     blf.position(font_id, xt + 15, 35 + yt, 0)
     bgl.glColor4f(0.912, 0.919, 0.994, 1.0)
@@ -76,7 +75,7 @@ def draw_callback_px(self, context):
     if(self.CreateMode == 2):
         if(self.Closed == False):
             blf.draw(font_id, "Type Line [SPACE] ([C] to close geometry)")
-        else:            
+        else:
             blf.draw(font_id, "Type closed Line [SPACE] ([C] to open geometry) ")
 
     if(self.CreateMode == 0):
@@ -108,7 +107,6 @@ def draw_callback_px(self, context):
         blf.position(font_id, xt + 15, -25 + yt, 0)
         blf.draw(font_id, "Incremental (Ctrl)")
 
-
     # Mode, couleur et largeur des lignes
     bgl.glEnable(bgl.GL_BLEND)
     bgl.glColor4f(0.812, 0.519, 0.094, 0.5)
@@ -118,13 +116,13 @@ def draw_callback_px(self, context):
     bgl.glEnable(bgl.GL_POINT_SMOOTH)
     if(self.bDone):
         # Affichage des primitives selon le type de découpe choisie
-        
+
         if(len(self.mouse_path) > 1):
-            x0 = self.mouse_path[0][0] 
+            x0 = self.mouse_path[0][0]
             y0 = self.mouse_path[0][1]
             x1 = self.mouse_path[1][0]
             y1 = self.mouse_path[1][1]
-        
+
         # Affichage de la ligne de coupe
         if(self.CreateMode == 2):
             bgl.glBegin(bgl.GL_LINE_STRIP)
@@ -137,8 +135,8 @@ def draw_callback_px(self, context):
             for x, y in self.mouse_path:
                 bgl.glVertex2i(x + self.xpos, y + self.ypos)
             bgl.glEnd()
-            
-        # Affichage du rectange de découpe    
+
+        # Affichage du rectange de découpe
         if(self.CreateMode == 0):
             bgl.glColor4f(0.812, 0.519, 0.094, 0.5)
             # Selon si on appuie sur SHIFT, le rectangle est plein ou pas
@@ -158,24 +156,23 @@ def draw_callback_px(self, context):
             bgl.glVertex2i(x0 + self.xpos, y1 + self.ypos)
             bgl.glEnd()
 
-        # Affichage du cercle            
+        # Affichage du cercle
         if(self.CreateMode == 1):
-            DEG2RAD = 3.14159/180;
+            DEG2RAD = 3.14159 / 180
             v0 = mathutils.Vector((self.mouse_path[0][0], self.mouse_path[0][1], 0))
             v1 = mathutils.Vector((self.mouse_path[1][0], self.mouse_path[1][1], 0))
             v0 -= v1
-            radius = self.mouse_path[1][0] - self.mouse_path[0][0]  
-            DEG2RAD = 3.14159/(180/self.stepAngle[self.step])
+            radius = self.mouse_path[1][0] - self.mouse_path[0][0]
+            DEG2RAD = 3.14159 / (180 / self.stepAngle[self.step])
             if(self.ctrl):
-                shift = (3.14159/(360/self.stepAngle[self.step])) * self.stepRotation
+                shift = (3.14159 / (360 / self.stepAngle[self.step])) * self.stepRotation
             else:
-                shift = (self.mouse_path[1][1] - self.mouse_path[0][1])/50
+                shift = (self.mouse_path[1][1] - self.mouse_path[0][1]) / 50
 
-            
-            # Selon si on appuie sur SHIFT, le cercle est plein ou pas                            
+            # Selon si on appuie sur SHIFT, le cercle est plein ou pas
             bgl.glBegin(bgl.GL_TRIANGLE_FAN)
             bgl.glVertex2i(x0 + self.xpos, y0 + self.ypos)
-            for i in range(0, int(360/self.stepAngle[self.step])):
+            for i in range(0, int(360 / self.stepAngle[self.step])):
                 degInRad = i * DEG2RAD
                 bgl.glVertex2i(x0 + self.xpos + int(math.cos(degInRad + shift) * radius), y0 + self.ypos + int(math.sin(degInRad + shift) * radius))
             bgl.glVertex2i(x0 + self.xpos + int(math.cos(0 + shift) * radius), y0 + self.ypos + int(math.sin(0 + shift) * radius))
@@ -188,16 +185,15 @@ def draw_callback_px(self, context):
     bgl.glDisable(bgl.GL_POINT_SMOOTH)
 
 
-
 ####################################################################################
 # Création du cube
 ####################################################################################
 def CreateCube(self, context):
     # Creation du mesh
-    me = bpy.data.meshes.new('C_Cube') 
+    me = bpy.data.meshes.new('C_Cube')
 
     # Creation de l'objet
-    ob = bpy.data.objects.new('C_Cube', me) 
+    ob = bpy.data.objects.new('C_Cube', me)
     # Sauvegarde l'objet créé
     self.CurrentObj = ob
     # Récup des infos de la scene
@@ -213,7 +209,7 @@ def CreateCube(self, context):
     # Indique à l'objet sa locatiopn et sa matrice "WORLD"
     ob.matrix_world = mat
     ob.location = loc
-    
+
     # Lie l'objet à la scene
     bpy.context.scene.objects.link(ob)
 
@@ -223,14 +219,14 @@ def CreateCube(self, context):
     # Convertit les coords de la souris en espace 3D
     v0 = self.mouse_path[0][0] + self.xpos, self.mouse_path[0][1] + self.ypos
     v1 = self.mouse_path[1][0] + self.xpos, self.mouse_path[1][1] + self.ypos
-    vec =  region_2d_to_vector_3d(region, rv3d, v0)
+    vec = region_2d_to_vector_3d(region, rv3d, v0)
     loc0 = region_2d_to_location_3d(region, rv3d, v0, vec) - loc
     vec = region_2d_to_vector_3d(region, rv3d, v1)
     loc1 = region_2d_to_location_3d(region, rv3d, v1, vec) - loc
-    
+
     loc0 = loc0 * mat
     loc1 = loc1 * mat
-    
+
     # !!!! encore utile ???
 #    vl = self.mouse_path[1][0] - self.mouse_path[0][0], self.mouse_path[1][1] - self.mouse_path[0][1]
 #    vecl =  region_2d_to_vector_3d(region, rv3d, vl)
@@ -253,19 +249,18 @@ def CreateCube(self, context):
     # Mise à jour de l'index des vertices
     t_bm.verts.index_update()
     # Creation des faces
-    t_face = t_bm.faces.new([t_v0, t_v1, t_v2, t_v3]) 
+    t_face = t_bm.faces.new([t_v0, t_v1, t_v2, t_v3])
     # Sauvegarde du mesh
     t_bm.to_mesh(me)
-
 
 
 ####################################################################################
 # Creation de forme géometrique (fermé ou pas)
 ####################################################################################
 def CreatePolygon(self, context):
-    me = bpy.data.meshes.new('C_Poly') 
+    me = bpy.data.meshes.new('C_Poly')
 
-    ob = bpy.data.objects.new('C_Poly', me)   
+    ob = bpy.data.objects.new('C_Poly', me)
     self.CurrentObj = ob
 
     scene = context.scene
@@ -282,19 +277,19 @@ def CreatePolygon(self, context):
 
     bpy.context.scene.objects.link(ob)
 
-    t_bm = bmesh.new() 
-    t_bm.from_mesh(me) 
+    t_bm = bmesh.new()
+    t_bm.from_mesh(me)
 
     # Parcours tous les points et les convertit avant de les sauvegarder
     FacesList = []
-    NbVertices = 0    
+    NbVertices = 0
     for x, y in self.mouse_path:
         v0 = x + self.xpos, y + self.ypos
-        vec =  region_2d_to_vector_3d(region, rv3d, v0)
+        vec = region_2d_to_vector_3d(region, rv3d, v0)
         loc0 = region_2d_to_location_3d(region, rv3d, v0, vec) - loc
 
         loc0 = loc0 * mat
-    
+
         x0 = loc0[0]
         y0 = loc0[1]
         z0 = loc0[2]
@@ -307,31 +302,30 @@ def CreatePolygon(self, context):
             yInit = y0
             zInit = z0
             t_bm.verts.index_update()
-            FacesList.append(t_v0) 
+            FacesList.append(t_v0)
         else:
             t_v1 = t_bm.verts.new((x0, y0, z0))
-            t_edges = t_bm.edges.new([t_v0, t_v1]) 
-            FacesList.append(t_v1)            
+            t_edges = t_bm.edges.new([t_v0, t_v1])
+            FacesList.append(t_v1)
             NbVertices = 1
             t_v0 = t_v1
-            
+
     if(self.Closed):
         t_v1 = t_bm.verts.new((xInit, yInit, zInit))
-        t_edges = t_bm.edges.new([t_v0, t_v1]) 
-        FacesList.append(t_v1)            
-        t_face = t_bm.faces.new(FacesList) 
-    
-    t_bm.to_mesh(me)
+        t_edges = t_bm.edges.new([t_v0, t_v1])
+        FacesList.append(t_v1)
+        t_face = t_bm.faces.new(FacesList)
 
+    t_bm.to_mesh(me)
 
 
 ####################################################################################
 # Creation de cylindre
 ####################################################################################
 def CreateCylinder(self, context):
-    me = bpy.data.meshes.new('C_Cylinder') 
+    me = bpy.data.meshes.new('C_Cylinder')
 
-    ob = bpy.data.objects.new('C_Cylinder', me) 
+    ob = bpy.data.objects.new('C_Cylinder', me)
     self.CurrentObj = ob
 
     scene = context.scene
@@ -345,55 +339,52 @@ def CreateCylinder(self, context):
 
     ob.matrix_world = mat
     ob.location = loc
-    
+
     bpy.context.scene.objects.link(ob)
 
-    t_bm = bmesh.new() 
-    t_bm.from_mesh(me) 
+    t_bm = bmesh.new()
+    t_bm.from_mesh(me)
 
     x0 = self.mouse_path[0][0]
     y0 = self.mouse_path[0][1]
     x1 = self.mouse_path[1][0]
     y1 = self.mouse_path[1][1]
-    
+
     v0 = mathutils.Vector((self.mouse_path[0][0], self.mouse_path[0][1], 0))
     v1 = mathutils.Vector((self.mouse_path[1][0], self.mouse_path[1][1], 0))
     v0 -= v1
-    radius = self.mouse_path[1][0] - self.mouse_path[0][0]  
-    DEG2RAD = 3.14159/(180/self.stepAngle[self.step])
+    radius = self.mouse_path[1][0] - self.mouse_path[0][0]
+    DEG2RAD = 3.14159 / (180 / self.stepAngle[self.step])
     if(self.ctrl):
-        shift = (3.14159/(360/self.stepAngle[self.step])) * self.stepRotation
+        shift = (3.14159 / (360 / self.stepAngle[self.step])) * self.stepRotation
     else:
-        shift = (self.mouse_path[1][1] - self.mouse_path[0][1])/50
+        shift = (self.mouse_path[1][1] - self.mouse_path[0][1]) / 50
 
     # Passe en revue tous les points du cercle pour les convertir
     FacesList = []
-    for i in range(0, int(360/self.stepAngle[self.step])):
+    for i in range(0, int(360 / self.stepAngle[self.step])):
         degInRad = i * DEG2RAD
         v0 = x0 + self.xpos + int(math.cos(degInRad + shift) * radius), y0 + self.ypos + int(math.sin(degInRad + shift) * radius)
-        vec =  region_2d_to_vector_3d(region, rv3d, v0)
+        vec = region_2d_to_vector_3d(region, rv3d, v0)
         loc0 = region_2d_to_location_3d(region, rv3d, v0, vec) - loc
         loc0 = loc0 * mat
 
         t_v0 = t_bm.verts.new(loc0)
-        
-        FacesList.append(t_v0)
 
+        FacesList.append(t_v0)
 
     t_bm.verts.index_update()
 
-    t_face = t_bm.faces.new(FacesList) 
+    t_face = t_bm.faces.new(FacesList)
 
     t_bm.to_mesh(me)
-
 
 
 ####################################################################################
 # Dimensions de l'objet (SCULPT Tools tips)
 ####################################################################################
 def objDiagonal(obj):
-    return ((obj.dimensions[0]**2)+(obj.dimensions[1]**2)+(obj.dimensions[2]**2))**0.5
-
+    return ((obj.dimensions[0]**2) + (obj.dimensions[1]**2) + (obj.dimensions[2]**2))**0.5
 
 
 ####################################################################################
@@ -405,7 +396,6 @@ class Create(bpy.types.Operator):
     bl_description = "Create object"
     bl_options = {'REGISTER', 'UNDO'}
 
-
     #---------------------------------------------------------------------------------------------------
     @classmethod
     def poll(cls, context):
@@ -413,11 +403,11 @@ class Create(bpy.types.Operator):
         # Il faut au moins un mesh de selectionner
         return(ob and ob.type == 'MESH' and context.mode == 'OBJECT')
     #---------------------------------------------------------------------------------------------------
-    
+
     #---------------------------------------------------------------------------------------------------
     def modal(self, context, event):
         context.area.tag_redraw()
-        
+
         # [Shift] appuyé
         self.shift = False
         if(event.shift):
@@ -427,12 +417,12 @@ class Create(bpy.types.Operator):
         self.ctrl = False
         if(event.ctrl):
             self.ctrl = True
-            
+
         # [Alt] appuyé
         self.alt = False
         if(event.alt and event.value == 'PRESS'):
             if(self.InitPosition == False):
-                # Initialise les variables pour la position de la forme 
+                # Initialise les variables pour la position de la forme
                 self.xpos = 0
                 self.ypos = 0
                 self.last_mouse_region_x = event.mouse_region_x
@@ -441,17 +431,17 @@ class Create(bpy.types.Operator):
             self.alt = True
         # [Alt] relaché
         if(self.InitPosition and self.alt == False):
-            # Mise à jour des coordonnées 
+            # Mise à jour des coordonnées
             # !!! Voir pour mieux coordonnéer le tout !!!
             for i in range(0, len(self.mouse_path) - 1):
                 l = list(self.mouse_path[i])
                 l[0] += self.xpos
                 l[1] += self.ypos
                 self.mouse_path[i] = tuple(l)
-            
-            self.xpos = self.ypos = 0  
-            self.InitPosition = False    
-                  
+
+            self.xpos = self.ypos = 0
+            self.InitPosition = False
+
         # Changement du mode (Possible tant que l'on n'a pas appuyé sur [LEFT mouse]
         if event.type == 'SPACE' and event.value == 'PRESS':
             if(self.bDone == False):
@@ -459,11 +449,11 @@ class Create(bpy.types.Operator):
                 self.CreateMode += 1
                 if(self.CreateMode > 2):
                     self.CreateMode = 0
-             
+
         # Fermeture de la forme
         if event.type == 'C' and event.value == 'RELEASE':
             self.Closed = not self.Closed
-             
+
         # Mouvement de la souris
         if event.type == 'MOUSEMOVE':
             if(self.alt == False):
@@ -471,19 +461,19 @@ class Create(bpy.types.Operator):
                     if(self.ctrl and (self.CreateMode == 2)):
                         # Mode "incremental"
                         coord = list(self.mouse_path[len(self.mouse_path) - 1])
-                        coord[0] = int(self.mouse_path[len(self.mouse_path) - 2][0] + int((event.mouse_region_x - self.mouse_path[len(self.mouse_path) - 2][0])/self.Increment) * self.Increment)
-                        coord[1] = int(self.mouse_path[len(self.mouse_path) - 2][1] + int((event.mouse_region_y - self.mouse_path[len(self.mouse_path) - 2][1])/self.Increment) * self.Increment)
+                        coord[0] = int(self.mouse_path[len(self.mouse_path) - 2][0] + int((event.mouse_region_x - self.mouse_path[len(self.mouse_path) - 2][0]) / self.Increment) * self.Increment)
+                        coord[1] = int(self.mouse_path[len(self.mouse_path) - 2][1] + int((event.mouse_region_y - self.mouse_path[len(self.mouse_path) - 2][1]) / self.Increment) * self.Increment)
                         self.mouse_path[len(self.mouse_path) - 1] = tuple(coord)
-                    else:                        
+                    else:
                         self.mouse_path[len(self.mouse_path) - 1] = (event.mouse_region_x, event.mouse_region_y)
             else:
                 # [ALT] appuyé, mise à jour de la position de la forme
                 self.xpos += (event.mouse_region_x - self.last_mouse_region_x)
                 self.ypos += (event.mouse_region_y - self.last_mouse_region_y)
-                
+
                 self.last_mouse_region_x = event.mouse_region_x
                 self.last_mouse_region_y = event.mouse_region_y
-        
+
         # Appui sur [LEFT mouse], récupère des coordonnées de la souris
         elif event.type == 'LEFTMOUSE' and event.value == 'RELEASE':
             if(self.CreateMode == 2):
@@ -492,17 +482,17 @@ class Create(bpy.types.Operator):
                     self.mouse_path.append((event.mouse_region_x, event.mouse_region_y))
 
                 self.mouse_path.append((event.mouse_region_x, event.mouse_region_y))
-            else:                
+            else:
                 self.mouse_path[0] = (event.mouse_region_x, event.mouse_region_y)
                 self.mouse_path[1] = (event.mouse_region_x, event.mouse_region_y)
             self.bDone = True
-            
+
         # Molette de la souris. Permet de changer la subdivision du cercle
         elif event.type == 'WHEELDOWNMOUSE':
             if(self.CreateMode == 1):
                 if(self.ctrl):
                     self.stepRotation += 1
-                else:         
+                else:
                     self.step += 1
                     if(self.step >= len(self.stepAngle)):
                         self.step = len(self.stepAngle) - 1
@@ -510,7 +500,7 @@ class Create(bpy.types.Operator):
             if(self.CreateMode == 1):
                 if(self.ctrl):
                     self.stepRotation -= 1
-                else:                
+                else:
                     if(self.step > 0):
                         self.step -= 1
 
@@ -522,8 +512,8 @@ class Create(bpy.types.Operator):
                 if(self.CreateMode == 1):
                     CreateCylinder(self, context)
                 if(self.CreateMode == 2):
-                    CreatePolygon(self, context)    
-                                
+                    CreatePolygon(self, context)
+
                 self.finish()
             bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
             return {'FINISHED'}
@@ -531,7 +521,6 @@ class Create(bpy.types.Operator):
         return {'RUNNING_MODAL'}
     #---------------------------------------------------------------------------------------------------
 
-    
     #---------------------------------------------------------------------------------------------------
     def invoke(self, context, event):
         if context.area.type == 'VIEW_3D':
@@ -539,10 +528,10 @@ class Create(bpy.types.Operator):
 
             self._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_px, args, 'WINDOW', 'POST_PIXEL')
 
-            self.mouse_path = [(0, 0), (0,0)]
-            
+            self.mouse_path = [(0, 0), (0, 0)]
+
             self.bDone = False
-            
+
             # Type de creation (Rectangle, Cercle, Ligne)
             self.CreateMode = 0
 
@@ -550,22 +539,22 @@ class Create(bpy.types.Operator):
             self.stepAngle = [2, 4, 5, 6, 9, 10, 15, 20, 30, 40, 45, 60, 72, 90]
             self.step = 4
             self.stepRotation = 0
-            
+
             # Position des primitives
             self.xpos = 0
             self.ypos = 0
             self.InitPosition = False
-            
+
             # Increment de la ligne
             self.Increment = 15
-            
+
             self.ViewVector = mathutils.Vector()
-            
+
             self.Closed = False
-            
+
             # Objet créé
             self.CurrentObj = None
-            
+
             context.window_manager.modal_handler_add(self)
             return {'RUNNING_MODAL'}
         else:
@@ -573,9 +562,8 @@ class Create(bpy.types.Operator):
             return {'CANCELLED'}
     #---------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------
-    def finish(self):            
+    def finish(self):
 
         context = bpy.context
 
@@ -590,15 +578,14 @@ class Create(bpy.types.Operator):
         bpy.data.objects[self.CurrentObj.name].select = True
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY')
 
-        
         # Prend l'objet créé, translation vers l'arrière et extrude vers l'avant pour tenter de "choper" toute la geometrie
         # !!! Voir pour trouver un autre systeme !!!
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.select_mode(type="EDGE")
-        bpy.ops.transform.translate(value = self.ViewVector * objBBDiagonal)
+        bpy.ops.transform.translate(value=self.ViewVector * objBBDiagonal)
         for i in range(0, subdivisions):
-            bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":-self.ViewVector * objBBDiagonal})
+            bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value": -self.ViewVector * objBBDiagonal})
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.normals_make_consistent()
         bpy.ops.object.mode_set(mode='OBJECT')
@@ -606,10 +593,6 @@ class Create(bpy.types.Operator):
         # Selection de l'objet à découper
         bpy.data.objects[ActiveObj.name].select = True
         context.scene.objects.active = ActiveObj
-        
-        
-        
-                
 
 
 #---------------------------------------------------------------------------------------------------

@@ -26,10 +26,10 @@ bl_info = {
     'location': "Editmode > F",
     'warning': "",
     'description': "Extends the 'Make Edge/Face' functionality",
-    'wiki_url': "http://wiki.blender.org/index.php/Extensions:2.6/Py/"\
-        "Scripts/Modeling/F2",
-    'tracker_url': "http://projects.blender.org/tracker/index.php?"\
-        "func=detail&aid=33979",
+    'wiki_url': "http://wiki.blender.org/index.php/Extensions:2.6/Py/"
+    "Scripts/Modeling/F2",
+    'tracker_url': "http://projects.blender.org/tracker/index.php?"
+    "func=detail&aid=33979",
     'category': 'Mesh'}
 
 
@@ -41,20 +41,23 @@ from bpy_extras import view3d_utils
 from bpy.props import StringProperty, BoolProperty
 from bpy.types import AddonPreferences
 
+
 class F2AddonPreferences(AddonPreferences):
     bl_idname = __name__
 
     boolean = BoolProperty(
-            name="Auto Grab",
-            default=False,
-            )
+        name="Auto Grab",
+        default=False,
+    )
 
     def draw(self, context):
         layout = self.layout
         layout.label(text="Settings")
         layout.prop(self, "boolean")
-        
+
 # create a face from a single selected edge
+
+
 def quad_from_edge(bm, edge_sel, context, event):
     ob = context.active_object
     region = context.region
@@ -62,10 +65,10 @@ def quad_from_edge(bm, edge_sel, context, event):
 
     # find linked edges that are open (<2 faces connected) and not part of
     # the face the selected edge belongs to
-    all_edges = [[edge for edge in edge_sel.verts[i].link_edges if \
-        len(edge.link_faces) < 2 and edge != edge_sel and \
-        sum([face in edge_sel.link_faces for face in edge.link_faces]) == 0] \
-        for i in range(2)]
+    all_edges = [[edge for edge in edge_sel.verts[i].link_edges if
+                  len(edge.link_faces) < 2 and edge != edge_sel and
+                  sum([face in edge_sel.link_faces for face in edge.link_faces]) == 0]
+                 for i in range(2)]
     if not all_edges[0] or not all_edges[1]:
         return
 
@@ -78,7 +81,7 @@ def quad_from_edge(bm, edge_sel, context, event):
             vert = [vert for vert in edge.verts if not vert.select][0]
             world_pos = ob.matrix_world * vert.co.copy()
             screen_pos = view3d_utils.location_3d_to_region_2d(region,
-                region_3d, world_pos)
+                                                               region_3d, world_pos)
             dist = (mouse_pos - screen_pos).length
             if not min_dist or dist < min_dist[0]:
                 min_dist = (dist, edge, vert)
@@ -102,7 +105,7 @@ def quad_from_edge(bm, edge_sel, context, event):
             if not normal_edge.link_faces:
                 # no connected faces, so no need to flip the face normal
                 flip_align = False
-    if flip_align: # there is a face to which the normal can be aligned
+    if flip_align:  # there is a face to which the normal can be aligned
         ref_verts = [v for v in normal_edge.link_faces[0].verts]
         if v3 in ref_verts:
             va_1 = v3
@@ -114,7 +117,7 @@ def quad_from_edge(bm, edge_sel, context, event):
             va_1 = v2
             va_2 = v4
         if (va_1 == ref_verts[0] and va_2 == ref_verts[-1]) or \
-        (va_2 == ref_verts[0] and va_1 == ref_verts[-1]):
+                (va_2 == ref_verts[0] and va_1 == ref_verts[-1]):
             # reference verts are at start and end of the list -> shift list
             ref_verts = ref_verts[1:] + [ref_verts[0]]
         if ref_verts.index(va_1) > ref_verts.index(va_2):
@@ -163,37 +166,36 @@ def quad_from_edge(bm, edge_sel, context, event):
 
 
 def decorator_grab(func):
-    #decorate function invoke of class MeshF2
+    # decorate function invoke of class MeshF2
     def bm_vert_active_get(ob):
         bm = bmesh.from_edit_mesh(ob.data)
         for elem in reversed(bm.select_history):
             if isinstance(elem, bmesh.types.BMVert):
-                return elem.index  
+                return elem.index
         return -1
-        
-    
+
     def wrapper(self, context, event):
-        obj = bpy.context.active_object    
+        obj = bpy.context.active_object
         bm = bmesh.from_edit_mesh(obj.data)
-        sel = [v for v in bm.verts if v.select]    
-        if len(sel) == 1 and bm_vert_active_get(obj)==-1:        
+        sel = [v for v in bm.verts if v.select]
+        if len(sel) == 1 and bm_vert_active_get(obj) == -1:
             return {'CANCELLED'}
-        
-        
+
         res = func(self, context, event)
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.mode_set(mode='EDIT')
 
         user_preferences = context.user_preferences
         addon_prefs = user_preferences.addons[__name__].preferences
-        
-        obj = bpy.context.active_object        
-        selected_verts = [i.index for i in obj.data.vertices if i.select]  
+
+        obj = bpy.context.active_object
+        selected_verts = [i.index for i in obj.data.vertices if i.select]
         if len(selected_verts) == 1 and addon_prefs.boolean:
-                bpy.ops.transform.translate('INVOKE_DEFAULT')
+            bpy.ops.transform.translate('INVOKE_DEFAULT')
 
         return res
     return wrapper
+
 
 def quad_from_vertex(bm, vert_sel, context, event):
     ob = context.active_object
@@ -209,14 +211,14 @@ def quad_from_vertex(bm, vert_sel, context, event):
     min_dist = False
     mouse_pos = mathutils.Vector([event.mouse_region_x, event.mouse_region_y])
     for a, b in itertools.combinations(edges, 2):
-        other_verts = [vert for edge in [a, b] for vert in edge.verts \
-            if not vert.select]
+        other_verts = [vert for edge in [a, b] for vert in edge.verts
+                       if not vert.select]
         mid_other = (other_verts[0].co.copy() + other_verts[1].co.copy()) \
             / 2
         new_pos = 2 * (mid_other - vert_sel.co.copy()) + vert_sel.co.copy()
         world_pos = ob.matrix_world * new_pos
         screen_pos = view3d_utils.location_3d_to_region_2d(region, region_3d,
-            world_pos)
+                                                           world_pos)
         dist = (mouse_pos - screen_pos).length
         if not min_dist or dist < min_dist[0]:
             min_dist = (dist, (a, b), other_verts, new_pos)
@@ -234,8 +236,8 @@ def quad_from_vertex(bm, vert_sel, context, event):
         normal_edge = edges[1]
         if not normal_edge.link_faces:
             # no connected faces, so no need to flip the face normal
-                flip_align = False
-    if flip_align: # there is a face to which the normal can be aligned
+            flip_align = False
+    if flip_align:  # there is a face to which the normal can be aligned
         ref_verts = [v for v in normal_edge.link_faces[0].verts]
         if other_verts[0] in ref_verts:
             va_1 = other_verts[0]
@@ -244,7 +246,7 @@ def quad_from_vertex(bm, vert_sel, context, event):
             va_1 = vert_sel
             va_2 = other_verts[1]
         if (va_1 == ref_verts[0] and va_2 == ref_verts[-1]) or \
-        (va_2 == ref_verts[0] and va_1 == ref_verts[-1]):
+                (va_2 == ref_verts[0] and va_1 == ref_verts[-1]):
             # reference verts are at start and end of the list -> shift list
             ref_verts = ref_verts[1:] + [ref_verts[0]]
         if ref_verts.index(va_1) > ref_verts.index(va_2):
@@ -284,8 +286,6 @@ class MeshF2(bpy.types.Operator):
     bl_label = "Make Edge/Face"
     bl_description = "Extends the 'Make Edge/Face' functionality"
     bl_options = {'REGISTER', 'UNDO'}
-    
-    
 
     @classmethod
     def poll(cls, context):
@@ -293,7 +293,7 @@ class MeshF2(bpy.types.Operator):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
 
-    @decorator_grab #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    @decorator_grab  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     def invoke(self, context, event):
         bm = bmesh.from_edit_mesh(context.active_object.data)
         sel = [v for v in bm.verts if v.select]
@@ -329,7 +329,7 @@ def register():
         bpy.utils.register_class(c)
 
     # add keymap entry
-    km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(\
+    km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(
         name='Mesh', space_type='EMPTY')
     kmi = km.keymap_items.new("mesh.f2", 'F', 'PRESS')
     addon_keymaps.append((km, kmi))
@@ -339,9 +339,9 @@ def unregister():
     # remove keymap entry
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
-        #bpy.context.window_manager.keyconfigs.addon.keymaps.remove(km)
+        # bpy.context.window_manager.keyconfigs.addon.keymaps.remove(km)
     addon_keymaps.clear()
-    
+
     # remove operator
     for c in reversed(classes):
         bpy.utils.unregister_class(c)

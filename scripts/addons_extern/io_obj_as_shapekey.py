@@ -1,12 +1,3 @@
-bl_info = {
-    'name': 'Load Obj Sequence as Shape Keys',
-    'author': 'cmomoney',
-    'version': (0, 2),
-    'blender': (2, 6, 7),
-    'category': 'Import-Export',
-    'location': 'File > Import/Export',
-    'wiki_url': ''}
-
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
 #  This program is free software; you can redistribute it and/or
@@ -25,8 +16,20 @@ bl_info = {
 #
 # ##### END GPL LICENSE BLOCK #####
 
-import bpy, os
+bl_info = {
+    'name': 'Load Obj Sequence as Shape Keys',
+    'author': 'cmomoney',
+    'version': (0, 2),
+    'blender': (2, 6, 7),
+    'category': 'Import-Export',
+    'location': 'File > Import/Export',
+    'wiki_url': ''}
+
+
+import bpy
+import os
 from bpy.props import *
+
 
 class LoadObjAsShapekey(bpy.types.Operator):
     bl_idname = 'load.obj_as_shapekey'
@@ -45,16 +48,15 @@ class LoadObjAsShapekey(bpy.types.Operator):
         return context.active_object is not None and context.active_object.type == 'MESH'
 
     def execute(self, context):
-        #get file names, sort, and set target mesh
+        # get file names, sort, and set target mesh
         spath = os.path.split(self.filepath)
-        files = [file.name for file in self.files]
-        files.sort()
+        files = sorted([file.name for file in self.files])
         target = bpy.context.scene.objects.active
-        #add all ojs in sequence as shape  keys
+        # add all ojs in sequence as shape  keys
         for f in files:
             fp = spath[0] + "\\" + f
             self.load_obj(fp)
-        #now delete objs
+        # now delete objs
         sknames = [sk.name for sk in target.data.shape_keys.key_blocks]
         bpy.ops.object.select_all(action='DESELECT')
         for obj in sknames:
@@ -64,7 +66,7 @@ class LoadObjAsShapekey(bpy.types.Operator):
                 bpy.data.objects[obj].select = True
                 bpy.ops.object.delete()
             bpy.ops.object.select_all(action='DESELECT')
-        #reselect target mesh and make active
+        # reselect target mesh and make active
         bpy.context.scene.objects.active = target
         target.select = True
         return{'FINISHED'}
@@ -78,12 +80,15 @@ class LoadObjAsShapekey(bpy.types.Operator):
         bpy.ops.object.join_shapes()
         return
 
+
 def menu_func_import(self, context):
     self.layout.operator(LoadObjAsShapekey.bl_idname, text="Obj As Shapekey(.obj)")
+
 
 def register():
     bpy.utils.register_class(LoadObjAsShapekey)
     bpy.types.INFO_MT_file_import.append(menu_func_import)
+
 
 def unregister():
     bpy.utils.unregister_class(LoadObjAsShapekey)

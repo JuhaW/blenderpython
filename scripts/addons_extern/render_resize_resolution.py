@@ -18,14 +18,14 @@ import bpy
 import math
 
 
-def defResizeResolution(context, anguloInicio, anguloPrimero, resx, resy): 
+def defResizeResolution(context, anguloInicio, anguloPrimero, resx, resy):
     # calcula valores
-    anguloActual= math.degrees(anguloInicio/ 2)
-    proportionxy = resx  / resy
-    
+    anguloActual = math.degrees(anguloInicio / 2)
+    proportionxy = resx / resy
+
     opuesto = resx / 2
     adyacente = opuesto / math.tan(anguloInicio / 2)
-    newx = (adyacente * math.tan(math.radians(anguloPrimero/2))) * 2
+    newx = (adyacente * math.tan(math.radians(anguloPrimero / 2))) * 2
 
     # setea valores
     context.scene.render.resolution_x = newx
@@ -33,16 +33,15 @@ def defResizeResolution(context, anguloInicio, anguloPrimero, resx, resy):
     context.scene.camera.data.angle = math.radians(anguloPrimero)
 
 
-
 class ResizeResolution(bpy.types.Operator):
     bl_idname = "scene.resize_resolution"
     bl_label = "Resize Resolution by Camera Angle"
     bl_options = {"REGISTER", "UNDO"}
-    
-    anguloPrimero = bpy.props.FloatProperty(name="Field of View", default=math.degrees(.8575), min=.01 )
-        
+
+    anguloPrimero = bpy.props.FloatProperty(name="Field of View", default=math.degrees(.8575), min=.01)
+
     def execute(self, context):
-        anguloInicio = context.scene.camera.data.angle    
+        anguloInicio = context.scene.camera.data.angle
         resx = context.scene.render.resolution_x
         resy = context.scene.render.resolution_y
         print(resx)

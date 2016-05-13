@@ -27,7 +27,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "https://github.com/JoseConseco/PivotPro",
     "category": "3D View",
-    }
+}
 
 
 import bpy
@@ -57,7 +57,7 @@ def UpdatePivotPro(self, context):  # just when enabling disablig button 'pivotP
         disablePivot(context)
 
 
-bpy.types.Scene.pivot_pro_enabled = bpy.props.BoolProperty(name="Enable PivotPro", description="Turns on/off pivot", default=False,update=UpdatePivotPro)
+bpy.types.Scene.pivot_pro_enabled = bpy.props.BoolProperty(name="Enable PivotPro", description="Turns on/off pivot", default=False, update=UpdatePivotPro)
 
 
 def enablePivot(context):  # unhides pivot (or create if dosn't exist)
@@ -71,7 +71,7 @@ def enablePivot(context):  # unhides pivot (or create if dosn't exist)
     except:
         pass
     pivot = bpy.data.objects['PivotPro']  # now pivot should be created
-    layers = [False]*20
+    layers = [False] * 20
     layers[context.scene.active_layer] = True
     pivot.layers = layers
 
@@ -93,7 +93,7 @@ def disablePivot(context):  # hides pivot but do not deletes it
 def createPivot(context):  # just when enabling addon
     newEmpty = bpy.data.objects.new('PivotPro', None)
     context.scene.objects.link(newEmpty)
-    layers = [False]*20
+    layers = [False] * 20
     layers[context.scene.active_layer] = True
     newEmpty.layers = layers
     newEmpty.empty_draw_type = "PLAIN_AXES"
@@ -259,7 +259,7 @@ def RegisterHotkeys():
     wm = bpy.context.window_manager
     km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
     kmi = km.keymap_items.new(PivotMacro.bl_idname, 'LEFTMOUSE', 'DOUBLE_CLICK')
-    #kmi.properties.my_prop = 'some'
+    # kmi.properties.my_prop = 'some'
     addon_keymaps.append((km, kmi))
 
     kmi = km.keymap_items.new(PivotTransform.bl_idname, 'G', 'PRESS', shift=True)
@@ -300,7 +300,7 @@ def register():
             UnRegisterHotkeys()
     except:
         pass
-        #RegisterHotkeys() #if there is no property  pivot_pro_enabled means we run it first time. By default is is disabled
+        # RegisterHotkeys()  # if there is no property  pivot_pro_enabled means we run it first time. By default is is disabled
 
 
 def unregister():

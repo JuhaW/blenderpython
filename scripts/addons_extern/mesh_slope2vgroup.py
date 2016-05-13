@@ -37,6 +37,7 @@ import bpy
 from mathutils import Vector
 from math import pi
 
+
 class Slope2VGroup(bpy.types.Operator):
     bl_idname = "mesh.slope2vgroup"
     bl_label = "Slope2VGroup"
@@ -48,7 +49,7 @@ class Slope2VGroup(bpy.types.Operator):
              isinstance(context.scene.objects.active, bpy.types.Object) and
              isinstance(context.scene.objects.active.data, bpy.types.Mesh))
         return p
-        
+
     def execute(self, context):
         ob = context.active_object
         vertex_group = ob.vertex_groups.active

@@ -49,10 +49,11 @@ def get_linked_data():
 
     for attr in dir(bpy.data):
         data_iter = getattr(bpy.data, attr, None)
-        if type(data_iter) == type_iter:
+        if isinstance(data_iter, type_iter):
             for id_data in data_iter:
                 if id_data.library:
                     yield id_data
+
 
 def count_type(data, rna_type):
     c = 0
@@ -60,6 +61,7 @@ def count_type(data, rna_type):
         if d.bl_rna.name == rna_type:
             c += 1
     return c
+
 
 def count_types(data):
     rna_types = {}
@@ -79,6 +81,7 @@ def count_types(data):
             rna_types[t] = 1
     return rna_types
 
+
 def type_icon(t):
 
     # Special cases:
@@ -90,34 +93,35 @@ def type_icon(t):
         return "TEXTURE"  # Image/Cloud etc have different types, but all include "Texture"
 
     d = {
-    'Action': 'ACTION',
-    'Armature': 'ARMATURE_DATA',
-    'Brush': 'BRUSH_DATA',
-    'Camera': 'CAMERA_DATA',
-    'Curve': 'CURVE_DATA',
-    'Grease Pencil': 'GREASEPENCIL',
-    'Group': 'GROUP',
-    'Image': 'IMAGE_DATA',
-    'Lattice': 'LATTICE_DATA',
-    'Mask': 'MOD_MASK',
-    'Material': 'MATERIAL',
-    'Mesh': 'MESH_DATA',
-    'MetaBall': 'META_DATA',
-    'MovieClip': 'CLIP',
-    'Object': 'OBJECT_DATAMODE',
-    'Particle Settings': 'PARTICLES',
-    'Scene': 'SCENE_DATA',
-    'Speaker': 'SPEAKER',
-    'Surface Curve': 'SURFACE_DATA',
-    'Text': 'TEXT',
-    'Text Curve': 'FONT_DATA',
-    'Vector Font': 'FONT_DATA',
-    'World': 'WORLD'
+        'Action': 'ACTION',
+        'Armature': 'ARMATURE_DATA',
+        'Brush': 'BRUSH_DATA',
+        'Camera': 'CAMERA_DATA',
+        'Curve': 'CURVE_DATA',
+        'Grease Pencil': 'GREASEPENCIL',
+        'Group': 'GROUP',
+        'Image': 'IMAGE_DATA',
+        'Lattice': 'LATTICE_DATA',
+        'Mask': 'MOD_MASK',
+        'Material': 'MATERIAL',
+        'Mesh': 'MESH_DATA',
+        'MetaBall': 'META_DATA',
+        'MovieClip': 'CLIP',
+        'Object': 'OBJECT_DATAMODE',
+        'Particle Settings': 'PARTICLES',
+        'Scene': 'SCENE_DATA',
+        'Speaker': 'SPEAKER',
+        'Surface Curve': 'SURFACE_DATA',
+        'Text': 'TEXT',
+        'Text Curve': 'FONT_DATA',
+        'Vector Font': 'FONT_DATA',
+        'World': 'WORLD'
     }
     if t in d:
         return d[t]
     else:
         return "QUESTION"  # default icon
+
 
 def pad_lib_name(lib):
     """ Used to ensure lib names do not match inside each other ('Lib' won't match 'Lib.001') """
@@ -184,13 +188,13 @@ class LibrarianImagePathsPanel(bpy.types.Panel):
                     col.label(d.name, icon=type_icon(d.rna_type.name))
         if len(libs) == 0:
             maincol.label("There are no linked libraries :)")
-        
 
 
 def register():
     bpy.utils.register_module(__name__)
 
     bpy.types.Scene.librarian_settings = bpy.props.PointerProperty(type=LibrarianSettings)
+
 
 def unregister():
     del bpy.types.Scene.librarian_settings

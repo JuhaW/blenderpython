@@ -35,9 +35,9 @@ import glob
 from subprocess import call
 
 
-######## ----------------------------------------------------------------------
-######## VSE TIMELINE TOGGLE PROXIES <-> FULLRES
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# VSE TIMELINE TOGGLE PROXIES <-> FULLRES
+# ----------------------------------------------------------------------
 
 class Proxy_Editing_ToProxy(bpy.types.Operator):
     """Change filepaths of current strips to proxy files (_proxy.mov)"""
@@ -57,7 +57,7 @@ class Proxy_Editing_ToProxy(bpy.types.Operator):
         bpy.ops.file.make_paths_absolute()
 
         def checkProxyFile(f_path, ref):
-            ''' Checks for (and returns) correspondent proxy file that may or 
+            ''' Checks for (and returns) correspondent proxy file that may or
             may not have the same extension as the original full_res file '''
             base_path, ext = os.path.splitext(f_path)
             proxy_file = base_path[:ref] + "_proxy" + ext
@@ -71,7 +71,7 @@ class Proxy_Editing_ToProxy(bpy.types.Operator):
                     if os.path.isfile(proxy_file):
                         return proxy_file
 
-        #for s in bpy.context.sequences:
+        # for s in bpy.context.sequences:
         scene = bpy.context.scene
         for s in scene.sequence_editor.sequences_all:
             if (s.type == "MOVIE"):
@@ -161,7 +161,7 @@ class Proxy_Editing_ToFullRes(bpy.types.Operator):
         # Making strips' paths absolute is necessary for script's execution.
         bpy.ops.file.make_paths_absolute()
 
-        #for s in bpy.context.sequences:
+        # for s in bpy.context.sequences:
         scene = bpy.context.scene
         for s in scene.sequence_editor.sequences_all:
             if (s.type == "MOVIE"):
@@ -225,13 +225,14 @@ class Proxy_Editing_ToFullRes(bpy.types.Operator):
         return {'FINISHED'}
 
 
-######## ----------------------------------------------------------------------
-######## FFMPEG TRANSCODING
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# FFMPEG TRANSCODING
+# ----------------------------------------------------------------------
 
 class VideoSource(object):
     """Uses video source to run FFMPEG and create
        proxies or full-res intra-frame copies"""
+
     def __init__(self, ffCommand, filepath, v_source, v_res, v_format,
                  fps, deinter, ar, ac):
         self.ffCommand = ffCommand
@@ -284,9 +285,9 @@ class VideoSource(object):
         return {'FINISHED'}
 
 
-######## ----------------------------------------------------------------------
-######## VELVET REVOLVER MAIN CLASS
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# VELVET REVOLVER MAIN CLASS
+# ----------------------------------------------------------------------
 
 from bpy_extras.io_utils import ExportHelper
 from bpy.props import StringProperty, EnumProperty, IntProperty, FloatProperty, BoolProperty
@@ -375,7 +376,7 @@ class VelvetRevolver(bpy.types.Operator, ExportHelper):
         for i in glob.glob(videosFolderPath + "*.*"):
             if i[-4:].lower() in bpy.path.extensions_movie:
                 # The line below does not allow for the creation of proxies from
-                # a _PRORES or _MJPEG file. TO-DO: creation of sources = [] has 
+                # a _PRORES or _MJPEG file. TO-DO: creation of sources = [] has
                 # to be inside self.proxies and self.copies. Then, the script
                 # should check for a "original" file (ie. without _prores) ->
                 # if it finds it, pass; else, execute ffmpeg command.

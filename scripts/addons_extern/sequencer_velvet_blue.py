@@ -32,14 +32,14 @@ bl_info = {
 import bpy
 import os
 
-######## ----------------------------------------------------------------------
-######## TIMELINE AND SETTINGS FUNCTIONS
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# TIMELINE AND SETTINGS FUNCTIONS
+# ----------------------------------------------------------------------
 
 
 def checkFPS():
     '''Checks project's FPS compatibility with Ardour's FPSs'''
-    validFPS = [23.976, 24, 24.975, 25, 29.97, 30, 59.94, 60] # Ardour FPSs
+    validFPS = [23.976, 24, 24.975, 25, 29.97, 30, 59.94, 60]  # Ardour FPSs
     render = bpy.context.scene.render
     fps = round((render.fps / render.fps_base), 3)
 
@@ -110,12 +110,12 @@ def getAudioTimeline(ar, fps):
             # "anything.001" or "anything.wav", the script would fail with the
             # error "ValueError: need more than 1 value to unpack"
             try:
-                base_name, ext = i.name.rsplit(".", maxsplit = 1)
+                base_name, ext = i.name.rsplit(".", maxsplit=1)
             except ValueError:
                 base_name = i.name
                 foo, ext = name.split(".")
 
-            if (i.channel < 10): # To keep track order: 3 will become 03.
+            if (i.channel < 10):  # To keep track order: 3 will become 03.
                 channel = "0" + str(i.channel)
             else:
                 channel = str(i.channel)
@@ -141,7 +141,7 @@ def getAudioTimeline(ar, fps):
                 audioData['locked'] = 1
             else:
                 audioData['locked'] = 0
-            
+
             # Some strips may be no longer in data.sounds but present in
             # Blender's list of sources. This would cause an error when
             # running the script. Files not in data.sounds will be considered
@@ -161,11 +161,11 @@ def getAudioTimeline(ar, fps):
                 audioData['nExt'] = int(ext)
                 audioData['ardour_name'] = "%s.%i" % (audioData['base_name'],
                                                       audioData['nExt'])
-                
+
                 # if strip name is foo.003 and the original foo.wav is not on the
                 # timeline, this guarantees that foo will go to timelineSources
                 # instead of going to timelineRepeated
-                if any (d['base_name'] == base_name for d in timelineSources):
+                if any(d['base_name'] == base_name for d in timelineSources):
                     timelineRepeated.append(audioData)
                 else:
                     timelineSources.append(audioData)
@@ -176,9 +176,9 @@ def getAudioTimeline(ar, fps):
     return timelineSources, timelineRepeated, tracks, idCounter
 
 
-######## ----------------------------------------------------------------------
-######## XML FUNCTIONS
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# XML FUNCTIONS
+# ----------------------------------------------------------------------
 
 def createSubElements(el, att):
     '''Creates XML SubElements using a dict of attributes (att)'''
@@ -208,9 +208,9 @@ def writeXML(outXML, xmlRoot):
     with open(outXML, 'w') as xmlFile:
         xmlFile.write(identXML(xmlRoot))
 
-######## ----------------------------------------------------------------------
-######## SKELETAL XML
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# SKELETAL XML
+# ----------------------------------------------------------------------
 
 
 def atSession(audioRate, fileBasename, idCounter):
@@ -292,9 +292,9 @@ def atMeter():
     return atMeter
 
 
-######## ----------------------------------------------------------------------
-######## SKELETAL AUDIO TRACK
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# SKELETAL AUDIO TRACK
+# ----------------------------------------------------------------------
 
 def atSource(strip, n_channels):
     '''Attributes for Sources > Source'''
@@ -310,7 +310,7 @@ def atSource(strip, n_channels):
 
 def atRoute(idCounter, track):
     '''Attributes for Routes > Route'''
-    atRoute = {'id': idCounter, # will be the referenced atPlaylist
+    atRoute = {'id': idCounter,  # will be the referenced atPlaylist
                'name': track,
 
                'active': "yes",
@@ -320,8 +320,8 @@ def atRoute(idCounter, track):
                'meter-type': "MeterPeak",
                'mode': "Normal",
                'monitoring': "",
-               'order-keys': "EditorSort=1:MixerSort=1", # was 0 for mono
-               'phase-invert': "00", # Was 0 for mono but seems to work only with 00 for stereo
+               'order-keys': "EditorSort=1:MixerSort=1",  # was 0 for mono
+               'phase-invert': "00",  # Was 0 for mono but seems to work only with 00 for stereo
                'saved-meter-point': "MeterPostFader",
                'self-solo': "no",
                'soloed-by-downstream': 0,
@@ -336,7 +336,7 @@ def atPlaylist(idCounter, routeID, track):
     '''Attributes for Playlists > Playlist'''
     atPlaylist = {'id': idCounter,
                   'name': track,
-                  'orig-track-id': routeID, # generic id of atRoute
+                  'orig-track-id': routeID,  # generic id of atRoute
 
                   'combine-ops': 0,
                   'frozen': "no",
@@ -359,7 +359,7 @@ def atRouteIO(idCounter, track):
 
 def atRouteIOPort(track):
     '''Attributes for Routes > Route > IO > Port'''
-    atRouteIOPort = {'name': [track+"/audio_in 1", track+"/audio_out 1"],
+    atRouteIOPort = {'name': [track + "/audio_in 1", track + "/audio_out 1"],
                      'type': ["audio", "audio"]
                      }
     return atRouteIOPort
@@ -367,15 +367,15 @@ def atRouteIOPort(track):
 
 def atRouteIOPort2(track):
     '''Attributes for Routes > Route > IO > Port'''
-    atRouteIOPort2 = {'name': [track+"/audio_in 2", track+"/audio_out 2"],
-                     'type': ["audio", "audio"]
-                     }
+    atRouteIOPort2 = {'name': [track + "/audio_in 2", track + "/audio_out 2"],
+                      'type': ["audio", "audio"]
+                      }
     return atRouteIOPort2
 
 
 def atDiskstream(idCounter, track):
     '''Attributes for Routes > Route > Diskstream'''
-    atDiskstream = {'channels': 2, # 1 for mono file
+    atDiskstream = {'channels': 2,  # 1 for mono file
                     'id': idCounter,
                     'name': track,
                     'playlist': track,
@@ -389,11 +389,11 @@ def atDiskstream(idCounter, track):
 
 def atPlaylistRegion(idCounter, strip):
     '''Attributes for Playlists > Playlist > Region'''
-    atPlaylistRegion = {'channels': strip['channels'] + 1, # mono file
+    atPlaylistRegion = {'channels': strip['channels'] + 1,  # mono file
                         'id': idCounter,
                         'length': strip['length'],
                         'locked': strip['locked'],
-                        'master-source-0': strip['sourceID'], # atSource's id
+                        'master-source-0': strip['sourceID'],  # atSource's id
                         'muted': strip['muted'],
                         'name': strip['ardour_name'],
                         'position': strip['position'],
@@ -406,7 +406,7 @@ def atPlaylistRegion(idCounter, strip):
                         'default-fade-in': 0,
                         'default-fade-out': 0,
                         'envelope-active': 0,
-                        'external': 1, # audios not in ardour sources folder?
+                        'external': 1,  # audios not in ardour sources folder?
                         'fade-in-active': 1,
                         'fade-out-active': 1,
                         'first-edit': "nothing",
@@ -428,17 +428,17 @@ def atPlaylistRegion(idCounter, strip):
                         'video-locked': 0,
                         'whole-file': 0
                         }
-                        
+
     if (strip['channels'] == 1):
         atPlaylistRegion['master-source-1'] = strip['master-source-1']
         atPlaylistRegion['source-1'] = strip['source-1']
-        
+
     return atPlaylistRegion
 
 
-######## ----------------------------------------------------------------------
-######## CREATE AUDIO TRACK
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# CREATE AUDIO TRACK
+# ----------------------------------------------------------------------
 
 def createAudioSources(Session, strip, n_channels=0):
     '''Creates audio sources in XML'''
@@ -491,9 +491,9 @@ def createPlaylistRegions(Session, idCount, strip, track):
     idCounter = idCount
 
 
-######## ----------------------------------------------------------------------
-######## CREATE XML
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# CREATE XML
+# ----------------------------------------------------------------------
 
 import xml.etree.ElementTree as etree
 from xml.etree.ElementTree import ElementTree, Element, SubElement
@@ -507,14 +507,14 @@ def createXML(sources, startFrame, endFrame, fps, timecode, audioRate,
     sources, repeated, tracks, idCounter = getAudioTimeline(audioRate, fps)
     tracks = sorted(set(tracks))[::-1]
     sampleFormat = checkSampleFormat()
-    ardourStart = toSamples((startFrame-1), audioRate, fps)
-    ardourEnd = toSamples((endFrame-1), audioRate, fps)
+    ardourStart = toSamples((startFrame - 1), audioRate, fps)
+    ardourEnd = toSamples((endFrame - 1), audioRate, fps)
 
-    ######## ------------------------------------------------------------------
-    ######## STATIC XML SECTIONS
-    ######## ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # STATIC XML SECTIONS
+    # ------------------------------------------------------------------
 
-    Session = Element("Session") # XML root = Session
+    Session = Element("Session")  # XML root = Session
     tree = ElementTree(Session)
 
     # Create Session Elements + Attributes
@@ -528,14 +528,14 @@ def createXML(sources, startFrame, endFrame, fps, timecode, audioRate,
 
     # Create Option, IO, Tempo and Meter + Attributes
     for counter in range(valLength(atOption(audiosFolder, sampleFormat, timecode))):
-        Option = SubElement(Session[0], "Option") # Session > Config > Option
+        Option = SubElement(Session[0], "Option")  # Session > Config > Option
         createSubElementsMulti(Option, atOption(audiosFolder, sampleFormat,
                                                 timecode), counter)
 
-    Location = SubElement(Session[4], "Location") # Session > Locations > Location
-    IO = SubElement(Session[10], "IO") # Session > Click > IO
-    Tempo = SubElement(Session[12], "Tempo") # Session > TempoMap > Tempo
-    Meter = SubElement(Session[12], "Meter") # Session > TempoMap > Meter
+    Location = SubElement(Session[4], "Location")  # Session > Locations > Location
+    IO = SubElement(Session[10], "IO")  # Session > Click > IO
+    Tempo = SubElement(Session[12], "Tempo")  # Session > TempoMap > Tempo
+    Meter = SubElement(Session[12], "Meter")  # Session > TempoMap > Meter
 
     createSubElements(Session, atSession(audioRate, ardourBasename, idCounter))
     createSubElements(Location, atLocation(ardourStart, ardourEnd, idCounter))
@@ -547,12 +547,12 @@ def createXML(sources, startFrame, endFrame, fps, timecode, audioRate,
 
     Port = ""
     for counter in range(valLength(atPort())):
-        Port = SubElement(IO, "Port") # Session > Click > IO > Port
+        Port = SubElement(IO, "Port")  # Session > Click > IO > Port
         createSubElementsMulti(Port, atPort(), counter)
 
-    ######## ------------------------------------------------------------------
-    ######## DYNAMIC XML SECTIONS
-    ######## ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # DYNAMIC XML SECTIONS
+    # ------------------------------------------------------------------
 
     # create sources and sources' regions
     for source in sources:
@@ -593,9 +593,9 @@ def createXML(sources, startFrame, endFrame, fps, timecode, audioRate,
 
     return Session, sources
 
-######## ----------------------------------------------------------------------
-######## RUN FFMPEG
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# RUN FFMPEG
+# ----------------------------------------------------------------------
 
 from shutil import which
 from subprocess import call
@@ -630,9 +630,9 @@ def runFFMPEG(ffCommand, sources, audioRate, outputFolder):
 
     return {'FINISHED'}
 
-######## ----------------------------------------------------------------------
-######## EXPORT TO ARDOUR
-######## ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# EXPORT TO ARDOUR
+# ----------------------------------------------------------------------
 
 from bpy_extras.io_utils import ExportHelper
 from bpy.props import StringProperty, BoolProperty
@@ -696,7 +696,7 @@ class Blue_Velvet_Ardour_Exporter(bpy.types.AddonPreferences):
     )
 
     def draw(self, context):
-    
+
         layout = self.layout
         layout.label(text="The path below *must* be absolute. If you have to "
                           "change it, do so with no .blend files open or "

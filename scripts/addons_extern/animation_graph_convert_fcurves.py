@@ -21,7 +21,6 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {"name": "F-Curve Samples/Keyframes conversion",
            "description": "Toggle Samples/Keyframes F-Curve mode",
            "author": "Quentin Wenger (Matpi)",
@@ -44,10 +43,10 @@ class GRAPH_MT_convert_to_samples(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         if (context.active_object and
-            context.active_object.select and
-            context.active_object.animation_data and
-            context.active_object.animation_data.action):
-            
+                context.active_object.select and
+                context.active_object.animation_data and
+                context.active_object.animation_data.action):
+
             action = context.active_object.animation_data.action
             for fcurve in action.fcurves:
                 if fcurve.select and not fcurve.hide:
@@ -62,8 +61,9 @@ class GRAPH_MT_convert_to_samples(bpy.types.Operator):
         for fcurve in action.fcurves:
             if fcurve.select and not fcurve.hide:
                 fcurve.convert_to_samples(*action.frame_range)
-        
+
         return {'FINISHED'}
+
 
 class GRAPH_MT_convert_to_keyframes(bpy.types.Operator):
     bl_idname = "action.convert_to_keyframes"
@@ -72,10 +72,10 @@ class GRAPH_MT_convert_to_keyframes(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         if (context.active_object and
-            context.active_object.select and
-            context.active_object.animation_data and
-            context.active_object.animation_data.action):
-            
+                context.active_object.select and
+                context.active_object.animation_data and
+                context.active_object.animation_data.action):
+
             action = context.active_object.animation_data.action
             for fcurve in action.fcurves:
                 if fcurve.select and not fcurve.hide:
@@ -90,7 +90,7 @@ class GRAPH_MT_convert_to_keyframes(bpy.types.Operator):
         for fcurve in action.fcurves:
             if fcurve.select and not fcurve.hide:
                 fcurve.convert_to_keyframes(*action.frame_range)
-        
+
         return {'FINISHED'}
 
 
@@ -101,17 +101,17 @@ class ConvertSubMenu(bpy.types.Menu):
     @classmethod
     def poll(cls, context):
         if (context.active_object and
-            context.active_object.select and
-            context.active_object.animation_data and
-            context.active_object.animation_data.action):
-            
+                context.active_object.select and
+                context.active_object.animation_data and
+                context.active_object.animation_data.action):
+
             action = context.active_object.animation_data.action
             for fcurve in action.fcurves:
                 if fcurve.select and not fcurve.hide:
                     return True
 
         return False
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -127,6 +127,7 @@ def displaySubMenu(self, context):
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.GRAPH_MT_channel.append(displaySubMenu)
+
 
 def unregister():
     bpy.types.GRAPH_MT_channel.remove(displaySubMenu)

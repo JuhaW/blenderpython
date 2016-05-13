@@ -118,29 +118,29 @@ def export_object(**kwargs):
     # Export obj.
     filepath = path.join(objdir, "%s.obj" % name)
     bpy.ops.export_scene.obj(
-            filepath=filepath,
-            check_existing=True,
-            use_selection=True,
-            use_animation=False,
-            use_mesh_modifiers=apply_modifiers,
-            use_edges=True,
-            use_normals=True,
-            use_uvs=True,
-            use_materials=export_mats,
-            use_triangles=False,
-            use_nurbs=False,
-            use_vertex_groups=False,
-            use_blen_objects=True,
-            use_smooth_groups=True,
-            use_smooth_groups_bitflags=True,
-            group_by_object=False,
-            group_by_material=False,
-            keep_vertex_order=True,
-            global_scale=1,
-            axis_forward='-Z',
-            axis_up='Y',
-            path_mode='AUTO',
-            )
+        filepath=filepath,
+        check_existing=True,
+        use_selection=True,
+        use_animation=False,
+        use_mesh_modifiers=apply_modifiers,
+        use_edges=True,
+        use_normals=True,
+        use_uvs=True,
+        use_materials=export_mats,
+        use_triangles=False,
+        use_nurbs=False,
+        use_vertex_groups=False,
+        use_blen_objects=True,
+        use_smooth_groups=True,
+        use_smooth_groups_bitflags=True,
+        group_by_object=False,
+        group_by_material=False,
+        keep_vertex_order=True,
+        global_scale=1,
+        axis_forward='-Z',
+        axis_up='Y',
+        path_mode='AUTO',
+    )
 
 
 class ExportObjs(Operator, ExportHelper):
@@ -154,23 +154,23 @@ class ExportObjs(Operator, ExportHelper):
     filter_glob = StringProperty(
         default="*.obj;*.mtl",
         options={'HIDDEN'},
-        )
+    )
 
     use_selection = BoolProperty(
         name="Selection Only",
         description="Export selected objects only",
         default=True,
-        )
+    )
     apply_modifiers = BoolProperty(
         name="Apply Modifiers",
         description="Apply the modifiers",
         default=True,
-        )
+    )
     export_mats = BoolProperty(
         name="Materials",
         description="Also export the materials",
         default=False,
-        )
+    )
     is_write_transforms = BoolProperty(
         name="Write transformations",
         description="Write the transformations to a file, reset all transforms before exporting to obj",
@@ -191,7 +191,7 @@ class ExportObjs(Operator, ExportHelper):
             objects_to_export = [ob for ob in bpy.context.selected_objects]
         else:
             objects_to_export = [ob for ob in bpy.data.objects
-                    if ob.type in ('MESH', 'CURVE')]
+                                 if ob.type in ('MESH', 'CURVE')]
 
         # Get the folder.
         dirpath = path.dirname(self.filepath)
@@ -205,7 +205,7 @@ class ExportObjs(Operator, ExportHelper):
                 ob.name,
                 objects_to_export.index(ob) + 1,
                 len(objects_to_export)),
-                )
+            )
 
             export_object(
                 obj=ob,
@@ -213,16 +213,16 @@ class ExportObjs(Operator, ExportHelper):
                 apply_modifiers=apply_modifiers,
                 export_mats=export_mats,
                 is_write_transforms=is_write_transforms
-                )
+            )
 
         process_time = time() - time1
         minutes, seconds = divmod(process_time, 60)
         if minutes == 1:
-            print("\n*** Objects export finished in %d minute and %d seconds"\
-                    "...\n" % (int(minutes), int(seconds)))
+            print("\n*** Objects export finished in %d minute and %d seconds"
+                  "...\n" % (int(minutes), int(seconds)))
         else:
-            print("\n*** Objects export finished in %d minutes and %d seconds"\
-                    "...\n" % (int(minutes), int(seconds)))
+            print("\n*** Objects export finished in %d minutes and %d seconds"
+                  "...\n" % (int(minutes), int(seconds)))
 
         return {'FINISHED'}
 

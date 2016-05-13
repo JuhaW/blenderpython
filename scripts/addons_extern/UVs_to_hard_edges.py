@@ -35,44 +35,42 @@ class UTHE_MainOperator(bpy.types.Operator):
     bl_label = "Split SK"
     bl_description = "Sets the object UV islands borders' edges to hard edges and an Edge Split modifier"
     bl_options = {'REGISTER', 'UNDO'}
-    
-    def execute(self,context):
+
+    def execute(self, context):
         if context.active_object.mode != 'EDIT':
-            bpy.ops.object.mode_set(mode = 'EDIT')
-            
+            bpy.ops.object.mode_set(mode='EDIT')
+
         bpy.ops.uv.seams_from_islands()
 
-        bpy.ops.object.mode_set(mode = 'OBJECT')
-        
+        bpy.ops.object.mode_set(mode='OBJECT')
+
         mesh = bpy.context.object.data
-        
+
         bm = bmesh.new()
         bm.from_mesh(mesh)
 
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='DESELECT')
         edges = []
 
         for edge in bm.edges:
-            
+
             if edge.seam:
                 edge.smooth = False
 
-                
         bpy.ops.mesh.mark_sharp()
 
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         bm.to_mesh(mesh)
         bm.free()
 
 #        bpy.ops.object.mode_set(mode = 'EDIT')
-        
-        edgeSplit = context.object.modifiers.new(name = "EdgeSplit", type = 'EDGE_SPLIT')
+
+        edgeSplit = context.object.modifiers.new(name="EdgeSplit", type='EDGE_SPLIT')
         edgeSplit.use_edge_angle = False
         edgeSplit.use_edge_sharp = True
 
-        
         return {'FINISHED'}
 
 
@@ -82,24 +80,26 @@ class UTHE_Panel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_category = "Shading / UVs"
-    
+
     @classmethod
-    def poll(cls,context):
+    def poll(cls, context):
         return(context.active_object.type == 'MESH')
-        #return((context.active_object.type == 'MESH') and (context.active_object.mode == 'EDIT'))
-    
+        # return((context.active_object.type == 'MESH') and (context.active_object.mode == 'EDIT'))
+
     def draw(self, context):
         layout = self.layout
         add = layout.row()
-        add.operator("uthe.main_operator", text = "UVs to Hard Edges", icon = 'MOD_EDGESPLIT')
-    
+        add.operator("uthe.main_operator", text="UVs to Hard Edges", icon='MOD_EDGESPLIT')
+
+
 def register():
-    
+
     bpy.utils.register_class(UTHE_MainOperator)
     bpy.utils.register_class(UTHE_Panel)
-    
+
+
 def unregister():
-    
+
     bpy.utils.unregister_class(UTHE_MainOperator)
     bpy.utils.unregister_class(UTHE_Panel)
 

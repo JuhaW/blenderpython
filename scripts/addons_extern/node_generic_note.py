@@ -21,15 +21,15 @@
 
 
 bl_info = {
-    "name":        "Generic Note Node",
+    "name": "Generic Note Node",
     "description": "A generic note node",
-    "author":      "Linus Yng",
-    "version":     (0, 1, 5),
-    "blender":     (2, 7, 1),
-    "location":    "Node Editor, N-Panel or menu Layout",
-    "category":    "Node",
-    "warning":     "The note will not work for people without this addon",
-    "wiki-url":    "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Nodes/Generic_Note",
+    "author": "Linus Yng",
+    "version": (0, 1, 5),
+    "blender": (2, 7, 1),
+    "location": "Node Editor, N-Panel or menu Layout",
+    "category": "Node",
+    "warning": "The note will not work for people without this addon",
+    "wiki-url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Nodes/Generic_Note",
 }
 
 import textwrap

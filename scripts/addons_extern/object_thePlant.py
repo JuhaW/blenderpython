@@ -29,6 +29,7 @@ import os
 
 
 class ToolsPanel(bpy.types.Panel):
+
     def __init__(self):
         pass
     bl_label = "The Plant Tools"
@@ -37,7 +38,6 @@ class ToolsPanel(bpy.types.Panel):
     bl_category = "The Plant"
     bl_context = "objectmode"
 
-    
     def draw(self, context):
         layout = self.layout
         layout.label("Duplication!")
@@ -46,8 +46,8 @@ class ToolsPanel(bpy.types.Panel):
         row.operator("theplant.button", text="Duplicate Characters", icon='MOD_ARRAY')
         row = layout.row(align=True)
         row.operator("theplant.duplicatetomesh", text="Duplicate Characters to mesh", icon='LATTICE_DATA')
-        #row.prop_search(self, "lowpoly", bpy.context.scene, "objects")
-        
+        # row.prop_search(self, "lowpoly", bpy.context.scene, "objects")
+
         layout.label("Tools")
 
         row = layout.row(align=True)
@@ -56,8 +56,6 @@ class ToolsPanel(bpy.types.Panel):
         row.operator("theplant.randomizetime", text="Randomize time offset", icon='TIME')
         row = layout.row(align=True)
 
-        
-        
         row.operator("theplant.randomizeparameter", text="Randomize parameter on bone", icon='RNDCURVE')
         row = layout.row(align=True)
         row.operator("theplant.randomizetimedistance", text="Offset time by distance", icon='TIME')
@@ -65,7 +63,7 @@ class ToolsPanel(bpy.types.Panel):
         row.operator("theplant.replacemesh", text="Replace mesh", icon='MESH_DATA')
         row = layout.row(align=True)
         row.operator("theplant.deletehierarchy", text="Delete hierarchy!!", icon='CANCEL')
-        
+
         row = layout.row(align=True)
         layout.label("Deadhands")
         row = layout.row(align=True)
@@ -75,11 +73,12 @@ class ToolsPanel(bpy.types.Panel):
 
 class OBJECT_OT_Button(bpy.types.Operator):
     bl_idname = "theplant.button"
-    bl_label="Button"
+    bl_label = "Button"
 
     def execute(self, context):
         bpy.ops.theplant.charactercopy_dialogoperator('INVOKE_DEFAULT')
         return{'FINISHED'}
+
 
 class OBJECT_OT_Button2(bpy.types.Operator):
     bl_idname = "theplant.button2"
@@ -92,6 +91,8 @@ class OBJECT_OT_Button2(bpy.types.Operator):
 ###############################
 #      deadHandsAdd(
 ###############################
+
+
 class deadHandsAdd(bpy.types.Operator):
     bl_idname = "theplant.deadhandsadd"
     bl_label = "Add dynamics to hands"
@@ -101,21 +102,19 @@ class deadHandsAdd(bpy.types.Operator):
         rootR = bpy.data.objects['DynamicHands_R.000']
         matrixL = rootL.matrix_world
         matrixR = rootL.matrix_world
-        
+
         rootL.parent = bpy.data.objects['SMILEY_RIG']
         rootL.parent_type = "ARMATURE"
         rootL.parent_bone = "shoulder.L"
         rootL.matrix_world = matrixL
-        #rootL.location = (0,0,0)
-
-        
-        
+        # rootL.location = (0,0,0)
 
         return{'FINISHED'}
 
 ###############################
 #      deleteHierarchy(
 ###############################
+
 
 class deleteHierarchy(bpy.types.Operator):
     bl_idname = "theplant.deletehierarchy"
@@ -145,6 +144,7 @@ class deleteHierarchy(bpy.types.Operator):
 #      Randomize time
 ###############################
 
+
 class randomizeTime(bpy.types.Operator):
     bl_idname = "theplant.randomizetime"
     bl_label = "randomizeTime"
@@ -154,40 +154,39 @@ class randomizeTime(bpy.types.Operator):
 
     def execute(self, context):
         obj = bpy.context.scene.objects.active
-        allObj=[obj]
-        
+        allObj = [obj]
+
         for car in obj.children:
-            timeOffset = random.random()*self.rFactor+self.offset
-            allObj=[car]
+            timeOffset = random.random() * self.rFactor + self.offset
+            allObj = [car]
             while allObj != []:
-                
+
                 cur = allObj.pop(0)
                 if cur.type == "MESH":
                     try:
                         cur.modifiers['Mesh Cache'].frame_start = timeOffset
                     except:
                         pass
-                    
+
                 if cur.type == "ARMATURE":
-                    if hasattr(cur.animation_data , "nla_tracks"):
+                    if hasattr(cur.animation_data, "nla_tracks"):
                         for track in cur.animation_data.nla_tracks:
                             for strip in track.strips:
                                 strip.frame_end = strip.frame_end + timeOffset
                                 strip.frame_start = strip.frame_start + timeOffset
-                                if strip.name=="roke.001":
-                                    rr=round(random.random())
+                                if strip.name == "roke.001":
+                                    rr = round(random.random())
                                     if rr == 1:
                                         strip.action = bpy.data.actions['roke.002']
                                     else:
-                                            
+
                                         strip.action = bpy.data.actions['roke.001']
-                                    
-                                    strip.influence=random.random()
-                                 
-                    
+
+                                    strip.influence = random.random()
+
                 for ch in cur.children:
                     allObj.append(ch)
-    
+
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -200,15 +199,16 @@ class randomizeTime(bpy.types.Operator):
 #   Randomize parameter on bone
 ###############################
 
+
 class randomizeParameter(bpy.types.Operator):
     bl_idname = "theplant.randomizeparameter"
     bl_label = "Randomize parameter on multiple rigs"
-    
+
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     object_name = bpy.props.StringProperty(name="Object name:")
     parameter = bpy.props.StringProperty(name="Parameter:")
-    ammount =  bpy.props.FloatProperty(name="Amount:")
+    ammount = bpy.props.FloatProperty(name="Amount:")
 
     def execute(self, context):
         obj = bpy.context.object
@@ -219,23 +219,19 @@ class randomizeParameter(bpy.types.Operator):
                 try:
                     if cur.pose.bones[self.object_name].rotation_mode == "QUATERNION":
                         if self.parameter == "x":
-                            cur.pose.bones[self.object_name].rotation_quaternion[1] = (random.random()-0.5)*self.ammount
+                            cur.pose.bones[self.object_name].rotation_quaternion[1] = (random.random() - 0.5) * self.ammount
                         if self.parameter == "y":
-                            cur.pose.bones[self.object_name].rotation_quaternion[2] = (random.random()-0.5)*self.ammount
+                            cur.pose.bones[self.object_name].rotation_quaternion[2] = (random.random() - 0.5) * self.ammount
                         if self.parameter == "z":
-                            cur.pose.bones[self.object_name].rotation_quaternion[3] = (random.random()-0.5)*self.ammount
-                except: 
-                    pass        
-                
-                
-            
+                            cur.pose.bones[self.object_name].rotation_quaternion[3] = (random.random() - 0.5) * self.ammount
+                except:
+                    pass
+
             for ch in cur.children:
                 allObj.append(ch)
-                
+
         return {'FINISHED'}
-    
-    
-    
+
     def invoke(self, context, event):
         self.object_name = ""
         self.parameter = "z"
@@ -245,73 +241,71 @@ class randomizeParameter(bpy.types.Operator):
 #   Duplicate rig to mesh vertices
 ###############################
 
+
 class duplicateToMesh(bpy.types.Operator):
     bl_idname = "theplant.duplicatetomesh"
     bl_label = "Duplicate rig to mesh vertices"
-    
+
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     mesh_layer = bpy.props.IntProperty(name="Mesh layer:")
     armature_layer = bpy.props.IntProperty(name="Armature layer:")
-    
 
     def execute(self, context):
-        
-        obj=bpy.context.object
-        
-        meshes = []     
+
+        obj = bpy.context.object
+
+        meshes = []
         for o in bpy.context.selected_objects:
-            
+
             if o != obj:
                 if o.type == "MESH":
                     meshes.append(o)
-                    
-        
-        
+
         if meshes != [] and obj != None:
             for mesh in meshes:
                 bpy.ops.object.add()
                 master = bpy.context.object
-                master.location=(0,0,0)
-                master.name="Crowd"
-                
+                master.location = (0, 0, 0)
+                master.name = "Crowd"
+
                 for vertice in mesh.data.vertices.items():
-                    
+
                     obj_new = None
-                    allObj=[obj]
-                    copyRel={}
-                    hasDrivers=[]
+                    allObj = [obj]
+                    copyRel = {}
+                    hasDrivers = []
 
                     while allObj != []:
                         cur = allObj.pop(0)
-                        cur_new=cur.copy()
+                        cur_new = cur.copy()
                         copyRel[cur.name] = cur_new.name
                         bpy.context.scene.objects.link(cur_new)
-                        
+
                         if obj_new == None:
-                            obj_new=cur_new
-                          
-                        if hasattr(cur_new.animation_data , "drivers"):
+                            obj_new = cur_new
+
+                        if hasattr(cur_new.animation_data, "drivers"):
                             if len(cur_new.animation_data.drivers) > 0:
                                 hasDrivers.append(cur_new)
 
                         if cur.parent != None:
                             if cur.parent.name in copyRel:
-                                cur_new.parent=bpy.data.objects[copyRel[cur.parent.name]]                         
+                                cur_new.parent = bpy.data.objects[copyRel[cur.parent.name]]
                             cur_new.matrix_world = cur.matrix_world
-                        
+
                         if cur_new.type == "ARMATURE":
-                            if hasattr(cur_new.data.animation_data , "drivers"):
+                            if hasattr(cur_new.data.animation_data, "drivers"):
                                 if len(cur_new.data.animation_data.drivers) > 0:
                                     hasDrivers.append(cur_new.data)
-                                     
-                            cur_new.layers = tuple(i ==  self.armature_layer-1 for i in range(0, 20))
-                        
+
+                            cur_new.layers = tuple(i == self.armature_layer - 1 for i in range(0, 20))
+
                         if cur_new.type == "MESH":
-                            #cur_new.data=cur_new.data.copy()    !!!!!!!
-                            
-                            cur_new.layers = tuple(i ==  self.mesh_layer-1 for i in range(0, 20))
-                            
+                            # cur_new.data=cur_new.data.copy()    !!!!!!!
+
+                            cur_new.layers = tuple(i == self.mesh_layer - 1 for i in range(0, 20))
+
                             for mod in cur.modifiers:
                                 if mod.name == "Armature":
                                     if mod.object != None:
@@ -321,7 +315,7 @@ class duplicateToMesh(bpy.types.Operator):
 
                         for ch in cur.children:
                             allObj.append(ch)
-                    
+
                     print(copyRel)
                     for drob in hasDrivers:
                         print(type(drob))
@@ -329,16 +323,16 @@ class duplicateToMesh(bpy.types.Operator):
                             for var in d.driver.variables:
                                 for tar in var.targets:
                                     if tar.id != None:
-                                        print("%s -->  %s" % (tar.id.name,copyRel[tar.id.name]))
+                                        print("%s -->  %s" % (tar.id.name, copyRel[tar.id.name]))
                                         if tar.id.name in copyRel:
                                             new_driver_target = copyRel[tar.id.name]
                                             tar.id = bpy.data.objects[new_driver_target]
 
                     obj_new.parent = master
-                    obj_new.location = mesh.matrix_world*vertice[1].co 
+                    obj_new.location = mesh.matrix_world * vertice[1].co
 
         return {'FINISHED'}
-        
+
     def invoke(self, context, event):
         self.armature_layer = 11
         self.mesh_layer = 12
@@ -347,8 +341,8 @@ class duplicateToMesh(bpy.types.Operator):
 
 ###############################
 #      Replace mesh
-###############################    
-    
+###############################
+
 class replaceMesh(bpy.types.Operator):
     bl_idname = "theplant.replacemesh"
     bl_label = "Replace mesh"
@@ -416,6 +410,7 @@ class replaceMesh(bpy.types.Operator):
 #  randomizeTimeDistance
 #########################################
 
+
 class randomizeTimeDistance(bpy.types.Operator):
     bl_idname = "theplant.randomizetimedistance"
     bl_label = "randomizeTimeDistance"
@@ -437,14 +432,14 @@ class randomizeTimeDistance(bpy.types.Operator):
                 hu = o["Crowd"]
             except:
                 hu = False
-            #print(hu)
+            # print(hu)
 
             if hu == True:
                 for ch in o.children:
-                    #print(ch.name)
+                    # print(ch.name)
                     if ch.type == "ARMATURE":
-                        #print(ch.name)
-                        distanceV = ch.location-point
+                        # print(ch.name)
+                        distanceV = ch.location - point
                         distance = distanceV.length
                         childrens.append([ch, distance])
                         if distance > max:
@@ -453,18 +448,18 @@ class randomizeTimeDistance(bpy.types.Operator):
                             min = distance
 
                 print(min, max)
-                fac = self.dFactor/max
+                fac = self.dFactor / max
 
         for o in childrens:
             try:
                 st = o[0].animation_data.nla_tracks[0].strips[0]
-                timeOffset = (o[1]-min)*fac+random.random()*self.rFactor+self.offset
+                timeOffset = (o[1] - min) * fac + random.random() * self.rFactor + self.offset
                 st.frame_end = st.frame_end + timeOffset + 1
                 st.frame_start = st.frame_start + timeOffset
 
             except:
                 pass
-                #print("nono2")
+                # print("nono2")
 
         return {'FINISHED'}
 
@@ -479,6 +474,7 @@ class randomizeTimeDistance(bpy.types.Operator):
 #########################################
 #  separateToLayers
 #########################################
+
 
 class separateToLayers(bpy.types.Operator):
     bl_idname = "theplant.separatetolayers"
@@ -496,41 +492,39 @@ class separateToLayers(bpy.types.Operator):
 
         indexLayer = self.slayer
         layerSpan = self.nlayers
-    
+
         point = obj.location
-        maxDistance=0
+        maxDistance = 0
 
         for o in bpy.context.selected_objects:
-           
+
             try:
-                
+
                 if o.name == "Crowd":
                     for ch in o.children:
                         if ch.type == "ARMATURE":
-                            
-                            disanceV = ch.location-point
+
+                            disanceV = ch.location - point
                             if distanceV.length > maxDistance:
-                                maxDistance=distanceV.length
-                               
-                            
+                                maxDistance = distanceV.length
+
                             childrens.append([ch, disanceV.length])
             except:
                 pass
-               #print("Finding charaters problem!")
+               # print("Finding charaters problem!")
 
         sortedCH = sorted(childrens, key=lambda a: a[1])
         numObj = len(sortedCH)
         print(numObj)
-        fac = maxDistance/numObj
+        fac = maxDistance / numObj
 
         for za in sortedCH:
-            
-            
-            layer =  int(za[1]/fac)+indexLayer
+
+            layer = int(za[1] / fac) + indexLayer
             for c in za.children:
 
                 if c.type == "MESH":
-                    c.layers = tuple(i == layer  for i in range(0, 20))
+                    c.layers = tuple(i == layer for i in range(0, 20))
 
         bpy.context.scene.layers = tuple(i == 0 for i in range(0, 20))
 
@@ -556,6 +550,7 @@ ParentName = "Crowd"
 Alayer = 1
 Mlayer = 1
 RandomTime = 10
+
 
 class CharacterCopyDialogOperator(bpy.types.Operator):
     bl_idname = "theplant.charactercopy_dialogoperator"
@@ -615,6 +610,7 @@ class CharacterCopyDialogOperator(bpy.types.Operator):
 
         return context.window_manager.invoke_props_dialog(self)
 
+
 class CharacterCopy(bpy.types.Operator):
     """Duplicating objecs"""
     bl_idname = "theplant.charactercopy"
@@ -649,42 +645,40 @@ class CharacterCopy(bpy.types.Operator):
 
         for i in range(width):
             for j in range(depth):
-                r1 = (random.random()-0.5)*2*rA
-                r2 = (random.random()-0.5)*2*rA
+                r1 = (random.random() - 0.5) * 2 * rA
+                r2 = (random.random() - 0.5) * 2 * rA
 
-                #location = (j, i, obj.location[2])
+                # location = (j, i, obj.location[2])
                 obj_new = None
-                allObj=[obj]
-                copyRel={}
+                allObj = [obj]
+                copyRel = {}
 
-                
                 if obj != None:
                     while allObj != []:
                         cur = allObj.pop(0)
                         if cur.parent != None:
-                            cur_new=cur.copy()
+                            cur_new = cur.copy()
                             copyRel[cur.name] = cur_new.name
                             bpy.context.scene.objects.link(cur_new)
                             try:
-                                cur_new.parent=bpy.data.objects[copyRel[cur.parent.name]]
-                                
+                                cur_new.parent = bpy.data.objects[copyRel[cur.parent.name]]
+
                             except:
-                                obj_new=cur_new
+                                obj_new = cur_new
                             cur_new.matrix_world = cur.matrix_world
 
                         else:
-                            
-                            cur_new=cur.copy()
+
+                            cur_new = cur.copy()
                             bpy.context.scene.objects.link(cur_new)
                             copyRel[cur.name] = cur_new.name
-                            obj_new=cur_new
+                            obj_new = cur_new
                         if cur_new.type == "MESH":
                             try:
-                                new_armature_object=copyRel[cur.modifiers['Armature'].object.name]
-                                cur_new.modifiers['Armature'].object=bpy.data.objects[new_armature_object]
+                                new_armature_object = copyRel[cur.modifiers['Armature'].object.name]
+                                cur_new.modifiers['Armature'].object = bpy.data.objects[new_armature_object]
                             except:
                                 pass
-                           
 
                         for i in cur.children:
                             allObj.append(i)
@@ -700,45 +694,41 @@ class CharacterCopy(bpy.types.Operator):
 
         for c in parent.children:
             if alayer != 1:
-                c.layers = set_layer(alayer-1)
+                c.layers = set_layer(alayer - 1)
 
             for m in c.children:
                 if mlayer != 1:
-                    m.layers = set_layer(mlayer-1)
-
+                    m.layers = set_layer(mlayer - 1)
 
         return {'FINISHED'}
-    
-import bmesh 
+
+import bmesh
+
+
 class VertexToZeroX(bpy.types.Operator):
     """VertexToZeroX"""
-    
+
     bl_idname = "theplant.vertextozero"
     bl_label = "theplant.vertextozero"         # display name in the interface.
     bl_options = {'REGISTER', 'UNDO'}  # enable undo for the operator.
     import bmesh
+
     def execute(self, context):
-        
+
         bm = bmesh.from_edit_mesh(bpy.context.active_object.data)
         selected_verts = [vert for vert in bm.verts if vert.select]
         for v in selected_verts:
-            v.co[0]=0
-        
+            v.co[0] = 0
+
         return {'FINISHED'}
 
-        
-        
-        
 
 def register():
     bpy.utils.register_module(__name__)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":
     register()
-
-
-
-

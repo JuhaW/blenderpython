@@ -20,17 +20,17 @@ class BonesExtraSelectSimilar(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     prop_type = bpy.props.StringProperty(name="type",
-        description="(enum in [‘LENGTH’, ‘DIRECTION’, ‘PREFIX’, ‘SUFFIX’, ‘LAYER’], (optional)) – Type",
-        default="LENGTH")
+                                         description="(enum in [‘LENGTH’, ‘DIRECTION’, ‘PREFIX’, ‘SUFFIX’, ‘LAYER’], (optional)) – Type",
+                                         default="LENGTH")
 
     threshold = bpy.props.FloatProperty(name="threshold",
-        description="(float in [0, 1], (optional)) – Threshold",
-        default=0.1, min=0.0)
+                                        description="(float in [0, 1], (optional)) – Threshold",
+                                        default=0.1, min=0.0)
 
     #  Extra options for search
     search_set = bpy.props.StringProperty(name="search_set",
-        description="(enum in ['ALL', 'GROUP', 'CHILDREN', 'IMMEDIATE-CHILDREN', 'SIBLINGS']) - Search Set",
-        default="ALL")
+                                          description="(enum in ['ALL', 'GROUP', 'CHILDREN', 'IMMEDIATE-CHILDREN', 'SIBLINGS']) - Search Set",
+                                          default="ALL")
 
     def deselect_bone(self, bone):
         bone.select = False
@@ -46,11 +46,11 @@ class BonesExtraSelectSimilar(bpy.types.Operator):
 
     def filter_selected_as_group(self, active_pose_bone, context):
         for selected_pose_bone in context.selected_pose_bones:
-                gr1 = active_pose_bone.bone_group
-                gr2 = selected_pose_bone.bone_group
-                #  If groups don't exist or are not equal
-                if (gr1 is None) or (gr2 is None) or (gr1.name != gr2.name):
-                    self.deselect_bone(selected_pose_bone.bone)
+            gr1 = active_pose_bone.bone_group
+            gr2 = selected_pose_bone.bone_group
+            #  If groups don't exist or are not equal
+            if (gr1 is None) or (gr2 is None) or (gr1.name != gr2.name):
+                self.deselect_bone(selected_pose_bone.bone)
 
     def filter_selected_as_children(self, active_bone, context):
         for selected_bone in context.selected_bones:

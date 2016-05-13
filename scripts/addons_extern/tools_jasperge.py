@@ -60,7 +60,7 @@ from bpy.app.handlers import persistent
 from bpy.props import StringProperty, IntProperty, BoolProperty, FloatProperty, EnumProperty
 
 
-### Helper functions
+# Helper functions
 def print_progress(progress, min=0, max=100, barlen=30, item="", line_length=120):
     if max <= min:
         return
@@ -74,7 +74,7 @@ def print_progress(progress, min=0, max=100, barlen=30, item="", line_length=120
     print(bar, end="\r")
 
 
-### Operators and other classes
+# Operators and other classes
 class CopyModifierSettings(bpy.types.Operator):
     """Copy settings of modifiers from active object to """
     """all other selected objects."""
@@ -383,7 +383,7 @@ class IncrementalSave(bpy.types.Operator):
         incr_files = glob.glob(os.path.join(
             incr_save_file_dir,
             "*.[bB][lL][eE][nN][dD]"
-            ))
+        ))
         if incr_files:
             incr_files.sort()   # Sort list, just to be sure.
             last_file_num = int(os.path.splitext(
@@ -957,10 +957,10 @@ class JaspergeToolsMenu(bpy.types.Menu):
         layout.operator("object.jaspergetools_modifier_viewport_off",)
         layout.separator()
         layout.operator("object.jaspergetools_wire_on",
-                        #text="Wireframe Display On",
+                        # text="Wireframe Display On",
                         icon='MESH_GRID')
         layout.operator("object.jaspergetools_wire_off",
-                        #text="Wireframe Display Off",
+                        # text="Wireframe Display Off",
                         icon='MESH_PLANE')
         layout.separator()
         layout.operator("object.shade_smooth",

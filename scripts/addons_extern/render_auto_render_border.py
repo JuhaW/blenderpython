@@ -1,7 +1,3 @@
-import bpy
-from bpy.app.handlers import persistent
-from bpy_extras.object_utils import world_to_camera_view
-
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
 #  This program is free software; you can redistribute it and/or
@@ -23,6 +19,11 @@ from bpy_extras.object_utils import world_to_camera_view
 # AUTHOR: Eugenio Pignataro (Oscurart) www.oscurart.com.ar
 
 
+import bpy
+from bpy.app.handlers import persistent
+from bpy_extras.object_utils import world_to_camera_view
+
+
 bl_info = {
     "name": "Automatic Render Border",
     "author": "Eugenio Pignataro (Oscurart)",
@@ -33,7 +34,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "category": "Render",
-    }
+}
 
 bpy.types.Scene.automatic_render_border_margin = \
     bpy.props.FloatProperty(default=0, min=0, max=1)
@@ -90,7 +91,7 @@ def autoCrop(dummy):
     sc.render.border_min_x = x[0] - margin
     sc.render.border_max_x = x[-1] + margin
     sc.render.border_min_y = y[0] - margin
-    sc.render.border_max_y = y[-1]+margin
+    sc.render.border_max_y = y[-1] + margin
     del x
     del y
 
@@ -138,4 +139,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

@@ -309,7 +309,7 @@ class UTSetLens(bpy.types.Operator):
     'Sets viewport lense to 100mm'
     bl_idname = 'ut.set_lens'
     bl_label = 'Set Lens'
-    prop = bpy.props.IntProperty(default = 35)
+    prop = bpy.props.IntProperty(default=35)
 
     def execute(self, context,):
         bpy.context.space_data.lens = self.prop
@@ -450,8 +450,8 @@ class UTClippingToggle(bpy.types.Operator):
             except KeyError:
                 print("No mirror modifier on " + e.name + " or it is not named Mirror")
         return {'FINISHED'}
-    
-    
+
+
 class UTEmptyAlign(bpy.types.Operator):
 
     'Sets the offset of the image'
@@ -531,7 +531,7 @@ class UTAddPositionedSuzanne(bpy.types.Operator):
 
     def execute(self, context):
         cloc = context.scene.cursor_location
-        bpy.ops.mesh.primitive_monkey_add(radius=1, view_align=False, enter_editmode=False, location=(cloc.x, cloc.y, cloc.z+0.4955), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
+        bpy.ops.mesh.primitive_monkey_add(radius=1, view_align=False, enter_editmode=False, location=(cloc.x, cloc.y, cloc.z + 0.4955), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
         bpy.ops.object.shade_smooth()
         bpy.ops.object.subdivision_set(level=3)
         bpy.context.object.modifiers["Subsurf"].render_levels = 3
@@ -654,16 +654,16 @@ def menu_func_3dviewheader(self, context):
         row = col.row(align=True)
         row.prop(context.object, 'show_wire')
 
-
     col = layout.column()
     row = col.row(align=True)
-    row.operator("ut.set_lens", text="35").prop=35
-    row.operator("ut.set_lens", text="100").prop=100
+    row.operator("ut.set_lens", text="35").prop = 35
+    row.operator("ut.set_lens", text="100").prop = 100
 
 
 def menu_func_addobj(self, context):
     self.layout.operator("ut.positioned_suz", icon="MONKEY")
-    
+
+
 def menu_func_vse(self, context):
     scene = bpy.context.scene
     sequences = scene.sequence_editor.sequences
@@ -673,12 +673,13 @@ def menu_func_vse(self, context):
     sequences_at_frame = []
     if sequences:
         for seq in sequences:
-            if (seq.frame_start <= frame <= seq.frame_start+seq.frame_duration):
+            if (seq.frame_start <= frame <= seq.frame_start + seq.frame_duration):
                 sequences_at_frame.append(seq)
 
-        if sequences_at_frame:        
+        if sequences_at_frame:
             shotname = sorted(sequences_at_frame, key=lambda k: k.channel)[0].name.split('.')[0]
-            self.layout.column().row().label("Strip: "+shotname)
+            self.layout.column().row().label("Strip: " + shotname)
+
 
 class UselessToolsPanel(bpy.types.Panel):
     bl_label = "Useless Tools"
@@ -701,21 +702,21 @@ class UselessToolsPanel(bpy.types.Panel):
         row = col.row(align=True)
         row.prop(scene, "UTSubSurfDrop", icon="TRIA_DOWN")
         if not SUBSURFDROP:
-            row.operator("ut.subsurfhideall", icon="MOD_SOLIDIFY", text="").show=False
-            row.operator("ut.subsurfhideall", icon="MOD_SUBSURF", text="").show=True
-            row.operator("ut.optimaldisplayall", icon="MESH_PLANE", text="").on=True
+            row.operator("ut.subsurfhideall", icon="MOD_SOLIDIFY", text="").show = False
+            row.operator("ut.subsurfhideall", icon="MOD_SUBSURF", text="").show = True
+            row.operator("ut.optimaldisplayall", icon="MESH_PLANE", text="").on = True
         if SUBSURFDROP:
             row1 = col.row(align=True)
-            row1.operator("ut.subsurfhidesel", icon="MOD_SOLIDIFY", text="Hide").show=False
-            row1.operator("ut.subsurfhidesel", icon="MOD_SUBSURF", text="Show").show=True
+            row1.operator("ut.subsurfhidesel", icon="MOD_SOLIDIFY", text="Hide").show = False
+            row1.operator("ut.subsurfhidesel", icon="MOD_SUBSURF", text="Show").show = True
             row2 = col.row(align=True)
-            row2.operator("ut.subsurfhideall", icon="MOD_SOLIDIFY", text="Hide All").show=False
-            row2.operator("ut.subsurfhideall", icon="MOD_SUBSURF", text="Show All").show=True
+            row2.operator("ut.subsurfhideall", icon="MOD_SOLIDIFY", text="Hide All").show = False
+            row2.operator("ut.subsurfhideall", icon="MOD_SUBSURF", text="Show All").show = True
             row3 = col.row(align=True)
-            row3.operator("ut.optimaldisplaysel", icon="MESH_GRID", text="S").on=False
-            row3.operator("ut.optimaldisplaysel", icon="MESH_PLANE", text="S").on=True
-            row3.operator("ut.optimaldisplayall", icon="MESH_GRID", text="A").on=False
-            row3.operator("ut.optimaldisplayall", icon="MESH_PLANE", text="A").on=True
+            row3.operator("ut.optimaldisplaysel", icon="MESH_GRID", text="S").on = False
+            row3.operator("ut.optimaldisplaysel", icon="MESH_PLANE", text="S").on = True
+            row3.operator("ut.optimaldisplayall", icon="MESH_GRID", text="A").on = False
+            row3.operator("ut.optimaldisplayall", icon="MESH_PLANE", text="A").on = True
             row4 = col.row(align=True)
             row4.operator("ut.remove_all_subsurfs", icon="PANEL_CLOSE")
 
@@ -724,46 +725,46 @@ class UselessToolsPanel(bpy.types.Panel):
         row = col.row(align=True)
         row.prop(scene, "UTWireDrop", icon="TRIA_DOWN")
         if not WIREDROP:
-            row.operator("ut.wirehideall", icon="MATSPHERE", text="").show=False
-            row.operator("ut.wirehideall", icon="MESH_UVSPHERE", text="").show=True
-            row.operator("ut.all_edges", icon="MESH_GRID", text="").on=True
+            row.operator("ut.wirehideall", icon="MATSPHERE", text="").show = False
+            row.operator("ut.wirehideall", icon="MESH_UVSPHERE", text="").show = True
+            row.operator("ut.all_edges", icon="MESH_GRID", text="").on = True
         if WIREDROP:
             row1 = col.row(align=True)
-            row1.operator("ut.wirehidesel", icon="MATSPHERE", text="Hide").show=False
-            row1.operator("ut.wirehidesel", icon="MESH_UVSPHERE", text="Show").show=True
+            row1.operator("ut.wirehidesel", icon="MATSPHERE", text="Hide").show = False
+            row1.operator("ut.wirehidesel", icon="MESH_UVSPHERE", text="Show").show = True
             row2 = col.row(align=True)
-            row2.operator("ut.wirehideall", icon="MATSPHERE", text="Hide All").show=False
-            row2.operator("ut.wirehideall", icon="MESH_UVSPHERE", text="Show All").show=True
+            row2.operator("ut.wirehideall", icon="MATSPHERE", text="Hide All").show = False
+            row2.operator("ut.wirehideall", icon="MESH_UVSPHERE", text="Show All").show = True
             row3 = col.row(align=True)
             row3.alignment = 'CENTER'
             row3.label(text="All Edges:")
-            row3.operator("ut.all_edges", icon="MESH_PLANE", text="Off").on=False
-            row3.operator("ut.all_edges", icon="MESH_GRID", text="On").on=True
+            row3.operator("ut.all_edges", icon="MESH_PLANE", text="Off").on = False
+            row3.operator("ut.all_edges", icon="MESH_GRID", text="On").on = True
 
         box1 = self.layout.box()
         col = box1.column(align=True)
         row = col.row(align=True)
         row.prop(scene, "UTViewPortDrop", icon="TRIA_DOWN")
         if not VIEWPORTDROP:
-            row.operator("ut.double_sided", icon="CLIPUV_DEHLT", text="").on=False
-            row.operator("ut.set_lens", icon="OUTLINER_DATA_CAMERA", text="").prop=35
+            row.operator("ut.double_sided", icon="CLIPUV_DEHLT", text="").on = False
+            row.operator("ut.set_lens", icon="OUTLINER_DATA_CAMERA", text="").prop = 35
             row.prop(bpy.context.user_preferences.system, "use_vertex_buffer_objects", text="")
         if VIEWPORTDROP:
             row3 = col.row(align=True)
             row3.alignment = 'CENTER'
             row3.label(text="Sides:")
-            row3.operator("ut.double_sided", icon="CLIPUV_HLT", text="2x").on=True
-            row3.operator("ut.double_sided", icon="CLIPUV_DEHLT", text="1x").on=False
+            row3.operator("ut.double_sided", icon="CLIPUV_HLT", text="2x").on = True
+            row3.operator("ut.double_sided", icon="CLIPUV_DEHLT", text="1x").on = False
             row5 = col.row(align=True)
             row5.prop(bpy.context.user_preferences.system, "use_vertex_buffer_objects")
             row5.prop(view, "show_backface_culling")
             col.prop(view, "lens")
             row4 = col.row(align=True)
-            row4.operator("ut.set_lens", text="18").prop=18
-            row4.operator("ut.set_lens", text="35").prop=35
-            row4.operator("ut.set_lens", text="50").prop=50
-            row4.operator("ut.set_lens", text="70").prop=70
-            row4.operator("ut.set_lens", text="100").prop=100
+            row4.operator("ut.set_lens", text="18").prop = 18
+            row4.operator("ut.set_lens", text="35").prop = 35
+            row4.operator("ut.set_lens", text="50").prop = 50
+            row4.operator("ut.set_lens", text="70").prop = 70
+            row4.operator("ut.set_lens", text="100").prop = 100
 
         box1 = self.layout.box()
         col = box1.column(align=True)
@@ -777,8 +778,8 @@ class UselessToolsPanel(bpy.types.Panel):
             row = col.row(align=True)
             row.alignment = 'CENTER'
             row.label(text="Del Anim")
-            row.operator("ut.clearanim", text="Sel").selected_only=True
-            row.operator("ut.clearanim", text="All").selected_only=False
+            row.operator("ut.clearanim", text="Sel").selected_only = True
+            row.operator("ut.clearanim", text="All").selected_only = False
             col.separator()
             row = col.row(align=True)
             row.alignment = 'CENTER'
@@ -788,7 +789,7 @@ class UselessToolsPanel(bpy.types.Panel):
             col.operator("ut.select_ngons", icon="MOD_BEVEL")
             col.operator("ut.recalculate_normals", icon="SNAP_NORMAL")
             col.separator()
-            col.operator("ut.delete_node_groups", icon="CANCEL", text="("+str(len(bpy.data.node_groups))+") Delete Unused Node Groups")
+            col.operator("ut.delete_node_groups", icon="CANCEL", text="(" + str(len(bpy.data.node_groups)) + ") Delete Unused Node Groups")
 
 
 def register():

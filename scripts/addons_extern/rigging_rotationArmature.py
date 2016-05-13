@@ -32,7 +32,7 @@
 # with a new bone that only rotates and scales.
 # This is to facilitate exporting to an app that doesn't support bone translations
 
-## WARNING
+# WARNING
 # This is made to work with a particular rig, adjustments may need to be made
 # to work with other rigs.
 # Most likely change will be setting the name of parent_bone
@@ -40,7 +40,7 @@
 bl_info = {
     "name": "Rotation Armature",
     "author": "sambler",
-    "version": (1,0),
+    "version": (1, 0),
     "blender": (2, 68, 0),
     "location": "View3D > Toolbar > Tools tab",
     "description": "Turn a movement based armature into rotation based",
@@ -51,6 +51,7 @@ bl_info = {
 }
 
 import bpy
+
 
 class createRotationBones(bpy.types.Operator):
     """Create bones that follow existing moving bones but don't move"""
@@ -72,7 +73,7 @@ class createRotationBones(bpy.types.Operator):
 
         # create new bones
         for bn in bnames:
-            nb = ebones.new(name=bn+'.new')
+            nb = ebones.new(name=bn + '.new')
             nb.head = basebone.tail
             nb.tail = ebones[bn].head
             nb.parent = basebone
@@ -82,7 +83,7 @@ class createRotationBones(bpy.types.Operator):
         pbones = context.active_object.pose.bones
 
         for bn in bnames:
-            nc = pbones[bn+'.new'].constraints.new(type='STRETCH_TO')
+            nc = pbones[bn + '.new'].constraints.new(type='STRETCH_TO')
             nc.target = context.active_object
             nc.subtarget = bn
             nc.head_tail = 0.0
@@ -90,11 +91,11 @@ class createRotationBones(bpy.types.Operator):
         # bake animation
         bpy.ops.pose.select_all(action='SELECT')
         bpy.ops.nla.bake(frame_start=bpy.context.scene.frame_start,
-            frame_end=bpy.context.scene.frame_end,
-            only_selected=True,
-            visual_keying=True,
-            clear_constraints=True,
-            bake_types={'POSE'})
+                         frame_end=bpy.context.scene.frame_end,
+                         only_selected=True,
+                         visual_keying=True,
+                         clear_constraints=True,
+                         bake_types={'POSE'})
 
         # remove old bones
         bpy.ops.object.mode_set(mode='EDIT', toggle=False)
@@ -104,7 +105,7 @@ class createRotationBones(bpy.types.Operator):
         bpy.ops.armature.delete()
 
         for bn in bnames:
-            ebones[bn+'.new'].name = bn
+            ebones[bn + '.new'].name = bn
 
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
@@ -128,6 +129,7 @@ class rotationBonesPanel(bpy.types.Panel):
 def register():
     bpy.utils.register_class(createRotationBones)
     bpy.utils.register_class(rotationBonesPanel)
+
 
 def unregister():
     bpy.utils.unregister_class(createRotationBones)

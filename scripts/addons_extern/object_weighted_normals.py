@@ -9,7 +9,9 @@ bl_info = {
     "support": "COMMUNITY"
 }
 
-import bpy, bmesh, array
+import bpy
+import bmesh
+import array
 from mathutils import Vector
 
 

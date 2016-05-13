@@ -19,7 +19,7 @@ bl_info = {
 
 
 class General(object):
-    
+
     is_baking_started = False
     original_color = None
     textures_use = []
@@ -113,8 +113,8 @@ class EasyLightMapBake(bpy.types.Operator):
     settings = None
     selected_object = None
     material = None
-    #original_color = None
-    #textures_use = []
+    # original_color = None
+    # textures_use = []
 
     @classmethod
     def poll(cls, context):
@@ -230,7 +230,6 @@ class EasyLightMapPanel(bpy.types.Panel):
         layout.operator(EasyLightMapBake.bl_idname, text="Bake it!")
 
 
-
 def check_uv_layers(selected_object):
     """ Object must have two uv sets. """
     if len(selected_object.data.uv_textures) == 0:
@@ -279,7 +278,6 @@ def scene_update(context):
 
             # Remove handler
             bpy.app.handlers.scene_update_post.remove(scene_update)
-
 
 
 def register():

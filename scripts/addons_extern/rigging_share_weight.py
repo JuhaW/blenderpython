@@ -29,13 +29,12 @@ def auto_weight():
     for bone in bpy.context.editable_bones:
         bone_sels.append(bone)
 
-
     # delete unselected bone
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.duplicate()
     bpy.ops.object.mode_set(mode='EDIT')
 
-    #arm = bpy.data.armatures["Armature"]
+    # arm = bpy.data.armatures["Armature"]
     arm = bpy.context.editable_bones[0].id_data
     for bone in arm.edit_bones:
         is_del = True

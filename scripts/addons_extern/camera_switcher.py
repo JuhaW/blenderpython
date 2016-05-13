@@ -9,7 +9,7 @@ bl_info = {
     "blender": (2, 65, 0),
     "location": "3D View > Tools",
     "category": "Camera"
-    }
+}
 
 # Helper internal functions:
 

@@ -43,6 +43,7 @@ bl_info = {
 
 import bpy
 
+
 class SetKeyingSetOperator(bpy.types.Operator):
     """Set the active keying set"""
     bl_idname = 'anim.set_keyingset'
@@ -57,6 +58,7 @@ class SetKeyingSetOperator(bpy.types.Operator):
         else:
             ks.active = ks[self.type]
         return {'FINISHED'}
+
 
 class KeyingsetsPanel(bpy.types.Panel):
     """Display some butons to set the active keying set"""
@@ -102,6 +104,7 @@ class KeyingsetsPanel(bpy.types.Panel):
 # store keymaps here to access after registration
 addon_keymaps = []
 
+
 def register():
     bpy.utils.register_class(SetKeyingSetOperator)
     bpy.utils.register_class(KeyingsetsPanel)
@@ -116,36 +119,35 @@ def register():
         km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
 
         kmi = km.keymap_items.new(SetKeyingSetOperator.bl_idname, 'Y',
-                    'PRESS', key_modifier='K')
+                                  'PRESS', key_modifier='K')
         kmi.properties.type = 'Location'
         addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new(SetKeyingSetOperator.bl_idname, 'U',
-                    'PRESS', key_modifier='K')
+                                  'PRESS', key_modifier='K')
         kmi.properties.type = 'Rotation'
         addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new(SetKeyingSetOperator.bl_idname, 'I',
-                    'PRESS', key_modifier='K')
+                                  'PRESS', key_modifier='K')
         kmi.properties.type = 'LocRotScale'
         addon_keymaps.append((km, kmi))
-
 
         # add keys for pose mode
         km = wm.keyconfigs.addon.keymaps.new(name='Pose', space_type='EMPTY')
 
         kmi = km.keymap_items.new(SetKeyingSetOperator.bl_idname, 'Y',
-                    'PRESS', key_modifier='K')
+                                  'PRESS', key_modifier='K')
         kmi.properties.type = 'Location'
         addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new(SetKeyingSetOperator.bl_idname, 'U',
-                    'PRESS', key_modifier='K')
+                                  'PRESS', key_modifier='K')
         kmi.properties.type = 'Rotation'
         addon_keymaps.append((km, kmi))
 
         kmi = km.keymap_items.new(SetKeyingSetOperator.bl_idname, 'I',
-                    'PRESS', key_modifier='K')
+                                  'PRESS', key_modifier='K')
         kmi.properties.type = 'LocRotScale'
         addon_keymaps.append((km, kmi))
 
@@ -161,4 +163,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

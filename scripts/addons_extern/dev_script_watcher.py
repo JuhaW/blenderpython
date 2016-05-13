@@ -193,7 +193,7 @@ class WatchScriptOperator(bpy.types.Operator):
             sys.modules[mod_name] = mod
 
             # Fianally, execute the module.
-            exec (compile(f.read(), self.filepath, 'exec'), mod.__dict__)
+            exec(compile(f.read(), self.filepath, 'exec'), mod.__dict__)
         except IOError:
             print('Could not open script file.')
         except:

@@ -30,17 +30,18 @@ __version__ = "0.2"
 __date__ = "17 May 2015"
 
 bl_info = {
-    "name" : "Face to Transform Orientation",
-    "author" : "Nutti",
-    "version" : (0, 2),
-    "blender" : (2, 7, 0),
-    "location" : "Object > Face object to Transform Orientation",
-    "description" : "Face object to transform orientation",
-    "warning" : "",
-    "wiki_url" : "",
-    "tracker_url" : "",
-    "category" : "Object"
+    "name": "Face to Transform Orientation",
+    "author": "Nutti",
+    "version": (0, 2),
+    "blender": (2, 7, 0),
+    "location": "Object > Face object to Transform Orientation",
+    "description": "Face object to transform orientation",
+    "warning": "",
+    "wiki_url": "",
+    "tracker_url": "",
+    "category": "Object"
 }
+
 
 def SetOrientationCallback(scene, context):
 
@@ -48,7 +49,7 @@ def SetOrientationCallback(scene, context):
 
     for key in bpy.data.screens['Default'].scene.orientations.keys():
         items.append((key, key, ""))
-    
+
     return items
 
 
@@ -60,39 +61,39 @@ class FTTO(bpy.types.Operator):
     bl_label = "Face To Transform Orientation"
     bl_description = "Face to transform orientation"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     orientation = EnumProperty(
-        name = "Transform Orientation",
-        description = "Transform orientation",
-        items = SetOrientationCallback)
+        name="Transform Orientation",
+        description="Transform orientation",
+        items=SetOrientationCallback)
 
     offset_euler_x = FloatProperty(
-        name = "Rotate X",
-        description = "Rotate X ...",
-        default = 0.0,
-        min = -360.0,
-        max = 360.0)
+        name="Rotate X",
+        description="Rotate X ...",
+        default=0.0,
+        min=-360.0,
+        max=360.0)
 
     offset_euler_y = FloatProperty(
-        name = "Rotate Y",
-        description = "Rotate Y ...",
-        default = 0.0,
-        min = -360.0,
-        max = 360.0)
+        name="Rotate Y",
+        description="Rotate Y ...",
+        default=0.0,
+        min=-360.0,
+        max=360.0)
 
     offset_euler_z = FloatProperty(
-        name = "Rotate Z",
-        description = "Rotate Z ...",
-        default = 0.0,
-        min = -360.0,
-        max = 360.0)
-        
+        name="Rotate Z",
+        description="Rotate Z ...",
+        default=0.0,
+        min=-360.0,
+        max=360.0)
+
     base_euler = None
     prev_orientation = None
 
     def __init__(self):
         self.face_to(self.orientation)
-        
+
     def face_to(self, orientation):
         # get base orientation
         scene = bpy.data.screens['Default'].scene
@@ -101,7 +102,7 @@ class FTTO(bpy.types.Operator):
             return 1
         mat = scene.orientations[orientation].matrix
         base_quota = mat.to_quaternion()
-    
+
         # set orientation to object
         active_objs = bpy.context.selected_objects
         for o in active_objs:
@@ -115,11 +116,11 @@ class FTTO(bpy.types.Operator):
         self.offset_euler_y = 0.0
         self.offset_euler_z = 0.0
         self.base_euler = base_quota.to_euler()
-        
+
         self.prev_orientation = orientation
-        
+
     def execute(self, context):
-    
+
         if self.prev_orientation != self.orientation:
             ret = self.face_to(self.orientation)
             if ret != 0:
@@ -127,9 +128,9 @@ class FTTO(bpy.types.Operator):
 
         # set orientation to object
         new_euler = self.base_euler.copy()
-        new_euler.x += radians(self.offset_euler_x);
-        new_euler.y += radians(self.offset_euler_y);
-        new_euler.z += radians(self.offset_euler_z);
+        new_euler.x += radians(self.offset_euler_x)
+        new_euler.y += radians(self.offset_euler_y)
+        new_euler.z += radians(self.offset_euler_z)
         active_objs = bpy.context.selected_objects
         for o in active_objs:
             mode = o.rotation_mode

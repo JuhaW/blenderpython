@@ -20,16 +20,16 @@
 # ##### END GPL LICENSE BLOCK #####
 
 bl_info = {
-	"name": "DumpMesh",
-	"author": "Michel Anders (varkenvarken)",
-	"version": (0, 0, 201601131201),
-	"blender": (2, 76, 0),
-	"location": "View3D > Object > DumpMesh",
-	"description": "Dumps geometry information of active object in a text buffer",
-	"warning": "",
-	"wiki_url": "https://github.com/varkenvarken/blenderaddons/blob/master/dumpmesh.py",
-	"tracker_url": "",
-	"category": "Object"}
+    "name": "DumpMesh",
+    "author": "Michel Anders (varkenvarken)",
+    "version": (0, 0, 201601131201),
+    "blender": (2, 76, 0),
+    "location": "View3D > Object > DumpMesh",
+    "description": "Dumps geometry information of active object in a text buffer",
+    "warning": "",
+    "wiki_url": "https://github.com/varkenvarken/blenderaddons/blob/master/dumpmesh.py",
+    "tracker_url": "",
+    "category": "Object"}
 
 # to prevent problems with all sorts of quotes and stuff, the code that will be included in the final output is here base64 encoded
 # you can find the readable version on https://github.com/varkenvarken/blenderaddons/blob/master/createmesh%20.py
@@ -46,168 +46,172 @@ import bmesh
 from bpy.props import BoolProperty, StringProperty, IntProperty
 from base64 import standard_b64decode as b64decode
 
+
 class DumpMesh(bpy.types.Operator):
-	"""Dumps mesh geometry information to a text buffer"""
-	bl_idname = "object.dumpmesh"
-	bl_label = "DumpMesh"
-	bl_options = {'REGISTER','UNDO'}
+    """Dumps mesh geometry information to a text buffer"""
+    bl_idname = "object.dumpmesh"
+    bl_label = "DumpMesh"
+    bl_options = {'REGISTER', 'UNDO'}
 
-	include_operator = BoolProperty(name="Add operator", 
-							description="Add operator definition",
-							default=True)
+    include_operator = BoolProperty(name="Add operator",
+                                    description="Add operator definition",
+                                    default=True)
 
-	compact = BoolProperty(name="Compact",
-							description="Omit newlines and other whitespace",
-							default=True)
+    compact = BoolProperty(name="Compact",
+                           description="Omit newlines and other whitespace",
+                           default=True)
 
-	geomonly = BoolProperty(name="Geometry only",
-							description="Omit everything other than verts, edges and faces",
-							default=False)
+    geomonly = BoolProperty(name="Geometry only",
+                            description="Omit everything other than verts, edges and faces",
+                            default=False)
 
-	digits = IntProperty(name="Digits",
-							description="Number of decimal places in vertex coordinates",
-							default=4,
-							min=1, max=9)
+    digits = IntProperty(name="Digits",
+                         description="Number of decimal places in vertex coordinates",
+                         default=4,
+                         min=1, max=9)
 
-	def format_vertex(self, v):
-		return ("({co[0]:.%dg},{co[1]:.%dg},{co[2]:.%dg})"%(self.digits,self.digits,self.digits)).format(co=v)
+    def format_vertex(self, v):
+        return ("({co[0]:.%dg},{co[1]:.%dg},{co[2]:.%dg})" % (self.digits, self.digits, self.digits)).format(co=v)
 
-	def tuple_or_orig(self, v):
-		if type(v) == str :
-			return v
-		elif type(v) == bmesh.types.BMLoopUV:
-			return tuple(v.uv)
-		# elif type(v) == bmesh.types.BMTexPoly: # this types is not yet defined
-		#	return None # has .image attribute but not sure what it is for
-		# skin and deform values also lack an entry in bmesh.types, we ignore anything else
-		elif v.__class__.__name__.startswith("BMVertSkin"):
-			return tuple(v.radius)
-		elif v.__class__.__name__.startswith("BM"):
-			return None
-		elif hasattr(v, '__iter__') or hasattr(v, '__len__'):
-			return tuple(v)
-		return v
+    def tuple_or_orig(self, v):
+        if isinstance(v, str):
+            return v
+        elif isinstance(v, bmesh.types.BMLoopUV):
+            return tuple(v.uv)
+        # elif type(v) == bmesh.types.BMTexPoly: # this types is not yet defined
+        #	return None # has .image attribute but not sure what it is for
+        # skin and deform values also lack an entry in bmesh.types, we ignore anything else
+        elif v.__class__.__name__.startswith("BMVertSkin"):
+            return tuple(v.radius)
+        elif v.__class__.__name__.startswith("BM"):
+            return None
+        elif hasattr(v, '__iter__') or hasattr(v, '__len__'):
+            return tuple(v)
+        return v
 
-	@classmethod
-	def poll(cls, context):
-		return (( context.active_object is not None ) 
-			and (type(context.active_object.data) == bpy.types.Mesh))
+    @classmethod
+    def poll(cls, context):
+        return ((context.active_object is not None)
+                and (isinstance(context.active_object.data, bpy.types.Mesh)))
 
-	def execute(self, context):
+    def execute(self, context):
 
-		output = bpy.data.texts.new("mesh_data.py")
+        output = bpy.data.texts.new("mesh_data.py")
 
-		if self.include_operator:
-			output.write(b64decode(GPLblurb).decode() + '\n')
-			output.write(b64decode(BaseClass).decode() + '\n')
+        if self.include_operator:
+            output.write(b64decode(GPLblurb).decode() + '\n')
+            output.write(b64decode(BaseClass).decode() + '\n')
 
-		names = []
+        names = []
 
-		for ob in context.selected_objects:
-			me = ob.data
-			bm = bmesh.new()
-			bm.from_mesh(me)
+        for ob in context.selected_objects:
+            me = ob.data
+            bm = bmesh.new()
+            bm.from_mesh(me)
 
-			name = ob.name.replace(".","_").replace(" ","_")
-			names.append(name)
+            name = ob.name.replace(".", "_").replace(" ", "_")
+            names.append(name)
 
-			bm.verts.ensure_lookup_table()
-			bm.edges.ensure_lookup_table()
-			bm.faces.ensure_lookup_table()
+            bm.verts.ensure_lookup_table()
+            bm.edges.ensure_lookup_table()
+            bm.faces.ensure_lookup_table()
 
-			nl = "" if self.compact else "\n"
-			tb = "" if self.compact else "\t"
+            nl = "" if self.compact else "\n"
+            tb = "" if self.compact else "\t"
 
-			output.write("class " + name + "(DumpMesh):\n" + nl)
+            output.write("class " + name + "(DumpMesh):\n" + nl)
 
-			output.write("\tverts = [" + nl)
-			for v in bm.verts:
-				output.write(tb + tb + self.format_vertex(v.co) + "," + nl)
-			output.write(tb + "]\n\n")
+            output.write("\tverts = [" + nl)
+            for v in bm.verts:
+                output.write(tb + tb + self.format_vertex(v.co) + "," + nl)
+            output.write(tb + "]\n\n")
 
-			output.write("\tedges = [" + nl)
-			for e in bm.edges:
-				output.write(tb + tb + str(tuple(v.index for v in e.verts)) + "," + nl)
-			output.write(tb + "]\n\n")
+            output.write("\tedges = [" + nl)
+            for e in bm.edges:
+                output.write(tb + tb + str(tuple(v.index for v in e.verts)) + "," + nl)
+            output.write(tb + "]\n\n")
 
-			output.write("\tfaces = [" + nl)
-			for f in bm.faces:
-				output.write(tb + tb + str(tuple(v.index for v in f.verts)) + "," + nl)
-			output.write(tb + "]\n\n")
+            output.write("\tfaces = [" + nl)
+            for f in bm.faces:
+                output.write(tb + tb + str(tuple(v.index for v in f.verts)) + "," + nl)
+            output.write(tb + "]\n\n")
 
-			if not self.geomonly:
-				for etype in ('verts', 'edges', 'faces'):
-					output.write("\t%s_layers = {"%etype + nl)
-					seq = getattr(bm, etype)
-					for attr in dir(seq.layers):
-						attrval = getattr(seq.layers,attr)
-						if type(attrval) == bmesh.types.BMLayerCollection:
-							output.write(tb + tb + "'"+attr+"': {" + nl)
-							for key, val in attrval.items():
-								output.write(tb + tb + tb + "'" + key + "': {" + nl)
-								for v in seq:
-									output.write(tb + tb + tb + str(v.index) + ":" + str(self.tuple_or_orig(v[val])) + "," + nl)
-								output.write(tb + tb + tb + "}, " + nl)
-							output.write(tb + tb + "}, " + nl)
-					output.write("\t}\n\n")
+            if not self.geomonly:
+                for etype in ('verts', 'edges', 'faces'):
+                    output.write("\t%s_layers = {" % etype + nl)
+                    seq = getattr(bm, etype)
+                    for attr in dir(seq.layers):
+                        attrval = getattr(seq.layers, attr)
+                        if isinstance(attrval, bmesh.types.BMLayerCollection):
+                            output.write(tb + tb + "'" + attr + "': {" + nl)
+                            for key, val in attrval.items():
+                                output.write(tb + tb + tb + "'" + key + "': {" + nl)
+                                for v in seq:
+                                    output.write(tb + tb + tb + str(v.index) + ":" + str(self.tuple_or_orig(v[val])) + "," + nl)
+                                output.write(tb + tb + tb + "}, " + nl)
+                            output.write(tb + tb + "}, " + nl)
+                    output.write("\t}\n\n")
 
-				output.write("\tloops_layers = {" + nl)
-				for attr in dir(bm.loops.layers):
-					attrval = getattr(bm.loops.layers,attr)
-					if type(attrval) == bmesh.types.BMLayerCollection:
-						output.write(tb + tb + "'"+attr+"': {" + nl)
-						for key, val in attrval.items():
-							output.write(tb + tb + tb + "'" + key + "': {" + nl)
-							for f in bm.faces:
-								output.write(tb + tb + tb + tb + str(f.index) + ": {" + nl)
-								for l in f.loops:
-									output.write(tb + tb + tb + tb + tb + str(l.index) + ":" + str(self.tuple_or_orig(l[val])) + "," + nl)
-								output.write(tb + tb + tb + tb + "}," + nl)
-							output.write(tb + tb + tb + "}," + nl)
-						output.write(tb + tb + "}," + nl)
-				output.write("\t}\n\n")
+                output.write("\tloops_layers = {" + nl)
+                for attr in dir(bm.loops.layers):
+                    attrval = getattr(bm.loops.layers, attr)
+                    if isinstance(attrval, bmesh.types.BMLayerCollection):
+                        output.write(tb + tb + "'" + attr + "': {" + nl)
+                        for key, val in attrval.items():
+                            output.write(tb + tb + tb + "'" + key + "': {" + nl)
+                            for f in bm.faces:
+                                output.write(tb + tb + tb + tb + str(f.index) + ": {" + nl)
+                                for l in f.loops:
+                                    output.write(tb + tb + tb + tb + tb + str(l.index) + ":" + str(self.tuple_or_orig(l[val])) + "," + nl)
+                                output.write(tb + tb + tb + tb + "}," + nl)
+                            output.write(tb + tb + tb + "}," + nl)
+                        output.write(tb + tb + "}," + nl)
+                output.write("\t}\n\n")
 
-				output.write("\tvert_attributes = {\n")
-				for attr in ('normal', 'select' ):
-					el = [self.tuple_or_orig(getattr(v,attr)) for v in bm.verts]
-					output.write("\t" + tb + "'" + attr + "' : " + str(el) + ",\n")
-				output.write("\t}\n\n")
+                output.write("\tvert_attributes = {\n")
+                for attr in ('normal', 'select'):
+                    el = [self.tuple_or_orig(getattr(v, attr)) for v in bm.verts]
+                    output.write("\t" + tb + "'" + attr + "' : " + str(el) + ",\n")
+                output.write("\t}\n\n")
 
-				output.write("\tedge_attributes = {\n")
-				for attr in ('seam', 'smooth', 'select'):
-					el = [self.tuple_or_orig(getattr(e,attr)) for e in bm.edges]
-					output.write("\t" + tb + "'" + attr + "' : " + str(el) + ",\n")
-				output.write("\t}\n\n")
+                output.write("\tedge_attributes = {\n")
+                for attr in ('seam', 'smooth', 'select'):
+                    el = [self.tuple_or_orig(getattr(e, attr)) for e in bm.edges]
+                    output.write("\t" + tb + "'" + attr + "' : " + str(el) + ",\n")
+                output.write("\t}\n\n")
 
-				output.write("\tface_attributes = {\n")
-				for attr in ('normal', 'smooth', 'select'):
-					el = [self.tuple_or_orig(getattr(f,attr)) for f in bm.faces]
-					output.write("\t" + tb + "'" + attr + "' : " + str(el) + ",\n")
-				output.write("\t}\n\n")
+                output.write("\tface_attributes = {\n")
+                for attr in ('normal', 'smooth', 'select'):
+                    el = [self.tuple_or_orig(getattr(f, attr)) for f in bm.faces]
+                    output.write("\t" + tb + "'" + attr + "' : " + str(el) + ",\n")
+                output.write("\t}\n\n")
 
-			output.write("\n")
+            output.write("\n")
 
-			bm.free()
+            bm.free()
 
-		if self.include_operator:
-			output.write('meshes = [ ' + ', '.join(names) + ' ]\n\n')
-			output.write(b64decode(OperatorDef).decode())
+        if self.include_operator:
+            output.write('meshes = [ ' + ', '.join(names) + ' ]\n\n')
+            output.write(b64decode(OperatorDef).decode())
 
-		# force newly created text block on top if text editor is visible
-		for a in context.screen.areas:
-			for s in a.spaces:
-				if s.type == 'TEXT_EDITOR':
-					s.text = output
+        # force newly created text block on top if text editor is visible
+        for a in context.screen.areas:
+            for s in a.spaces:
+                if s.type == 'TEXT_EDITOR':
+                    s.text = output
 
-		return {'FINISHED'}
+        return {'FINISHED'}
+
 
 def register():
-	bpy.utils.register_module(__name__)
-	bpy.types.VIEW3D_MT_object.append(menu_func)
+    bpy.utils.register_module(__name__)
+    bpy.types.VIEW3D_MT_object.append(menu_func)
+
 
 def unregister():
-	bpy.utils.unregister_module(__name__)
-	bpy.types.VIEW3D_MT_object.remove(menu_func)
+    bpy.utils.unregister_module(__name__)
+    bpy.types.VIEW3D_MT_object.remove(menu_func)
+
 
 def menu_func(self, context):
-	self.layout.operator(DumpMesh.bl_idname, icon='PLUGIN')
+    self.layout.operator(DumpMesh.bl_idname, icon='PLUGIN')

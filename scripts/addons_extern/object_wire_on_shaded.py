@@ -34,6 +34,7 @@ bl_info = {
 
 import bpy
 
+
 def toggleWire():
     s = bpy.context.scene
     for object in s.objects:
@@ -41,32 +42,36 @@ def toggleWire():
             if not object.show_wire or not object.show_all_edges:
                 object.show_wire = True
                 object.show_all_edges = True
-                print (object.name)
+                print(object.name)
             else:
                 object.show_wire = False
                 object.show_all_edges = False
-                print (object.name)
-                
+                print(object.name)
+
+
 class ToggleWire (bpy.types.Operator):
     """Toggle wire on all meshes"""
     bl_label = "Toggle wire"
-    bl_idname ="object.toggle_wire"
+    bl_idname = "object.toggle_wire"
     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self,context):
-        print ('Toggling Wire...')
+    def execute(self, context):
+        print('Toggling Wire...')
         toggleWire()
         return {'FINISHED'}
 
-def draw_ui(self,context):
-    self.layout.operator(ToggleWire.bl_idname, text="Toggle wire")    
+
+def draw_ui(self, context):
+    self.layout.operator(ToggleWire.bl_idname, text="Toggle wire")
+
 
 def register():
-    bpy.utils.register_class (ToggleWire)
+    bpy.utils.register_class(ToggleWire)
     bpy.types.VIEW3D_MT_object.append(draw_ui)
 
+
 def unregister():
-    bpy.utils.unregister_class (ToggleWire) 
+    bpy.utils.unregister_class(ToggleWire)
     bpy.types.VIEW3D_MT_object.remove(draw_ui)
 
 if __name__ == "__name__":

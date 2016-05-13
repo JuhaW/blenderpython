@@ -82,7 +82,7 @@ def get_pixel_rect_bb(context):
     y1 = max(ys, ye) + 1
     x0 = min(xs, xe)
     x1 = max(xs, xe)
-     
+
     return {'x0': x0, 'y0': y0, 'x1': x1, 'y1': y1}
 
 
@@ -170,7 +170,6 @@ class PT_SelectAll(bpy.types.Operator):
         redraw_all_areas()
 
         return {'FINISHED'}
-
 
 
 class PT_BinarizeRect(bpy.types.Operator):
@@ -376,6 +375,7 @@ class PTProps():
     start = (0.0, 0.0)
     end = (0.0, 0.0)
 
+
 def init_props():
     scene = bpy.types.Scene
     scene.pt_props = PTProps()
@@ -401,6 +401,7 @@ def init_props():
         min=0,
         max=255)
 
+
 def clear_props():
     scene = bpy.types.Scene
     del scene.pt_fill_color
@@ -408,9 +409,11 @@ def clear_props():
     del scene.pt_binarize_threshold
     del scene.pt_binarize_threshold_color
 
+
 def register():
     bpy.utils.register_module(__name__)
     init_props()
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)
@@ -418,4 +421,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

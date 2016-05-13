@@ -19,7 +19,7 @@
 bl_info = {
     "name": "Spline To Armature",
     "author": "Oscurart",
-    "version": (0,1),
+    "version": (0, 1),
     "blender": (2, 6, 3),
     "api": 49000,
     "location": "Add > Armature > Spline To Armature",
@@ -30,40 +30,38 @@ bl_info = {
     "category": "Rigging"}
 
 
-
 import bpy
 
-def OscSplineToArmature (context) :
+
+def OscSplineToArmature(context):
 
     sp = bpy.context.object
     amt = bpy.data.armatures.new("Armature")
     obj = bpy.data.objects.new("Object", amt)
     bpy.context.scene.objects.link(obj)
-    
+
     bpy.context.scene.objects.active = obj
     bpy.ops.object.mode_set(mode="EDIT")
-    
+
     for POINT in sp.data.splines[0].points[:]:
         bone = amt.edit_bones.new("bone")
-        bone.tail = (POINT.co[0]+sp.location.x, POINT.co[1]+sp.location.y, POINT.co[2]+1+sp.location.z)
-        bone.head = (POINT.co[0]+sp.location.x, POINT.co[1]+sp.location.y, POINT.co[2]+sp.location.z)
-        
-    bpy.ops.object.mode_set(mode="OBJECT")   
-    bpy.context.scene.objects.active = sp    
+        bone.tail = (POINT.co[0] + sp.location.x, POINT.co[1] + sp.location.y, POINT.co[2] + 1 + sp.location.z)
+        bone.head = (POINT.co[0] + sp.location.x, POINT.co[1] + sp.location.y, POINT.co[2] + sp.location.z)
+
+    bpy.ops.object.mode_set(mode="OBJECT")
+    bpy.context.scene.objects.active = sp
     bpy.ops.object.mode_set(mode="EDIT")
 
-
-    for BONEINC,POINT in enumerate(sp.data.splines[0].points):
+    for BONEINC, POINT in enumerate(sp.data.splines[0].points):
         md = sp.modifiers.new("Hook", "HOOK")
-        md.object = obj    
-        md.subtarget = amt.bones[BONEINC].name        
+        md.object = obj
+        md.subtarget = amt.bones[BONEINC].name
         bpy.ops.curve.select_all(action='DESELECT')
         sp.data.splines[0].points[BONEINC].select = 1
         POINT.select = 1
         print(md.name)
         bpy.ops.object.hook_assign(modifier=md.name)
         bpy.ops.object.hook_reset(modifier=md.name)
-
 
     bpy.ops.object.mode_set(mode='OBJECT')
     obj.select = True
@@ -81,12 +79,11 @@ class oscClSplineToArmature (bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return(bpy.context.active_object.type == "CURVE" )  
-    
+        return(bpy.context.active_object.type == "CURVE")
+
     def execute(self, context):
         OscSplineToArmature(self)
         return {'FINISHED'}
-
 
 
 # Registration
@@ -96,6 +93,7 @@ def add_oscsplinetoarmature_list(self, context):
         "armature.spline_to_armature",
         text="Spline To Armature",
         icon="PLUGIN")
+
 
 def register():
     bpy.types.INFO_MT_armature_add.append(add_oscsplinetoarmature_list)
@@ -108,4 +106,4 @@ def unregister():
 
 
 if __name__ == '__main__':
-    register()    
+    register()

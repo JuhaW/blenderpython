@@ -46,22 +46,24 @@ bl_info = {
     "location": "Sequencer",
     "description": "Collection of extra operators to manipulate VSE strips",
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/"
-        "Scripts/Sequencer/Extra_Sequencer_Actions",
+    "Scripts/Sequencer/Extra_Sequencer_Actions",
     "tracker_url": "https://developer.blender.org/T32532",
     "support": "COMMUNITY"}
 
 
-import bpy, os, sys, subprocess, time
+import bpy
+import os
+import sys
+import subprocess
+import time
 
 from xml.dom.minidom import parseString
 
 from bpy.props import IntProperty, BoolProperty, StringProperty
 
 
-
-proxy_qualities = [  ( "1", "25%", "" ), ( "2", "50%", "" ), \
-                    ( "3", "75%", "" ), ( "4", "100%", "" )]
-
+proxy_qualities = [("1", "25%", ""), ("2", "50%", ""),
+                   ("3", "75%", ""), ("4", "100%", "")]
 
 
 # functions  (from sequencer_extra_tools/functions.py)
@@ -78,7 +80,7 @@ def setpathinbrowser(path, file):
     try:
         params
     except UnboundLocalError:
-        #print("no browser")
+        # print("no browser")
         self.report({'ERROR_INVALID_INPUT'}, 'No visible File Browser')
         return {'CANCELLED'}
 
@@ -90,8 +92,8 @@ def setpathinbrowser(path, file):
 def create_folder(path):
     if not os.path.isdir(bpy.path.abspath(path)):
         folder = bpy.path.abspath(path)
-        command = "mkdir "+folder
-        subprocess.call(command,shell=True)
+        command = "mkdir " + folder
+        subprocess.call(command, shell=True)
 
 
 def triminout(strip, sin, sout):
@@ -133,9 +135,9 @@ def add_strip_image(infile, context, strip=None):
 
             channel = strip.channel + 1
 
-            bpy.ops.sequencer.image_strip_add(files=image_file, \
-            directory=f.rpartition("/")[0], frame_start=f_in, \
-            frame_end=f_out, relative_path=False, channel = channel)
+            bpy.ops.sequencer.image_strip_add(files=image_file,
+                                              directory=f.rpartition("/")[0], frame_start=f_in,
+                                              frame_end=f_out, relative_path=False, channel=channel)
 
             # make new strip active
             newstrip = context.scene.sequence_editor.active_strip
@@ -143,7 +145,7 @@ def add_strip_image(infile, context, strip=None):
             # deselect all other strips
             for i in context.selected_editable_sequences:
                 if i.name != newstrip.name:
-                    i.select=False
+                    i.select = False
 
             # Update scene
             context.scene.update()
@@ -151,19 +153,19 @@ def add_strip_image(infile, context, strip=None):
             print(newstrip.frame_final_duration, strip.frame_final_duration)
             newstrip.frame_final_duration = strip.frame_final_duration
 
-            triminout(newstrip, strip.frame_start + strip.frame_offset_start, \
-                strip.frame_start + strip.frame_offset_start + \
-                strip.frame_final_duration)
+            triminout(newstrip, strip.frame_start + strip.frame_offset_start,
+                      strip.frame_start + strip.frame_offset_start +
+                      strip.frame_final_duration)
 
             context.scene.update()
             return
 
         elif strip.type == 'MOVIE':
-            bpy.ops.sequencer.movie_strip_add(filepath=path, \
-            frame_start=frame, relative_path=False)
+            bpy.ops.sequencer.movie_strip_add(filepath=path,
+                                              frame_start=frame, relative_path=False)
         elif strip.type == 'SOUND':
-            bpy.ops.sequencer.sound_strip_add(filepath=path, \
-            frame_start=frame, relative_path=False)
+            bpy.ops.sequencer.sound_strip_add(filepath=path,
+                                              frame_start=frame, relative_path=False)
 
     elif strip == None:
         image_file = []
@@ -175,9 +177,9 @@ def add_strip_image(infile, context, strip=None):
 
         print("cargando ", filename, f_in, f_out)
 
-        bpy.ops.sequencer.image_strip_add(files=image_file, \
-        directory=f.rpartition("/")[0], frame_start=f_in, \
-        frame_end=f_out, relative_path=False)
+        bpy.ops.sequencer.image_strip_add(files=image_file,
+                                          directory=f.rpartition("/")[0], frame_start=f_in,
+                                          frame_end=f_out, relative_path=False)
 
         context.scene.frame_current = f_out + 1
 
@@ -189,7 +191,7 @@ def add_strip_image(infile, context, strip=None):
 def kill_gstreamer():
     print("kill\n*\n*\n")
     command = "killall -9 gst-launch-0.10"
-    p = subprocess.call(command,shell=True)
+    p = subprocess.call(command, shell=True)
 
 
 # elphel functions
@@ -230,15 +232,15 @@ def get_image_from_camera(context, filepath):
     prefs = preferences.addons['stopmotion'].preferences
 
     if prefs.elphel_on:
-   
+
         elphelIP = prefs.elphelIP
 
         # get an image from elphel, and rename it with given filepath
         command = """wget http://{}:8081/bimg"""
         command = command.format(elphelIP)
-        subprocess.call(command,shell=True)
+        subprocess.call(command, shell=True)
         command = "mv bimg " + filepath
-        subprocess.call(command,shell=True)
+        subprocess.call(command, shell=True)
 
     else:
         device = prefs.device
@@ -247,10 +249,9 @@ def get_image_from_camera(context, filepath):
 
         command = """gnome-terminal -e 'gst-launch-0.10 -e v4l2src device={} ! ffmpegcolorspace ! pngenc ! filesink location={} '""".format(device, filepath)
 
-        subprocess.call(command,shell=True)
+        subprocess.call(command, shell=True)
 
         print("-----------------capturado: ", filepath)
-
 
     return filepath
 
@@ -275,10 +276,10 @@ class CameraControlOperator(bpy.types.Operator):
 
             command = """gnome-terminal -e 'midori http://{}/camvc.html?reload=0'"""
             command = command.format(elphelIP)
-            subprocess.call(command,shell=True)
+            subprocess.call(command, shell=True)
         else:
             command = """gnome-terminal -e 'guvcview -o {}'""".format(prefs.device)
-            subprocess.call(command,shell=True)
+            subprocess.call(command, shell=True)
 
         return {'FINISHED'}
 
@@ -291,15 +292,15 @@ class CameraSyncResOperator(bpy.types.Operator):
 
     @staticmethod
     def has_sequencer(context):
-        return (context.space_data.view_type\
-        in {'SEQUENCER', 'SEQUENCER_PREVIEW'})
+        return (context.space_data.view_type
+                in {'SEQUENCER', 'SEQUENCER_PREVIEW'})
 
     @classmethod
     def poll(self, context):
         preferences = bpy.context.user_preferences
         prefs = preferences.addons['stopmotion'].preferences
         return prefs.elphel_on
-        
+
     def execute(self, context):
 
         preferences = bpy.context.user_preferences
@@ -316,25 +317,23 @@ class CameraSyncResOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
-
 class CameraPreviewOperator(bpy.types.Operator):
     """ preview a clip from elphel or webcam"""
     bl_idname = "sequencer.elphel_preview_operator"
     bl_label = " preview video stream "
 
     size = IntProperty(
-    name='proxysize',
-    default=1)
+        name='proxysize',
+        default=1)
     bl_options = {'REGISTER', 'UNDO'}
 
     color = IntProperty(
-    name='colormode',
-    default=2)
+        name='colormode',
+        default=2)
     bl_options = {'REGISTER', 'UNDO'}
 
     #@classmethod
-    #def poll(cls, context):
+    # def poll(cls, context):
     #     return context.selected_editable_sequences
 
     def execute(self, context):
@@ -350,25 +349,25 @@ class CameraPreviewOperator(bpy.types.Operator):
             if self.color != 2:
 
                 command = "gnome-terminal -e 'mplayer rtsp://{}:554 -vo x11 "\
-                 "-zoom'".format(elphelIP)
+                    "-zoom'".format(elphelIP)
 
-                #command = "gnome-terminal -e 'gst-launch rtspsrc " \
+                # command = "gnome-terminal -e 'gst-launch rtspsrc " \
                 #          "location=rtsp://{}:554 latency=100 " \
                 #          "! rtpjpegdepay ! jpegdec ! autovideosink'".format(
                 # elphelIP)
 
-                print (command)
+                print(command)
 
             else:
                 size_file = os.path.join(bpy.path.abspath("//"), "size.xml")
                 getsize(size_file)
                 xxx, yyy = readsize(size_file)
 
-                div = 4/self.size
+                div = 4 / self.size
 
                 print(self.size)
 
-                newres = (int(xxx/div),int(yyy/div))
+                newres = (int(xxx / div), int(yyy / div))
 
                 location = "rtsp://{}:554".format(elphelIP)
 
@@ -380,7 +379,7 @@ class CameraPreviewOperator(bpy.types.Operator):
 
                 command = command.format(location, newres[0], newres[1])
 
-            subprocess.call(command,shell=True)
+            subprocess.call(command, shell=True)
 
         else:
             xxx = context.scene.render.resolution_x
@@ -393,8 +392,8 @@ class CameraPreviewOperator(bpy.types.Operator):
 
                 strip = act_strip(context)
 
-                path = os.path.join(strip.directory,strip.elements[0]
-                .filename)
+                path = os.path.join(strip.directory, strip.elements[0]
+                                    .filename)
 
                 command = """gnome-terminal --geometry=10x10 -e ' gst-launch-0.10 \
                     videomixer name=mix sink_1::alpha=0.5 sink_1::zorder=3 !\
@@ -405,15 +404,14 @@ class CameraPreviewOperator(bpy.types.Operator):
                     filesrc location={} ! pngdec ! imagefreeze \
                     ! ffmpegcolorspace ! mix.sink_0'""".format(device, xxx, yyy, path)
 
-
             else:
                 command = """gnome-terminal --geometry=10x10 -e 'gst-launch-0.10 v4l2src \
                     device={} ! "video/x-raw-yuv,width={},height={},framerate=30/1" ! autovideosink'""".format(device, xxx, yyy)
 
-                #command = """gst-launch-0.10 v4l2src device={} ! "video/x-raw-yuv,width={},height={},framerate=30/1" ! autovideosink""".format(device, xxx, yyy)
+                # command = """gst-launch-0.10 v4l2src device={} ! "video/x-raw-yuv,width={},height={},framerate=30/1" ! autovideosink""".format(device, xxx, yyy)
 
-            print (command)
-            p = subprocess.call(command,shell=True)
+            print(command)
+            p = subprocess.call(command, shell=True)
 
         return {'FINISHED'}
 
@@ -424,13 +422,13 @@ class CameraRecordOperator(bpy.types.Operator):
     bl_label = " capture a video "
 
     #@classmethod
-    #def poll(cls, context):
+    # def poll(cls, context):
     #     return context.selected_editable_sequences
 
     def execute(self, context):
 
         filename = str(time.time()).rpartition(".")[0]
-        dir =  bpy.path.abspath("//footage_" + context.scene.name)
+        dir = bpy.path.abspath("//footage_" + context.scene.name)
         path = os.path.join(dir, filename)
 
         create_folder(dir)
@@ -450,11 +448,9 @@ class CameraRecordOperator(bpy.types.Operator):
 
             factor = 2
 
-            newres = (int(xxx/factor),int(yyy/factor))
+            newres = (int(xxx / factor), int(yyy / factor))
 
             location = "rtsp://{}:554".format(elphelIP)
-
-
 
             get_image_from_camera(context, path + ".jpg")
 
@@ -466,8 +462,8 @@ class CameraRecordOperator(bpy.types.Operator):
                 queue ! bayer2rgb2 method=1 ! ffmpegcolorspace ! xvimagesink'"""
 
             command = command.format(location, path, newres[0], newres[1])
-            
-            subprocess.call(command,shell=True)
+
+            subprocess.call(command, shell=True)
 
         else:
             xxx = context.scene.render.resolution_x
@@ -479,15 +475,14 @@ class CameraRecordOperator(bpy.types.Operator):
 
             kill_gstreamer()
 
-            #timestamp_command="""gnome-terminal -e 'gst-launch-0.10 -e v4l2src device={} ! 'video/x-raw-yuv,width={},height={},framerate=30/1' ! timeoverlay halignment=right valignment=bottom shaded-background=true ! clockoverlay halignment=left valignment=bottom text="M/D/Y:" shaded-background=true time-format="%m/%d/%Y %H:%M:%S" ! tee name=t_vid ! queue ! xvimagesink sync=false t_vid. ! queue ! videorate ! 'video/x-raw-yuv,framerate=30/1' ! theoraenc ! queue ! oggmux ! filesink location={}.ogv'"""
+            # timestamp_command="""gnome-terminal -e 'gst-launch-0.10 -e v4l2src device={} ! 'video/x-raw-yuv,width={},height={},framerate=30/1' ! timeoverlay halignment=right valignment=bottom shaded-background=true ! clockoverlay halignment=left valignment=bottom text="M/D/Y:" shaded-background=true time-format="%m/%d/%Y %H:%M:%S" ! tee name=t_vid ! queue ! xvimagesink sync=false t_vid. ! queue ! videorate ! 'video/x-raw-yuv,framerate=30/1' ! theoraenc ! queue ! oggmux ! filesink location={}.ogv'"""
 
-            command="""gnome-terminal --geometry=10x10 -e 'gst-launch-0.10 -e v4l2src device={} ! 'video/x-raw-yuv,width={},height={},framerate=30/1' ! tee name=t_vid ! queue ! xvimagesink sync=false t_vid. ! queue ! videorate ! 'video/x-raw-yuv,framerate=30/1' ! jpegenc ! queue ! avimux ! filesink location={}.avi'"""
+            command = """gnome-terminal --geometry=10x10 -e 'gst-launch-0.10 -e v4l2src device={} ! 'video/x-raw-yuv,width={},height={},framerate=30/1' ! tee name=t_vid ! queue ! xvimagesink sync=false t_vid. ! queue ! videorate ! 'video/x-raw-yuv,framerate=30/1' ! jpegenc ! queue ! avimux ! filesink location={}.avi'"""
 
             command = command.format(device, xxx, yyy, path)
-            
 
             print(command)
-            subprocess.call(command,shell=True)
+            subprocess.call(command, shell=True)
 
             prefs.captured_clip = path + ".avi"
             prefs.recording = True
@@ -501,7 +496,7 @@ class CameraStopRecordOperator(bpy.types.Operator):
     bl_label = "stop recording"
 
     #@classmethod
-    #def poll(cls, context):
+    # def poll(cls, context):
     #     return context.selected_editable_sequences
 
     def execute(self, context):
@@ -519,27 +514,24 @@ class CameraStopRecordOperator(bpy.types.Operator):
                 kill_gstreamer()
 
                 prefs.recording = False
-                
+
                 command1 = "mencoder -idx {} -ovc copy -oac copy -o {}_fixed.avi".format(path, filename)
 
                 command2 = "rm {}.avi && mv {}_fixed.avi {}.avi".format(filename, filename, filename)
 
                 command = command1 + " && " + command2
-                
+
                 print(command)
-                subprocess.call(command,shell=True)
+                subprocess.call(command, shell=True)
 
                 setpathinbrowser(path.rpartition("/")[0], path.rpartition("/")[2])
-                
-                bpy.ops.sequencerextra.placefromfilebrowser()
 
+                bpy.ops.sequencerextra.placefromfilebrowser()
 
         except RuntimeError:
             return {'CANCELLED'}
 
         return {'FINISHED'}
-
-
 
 
 class CameraGetImageOperator(bpy.types.Operator):
@@ -548,15 +540,15 @@ class CameraGetImageOperator(bpy.types.Operator):
     bl_label = " get an image "
 
     duration = IntProperty(
-    name='frame_duration',
-    default=1)
+        name='frame_duration',
+        default=1)
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
 
         create_folder("//footage")
 
-        #kill_gstreamer()
+        # kill_gstreamer()
 
         preferences = bpy.context.user_preferences
         prefs = preferences.addons['stopmotion'].preferences
@@ -584,13 +576,9 @@ class CameraGetImageOperator(bpy.types.Operator):
 
         bpy.ops.sequencer.refresh_all()
 
+        # bpy.ops.sequencer.elphel_preview_operator(color=1)
 
-        #bpy.ops.sequencer.elphel_preview_operator(color=1)
-
-
-        
-        return  {'FINISHED'}
-
+        return {'FINISHED'}
 
 
 class StopMotionPanel(bpy.types.Panel):
@@ -603,32 +591,27 @@ class StopMotionPanel(bpy.types.Panel):
         name='elphel_on',
         default=False)
 
-
     @staticmethod
     def has_sequencer(context):
-        return (context.space_data.view_type\
-        in {'SEQUENCER', 'SEQUENCER_PREVIEW'})
-
+        return (context.space_data.view_type
+                in {'SEQUENCER', 'SEQUENCER_PREVIEW'})
 
     @classmethod
     def poll(cls, context):
         return cls.has_sequencer(context)
 
-
     def draw_header(self, context):
         layout = self.layout
         layout.label(text="", icon="NLA")
-
 
     def draw(self, context):
 
         preferences = context.user_preferences
         prefs = preferences.addons['stopmotion'].preferences
 
-
         layout = self.layout
         row = layout.row(align=True)
-        #row.label("Use elphel camera:")
+        # row.label("Use elphel camera:")
         row.prop(prefs, "elphel_on")
 
         if prefs.elphel_on:
@@ -638,46 +621,43 @@ class StopMotionPanel(bpy.types.Panel):
 
             # LAUNCH ELPHEL WEB SERVICE
             row = layout.row(align=True)
-            row.operator("sequencer.elphel_control_operator", \
+            row.operator("sequencer.elphel_control_operator",
                          icon='SETTINGS')
             # SYNC RENDER RESOLUTION with elphel
-            row.operator("sequencer.elphel_sync_res_operator", \
+            row.operator("sequencer.elphel_sync_res_operator",
                          icon='FILE_REFRESH')
 
-            
         else:
             # LAUNCH WEBCAM interface
             layout = self.layout
             layout.prop(prefs, "device")
 
             row = layout.row(align=True)
-            row.operator("sequencer.elphel_control_operator", \
+            row.operator("sequencer.elphel_control_operator",
                          icon='SETTINGS')
             # SYNC RENDER RESOLUTION with elphel
-            row.operator("sequencer.elphel_sync_res_operator", \
+            row.operator("sequencer.elphel_sync_res_operator",
                          icon='FILE_REFRESH')
-
 
         layout = self.layout
 
         onion_skin = preferences.addons['stopmotion'].preferences\
-                .onion_skin
+            .onion_skin
 
         layout = self.layout
         layout.prop(prefs, "onion_skin")
 
-        layout.operator("sequencer.elphel_preview_operator",\
-                     text="RGB preview", icon="COLOR").color=1
+        layout.operator("sequencer.elphel_preview_operator",
+                        text="RGB preview", icon="COLOR").color = 1
 
         if prefs.elphel_on:
-        # PREVIEW
+            # PREVIEW
             layout.label(text="JP4 preview:", icon="CAMERA_DATA")
             row = layout.row(align=True)
             for i in range(4):
                 proxysuffix = proxy_qualities[i][1]
-                row.operator("sequencer.elphel_preview_operator", \
-                         text= proxysuffix).size=i+1
-
+                row.operator("sequencer.elphel_preview_operator",
+                             text=proxysuffix).size = i + 1
 
         layout = self.layout
         layout.prop(prefs, "repeated_frames")
@@ -687,7 +667,6 @@ class StopMotionPanel(bpy.types.Panel):
         layout.label(text="capture:")
         layout = layout.split(0.50)
 
-
         if prefs.recording:
             layout = self.layout
             layout.operator("sequencer.elphel_stop_record_operator", icon='MATPLANE')
@@ -695,11 +674,10 @@ class StopMotionPanel(bpy.types.Panel):
         else:
 
             layout.operator("sequencer.elphel_record_operator", icon='REC')
-            layout.operator("sequencer.elphel_get_image_operator",\
+            layout.operator("sequencer.elphel_get_image_operator",
                             icon='RENDER_STILL')
 
 
-            
 class StopMotionAddon(bpy.types.AddonPreferences):
     bl_idname = "stopmotion"
     bl_option = {'REGISTER'}
@@ -728,7 +706,7 @@ class StopMotionAddon(bpy.types.AddonPreferences):
         name="repeated frames",
         description="repeated_frames",
         default=2,
-        min = 1, max = 5)
+        min=1, max=5)
 
     captured_clip = StringProperty(
         name="captured clip",
@@ -741,7 +719,7 @@ class StopMotionAddon(bpy.types.AddonPreferences):
         default=False)
 
     def draw(self, context):
-    
+
         layout = self.layout
         layout.prop(self, "elphel_on")
 
@@ -755,7 +733,7 @@ class StopMotionAddon(bpy.types.AddonPreferences):
 
 
 def register():
-    
+
     bpy.utils.register_class(StopMotionAddon)
     bpy.utils.register_class(CameraGetImageOperator)
     bpy.utils.register_class(CameraSyncResOperator)
@@ -779,5 +757,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
-

@@ -7,8 +7,8 @@ bl_info = {
     "location": "View3D",
     "warning": "This addon is still in development.",
     "wiki_url": "",
-    "category": "Object" }
-    
+    "category": "Object"}
+
 
 import bpy
 from bpy.types import Menu, Panel, UIList, Operator
@@ -16,8 +16,6 @@ from rna_prop_ui import PropertyPanel
 from bpy.props import PointerProperty, StringProperty, BoolProperty, \
     EnumProperty, IntProperty, FloatProperty, FloatVectorProperty, \
     CollectionProperty, BoolVectorProperty
-
-
 
 
 bpy.types.WindowManager.render_simple = BoolProperty(
@@ -41,7 +39,7 @@ bpy.types.WindowManager.shading_render = BoolProperty(
 bpy.types.WindowManager.performance_render = BoolProperty(
     name="renderperformance",
     description="show performance settings",
-    default=False)            
+    default=False)
 bpy.types.WindowManager.post_render = BoolProperty(
     name="renderpost",
     description="show post settings",
@@ -49,11 +47,11 @@ bpy.types.WindowManager.post_render = BoolProperty(
 bpy.types.WindowManager.meta_render = BoolProperty(
     name="rendermeta",
     description="show metadata settings",
-    default=False)              
+    default=False)
 bpy.types.WindowManager.out_render = BoolProperty(
     name="renderout",
     description="show output settings",
-    default=False)   
+    default=False)
 bpy.types.WindowManager.bake_render = BoolProperty(
     name="renderbake",
     description="show bake settings",
@@ -61,62 +59,55 @@ bpy.types.WindowManager.bake_render = BoolProperty(
 bpy.types.WindowManager.layer_layer = BoolProperty(
     name="layerlayer",
     description="show layer settings",
-    default=False)     
+    default=False)
 bpy.types.WindowManager.passes_layer = BoolProperty(
     name="passes_layer",
     description="show passes settings",
     default=False)
-            
-   
-    
-    
+
+
 bpy.types.WindowManager.render_popup = bpy.props.EnumProperty(
     items=(('Onglet_1', "Render", "Render"),
-        ('Onglet_2', "layers", "Resolution"),
-        ('Onglet_3', "Scene", "Resolution"),
-        ('Onglet_4', "World", "Light Paths"),
-        ('Onglet_5', "object", "Resolution"),
-        ('Onglet_6', "CManag..", "Color Management")),
-        default='Onglet_1')
+           ('Onglet_2', "layers", "Resolution"),
+           ('Onglet_3', "Scene", "Resolution"),
+           ('Onglet_4', "World", "Light Paths"),
+           ('Onglet_5', "object", "Resolution"),
+           ('Onglet_6', "CManag..", "Color Management")),
+    default='Onglet_1')
+
 
 class draguu_Popup(Operator):
     bl_idname = "view3d.draguu_popup"
     bl_label = "Popup Menus"
- 
+
     def execute(self, context):
         return {'FINISHED'}
-    
 
-
-    
     def invoke(self, context, event):
         dpi_value = bpy.context.user_preferences.system.dpi
-        return context.window_manager.invoke_props_dialog(self, width=dpi_value*6, height=-550)
-    
+        return context.window_manager.invoke_props_dialog(self, width=dpi_value * 6, height=-550)
+
     def check(self, context):
         return True
-    
+
     def draw(self, context):
         layout = self.layout
         WM = bpy.context.window_manager
         row = layout.row(align=True)
         scene = context.scene
         cscene = scene.cycles
-        rd = scene.render 
+        rd = scene.render
         system = context.user_preferences.system
         ob = bpy.context.object
         obj = context.object
         COMPAT_ENGINES = {'BLENDER_RENDER', 'BLENDER_GAME'}
-        
-        
-        #Render
-        if ob.type == 'MESH': 
 
-            
+        # Render
+        if ob.type == 'MESH':
+
             row.prop(WM, "render_popup", text=" ", expand=True)
             if WM.render_popup == 'Onglet_1':
-                    
-  
+
                 layout = self.layout
 
                 rd = context.scene.render
@@ -124,7 +115,6 @@ class draguu_Popup(Operator):
                 row = layout.row(align=True)
                 row.operator("render.render", text="Render", icon='RENDER_STILL')
                 row.operator("render.render", text="Animation", icon='RENDER_ANIMATION').animation = True
-                
 
                 split = layout.split(percentage=0.33)
 
@@ -132,12 +122,12 @@ class draguu_Popup(Operator):
                 row = split.row(align=True)
                 row.prop(rd, "display_mode", text="")
                 row.prop(rd, "use_lock_interface", icon_only=True)
-                
-                #CPU/GPU Compute
-                #row.prop(system, "compute_device", text="")
-                
-                #Reso
-                
+
+                # CPU/GPU Compute
+                # row.prop(system, "compute_device", text="")
+
+                # Reso
+
                 split = layout.split()
 
                 col = split.column()
@@ -166,22 +156,17 @@ class draguu_Popup(Operator):
 
                 sub.label(text="Frame Rate:")
 
-                #self.draw_framerate(sub, rd)
-                #sub.menu("RENDER_MT_framerate_presets", text=fps_label_text)
+                # self.draw_framerate(sub, rd)
+                # sub.menu("RENDER_MT_framerate_presets", text=fps_label_text)
                 subrow = sub.row(align=True)
                 subrow.label(text="Time Remapping:")
                 subrow = sub.row(align=True)
                 subrow.prop(rd, "frame_map_old", text="Old")
                 subrow.prop(rd, "frame_map_new", text="New")
                 self.layout.label(text="________________________________________________________________________________________")
-                
-                
-                
-                
+
                 self.layout.prop(rd, "use_antialiasing", text="Anti-Aliasing")
-               
-                
-                
+
                 if layout.active == rd.use_antialiasing:
 
                     split = layout.split()
@@ -195,22 +180,17 @@ class draguu_Popup(Operator):
                     col = split.column()
                     col.prop(rd, "pixel_filter_type", text="")
                     col.prop(rd, "filter_size", text="Size")
-                    
-               
-                    
-                    
-                    
-                    
-                   
-#shading                    
+
+
+# shading
                 self.layout.label(text="________________________________________________________________________________________")
                 layout.prop(WM, "shading_render", text="Shading Menu")
                 if layout.active == WM.shading_render:
                     self.layout.label(text="Shading:")
-                    
+
                     split = layout.split()
                     col = split.column()
-                    
+
                     col.prop(rd, "use_textures", text="Textures")
                     col.prop(rd, "use_shadows", text="Shadows")
                     col.prop(rd, "use_sss", text="Subsurface Scattering")
@@ -219,14 +199,12 @@ class draguu_Popup(Operator):
                     col = split.column()
                     col.prop(rd, "use_raytrace", text="Ray Tracing")
                     col.prop(rd, "alpha_mode", text="Alpha")
- # performance                   
+ # performance
                 self.layout.label(text="________________________________________________________________________________________")
-               
+
                 layout.prop(WM, "performance_render", text="Performance Menu")
                 if layout.active == WM.performance_render:
-                
-                
-                
+
                     split = layout.split()
 
                     col = split.column(align=True)
@@ -261,12 +239,12 @@ class draguu_Popup(Operator):
                     else:
                         sub.prop(rd, "use_instances", text="Instances")
                     sub.prop(rd, "use_local_coords", text="Local Coordinates")
-                    
-#postprocessing                        
+
+# postprocessing
                 self.layout.label(text="________________________________________________________________________________________")
-               
+
                 layout.prop(WM, "post_render", text="Post-Processing")
-                if layout.active == WM.post_render:  
+                if layout.active == WM.post_render:
                     split = layout.split()
 
                     col = split.column()
@@ -291,19 +269,17 @@ class draguu_Popup(Operator):
                     sub = col.column()
                     sub.active = rd.use_edge_enhance
                     sub.prop(rd, "edge_threshold", text="Threshold", slider=True)
-                    sub.prop(rd, "edge_color", text="") 
-#output                       
+                    sub.prop(rd, "edge_color", text="")
+# output
                 self.layout.label(text="________________________________________________________________________________________")
-               
+
                 layout.prop(WM, "out_render", text="Output")
-                if layout.active == WM.out_render: 
-                    
+                if layout.active == WM.out_render:
+
                     image_settings = rd.image_settings
                     file_format = image_settings.file_format
                     layout.prop(rd, "filepath", text="")
                     split = layout.split()
-                    
-                    
 
                     col = split.column()
                     col.active = not rd.is_movie_format
@@ -347,12 +323,12 @@ class draguu_Popup(Operator):
                                 col.prop(quicktime, "audio_codec_isvbr")
 
                             col = subsplit.column()
-                            col.prop(quicktime, "audio_resampling_hq")          
-#bake                      
+                            col.prop(quicktime, "audio_resampling_hq")
+# bake
                 self.layout.label(text="________________________________________________________________________________________")
-               
+
                 layout.prop(WM, "bake_render", text="Bake")
-                if layout.active == WM.bake_render: 
+                if layout.active == WM.bake_render:
                     rd = context.scene.render
 
                     layout.operator("object.bake_image", icon='RENDER_STILL')
@@ -413,10 +389,10 @@ class draguu_Popup(Operator):
 
                         sub = row.column()
                         sub.active = rd.use_bake_user_scale
-                        sub.prop(rd, "bake_user_scale", text="User Scale")                                
+                        sub.prop(rd, "bake_user_scale", text="User Scale")
 
 
-#layerbutton  
+# layerbutton
             elif WM.render_popup == 'Onglet_2':
                 split = layout.split()
                 col = split.column()
@@ -425,13 +401,13 @@ class draguu_Popup(Operator):
                 sub.prop(cscene, "transparent_max_bounces", text="Max")
                 sub.prop(cscene, "transparent_min_bounces", text="Min")
                 sub.prop(cscene, "use_transparent_shadows", text="Shadows")
-                
-#layers               
+
+# layers
                 self.layout.label(text="________________________________________________________________________________________")
-               
+
                 layout.prop(WM, "layer_layer", text="Layer")
                 if layout.active == WM.layer_layer:
-                     
+
                     rd = scene.render
                     rl = rd.layers.active
 
@@ -472,16 +448,16 @@ class draguu_Popup(Operator):
                         row = col.row()
                         row.prop(rl, "use_freestyle")
                         row.active = rd.use_freestyle
-#layers               
+# layers
                 self.layout.label(text="________________________________________________________________________________________")
-               
+
                 layout.prop(WM, "passes_layer", text="Passes")
                 if layout.active == WM.passes_layer:
                     rd = scene.render
                     rl = rd.layers.active
 
                     split = layout.split()
-                    
+
                     col = split.column()
                     col.prop(rl, "use_pass_combined")
                     col.prop(rl, "use_pass_z")
@@ -503,42 +479,25 @@ class draguu_Popup(Operator):
                     self.draw_pass_type_buttons(col, rl, "indirect")
                     self.draw_pass_type_buttons(col, rl, "reflection")
                     self.draw_pass_type_buttons(col, rl, "refraction")
-                    
-                    
-                        
-                    
-                                         
-                    
-                    
-                    
-                    
-                    
-                    
-                
-            
-            
-                
-        
+
 
 addon_keymaps = []
- 
+
+
 def register():
     bpy.utils.register_module(__name__)
-    
+
     global addon_keymaps
     wm = bpy.context.window_manager
-    km = wm.keyconfigs.addon.keymaps.new(name = "3D View", space_type = "VIEW_3D")
+    km = wm.keyconfigs.addon.keymaps.new(name="3D View", space_type="VIEW_3D")
     kmi = km.keymap_items.new(draguu_Popup.bl_idname, 'LEFTMOUSE', 'DOUBLE_CLICK', shift=False)
-     
-    addon_keymaps.append(km)
-    
-    
 
-    
+    addon_keymaps.append(km)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)
-    
+
     global addon_keymaps
     wm = bpy.context.window_manager
     for km in addon_keymaps:
@@ -546,7 +505,7 @@ def unregister():
             km.keymap_items.remove(kmi)
         wm.keyconfigs.addon.keymaps.remove(km)
     addon_keymaps.clear()
-    
+
 
 if __name__ == "__main__":
     register()

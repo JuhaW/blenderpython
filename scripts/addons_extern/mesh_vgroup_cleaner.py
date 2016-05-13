@@ -43,6 +43,7 @@ def zero_verts(obj, grp, th):
 
     return ids
 
+
 def remove_verts(obj, grp, ctx):
     ids = zero_verts(obj, grp, ctx.scene.VGCThreshold)
 
@@ -53,6 +54,7 @@ def remove_verts(obj, grp, ctx):
         # toggle edit mode, to force correct drawing
         bpy.ops.object.mode_set(mode="EDIT", toggle=True)
         bpy.ops.object.mode_set(mode="EDIT", toggle=True)
+
 
 class CleanActiveVgroup(bpy.types.Operator):
     """Remove vertices with weight=0 from active vertex group in active object"""
@@ -67,6 +69,7 @@ class CleanActiveVgroup(bpy.types.Operator):
             if idx >= 0:
                 remove_verts(obj, obj.vertex_groups[idx], context)
         return {'FINISHED'}
+
 
 class CleanAllVgroups(bpy.types.Operator):
     """Remove vertices with weight=0 from all vertex groups in all selected objects"""
@@ -92,9 +95,11 @@ def is_empty(obj, grp):
 
     return True
 
+
 def remove_vgrp(obj, grp):
     print("delete vertex group %s" % grp.name)
     obj.vertex_groups.remove(grp)
+
 
 class DeleteEmptyVgroups(bpy.types.Operator):
     """Delete empty vertex groups in selected objects"""
@@ -215,6 +220,7 @@ def register():
         min=0.0,
         max=1.0,
         default=0.000999)
+
 
 def unregister():
     del bpy.types.Scene.VGCThreshold

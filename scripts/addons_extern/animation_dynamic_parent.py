@@ -33,6 +33,7 @@ bl_info = {
 import bpy
 import mathutils
 
+
 def dp_keyframe_insert(obj):
     obj.keyframe_insert(data_path="location")
     if obj.rotation_mode == 'QUATERNION':
@@ -41,8 +42,8 @@ def dp_keyframe_insert(obj):
         obj.keyframe_insert(data_path="rotation_axis_angle")
     else:
         obj.keyframe_insert(data_path="rotation_euler")
-    obj.keyframe_insert(data_path="scale")  
-    
+    obj.keyframe_insert(data_path="scale")
+
 
 def dp_create_dynamic_parent_obj(context):
     obj = bpy.context.active_object
@@ -50,14 +51,13 @@ def dp_create_dynamic_parent_obj(context):
     current_frame = scn.frame_current
     list_selected_obj = bpy.context.selected_objects
 
-    
     if len(list_selected_obj) == 2:
         i = list_selected_obj.index(obj)
         list_selected_obj.pop(i)
         parent_obj = list_selected_obj[0]
     else:
         return False
-        #print("Warning! 2 objects must be selected")
+        # print("Warning! 2 objects must be selected")
 
     dp_keyframe_insert(obj)
     bpy.ops.object.constraint_add_with_targets(type='CHILD_OF')
@@ -65,24 +65,24 @@ def dp_create_dynamic_parent_obj(context):
 
     if parent_obj.type == 'ARMATURE':
         last_constraint.subtarget = parent_obj.data.bones.active.name
-        last_constraint.name = "DP_"+last_constraint.target.name+"."+last_constraint.subtarget
+        last_constraint.name = "DP_" + last_constraint.target.name + "." + last_constraint.subtarget
     else:
-        last_constraint.name = "DP_"+last_constraint.target.name
+        last_constraint.name = "DP_" + last_constraint.target.name
 
     override = context.copy()
     override['constraint'] = bpy.context.active_pose_bone.constraints[last_constraint.name]
-    bpy.ops.constraint.childof_set_inverse(override, constraint=""+last_constraint.name+"", owner='OBJECT')
-    
-    fcrv = obj.animation_data.action.fcurves.new(data_path='constraints["'+last_constraint.name+'"].influence')
+    bpy.ops.constraint.childof_set_inverse(override, constraint="" + last_constraint.name + "", owner='OBJECT')
+
+    fcrv = obj.animation_data.action.fcurves.new(data_path='constraints["' + last_constraint.name + '"].influence')
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
+    scn.frame_current = curr_frame - 1
     obj.constraints[last_constraint.name].influence = 0
-    obj.keyframe_insert(data_path='constraints["'+last_constraint.name+'"].influence')
-    
+    obj.keyframe_insert(data_path='constraints["' + last_constraint.name + '"].influence')
+
     scn.frame_current = curr_frame
     obj.constraints[last_constraint.name].influence = 1
-    obj.keyframe_insert(data_path='constraints["'+last_constraint.name+'"].influence')
-    
+    obj.keyframe_insert(data_path='constraints["' + last_constraint.name + '"].influence')
+
     return True
 
 
@@ -93,14 +93,13 @@ def dp_create_dynamic_parent_pbone(context):
     current_frame = scn.frame_current
     list_selected_obj = bpy.context.selected_objects
 
-    
     if len(list_selected_obj) == 2:
         i = list_selected_obj.index(obj_obj)
         list_selected_obj.pop(i)
         parent_obj = list_selected_obj[0]
     else:
         return False
-        #print("Warning! 2 objects must be selected")
+        # print("Warning! 2 objects must be selected")
 
     dp_keyframe_insert(obj)
     bpy.ops.pose.constraint_add_with_targets(type='CHILD_OF')
@@ -108,62 +107,61 @@ def dp_create_dynamic_parent_pbone(context):
 
     if parent_obj.type == 'ARMATURE':
         last_constraint.subtarget = parent_obj.data.bones.active.name
-        last_constraint.name = "DP_"+last_constraint.target.name+"."+last_constraint.subtarget
+        last_constraint.name = "DP_" + last_constraint.target.name + "." + last_constraint.subtarget
     else:
-        last_constraint.name = "DP_"+last_constraint.target.name
+        last_constraint.name = "DP_" + last_constraint.target.name
 
     override = context.copy()
     override['constraint'] = bpy.context.active_pose_bone.constraints[last_constraint.name]
-    bpy.ops.constraint.childof_set_inverse(override, constraint=""+last_constraint.name+"", owner='BONE')
-    
-    fcrv = obj_obj.animation_data.action.fcurves.new(data_path='constraints["'+last_constraint.name+'"].influence')
+    bpy.ops.constraint.childof_set_inverse(override, constraint="" + last_constraint.name + "", owner='BONE')
+
+    fcrv = obj_obj.animation_data.action.fcurves.new(data_path='constraints["' + last_constraint.name + '"].influence')
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
+    scn.frame_current = curr_frame - 1
     obj.constraints[last_constraint.name].influence = 0
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].constraints["'+last_constraint.name+'"].influence')
-    
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].constraints["' + last_constraint.name + '"].influence')
+
     scn.frame_current = curr_frame
     obj.constraints[last_constraint.name].influence = 1
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].constraints["'+last_constraint.name+'"].influence')
-    
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].constraints["' + last_constraint.name + '"].influence')
+
     return True
 
-    
+
 def dp_disable_dynamic_parent_obj():
     obj = bpy.context.active_object
     scn = bpy.context.scene
     current_frame = scn.frame_current
     last_constraint = obj.constraints[-1]
-    
-    
+
     for fcrv in obj.animation_data.action.fcurves:
-        if fcrv.data_path == "constraints["+last_constraint.name+"].influence":
+        if fcrv.data_path == "constraints[" + last_constraint.name + "].influence":
             fcurve = fcrv
-            
+
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
+    scn.frame_current = curr_frame - 1
     obj.constraints[last_constraint.name].influence = 1
-    obj.keyframe_insert(data_path='constraints["'+last_constraint.name+'"].influence')
-    
+    obj.keyframe_insert(data_path='constraints["' + last_constraint.name + '"].influence')
+
     scn.frame_current = curr_frame
     obj.constraints[last_constraint.name].influence = 0
-    obj.keyframe_insert(data_path='constraints["'+last_constraint.name+'"].influence')
+    obj.keyframe_insert(data_path='constraints["' + last_constraint.name + '"].influence')
 
     loc_old = obj.location
     rot_old = obj.rotation_euler
-    scale_old =  obj.scale
-    
+    scale_old = obj.scale
+
     loc, rot, scale = obj.matrix_world.decompose()
     rot_euler = rot.to_euler()
-    
+
     fcurves = obj.animation_data.action.fcurves
-    
+
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
+    scn.frame_current = curr_frame - 1
     obj.keyframe_insert(data_path='location')
     obj.keyframe_insert(data_path='rotation_euler')
     obj.keyframe_insert(data_path='scale')
-    
+
     scn.frame_current = curr_frame
     obj.location = loc
     obj.rotation_euler = rot_euler
@@ -171,9 +169,8 @@ def dp_disable_dynamic_parent_obj():
     obj.keyframe_insert(data_path='location')
     obj.keyframe_insert(data_path='rotation_euler')
     obj.keyframe_insert(data_path='scale')
-    
-    return True
 
+    return True
 
 
 def dp_disable_dynamic_parent_pbone():
@@ -182,80 +179,78 @@ def dp_disable_dynamic_parent_pbone():
     scn = bpy.context.scene
     current_frame = scn.frame_current
     last_constraint = obj.constraints[-1]
-    
-    
+
     for fcrv in obj_obj.animation_data.action.fcurves:
-        if fcrv.data_path == 'pose.bones["'+obj.name+'"].constraints["'+last_constraint.name+'"].influence':
+        if fcrv.data_path == 'pose.bones["' + obj.name + '"].constraints["' + last_constraint.name + '"].influence':
             fcurve = fcrv
-            
+
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
+    scn.frame_current = curr_frame - 1
     obj.constraints[last_constraint.name].influence = 1
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].constraints["'+last_constraint.name+'"].influence')
-    
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].constraints["' + last_constraint.name + '"].influence')
+
     scn.frame_current = curr_frame
     obj.constraints[last_constraint.name].influence = 0
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].constraints["'+last_constraint.name+'"].influence')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].constraints["' + last_constraint.name + '"].influence')
 
     loc_old = obj.location
     rot_old = obj.rotation_quaternion
-    scale_old =  obj.scale
-    
+    scale_old = obj.scale
+
     final_matrix = obj.matrix * obj_obj.matrix_world
-    
+
     fcurves = obj_obj.animation_data.action.fcurves
-    
+
     curr_frame = scn.frame_current
-    scn.frame_current = curr_frame-1
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].location')
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].rotation_quaternion')
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].scale')
-    
+    scn.frame_current = curr_frame - 1
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].location')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].rotation_quaternion')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].scale')
+
     scn.frame_current = curr_frame
     obj.matrix = final_matrix
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].location')
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].rotation_quaternion')
-    obj_obj.keyframe_insert(data_path='pose.bones["'+obj.name+'"].scale')
-    
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].location')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].rotation_quaternion')
+    obj_obj.keyframe_insert(data_path='pose.bones["' + obj.name + '"].scale')
+
     return True
-    
-   
+
+
 class DpCreateConstraint(bpy.types.Operator):
     """Create a new animated Child Of constraint"""
     bl_idname = "dp.create"
     bl_label = "Create Constraint"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
         obj = bpy.context.active_object
-        
+
         if obj.type == 'ARMATURE':
             obj = bpy.context.active_pose_bone
-            
+
             if len(obj.constraints) == 0:
                 if not dp_create_dynamic_parent_pbone(context):
-                    self.report( {'ERROR'}, "Error parenting bones")
+                    self.report({'ERROR'}, "Error parenting bones")
                     return {'CANCELLED'}
             else:
                 if obj.constraints[-1].influence == 1:
                     dp_disable_dynamic_parent_pbone()
                 if not dp_create_dynamic_parent_pbone(context):
-                    self.report( {'ERROR'}, "Error parenting bones")
+                    self.report({'ERROR'}, "Error parenting bones")
                     return {'CANCELLED'}
-        else:        
+        else:
             if len(obj.constraints) == 0:
                 if not dp_create_dynamic_parent_obj(context):
-                    self.report( {'ERROR'}, "Error parenting objects")
+                    self.report({'ERROR'}, "Error parenting objects")
                     return {'CANCELLED'}
             else:
                 if obj.constraints[-1].influence == 1:
                     dp_disable_dynamic_parent_obj()
                 if not dp_create_dynamic_parent_obj(context):
-                    self.report( {'ERROR'}, "Error parenting objects")
+                    self.report({'ERROR'}, "Error parenting objects")
                     return {'CANCELLED'}
-        
+
         return {'FINISHED'}
-    
 
 
 class DpDisableConstraint(bpy.types.Operator):
@@ -263,7 +258,7 @@ class DpDisableConstraint(bpy.types.Operator):
     bl_idname = "dp.disable"
     bl_label = "Disable Constraint"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
         obj = bpy.context.active_object
         if obj.type == 'ARMATURE':
@@ -271,7 +266,6 @@ class DpDisableConstraint(bpy.types.Operator):
         else:
             dp_disable_dynamic_parent_obj()
         return {'FINISHED'}
-    
 
 
 class DinamicParentUI(bpy.types.Panel):
@@ -280,7 +274,7 @@ class DinamicParentUI(bpy.types.Panel):
     bl_idname = "dp.ui"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    
+
     def draw(self, context):
         layout = self.layout
         col = layout.column(align=True)
@@ -288,20 +282,20 @@ class DinamicParentUI(bpy.types.Panel):
         col.operator("dp.disable", text="Disable", icon="KEY_DEHLT")
 
 
-
 def register():
     bpy.utils.register_class(DpCreateConstraint)
     bpy.utils.register_class(DpDisableConstraint)
     bpy.utils.register_class(DinamicParentUI)
- 
-    pass 
+
+    pass
+
 
 def unregister():
     bpy.utils.unregister_class(DpCreateConstraint)
     bpy.utils.unregister_class(DpDisableConstraint)
     bpy.utils.unregister_class(DinamicParentUI)
- 
-    pass 
 
-if __name__ == "__main__": 
+    pass
+
+if __name__ == "__main__":
     register()

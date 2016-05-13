@@ -32,7 +32,7 @@ import bpy
 bl_info = {
     "name": "Duplicate object(s) without parenting",
     "author": "sambler",
-    "version": (1,0),
+    "version": (1, 0),
     "blender": (2, 65, 0),
     "location": "Shift-Alt-D",
     "description": "Duplicate selected objects or bones without copying the parent connection",
@@ -41,6 +41,7 @@ bl_info = {
     "tracker_url": "https://github.com/sambler/addonsByMe/issues",
     "category": "Object",
 }
+
 
 class DuplicateWithoutParent(bpy.types.Operator):
     """Duplicate selection without parenting"""
@@ -64,23 +65,26 @@ class DuplicateWithoutParent(bpy.types.Operator):
 
 addon_keymaps = []
 
+
 def register():
     bpy.utils.register_module(__name__)
 
-    if bpy.app.background: return
+    if bpy.app.background:
+        return
 
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
         km = kc.keymaps.new('Armature', space_type='EMPTY')
         kmi = km.keymap_items.new(DuplicateWithoutParent.bl_idname,
-                'D', 'PRESS', alt=True, shift=True)
+                                  'D', 'PRESS', alt=True, shift=True)
         addon_keymaps.append((km, kmi))
 
         km = kc.keymaps.new('Object Mode', space_type='EMPTY')
         kmi = km.keymap_items.new(DuplicateWithoutParent.bl_idname,
-                'D', 'PRESS', alt=True, shift=True)
+                                  'D', 'PRESS', alt=True, shift=True)
         addon_keymaps.append((km, kmi))
+
 
 def unregister():
     for km, kmi in addon_keymaps:

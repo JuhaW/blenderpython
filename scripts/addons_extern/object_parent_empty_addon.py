@@ -8,11 +8,12 @@ bl_info = {
 import bpy
 from bpy.props import StringProperty, BoolProperty, EnumProperty
 
+
 def centro(sel):
-    x = sum([obj.location[0] for obj in sel])/len(sel)
-    y = sum([obj.location[1] for obj in sel])/len(sel)
-    z = sum([obj.location[2] for obj in sel])/len(sel)
-    return (x,y,z)
+    x = sum([obj.location[0] for obj in sel]) / len(sel)
+    y = sum([obj.location[1] for obj in sel]) / len(sel)
+    z = sum([obj.location[2] for obj in sel]) / len(sel)
+    return (x, y, z)
 
 
 class P2E(bpy.types.Operator):
@@ -23,8 +24,8 @@ class P2E(bpy.types.Operator):
 
     nombre = StringProperty(name='', default='OBJECTS', description='Give the empty / group a name')
     grupo = bpy.props.BoolProperty(name='Create Group', default=False, description='Also add objects to a group')
-    locat = bpy.props.EnumProperty(name='', items=[('CURSOR','Cursor','Cursor'),('ACTIVE','Active','Active'),
-    ('CENTER','Center','Selection Center')],description='Empty location', default='CENTER')
+    locat = bpy.props.EnumProperty(name='', items=[('CURSOR', 'Cursor', 'Cursor'), ('ACTIVE', 'Active', 'Active'),
+                                                   ('CENTER', 'Center', 'Selection Center')], description='Empty location', default='CENTER')
     renom = bpy.props.BoolProperty(name='Add Prefix', default=False, description='Add prefix to objects name')
 
     @classmethod
@@ -34,25 +35,27 @@ class P2E(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self,'nombre')
+        layout.prop(self, 'nombre')
         column = layout.column(align=True)
-        column.prop(self,'locat')
-        column.prop(self,'grupo')
-        column.prop(self,'renom')
+        column.prop(self, 'locat')
+        column.prop(self, 'grupo')
+        column.prop(self, 'renom')
 
     def execute(self, context):
         objs = context.selected_objects
         act = context.object
         sce = context.scene
-        try: bpy.ops.object.mode_set()
-        except: pass
+        try:
+            bpy.ops.object.mode_set()
+        except:
+            pass
 
         if self.locat == 'CURSOR':
             loc = sce.cursor_location
         elif self.locat == 'ACTIVE':
             loc = act.location
         else:
-            loc = centro(objs) 
+            loc = centro(objs)
 
         bpy.ops.object.add(type='EMPTY', location=loc)
         context.object.name = self.nombre
@@ -60,13 +63,14 @@ class P2E(bpy.types.Operator):
         context.object.show_x_ray = True
 
         if self.grupo:
-            for o in objs: o.select = True
+            for o in objs:
+                o.select = True
             bpy.ops.group.create(name=self.nombre)
 
         for o in objs:
             o.select = not(o.parent)
             if self.renom:
-                o.name = self.nombre+'_'+o.name
+                o.name = self.nombre + '_' + o.name
 
         bpy.ops.object.parent_set(type='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
@@ -89,7 +93,7 @@ class PreFix(bpy.types.Operator):
     def execute(self, context):
         act = bpy.context.object
         objs = act.children
-        prefix = act.name+'_'
+        prefix = act.name + '_'
         remove = False
         for o in objs:
             if o.name.startswith(prefix):
@@ -102,7 +106,7 @@ class PreFix(bpy.types.Operator):
                     o.name = o.name.partition(prefix)[2]
         else:
             for o in objs:
-                o.name = prefix+o.name
+                o.name = prefix + o.name
 
         return {'FINISHED'}
 
@@ -123,6 +127,7 @@ def register():
     bpy.utils.register_class(P2E)
     bpy.utils.register_class(PanelP2E)
     bpy.utils.register_class(PreFix)
+
 
 def unregister():
     bpy.utils.unregister_class(P2E)

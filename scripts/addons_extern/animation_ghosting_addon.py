@@ -11,6 +11,7 @@ bl_info = {
 
 import bpy
 
+
 class Fantasma(bpy.types.Operator):
     bl_idname = 'object.fantasma'
     bl_label = 'Create / Update'
@@ -40,23 +41,23 @@ class Fantasma(bpy.types.Operator):
             scn.objects.active.hide_select = True
 
         # crear o refrescar el armature / limpiar animacion
-        if bpy.data.objects.get(obj.name+'_ghost'):
-            rig = scn.objects.get(obj.name+'_ghost')
+        if bpy.data.objects.get(obj.name + '_ghost'):
+            rig = scn.objects.get(obj.name + '_ghost')
             rig.animation_data_clear()
         else:
             arm = bpy.data.armatures.new('arm')
-            rig = bpy.data.objects.new(obj.name+'_ghost', arm)
+            rig = bpy.data.objects.new(obj.name + '_ghost', arm)
             rig.parent = scn.objects.get('Ghost_Objects')
             self.report({'INFO'}, 'Now edit Ghost Settings...')
-            #doing this from script crashes blender...
-            #rig.data.ghost_step = 25
+            # doing this from script crashes blender...
+            # rig.data.ghost_step = 25
             scn.objects.link(rig)
             scn.update()
             scn.objects.active = rig
             bpy.ops.object.mode_set(mode='EDIT')
             bon = arm.edit_bones.new('clon')
-            bon.head = (0,0,0)
-            bon.tail = (0,1,0)
+            bon.head = (0, 0, 0)
+            bon.tail = (0, 1, 0)
             bon.use_local_location = False
 
         # entro a modo pose y defino el objeto como shape
@@ -78,7 +79,7 @@ class Fantasma(bpy.types.Operator):
 
         # copiar los keyframes del objeto al pose bone
         for fcu in obj.animation_data.action.fcurves:
-            ruta = 'pose.bones["clon"].'+fcu.data_path
+            ruta = 'pose.bones["clon"].' + fcu.data_path
             copia = rig.animation_data.action.fcurves.new(data_path=ruta, index=fcu.array_index)
             copia.keyframe_points.add(len(fcu.keyframe_points))
             copia.hide = True
@@ -90,8 +91,9 @@ class Fantasma(bpy.types.Operator):
                     copia.keyframe_points[i].handle_left_type = fcu.keyframe_points[i].handle_left_type
                     copia.keyframe_points[i].handle_right = fcu.keyframe_points[i].handle_right
                     copia.keyframe_points[i].handle_right_type = fcu.keyframe_points[i].handle_right_type
-                except: 
-                    print ('error'); pass
+                except:
+                    print('error')
+                    pass
         scn.objects.active = rig
         return{'FINISHED'}
 
@@ -112,9 +114,11 @@ class BorrarFantasma(bpy.types.Operator):
         obj = bpy.context.object
 
         if obj.type != 'ARMATURE':
-            rig = scn.objects.get(obj.name+'_ghost')
-            if rig: obj = rig
-            else: return{'FINISHED'}
+            rig = scn.objects.get(obj.name + '_ghost')
+            if rig:
+                obj = rig
+            else:
+                return{'FINISHED'}
 
         if obj.name.endswith('_ghost'):
             scn.objects.active = obj
@@ -143,10 +147,12 @@ class Boton(bpy.types.Panel):
             column.prop(obj.data, 'ghost_step')
             column.prop(obj.data, 'ghost_size')
 
+
 def register():
     bpy.utils.register_class(Fantasma)
     bpy.utils.register_class(BorrarFantasma)
     bpy.utils.register_class(Boton)
+
 
 def unregister():
     bpy.utils.unregister_class(Fantasma)

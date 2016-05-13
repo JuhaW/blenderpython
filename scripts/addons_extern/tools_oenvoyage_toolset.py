@@ -35,13 +35,15 @@ from bpy.props import BoolProperty
 from datetime import datetime, timedelta
 
 # Preferences
+
+
 class OenvoyageToolsetPreferences(AddonPreferences):
     bl_idname = __name__
     use_render_estimate = BoolProperty(
-            name="Estimate Render time",
-            description="show the panel with render estimation",
-            default=True,
-            )
+        name="Estimate Render time",
+        description="show the panel with render estimation",
+        default=True,
+    )
 
     def draw(self, context):
         layout = self.layout
@@ -58,17 +60,20 @@ class OenvoyageToolsetPreferences(AddonPreferences):
         sub.prop(self, "use_render_estimate")
 
 # Properties
+
+
 def init_properties():
 
     scene = bpy.types.Scene
-    
-    scene.average_rendertime = bpy.props.FloatProperty(min=0, default=5, max = 200)
+
+    scene.average_rendertime = bpy.props.FloatProperty(min=0, default=5, max=200)
+
 
 def clear_properties():
     props = (
         "use_render_estimate",
     )
-    
+
     wm = bpy.context.window_manager
     for p in props:
         if p in wm:
@@ -76,47 +81,49 @@ def clear_properties():
 
 
 # FEATURE: Estimate Time to Render an Animation
-def hours_float_to_str(rendertime): 
-    hours_int = int(rendertime)    
-        
-    left_mins = (rendertime - hours_int)*60
+def hours_float_to_str(rendertime):
+    hours_int = int(rendertime)
+
+    left_mins = (rendertime - hours_int) * 60
     if left_mins > 0:
-        return "%d:%02d" % (hours_int,left_mins)
+        return "%d:%02d" % (hours_int, left_mins)
     else:
         return hours_int
- 
+
+
 def estimate_render_animation_time(self, context):
     preferences = context.user_preferences.addons[__name__].preferences
-    
+
     if preferences.use_render_estimate:
         layout = self.layout
         scene = context.scene
-            
+
         total_frames = scene.frame_end - scene.frame_start
-        
-        avg = scene.average_rendertime 
-        estimated_rendertime = total_frames * avg/60
+
+        avg = scene.average_rendertime
+        estimated_rendertime = total_frames * avg / 60
 
         rendertime_in_hours = hours_float_to_str(estimated_rendertime)
-        
+
         estimated_finish_time = datetime.now() + timedelta(hours=estimated_rendertime)
         formatted_finish_time = '{:%a, %d %b @ %H:%M}'.format(estimated_finish_time)
 
         row = layout.row()
-        split =layout.split()
+        split = layout.split()
         split.label("Average rendertime: ")
-        
-        split.prop(scene,"average_rendertime", text="mins")
+
+        split.prop(scene, "average_rendertime", text="mins")
 
         row = layout.row()
-        row = row.label("Expected rendertime for %s frames is:"  % total_frames)
+        row = row.label("Expected rendertime for %s frames is:" % total_frames)
         row = layout.row()
-        row = row.label("%s hours (ETA %s)"  % (rendertime_in_hours,formatted_finish_time))
+        row = row.label("%s hours (ETA %s)" % (rendertime_in_hours, formatted_finish_time))
 # // FEATURE: Estimate Time to Render an Animation
 
 # make a quick OpenGL render
 
 # PIE menu
+
 
 class VIEW3D_PIE_oenvoyage(Menu):
     bl_label = "Oenvoyage PIE"
@@ -132,7 +139,6 @@ class VIEW3D_PIE_oenvoyage(Menu):
         pie.prop(context.space_data, "show_manipulator")
 
 
-
 class render_Quick_OpenGL(bpy.types.Operator):
     """Tooltip"""
     bl_idname = "view3d.render_quickopengl"
@@ -145,16 +151,16 @@ class render_Quick_OpenGL(bpy.types.Operator):
     def execute(self, context):
         render = context.scene.render
         space = bpy.context.space_data
-        
+
         # pre preview
         space.show_only_render = True
-        bpy.ops.render.opengl(animation = True)
+        bpy.ops.render.opengl(animation=True)
 
-        # post preview 
+        # post preview
         space.show_only_render = False
 
         return {'FINISHED'}
-    
+
 
 # FEATURE: Select camera target (TrackTo like constraints)
 class SelectCameraTarget(bpy.types.Operator):
@@ -169,15 +175,15 @@ class SelectCameraTarget(bpy.types.Operator):
         if context.active_object.constraints:
             for const in context.active_object.constraints:
                 print(const.type)
-                if const.type in ('DAMPED_TRACK','LOCKED_TRACK','TRACK_TO'):
+                if const.type in ('DAMPED_TRACK', 'LOCKED_TRACK', 'TRACK_TO'):
                     if const.target:
                         bpy.ops.object.select_all()
                         const.target.select = True
                         bpy.context.scene.objects.active = const.target
                     else:
-                        self.report({'WARNING'},"No target for constraint found")
+                        self.report({'WARNING'}, "No target for constraint found")
         else:
-            self.report({'WARNING'},"No constraints found")
+            self.report({'WARNING'}, "No constraints found")
 
         return {'FINISHED'}
 
@@ -188,12 +194,12 @@ def special_key_options(self, context):
     obj = context.active_object
     scene = context.scene
     layout = self.layout
-    
-    if obj.type =='CAMERA':
-        layout.separator()
-        layout.operator("view3d.select_camera_target", icon="CONSTRAINT")   
 
-    layout.operator("view3d.render_quickopengl",icon='RENDER_ANIMATION')   
+    if obj.type == 'CAMERA':
+        layout.separator()
+        layout.operator("view3d.select_camera_target", icon="CONSTRAINT")
+
+    layout.operator("view3d.render_quickopengl", icon='RENDER_ANIMATION')
 
 
 # // FEATURE: Additional options in W
@@ -215,6 +221,7 @@ def motion_path_buttons(self, context):
 
 addon_keymaps = []
 
+
 def register():
 
     init_properties()
@@ -228,12 +235,11 @@ def register():
     # register menus
     bpy.utils.register_class(VIEW3D_PIE_oenvoyage)
 
-    
     # UI: Register the panels
     bpy.types.RENDER_PT_render.append(estimate_render_animation_time)
     bpy.types.VIEW3D_MT_object_specials.append(special_key_options)
     bpy.types.VIEW3D_MT_object_specials.append(motion_path_buttons)
-    
+
     wm = bpy.context.window_manager
 
     if wm.keyconfigs.addon:
@@ -241,8 +247,8 @@ def register():
         kmi = km.keymap_items.new('wm.call_menu_pie', 'Q', 'PRESS', shift=True)
         kmi.properties.name = 'VIEW3D_PIE_oenvoyage'
 
-        
         addon_keymaps.append(km)
+
 
 def unregister():
 
@@ -259,7 +265,7 @@ def unregister():
     bpy.types.RENDER_PT_render.remove(estimate_render_animation_time)
     bpy.types.VIEW3D_MT_object_specials.remove(special_key_options)
     bpy.types.VIEW3D_MT_object_specials.remove(motion_path_buttons)
-    
+
     clear_properties()
 
 if __name__ == "__main__":

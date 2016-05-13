@@ -230,7 +230,7 @@ classes = (
     SplitHorizontal,
     SplitVertical,
     JoinArea
-    )
+)
 
 addon_keymaps = []
 

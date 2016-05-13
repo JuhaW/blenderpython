@@ -21,9 +21,8 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {"name": "Preselect",
-           "description": "Draw the mesh element under the cursor " \
+           "description": "Draw the mesh element under the cursor "
                           "thicker in Edit Mode.",
            "author": "Quentin Wenger (Matpi)",
            "version": (1, 0),
@@ -54,11 +53,12 @@ RAY_MAX = 100.0
 DIST_MAX = 27
 DIST_MAX_SQR = DIST_MAX**2
 
+
 class ViewPreselectWorker(object):
 
-#    ACTIVE = 0
-#    SELECT = 1
-#    NORMAL = 2
+    #    ACTIVE = 0
+    #    SELECT = 1
+    #    NORMAL = 2
 
     def __init__(self):
 
@@ -107,7 +107,7 @@ class ViewPreselectWorker(object):
                   self.custom_color[1],
                   self.custom_color[2],
                   self.face_opacity)
-    
+
     def updateSelectionModes(self, context):
         (self.select_verts,
          self.select_edges,
@@ -129,13 +129,13 @@ class ViewPreselectWorker(object):
 
                 for vertex in self.draw_face:
                     glVertex3f(*vertex)
-                
+
                 glEnd()
 
             if ((self.select_edges or self.select_faces)
-                and self.edge_opacity and self.draw_edges):
+                    and self.edge_opacity and self.draw_edges):
                 glLineWidth(self.edge_width)
-                
+
                 glBegin(GL_LINES)
 
                 self.set_glColor_edge()
@@ -143,19 +143,19 @@ class ViewPreselectWorker(object):
                 for edge in self.draw_edges:
                     glVertex3f(*edge[0])
                     glVertex3f(*edge[1])
-                
+
                 glEnd()
 
             if self.select_verts and self.vert_opacity and self.draw_verts:
                 glPointSize(self.vert_radius)
-                
+
                 glBegin(GL_POINTS)
 
                 self.set_glColor_vert()
 
                 for vertex in self.draw_verts:
                     glVertex3f(*vertex)
-                
+
                 glEnd()
 
             glLineWidth(1.0)
@@ -173,20 +173,20 @@ class ViewPreselectWorker(object):
         """
         from mathutils import Vector
 
-        prj = self.region_3d.perspective_matrix*Vector((coord[0],
-                                                        coord[1],
-                                                        coord[2],
-                                                        1.0))
-        width_half = self.region.width/2.0
-        height_half = self.region.height/2.0
-        
+        prj = self.region_3d.perspective_matrix * Vector((coord[0],
+                                                          coord[1],
+                                                          coord[2],
+                                                          1.0))
+        width_half = self.region.width / 2.0
+        height_half = self.region.height / 2.0
+
         if prj.w == 0.0:
             # hope it never happens...
             prj.w = -0.0001
 
-        return (width_half*(1.0 + prj.x/prj.w),
-                height_half*(1.0 + prj.y/prj.w))
-    
+        return (width_half * (1.0 + prj.x / prj.w),
+                height_half * (1.0 + prj.y / prj.w))
+
     def testEdge2D(self, coords):
         x0, y0 = coords[0]
         x1, y1 = coords[1]
@@ -197,28 +197,28 @@ class ViewPreselectWorker(object):
         x = self.mouse_x - x0
         y = self.mouse_y - y0
 
-        dist_sqr = xa*xa + ya*ya
+        dist_sqr = xa * xa + ya * ya
 
         if dist_sqr == 0.0:
             return None
 
-        s = (x*xa + y*ya)/dist_sqr
+        s = (x * xa + y * ya) / dist_sqr
 
         if s < 0.0:
-            return x*x + y*y
+            return x * x + y * y
 
         elif s > 1.0:
             return (x - xa)**2 + (y - ya)**2
-            
+
         else:
-            return ((xa*y - ya*x)**2)/dist_sqr
+            return ((xa * y - ya * x)**2) / dist_sqr
 
     def testVert2D(self, coords):
         x = self.mouse_x - coords[0]
         y = self.mouse_y - coords[1]
 
-        return x*x + y*y
-    
+        return x * x + y * y
+
     def testTri2D(self, coords):
         x0, y0 = coords[0]
         x1, y1 = coords[1]
@@ -233,14 +233,14 @@ class ViewPreselectWorker(object):
         x = self.mouse_x - x0
         y = self.mouse_y - y0
 
-        det = xa*yb - ya*xb
+        det = xa * yb - ya * xb
 
         if det == 0.0:
             return False
 
-        s = (x*yb - y*xb)/det
-        t = (xa*y - ya*x)/det
-        
+        s = (x * yb - y * xb) / det
+        t = (xa * y - ya * x) / det
+
         return s >= 0.0 and t >= 0.0 and s + t <= 1.0
 
     def testTri3D(self, coords):
@@ -271,11 +271,11 @@ class ViewPreselectWorker(object):
                 self.flag_redraw = True
             elif self.flag_redraw:
                 self.flag_redraw = False
-                
+
             self.flag = False
 
             if (self.region_3d is not None and context.mode == 'EDIT_MESH'
-                and self.running):
+                    and self.running):
 
                 coords = (self.mouse_x, self.mouse_y)
 
@@ -286,7 +286,7 @@ class ViewPreselectWorker(object):
                 self.ray_direction = region_2d_to_vector_3d(
                     self.region,
                     self.region_3d,
-                    coords)*RAY_MAX
+                    coords) * RAY_MAX
 
                 obj = context.object
                 matrix_world = obj.matrix_world
@@ -307,14 +307,14 @@ class ViewPreselectWorker(object):
 
                     for vert in self.bmesh.verts:
                         if not vert.hide:
-                            point = matrix_world*vert.co
+                            point = matrix_world * vert.co
                             point_2d = self.location_3d_to_region_2d(point)
 
                             dist_sqr = self.testVert2D(point_2d)
 
                             if dist_sqr is not None:
                                 if (min_dist_sqr is None
-                                    or min_dist_sqr > dist_sqr):
+                                        or min_dist_sqr > dist_sqr):
                                     min_dist_sqr = dist_sqr
                                     point_vert = point
 
@@ -330,7 +330,6 @@ class ViewPreselectWorker(object):
                         self.draw_edges = []
                         self.draw_verts = [point_vert]
 
-
                 if self.select_edges and not found:
 
                     min_dist_sqr = None
@@ -338,7 +337,7 @@ class ViewPreselectWorker(object):
 
                     for edge in self.bmesh.edges:
                         if not edge.hide:
-                            points = [matrix_world*v.co for v in edge.verts]
+                            points = [matrix_world * v.co for v in edge.verts]
                             points_2d = [self.location_3d_to_region_2d(point)
                                          for point in points]
 
@@ -346,7 +345,7 @@ class ViewPreselectWorker(object):
 
                             if dist_sqr is not None:
                                 if (min_dist_sqr is None
-                                    or min_dist_sqr > dist_sqr):
+                                        or min_dist_sqr > dist_sqr):
                                     min_dist_sqr = dist_sqr
                                     points_edge = points
 
@@ -361,16 +360,15 @@ class ViewPreselectWorker(object):
                         self.draw_face = None
                         self.draw_edges = [points_edge]
                         self.draw_verts = points_edge
-                        
 
                 if self.select_faces and not found:
 
                     min_dist = None
                     points_face = None
-                    
+
                     for face in self.bmesh.faces:
                         if not face.hide:
-                            points = [matrix_world*v.co for v in face.verts]
+                            points = [matrix_world * v.co for v in face.verts]
                             points_2d = [self.location_3d_to_region_2d(point)
                                          for point in points]
                             tess_face = tessellate_polygon((points,))
@@ -391,8 +389,8 @@ class ViewPreselectWorker(object):
 
                     if points_face is None:
                         self.draw_face = None
-                        self.draw_edges = [] # XXX TEMP!!!
-                        self.draw_verts = [] # XXX
+                        self.draw_edges = []  # XXX TEMP!!!
+                        self.draw_verts = []  # XXX
                     else:
                         self.draw_face = points_face
                         self.draw_edges = [(points_face[i - 1], v)
@@ -400,12 +398,11 @@ class ViewPreselectWorker(object):
                         self.draw_verts = points_face
 
                 if (df != self.draw_face or de != self.draw_edges
-                    or dv != self.draw_verts):
+                        or dv != self.draw_verts):
                     self.region.tag_redraw()
                     # forced redraw -> not another modal
                     # -> no need for a new one
                     self.flag_redraw = True
-
 
     def register(self):
         if self.handle is not None:
@@ -420,8 +417,6 @@ class ViewPreselectWorker(object):
         if self.handle is not None:
             bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
             self.handle = None
-
-
 
 
 class ViewOperatorPreselect(bpy.types.Operator):
@@ -448,7 +443,7 @@ class ViewOperatorPreselect(bpy.types.Operator):
     @classmethod
     def register(cls):
         cls.worker.register()
-    
+
     @classmethod
     def unregister(cls):
         cls.worker.unregister()
@@ -456,7 +451,7 @@ class ViewOperatorPreselect(bpy.types.Operator):
 
 def updateBGLData(self, context):
     VOP = ViewOperatorPreselect
-    
+
     if self.preselect_use:
         if not VOP.worker.running:
             # INVOKE_DEFAULT leads to error in cursor position retrieval
@@ -554,12 +549,12 @@ def displayPreselectPanel(self, context):
         if preselect.preselect_use:
 
             v, e, f = context.tool_settings.mesh_select_mode
-            
+
             split = layout.split(percentage=0.1)
             split.separator()
 
             col = split.column()
-            
+
             col.prop(preselect, "depth_test")
 
             r = col.row()
@@ -568,7 +563,7 @@ def displayPreselectPanel(self, context):
             r = col.row()
             r.active = e or f
             r.prop(preselect, "preselect_width")
-            
+
             r = col.row()
             r.active = v
             r.prop(preselect, "opacity_vertices")
@@ -580,11 +575,11 @@ def displayPreselectPanel(self, context):
             r.prop(preselect, "opacity_face")
 
 #            if preselect.custom_color_use:
-#                split2 = col.split()    
+#                split2 = col.split()
 #                split2.prop(preselect, "custom_color_use")
             col.prop(preselect, "custom_color", text="")
 #            else:
-#                col.prop(preselect, "custom_color_use") 
+#                col.prop(preselect, "custom_color_use")
 
 
 def register():
@@ -592,13 +587,13 @@ def register():
     bpy.types.WindowManager.preselect = bpy.props.PointerProperty(
         type=PreselectCollectionGroup)
     bpy.types.VIEW3D_PT_view3d_shading.append(displayPreselectPanel)
-    
+
 
 def unregister():
     bpy.types.VIEW3D_PT_view3d_shading.remove(displayPreselectPanel)
     del bpy.types.WindowManager.preselect
     bpy.utils.unregister_module(__name__)
-    
+
 
 if __name__ == "__main__":
     register()

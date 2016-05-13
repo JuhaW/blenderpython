@@ -1,12 +1,12 @@
 #*********************************************************************************************
 # NAME : shaderNodeObjectIndexer.py
-# 
+#
 # TYPE : Input Shader
 #
 # DESCRIPTION : compute the number of object sharing the same prefix name of the current object.
 #               linked to this material. Work with node_objectindexer.osl
 #
-# SOCKETS : 
+# SOCKETS :
 # 	Outputs :
 # 		Total        	: int 	- total number of objects ( 1 <= Total <= +inf. )
 #               RefLoc          : point - TODO
@@ -14,7 +14,7 @@
 #       Options :
 #               Auto Update     : bool  - compute Total (unset it if you prefer to set Total yourself)
 #
-# AUTHOR 
+# AUTHOR
 # 	Valery Seys - Paris /\
 #
 # CHANGELOG
@@ -24,15 +24,15 @@
 #
 #********************************************************************************************/
 bl_info = {
-    "name":        "Shader Node Object Indexer (Cycles)",
+    "name": "Shader Node Object Indexer (Cycles)",
     "description": "Provide Object Info Index, works with the shader node_objectindexer.osl",
-    "author":      "Valery Seys",
-    "version":     (0, 0, 1),
-    "blender":     (2, 7, 6),
-    "location":    "Node Editor",
-    "category":    "Node",
-    "warning":     "Beta",
-    "wiki-url":    "",
+    "author": "Valery Seys",
+    "version": (0, 0, 1),
+    "blender": (2, 7, 6),
+    "location": "Node Editor",
+    "category": "Node",
+    "warning": "Beta",
+    "wiki-url": "",
 }
 
 import bpy
@@ -43,6 +43,7 @@ from bpy.types import NodeTree, Node, NodeSocket
 from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom
 from nodeitems_builtins import ShaderNewNodeCategory
 
+
 class ObjectIndexer(bpy.types.Node):
     bl_idname = 'ShaderNodeObjectIndexer'
     bl_label = 'Object Info Indexer'       # label seen in the property panel
@@ -50,7 +51,7 @@ class ObjectIndexer(bpy.types.Node):
 
     checkLoc = False
 
-    def onAutoUpdateChange(self,context):   # act as static
+    def onAutoUpdateChange(self, context):   # act as static
         node = self.getNode(context)
         if node is None:
             return
@@ -60,7 +61,7 @@ class ObjectIndexer(bpy.types.Node):
         else:
             node["autoUpdateProperty"] = False
 
-    def onUserTotalChange(self,context):    # act as static
+    def onUserTotalChange(self, context):    # act as static
         node = self.getNode(context)
         if node is None:
             return
@@ -73,36 +74,37 @@ class ObjectIndexer(bpy.types.Node):
             node.isaComputerChange = False
             node.userTotalProperty = node.outputs["Total"].default_value
 
-    autoUpdateProperty = bpy.props.BoolProperty(name="Auto Update",description="Update automatically total",default=False,update=onAutoUpdateChange)
-    userTotalProperty = bpy.props.IntProperty(name="Total",description="Total",default=1,min=1,step=1,update=onUserTotalChange)
-    isaComputerChange = bpy.props.BoolProperty(name="ComputerChange",default=False) # avoid recursing (change coming from computation, not user)
-    
+    autoUpdateProperty = bpy.props.BoolProperty(name="Auto Update", description="Update automatically total", default=False, update=onAutoUpdateChange)
+    userTotalProperty = bpy.props.IntProperty(name="Total", description="Total", default=1, min=1, step=1, update=onUserTotalChange)
+    isaComputerChange = bpy.props.BoolProperty(name="ComputerChange", default=False)  # avoid recursing (change coming from computation, not user)
+
     @classmethod
     def poll(cls, ntree):       # TODO
         print("==> DEBUG : poll() called")
         b = False
         # Make your node appear in different node trees by adding their bl_idname type here.
-        if ntree.bl_idname == 'ShaderNodeTree': b = True
+        if ntree.bl_idname == 'ShaderNodeTree':
+            b = True
         return b
-    
+
     def init(self, context):    # context is not set yet and is not usable
         self.outputs.new('NodeSocketInt', "Total")              # our output socket
         self.outputs["Total"].default_value = self.userTotalProperty
-        self.outputs.new('NodeSocketVector',"RefLoc")
-        self.outputs["RefLoc"].default_value = (0.0,0.0,0.0)
-        self.outputs.new('NodeSocketVector',"InfLoc")
-        self.outputs["InfLoc"].default_value = (0.0,0.0,0.0)
+        self.outputs.new('NodeSocketVector', "RefLoc")
+        self.outputs["RefLoc"].default_value = (0.0, 0.0, 0.0)
+        self.outputs.new('NodeSocketVector', "InfLoc")
+        self.outputs["InfLoc"].default_value = (0.0, 0.0, 0.0)
 
     # Additional buttons displayed on the node.
     def draw_buttons(self, context, layout):
         currentScene = context.scene
-        layout.prop(self,"autoUpdateProperty")
+        layout.prop(self, "autoUpdateProperty")
         layout.prop(self, "userTotalProperty")
         # prop_search(data, property, search_data, search_property, text="", text_ctxt="", translate=True, icon='NONE')
         # we use 'SNOI_OREF' as string : see self.register()
         layout.label("Spacial Reference:")
-        layout.prop_search(currentScene, "SNOI_OREF", currentScene, "objects",text="Reference")
-        layout.prop_search(currentScene, "SNOI_OEXT", currentScene, "objects",text="Influence")
+        layout.prop_search(currentScene, "SNOI_OREF", currentScene, "objects", text="Reference")
+        layout.prop_search(currentScene, "SNOI_OEXT", currentScene, "objects", text="Influence")
 
     # The label seen on the Node Title Bar
     def draw_label(self):
@@ -126,7 +128,7 @@ class ObjectIndexer(bpy.types.Node):
         # Review linked outputs.
         self.updateLinks(self)
 
-    def updateLinks(self,node):
+    def updateLinks(self, node):
         print("==> DEBUG : updateLinks() ...")
         try:
             out = node.outputs["Total"]
@@ -162,18 +164,18 @@ class ObjectIndexer(bpy.types.Node):
                         if o.to_socket.bl_idname == "NodeSocketVector":
                             o.to_socket.node.inputs[o.to_socket.name].default_value = outInf.default_value
 
-    def getNode(self,context):
+    def getNode(self, context):
         materialName = context.object.active_material.name
         if hasattr(context, 'node'):
             return context.node
         else:
             n = bpy.data.materials[materialName].node_tree.nodes.active
-            if hasattr(n,'getNode'):    # yes, it's me
+            if hasattr(n, 'getNode'):    # yes, it's me
                 return n
             else:
                 return None     # user disconnect links from other node, we loose the focus: no need to compute anything
 
-    def computeTotal(self,context):
+    def computeTotal(self, context):
         materialName = context.object.active_material.name
         znode = self.getNode(context)
         if znode is None:
@@ -192,7 +194,7 @@ class ObjectIndexer(bpy.types.Node):
             objectNamePrefix = objectNameSplited[0]
             objectNameSuffix = None
         # Ok, now find out if clones exists (with same material of course ..)
-        for obj, ptr in bpy.data.scenes[bpy.context.scene.name].objects.items(): 
+        for obj, ptr in bpy.data.scenes[bpy.context.scene.name].objects.items():
             if ptr.type == 'MESH' and objectNamePrefix in obj and context.object.name != obj:
                 for mat, matPtr in ptr.material_slots.items():
                     if mat == materialName:
@@ -203,8 +205,8 @@ class ObjectIndexer(bpy.types.Node):
         znode.userTotalProperty = total
 
 
-myNewMenuCategory = { 
-    "SH_NEW_INPUT" :     
+myNewMenuCategory = {
+    "SH_NEW_INPUT":
     ShaderNewNodeCategory("SH_NEW_INPUT", "Input", items=[
         NodeItem("ShaderNodeTexCoord"),
         NodeItem("ShaderNodeAttribute"),
@@ -224,18 +226,20 @@ myNewMenuCategory = {
         NodeItem("ShaderNodeUVAlongStroke", poll=nodeitems_builtins.line_style_shader_nodes_poll),
         NodeItem("NodeGroupInput", poll=nodeitems_builtins.group_input_output_item_poll),
         NodeItem("ShaderNodeObjectIndexer"),
-        ]),}
+    ]), }
+
 
 def registerMenu():
     # remove, replace, add back the menu
     nodeitems_builtins.unregister()
-    
+
     for index, nodeCat in enumerate(nodeitems_builtins.shader_node_categories):
         if nodeCat.identifier == "SH_NEW_INPUT":
             newMenu = myNewMenuCategory[nodeCat.identifier]
             nodeitems_builtins.shader_node_categories[index] = newMenu
 
     nodeitems_builtins.register()
+
 
 def unregisterMenu():
     #  if this fails menus aren't loaded. this ensure that they can load
@@ -247,9 +251,9 @@ def unregisterMenu():
     importlib.reload(nodeitems_builtins)
     nodeitems_builtins.register()
 
-    
+
 def register():
-    #bpy.utils.register_class(updateTotalOperator)
+    # bpy.utils.register_class(updateTotalOperator)
     bpy.utils.register_class(ObjectIndexer)
     bpy.types.Scene.SNOI_OREF = bpy.props.StringProperty()    # Shader Node Object Indexer - Object as Reference of group
     bpy.types.Scene.SNOI_OEXT = bpy.props.StringProperty()    # Shader Node Object Indexer - External Object
@@ -261,6 +265,7 @@ def register():
     bpy.app.handlers.frame_change_pre.append(pre_frame_change)
     print("==> registered")
 
+
 def unregister():
     try:
         unregisterMenu()
@@ -268,6 +273,7 @@ def unregister():
         print("==> unregistered")
     except RuntimeError:
         raise
+
 
 def pre_frame_change(scene):
     if scene.render.engine == 'CYCLES':
@@ -285,7 +291,7 @@ def pre_frame_change(scene):
 
 if __name__ == "__main__":
     print("==> try to unregistering")
-    #if hasattr(bpy.utils, "ObjectIndexer"):
+    # if hasattr(bpy.utils, "ObjectIndexer"):
     #    print("==> class ObjectIndexer registered")
     try:
         unregister()

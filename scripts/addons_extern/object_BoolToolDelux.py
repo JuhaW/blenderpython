@@ -79,7 +79,7 @@ def isMakeVertexGroup():
         return True
     else:
         return False
-    
+
 def isMakeBoundary():
     user_preferences = bpy.context.user_preferences
     addon_prefs = user_preferences.addons[bl_info["name"]].preferences
@@ -120,29 +120,29 @@ def Operation(context, _operation):
             else:
                 selObj.draw_type = "BOUNDS"
 
-            cyclesVis.camera = False;
-            cyclesVis.diffuse = False;
-            cyclesVis.glossy = False;
-            cyclesVis.shadow = False;
-            cyclesVis.transmission = False;
-            if _operation=="SLICE":
-                clone=context.active_object.copy() #copies dupli_group property(empty), but group property is empty (users_group = None)
+            cyclesVis.camera = False
+            cyclesVis.diffuse = False
+            cyclesVis.glossy = False
+            cyclesVis.shadow = False
+            cyclesVis.transmission = False
+            if _operation == "SLICE":
+                clone = context.active_object.copy()  # copies dupli_group property(empty), but group property is empty (users_group = None)
                 # clone.select=True
                 context.scene.objects.link(clone)
-                sliceMod = clone.modifiers.new("BTool_" + selObj.name, "BOOLEAN") #add mod to clone obj
+                sliceMod = clone.modifiers.new("BTool_" + selObj.name, "BOOLEAN")  # add mod to clone obj
                 sliceMod.object = selObj
                 sliceMod.operation = "DIFFERENCE"
                 clone["BoolToolRoot"] = True
                 if useBmesh:
-                    sliceMod.use_bmesh=True
+                    sliceMod.use_bmesh = True
             newMod = actObj.modifiers.new("BTool_" + selObj.name, "BOOLEAN")
             newMod.object = selObj
-            if _operation=="SLICE":
+            if _operation == "SLICE":
                 newMod.operation = "INTERSECT"
             else:
                 newMod.operation = _operation
             if useBmesh:
-                    newMod.use_bmesh=True
+                newMod.use_bmesh = True
             actObj["BoolToolRoot"] = True
             selObj["BoolToolBrush"] = _operation
             selObj["BoolTool_FTransform"] = "False"
@@ -162,24 +162,24 @@ def Operation_Direct(context, _operation):
                 selObj.draw_type = "WIRE"
             else:
                 selObj.draw_type = "BOUNDS"
-            if _operation=="SLICE":
-                clone=context.active_object.copy() #copies dupli_group property(empty), but group property is empty (users_group = None)
+            if _operation == "SLICE":
+                clone = context.active_object.copy()  # copies dupli_group property(empty), but group property is empty (users_group = None)
                 # clone.select=True
-                clone.data=context.active_object.data.copy()
+                clone.data = context.active_object.data.copy()
                 context.scene.objects.link(clone)
-                sliceMod = clone.modifiers.new("BTool_" + selObj.name, "BOOLEAN") #add mod to clone obj
+                sliceMod = clone.modifiers.new("BTool_" + selObj.name, "BOOLEAN")  # add mod to clone obj
                 sliceMod.object = selObj
                 sliceMod.operation = "DIFFERENCE"
                 if useBmesh:
-                    sliceMod.use_bmesh=True
+                    sliceMod.use_bmesh = True
                 bpy.ops.object.modifier_apply(modifier=sliceMod.name)
             newMod = actObj.modifiers.new("BTool_" + selObj.name, "BOOLEAN")
-            if _operation=="SLICE":
+            if _operation == "SLICE":
                 newMod.operation = "INTERSECT"
             else:
                 newMod.operation = _operation
             if useBmesh:
-                    newMod.use_bmesh=True
+                newMod.use_bmesh = True
             newMod.object = selObj
             bpy.ops.object.modifier_apply(modifier=newMod.name)
             bpy.ops.object.select_all(action='DESELECT')
@@ -187,7 +187,7 @@ def Operation_Direct(context, _operation):
             # bpy.ops.object.delete()
 
 
-# Remove Obejcts form the BoolTool System    
+# Remove Obejcts form the BoolTool System
 def Remove(context, thisObj_name, Prop):
     # Find the Brush pointed in the Tree View and Restore it, active is the Canvas
     actObj = context.active_object
@@ -201,11 +201,11 @@ def Remove(context, thisObj_name, Prop):
                 obj.draw_type = "TEXTURED"
                 del obj["BoolToolBrush"]
                 del obj["BoolTool_FTransform"]
-                cyclesVis.camera = True;
-                cyclesVis.diffuse = True;
-                cyclesVis.glossy = True;
-                cyclesVis.shadow = True;
-                cyclesVis.transmission = True;
+                cyclesVis.camera = True
+                cyclesVis.diffuse = True
+                cyclesVis.glossy = True
+                cyclesVis.shadow = True
+                cyclesVis.transmission = True
 
                 # Remove it from the Canvas
                 for mod in actObj.modifiers:
@@ -229,11 +229,11 @@ def Remove(context, thisObj_name, Prop):
                         actObj.draw_type = "TEXTURED"
                         del actObj["BoolToolBrush"]
                         del actObj["BoolTool_FTransform"]
-                        cyclesVis.camera = True;
-                        cyclesVis.diffuse = True;
-                        cyclesVis.glossy = True;
-                        cyclesVis.shadow = True;
-                        cyclesVis.transmission = True;
+                        cyclesVis.camera = True
+                        cyclesVis.diffuse = True
+                        cyclesVis.glossy = True
+                        cyclesVis.shadow = True
+                        cyclesVis.transmission = True
 
         if Prop == "CANVAS":
             for mod in actObj.modifiers:
@@ -305,8 +305,8 @@ def ApplyAll(context, list):
                     objDeleteList.append(mod.object)
                 try:
                     bpy.ops.object.modifier_apply(modifier=mod.name)
-                except: #if fails the means it is multiuser data
-                    context.active_object.data=context.active_object.data.copy() #so just make data unique
+                except:  # if fails the means it is multiuser data
+                    context.active_object.data = context.active_object.data.copy()  # so just make data unique
                     bpy.ops.object.modifier_apply(modifier=mod.name)
 
             # bpy.ops.object.select_all(action='TOGGLE')
@@ -318,7 +318,7 @@ def ApplyAll(context, list):
         if isCanvas(obj):
             for mod in obj.modifiers:
                 if mod.type == 'BOOLEAN':
-                    if mod.object in objDeleteList: # do not delete brush that is used by another canvas
+                    if mod.object in objDeleteList:  # do not delete brush that is used by another canvas
                         objDeleteList.remove(mod.object)  # remove it from deletion
     bpy.ops.object.select_all(action='DESELECT')
     # for obj in objDeleteList:
@@ -340,8 +340,8 @@ def ApplyThisBrush(context, brush):
                         bpy.ops.object.mode_set(mode='EDIT')
                         bpy.ops.mesh.select_all(action='SELECT')
                         bpy.ops.object.mode_set(mode='OBJECT')
-                        
-                        #Turn off al faces of the Canvas selected
+
+                        # Turn off al faces of the Canvas selected
                         bpy.context.scene.objects.active = canvas
                         bpy.ops.object.mode_set(mode='EDIT')
                         bpy.ops.mesh.select_all(action='DESELECT')
@@ -352,8 +352,8 @@ def ApplyThisBrush(context, brush):
                     context.scene.objects.active = obj
                     try:
                         bpy.ops.object.modifier_apply(modifier=mod.name)
-                    except: #if fails the means it is multiuser data
-                        context.active_object.data=context.active_object.data.copy() #so just make data unique
+                    except:  # if fails the means it is multiuser data
+                        context.active_object.data = context.active_object.data.copy()  # so just make data unique
                         bpy.ops.object.modifier_apply(modifier=mod.name)
                     bpy.ops.object.select_all(action='TOGGLE')
                     bpy.ops.object.select_all(action='DESELECT')
@@ -366,7 +366,7 @@ def ApplyThisBrush(context, brush):
                         bpy.ops.object.vertex_group_assign_new()
                         bpy.ops.mesh.select_all(action='DESELECT')
                         bpy.ops.object.mode_set(mode='OBJECT')
-                        
+
                         canvas.vertex_groups.active.name = "BTool_" + brush.name
                     """
 
@@ -474,6 +474,7 @@ class BTool_FastTransform(bpy.types.Operator):
     operator = bpy.props.StringProperty("")
 
     count = 0
+
     def modal(self, context, event):
         self.count += 1
         actObj = bpy.context.active_object
@@ -521,7 +522,7 @@ class BTool_FastTransform(bpy.types.Operator):
 
 # Brush Operators --------------------------------------------
 
-# Boolean Union Operator                
+# Boolean Union Operator
 class BTool_Union(bpy.types.Operator):
     """This operator add a union brush to a canvas"""
     bl_idname = "btool.boolean_union"
@@ -566,6 +567,8 @@ class BTool_Diff(bpy.types.Operator):
         return {'FINISHED'}
 
 # Boolean Slices Operator
+
+
 class BTool_Slice(bpy.types.Operator):
     """This operator add a intersect brush to a canvas"""
     bl_idname = "btool.boolean_slice"
@@ -581,7 +584,9 @@ class BTool_Slice(bpy.types.Operator):
 
 # Direct Operators ---------------------------------------------------
 
-# Boolean Union Direct Operator                
+# Boolean Union Direct Operator
+
+
 class BTool_Union_Direct(bpy.types.Operator):
     """Make the union between selected objects to the active"""
     bl_idname = "btool.boolean_union_direct"
@@ -626,6 +631,8 @@ class BTool_Diff_Direct(bpy.types.Operator):
         return {'FINISHED'}
 
 # Boolean Slice Operator
+
+
 class BTool_Slice_Direct(bpy.types.Operator):
     """Make the difference between selected objects to the active"""
     bl_idname = "btool.boolean_slice_direct"
@@ -642,6 +649,8 @@ class BTool_Slice_Direct(bpy.types.Operator):
 # Utils Class ---------------------------------------------------------------
 
 # Find the Brush Selected in Three View
+
+
 class BTool_FindBrush(bpy.types.Operator):
     """Find the this brush"""
     bl_idname = "btool.find_brush"
@@ -910,7 +919,7 @@ class BoolTool_Config(bpy.types.Panel):
             if isBrush(actObj):
                 self.layout.separator()
 
-        # BRUSH ------------------------------------------------------    
+        # BRUSH ------------------------------------------------------
         if isBrush(actObj):
 
             if (actObj["BoolToolBrush"] == "UNION") or (actObj["BoolToolBrush"] == "SLICE"):
@@ -1057,8 +1066,8 @@ class BoolTool_Pref(AddonPreferences):
         layout = self.layout
         layout.label(text="Experimental Features:")
         layout.prop(self, "fast_transform")
-        layout.prop(self, "use_bmesh", text = "Use Bmesh Boolean")
-        layout.prop(self, "use_wire", text = "Use Wire Instead Of Bbox ")
+        layout.prop(self, "use_bmesh", text="Use Bmesh Boolean")
+        layout.prop(self, "use_wire", text="Use Wire Instead Of Bbox ")
         """
         # EXPERIMENTAL
         layout.prop(self, "make_vertex_groups")
@@ -1103,7 +1112,6 @@ def register():
     # Handlers
     bpy.app.handlers.scene_update_post.append(HandleScene)
 
-
     # Operators
     bpy.utils.register_class(BTool_Union)
     bpy.utils.register_class(BTool_Diff)
@@ -1117,7 +1125,6 @@ def register():
 
     bpy.utils.register_class(BTool_DrawPolyBrush)
 
-
     # Others
     bpy.utils.register_class(BTool_Remove)
     bpy.utils.register_class(BTool_AllBrushToMesh)
@@ -1129,7 +1136,6 @@ def register():
     bpy.utils.register_class(BTool_EnableBrush)
     bpy.utils.register_class(BTool_EnableThisBrush)
     bpy.utils.register_class(BTool_EnableFTransform)
-
 
     # Append 3DVIEW Menu
     bpy.utils.register_class(BoolTool_Menu)

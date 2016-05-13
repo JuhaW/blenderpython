@@ -31,12 +31,13 @@
 # so may not be available until the next release.
 # this addon fills the gap until then.
 
-import bpy, math
+import bpy
+import math
 
 bl_info = {
     "name": "Clear bone roll",
     "author": "sambler",
-    "version": (1,0),
+    "version": (1, 0),
     "blender": (2, 62, 0),
     "location": "Alt-R while editing an armature",
     "description": "Clear the roll of selected bones",
@@ -46,6 +47,7 @@ bl_info = {
     "category": "Rigging",
 }
 
+
 class ClearBoneRoll(bpy.types.Operator):
     """Clear Roll of selected bones"""
     bl_idname = 'armature.clear_roll'
@@ -53,13 +55,13 @@ class ClearBoneRoll(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     roll = bpy.props.FloatProperty(name='Roll', default=0.0,
-                subtype='ANGLE', unit='ROTATION',
-                min=math.radians(-360), max=math.radians(360))
+                                   subtype='ANGLE', unit='ROTATION',
+                                   min=math.radians(-360), max=math.radians(360))
 
     @classmethod
     def poll(cls, context):
         return context.active_object.type == 'ARMATURE' \
-                and context.active_object.mode == 'EDIT'
+            and context.active_object.mode == 'EDIT'
 
     def execute(self, context):
         for b in context.selected_bones:
@@ -72,10 +74,12 @@ def menu_item(self, context):
 
 addon_keymaps = []
 
+
 def register():
     bpy.utils.register_class(ClearBoneRoll)
 
-    if bpy.app.background: return
+    if bpy.app.background:
+        return
 
     bpy.types.VIEW3D_MT_edit_armature_roll.append(menu_item)
 
@@ -84,8 +88,9 @@ def register():
     if kc:
         km = kc.keymaps.new('Armature', space_type='EMPTY')
         kmi = km.keymap_items.new('armature.clear_roll',
-                    'R', 'PRESS', alt=True)
+                                  'R', 'PRESS', alt=True)
         addon_keymaps.append((km, kmi))
+
 
 def unregister():
     for km, kmi in addon_keymaps:

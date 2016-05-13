@@ -30,8 +30,8 @@ bl_info = {
     "category": "Camera"}
 
 import bpy
-from bpy.props import (FloatProperty, BoolProperty, 
-FloatVectorProperty, StringProperty, EnumProperty)
+from bpy.props import (FloatProperty, BoolProperty,
+                       FloatVectorProperty, StringProperty, EnumProperty)
 
 
 class CameraSelectorPanel(bpy.types.Panel):
@@ -40,27 +40,27 @@ class CameraSelectorPanel(bpy.types.Panel):
     bl_context = "scene"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    
+
     def draw(self, context):
         layout = self.layout
         scene = context.scene
 
         cameras = sorted([o for o in scene.objects if o.type == 'CAMERA'],
-                         key = lambda o: o.name)
-        
+                         key=lambda o: o.name)
+
         if len(cameras) > 0:
             for camera in cameras:
                 row = layout.row(align=True)
-                btn = row.operator("cameraselector.set_scene_camera", 
-                text=camera.name, icon='OUTLINER_DATA_CAMERA')
+                btn = row.operator("cameraselector.set_scene_camera",
+                                   text=camera.name, icon='OUTLINER_DATA_CAMERA')
                 btn.chosen_camera = camera.name
 
-                btn = row.operator("cameraselector.add_camera_marker", 
-                text='', icon='MARKER')
+                btn = row.operator("cameraselector.add_camera_marker",
+                                   text='', icon='MARKER')
                 btn.chosen_camera = camera.name
         else:
-            layout.label("No cameras in this scene") 
-        
+            layout.label("No cameras in this scene")
+
 
 class SetSceneCamera(bpy.types.Operator):
     bl_idname = "cameraselector.set_scene_camera"
@@ -69,7 +69,7 @@ class SetSceneCamera(bpy.types.Operator):
 
     chosen_camera = bpy.props.StringProperty()
     select_chosen = False
-    
+
     def execute(self, context):
         chosen_camera = bpy.data.objects.get(self.chosen_camera, None)
         scene = context.scene
@@ -90,7 +90,8 @@ class SetSceneCamera(bpy.types.Operator):
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        if event.ctrl: self.select_chosen = True
+        if event.ctrl:
+            self.select_chosen = True
 
         return self.execute(context)
 
@@ -113,7 +114,7 @@ class AddCameraMarker(bpy.types.Operator):
         marker = None
         for m in reversed(sorted(filter(lambda m: m.frame <= current_frame,
                                         scene.timeline_markers),
-                                 key = lambda m: m.frame)):
+                                 key=lambda m: m.frame)):
             marker = m
             break
         if marker and (marker.camera == chosen_camera):
@@ -142,11 +143,12 @@ def register():
     bpy.utils.register_class(SetSceneCamera)
     bpy.utils.register_class(AddCameraMarker)
     bpy.utils.register_class(CameraSelectorPanel)
-    
+
+
 def unregister():
     bpy.utils.unregister_class(SetSceneCamera)
     bpy.utils.unregister_class(AddCameraMarker)
     bpy.utils.unregister_class(CameraSelectorPanel)
-    
+
 if __name__ == "__main__":
     register()

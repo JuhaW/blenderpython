@@ -33,7 +33,7 @@ bl_info = {
     "warning": "",
     "wiki_url": "",
     "category": "Add Curve",
-    }
+}
 
 # Self contained Python3 module to calculate bezier curves from an array of points.
 # This script is in 2 parts, first the module (no Blender deps), then the addon
@@ -53,33 +53,33 @@ DBL_NAN = float("nan")
 
 __all__ = (
     "calc_spline",
-    )
+)
 
 CornerPoint = namedtuple(
-        'CornerPoint',
-        ('point',
-         'original_index',
-         'sharpness',
-         'is_corner',
-         ))
+    'CornerPoint',
+    ('point',
+     'original_index',
+     'sharpness',
+     'is_corner',
+     ))
 
 CornerParams = namedtuple(
-        'CornerParams',
-        ('sample_num_min',
-         'dist_min',
-         'dist_max',
-         'dist_min_squared',
-         'dist_max_squared',
-         'angle_max',
-         ))
+    'CornerParams',
+    ('sample_num_min',
+     'dist_min',
+     'dist_max',
+     'dist_min_squared',
+     'dist_max_squared',
+     'angle_max',
+     ))
 
 Cubic = namedtuple(
-        'Cubic',
-        ('p0',
-         'p1',
-         'p2',
-         'p3',
-         ))
+    'Cubic',
+    ('p0',
+     'p1',
+     'p2',
+     'p3',
+     ))
 
 
 # Typing:
@@ -90,10 +90,10 @@ except ImportError:
 
 if typing is not None:
     from typing import (
-            List,
-            Sequence,
-            Tuple,
-            )
+        List,
+        Sequence,
+        Tuple,
+    )
 else:
     # Stub out typing for pypy
 
@@ -171,8 +171,8 @@ def cubic_evaluate(cubic: Cubic, t: float) -> Vector:
 
     # now reuse the variables already used
 
-    p01 = add_vnvn(mul_vn_fl(p01, s), mul_vn_fl(p12,  t))   # l2
-    p23 = add_vnvn(mul_vn_fl(p12,  s), mul_vn_fl(p23, t))  # r1
+    p01 = add_vnvn(mul_vn_fl(p01, s), mul_vn_fl(p12, t))   # l2
+    p23 = add_vnvn(mul_vn_fl(p12, s), mul_vn_fl(p23, t))  # r1
 
     # l3-r0
     p12 = add_vnvn(mul_vn_fl(p01, s), mul_vn_fl(p23, t))
@@ -209,8 +209,7 @@ def cubic_calc_error(
         points_offset: Sequence[Vector],
         points_offset_len: int,
         u: float
-        ) -> Tuple[float, int]:
-
+) -> Tuple[float, int]:
     '''
     Returns a 'measure' of the maximal discrepancy of the points specified
     by points_offset from the corresponding cubic(u[]) points.
@@ -259,7 +258,7 @@ def is_almost_zero(val, eps=1e-8):
 def points_calc_center_weighted(
         points_offset: Sequence[Vector],
         points_offset_len: int,
-        ) -> Vector:
+) -> Vector:
     """
     Calculate a center that compensates for point spacing.
     """
@@ -297,7 +296,7 @@ def cubic_from_points(
         u_prime: Vector,
         tan_l: Vector,
         tan_r: Vector,
-        ) -> Cubic:
+) -> Cubic:
 
     # Point Pairs
     A = [[None, None] for i in range(points_offset_len)]
@@ -368,7 +367,7 @@ def cubic_from_points(
     p1_dist_sq = len_squared_vnvn(center, p1)
     p2_dist_sq = len_squared_vnvn(center, p2)
     if (p1_dist_sq > dist_sq_max or
-        p2_dist_sq > dist_sq_max):
+            p2_dist_sq > dist_sq_max):
 
         alpha_l = alpha_r = len_vnvn(p0, p3) / 3.0
         p1 = sub_vnvn(p0, mul_vn_fl(tan_l, alpha_l))
@@ -394,12 +393,12 @@ def cubic_from_points(
     # ------------
 
     cubic = Cubic(
-            # TThickPoint ? - vector is fine too
-            tuple(p0),
-            tuple(p1),
-            tuple(p2),
-            tuple(p3),
-            )
+        # TThickPoint ? - vector is fine too
+        tuple(p0),
+        tuple(p1),
+        tuple(p2),
+        tuple(p3),
+    )
 
     del A
 
@@ -409,7 +408,7 @@ def cubic_from_points(
 def points_calc_coord_length(
         points_offset: Sequence[Vector],
         points_offset_len: int,
-        ) -> List[float]:
+) -> List[float]:
 
     u = [None] * points_offset_len
     u[0] = 0.0
@@ -428,7 +427,7 @@ def cubic_find_root(
         cubic: Cubic,
         p: Vector,
         u: float
-        ) -> float:
+) -> float:
     """
     Newton-Raphson Method.
     """
@@ -449,7 +448,7 @@ def cubic_reparameterize(
         points_offset: Sequence[Vector],
         points_offset_len: int,
         u: Vector,
-        ) -> List[float]:
+) -> List[float]:
     """
     Recalculate the values of u[] based on the Newton Raphson method
     """
@@ -486,7 +485,7 @@ def fit_cubic_to_points(
         error_threshold: float,
         # fill in this value
         r_cubic_array: Sequence[Cubic],
-        ):
+):
 
     iteration_max = 4  # const (make configurable?)
     error_sq = sq(error_threshold)
@@ -494,12 +493,12 @@ def fit_cubic_to_points(
     if points_offset_len == 2:
         dist = len_vnvn(points_offset[0], points_offset[1]) / 3.0
         r_cubic_array.append(
-                Cubic(points_offset[0],
-                      sub_vnvn(points_offset[0], (mul_vn_fl(tan_l, dist))),
-                      add_vnvn(points_offset[1], (mul_vn_fl(tan_r, dist))),
-                      points_offset[1],
-                      )
-                )
+            Cubic(points_offset[0],
+                  sub_vnvn(points_offset[0], (mul_vn_fl(tan_l, dist))),
+                  add_vnvn(points_offset[1], (mul_vn_fl(tan_r, dist))),
+                  points_offset[1],
+                  )
+        )
         return
 
     u = points_calc_coord_length(points_offset, points_offset_len)
@@ -548,11 +547,11 @@ def fit_cubic_to_points(
         tan_center = normalized_vn(sub_vnvn(points_offset[split_index - 1], points_offset[split_index + 1]))
 
     fit_cubic_to_points(
-            points_offset, split_index + 1,
-            tan_l, tan_center, error_threshold, r_cubic_array)
+        points_offset, split_index + 1,
+        tan_l, tan_center, error_threshold, r_cubic_array)
     fit_cubic_to_points(
-            points_offset[split_index:], points_offset_len - split_index,
-            tan_center, tan_r, error_threshold, r_cubic_array)
+        points_offset[split_index:], points_offset_len - split_index,
+        tan_center, tan_r, error_threshold, r_cubic_array)
 
 
 # ----------------------------------------------------------------------------
@@ -560,11 +559,11 @@ def fit_cubic_to_points(
 
 def AlgorithmPointI_new(point, original_index):
     return CornerPoint(
-            point=tuple((int(a) for a in point)),
-            original_index=original_index,
-            sharpness=0.0,
-            is_corner=False,
-            )
+        point=tuple((int(a) for a in point)),
+        original_index=original_index,
+        sharpness=0.0,
+        is_corner=False,
+    )
 
 
 def corners_is_corner_ok(
@@ -574,14 +573,14 @@ def corners_is_corner_ok(
         *,
         corner_params: CornerParams,
         corner_points: Vector
-        ) -> bool:
+) -> bool:
     """
     Check if i_curr and a possible corner and if so prejudice "acuity"
     """
 
     if (i_curr < 0 or i_curr >= len(corner_points) or
-        i_prev < 0 or i_prev >= len(corner_points) or
-        i_next < 0 or i_next >= len(corner_points)):
+            i_prev < 0 or i_prev >= len(corner_points) or
+            i_next < 0 or i_next >= len(corner_points)):
 
         return False
 
@@ -594,14 +593,14 @@ def corners_is_corner_ok(
     norm2_b = len_squared_vn(b)
 
     if ((not (norm2_a <= corner_params.dist_max_squared and norm2_a >= corner_params.dist_min_squared)) or
-        (not (norm2_b <= corner_params.dist_max_squared and norm2_b >= corner_params.dist_min_squared))):
+            (not (norm2_b <= corner_params.dist_max_squared and norm2_b >= corner_params.dist_min_squared))):
 
         return False
 
     norm2_c = len_squared_vn(c)
     cosine_of_alpha = (
-            (norm2_a + norm2_b - norm2_c) /
-            math.sqrt(4.0 * norm2_a * norm2_b))
+        (norm2_a + norm2_b - norm2_c) /
+        math.sqrt(4.0 * norm2_a * norm2_b))
 
     if cosine_of_alpha < -1.0:
         cosine_of_alpha = -1.0
@@ -625,7 +624,7 @@ def corners_find_candidates(
         *,
         corner_params: CornerParams,
         corner_points: Sequence[Vector]
-        ) -> None:
+) -> None:
     """
     Find the possible angles between points corner_points.
     """
@@ -659,7 +658,7 @@ def corners_find_candidates(
             corner_points[i_curr] = _._replace(sharpness=_.sharpness / admissibleCornersCount)
             del _
             if ((corner_points[i_curr].sharpness > (math.pi - corner_params.angle_max)) and
-                (admissibleCornersCount > corner_params.sample_num_min)):
+                    (admissibleCornersCount > corner_params.sample_num_min)):
 
                 # corner_points[i_curr].is_corner = True
                 corner_points[i_curr] = corner_points[i_curr]._replace(is_corner=True)
@@ -672,7 +671,7 @@ def corner_points_calc(
         *,
         corner_params,
         corner_points
-        ) -> bool:
+) -> bool:
     '''
     Returns true if and can do the interpolation
 
@@ -756,9 +755,9 @@ def corners_find(
         *,
         corner_params: CornerParams,
         corner_points: Sequence[Vector]
-        ) -> None:
+) -> None:
 
-    assert(type(corner_params.dist_max) == int)
+    assert(isinstance(corner_params.dist_max, int))
     i_curr = corner_params.dist_max
 
     while i_curr != len(corner_points) - corner_params.dist_max:
@@ -771,7 +770,7 @@ def corners_find(
                corner_points[i_curr].is_corner):
 
             if (corner_points[i_curr].sharpness <= corner_points[i_perc].sharpness or
-                corner_points[i_curr].sharpness <= corner_points[i_next].sharpness):
+                    corner_points[i_curr].sharpness <= corner_points[i_next].sharpness):
 
                 # corner_points[i_curr].is_corner = False
                 _ = corner_points[i_curr]
@@ -796,36 +795,36 @@ def corners_detect(
         dist_min: float,
         dist_max: float,
         angle_max: float
-        ) -> None:
+) -> None:
 
     corner_params = CornerParams(
-            sample_num_min=3,
-            dist_min=3,
-            dist_max=15,
-            dist_min_squared=dist_min ** 2.0,
-            dist_max_squared=dist_max ** 2.0,
-            angle_max=angle_max,
-            )
+        sample_num_min=3,
+        dist_min=3,
+        dist_max=15,
+        dist_min_squared=dist_min ** 2.0,
+        dist_max_squared=dist_max ** 2.0,
+        angle_max=angle_max,
+    )
 
     corner_points = []
 
     corner_points_calc(
-            input_points,
-            corner_params=corner_params,
-            corner_points=corner_points,
-            )
+        input_points,
+        corner_params=corner_params,
+        corner_points=corner_points,
+    )
 
     if len(corner_points) > 2 * dist_max:
         corners_find_candidates(
-                corner_params=corner_params,
-                corner_points=corner_points,
-                )
+            corner_params=corner_params,
+            corner_points=corner_points,
+        )
         corners_find(
-                int(math.sqrt(corner_params.dist_max_squared)) + 10,
-                corner_indices,
-                corner_params=corner_params,
-                corner_points=corner_points,
-                )
+            int(math.sqrt(corner_params.dist_max_squared)) + 10,
+            corner_indices,
+            corner_params=corner_params,
+            corner_points=corner_points,
+        )
     del corner_points  # free
 
     # check for no index equal to an adjacent
@@ -849,8 +848,7 @@ def calc_spline(
         error: float,
         use_detect_corners: bool=True,
         detect_corners_angle_threshold: float=math.radians(100)
-        ) -> List[Cubic]:
-
+) -> List[Cubic]:
     """
     Main function:
 
@@ -863,13 +861,13 @@ def calc_spline(
     corners = [0]
     if use_detect_corners and len(points) > 2:
         corners_detect(
-                points, corners,
+            points, corners,
 
-                sample_num_min=3,
-                dist_min=3,
-                dist_max=15,
-                angle_max=detect_corners_angle_threshold,
-                )
+            sample_num_min=3,
+            dist_min=3,
+            dist_max=15,
+            angle_max=detect_corners_angle_threshold,
+        )
     corners.append(len(points) - 1)
 
     r_cubic_array = []
@@ -882,18 +880,18 @@ def calc_spline(
         assert(points_offset_len >= 1)
         if points_offset_len > 1:
             tan_l = add_vnvn(
-                    negated_vn(points[first_point + 1]),
-                    points[first_point])
+                negated_vn(points[first_point + 1]),
+                points[first_point])
             tan_r = sub_vnvn(
-                    points[first_point + points_offset_len - 2],
-                    points[first_point + points_offset_len - 1])
+                points[first_point + points_offset_len - 2],
+                points[first_point + points_offset_len - 1])
 
             tan_l = normalized_vn(tan_l)
             tan_r = normalized_vn(tan_r)
 
             fit_cubic_to_points(
-                    points[first_point:], points_offset_len,
-                    tan_l, tan_r, error, r_cubic_array)
+                points[first_point:], points_offset_len,
+                tan_l, tan_r, error, r_cubic_array)
 
         elif len(points) == 1:
             assert(points_offset_len == 1)
@@ -907,7 +905,7 @@ def calc_spline(
         "points:", len(r_cubic_array),
         "corners:", len(corners),
         "uuid:", hex(hash(tuple(r_cubic_array)) % 0xFFFFFFFF)[2:].upper(),
-        )
+    )
 
     return r_cubic_array
 
@@ -918,10 +916,10 @@ def calc_spline(
 import bpy
 import bgl
 from bpy.props import (
-        BoolProperty,
-        FloatProperty,
-        PointerProperty,
-        )
+    BoolProperty,
+    FloatProperty,
+    PointerProperty,
+)
 
 
 def context_cursor(context):
@@ -938,7 +936,7 @@ def points_to_spline(
         spline_data: List[Cubic],
         radius_min: float,
         radius_max: float,
-        ) -> None:
+) -> None:
 
     spline.bezier_points.add(len(spline_data))
     bezier_points = spline.bezier_points
@@ -981,16 +979,16 @@ def points_to_spline(
 def mouse_path_to_spline(
         context,
         mouse_path: list,
-        ) -> None:
+) -> None:
 
     curve_freehand = context.scene.curve_freehand
 
     spline_data = calc_spline(
-            mouse_path,
-            error=curve_freehand.error_threshold,
-            use_detect_corners=curve_freehand.use_detect_corners,
-            detect_corners_angle_threshold=curve_freehand.detect_corners_angle_threshold,
-            )
+        mouse_path,
+        error=curve_freehand.error_threshold,
+        use_detect_corners=curve_freehand.use_detect_corners,
+        detect_corners_angle_threshold=curve_freehand.detect_corners_angle_threshold,
+    )
 
     obj = context.object
     curve = obj.data
@@ -1002,20 +1000,19 @@ def mouse_path_to_spline(
     depth_pt = context_cursor(context)
 
     spline_data = [
-            Cubic(*[
-                (*(matrix_inverse * region_2d_to_location_3d(region, rv3d, pt, depth_pt)), *pt[2:])
-                 for pt in cubic])
-            for cubic in spline_data]
-
+        Cubic(*[
+            (*(matrix_inverse * region_2d_to_location_3d(region, rv3d, pt, depth_pt)), *pt[2:])
+            for pt in cubic])
+        for cubic in spline_data]
 
     bpy.ops.curve.select_all(action='DESELECT')
 
     spline = curve.splines.new(type='BEZIER')
     points_to_spline(
-            spline, spline_data,
-            curve_freehand.pressure_min,
-            curve_freehand.pressure_max,
-            )
+        spline, spline_data,
+        curve_freehand.pressure_min,
+        curve_freehand.pressure_max,
+    )
 
     for bezt in spline.bezier_points:
         bezt.select_control_point = True
@@ -1149,51 +1146,52 @@ class VIEW3D_PT_tools_curveedit_options(bpy.types.Panel):
         colsub.prop(curve_freehand, "pressure_min", text="Min")
         colsub.prop(curve_freehand, "pressure_max", text="Max")
 
+
 class CurveFreehandProps(bpy.types.PropertyGroup):
     use_detect_corners = BoolProperty(
-            name="Detect Corners",
-            description="Detect sharp corners",
-            default=True,
-            )
+        name="Detect Corners",
+        description="Detect sharp corners",
+        default=True,
+    )
 
     error_threshold = FloatProperty(
-            name="Detail",
-            description="Detail threshold (smaller values give more detailed splines)",
-            subtype='PIXEL',
-            min=0.01, max=1000.0,
-            default=10.0,
-            )
+        name="Detail",
+        description="Detail threshold (smaller values give more detailed splines)",
+        subtype='PIXEL',
+        min=0.01, max=1000.0,
+        default=10.0,
+    )
 
     detect_corners_angle_threshold = FloatProperty(
-            name="Angle Limit",
-            description="Detail threshold (smaller values give more detailed splines)",
-            subtype='ANGLE',
-            min=0.0, max=math.pi,
-            default=math.radians(100),
-            )
+        name="Angle Limit",
+        description="Detail threshold (smaller values give more detailed splines)",
+        subtype='ANGLE',
+        min=0.0, max=math.pi,
+        default=math.radians(100),
+    )
 
     use_pressure = BoolProperty(
-            name="Tablet Pressure",
-            description="Map tablet pressure to radius",
-            default=False,
-            )
+        name="Tablet Pressure",
+        description="Map tablet pressure to radius",
+        default=False,
+    )
     pressure_min = FloatProperty(
-            name="Pressure Min",
-            min=0.0, max=100.0,
-            default=0.0,
-            )
+        name="Pressure Min",
+        min=0.0, max=100.0,
+        default=0.0,
+    )
     pressure_max = FloatProperty(
-            name="Pressure Max",
-            min=0.0, max=100.0,
-            default=1.0,
-            )
+        name="Pressure Max",
+        min=0.0, max=100.0,
+        default=1.0,
+    )
 
 
 classes = (
     CurveFreehandDraw,
     CurveFreehandProps,
     VIEW3D_PT_tools_curveedit_options,
-    )
+)
 
 addon_keymaps = []
 
@@ -1219,7 +1217,6 @@ def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
 
-
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
@@ -1227,4 +1224,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

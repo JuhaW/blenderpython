@@ -36,16 +36,16 @@ Save as Default (Optional).
 
 
 bl_info = {
-	"name": "DeCouple",
-	"author": "Gert De Roost",
-	"version": (0, 1, 0),
-	"blender": (2, 6, 5),
-	"location": "View3D > Tools",
-	"description": "Temporarily decouples parent and children",
-	"warning": "",
-	"wiki_url": "",
-	"tracker_url": "",
-	"category": "Object"}
+    "name": "DeCouple",
+    "author": "Gert De Roost",
+    "version": (0, 1, 0),
+    "blender": (2, 6, 5),
+    "location": "View3D > Tools",
+    "description": "Temporarily decouples parent and children",
+    "warning": "",
+    "wiki_url": "",
+    "tracker_url": "",
+    "category": "Object"}
 
 if "bpy" in locals():
     import imp
@@ -54,94 +54,89 @@ if "bpy" in locals():
 import bpy
 
 
-
 started = 0
 
 
-
 class DeCouple(bpy.types.Operator):
-	bl_idname = "object.decouple"
-	bl_label = "DeCouple"
-	bl_description = "Temporarily decouples parent and children"
-	bl_options = {"REGISTER", "UNDO"}
-	
-	@classmethod
-	def poll(cls, context):
-		obj = context.active_object
-		return (obj and context.mode == 'OBJECT')
+    bl_idname = "object.decouple"
+    bl_label = "DeCouple"
+    bl_description = "Temporarily decouples parent and children"
+    bl_options = {"REGISTER", "UNDO"}
 
-	def invoke(self, context, event):
-		self.save_global_undo = bpy.context.user_preferences.edit.use_global_undo
-		bpy.context.user_preferences.edit.use_global_undo = False
-		
-		do_decouple(self)
-		
-		context.window_manager.modal_handler_add(self)
-		
-		return {'RUNNING_MODAL'}
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        return (obj and context.mode == 'OBJECT')
 
-	def modal(self, context, event):
-		
-		global started
-		
-		if started == 2:
-			started = 0
-			return {"FINISHED"}
-	
-		return {"PASS_THROUGH"}
+    def invoke(self, context, event):
+        self.save_global_undo = bpy.context.user_preferences.edit.use_global_undo
+        bpy.context.user_preferences.edit.use_global_undo = False
+
+        do_decouple(self)
+
+        context.window_manager.modal_handler_add(self)
+
+        return {'RUNNING_MODAL'}
+
+    def modal(self, context, event):
+
+        global started
+
+        if started == 2:
+            started = 0
+            return {"FINISHED"}
+
+        return {"PASS_THROUGH"}
 
 
 def panel_func(self, context):
-	self.layout.label(text="DeCouple:")
-	if started:
-		self.layout.operator("object.decouple", text="Reparent")
-	else:
-		self.layout.operator("object.decouple", text="Unparent")
+    self.layout.label(text="DeCouple:")
+    if started:
+        self.layout.operator("object.decouple", text="Reparent")
+    else:
+        self.layout.operator("object.decouple", text="Unparent")
 
 
 def register():
-	bpy.utils.register_module(__name__)
-	bpy.types.VIEW3D_PT_tools_objectmode.append(panel_func)
+    bpy.utils.register_module(__name__)
+    bpy.types.VIEW3D_PT_tools_objectmode.append(panel_func)
 
 
 def unregister():
-	bpy.utils.unregister_module(__name__)
-	bpy.types.VIEW3D_PT_tools_objectmode.remove(panel_func)
+    bpy.utils.unregister_module(__name__)
+    bpy.types.VIEW3D_PT_tools_objectmode.remove(panel_func)
 
 
 if __name__ == "__main__":
-	register()
-
-
-
+    register()
 
 
 def do_decouple(self):
 
-	global started, parent, children
+    global started, parent, children
 
-	if not(started):
-		parent = bpy.context.active_object
-		if len(parent.children) == 0:
-			return
-		parent.select = 0
-		children = []
-		for child in parent.children:
-			children.append(child)
-			child.select = 1
-		bpy.ops.object.parent_clear(type='CLEAR')
-		for child in children:
-			child.select = 0
-		parent.select = 1
-		bpy.context.scene.objects.active = parent
-		started = 1
-	else:
-		parent.select = 0
-		for child in children:
-			child.select = 1
-		parent.select = 1
-		bpy.context.scene.objects.active = parent
-		bpy.ops.object.parent_set()
-		for child in children:
-			child.select = 0
-		started = 2
+    if not(started):
+        parent = bpy.context.active_object
+        if len(parent.children) == 0:
+            return
+        parent.select = 0
+        children = []
+        for child in parent.children:
+            children.append(child)
+            child.select = 1
+        bpy.ops.object.parent_clear(type='CLEAR')
+        for child in children:
+            child.select = 0
+        parent.select = 1
+        bpy.context.scene.objects.active = parent
+        started = 1
+    else:
+        parent.select = 0
+        for child in children:
+            child.select = 1
+        parent.select = 1
+        bpy.context.scene.objects.active = parent
+        bpy.ops.object.parent_set()
+        for child in children:
+            child.select = 0
+        started = 2
