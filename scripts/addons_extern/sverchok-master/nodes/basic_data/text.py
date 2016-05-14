@@ -32,10 +32,10 @@ from bpy.props import BoolProperty, EnumProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, StringsSocket
 from sverchok.data_structure import (node_id, multi_socket,
-                            updateNode, SvGetSocketAnyType, SvSetSocketAnyType)
+                                     updateNode, SvGetSocketAnyType, SvSetSocketAnyType)
 
 
-#this function shouldn't be used, always use full .bl_idname in the code
+# this function shouldn't be used, always use full .bl_idname in the code
 def get_socket_type(node, inputsocketname):
     if type(node.inputs[inputsocketname].links[0].from_socket) == bpy.types.VerticesSocket:
         return 'v'
@@ -137,28 +137,28 @@ class SvTextInNode(bpy.types.Node, SverchCustomTreeNode):
 # user defined.
 # to add ; as delimiter and , as decimal mark
 
-    csv_dialects = [('excel',      'Excel',        'Standard excel',   1),
-                    ('excel-tab',  'Excel tabs',   'Excel tab format', 2),
-                    ('unix',       'Unix',         'Unix standard',    3),
-                    ('semicolon',  'Excel ;,',     'Excel ; ,',        4),
-                    ('user',       'User defined', 'Define settings', 10), ]
+    csv_dialects = [('excel', 'Excel', 'Standard excel', 1),
+                    ('excel-tab', 'Excel tabs', 'Excel tab format', 2),
+                    ('unix', 'Unix', 'Unix standard', 3),
+                    ('semicolon', 'Excel ;,', 'Excel ; ,', 4),
+                    ('user', 'User defined', 'Define settings', 10), ]
 
     csv_dialect = EnumProperty(items=csv_dialects, name="Csv Dialect",
                                description="Choose csv dialect", default='excel',
                                update=updateNode)
 
-    csv_delimiters = [(',',  ",",    "Comma: ,",    1),
-                      ('\t', 'tab',  "Tab",          2),
-                      (';',  ';',    "Semi-colon ;", 3),
-                      ('CUSTOM', 'custom', "Custom",  10), ]
+    csv_delimiters = [(',', ",", "Comma: ,", 1),
+                      ('\t', 'tab', "Tab", 2),
+                      (';', ';', "Semi-colon ;", 3),
+                      ('CUSTOM', 'custom', "Custom", 10), ]
 
     csv_delimiter = EnumProperty(items=csv_delimiters, default=',')
     csv_custom_delimiter = StringProperty(default=':')
 
-    csv_decimalmarks = [('.',       ".",        "Dot",          1),
-                        (',',       ',',        "Comma",        2),
-                        ('LOCALE',  'Locale',   "Follow locale", 3),
-                        ('CUSTOM', 'custom',    "Custom",       10), ]
+    csv_decimalmarks = [('.', ".", "Dot", 1),
+                        (',', ',', "Comma", 2),
+                        ('LOCALE', 'Locale', "Follow locale", 3),
+                        ('CUSTOM', 'custom', "Custom", 10), ]
 
     csv_decimalmark = EnumProperty(items=csv_decimalmarks, default='LOCALE')
     csv_custom_decimalmark = StringProperty(default=',')
@@ -166,12 +166,12 @@ class SvTextInNode(bpy.types.Node, SverchCustomTreeNode):
 
 # Sverchok list options
 # choose which socket to interpretate data as
-    socket_types = [('v', 'Vertices',  "Point, vector or vertices data", 1),
-                    ('s', 'Data',    "Generals numbers or edge polygon data", 2),
-                    ('m', 'Matrix',  "Matrix data", 3), ]
+    socket_types = [('v', 'Vertices', "Point, vector or vertices data", 1),
+                    ('s', 'Data', "Generals numbers or edge polygon data", 2),
+                    ('m', 'Matrix', "Matrix data", 3), ]
     socket_type = EnumProperty(items=socket_types, default='s')
 
-    #interesting but dangerous, TODO
+    # interesting but dangerous, TODO
     reload_on_update = BoolProperty(default=False, description="Reload text file on every update")
 
     def draw_buttons(self, context, layout):
@@ -297,7 +297,7 @@ class SvTextInNode(bpy.types.Node, SverchCustomTreeNode):
     def reload_csv(self):
         n_id = node_id(self)
         self.load_csv_data()
-        #if n_id in self.csv_data:
+        # if n_id in self.csv_data:
         #    for i, name in enumerate(self.csv_data[node_id(self)]):
         #        if not name in self.outputs:
         #            self.outputs.new('StringsSocket', name, name)
@@ -357,13 +357,13 @@ class SvTextInNode(bpy.types.Node, SverchCustomTreeNode):
                         tmp = name
                         c = 1
                         while tmp in csv_data:
-                            tmp = name+str(c)
+                            tmp = name + str(c)
                             c += 1
                         csv_data[str(tmp)] = []
                     continue  # first row is names
                 else:
                     for j in range(len(row)):
-                        csv_data["Col "+str(j)] = []
+                        csv_data["Col " + str(j)] = []
             # load data
 
             for j, name in enumerate(csv_data):
@@ -550,26 +550,26 @@ class SvTextOutNode(bpy.types.Node, SverchCustomTreeNode):
     text = EnumProperty(items=avail_texts, name="Texts",
                         description="Choose text to load", update=updateNode)
 
-    text_modes = [("CSV",   "Csv",      "Csv data", "",  1),
-                  ("SV",    "Sverchok", "Python data",  2),
-                  ("JSON",  "JSON",     "Sverchok JSON", 3)]
+    text_modes = [("CSV", "Csv", "Csv data", "", 1),
+                  ("SV", "Sverchok", "Python data", 2),
+                  ("JSON", "JSON", "Sverchok JSON", 3)]
 
     text_mode = EnumProperty(items=text_modes, default='CSV', update=change_mode)
 
     # csv options
-    csv_dialects = [('excel',      'Excel',        'Standard excel',   1),
-                    ('excel-tab',  'Excel tabs',   'Excel tab format', 2),
-                    ('unix',       'Unix',         'Unix standard',    3), ]
+    csv_dialects = [('excel', 'Excel', 'Standard excel', 1),
+                    ('excel-tab', 'Excel tabs', 'Excel tab format', 2),
+                    ('unix', 'Unix', 'Unix standard', 3), ]
 
     csv_dialect = EnumProperty(items=csv_dialects, default='excel')
 
     # sv options
-    sv_modes = [('compact',     'Compact',      'Using str()', 1),
-                ('pretty',      'Pretty',       'Using pretty print', 2)]
+    sv_modes = [('compact', 'Compact', 'Using str()', 1),
+                ('pretty', 'Pretty', 'Using pretty print', 2)]
     sv_mode = EnumProperty(items=sv_modes, default='compact')
     # json options
-    json_modes = [('compact',    'Compact',      'Minimal', 1),
-                  ('pretty',      'Pretty',      'Indent and order', 2)]
+    json_modes = [('compact', 'Compact', 'Minimal', 1),
+                  ('pretty', 'Pretty', 'Indent and order', 2)]
     json_mode = EnumProperty(items=json_modes, default='pretty')
 
     base_name = StringProperty(name='base_name', default='Col ')
@@ -634,7 +634,7 @@ class SvTextOutNode(bpy.types.Node, SverchCustomTreeNode):
             data_out = []
             for socket in self.inputs:
                 if socket.links and \
-                    type(socket.links[0].from_socket) == StringsSocket:
+                        type(socket.links[0].from_socket) == StringsSocket:
 
                     tmp = SvGetSocketAnyType(self, socket)
                     if tmp:
@@ -656,11 +656,11 @@ class SvTextOutNode(bpy.types.Node, SverchCustomTreeNode):
                 if socket.links:
                     tmp = SvGetSocketAnyType(self, socket)
                     if tmp:
-                        tmp_name = socket.links[0].from_node.name+':'+socket.links[0].from_socket.name
+                        tmp_name = socket.links[0].from_node.name + ':' + socket.links[0].from_socket.name
                         name = tmp_name
                         j = 1
                         while name in data_out:  # unique names for json
-                            name = tmp_name+str(j)
+                            name = tmp_name + str(j)
                             j += 1
 
                         data_out[name] = (get_socket_type(self, socket.name), tmp)
@@ -693,4 +693,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-

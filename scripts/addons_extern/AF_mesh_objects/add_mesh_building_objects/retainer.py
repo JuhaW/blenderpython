@@ -6,7 +6,7 @@
 #       - id2 = Housed-open staircase
 #       - id3 = Box staircase
 #       - id4 = Circular staircase
-# 
+#
 # Paul "BrikBot" Marshall
 # Created: September 19, 2011
 # Last Modified: January 29, 2011
@@ -38,15 +38,17 @@
 
 from mathutils import Vector
 
+
 class Retainers:
-    def __init__(self,G,w,h,wP,wT,hR,n, rEnable, lEnable):
-        self.G = G #General
-        self.w=w #retainer width
-        self.h=h #retainer height
-        self.wP=wP #post width
-        self.wT=wT #tread width
-        self.nR=n #number of retainers
-        self.sp=hR/float(n+1) #retainer spacing
+
+    def __init__(self, G, w, h, wP, wT, hR, n, rEnable, lEnable):
+        self.G = G  # General
+        self.w = w  # retainer width
+        self.h = h  # retainer height
+        self.wP = wP  # post width
+        self.wT = wT  # tread width
+        self.nR = n  # number of retainers
+        self.sp = hR / float(n + 1)  # retainer spacing
         self.rEnable = rEnable
         self.lEnable = lEnable
         self.Create()
@@ -54,20 +56,20 @@ class Retainers:
     def Create(self):
         for i in range(self.nR):
             coords = []
-            offset=(i+1)*Vector([0,0,self.sp])
+            offset = (i + 1) * Vector([0, 0, self.sp])
             coords.append(offset)
             coords.append(self.G.stop + offset)
-            coords.append(offset + Vector([0,self.w,0]))
-            coords.append(self.G.stop + offset + Vector([0,self.w,0]))
+            coords.append(offset + Vector([0, self.w, 0]))
+            coords.append(self.G.stop + offset + Vector([0, self.w, 0]))
             for j in range(4):
-                coords.append(coords[j] + Vector([0,0,self.h]))
+                coords.append(coords[j] + Vector([0, 0, self.h]))
             #centre in posts
             for j in coords:
-                j += Vector([0,0.5*(self.wP-self.w),0])
+                j += Vector([0, 0.5 * (self.wP - self.w), 0])
             if self.rEnable:
                 self.G.Make_mesh(coords, self.G.faces, 'retainers')
             if self.lEnable:
-                #make retainer on other side
+                # make retainer on other side
                 for j in coords:
-                    j += Vector([0,self.wT-self.wP,0])
-                self.G.Make_mesh(coords,self.G.faces, 'retainers')
+                    j += Vector([0, self.wT - self.wP, 0])
+                self.G.Make_mesh(coords, self.G.faces, 'retainers')

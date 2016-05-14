@@ -3,6 +3,7 @@ from .. problems import canExecute
 from .. utils.layout import writeText
 from .. utils.blender_ui import isViewportRendering
 
+
 class AutoExecutionPanel(bpy.types.Panel):
     bl_idname = "an_auto_execution_panel"
     bl_label = "Auto Execution"
@@ -13,12 +14,13 @@ class AutoExecutionPanel(bpy.types.Panel):
     @classmethod
     def poll(cls, context):
         tree = cls.getTree()
-        if tree is None: return False
+        if tree is None:
+            return False
         return tree.bl_idname == "an_AnimationNodeTree"
 
     def draw_header(self, context):
         tree = self.getTree()
-        self.layout.prop(tree.autoExecution, "enabled", text = "")
+        self.layout.prop(tree.autoExecution, "enabled", text="")
 
     def draw(self, context):
         layout = self.layout
@@ -26,7 +28,7 @@ class AutoExecutionPanel(bpy.types.Panel):
         if not canExecute():
             message = ("Your node tree cannot be executed. "
                        "Look in the 'Problems' panel for more information.")
-            writeText(layout, message, width = 35, icon = "INFO")
+            writeText(layout, message, width=35, icon="INFO")
 
         tree = context.space_data.edit_tree
         autoExecution = tree.autoExecution
@@ -36,15 +38,15 @@ class AutoExecutionPanel(bpy.types.Panel):
         col = layout.column()
         col.active = not isRendering
         text = "Always" if not isRendering else "Always (deactivated)"
-        col.prop(autoExecution, "sceneUpdate", text = text)
+        col.prop(autoExecution, "sceneUpdate", text=text)
 
         col = layout.column()
         col.active = not autoExecution.sceneUpdate or isRendering
-        col.prop(autoExecution, "treeChanged", text = "Tree Changed")
-        col.prop(autoExecution, "frameChanged", text = "Frame Changed")
-        col.prop(autoExecution, "propertyChanged", text = "Property Changed")
+        col.prop(autoExecution, "treeChanged", text="Tree Changed")
+        col.prop(autoExecution, "frameChanged", text="Frame Changed")
+        col.prop(autoExecution, "propertyChanged", text="Property Changed")
 
-        layout.prop(autoExecution, "minTimeDifference", slider = True)
+        layout.prop(autoExecution, "minTimeDifference", slider=True)
 
     @classmethod
     def getTree(cls):

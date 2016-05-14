@@ -88,7 +88,6 @@ class GenRangeNode(bpy.types.Node, SverchCustomTreeNode):
             yield count
 
 
-
 def register():
     bpy.utils.register_class(GenRangeNode)
 

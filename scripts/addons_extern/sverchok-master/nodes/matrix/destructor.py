@@ -37,7 +37,7 @@ class MatrixOutNode(bpy.types.Node, SverchCustomTreeNode):
         self.inputs.new('MatrixSocket', "Matrix")
 
     def process(self):
-        L,S,R,A = self.outputs
+        L, S, R, A = self.outputs
         M = self.inputs[0]
         if M.is_linked:
             matrixes_ = M.sv_get()
@@ -50,7 +50,7 @@ class MatrixOutNode(bpy.types.Node, SverchCustomTreeNode):
                 S.sv_set(locs)
             if R.is_linked or A.is_linked:
                 locs = Matrix_rotation(matrixes, list=True)
-                rots, angles = [],[]
+                rots, angles = [], []
                 for lists in locs:
                     rots.append([pair[0] for pair in lists])
                     for pair in lists:

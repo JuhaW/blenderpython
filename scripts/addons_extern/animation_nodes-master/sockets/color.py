@@ -3,6 +3,7 @@ from bpy.props import *
 from .. events import propertyChanged
 from .. base_types.socket import AnimationNodeSocket
 
+
 class ColorSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_ColorSocket"
     bl_label = "Color Socket"
@@ -13,12 +14,12 @@ class ColorSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     comparable = False
 
     value = FloatVectorProperty(
-        default = [0.5, 0.5, 0.5], subtype = "COLOR",
-        soft_min = 0.0, soft_max = 1.0,
-        update = propertyChanged)
+        default=[0.5, 0.5, 0.5], subtype="COLOR",
+        soft_min=0.0, soft_max=1.0,
+        update=propertyChanged)
 
     def drawProperty(self, layout, text):
-        layout.prop(self, "value", text = text)
+        layout.prop(self, "value", text=text)
 
     def getValue(self):
         return list(self.value) + [1.0]

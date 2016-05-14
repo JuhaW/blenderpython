@@ -25,7 +25,7 @@ from mathutils import Matrix, Euler
 
 from sverchok.node_tree import SverchCustomTreeNode, StringsSocket
 from sverchok.data_structure import (updateNode, Matrix_listing, match_long_repeat,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class SvMatrixEulerNode(bpy.types.Node, SverchCustomTreeNode):
@@ -34,16 +34,15 @@ class SvMatrixEulerNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Euler Matrix'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
-
     X = FloatProperty(name='X', description='X rotation',
-                             default=0.0,
-                             options={'ANIMATABLE'}, update=updateNode)
+                      default=0.0,
+                      options={'ANIMATABLE'}, update=updateNode)
     Y = FloatProperty(name='Y', description='Y rotation',
-                             default=0.0,
-                             options={'ANIMATABLE'}, update=updateNode)
+                      default=0.0,
+                      options={'ANIMATABLE'}, update=updateNode)
     Z = FloatProperty(name='Z', description='Z rotation',
-                             default=0.0,
-                             options={'ANIMATABLE'}, update=updateNode)
+                      default=0.0,
+                      options={'ANIMATABLE'}, update=updateNode)
 
     def change_prop(self, context):
         for i, name in enumerate(self.order):
@@ -51,16 +50,16 @@ class SvMatrixEulerNode(bpy.types.Node, SverchCustomTreeNode):
         updateNode(self, context)
 
     orders = [
-        ('XYZ', "XYZ",        "", 0),
-        ('XZY', 'XZY',        "", 1),
-        ('YXZ', 'YXZ',        "", 2),
-        ('YZX', 'YZX',        "", 3),
-        ('ZXY', 'ZXY',        "", 4),
-        ('ZYX', 'ZYX',        "", 5),
+        ('XYZ', "XYZ", "", 0),
+        ('XZY', 'XZY', "", 1),
+        ('YXZ', 'YXZ', "", 2),
+        ('YZX', 'YZX', "", 3),
+        ('ZXY', 'ZXY', "", 4),
+        ('ZYX', 'ZYX', "", 5),
     ]
     order = EnumProperty(name="Order", description="Order",
-                          default="XYZ", items=orders,
-                          update=change_prop)
+                         default="XYZ", items=orders,
+                         update=change_prop)
 
     def sv_init(self, context):
         self.inputs.new('StringsSocket', "pos0").prop_name = 'X'

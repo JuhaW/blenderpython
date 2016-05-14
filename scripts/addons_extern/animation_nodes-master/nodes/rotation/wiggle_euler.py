@@ -6,11 +6,12 @@ from ... events import propertyChanged
 from ... base_types.node import AnimationNode
 from ... algorithms.perlin_noise import perlinNoise
 
+
 class EulerWiggleNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_EulerWiggleNode"
     bl_label = "Euler Wiggle"
 
-    nodeSeed = IntProperty(update = propertyChanged)
+    nodeSeed = IntProperty(update=propertyChanged)
 
     def create(self):
         self.inputs.new("an_FloatSocket", "Seed", "seed")
@@ -24,7 +25,7 @@ class EulerWiggleNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_EulerSocket", "Euler", "euler")
 
     def draw(self, layout):
-        layout.prop(self, "nodeSeed", text = "Node Seed")
+        layout.prop(self, "nodeSeed", text="Node Seed")
 
     def execute(self, seed, evolution, speed, amplitude, octaves, persistance):
         euler = Euler()

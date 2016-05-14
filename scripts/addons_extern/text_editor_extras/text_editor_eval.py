@@ -14,15 +14,14 @@ def strict_eval(input_string):
         return answer
     except:
         print('addon not smart enough yet to read minds')
-        
-    return input_string
 
+    return input_string
 
 
 class TextEval(bpy.types.Operator):
     bl_label = ""
     bl_idname = "txt.eval_selected_text"
-    
+
     def execute(self, context):
         bpy.ops.text.copy()
         copied_text = bpy.data.window_managers[0].clipboard
@@ -30,4 +29,3 @@ class TextEval(bpy.types.Operator):
         bpy.data.window_managers[0].clipboard = answer
         bpy.ops.text.paste()
         return {'FINISHED'}
-

@@ -30,10 +30,8 @@ bl_info = {
     "category": "User Display"}
 
 
-
 import bpy
 from bpy import *
-
 
 
 ######  Main Menu  ##############################
@@ -43,32 +41,30 @@ class VIEW3D_WKST_VertexGroupMenu(bpy.types.Menu):
     bl_label = "Vertex Group Menu"
     bl_idname = "wkst_menu.vertex_group"
 
-
     def draw(self, context):
         layout = self.layout
         settings = context.tool_settings
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-
         layout.prop(context.object, "vertex_groups", icon="INFO")
         layout.prop(context.object.vertex_groups, "active_index")
 
-        if context.mode == 'EDIT_MESH':   
+        if context.mode == 'EDIT_MESH':
 
             layout.separator()
-                          
+
             layout.operator("object.vertex_group_select", text="Select Group", icon="RESTRICT_SELECT_OFF")
-            layout.operator("object.vertex_group_deselect", text="Deselect Group", icon="RESTRICT_SELECT_ON")    
-        
-            layout.separator()    
+            layout.operator("object.vertex_group_deselect", text="Deselect Group", icon="RESTRICT_SELECT_ON")
+
+            layout.separator()
 
             layout.operator("object.vertex_group_assign", text="Assign to Group", icon="DISCLOSURE_TRI_RIGHT")
-            layout.operator("object.vertex_group_remove_from", text="Remove from Group", icon="DISCLOSURE_TRI_DOWN") 
-                
-        layout.separator()        
-                   
-        layout.operator("object.vertex_group_add",text="Add Vertex Group", icon='ZOOMIN')
-        layout.operator("object.vertex_group_remove",text="Remove Vertex Group", icon='ZOOMOUT').all=False           
+            layout.operator("object.vertex_group_remove_from", text="Remove from Group", icon="DISCLOSURE_TRI_DOWN")
+
+        layout.separator()
+
+        layout.operator("object.vertex_group_add", text="Add Vertex Group", icon='ZOOMIN')
+        layout.operator("object.vertex_group_remove", text="Remove Vertex Group", icon='ZOOMOUT').all = False
 
         if context.mode == 'EDIT_MESH':
 
@@ -78,44 +74,29 @@ class VIEW3D_WKST_VertexGroupMenu(bpy.types.Menu):
 
         layout.separator()
 
-        layout.menu("MESH_MT_vertex_group_specials", icon='TRIA_RIGHT', text="Vertex Group Specials")	
+        layout.menu("MESH_MT_vertex_group_specials", icon='TRIA_RIGHT', text="Vertex Group Specials")
 
-
-        #layout.separator() 
+        # layout.separator()
 
         #layout.operator("object.vertex_group_move", icon='TRIA_UP', text="Index UP").direction = 'UP'
-        #layout.operator("object.vertex_group_move", icon='TRIA_DOWN', text="Index DOWN").direction = 'DOWN'        
-		
+        #layout.operator("object.vertex_group_move", icon='TRIA_DOWN', text="Index DOWN").direction = 'DOWN'
 
-        
-        	
 
 ######  Registry  #######################################
 
 def register():
 
     bpy.utils.register_class(VIEW3D_WKST_VertexGroupMenu)
-    
-    #bpy.utils.register_module(__name__)       
+
+    # bpy.utils.register_module(__name__)
+
 
 def unregister():
-  
+
     bpy.utils.unregister_class(VIEW3D_WKST_VertexGroupMenu)
-    
-    bpy.utils.unregister_module(__name__)       
+
+    bpy.utils.unregister_module(__name__)
 
 
 if __name__ == "__main__":
-    register() 	
-
-
-
-
-
-
-
-
-
-
-
-
+    register()

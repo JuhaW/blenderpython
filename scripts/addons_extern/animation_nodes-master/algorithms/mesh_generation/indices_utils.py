@@ -4,12 +4,14 @@ def tubeQuadPolygonIndices(xDivisions, yDivisions):
     polygons.extend(gridEndEdgesQuadPolygonIndices(xDivisions, yDivisions))
     return polygons
 
+
 def gridQuadPolygonIndices(xDivisions, yDivisions):
     polygons = []
     for i in range(0, (xDivisions - 1) * yDivisions, yDivisions):
         for j in range(i, i + yDivisions - 1):
             polygons.append((j, j + 1, j + yDivisions + 1, j + yDivisions))
     return polygons
+
 
 def gridQuadEdgeIndices(xDivisions, yDivisions):
     edges = []
@@ -20,6 +22,7 @@ def gridQuadEdgeIndices(xDivisions, yDivisions):
             firstIndex = i + j * yDivisions
             edges.append((firstIndex, firstIndex + 1))
     return edges
+
 
 def gridEndEdgesQuadPolygonIndices(xDivisions, yDivisions):
     polygons = []

@@ -10,7 +10,7 @@ def sv_main(obj_id=0, particle_sys=0):
 
     objects = bpy.data.objects
     if not obj_id < len(objects):
-        return in_sockets, out_sockets       
+        return in_sockets, out_sockets
 
     obj = objects[obj_id]
     if not particle_sys < len(obj.particle_systems):

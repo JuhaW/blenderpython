@@ -25,8 +25,8 @@ bl_info = {
     "location": "View3D > Object/Edit Mode",
     "description": "Information In Drop Down",
     "warning": "",
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"\
-        "/Py/Scripts",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"
+    "/Py/Scripts",
     "tracker_url": "",
     "category": "Addon Factory"}
 
@@ -74,29 +74,32 @@ else:
 
 import bpy
 # Addons Preferences
+
+
 class AddonPreferences(bpy.types.AddonPreferences):
-	bl_idname = __name__
+    bl_idname = __name__
 
-	view_savedata = bpy.props.StringProperty(name="View Saved Data", default="")
-	
-	def draw(self, context):
-		layout = self.layout
-		layout.label(text="Save your Views to addons preferences")
-		layout.label(text="Per Session ues only")
-		layout.label(text="Save User Settings to store permenantly")
-		layout.prop(self, 'view_savedata')
+    view_savedata = bpy.props.StringProperty(name="View Saved Data", default="")
 
-		layout.label(text="----3d View Menu's----")
-		layout.label(text="Adds additional features & concepts")
-		layout.label(text="View Menu: Pies, Switch Local, Save View Prefs, Align Menu")
-		layout.label(text="Select Menu: Additional selection methods: Object mode")
-		layout.label(text="Object Menu:")
-		layout.label(text="Pies, Shortcut Concept, Show Hide & Make Links Menu's")
-		layout.separator
-		layout.label(text="----Mesh Edit Menu's----")
-		layout.label(text="Experimental extra Functions in the edit mesh menu's")
-		layout.label(text="New features have the Plugin icon")
-		layout.label(text="Mesh, Select, Show Hide & more ")
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Save your Views to addons preferences")
+        layout.label(text="Per Session ues only")
+        layout.label(text="Save User Settings to store permenantly")
+        layout.prop(self, 'view_savedata')
+
+        layout.label(text="----3d View Menu's----")
+        layout.label(text="Adds additional features & concepts")
+        layout.label(text="View Menu: Pies, Switch Local, Save View Prefs, Align Menu")
+        layout.label(text="Select Menu: Additional selection methods: Object mode")
+        layout.label(text="Object Menu:")
+        layout.label(text="Pies, Shortcut Concept, Show Hide & Make Links Menu's")
+        layout.separator
+        layout.label(text="----Mesh Edit Menu's----")
+        layout.label(text="Experimental extra Functions in the edit mesh menu's")
+        layout.label(text="New features have the Plugin icon")
+        layout.label(text="Mesh, Select, Show Hide & more ")
+
 
 def register():
     bpy.utils.register_module(__name__)
@@ -130,7 +133,8 @@ def register():
 
     except:
         pass
-		
+
+
 def unregister():
 
     bpy.types.VIEW3D_MT_object.remove(VIEW3D_MT_object.menu)
@@ -162,6 +166,6 @@ def unregister():
     except:
         pass
     bpy.utils.unregister_module(__name__)
-	
+
 if __name__ == "__main__":
     register()

@@ -70,16 +70,16 @@ class VoronoiNode(bpy.types.Node, SverchCustomTreeNode):
         # outputs
         if 'Vertices' in self.outputs and len(self.outputs['Vertices'].links) > 0:
 
-            verts = self.hilbert(0.0, 0.0, Step*1.0, 0.0, 0.0, Step*1.0, Integer)
+            verts = self.hilbert(0.0, 0.0, Step * 1.0, 0.0, 0.0, Step * 1.0, Integer)
 
             self.outputs['Vertices'].VerticesProperty = str([verts])
 
         if 'Edges' in self.outputs and len(self.outputs['Edges'].links) > 0:
 
             listEdg = []
-            r = len(verts)-1
+            r = len(verts) - 1
             for i in range(r):
-                listEdg.append((i, i+1))
+                listEdg.append((i, i + 1))
 
             edg = list(listEdg)
             self.outputs['Edges'].StringsProperty = str([edg])
@@ -98,16 +98,16 @@ class VoronoiNode(bpy.types.Node, SverchCustomTreeNode):
 
         for y in range(imgy):
             for x in range(imgx):
-                dmin = math.hypot(imgx-1, imgy-1)
+                dmin = math.hypot(imgx - 1, imgy - 1)
                 j = -1
                 for i in range(num_cells):
-                    d = math.hypot(nx[i]-x, ny[i]-y)
+                    d = math.hypot(nx[i] - x, ny[i] - y)
                     if d < dmin:
                         dmin = d
                         j = i
                 #putpixel((x, y), (nr[j], ng[j], nb[j]))
         #image.save("VoronoiDiagram.png", "PNG")
-            #image.show()
+            # image.show()
 
     def fullList(self, l, count):
         d = count - len(l)

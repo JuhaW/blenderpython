@@ -148,8 +148,8 @@ class ImageComponentsOps(bpy.types.Operator):
                 x, y = idx_to_co(idx, w)
                 add_pixeldata()
         else:
-            xlookup = [ix for ix in range(w) if ix % (n.skip+1) == 0]
-            ylookup = [iy for iy in range(h) if iy % (n.skip+1) == 0]
+            xlookup = [ix for ix in range(w) if ix % (n.skip + 1) == 0]
+            ylookup = [iy for iy in range(h) if iy % (n.skip + 1) == 0]
 
             for idx in range(num_pixels):
                 x, y = idx_to_co(idx, w)
@@ -299,10 +299,9 @@ class SvImageComponentsNode(bpy.types.Node, SverchCustomTreeNode):
             text='img from disk',
             icon="FILE_IMAGE").origin = origin
 
-
     def process(self):
         outputs = self.outputs
-        
+
         if not self.loaded:
             return
         if not (outputs['xya'].is_linked and outputs['rgb'].is_linked):
@@ -321,7 +320,7 @@ class SvImageComponentsNode(bpy.types.Node, SverchCustomTreeNode):
         m2 = self.z_spread
 
         if outputs[xya].is_linked:
-            tmul = lambda v: (v[0]*m1, v[1]*m1, v[2])
+            tmul = lambda v: (v[0] * m1, v[1] * m1, v[2])
             data = [tmul(v) for v in dict_data[xya]]
             outputs[xya].sv_set([data])
 
@@ -329,7 +328,7 @@ class SvImageComponentsNode(bpy.types.Node, SverchCustomTreeNode):
             if -0.001 <= m2 <= 0.001:
                 data = dict_data[rgb]
             else:
-                tmul = lambda v: (v[0]*m2, v[1]*m2, v[2]*m2)
+                tmul = lambda v: (v[0] * m2, v[1] * m2, v[2] * m2)
                 data = [tmul(v) for v in dict_data[rgb]]
 
             outputs[rgb].sv_set([data])
@@ -349,8 +348,8 @@ class SvImageComponentsNode(bpy.types.Node, SverchCustomTreeNode):
 
             w, h = dict_data['dimensions']
             if not self.skip == 0:
-                w = ceil(w/(self.skip+1))
-                h = ceil(h/(self.skip+1))
+                w = ceil(w / (self.skip + 1))
+                h = ceil(h / (self.skip + 1))
 
             dict_data[polygons] = generate_polygons(w, h)
 

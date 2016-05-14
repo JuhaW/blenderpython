@@ -17,6 +17,7 @@ categoryItems = [
     ("BOUNCE", "Bounce", "", "IPO_BOUNCE", 9),
     ("ELASTIC", "Elastic", "", "IPO_ELASTIC", 10)]
 
+
 class InterpolationSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_InterpolationSocket"
     bl_label = "Interpolation Socket"
@@ -26,20 +27,21 @@ class InterpolationSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     comparable = True
     storable = True
 
-    category = EnumProperty(name = "Interpolation Category", default = "LINEAR",
-                            items = categoryItems, update = propertyChanged)
+    category = EnumProperty(name="Interpolation Category", default="LINEAR",
+                            items=categoryItems, update=propertyChanged)
 
-    easeIn = BoolProperty(name = "Ease In", default = False, update = propertyChanged)
-    easeOut = BoolProperty(name = "Ease Out", default = True, update = propertyChanged)
+    easeIn = BoolProperty(name="Ease In", default=False, update=propertyChanged)
+    easeOut = BoolProperty(name="Ease Out", default=True, update=propertyChanged)
 
     def drawProperty(self, layout, text):
-        col = layout.column(align = True)
-        if text != "": col.label(text)
-        row = col.row(align = True)
-        row.prop(self, "category", text = "")
+        col = layout.column(align=True)
+        if text != "":
+            col.label(text)
+        row = col.row(align=True)
+        row.prop(self, "category", text="")
         if self.category != "LINEAR":
-            row.prop(self, "easeIn", text = "", icon = "IPO_EASE_IN")
-            row.prop(self, "easeOut", text = "", icon = "IPO_EASE_OUT")
+            row.prop(self, "easeIn", text="", icon="IPO_EASE_IN")
+            row.prop(self, "easeOut", text="", icon="IPO_EASE_OUT")
 
     def getValue(self):
         return getInterpolationPreset(self.category, self.easeIn, self.easeOut)

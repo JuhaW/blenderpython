@@ -20,7 +20,7 @@ import bpy
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import SvSetSocketAnyType, SvGetSocketAnyType, \
-                                    levelsOflist, updateNode
+    levelsOflist, updateNode
 from bpy.props import IntProperty
 
 
@@ -57,16 +57,16 @@ class ListSumNodeMK2(bpy.types.Node, SverchCustomTreeNode):
 
     def summ(self, data, level, lol):
         out = []
-        if level == 0  and lol > 0:
+        if level == 0 and lol > 0:
             for obj in data:
                 print(obj)
-                out.append(self.summ(obj,level,lol-1))
+                out.append(self.summ(obj, level, lol - 1))
             return sum(out)
         elif level == 0 and lol == 0:
             return sum(data)
         elif level > 0 and lol > 0:
             for obj in data:
-                out.append(self.summ(obj,level-1,lol-1))
+                out.append(self.summ(obj, level - 1, lol - 1))
         else:
             return data
         return out

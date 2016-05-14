@@ -61,7 +61,7 @@ else:
 
 
 import bpy
-from bpy.types import  AddonPreferences
+from bpy.types import AddonPreferences
 from bpy.props import StringProperty, BoolProperty, IntProperty
 from bpy.utils import register_class, unregister_class
 
@@ -71,31 +71,31 @@ class SpeakerToolsAddonPreferences(AddonPreferences):
     bl_idname = "sound_drivers"
 
     temp_folder = StringProperty(
-            name="Example File Path",
-            subtype='DIR_PATH',
-            )
+        name="Example File Path",
+        subtype='DIR_PATH',
+    )
 
     midi_support = BoolProperty(
-            name = "Midi Support",
-            description = "Enable Midi Support",
-            default = False,
-            )
+        name="Midi Support",
+        description="Enable Midi Support",
+        default=False,
+    )
     smf_dir = StringProperty(
-            name="smf (midi) python path",
-            description="folder where smf is installed",
-            subtype='DIR_PATH',
-            )
+        name="smf (midi) python path",
+        description="folder where smf is installed",
+        subtype='DIR_PATH',
+    )
     audio_dir = StringProperty(
-            name="Audio Files Folder",
-            description="folder where audio files are",
-            subtype='DIR_PATH',
-            )
+        name="Audio Files Folder",
+        description="folder where audio files are",
+        subtype='DIR_PATH',
+    )
     driver_manager_update_speed = IntProperty(
-                                  name="Driver Manager Update Speed",
-                                  min=1,
-                                  max=100,
-                                  description="Update timer, lower value = faster updates, higher value slow self update use refresh",
-                                  default=10)
+        name="Driver Manager Update Speed",
+        min=1,
+        max=100,
+        description="Update timer, lower value = faster updates, higher value slow self update use refresh",
+        default=10)
 
     def draw(self, context):
         def icon(test):
@@ -123,7 +123,7 @@ class SpeakerToolsAddonPreferences(AddonPreferences):
                                                               dns))
         row = layout.row()
         row.label("GetLocals in Driver Namespace", icon=icon("GetLocals" in
-                                                              dns))
+                                                             dns))
         test = "DriverManager" in dns
         row = layout.row()
         row.label("DriverManager Started", icon=icon(test))
@@ -140,7 +140,7 @@ class SpeakerToolsAddonPreferences(AddonPreferences):
             row.prop(self, "smf_dir")
             row = layout.row()
             op = row.operator("wm.url_open", icon='INFO', text="GitHub PySMF Project (Cython)")
-            op.url="https://github.com/dsacre/pysmf"
+            op.url = "https://github.com/dsacre/pysmf"
             row = layout.row()
             if "smf" in locals():
                 row.label("SMF IMPORTED OK...", icon='FILE_TICK')
@@ -152,7 +152,7 @@ class SpeakerToolsAddonPreferences(AddonPreferences):
                     import smf
                     row.label("SMF IMPORTED OK", icon='FILE_TICK')
                 except:
-                    row.label("SMF FAILED", icon ='ERROR')
+                    row.label("SMF FAILED", icon='ERROR')
 
         # end midi support
         row = layout.row()

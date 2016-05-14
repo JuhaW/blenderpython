@@ -17,19 +17,17 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 import bpy
 from bpy import*
 
 
-
-#######  Multi Select  #######-------------------------------------------------------                                  
+# Multi Select  #######-------------------------------------------------------
 
 class VIEW3D_MT_edit_multi(bpy.types.Menu):
     """Multi Selection"""
     bl_label = "Multi Selection"
     bl_label = "wkst.multi_selection"
-    
+
     def draw(self, context):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
@@ -45,7 +43,7 @@ class VIEW3D_MT_edit_multi(bpy.types.Menu):
         prop = layout.operator("wm.context_set_value", text="Face Select", icon='FACESEL')
         prop.value = "(False, False, True)"
         prop.data_path = "tool_settings.mesh_select_mode"
-        
+
         layout.separator()
 
         prop = layout.operator("wm.context_set_value", text="Vertex & Edge Select", icon='EDITMODE_HLT')
@@ -66,9 +64,7 @@ class VIEW3D_MT_edit_multi(bpy.types.Menu):
         prop.data_path = "tool_settings.mesh_select_mode"
 
 
-
-
-#######  Cycle through Selected  #######------------------------------------------------------- 
+# Cycle through Selected  #######-------------------------------------------------------
 
 ###Mr. Stan_Pancake
 class ThroughSelected(bpy.types.Operator):
@@ -83,61 +79,61 @@ class ThroughSelected(bpy.types.Operator):
     def execute(self, context):
         selection = bpy.context.selected_objects
 
-
         if not bpy.context.active_object.select:
             if len(selection):
                 bpy.context.scene.objects.active = selection[0]
         else:
             for i, o in enumerate(selection):
                 if o == bpy.context.active_object:
-                    bpy.context.scene.objects.active = selection[(i+1) % len(selection)]
+                    bpy.context.scene.objects.active = selection[(i + 1) % len(selection)]
                     break
-        
+
         return {'FINISHED'}
-    
 
 
-
-
-import bpy,re, math
+import bpy
+import re
+import math
 from mathutils import Vector
 from math import pi
 
 # ------------------------------------------------------------------------
 #    freeze selection button
-# ------------------------------------------------------------------------   
+# ------------------------------------------------------------------------
 
 
-def get_AllObjectsInSelection():   
+def get_AllObjectsInSelection():
     return bpy.context.selected_objects
+
 
 def get_hideSelectObjects(object_list):
     for i in object_list:
         i.hide_select = True
     bpy.ops.object.select_all(action='DESELECT')
-    return True 
+    return True
+
 
 class FreezeObjectsButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.freeze_selected_objects"
     bl_label = "Freeze Selection"
     bl_description = "Disables the viewport selection of current objects."
-   
+
     def execute(self, context):
         selection = get_AllObjectsInSelection()
         n = len(selection)
         if n > 0:
             get_hideSelectObjects(selection)
-            self.report({'INFO'}, "%d Object%s frozen." % (n, "s"[n==1:]))
+            self.report({'INFO'}, "%d Object%s frozen." % (n, "s"[n == 1:]))
         else:
             self.report({'INFO'}, 'Nothing selected.')
-        return{'FINISHED'} 
+        return{'FINISHED'}
 
 
 # ------------------------------------------------------------------------
 #    unfreeze all button
-# ------------------------------------------------------------------------ 
+# ------------------------------------------------------------------------
 
-def get_AllObjectsInScene():   
+def get_AllObjectsInScene():
     return bpy.data.objects
 
 
@@ -151,16 +147,16 @@ def get_dehideSelectObjects(object_list):
 
 
 def get_highlightObjects(selection_list):
-    
-   for i in selection_list:
-        bpy.data.objects[i.name].select = True 
-        
+
+    for i in selection_list:
+        bpy.data.objects[i.name].select = True
+
 
 class UnfreezeButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.defreeze_all_objects"
     bl_label = "Unfreeze All"
     bl_description = "Enables viewport selection of all objects in scene."
-   
+
     def execute(self, context):
         bpy.ops.object.select_all(action='DESELECT')
         selection = get_AllObjectsInScene()
@@ -169,25 +165,24 @@ class UnfreezeButton(bpy.types.Operator):
         if n > 0:
             freezed_array = get_dehideSelectObjects(selection)
             get_highlightObjects(freezed_array)
-            self.report({'INFO'}, "%d Object%s released." % (n, "s"[n==1:]))
+            self.report({'INFO'}, "%d Object%s released." % (n, "s"[n == 1:]))
         else:
             self.report({'INFO'}, 'Nothing selected.')
-        
-        return{'FINISHED'} 
+
+        return{'FINISHED'}
 
 ############------------############
 ############  REGISTER  ############
 
+
 def register():
-    #bpy.utils.register_class()
+    # bpy.utils.register_class()
     bpy.utils.register_module(__name__)
- 
+
+
 def unregister():
-    #bpy.utils.unregister_class()
+    # bpy.utils.unregister_class()
     bpy.utils.unregister_module(__name__)
- 
+
 if __name__ == "__main__":
     register()
-
-
-

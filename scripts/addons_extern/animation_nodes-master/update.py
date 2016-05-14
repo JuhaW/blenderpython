@@ -7,6 +7,7 @@ from . execution.units import createExecutionUnits
 from . node_link_conversion import correctForbiddenNodeLinks
 from . utils.nodes import iterAnimationNodes, getAnimationNodeTrees
 
+
 @measureTime
 def updateEverything():
     '''
@@ -33,11 +34,13 @@ def enableUseFakeUser():
     for tree in getAnimationNodeTrees():
         tree.use_fake_user = True
 
+
 def callNodeEditFunctions():
     tree_info.updateIfNecessary()
     for node in iterAnimationNodes():
         node.edit()
         tree_info.updateIfNecessary()
+
 
 def checkNetworks():
     invalidNetworkExists = False
@@ -53,10 +56,12 @@ def checkNetworks():
     if invalidNetworkExists:
         problems.InvalidNetworksExist().report()
 
+
 def markInvalidNodes(network, nodes):
     isInvalid = network.type == "Invalid"
     for node in nodes:
         node.inInvalidNetwork = isInvalid
+
 
 def checkNodeOptions(network, nodes):
     for node in nodes:
@@ -67,19 +72,22 @@ def checkNodeOptions(network, nodes):
         if "No Auto Execution" in node.options:
             problems.NodeShouldNotBeUsedInAutoExecution(node.identifier).report()
 
+
 def checkIdentifiers():
     identifierAmount = tree_info.getIdentifierAmount()
     nodeAmount = len(list(iterAnimationNodes()))
     if nodeAmount > identifierAmount:
         problems.IdentifierExistsTwice().report()
 
+
 def checkIfNodeTreeIsLinked():
-    for tree in getAnimationNodeTrees(skipLinkedTrees = False):
+    for tree in getAnimationNodeTrees(skipLinkedTrees=False):
         if tree.library is not None:
             problems.LinkedAnimationNodeTreeExists().report()
             break
 
+
 def checkUndefinedNodes():
     undefinedNodes = tree_info.getUndefinedNodes()
     if len(undefinedNodes) > 0:
-        problems.UndefinedNodeExists(undefinedNodes).report()        
+        problems.UndefinedNodeExists(undefinedNodes).report()

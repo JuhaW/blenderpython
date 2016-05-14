@@ -38,10 +38,10 @@ class VectorNormalNode(bpy.types.Node, SverchCustomTreeNode):
         if 'Centers' in self.outputs and self.outputs['Centers'].links or self.outputs['Normals'].links:
             if 'Polygons' in self.inputs and 'Vertices' in self.inputs and self.inputs['Polygons'].links and self.inputs['Vertices'].links:
 
-                #if type(self.inputs['Poligons'].links[0].from_socket) == StringsSocket:
+                # if type(self.inputs['Poligons'].links[0].from_socket) == StringsSocket:
                 pols = SvGetSocketAnyType(self, self.inputs['Polygons'])
 
-                #if type(self.inputs['Vertices'].links[0].from_socket) == VerticesSocket:
+                # if type(self.inputs['Vertices'].links[0].from_socket) == VerticesSocket:
                 vers = SvGetSocketAnyType(self, self.inputs['Vertices'])
                 normalsFORout = []
                 for i, obj in enumerate(vers):

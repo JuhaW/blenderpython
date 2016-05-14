@@ -16,8 +16,8 @@ def get_coconuts_mesh(context, prefs):
 
     trunk_length = prefs.palm_stage_length * prefs.palm_stages
 
-    coconutX = (0.29, -0.29, 0,     0)
-    coconutY = (0,     0,    0.29, -0.29)
+    coconutX = (0.29, -0.29, 0, 0)
+    coconutY = (0, 0, 0.29, -0.29)
     coconutZ = trunk_length - 0.2
 
     coconuts = get_random(prefs.lp_Tree_Palm_Top_Coconuts_Min,

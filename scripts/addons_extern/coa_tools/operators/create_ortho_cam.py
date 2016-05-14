@@ -17,7 +17,7 @@ Created by Andreas Esau
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-    
+
 import bpy
 import bpy_extras
 import bpy_extras.view3d_utils
@@ -33,29 +33,31 @@ import json
 from bpy.app.handlers import persistent
 from .. functions import *
 
-######################################################################################################################################### Create Sprite Object
+# Create Sprite Object
+
+
 class CreateOrtpographicCamera(bpy.types.Operator):
     bl_idname = "wm.coa_create_ortho_cam"
     bl_label = "Camera Settings"
-    bl_options = {"REGISTER","UNDO"}
-    
-    set_resolution = BoolProperty(name="Set Resolution", default = True)
-    resolution = IntVectorProperty(name="Resolution", default=(960,600), size=2)
-    create = BoolProperty(name="Create Camera",default=True)
-    
+    bl_options = {"REGISTER", "UNDO"}
+
+    set_resolution = BoolProperty(name="Set Resolution", default=True)
+    resolution = IntVectorProperty(name="Resolution", default=(960, 600), size=2)
+    create = BoolProperty(name="Create Camera", default=True)
+
     def draw(self, context):
         layout = self.layout
         if self.create:
             row = layout.row()
-            row.prop(self,"set_resolution")
-        
+            row.prop(self, "set_resolution")
+
         row = layout.row()
-        row.prop(self,"resolution")
-    
+        row.prop(self, "resolution")
+
     def invoke(self, context, event):
-        wm = context.window_manager 
+        wm = context.window_manager
         return wm.invoke_props_dialog(self)
-        
+
     def execute(self, context):
         scene = context.scene
         if self.create:
@@ -66,11 +68,11 @@ class CreateOrtpographicCamera(bpy.types.Operator):
         cam.data.type = "ORTHO"
         scene.render.pixel_filter_type = "BOX"
         scene.render.alpha_mode = "TRANSPARENT"
-        
+
         if self.set_resolution:
-            ortho_scale = max(self.resolution[0],self.resolution[1])
-            cam.data.ortho_scale = ortho_scale/100
-            
+            ortho_scale = max(self.resolution[0], self.resolution[1])
+            cam.data.ortho_scale = ortho_scale / 100
+
             scene.render.resolution_x = self.resolution[0]
             scene.render.resolution_y = self.resolution[1]
             scene.render.resolution_percentage = 100

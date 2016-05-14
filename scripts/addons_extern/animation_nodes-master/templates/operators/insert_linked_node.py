@@ -2,17 +2,19 @@ import bpy
 from bpy.props import *
 from ... base_types.template import Template
 
+
 class NodeSetting(bpy.types.PropertyGroup):
     value = StringProperty()
+
 
 class InsertLinkedNodeOperatorTemplate(bpy.types.Operator, Template):
     bl_idname = "an.insert_linked_node_operator_template"
     bl_label = "Insert Linked Node"
 
     nodeIdName = StringProperty()
-    settings = CollectionProperty(name = "Settings", type = NodeSetting, options = {"SKIP_SAVE"})
-    fromIndex = IntProperty(default = 0)
-    toIndex = IntProperty(default = 0)
+    settings = CollectionProperty(name="Settings", type=NodeSetting, options={"SKIP_SAVE"})
+    fromIndex = IntProperty(default=0)
+    toIndex = IntProperty(default=0)
 
     def insert(self):
         activeNode = self.activeNode
@@ -25,8 +27,9 @@ class InsertLinkedNodeOperatorTemplate(bpy.types.Operator, Template):
         activeNode.outputs[self.fromIndex].linkWith(node.inputs[self.toIndex])
         self.setActiveNode(node)
 
-def invokeLinkedNodeInsertion(layout, idName, fromIndex, toIndex, text, settings = {}):
-    props = layout.operator("an.insert_linked_node_operator_template", text = text)
+
+def invokeLinkedNodeInsertion(layout, idName, fromIndex, toIndex, text, settings={}):
+    props = layout.operator("an.insert_linked_node_operator_template", text=text)
     props.nodeIdName = idName
     props.fromIndex = fromIndex
     props.toIndex = toIndex

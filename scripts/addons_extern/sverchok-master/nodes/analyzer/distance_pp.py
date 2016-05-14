@@ -22,8 +22,8 @@ from mathutils import Vector
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (Matrix_generate, Matrix_location,
-                            SvGetSocketAnyType, SvSetSocketAnyType,
-                            Vector_generate)
+                                     SvGetSocketAnyType, SvSetSocketAnyType,
+                                     Vector_generate)
 
 
 class DistancePPNode(bpy.types.Node, SverchCustomTreeNode):
@@ -86,7 +86,7 @@ class DistancePPNode(bpy.types.Node, SverchCustomTreeNode):
                     continue
                 values.append(self.distance(vert1, list2[i][k]))
             dists.append(values)
-        #print(dists)
+        # print(dists)
         return dists
 
     def calcM(self, list1, list2):
@@ -107,13 +107,12 @@ class DistancePPNode(bpy.types.Node, SverchCustomTreeNode):
                         oblndis.append(self.distance(vers, verl))
                     obshdis.append(oblndis)
             dists.append(obshdis)
-        #print(dists)
+        # print(dists)
         return dists[0]
 
     def distance(self, x, y):
-        vec = Vector((x[0]-y[0], x[1]-y[1], x[2]-y[2]))
+        vec = Vector((x[0] - y[0], x[1] - y[1], x[2] - y[2]))
         return vec.length
-
 
 
 def register():

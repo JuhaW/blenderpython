@@ -2,6 +2,7 @@ import bpy
 from mathutils import Vector
 from ... base_types.node import AnimationNode
 
+
 class FindNearestPointInKDTreeNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_FindNearestPointInKDTreeNode"
     bl_label = "Find Nearest Point"

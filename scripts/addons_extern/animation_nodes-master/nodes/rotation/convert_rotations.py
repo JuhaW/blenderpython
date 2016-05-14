@@ -12,7 +12,8 @@ conversionTypeItems = [
     ("EULER_TO_MATRIX", "Euler to Matrix", "", "NONE", 4),
     ("MATRIX_TO_EULER", "Matrix to Euler", "", "NONE", 5),
     ("QUATERNION_TO_AXIS_ANGLE", "Quaternion to Axis Angle", "", "NONE", 6),
-    ("AXIS_ANGLE_TO_QUATERNION", "Axis Angle to Quaternion", "", "NONE", 7) ]
+    ("AXIS_ANGLE_TO_QUATERNION", "Axis Angle to Quaternion", "", "NONE", 7)]
+
 
 class ConvertRotationsNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ConvertRotationsNode"
@@ -21,26 +22,28 @@ class ConvertRotationsNode(bpy.types.Node, AnimationNode):
     dynamicLabelType = "ALWAYS"
 
     onlySearchTags = True
-    searchTags = [(name, {"conversionType" : repr(type)}) for type, name, _,_,_ in conversionTypeItems]
+    searchTags = [(name, {"conversionType": repr(type)}) for type, name, _, _, _ in conversionTypeItems]
 
     def conversionTypeChanged(self, context):
         self.createSockets()
         executionCodeChanged()
 
-    conversionType = EnumProperty(name = "Conversion Type", default = "QUATERNION_TO_EULER",
-        items = conversionTypeItems, update = conversionTypeChanged)
-    useDegree = BoolProperty(name = "Use Degree", default = False, update = executionCodeChanged)
+    conversionType = EnumProperty(name="Conversion Type", default="QUATERNION_TO_EULER",
+                                  items=conversionTypeItems, update=conversionTypeChanged)
+    useDegree = BoolProperty(name="Use Degree", default=False, update=executionCodeChanged)
 
     def create(self):
         self.conversionType = "QUATERNION_TO_EULER"
 
     def draw(self, layout):
-        layout.prop(self, "conversionType", text = "")
-        if "ANGLE" in self.conversionType: layout.prop(self, "useDegree")
+        layout.prop(self, "conversionType", text="")
+        if "ANGLE" in self.conversionType:
+            layout.prop(self, "useDegree")
 
     def drawLabel(self):
         for item in conversionTypeItems:
-            if self.conversionType == item[0]: return item[1]
+            if self.conversionType == item[0]:
+                return item[1]
 
     def getExecutionCode(self):
         if self.conversionType == "QUATERNION_TO_EULER":
@@ -59,11 +62,15 @@ class ConvertRotationsNode(bpy.types.Node, AnimationNode):
             return "euler = matrix.to_euler('XYZ')"
 
         if self.conversionType == "QUATERNION_TO_AXIS_ANGLE":
-            if self.useDegree: return "axis, angle = quaternion.axis, math.degrees(quaternion.angle)"
-            else: return "axis, angle = quaternion.to_axis_angle()"
+            if self.useDegree:
+                return "axis, angle = quaternion.axis, math.degrees(quaternion.angle)"
+            else:
+                return "axis, angle = quaternion.to_axis_angle()"
         if self.conversionType == "AXIS_ANGLE_TO_QUATERNION":
-            if self.useDegree: return "quaternion = mathutils.Quaternion(axis, math.radians(angle))"
-            else: return "quaternion = mathutils.Quaternion(axis, angle)"
+            if self.useDegree:
+                return "quaternion = mathutils.Quaternion(axis, math.radians(angle))"
+            else:
+                return "quaternion = mathutils.Quaternion(axis, angle)"
 
     def getUsedModules(self):
         return ["mathutils", "math"]

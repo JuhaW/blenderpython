@@ -2,11 +2,12 @@ import bpy
 from bpy.props import *
 from .. tree_info import getNodeByIdentifier
 
+
 class ChoosePath(bpy.types.Operator):
     bl_idname = "an.choose_path"
     bl_label = "Choose Path"
 
-    filepath = StringProperty(subtype = "FILE_PATH")
+    filepath = StringProperty(subtype="FILE_PATH")
     nodeIdentifier = StringProperty()
     callback = StringProperty()
 

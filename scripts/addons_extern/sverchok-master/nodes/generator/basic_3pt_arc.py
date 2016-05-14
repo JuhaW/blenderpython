@@ -82,7 +82,7 @@ def make_all_arcs(v, nv, make_edges):
     verts_out = []
     edges_out = []
 
-    collected = [v[i:i+3] for i in range(0, (len(v)-2), 3)]
+    collected = [v[i:i + 3] for i in range(0, (len(v) - 2), 3)]
     for idx, pts in enumerate(collected):
 
         # to force a minimum of verts per arc.

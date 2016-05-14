@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class JoinStringsNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_JoinStringsNode"
     bl_label = "Join Texts"

@@ -132,7 +132,6 @@ def init_props(scene):
         max=1.0)
 
 
-
 def clear_props(scene):
     del scene.muv_props
     del scene.muv_uvbb_cp_size
@@ -140,4 +139,3 @@ def clear_props(scene):
     del scene.muv_texproj_tex_magnitude
     del scene.muv_texproj_tex_image
     del scene.muv_texproj_tex_transparency
-

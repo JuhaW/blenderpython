@@ -36,36 +36,36 @@ class SvBevelNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     offset_ = FloatProperty(name='Amount',
-        description='Amount to offset beveled edge',
-        default=0.0, min=0.0,
-        update=updateNode)
+                            description='Amount to offset beveled edge',
+                            default=0.0, min=0.0,
+                            update=updateNode)
 
     offset_modes = [
-            ("0", "Offset", "Amount is offset of new edges from original", 1),
-            ("1", "Width",  "Amount is width of new face", 2),
-            ("2", "Depth",  "Amount is perpendicular distance from original edge to bevel face", 3),
-            ("3", "Percent", "Amount is percent of adjacent edge length", 4)
-        ]
+        ("0", "Offset", "Amount is offset of new edges from original", 1),
+        ("1", "Width", "Amount is width of new face", 2),
+        ("2", "Depth", "Amount is perpendicular distance from original edge to bevel face", 3),
+        ("3", "Percent", "Amount is percent of adjacent edge length", 4)
+    ]
 
     offsetType = EnumProperty(name='Amount Type',
-        description="What distance Amount measures",
-        items = offset_modes,
-        update=updateNode)
+                              description="What distance Amount measures",
+                              items=offset_modes,
+                              update=updateNode)
 
     segments_ = IntProperty(name="Segments",
-        description="Number of segments in bevel",
-        default=1, min=1,
-        update=updateNode)
+                            description="Number of segments in bevel",
+                            default=1, min=1,
+                            update=updateNode)
 
     profile_ = FloatProperty(name="Profile",
-        description="Profile shape; 0.5 - round",
-        default=0.5, min=0.0, max=1.0,
-        update=updateNode)
+                             description="Profile shape; 0.5 - round",
+                             default=0.5, min=0.0, max=1.0,
+                             update=updateNode)
 
     vertexOnly = BoolProperty(name="Vertex only",
-        description="Only bevel edges, not edges",
-        default=False,
-        update=updateNode)
+                              description="Only bevel edges, not edges",
+                              default=False,
+                              update=updateNode)
 
 #     clampOverlap = BoolProperty(name="Clamp overlap",
 #         description="Do not allow beveled edges/vertices to overlap each other",
@@ -73,7 +73,7 @@ class SvBevelNode(bpy.types.Node, SverchCustomTreeNode):
 #         update=updateNode)
 
     def sv_init(self, context):
-        si,so = self.inputs.new,self.outputs.new
+        si, so = self.inputs.new, self.outputs.new
         si('VerticesSocket', "Vertices")
         si('StringsSocket', 'Edges')
         si('StringsSocket', 'Polygons')
@@ -92,8 +92,8 @@ class SvBevelNode(bpy.types.Node, SverchCustomTreeNode):
         #layout.prop(self, "clampOverlap")
 
     def process(self):
-        InV,InE,InP,BE,O,S,Pr = self.inputs
-        oV,oE,oP,NP = self.outputs
+        InV, InE, InP, BE, O, S, Pr = self.inputs
+        oV, oE, oP, NP = self.outputs
         if not (InV.is_linked and InP.is_linked):
             return
         if not (any(self.outputs[name].is_linked for name in ['Vertices', 'Edges', 'Polygons', 'NewPolys'])):
@@ -105,7 +105,7 @@ class SvBevelNode(bpy.types.Node, SverchCustomTreeNode):
         segments_s = S.sv_get()[0]
         profiles_s = Pr.sv_get()[0]
         bevel_edges_s = BE.sv_get(default=[[]])
-        out,result_bevel_faces = [],[]
+        out, result_bevel_faces = [], []
         meshes = match_long_repeat([vertices_s, edges_s, faces_s, bevel_edges_s, offsets_s, segments_s, profiles_s])
         for vertices, edges, faces, bevel_edges, offset, segments, profile in zip(*meshes):
             bm = bmesh_from_pydata(vertices, edges, faces)
@@ -118,10 +118,10 @@ class SvBevelNode(bpy.types.Node, SverchCustomTreeNode):
                 b_edges = bm.edges
             geom = list(bm.verts) + list(b_edges) + list(bm.faces)
             bevel_faces = bmesh.ops.bevel(bm, geom=geom, offset=offset,
-                            offset_type=int(self.offsetType), segments=segments,
-                            profile=profile, vertex_only=self.vertexOnly,
-                            #clamp_overlap=self.clampOverlap,
-                            material=-1)['faces']
+                                          offset_type=int(self.offsetType), segments=segments,
+                                          profile=profile, vertex_only=self.vertexOnly,
+                                          # clamp_overlap=self.clampOverlap,
+                                          material=-1)['faces']
             new_bevel_faces = [[v.index for v in face.verts] for face in bevel_faces]
             out.append(pydata_from_bmesh(bm))
             bm.free()

@@ -24,6 +24,7 @@ from bpy import*
 
 ### switch of spline type ###
 
+
 class toPoly(bpy.types.Operator):
     """Curve to Poly Spline"""
     bl_idname = "curve.to_poly"
@@ -47,6 +48,7 @@ class toBezier(bpy.types.Operator):
         bpy.ops.object.editmode_toggle()
         return {'FINISHED'}
 
+
 class toNurbs(bpy.types.Operator):
     """Curve to Nurbs Spline"""
     bl_idname = "curve.to_nurbs"
@@ -59,6 +61,7 @@ class toNurbs(bpy.types.Operator):
         return {'FINISHED'}
 
 ### switch of handle type ###
+
 
 class toAutomatic(bpy.types.Operator):
     """Handle to Automatic Rounded Type"""
@@ -95,6 +98,7 @@ class toAligned(bpy.types.Operator):
         bpy.ops.object.editmode_toggle()
         return {'FINISHED'}
 
+
 class toFree(bpy.types.Operator):
     """Handle to Free Type"""
     bl_idname = "curve.handle_to_free"
@@ -108,6 +112,7 @@ class toFree(bpy.types.Operator):
 
 ### further operator ###
 
+
 class SmoothCurve(bpy.types.Operator):
     """Smooth Curve Spline"""
     bl_idname = "curve.smoothspline"
@@ -119,17 +124,18 @@ class SmoothCurve(bpy.types.Operator):
         bpy.ops.object.editmode_toggle()
         return {'FINISHED'}
 
+
 class CurveDirection(bpy.types.Operator):
-    """switch curve direction > only BEZIER"""                 
-    bl_idname = "curve.switch_direction_obm"        
-    bl_label = "Curve Direction"                  
-    #bl_options = {'REGISTER', 'UNDO'}  
-        
+    """switch curve direction > only BEZIER"""
+    bl_idname = "curve.switch_direction_obm"
+    bl_label = "Curve Direction"
+    #bl_options = {'REGISTER', 'UNDO'}
+
     def execute(self, context):
         bpy.ops.object.editmode_toggle()
         bpy.ops.curve.switch_direction()
-        bpy.ops.object.editmode_toggle()        
-        bpy.ops.curvetools2.operatororigintospline0start()        
+        bpy.ops.object.editmode_toggle()
+        bpy.ops.curvetools2.operatororigintospline0start()
         return {'FINISHED'}
 
 
@@ -156,13 +162,13 @@ def register():
     bpy.utils.register_class(toFree)
     bpy.utils.register_class(SmoothCurve)
     bpy.utils.register_class(CurveDirection)
-    bpy.utils.register_class(ConvertBezier)    
-    
-    #bpy.utils.register_module(__name__) 
+    bpy.utils.register_class(ConvertBezier)
+
+    # bpy.utils.register_module(__name__)
 
 
 def unregister():
-    
+
     bpy.utils.unregister_class(toPoly)
     bpy.utils.unregister_class(toBezier)
     bpy.utils.unregister_class(toNurbs)
@@ -172,6 +178,6 @@ def unregister():
     bpy.utils.unregister_class(toFree)
     bpy.utils.unregister_class(SmoothCurve)
     bpy.utils.unregister_class(CurveDirection)
-    bpy.utils.unregister_class(ConvertBezier)    
-    
-    #bpy.utils.unregister_module(__name__) 
+    bpy.utils.unregister_class(ConvertBezier)
+
+    # bpy.utils.unregister_module(__name__)

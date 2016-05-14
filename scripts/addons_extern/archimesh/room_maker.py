@@ -67,7 +67,7 @@ class ExportRoom(bpy.types.Operator, ExportHelper):
             mydata = myobj.RoomGenerator[0]
 
             # -------------------------------
-            # extract path and filename 
+            # extract path and filename
             # -------------------------------
             (filepath, filename) = os.path.split(self.properties.filepath)
             print('Exporting %s' % filename)
@@ -177,7 +177,7 @@ class ImportRoom(bpy.types.Operator, ImportHelper):
 
             myobj = bpy.context.active_object
             mydata = myobj.RoomGenerator[0]
-            # ----------------------------------         
+            # ----------------------------------
             # Loop all records from file
             # ----------------------------------
             idx = 0  # index of each wall
@@ -472,7 +472,7 @@ def shape_walls_and_create_children(myroom, update=False):
             for mod in myroom.modifiers:
                 if mod.type == 'SOLIDIFY':
                     mod.thickness = rp.wall_width
-        # Move to Top SOLIDIFY            
+        # Move to Top SOLIDIFY
         movetotopsolidify(myroom)
 
     else:  # clear not used SOLIDIFY
@@ -495,7 +495,7 @@ def shape_walls_and_create_children(myroom, update=False):
         set_normals(mybase, rp.inverse)  # inside/outside room
         if rp.base_width > 0.0:
             set_modifier_solidify(mybase, get_blendunits(rp.base_width))
-            # Move to Top SOLIDIFY            
+            # Move to Top SOLIDIFY
             movetotopsolidify(mybase)
         # Mark Seams
         select_vertices(mybase, [0, 1])
@@ -549,7 +549,7 @@ def shape_walls_and_create_children(myroom, update=False):
             mat = create_diffuse_material("Ceiling_material", False, 0.95, 0.95, 0.95)
             set_material(myceiling, mat)
 
-        # Floor material    
+        # Floor material
         if rp.floor and myfloor is not None:
             mat = create_brick_material("Floor_material", False, 0.711, 0.668, 0.668, 0.8, 0.636, 0.315)
             set_material(myfloor, mat)
@@ -645,10 +645,10 @@ def make_wall(prv, wall, baseboard, lastface, lastx, lasty, height, myvertex, my
     hide = wall.h
 
     # if angle negative, calculate real
-    # use add because the angle is negative 
+    # use add because the angle is negative
     if angle < 0:
         angle += 360
-    # Verify Units    
+    # Verify Units
     size = get_blendunits(size)
     over = get_blendunits(over)
 

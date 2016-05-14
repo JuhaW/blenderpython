@@ -969,7 +969,7 @@ def draw_callback_px_text(cls, context):
                                                    text)
         row_count += 1
 
-    # remove blurriness 
+    # remove blurriness
 
     # disable shadows so they don't appear all over blender
     blf.blur(0, 0)
@@ -1305,7 +1305,7 @@ class ScreencastKeysStatus(bpy.types.Operator):
                    'FOUR': '4', 'FIVE': '5', 'SIX': '6', 'SEVEN': '7',
                    'EIGHT': '8', 'NINE': '9'}
         if event.value == 'PRESS' or (event.value == 'RELEASE' and
-                self.last_activity == 'KEYBOARD' and event.type in mouse_keys):
+                                      self.last_activity == 'KEYBOARD' and event.type in mouse_keys):
             # add key-press to display-list
             mods = []
             if event.shift:

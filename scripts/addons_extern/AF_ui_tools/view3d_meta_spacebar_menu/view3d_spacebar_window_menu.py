@@ -19,7 +19,7 @@
 ###################################
 
 
-#bl_info = {
+# bl_info = {
 #        "name": "Spacebar Windows",
 #        "category": "User Menu",
 #        "author": "Cedric_Lepiller & DoubleZ & Lapineige, mkbreuer",
@@ -41,7 +41,7 @@ from bpy.types import Operator, AddonPreferences
 ######------------#####################################################################################################################
 
 
-#Class join area
+# Class join area
 class JoinArea(bpy.types.Operator):
     """Join 2 area, clic on the second area to join"""
     bl_idname = "area.joinarea"
@@ -65,76 +65,77 @@ class JoinArea(bpy.types.Operator):
         self.min_y = event.mouse_y
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
-    
-bpy.utils.register_class(JoinArea)     
-    
+
+bpy.utils.register_class(JoinArea)
+
 ######--------#####################################################################################################################
 ######  Menu  #####################################################################################################################
 ######  Menu  #####################################################################################################################
 ######--------#####################################################################################################################
 
-#######  Editor Menu  #######-------------------------------------------------------                  
-#######  Editor Menu  #######-------------------------------------------------------                  
+# Editor Menu  #######-------------------------------------------------------
+# Editor Menu  #######-------------------------------------------------------
 
-#Add options to User Preferences Addon
+# Add options to User Preferences Addon
+
 
 class PreferencesAddon(AddonPreferences):
     bl_idname = __name__
-    
-    bpy.types.Scene.MenuSplitHorizontal = BoolProperty(default = True)
-    bpy.types.Scene.MenuSplitVertical = BoolProperty(default = True)
-    bpy.types.Scene.MenuJoinArea = BoolProperty(default = True)
-    
-    bpy.types.Scene.Menu3DView = BoolProperty(default = True)
-    bpy.types.Scene.MenuNodeEditor = BoolProperty(default = True)
-    bpy.types.Scene.MenuImageEditor = BoolProperty(default = True)
-    bpy.types.Scene.MenuOutliner = BoolProperty(default = True)
-    bpy.types.Scene.MenuProperties = BoolProperty(default = True)
-    bpy.types.Scene.MenuTextEditor = BoolProperty(default = True)
-    bpy.types.Scene.MenuGraphEditor = BoolProperty(default = True)
-    bpy.types.Scene.MenuDopeSheet = BoolProperty(default = True)
-    bpy.types.Scene.MenuTimeline = BoolProperty(default = True)
-    bpy.types.Scene.MenuNlaEditor = BoolProperty(default = False)
-    bpy.types.Scene.MenuLogicEditor = BoolProperty(default = False)
-    bpy.types.Scene.MenuSequenceEditor = BoolProperty(default = False)
-    bpy.types.Scene.MenuMovieClip = BoolProperty(default = False)
-    bpy.types.Scene.MenuPythonConsole = BoolProperty(default = False)
-    bpy.types.Scene.MenuInfo = BoolProperty(default = False)
-    bpy.types.Scene.MenuFileBrowser = BoolProperty(default = False)
-    bpy.types.Scene.MenuUserPreferences = BoolProperty(default = True)
-    
-    def draw (self, context):
-        layout=self.layout
-        
-        layout.prop(context.scene,"MenuSplitHorizontal", text = "Show Split Horizontal", icon= 'TRIA_DOWN')
-        layout.prop(context.scene,"MenuSplitVertical", text = "Show Split Vertical", icon= 'TRIA_RIGHT')
-        layout.prop(context.scene,"MenuJoinArea", text = "Show Join Area", icon= 'X')
-        layout.separator() 
-        layout.prop(context.scene,"Menu3DView", text = "Show 3D View", icon= 'VIEW3D')
-        layout.prop(context.scene,"MenuNodeEditor", text = "Show Node Editor", icon= 'NODETREE')
-        layout.prop(context.scene,"MenuImageEditor", text = "Show Image Editor", icon= 'IMAGE_COL')
-        layout.prop(context.scene,"MenuOutliner", text = "Show Outliner", icon= 'OOPS')
-        layout.prop(context.scene,"MenuProperties", text = "Show Properties", icon= 'BUTS')
-        layout.prop(context.scene,"MenuTextEditor", text = "Show Text Editor", icon= 'FILE_TEXT')
-        layout.prop(context.scene,"MenuGraphEditor", text = "Show Graph Editor", icon= 'IPO')
-        layout.prop(context.scene,"MenuDopeSheet", text = "Show Dope Sheet", icon= 'ACTION')
-        layout.prop(context.scene,"MenuTimeline", text = "Show Timeline", icon= 'TIME')
-        layout.prop(context.scene,"MenuNlaEditor", text = "Show Nla Editor", icon= 'NLA')
-        layout.prop(context.scene,"MenuLogicEditor", text = "Show Logic Editor", icon= 'LOGIC')
-        layout.prop(context.scene,"MenuSequenceEditor", text = "Show Sequence Editor", icon= 'SEQUENCE')
-        layout.prop(context.scene,"MenuMovieClip", text = "Show Movie Clip", icon= 'RENDER_ANIMATION')
-        layout.prop(context.scene,"MenuPythonConsole", text = "ShowM Python Console", icon= 'CONSOLE')
-        layout.prop(context.scene,"MenuInfo", text = "Show Info", icon= 'INFO')
-        layout.prop(context.scene,"MenuFileBrowser", text = "Show File Browser", icon= 'FILESEL')
-        layout.prop(context.scene,"MenuUserPreferences", text = "Show User Preferences", icon= 'PREFERENCES')
 
-bpy.utils.register_class(PreferencesAddon)  
+    bpy.types.Scene.MenuSplitHorizontal = BoolProperty(default=True)
+    bpy.types.Scene.MenuSplitVertical = BoolProperty(default=True)
+    bpy.types.Scene.MenuJoinArea = BoolProperty(default=True)
+
+    bpy.types.Scene.Menu3DView = BoolProperty(default=True)
+    bpy.types.Scene.MenuNodeEditor = BoolProperty(default=True)
+    bpy.types.Scene.MenuImageEditor = BoolProperty(default=True)
+    bpy.types.Scene.MenuOutliner = BoolProperty(default=True)
+    bpy.types.Scene.MenuProperties = BoolProperty(default=True)
+    bpy.types.Scene.MenuTextEditor = BoolProperty(default=True)
+    bpy.types.Scene.MenuGraphEditor = BoolProperty(default=True)
+    bpy.types.Scene.MenuDopeSheet = BoolProperty(default=True)
+    bpy.types.Scene.MenuTimeline = BoolProperty(default=True)
+    bpy.types.Scene.MenuNlaEditor = BoolProperty(default=False)
+    bpy.types.Scene.MenuLogicEditor = BoolProperty(default=False)
+    bpy.types.Scene.MenuSequenceEditor = BoolProperty(default=False)
+    bpy.types.Scene.MenuMovieClip = BoolProperty(default=False)
+    bpy.types.Scene.MenuPythonConsole = BoolProperty(default=False)
+    bpy.types.Scene.MenuInfo = BoolProperty(default=False)
+    bpy.types.Scene.MenuFileBrowser = BoolProperty(default=False)
+    bpy.types.Scene.MenuUserPreferences = BoolProperty(default=True)
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.prop(context.scene, "MenuSplitHorizontal", text="Show Split Horizontal", icon='TRIA_DOWN')
+        layout.prop(context.scene, "MenuSplitVertical", text="Show Split Vertical", icon='TRIA_RIGHT')
+        layout.prop(context.scene, "MenuJoinArea", text="Show Join Area", icon='X')
+        layout.separator()
+        layout.prop(context.scene, "Menu3DView", text="Show 3D View", icon='VIEW3D')
+        layout.prop(context.scene, "MenuNodeEditor", text="Show Node Editor", icon='NODETREE')
+        layout.prop(context.scene, "MenuImageEditor", text="Show Image Editor", icon='IMAGE_COL')
+        layout.prop(context.scene, "MenuOutliner", text="Show Outliner", icon='OOPS')
+        layout.prop(context.scene, "MenuProperties", text="Show Properties", icon='BUTS')
+        layout.prop(context.scene, "MenuTextEditor", text="Show Text Editor", icon='FILE_TEXT')
+        layout.prop(context.scene, "MenuGraphEditor", text="Show Graph Editor", icon='IPO')
+        layout.prop(context.scene, "MenuDopeSheet", text="Show Dope Sheet", icon='ACTION')
+        layout.prop(context.scene, "MenuTimeline", text="Show Timeline", icon='TIME')
+        layout.prop(context.scene, "MenuNlaEditor", text="Show Nla Editor", icon='NLA')
+        layout.prop(context.scene, "MenuLogicEditor", text="Show Logic Editor", icon='LOGIC')
+        layout.prop(context.scene, "MenuSequenceEditor", text="Show Sequence Editor", icon='SEQUENCE')
+        layout.prop(context.scene, "MenuMovieClip", text="Show Movie Clip", icon='RENDER_ANIMATION')
+        layout.prop(context.scene, "MenuPythonConsole", text="ShowM Python Console", icon='CONSOLE')
+        layout.prop(context.scene, "MenuInfo", text="Show Info", icon='INFO')
+        layout.prop(context.scene, "MenuFileBrowser", text="Show File Browser", icon='FILESEL')
+        layout.prop(context.scene, "MenuUserPreferences", text="Show User Preferences", icon='PREFERENCES')
+
+bpy.utils.register_class(PreferencesAddon)
 
 
-#######  View Menu  #######-------------------------------------------------------                  
-#######  View Menu  #######-------------------------------------------------------                  
+# View Menu  #######-------------------------------------------------------
+# View Menu  #######-------------------------------------------------------
 
-#Class menu
+# Class menu
 class ViewMenu(bpy.types.Operator):
     """Menu to change views"""
     bl_idname = "object.view_menu"
@@ -146,113 +147,109 @@ class ViewMenu(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        bpy.context.area.type=self.variable
-        return {'FINISHED'}    
+        bpy.context.area.type = self.variable
+        return {'FINISHED'}
 
-bpy.utils.register_class(ViewMenu) 
+bpy.utils.register_class(ViewMenu)
 
 
+# View Shade Menu  #######-------------------------------------------------------
+# View Shade Menu  #######-------------------------------------------------------
 
-#######  View Shade Menu  #######-------------------------------------------------------                  
-#######  View Shade Menu  #######-------------------------------------------------------                  
-
-#Class menu
+# Class menu
 class ViewShadeMenu(bpy.types.Menu):
     bl_idname = "space_shade_menu"
     bl_label = "Shade Menu"
 
     def draw(self, context):
-        layout = self.layout 
-      
+        layout = self.layout
+
         view = context.space_data
         obj = context.active_object
         toolsettings = context.tool_settings
-                         
-        view = context.space_data        
+
+        view = context.space_data
 
         if obj and obj.mode == 'OBJECT':
-            layout.operator("object.shade_flat", icon="MESH_CIRCLE")               
-            layout.operator("object.shade_smooth", icon="SOLID")  
-    
-        
+            layout.operator("object.shade_flat", icon="MESH_CIRCLE")
+            layout.operator("object.shade_smooth", icon="SOLID")
+
         if obj and obj.mode == 'EDIT':
-            layout.operator("mesh.faces_shade_flat", icon="MESH_CIRCLE")		
-            layout.operator("mesh.faces_shade_smooth", icon="SOLID")              
+            layout.operator("mesh.faces_shade_flat", icon="MESH_CIRCLE")
+            layout.operator("mesh.faces_shade_smooth", icon="SOLID")
 
         layout.separator()
-                
-        layout.prop(context.space_data, "viewport_shade", expand=True)          
-        
-bpy.utils.register_class(ViewShadeMenu) 
+
+        layout.prop(context.space_data, "viewport_shade", expand=True)
+
+bpy.utils.register_class(ViewShadeMenu)
 
 
+# View Custom Menu  ######-------------------------------------------------------
+# View Custom Menu  ######-------------------------------------------------------
 
-######  View Custom Menu  ######-------------------------------------------------------                          
-######  View Custom Menu  ######-------------------------------------------------------                          
-    
 class VIEW3D_Space_ViewCustomMenu(bpy.types.Menu):
     bl_label = "View Custom Menu"
     bl_idname = "space_viewcustom"
- 
-    
+
     def draw(self, context):
         layout = self.layout
-        
-        col=layout.column()
-        
+
+        col = layout.column()
+
         if context.scene.Menu3DView:
-            col.operator("object.view_menu", text="VIEW 3D", icon= 'VIEW3D').variable="VIEW_3D"
-        
+            col.operator("object.view_menu", text="VIEW 3D", icon='VIEW3D').variable = "VIEW_3D"
+
         if context.scene.MenuNodeEditor:
-            col.operator("object.view_menu", text="Node Editor", icon= 'NODETREE').variable="NODE_EDITOR"
-        
+            col.operator("object.view_menu", text="Node Editor", icon='NODETREE').variable = "NODE_EDITOR"
+
         if context.scene.MenuImageEditor:
-            col.operator("object.view_menu", text="Image Editor", icon= 'IMAGE_COL').variable="IMAGE_EDITOR"
-        
+            col.operator("object.view_menu", text="Image Editor", icon='IMAGE_COL').variable = "IMAGE_EDITOR"
+
         if context.scene.MenuOutliner:
-            col.operator("object.view_menu", text="Outliner", icon= 'OOPS').variable="OUTLINER"
-            
+            col.operator("object.view_menu", text="Outliner", icon='OOPS').variable = "OUTLINER"
+
         if context.scene.MenuProperties:
-            col.operator("object.view_menu", text="Properties", icon= 'BUTS').variable="PROPERTIES"
-            
+            col.operator("object.view_menu", text="Properties", icon='BUTS').variable = "PROPERTIES"
+
         if context.scene.MenuTextEditor:
-            col.operator("object.view_menu", text="Text Editor", icon= 'FILE_TEXT').variable="TEXT_EDITOR"
-        
+            col.operator("object.view_menu", text="Text Editor", icon='FILE_TEXT').variable = "TEXT_EDITOR"
+
         if context.scene.MenuGraphEditor:
-            col.operator("object.view_menu", text="Graph Editor", icon= 'IPO').variable="GRAPH_EDITOR"
-            
-        if context.scene.MenuDopeSheet:     
-            col.operator("object.view_menu", text="Dope Sheet", icon= 'ACTION').variable="DOPESHEET_EDITOR"
-        
+            col.operator("object.view_menu", text="Graph Editor", icon='IPO').variable = "GRAPH_EDITOR"
+
+        if context.scene.MenuDopeSheet:
+            col.operator("object.view_menu", text="Dope Sheet", icon='ACTION').variable = "DOPESHEET_EDITOR"
+
         if context.scene.MenuTimeline:
-            col.operator("object.view_menu", text="Timeline", icon= 'TIME').variable="TIMELINE"
-        
+            col.operator("object.view_menu", text="Timeline", icon='TIME').variable = "TIMELINE"
+
         if context.scene.MenuNlaEditor:
-            col.operator("object.view_menu", text="NLA Editor", icon= 'NLA').variable="NLA_EDITOR"
-            
+            col.operator("object.view_menu", text="NLA Editor", icon='NLA').variable = "NLA_EDITOR"
+
         if context.scene.MenuLogicEditor:
-            col.operator("object.view_menu", text="Logic Editor", icon= 'LOGIC').variable="LOGIC_EDITOR"
-        
+            col.operator("object.view_menu", text="Logic Editor", icon='LOGIC').variable = "LOGIC_EDITOR"
+
         if context.scene.MenuSequenceEditor:
-            col.operator("object.view_menu", text="Sequence Editor", icon= 'SEQUENCE').variable="SEQUENCE_EDITOR"
-     
+            col.operator("object.view_menu", text="Sequence Editor", icon='SEQUENCE').variable = "SEQUENCE_EDITOR"
+
         if context.scene.MenuMovieClip:
-            col.operator("object.view_menu", text="Movie Clip Editor", icon= 'RENDER_ANIMATION').variable="CLIP_EDITOR"
-   
+            col.operator("object.view_menu", text="Movie Clip Editor", icon='RENDER_ANIMATION').variable = "CLIP_EDITOR"
+
         if context.scene.MenuPythonConsole:
-            col.operator("object.view_menu", text="Python Console", icon= 'CONSOLE').variable="CONSOLE" 
-        
+            col.operator("object.view_menu", text="Python Console", icon='CONSOLE').variable = "CONSOLE"
+
         if context.scene.MenuInfo:
-            col.operator("object.view_menu", text="Info", icon= 'INFO').variable="INFO"
-            
+            col.operator("object.view_menu", text="Info", icon='INFO').variable = "INFO"
+
         if context.scene.MenuFileBrowser:
-            col.operator("object.view_menu", text="File Browser", icon= 'FILESEL').variable="FILE_BROWSER" 
-   
+            col.operator("object.view_menu", text="File Browser", icon='FILESEL').variable = "FILE_BROWSER"
+
         if context.scene.MenuUserPreferences:
-            col.operator("object.view_menu", text="User Preferences", icon= 'PREFERENCES').variable="USER_PREFERENCES"  
+            col.operator("object.view_menu", text="User Preferences", icon='PREFERENCES').variable = "USER_PREFERENCES"
 
 
-bpy.utils.register_class(VIEW3D_Space_ViewCustomMenu) 
+bpy.utils.register_class(VIEW3D_Space_ViewCustomMenu)
 
 
 #############################################################################################################################################################
@@ -262,82 +259,65 @@ bpy.utils.register_class(VIEW3D_Space_ViewCustomMenu)
 #############################################################################################################################################################
 #############################################################################################################################################################
 
-######  Window Views  ######-------------------------------------------------------                          
-######  Window Views  ######-------------------------------------------------------                          
+# Window Views  ######-------------------------------------------------------
+# Window Views  ######-------------------------------------------------------
 
 class VIEW3D_Space_ViewExtend(bpy.types.Menu):
     bl_label = "Window Views"
     bl_idname = "space_viewextend"
-     
+
     def draw(self, context):
         layout = self.layout
         view = context.space_data
 
         obj = context.active_object
         toolsettings = context.tool_settings
-                
+
         #layout.menu("space_viewcustom", text = "Editor View", icon = "PLUG" )
-              
-        #layout.separator()
+
+        # layout.separator()
 
         layout.operator_enum("OBJECT_OT_mode_set", "mode")
-         
-        #layout.separator() 
-                
-        #if context.scene.MenuSplitHorizontal:
-            #layout.operator("screen.area_split", text="Split Horizontal", icon= 'TRIA_DOWN').direction="HORIZONTAL"
-        
-        #if context.scene.MenuSplitVertical:    
-            #layout.operator("screen.area_split", text="Split Vertical", icon= 'TRIA_RIGHT').direction="VERTICAL"
-        
-        #if context.scene.MenuJoinArea: 
-            #layout.operator_context="INVOKE_DEFAULT"
-            #layout.operator("area.joinarea", icon='X', text="Join Area")        
 
-        #layout.separator() 
+        # layout.separator()
 
+        # if context.scene.MenuSplitHorizontal:
+        #layout.operator("screen.area_split", text="Split Horizontal", icon= 'TRIA_DOWN').direction="HORIZONTAL"
+
+        # if context.scene.MenuSplitVertical:
+        #layout.operator("screen.area_split", text="Split Vertical", icon= 'TRIA_RIGHT').direction="VERTICAL"
+
+        # if context.scene.MenuJoinArea:
+        # layout.operator_context="INVOKE_DEFAULT"
+        #layout.operator("area.joinarea", icon='X', text="Join Area")
+
+        # layout.separator()
 
 
 ######------------################################################################################################################
 ######  Registry  ################################################################################################################
 ######  Registry  ################################################################################################################
 ######------------################################################################################################################
-
 
 
 def register():
 
-    bpy.utils.register_class(VIEW3D_Space_ViewExtend) 
-     
-    #bpy.ops.wm.call_menu(name=View_Custom_Menu.bl_idname)
+    bpy.utils.register_class(VIEW3D_Space_ViewExtend)
 
-    #bpy.utils.register_module(__name__)    
+    # bpy.ops.wm.call_menu(name=View_Custom_Menu.bl_idname)
+
+    # bpy.utils.register_module(__name__)
+
 
 def unregister():
-    
+
     bpy.utils.unregister_class(VIEW3D_Space_ViewExtend)
-        
+
     bpy.utils.unregister_module(__name__)
 
 
 if __name__ == "__main__":
-    register() 	
+    register()
 
     # The menu can also be called from scripts
     bpy.ops.wm.call_menu(name=VIEW3D_Space_ViewExtend.bl_idname)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

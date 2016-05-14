@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class EulerListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_EulerListSocket"
     bl_label = "Euler List Socket"

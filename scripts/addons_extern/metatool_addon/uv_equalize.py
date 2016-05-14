@@ -54,60 +54,19 @@ from mathutils import Vector
 import math
 
 
-
 def equalize(operator, context, use_pack, rotate, margin, use_active, ):
     def activate_object(o):
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         bpy.ops.object.select_all(action='DESELECT')
         sc = bpy.context.scene
         o.select = True
         sc.objects.active = o
-    
+
     ao = context.scene.objects.active
     # obs = [ob for ob in context.scene.objects if ob.name != ao.name and ob.select]
     # make it easier to select all, exclude non-mesh objects from list
     obs = [ob for ob in context.scene.objects if ob.name != ao.name and ob.select and ob.type == 'MESH']
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     # some checks
     for o in obs:
         if(o.type != 'MESH'):
@@ -116,11 +75,9 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         if(len(o.data.uv_layers) < 1):
             operator.report({'ERROR'}, "Object {} has no uv map.".format(o.name))
             return False
-    
+
     cache = {}
 
-
-    
     def calc_areas(o):
         # cache
         k = o.name
@@ -131,7 +88,6 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         except:
             pass
         # prepare
-
 
         bm = bmesh.new()
         # bm.from_mesh(o.data)
@@ -169,7 +125,6 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         cache[k] = (mesh_area, uv_area, )
         return mesh_area, uv_area
 
-    
     if(not use_active):
         obs.append(ao)
         oms = []
@@ -181,31 +136,9 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         aom = sum(oms) / len(oms)
         aouv = sum(ouvs) / len(ouvs)
 
-
-
     else:
         aom, aouv = calc_areas(ao)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     for o in obs:
         activate_object(o)
         # store image assignments
@@ -213,19 +146,9 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         uv = o.data.uv_textures.active
         for p in uv.data:
             pi.append(p.image)
-        
+
         # average and pack islands
         if(use_pack):
-
-
-
-
-
-
-
-
-
-
 
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.select_all(action='SELECT')
@@ -234,106 +157,40 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
             bpy.ops.uv.pack_islands(rotate=rotate, margin=margin, )
             bpy.ops.object.mode_set(mode='OBJECT')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         # transform uv
-
-
 
         bpy.ops.object.mode_set(mode='EDIT')
         if(not use_pack):
             bpy.ops.mesh.select_all(action='SELECT')
             bpy.ops.uv.select_all(action='SELECT')
-        
+
         original_type = bpy.context.area.type
         bpy.context.area.type = "IMAGE_EDITOR"
         # reset image inside editor, it might be Render Result and in this case,
         # UV operators will not work because UVs will not be displayed..
         bpy.context.area.spaces[0].image = None
-        
+
         om, ouv = calc_areas(o)
         x = (aouv / aom) * om
         v = x / ouv
         v = math.sqrt(v)
 
-
-
-
-        
         bpy.ops.transform.resize(value=(v, v, v), )
         bpy.context.area.type = original_type
 
-        
         bpy.ops.object.mode_set(mode='OBJECT')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
         # restore image assignments
         uv = o.data.uv_textures.active
         for i, p in enumerate(uv.data):
             p.image = pi[i]
-
-    
-
-
-
 
     # activate the one which was not changed
     activate_object(ao)
     # reselect objects for convenience
     for o in obs:
         o.select = True
-    
+
     return True
 
 
@@ -342,7 +199,7 @@ class UVEqualize(bpy.types.Operator):
     bl_label = "UV Equalize"
     bl_description = "Equalizes scale of UVs of selected objects to active object."
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     use_active = BoolProperty(name="Use Active",
                               description="Use active object as scale specimen. Otherwise will be used object with largest polygons after packing. This object will be packed to fit bounds.",
                               default=True, )
@@ -359,31 +216,24 @@ class UVEqualize(bpy.types.Operator):
 
                            default=0.001, )
 
-
-
-    
     @classmethod
     def poll(cls, context):
         ao = context.active_object
         so = bpy.context.selected_objects
         return (ao and ao.type == 'MESH' and len(so) > 1 and context.mode == 'OBJECT')
-    
+
     def execute(self, context):
         r = equalize(self, context, self.use_pack, self.rotate, self.margin, self.use_active, )
         if(r is False):
             return {'CANCELLED'}
         return {'FINISHED'}
-    
-
-
-
 
     def draw(self, context):
         l = self.layout
-        
+
         r = l.row()
         r.prop(self, "use_active")
-        
+
         r = l.row()
         r.prop(self, "use_pack")
 
@@ -393,8 +243,6 @@ class UVEqualize(bpy.types.Operator):
         r = l.row()
         r.prop(self, "margin")
         r.enabled = self.use_pack
-
-
 
 
 def menu_func(self, context):
@@ -415,4 +263,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

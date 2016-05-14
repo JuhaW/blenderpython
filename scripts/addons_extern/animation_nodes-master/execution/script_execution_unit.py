@@ -3,7 +3,9 @@ from . compile_scripts import compileScript
 from .. problems import ExecutionUnitNotSetup
 from . code_generator import getSocketValueExpression, getSetupCode, getInitialVariables
 
+
 class ScriptExecutionUnit:
+
     def __init__(self, network):
         self.network = network
         self.setupScript = ""
@@ -31,7 +33,6 @@ class ScriptExecutionUnit:
     def getCodes(self):
         return [self.setupScript]
 
-
     def generateScript(self):
         node = self.network.scriptNode
         userCode = node.executionCode
@@ -48,8 +49,10 @@ class ScriptExecutionUnit:
             codeLines.extend(userCode.split("\n"))
             codeLines.append(self.getReturnStatement(node))
 
-            if node.debugMode: finalCode.extend(indent(self.getDebugModeFunctionBody(codeLines, node)))
-            else: finalCode.extend(indent(codeLines))
+            if node.debugMode:
+                finalCode.extend(indent(self.getDebugModeFunctionBody(codeLines, node)))
+            else:
+                finalCode.extend(indent(codeLines))
         else:
             finalCode.append("    {}.errorMessage = 'Syntax Error'".format(node.identifier))
             finalCode.append("    " + self.getDefaultReturnStatement(node))
@@ -83,10 +86,11 @@ class ScriptExecutionUnit:
         return "return " + ", ".join(outputExpressions)
 
     def compileScript(self):
-        self.setupCodeObject = compileScript(self.setupScript, name = "script: {}".format(repr(self.network.name)))
+        self.setupCodeObject = compileScript(self.setupScript, name="script: {}".format(repr(self.network.name)))
 
     def raiseNotSetupException(self):
         raise ExecutionUnitNotSetup()
 
-def indent(lines, amount = 1):
+
+def indent(lines, amount=1):
     return [" " * (4 * amount) + line for line in lines]

@@ -52,8 +52,8 @@ def callback_enable(name, sl1, sl2, sl3, vs, colo, tran, shade):
     if name in callback_dict:
         return
     handle_view = SpaceView3D.draw_handler_add(draw_callback_view,
-                    (name, sl1, sl2, sl3, vs, colo, tran, shade),
-                    'WINDOW', 'POST_VIEW')
+                                               (name, sl1, sl2, sl3, vs, colo, tran, shade),
+                                               'WINDOW', 'POST_VIEW')
     callback_dict[name] = handle_view
     tag_redraw_all_view3d()
 
@@ -79,10 +79,10 @@ def callback_disable(name):
 def draw_callback_view(handle, sl1, sl2, sl3, vs, colo, tran, shade):
     context = bpy.context
     from bgl import glEnable, glDisable, glColor3f, glVertex3f, glPointSize, \
-                glLineWidth, glBegin, glEnd, glLineStipple, GL_POINTS, \
-                GL_LINE_STRIP, GL_LINES, GL_LINE, GL_LINE_STIPPLE, GL_POLYGON, \
-                GL_POLYGON_STIPPLE, GL_POLYGON_SMOOTH, glPolygonStipple, \
-                GL_TRIANGLES, GL_QUADS, glColor4f
+        glLineWidth, glBegin, glEnd, glLineStipple, GL_POINTS, \
+        GL_LINE_STRIP, GL_LINES, GL_LINE, GL_LINE_STIPPLE, GL_POLYGON, \
+        GL_POLYGON_STIPPLE, GL_POLYGON_SMOOTH, glPolygonStipple, \
+        GL_TRIANGLES, GL_QUADS, glColor4f
     # define globals, separate edgs from pols
     if tran:
         polyholy = GL_POLYGON_STIPPLE
@@ -95,8 +95,8 @@ def draw_callback_view(handle, sl1, sl2, sl3, vs, colo, tran, shade):
 
     if sl1:
         data_vector = Vector_generate(sl1)
-        verlen = len(data_vector)-1
-        verlen_every = [len(d)-1 for d in data_vector]
+        verlen = len(data_vector) - 1
+        verlen_every = [len(d) - 1 for d in data_vector]
     else:
         data_vector = []
         verlen = 0
@@ -112,14 +112,14 @@ def draw_callback_view(handle, sl1, sl2, sl3, vs, colo, tran, shade):
         else:
             data_polygons = []
             data_edges = []
-    
+
     else:
         data_edges, data_polygons = [], []
 
     if sl3:
         data_matrix = Matrix_generate(sl3)
     else:
-        data_matrix = [Matrix() for i in range(verlen+1)]
+        data_matrix = [Matrix() for i in range(verlen + 1)]
 
     coloa = colo[0]
     colob = colo[1]
@@ -208,11 +208,10 @@ def draw_callback_view(handle, sl1, sl2, sl3, vs, colo, tran, shade):
         for i in range(0, 24, 2):
             glBegin(GL_LINE_STRIP)
             glVertex3f(*bb[i])
-            glVertex3f(*bb[i+1])
+            glVertex3f(*bb[i + 1])
             glEnd()
 
-
-    # MAYBE WE SHOULD CONNECT ITERATION FOR ALL PROCESS TO DECREASE 
+    # MAYBE WE SHOULD CONNECT ITERATION FOR ALL PROCESS TO DECREASE
     # TIME?
     ########
     # points
@@ -227,7 +226,7 @@ def draw_callback_view(handle, sl1, sl2, sl3, vs, colo, tran, shade):
                 if i > verlen:
                     k = verlen
                 for vert in data_vector[k]:
-                    vec_corrected = data_matrix[i]*vert
+                    vec_corrected = data_matrix[i] * vert
                     glVertex3f(*vec_corrected)
                     #print ('рисовальня', matrix, vec_corrected)
                 glEnd()
@@ -249,13 +248,12 @@ def draw_callback_view(handle, sl1, sl2, sl3, vs, colo, tran, shade):
                     line = data_edges[k][-1]
                 glBegin(edgeline)
                 for point in line:              # point
-                    vec_corrected = data_matrix[i]*data_vector[k][int(point)]
+                    vec_corrected = data_matrix[i] * data_vector[k][int(point)]
                     glVertex3f(*vec_corrected)
                 glEnd()
                 glPointSize(1.75)
                 glLineWidth(1.0)
         glDisable(edgeholy)
-
 
     #######
     # polygons
@@ -272,42 +270,42 @@ def draw_callback_view(handle, sl1, sl2, sl3, vs, colo, tran, shade):
             for j, pol in enumerate(data_polygons[k]):
                 if max(pol) > verlen_every[k]:
                     pol = data_edges[k][-1]
-                    j = len(data_edges[k])-1
+                    j = len(data_edges[k]) - 1
                 if shade:
                     normal_no_ = mathutils.geometry.normal(
-                            data_vector[k][pol[0]],
-                            data_vector[k][pol[1]],
-                            data_vector[k][pol[2]]
-                            )
-                    normal_no = (normal_no_.angle(vectorlight, 0))/math.pi
+                        data_vector[k][pol[0]],
+                        data_vector[k][pol[1]],
+                        data_vector[k][pol[2]]
+                    )
+                    normal_no = (normal_no_.angle(vectorlight, 0)) / math.pi
                     randa = (normal_no * coloa) - 0.1
                     randb = (normal_no * colob) - 0.1
                     randc = (normal_no * coloc) - 0.1
                 else:
-                    randa = ((j/oblen) + coloa) / 2.5
-                    randb = ((j/oblen) + colob) / 2.5
-                    randc = ((j/oblen) + coloc) / 2.5
+                    randa = ((j / oblen) + coloa) / 2.5
+                    randb = ((j / oblen) + colob) / 2.5
+                    randc = ((j / oblen) + coloc) / 2.5
                 if len(pol) > 4:
                     glBegin(GL_TRIANGLES)
-                    glColor4f(randa+0.2, randb+0.2, randc+0.2, 0.5)
+                    glColor4f(randa + 0.2, randb + 0.2, randc + 0.2, 0.5)
                     #glColor3f(randa+0.2, randb+0.2, randc+0.2)
                     v = [data_vector[k][i] for i in pol]
                     tess_poly = mathutils.geometry.tessellate_polygon([v])
                     for a, b, c in tess_poly:
-                        glVertex3f(*(data_matrix[i]*v[a]))
-                        glVertex3f(*(data_matrix[i]*v[b]))
-                        glVertex3f(*(data_matrix[i]*v[c]))
+                        glVertex3f(*(data_matrix[i] * v[a]))
+                        glVertex3f(*(data_matrix[i] * v[b]))
+                        glVertex3f(*(data_matrix[i] * v[c]))
                 elif len(pol) == 4:
                     glBegin(GL_POLYGON)
-                    glColor3f(randa+0.2, randb+0.2, randc+0.2)
+                    glColor3f(randa + 0.2, randb + 0.2, randc + 0.2)
                     for point in pol:
-                        vec_corrected = data_matrix[i]*data_vector[k][int(point)]
+                        vec_corrected = data_matrix[i] * data_vector[k][int(point)]
                         glVertex3f(*vec_corrected)
                 else:
                     glBegin(GL_TRIANGLES)
-                    glColor3f(randa+0.2, randb+0.2, randc+0.2)
+                    glColor3f(randa + 0.2, randb + 0.2, randc + 0.2)
                     for point in pol:
-                        vec_corrected = data_matrix[i]*data_vector[k][int(point)]
+                        vec_corrected = data_matrix[i] * data_vector[k][int(point)]
                         glVertex3f(*vec_corrected)
                 glEnd()
                 glPointSize(1.75)
@@ -315,26 +313,27 @@ def draw_callback_view(handle, sl1, sl2, sl3, vs, colo, tran, shade):
         glDisable(polyholy)
 
     # for future bezier drawing - to remake
-    #if data_edges and data_vector and bezier:
+    # if data_edges and data_vector and bezier:
         # here 3 lines that i must understand
         #from bpy_extras.view3d_utils import location_3d_to_region_2d
         #region = context.region
         #region_data = context.region_data
 
-        #glEnable(GL_BLEND)
+        # glEnable(GL_BLEND)
         #glColor4f(1, 0, 0, 0.5)
-        #glLineWidth(1.0)
-        #glBegin(GL_LINE_STRIP)
-        #for i in range(current_frame):
-            #glVertex2f(*location_3d_to_region_2d(region, region_data, (math.sin(i / 10), 0, i / 10)).to_tuple())
-        #glEnd()
-        #glDisable(GL_BLEND)
+        # glLineWidth(1.0)
+        # glBegin(GL_LINE_STRIP)
+        # for i in range(current_frame):
+        #glVertex2f(*location_3d_to_region_2d(region, region_data, (math.sin(i / 10), 0, i / 10)).to_tuple())
+        # glEnd()
+        # glDisable(GL_BLEND)
 
     #######
     # matrix
     if data_matrix and not data_vector:
         for mat in data_matrix:
             draw_matrix(mat)
-            
+
+
 def unregister():
     callback_disable_all()

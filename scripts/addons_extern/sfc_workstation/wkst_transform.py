@@ -20,7 +20,6 @@
 # ***** END GPL LICENCE BLOCK *****
 
 
-
 import bpy
 from bpy import *
 
@@ -33,28 +32,27 @@ class WKST_Transform_Menu(bpy.types.Menu):
     bl_idname = "wkst.transform_menu"
 
     def draw(self, context):
-        layout = self.layout    
+        layout = self.layout
 
-        layout.operator("transform.translate",text="Translate", icon="MAN_TRANS")
+        layout.operator("transform.translate", text="Translate", icon="MAN_TRANS")
         layout.operator("transform.rotate", text="Rotate", icon="MAN_ROT")
-        layout.operator("transform.resize", text="Resize", icon="MAN_SCALE") 
+        layout.operator("transform.resize", text="Resize", icon="MAN_SCALE")
 
         if context.mode == 'OBJECT':
 
             layout.separator()
-            
+
             layout.menu("VIEW3D_MT_object_clear")
             layout.menu("VIEW3D_MT_object_apply")
 
-
-         ###space###    
+         ###space###
         if context.mode == 'EDIT_MESH':
 
             layout.separator()
 
-            layout.operator("transform.tosphere", "to Sphere") 
+            layout.operator("transform.tosphere", "to Sphere")
             layout.operator("transform.push_pull", text="Push/Pull")
-            layout.operator("transform.shrink_fatten", text="Shrink Fatten") 
+            layout.operator("transform.shrink_fatten", text="Shrink Fatten")
             layout.operator('mesh.rot_con', 'Face-Rotation')
 
             layout.separator()
@@ -70,76 +68,73 @@ class WKST_Transform_Menu(bpy.types.Menu):
             layout.operator("transform.resize", text="Scale Texture Space").texture_space = True
 
 
-
-
 ########### Freeze Transformation ###########
 
 class Set_Freezetransform(bpy.types.Operator):
     """set transform values to zero"""
     bl_idname = "freeze_transform.selected"
-    bl_label = "Freeze Transform"	
+    bl_label = "Freeze Transform"
     bl_options = {'REGISTER', 'UNDO'}
-        
-    def execute(self, context):       
-   
-        str = context.active_object.type       
-        if str.startswith('EMPTY') or str.startswith('SPEAKER') or str.startswith('CAMERA')or str.startswith('LAMP')or str.startswith('FONT'):                 
-            #Location
-            context.active_object.delta_location+=context.active_object.location
-            context.active_object.location=[0,0,0]       
-            
-            #Rotation
-            
-            rotX=bpy.context.active_object.rotation_euler.x
-            rotDeltaX=bpy.context.active_object.delta_rotation_euler.x
-            bpy.context.active_object.delta_rotation_euler.x=rotX+rotDeltaX    
-                
-            rotY=bpy.context.active_object.rotation_euler.y
-            rotDeltaY=bpy.context.active_object.delta_rotation_euler.y
-            bpy.context.active_object.delta_rotation_euler.y=rotDeltaY+rotY           
-         
-            rotZ= bpy.context.active_object.rotation_euler.z
-            rotDeltaZ=bpy.context.active_object.delta_rotation_euler.z
-            bpy.context.active_object.delta_rotation_euler.z= rotDeltaZ+rotZ  
-                        
+
+    def execute(self, context):
+
+        str = context.active_object.type
+        if str.startswith('EMPTY') or str.startswith('SPEAKER') or str.startswith('CAMERA')or str.startswith('LAMP')or str.startswith('FONT'):
+            # Location
+            context.active_object.delta_location += context.active_object.location
+            context.active_object.location = [0, 0, 0]
+
+            # Rotation
+
+            rotX = bpy.context.active_object.rotation_euler.x
+            rotDeltaX = bpy.context.active_object.delta_rotation_euler.x
+            bpy.context.active_object.delta_rotation_euler.x = rotX + rotDeltaX
+
+            rotY = bpy.context.active_object.rotation_euler.y
+            rotDeltaY = bpy.context.active_object.delta_rotation_euler.y
+            bpy.context.active_object.delta_rotation_euler.y = rotDeltaY + rotY
+
+            rotZ = bpy.context.active_object.rotation_euler.z
+            rotDeltaZ = bpy.context.active_object.delta_rotation_euler.z
+            bpy.context.active_object.delta_rotation_euler.z = rotDeltaZ + rotZ
+
             rquatW = context.active_object.rotation_quaternion.w
             rquatX = context.active_object.rotation_quaternion.x
             rquatY = context.active_object.rotation_quaternion.y
             rquatZ = context.active_object.rotation_quaternion.z
-            
+
             drquatW = context.active_object.delta_rotation_quaternion.w
             drquatX = context.active_object.delta_rotation_quaternion.x
             drquatY = context.active_object.delta_rotation_quaternion.y
             drquatZ = context.active_object.delta_rotation_quaternion.z
-            
+
             context.active_object.delta_rotation_quaternion.w = 1.0
             context.active_object.delta_rotation_quaternion.x = rquatX + drquatX
             context.active_object.delta_rotation_quaternion.y = rquatY + drquatY
             context.active_object.delta_rotation_quaternion.z = rquatZ + drquatZ
-            
+
             context.active_object.rotation_quaternion.w = 1.0
             context.active_object.rotation_quaternion.x = 0.0
             context.active_object.rotation_quaternion.y = 0.0
             context.active_object.rotation_quaternion.z = 0.0
-            
-            bpy.context.active_object.rotation_euler.x = 0        
+
+            bpy.context.active_object.rotation_euler.x = 0
             bpy.context.active_object.rotation_euler.y = 0
             bpy.context.active_object.rotation_euler.z = 0
-                      
-            #Scale        
-            context.active_object.delta_scale.x += (context.active_object.scale.x-1) * context.active_object.delta_scale.x
-            context.active_object.delta_scale.y += (context.active_object.scale.y-1) * context.active_object.delta_scale.y
-            context.active_object.delta_scale.z += (context.active_object.scale.z-1) * context.active_object.delta_scale.z
-            context.active_object.scale=[1,1,1]   
-            
-            return {'FINISHED'}  
-        else:            
-            context.active_object.delta_location+=context.active_object.location
-            context.active_object.location=[0,0,0]
-            bpy.ops.object.transform_apply(location = False, rotation = True, scale = True)                   
-        
-            return {'FINISHED'}
 
+            # Scale
+            context.active_object.delta_scale.x += (context.active_object.scale.x - 1) * context.active_object.delta_scale.x
+            context.active_object.delta_scale.y += (context.active_object.scale.y - 1) * context.active_object.delta_scale.y
+            context.active_object.delta_scale.z += (context.active_object.scale.z - 1) * context.active_object.delta_scale.z
+            context.active_object.scale = [1, 1, 1]
+
+            return {'FINISHED'}
+        else:
+            context.active_object.delta_location += context.active_object.location
+            context.active_object.location = [0, 0, 0]
+            bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+
+            return {'FINISHED'}
 
 
 ######  Transform Orientation  ##################################################################
@@ -154,21 +149,21 @@ class spaceGlobal(bpy.types.Operator):
 
         bpy.context.space_data.transform_orientation = 'GLOBAL'
         return {'FINISHED'}
-    
-bpy.utils.register_class(spaceGlobal) 
-    
+
+bpy.utils.register_class(spaceGlobal)
+
 
 class spaceLOCAL(bpy.types.Operator):
     """Transform Orientation LOCAL"""
     bl_idname = "space.local"
     bl_label = "Transform Orientation LOCAL"
     bl_options = {'REGISTER'}
-    
+
     def execute(self, context):
         bpy.context.space_data.transform_orientation = 'LOCAL'
         return {'FINISHED'}
 
-bpy.utils.register_class(spaceLOCAL) 
+bpy.utils.register_class(spaceLOCAL)
 
 
 class spaceNORMAL(bpy.types.Operator):
@@ -176,12 +171,12 @@ class spaceNORMAL(bpy.types.Operator):
     bl_idname = "space.normal"
     bl_label = "Transform Orientation NORMAL"
     bl_options = {'REGISTER'}
-    
+
     def execute(self, context):
         bpy.context.space_data.transform_orientation = 'NORMAL'
         return {'FINISHED'}
-    
-bpy.utils.register_class(spaceNORMAL) 
+
+bpy.utils.register_class(spaceNORMAL)
 
 
 class spaceGIMBAL(bpy.types.Operator):
@@ -194,7 +189,7 @@ class spaceGIMBAL(bpy.types.Operator):
         bpy.context.space_data.transform_orientation = 'GIMBAL'
         return {'FINISHED'}
 
-bpy.utils.register_class(spaceGIMBAL)   
+bpy.utils.register_class(spaceGIMBAL)
 
 
 class spaceVIEW(bpy.types.Operator):
@@ -207,8 +202,7 @@ class spaceVIEW(bpy.types.Operator):
         bpy.context.space_data.transform_orientation = 'VIEW'
         return {'FINISHED'}
 
-bpy.utils.register_class(spaceVIEW)     
-  
+bpy.utils.register_class(spaceVIEW)
 
 
 ######  Snap Target  ##################################################################
@@ -223,7 +217,7 @@ class snapACTIVE(bpy.types.Operator):
         bpy.context.scene.tool_settings.snap_target = 'ACTIVE'
         return {'FINISHED'}
 
-bpy.utils.register_class(snapACTIVE) 
+bpy.utils.register_class(snapACTIVE)
 
 
 class snapMEDIAN(bpy.types.Operator):
@@ -236,7 +230,7 @@ class snapMEDIAN(bpy.types.Operator):
         bpy.context.scene.tool_settings.snap_target = 'MEDIAN'
         return {'FINISHED'}
 
-bpy.utils.register_class(snapMEDIAN) 
+bpy.utils.register_class(snapMEDIAN)
 
 
 class snapCENTER(bpy.types.Operator):
@@ -249,7 +243,7 @@ class snapCENTER(bpy.types.Operator):
         bpy.context.scene.tool_settings.snap_target = 'CENTER'
         return {'FINISHED'}
 
-bpy.utils.register_class(snapCENTER) 
+bpy.utils.register_class(snapCENTER)
 
 
 class snapCLOSEST(bpy.types.Operator):
@@ -262,8 +256,7 @@ class snapCLOSEST(bpy.types.Operator):
         bpy.context.scene.tool_settings.snap_target = 'CLOSEST'
         return {'FINISHED'}
 
-bpy.utils.register_class(snapCLOSEST) 
-
+bpy.utils.register_class(snapCLOSEST)
 
 
 ######  Snap Element  ##################################################################
@@ -273,12 +266,12 @@ class snaepVOLUME(bpy.types.Operator):
     bl_idname = "snape.volume"
     bl_label = "Snap Element VOLUME"
     bl_options = {'REGISTER'}
-    
+
     def execute(self, context):
         bpy.context.scene.tool_settings.snap_element = 'VOLUME'
         return {'FINISHED'}
 
-bpy.utils.register_class(snaepVOLUME)  
+bpy.utils.register_class(snaepVOLUME)
 
 
 class snaepFACE(bpy.types.Operator):
@@ -286,12 +279,12 @@ class snaepFACE(bpy.types.Operator):
     bl_idname = "snape.face"
     bl_label = "Snap Element FACE"
     bl_options = {'REGISTER'}
-    
+
     def execute(self, context):
         bpy.context.scene.tool_settings.snap_element = 'FACE'
         return {'FINISHED'}
 
-bpy.utils.register_class(snaepFACE)  
+bpy.utils.register_class(snaepFACE)
 
 
 class snaepEDGE(bpy.types.Operator):
@@ -299,12 +292,12 @@ class snaepEDGE(bpy.types.Operator):
     bl_idname = "snape.edge"
     bl_label = "Snap Element EDGE"
     bl_options = {'REGISTER'}
-    
+
     def execute(self, context):
         bpy.context.scene.tool_settings.snap_element = 'EDGE'
         return {'FINISHED'}
 
-bpy.utils.register_class(snaepEDGE)    
+bpy.utils.register_class(snaepEDGE)
 
 
 class snaepVERTEX(bpy.types.Operator):
@@ -312,11 +305,11 @@ class snaepVERTEX(bpy.types.Operator):
     bl_idname = "snape.vertex"
     bl_label = "Snap Element VERTEX"
     bl_options = {'REGISTER'}
-    
+
     def execute(self, context):
         bpy.context.scene.tool_settings.snap_element = 'VERTEX'
-        return {'FINISHED'} 
-    
+        return {'FINISHED'}
+
 bpy.utils.register_class(snaepVERTEX)
 
 
@@ -326,7 +319,6 @@ class snaepINCREMENT(bpy.types.Operator):
     bl_label = "Snap Element INCREMENT"
     bl_options = {'REGISTER'}
 
-    
     def execute(self, context):
         bpy.context.scene.tool_settings.snap_element = 'INCREMENT'
         return {'FINISHED'}
@@ -334,35 +326,31 @@ class snaepINCREMENT(bpy.types.Operator):
 bpy.utils.register_class(snaepINCREMENT)
 
 
-
-
-#######  Menus Proportional  #######-------------------------------------------------------  
+# Menus Proportional  #######-------------------------------------------------------
 
 class ProportionalMenu(bpy.types.Menu):
     """Proportional Menu"""
     bl_label = "Proportional Menu"
     bl_idname = "proportionalmenu"
-  
+
     def draw(self, context):
         layout = self.layout
         view = context.space_data
         obj = context.active_object
         toolsettings = context.tool_settings
 
-        layout.prop(toolsettings, "use_proportional_edit_objects", text = "on/off", icon_only=True)
-       
+        layout.prop(toolsettings, "use_proportional_edit_objects", text="on/off", icon_only=True)
+
         if toolsettings.use_proportional_edit_objects:
             layout.prop(toolsettings, "proportional_edit_falloff", icon_only=True)
 
         layout.prop(toolsettings, "proportional_edit", icon_only=True)
 
-bpy.utils.register_class(ProportionalMenu) 
+bpy.utils.register_class(ProportionalMenu)
 
 
+# Menus Apply / Clear  #######-------------------------------------------------------
 
-
-#######  Menus Apply / Clear  #######-------------------------------------------------------                  
-               
 
 class VIEW3D_ApplyandClear(bpy.types.Menu):
     """Apply & Clear Setup"""
@@ -372,44 +360,43 @@ class VIEW3D_ApplyandClear(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         obj = context.active_object
-        mesh = context.active_object.data        
+        mesh = context.active_object.data
 
-        layout.label("Apply Transform", icon = "FILE_TICK")
+        layout.label("Apply Transform", icon="FILE_TICK")
 
-        props = layout.operator("object.transform_apply", text=" Move",icon="RIGHTARROW_THIN")
-        props.location= True
-        props.rotation= False
-        props.scale= False
-        
-        props = layout.operator("object.transform_apply", text=" Rotation",icon="RIGHTARROW_THIN")
-        props.location= False
-        props.rotation= True
-        props.scale= False
-        
-        props = layout.operator("object.transform_apply", text=" Scale",icon="RIGHTARROW_THIN")
-        props.location= False
-        props.rotation= False
-        props.scale= True
+        props = layout.operator("object.transform_apply", text=" Move", icon="RIGHTARROW_THIN")
+        props.location = True
+        props.rotation = False
+        props.scale = False
+
+        props = layout.operator("object.transform_apply", text=" Rotation", icon="RIGHTARROW_THIN")
+        props.location = False
+        props.rotation = True
+        props.scale = False
+
+        props = layout.operator("object.transform_apply", text=" Scale", icon="RIGHTARROW_THIN")
+        props.location = False
+        props.rotation = False
+        props.scale = True
 
         layout.separator()
 
         layout.operator("object.visual_transform_apply", text="Visual Transform")
         layout.operator("object.duplicates_make_real", text="Real Duplicate")
-               
-        layout.separator()  
-        
-        layout.label("Clear Transform", icon = "X")
-        
+
+        layout.separator()
+
+        layout.label("Clear Transform", icon="X")
+
         layout.operator("object.location_clear", text=" Move")
         layout.operator("object.rotation_clear", text=" Rotation")
         layout.operator("object.scale_clear", text=" Scale")
-        
+
         layout.separator()
-        
+
         layout.operator("object.location_clear", text="Origin", icon="LAYER_ACTIVE")
 
 bpy.utils.register_class(VIEW3D_ApplyandClear)
-
 
 
 class VIEW3D_PoseApplyClear(bpy.types.Menu):
@@ -419,7 +406,7 @@ class VIEW3D_PoseApplyClear(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        
+
         layout.label(text="Apply Pose", icon="PMARKER")
 
         layout.operator("pose.armature_apply", text="Pose as Rest Pose")
@@ -434,16 +421,12 @@ class VIEW3D_PoseApplyClear(bpy.types.Menu):
         layout.operator("pose.rot_clear", text="Rotation")
         layout.operator("pose.scale_clear", text="Scale")
         layout.operator("pose.transforms_clear", text="Clear All Pose")
-        
+
         layout.separator()
 
         layout.operator("pose.user_transforms_clear", text="Reset unkeyed")
-                
+
 bpy.utils.register_class(VIEW3D_PoseApplyClear)
-
-
-
-
 
 
 ######------------################################################################################################################
@@ -454,58 +437,16 @@ def abs(val):
         return val
     return -val
 
-def register():
-    
-    bpy.utils.register_module(__name__)        
 
+def register():
+
+    bpy.utils.register_module(__name__)
 
 
 def unregister():
-    
-    bpy.utils.unregister_module(__name__)
-    
 
+    bpy.utils.unregister_module(__name__)
 
 
 if __name__ == "__main__":
-    register() 	
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    register()

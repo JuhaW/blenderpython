@@ -53,7 +53,7 @@ from bpy.props import *
 def material_update(self, context):
     scene = context.scene
     if scene.material_prop != '':
-        
+
         for i in range(0, 5):
             update_texture_index(context, i)
 
@@ -155,6 +155,7 @@ def update_texture_index(context, input_index):
                 scene.imageindex5_prop = image_index
             break
         i += 1
+
 
 def get_override():
     for window in bpy.context.window_manager.windows:
@@ -344,7 +345,7 @@ class ModalPPBrushOperator(bpy.types.Operator):
                         tools_r = area.regions[1]
                         if mx < tools_r.width + 30 or my < 0 or mx > (r.width - tools_r.width - 30) or my > r.height:
                             return {'PASS_THROUGH'}
-                    else: # mx is negative when in tools panel
+                    else:  # mx is negative when in tools panel
                         if mx < 30 or my < 0 or mx > r.width - 30 or my > r.height:
                             return {'PASS_THROUGH'}
             if view_area is False:
@@ -452,11 +453,11 @@ class PPSetupButton(bpy.types.Operator):
         import_node_groups()
 
         # Create material if needed
-        if obj.name+'_pbr' not in bpy.data.materials:
-            mat = bpy.data.materials.new(name=obj.name+'_pbr')
+        if obj.name + '_pbr' not in bpy.data.materials:
+            mat = bpy.data.materials.new(name=obj.name + '_pbr')
             mat.use_nodes = True
         else:
-            mat = bpy.data.materials[obj.name+'_pbr']
+            mat = bpy.data.materials[obj.name + '_pbr']
 
         if len(obj.data.materials) > 0:
             obj.data.materials[0] = mat
@@ -517,12 +518,12 @@ class PPSetupButton(bpy.types.Operator):
 
 def import_node_groups():
     if bpy.data.node_groups.get('PBR') is None:
-            data_path = \
+        data_path = \
             os.path.dirname(os.path.abspath(__file__)) + '/data.blend'
 
-            with bpy.data.libraries.load(data_path, link=False) as \
-            (data_from, data_to):
-                data_to.node_groups = ['PBR']
+        with bpy.data.libraries.load(data_path, link=False) as \
+                (data_from, data_to):
+            data_to.node_groups = ['PBR']
 
 
 class PPImportNodeGroupsButton(bpy.types.Operator):
@@ -604,9 +605,9 @@ class VIEW3D_PT_tools_imagepaint_pbr(bpy.types.Panel):
         box.operator("pp.import_node_groups")
         box.operator("pp.set_environment")
 
-        #layout.label('Export')
-        #layout.operator("pp.export_textures")
-        #layout.operator("pp.export_webgl")
+        # layout.label('Export')
+        # layout.operator("pp.export_textures")
+        # layout.operator("pp.export_webgl")
 
 
 def register():

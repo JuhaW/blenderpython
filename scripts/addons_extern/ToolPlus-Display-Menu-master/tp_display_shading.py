@@ -19,10 +19,10 @@
 bl_info = {
     "name": "TP Display Shading",
     "author": "marvin.k.breuer",
-    "version": (0,1),
+    "version": (0, 1),
     "blender": (2, 7, 7),
     "category": "Tool+"
-    }
+}
 
 
 import bpy
@@ -35,11 +35,11 @@ class VIEW3D_TP_Menu_3dview(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        view = context.space_data		
+        view = context.space_data
         obj = context.object
         obj_type = obj.type
         is_geometry = (obj_type in {'MESH', 'CURVE', 'SURFACE', 'META', 'FONT'})
-        is_empty_image = (obj_type == 'EMPTY' and obj.empty_draw_type == 'IMAGE')		
+        is_empty_image = (obj_type == 'EMPTY' and obj.empty_draw_type == 'IMAGE')
         with_freestyle = bpy.app.build_options.freestyle
         layout.operator_context = 'INVOKE_REGION_WIN'
         mesh = context.active_object.data
@@ -49,45 +49,44 @@ class VIEW3D_TP_Menu_3dview(bpy.types.Menu):
         mode_string = context.mode
         edit_object = context.edit_object
         obj = context.active_object
-        
+
         toolsettings = context.tool_settings
-       
+
         if obj and obj.mode == 'OBJECT':
-            layout.operator("object.shade_flat", icon="MESH_CIRCLE")            
+            layout.operator("object.shade_flat", icon="MESH_CIRCLE")
             layout.operator("object.shade_smooth", icon="SOLID")
-        
+
         if obj and obj.mode == 'EDIT':
-            layout.operator("mesh.faces_shade_flat", icon="MESH_CIRCLE")               
+            layout.operator("mesh.faces_shade_flat", icon="MESH_CIRCLE")
             layout.operator("mesh.faces_shade_smooth", icon="SOLID")
 
-
         layout.separator()
-        
+
         if view.viewport_shade == 'SOLID':
             layout.prop(view, "use_matcap")
             if view.use_matcap:
                 layout.template_icon_view(view, "matcap_icon")
-       
+
         layout.separator()
-        
+
         layout.prop(view, "show_backface_culling")
         if obj and obj.mode == 'EDIT' and view.viewport_shade not in {'BOUNDBOX', 'WIREFRAME'}:
             layout.prop(view, "show_occlude_wire")
-            
-        layout.separator()            
 
-        if view.viewport_shade == 'SOLID':               
+        layout.separator()
+
+        if view.viewport_shade == 'SOLID':
             layout.prop(view, "show_textured_solid", text="Texture")
-               
+
         elif view.viewport_shade == 'TEXTURED':
             if scene.render.use_shading_nodes or gs.material_mode != 'GLSL':
                 layout.prop(view, "show_textured_shadeless")
 
         if not scene.render.use_shading_nodes:
-            layout.prop(gs, "material_mode", text="")                
+            layout.prop(gs, "material_mode", text="")
 
-        layout.separator()   
-                                        
+        layout.separator()
+
         col = layout.column()
         col.prop(view, "show_only_render")
 
@@ -98,7 +97,7 @@ class VIEW3D_TP_Menu_3dview(bpy.types.Menu):
         col.prop(view, "show_all_objects_origin")
         col.prop(view, "show_relationship_lines")
 
-        layout.separator()        
+        layout.separator()
 
         col = layout.column()
         col.active = display_all
@@ -108,7 +107,7 @@ class VIEW3D_TP_Menu_3dview(bpy.types.Menu):
         layout.prop(view, "show_axis_y", text="Y", toggle=True)
         layout.prop(view, "show_axis_z", text="Z", toggle=True)
 
-        layout.separator()          
+        layout.separator()
 
         sub = layout.column(align=True)
         sub.active = (display_all and view.show_floor)
@@ -119,24 +118,22 @@ class VIEW3D_TP_Menu_3dview(bpy.types.Menu):
         subsub.prop(view, "grid_subdivisions", text="Subdivisions")
 
 
-
-
 def register():
 
     bpy.utils.register_class(VIEW3D_TP_Menu_3dview)
-        
+
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
-        km = kc.keymaps.new(name='3D View', space_type ='VIEW_3D')
+        km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
         kmi = km.keymap_items.new('wm.call_menu', 'TWO', 'PRESS', alt=True)
-        kmi.properties.name = "tp_display.menu_3d_view"      
+        kmi.properties.name = "tp_display.menu_3d_view"
 
 
 def unregister():
-  
+
     bpy.utils.unregister_class(VIEW3D_TP_Menu_3dview)
-        
+
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
@@ -145,25 +142,11 @@ def unregister():
             if kmi.idname == 'wm.call_menu':
                 if kmi.properties.name == "":
                     km.keymap_items.remove(kmi)
-                    break 
+                    break
 
 
 if __name__ == "__main__":
-    register() 	
+    register()
 
     # The menu can also be called from scripts
     bpy.ops.wm.call_menu(name=VIEW3D_TP_Menu_3dview.bl_idname)
-         
-
-
-
-
-
-
-
-
-
-
-
-
-

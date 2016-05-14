@@ -45,7 +45,7 @@ class SvObjectToMeshNode(bpy.types.Node, SverchCustomTreeNode):
         objs = self.inputs[0].sv_get()
         if isinstance(objs[0], list):
             objs = objs[0]
-        es,vs,ps,ms = [],[],[],[]
+        es, vs, ps, ms = [], [], [], []
         scene, mod = bpy.context.scene, self.modifiers
         ot = objs[0].type in ['MESH', 'CURVE', 'FONT', 'SURFACE']
         for obj in objs:
@@ -56,7 +56,7 @@ class SvObjectToMeshNode(bpy.types.Node, SverchCustomTreeNode):
                 es.append(obj_data.edge_keys)
                 ps.append([p.vertices[:] for p in obj_data.polygons])
                 bpy.data.meshes.remove(obj_data)
-        for i,i2 in zip(self.outputs, [vs,es,ps,ms]):
+        for i, i2 in zip(self.outputs, [vs, es, ps, ms]):
             if i.is_linked:
                 i.sv_set(i2)
 

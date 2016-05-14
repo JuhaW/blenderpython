@@ -113,7 +113,7 @@ class MatrixDraw(object):
         for i in range(0, 24, 2):
             glBegin(GL_LINE_STRIP)
             glVertex3f(*bb[i])
-            glVertex3f(*bb[i+1])
+            glVertex3f(*bb[i + 1])
             glEnd()
         glDisable(GL_LINE_STIPPLE)
 
@@ -173,7 +173,7 @@ def get_color_from_normal(dvk, pol, num_verts, vectorlight, colo):
     r = (normal_no * colo[0]) - 0.1
     g = (normal_no * colo[1]) - 0.1
     b = (normal_no * colo[2]) - 0.1
-    return (r+0.2, g+0.2, b+0.2)
+    return (r + 0.2, g + 0.2, b + 0.2)
 
 
 def display_face(options, pol, data_vector, data_matrix, k, i):
@@ -279,8 +279,8 @@ def draw_geometry(n_id, options, data_vector, data_polygons, data_matrix, data_e
             k = get_max_k(i, verlen)
             mesh_edges = set()
             if k >= num_datapolygon_lists:
-                k = (num_datapolygon_lists-1)
-                #break
+                k = (num_datapolygon_lists - 1)
+                # break
 
             for j, pol in enumerate(data_polygons[k]):
 
@@ -293,7 +293,7 @@ def draw_geometry(n_id, options, data_vector, data_polygons, data_matrix, data_e
                 # collect raw edges, sort by index, use set to prevent dupes.
                 if show_edges:
                     er = list(pol) + [pol[0]]
-                    kb = {tuple(sorted((e, er[i+1]))) for i, e in enumerate(er[:-1])}
+                    kb = {tuple(sorted((e, er[i + 1]))) for i, e in enumerate(er[:-1])}
                     mesh_edges.update(kb)
 
             if show_edges and mesh_edges:
@@ -370,7 +370,7 @@ def draw_callback_view(n_id, cached_view, options):
 
         if sl1:
             data_vector = Vector_generate2(sl1)
-            verlen = len(data_vector)-1
+            verlen = len(data_vector) - 1
         else:
             if not sl3:
                 # end early: no matrix and no vertices
@@ -399,7 +399,7 @@ def draw_callback_view(n_id, cached_view, options):
         if sl3:
             data_matrix = Matrix_generate(sl3)
         else:
-            data_matrix = [Matrix() for i in range(verlen+1)]
+            data_matrix = [Matrix() for i in range(verlen + 1)]
 
         if (data_vector, data_polygons, data_matrix, data_edges) == (0, 0, 0, 0):
             callback_disable(n_id)
@@ -419,7 +419,7 @@ def draw_callback_view(n_id, cached_view, options):
 
     elif options['draw_list'] == 1:
         the_display_list = options['genlist']
-    
+
     if not 'error' in options:
         glCallList(the_display_list)
         glFlush()
@@ -429,7 +429,7 @@ def draw_callback_view(n_id, cached_view, options):
 
     if options["timings"]:
         stop = time.perf_counter()
-        print("callback drawn in {:4f}".format(stop-start))
+        print("callback drawn in {:4f}".format(stop - start))
 
     # has drawn once with success.
     options['draw_list'] = 1

@@ -17,6 +17,7 @@ end
 
 import numpy as np
 
+
 def sv_main(n=3):
 
     in_sockets = [
@@ -26,10 +27,10 @@ def sv_main(n=3):
         if (n <= 0):
             x, y, z = 0, 0, 0
         else:
-            [xo, yo, zo] = hilbert3(n-1)
-            x = .5 * np.array([.5+zo, .5+yo, -.5+yo, -.5-xo, -.5-xo, -.5-yo, .5-yo, .5+zo])
-            y = .5 * np.array([.5+xo, .5+zo, .5+zo, .5+yo, -.5+yo, -.5-zo, -.5-zo, -.5-xo])
-            z = .5 * np.array([.5+yo, -.5+xo, -.5+xo, .5-zo, .5-zo, -.5+xo, -.5+xo, .5-yo])
+            [xo, yo, zo] = hilbert3(n - 1)
+            x = .5 * np.array([.5 + zo, .5 + yo, -.5 + yo, -.5 - xo, -.5 - xo, -.5 - yo, .5 - yo, .5 + zo])
+            y = .5 * np.array([.5 + xo, .5 + zo, .5 + zo, .5 + yo, -.5 + yo, -.5 - zo, -.5 - zo, -.5 - xo])
+            z = .5 * np.array([.5 + yo, -.5 + xo, -.5 + xo, .5 - zo, .5 - zo, -.5 + xo, -.5 + xo, .5 - yo])
         return [x, y, z]
 
     vx, vy, vz = hilbert3(n)
@@ -37,7 +38,7 @@ def sv_main(n=3):
     vy = vy.flatten().tolist()
     vz = vz.flatten().tolist()
     verts = [list(zip(vx, vy, vz))]
-    
+
     out_sockets = [
         ['v', 'verts', verts]
     ]

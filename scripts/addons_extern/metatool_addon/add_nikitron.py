@@ -23,12 +23,13 @@ import math
 from math import radians
 import re
 
+
 class CurvesTo3D (bpy.types.Operator):
     """Put curves to ground and turn to 3d mode (wiring them) for farthere spread to layout sheet"""
     bl_idname = "object.curv_to_3d"
     bl_label = "Curves to 3d"
-    bl_options = {'REGISTER', 'UNDO'} 
-    
+    bl_options = {'REGISTER', 'UNDO'}
+
     def execute(self, context):
         obj = bpy.context.selected_objects
         if obj[0].type == 'CURVE':
@@ -38,12 +39,13 @@ class CurvesTo3D (bpy.types.Operator):
                 #o.matrix_world.translation[2] = 0
         return {'FINISHED'}
 
+
 class CurvesTo2D (bpy.types.Operator):
     """Curves turn to 2d mode (and thicken 0.03 mm)"""
     bl_idname = "object.curv_to_2d"
     bl_label = "Curves to 2d"
-    bl_options = {'REGISTER', 'UNDO'} 
-    
+    bl_options = {'REGISTER', 'UNDO'}
+
     def execute(self, context):
         obj = bpy.context.selected_objects
         if obj[0].type == 'CURVE':
@@ -58,12 +60,13 @@ class CurvesTo2D (bpy.types.Operator):
                         point.radius = 1.0
         return {'FINISHED'}
 
+
 class ObjectNames (bpy.types.Operator):
-    """Make all objects show names in 3d"""      
-    bl_idname = "object.name_objects" 
-    bl_label = "Name objects"        
-    bl_options = {'REGISTER', 'UNDO'} 
-    
+    """Make all objects show names in 3d"""
+    bl_idname = "object.name_objects"
+    bl_label = "Name objects"
+    bl_options = {'REGISTER', 'UNDO'}
+
     def execute(self, context):
         obj = bpy.context.selected_objects
         for ob in obj:
@@ -73,19 +76,19 @@ class ObjectNames (bpy.types.Operator):
             box = ob.bound_box
             v1 = Vector((box[0][0:]))
             v2 = Vector((box[6][0:]))
-            len = Vector((v2-v1)).length
-            self.run(mw,name,len)
+            len = Vector((v2 - v1)).length
+            self.run(mw, name, len)
         return {'FINISHED'}
 
-    def run(self, origin,text,length):
+    def run(self, origin, text, length):
        # Create and name TextCurve object
         bpy.ops.object.text_add(
-        location=origin,
-        rotation=(radians(0),radians(0),radians(0)))
+            location=origin,
+            rotation=(radians(0), radians(0), radians(0)))
         ob = bpy.context.object
-        ob.name = 'lable_'+str(text)
+        ob.name = 'lable_' + str(text)
         tcu = ob.data
-        tcu.name = 'lable_'+str(text)
+        tcu.name = 'lable_' + str(text)
         # TextCurve attributes
         tcu.body = str(text)
         tcu.font = bpy.data.fonts[0]
@@ -94,7 +97,7 @@ class ObjectNames (bpy.types.Operator):
         tcu.resolution_u = 2
         tcu.shear = 0
         if length < 0.0625:
-            Tsize = 0.01*(5*length)
+            Tsize = 0.01 * (5 * length)
         else:
             Tsize = 0.0625
         tcu.size = Tsize
@@ -104,18 +107,18 @@ class ObjectNames (bpy.types.Operator):
         # Inherited Curve attributes
         tcu.extrude = 0.0
         tcu.fill_mode = 'NONE'
-        
-        
+
+
 class VerticesNumbers3D (bpy.types.Operator):
-    """make all vertices show numbers in 3D"""      
+    """make all vertices show numbers in 3D"""
     bl_idname = "object.vertices_numbers3d"
     bl_label = "Vertices num."
-    bl_options = {'REGISTER', 'UNDO'} 
-    
+    bl_options = {'REGISTER', 'UNDO'}
+
     def execute(self, context):
         obj1 = bpy.context.selected_objects[0]
         if obj1.type != 'MESH':
-            print ("Select meshes, plase")
+            print("Select meshes, plase")
             return {'CANCELLED'}
         mw1 = obj1.matrix_world
         mesh1 = obj1.data
@@ -124,18 +127,18 @@ class VerticesNumbers3D (bpy.types.Operator):
         for id in ver1:
             i = id.index
             coor = mw1 * ver1[i].co
-            self.run(coor,i)
+            self.run(coor, i)
         return {'FINISHED'}
-    
-    def run(self, origin,text):
+
+    def run(self, origin, text):
         # Create and name TextCurve object
         bpy.ops.object.text_add(
-        location=origin,
-        rotation=(radians(90),radians(0),radians(0)))
+            location=origin,
+            rotation=(radians(90), radians(0), radians(0)))
         ob = bpy.context.object
-        ob.name = 'vert '+str(text)
+        ob.name = 'vert ' + str(text)
         tcu = ob.data
-        tcu.name = 'vert '+str(text)
+        tcu.name = 'vert ' + str(text)
         # TextCurve attributes
         tcu.body = str(text)
         tcu.font = bpy.data.fonts[0]
@@ -151,16 +154,17 @@ class VerticesNumbers3D (bpy.types.Operator):
 
 vert_max = 0
 
+
 class Connect2Meshes (bpy.types.Operator):
-    """connect two objects by mesh edges with vertices shift and hooks to initial objects"""      
+    """connect two objects by mesh edges with vertices shift and hooks to initial objects"""
     bl_idname = "object.connect2objects"
     bl_label = "connect2objects"
     bl_options = {'REGISTER', 'UNDO'}
-    
-    def dis(self, x,y):
-        vec = mathutils.Vector((x[0]-y[0], x[1]-y[1], x[2]-y[2]))
+
+    def dis(self, x, y):
+        vec = mathutils.Vector((x[0] - y[0], x[1] - y[1], x[2] - y[2]))
         return vec.length
-    
+
     def maxObj(self, ver1, ver2, mw1, mw2):
         if len(ver1) > len(ver2):
             inverc = 0
@@ -177,7 +181,7 @@ class Connect2Meshes (bpy.types.Operator):
         cache_max = [vert1, mworld1]
         cache_min = [vert2, mworld2]
         return cache_max, cache_min, inverc
-    
+
     def points(self, ver1, ver2, mw1, mw2, shift):
         vert_new = []
         # choosing maximum vertex count in ver1/2, esteblish vert2 - mincount of vertex
@@ -203,21 +207,21 @@ class Connect2Meshes (bpy.types.Operator):
             vert_new.append(v2 - m2)
             vert_new.append(v1 - m1)
         return vert_new
-    
+
     def edges(self, vert_new):
         edges_new = []
         i = -2
         for v in vert_new:
-            # dis(vert_new[i],vert_new[i+1]) < 10 and 
+            # dis(vert_new[i],vert_new[i+1]) < 10 and
             if i > -1 and i < (len(vert_new)):
-                edges_new.append((i,i + 1))
+                edges_new.append((i, i + 1))
             i += 2
         return edges_new
-    
+
     def mk_me(self, name):
-        me = bpy.data.meshes.new(name+'Mesh')
+        me = bpy.data.meshes.new(name + 'Mesh')
         return me
-    
+
     def mk_ob(self, mesh, name, mw):
         loc = mw.translation.to_tuple()
         ob = bpy.data.objects.new(name, mesh)
@@ -225,7 +229,7 @@ class Connect2Meshes (bpy.types.Operator):
         ob.show_name = True
         bpy.context.scene.objects.link(ob)
         return ob
-    
+
     def def_me(self, mesh, ver1, ver2, mw1, mw2, obj1, obj2, nam):
         ver = self.points(ver1, ver2, mw1, mw2, bpy.context.scene.shift_verts)
         edg = self.edges(ver)
@@ -234,7 +238,7 @@ class Connect2Meshes (bpy.types.Operator):
         if bpy.context.scene.hook_or_not:
             self.hook_verts(ver, obj1, obj2, nam, ver1, ver2, mw1, mw2)
         return
-    
+
     # preparations for hooking
     def hook_verts(self, ver, obj1, obj2, nam, ver1, ver2, mw1, mw2):
         # pull cache from maxObj
@@ -265,7 +269,7 @@ class Connect2Meshes (bpy.types.Operator):
             # ob1 = obj2 ob2 = obj1, 2 - bigger
             self.hooking_action(obj2, nam, points_od, ver)
             self.hooking_action(obj1, nam, points_ev, ver)
-        
+
     # free hooks :-)
     def hooking_action(self, ob, nam, points, verts_of_object):
         # select 1st obj, second connection
@@ -282,12 +286,11 @@ class Connect2Meshes (bpy.types.Operator):
         # hook itself
         bpy.ops.object.editmode_toggle()
         bpy.ops.object.hook_add_selob(use_bone=False)
-        #bpy.ops.mesh.select_all(action='TOGGLE')
+        # bpy.ops.mesh.select_all(action='TOGGLE')
         bpy.ops.object.editmode_toggle()
         # deselect all
         bpy.ops.object.select_all(action='TOGGLE')
 
-    
     def execute(self, context):
         context.scene.update()
         obj1 = context.selected_objects[0]
@@ -304,15 +307,16 @@ class Connect2Meshes (bpy.types.Operator):
         me = self.mk_me(nam)
         ob = self.mk_ob(me, nam, mw1)
         self.def_me(me, ver1, ver2, mw1, mw2, obj1, obj2, nam)
-        print ('---- NIKITRON_connect2objects MADE CONNECTION BETWEEN: ' + str(obj1.name) + ' AND ' + str(obj2.name) + ' AND GOT ' + str(ob.name) + ' ----')
+        print('---- NIKITRON_connect2objects MADE CONNECTION BETWEEN: ' + str(obj1.name) + ' AND ' + str(obj2.name) + ' AND GOT ' + str(ob.name) + ' ----')
         return {'FINISHED'}
 
 
 class MaterialToObjectAll (bpy.types.Operator):
-    """all materials turned to object mode"""      
+    """all materials turned to object mode"""
     bl_idname = "object.materials_to_object"
     bl_label = "Materials to object"
-    bl_options = {'REGISTER', 'UNDO'} 
+    bl_options = {'REGISTER', 'UNDO'}
+
     def execute(self, context):
         obj = bpy.context.selected_objects
         mode = 'OBJECT'
@@ -321,12 +325,14 @@ class MaterialToObjectAll (bpy.types.Operator):
             for m in materials:
                 m.link = mode
         return {'FINISHED'}
-    
+
+
 class MaterialToDataAll (bpy.types.Operator):
-    """all materials turned to data mode"""      
+    """all materials turned to data mode"""
     bl_idname = "object.materials_to_data"
     bl_label = "Materials to data"
-    bl_options = {'REGISTER', 'UNDO'} 
+    bl_options = {'REGISTER', 'UNDO'}
+
     def execute(self, context):
         obj = bpy.context.selected_objects
         mode = 'DATA'
@@ -338,11 +344,11 @@ class MaterialToDataAll (bpy.types.Operator):
 
 
 class BoundingBox (bpy.types.Operator):
-    """Make bound boxes for selected objects in mesh"""      
+    """Make bound boxes for selected objects in mesh"""
     bl_idname = "object.bounding_boxers"
     bl_label = "Bounding boxes"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
         objects = bpy.context.selected_objects
         i = 0
@@ -350,12 +356,12 @@ class BoundingBox (bpy.types.Operator):
             self.make_it(i, a)
             i += 1
         return {'FINISHED'}
-    
+
     def make_it(self, i, obj):
         box = bpy.context.selected_objects[i].bound_box
         mw = bpy.context.selected_objects[i].matrix_world
         name = (bpy.context.selected_objects[i].name + '_bounding_box')
-        me = bpy.data.meshes.new(name+'Mesh')
+        me = bpy.data.meshes.new(name + 'Mesh')
         ob = bpy.data.objects.new(name, me)
         ob.location = mw.translation
         ob.scale = mw.to_scale()
@@ -364,23 +370,24 @@ class BoundingBox (bpy.types.Operator):
         bpy.context.scene.objects.link(ob)
         loc = []
         for ver in box:
-            loc.append(mathutils.Vector((ver[0],ver[1],ver[2])))
-        me.from_pydata((loc), [], ((0,1,2,3),(0,1,5,4),(4,5,6,7), (6,7,3,2),(0,3,7,4),(1,2,6,5)))
+            loc.append(mathutils.Vector((ver[0], ver[1], ver[2])))
+        me.from_pydata((loc), [], ((0, 1, 2, 3), (0, 1, 5, 4), (4, 5, 6, 7), (6, 7, 3, 2), (0, 3, 7, 4), (1, 2, 6, 5)))
         me.update(calc_edges=True)
         return
+
 
 class SpreadObjects (bpy.types.Operator):
     """spread all objects on sheet for farthere use in dxf layout export"""
     bl_idname = "object.spread_objects"
     bl_label = "Spread objects"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
         obj = bpy.context.selected_objects
         bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='MEDIAN')
         count = len(obj) - 1                # items number
-        row = math.modf(math.sqrt(count))[1] or 1 #optimal number of rows and columns !!! temporery solution
-        locata = mathutils.Vector()    # while veriable 
+        row = math.modf(math.sqrt(count))[1] or 1  # optimal number of rows and columns !!! temporery solution
+        locata = mathutils.Vector()    # while veriable
         dx, dy, ddy = 0, 0, 0                       # distance
         while count > -1:   # iterations X
             locata[2] = 0               # Z = 0
@@ -398,8 +405,8 @@ class SpreadObjects (bpy.types.Operator):
                 y0 = bb[0][1]
                 y1 = bb[2][1]
                 ddy = dy            # secondary distance to calculate avverage
-                dx = mwscalex*(max(x0,x1)-min(x0,x1)) + 0.03        # seek for distance !!! temporery solution
-                dy = mwscaley*(max(y0,y1)-min(y0,y1)) + 0.03        # seek for distance !!! temporery solution
+                dx = mwscalex * (max(x0, x1) - min(x0, x1)) + 0.03        # seek for distance !!! temporery solution
+                dy = mwscaley * (max(y0, y1) - min(y0, y1)) + 0.03        # seek for distance !!! temporery solution
                 # shift y
                 locata[1] += ((dy + ddy) / 2)
                 # append x bounds
@@ -412,44 +419,49 @@ class SpreadObjects (bpy.types.Operator):
             dx, dy, ddy = 0, 0, 0
             del(x_curr)
         return {'FINISHED'}
-    
+
 from bpy.props import IntProperty, BoolProperty
 
 # this def for connect2objects maximum shift (it cannot update scene's veriable somehow)
+
+
 def maxim():
     if bpy.context.selected_objects[0].type == 'MESH':
-        if len(bpy.context.selected_objects) >= 2:     
+        if len(bpy.context.selected_objects) >= 2:
             len1 = len(bpy.context.selected_objects[0].data.vertices)
             len2 = len(bpy.context.selected_objects[1].data.vertices)
             maxim = min(len1, len2)
             #print (maxim)
     return maxim
 
+
 def shift():
     bpy.types.Scene.shift_verts = IntProperty(
         name="shift_verts",
         description="shift vertices of smaller object, it can reach maximum (look right), to make patterns",
-        min=0, max=1000,  #maxim(), - this cannot be updated
-        default = 0, options={'ANIMATABLE', 'LIBRARY_EDITABLE'})
+        min=0, max=1000,  # maxim(), - this cannot be updated
+        default=0, options={'ANIMATABLE', 'LIBRARY_EDITABLE'})
     return
 shift()
 
 # this flag for connetc2objects, hook or not?
+
+
 def hook_or_not():
     bpy.types.Scene.hook_or_not = BoolProperty(
         name="hook_or_not",
         description="hook or not new connected vertices to parents objects? it will get spider's web's linkage effect",
-        default = True)
+        default=True)
     return
 hook_or_not()
 
 # this cache for define vertex count of currently selected materials.
 #cache_obj = []
-#def cache_add():
+# def cache_add():
 #    for i in bpy.context.selected_objects:
 #        cache_obj.append(i)
 #    print (cache_obj)
-#cache_add()
+# cache_add()
 """
 class NikitronPanel(bpy.types.Panel):
     bl_idname = "panel.nikitron"
@@ -509,16 +521,18 @@ class NikitronPanel(bpy.types.Panel):
                 row = layout.row()
                 row.prop(bpy.context.scene, "hook_or_not", text="hook new vertices?")
 """
-        
+
 my_classes = [CurvesTo3D, CurvesTo2D, ObjectNames, VerticesNumbers3D, Connect2Meshes, MaterialToObjectAll, MaterialToDataAll, BoundingBox, SpreadObjects]
-    
+
+
 def register():
     for clas in my_classes:
         bpy.utils.register_class(clas)
 
+
 def unregister():
     for clas in my_classes:
         bpy.utils.unregister_class(clas)
-    
+
 if __name__ == "__main__":
     register()

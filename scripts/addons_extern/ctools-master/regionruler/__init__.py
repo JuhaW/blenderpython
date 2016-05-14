@@ -153,8 +153,10 @@ class RegionRuler_PG_Color(bpy.types.PropertyGroup):
         min=0, max=1, soft_min=0, soft_max=1,
         subtype='COLOR_GAMMA', size=3)
     # 線と数字の色をわざわざ分ける必要は無さそうなので
+
     def number_getter(self):
         return self.line
+
     def number_setter(self, value):
         self.line = value
     number = vap.FVP(
@@ -182,6 +184,7 @@ class RegionRuler_PG_Color(bpy.types.PropertyGroup):
 
 class RegionRuler_PG(bpy.types.PropertyGroup):
     """WindowManager.region_ruler"""
+
     def _enabled_update(self, context):
         if not data.ignore_operator_call:
             if self.enable:
@@ -204,7 +207,7 @@ class RegionRuler_PG(bpy.types.PropertyGroup):
     def _measure_set(self, value):
         self.__class__._measure = value
 
-    measure = vap.BP('Measure',get=_measure_get, set=_measure_set,
+    measure = vap.BP('Measure', get=_measure_get, set=_measure_set,
                      update=_update_redraw)
 
     origin_type = vap.EP(
@@ -288,6 +291,7 @@ class RegionRulerPreferences(
         utils.AddonPreferences,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
+
     def draw_property(self, attr, layout, text=None, skip_hidden=True,
                       row=False, **kwargs):
         """プロパティを描画。別オブジェクトのプロパティを描画する為に
@@ -473,6 +477,7 @@ def get_view_location(context):
 
 
 class Data:
+
     def __init__(self):
         # RegionRuler_PG.enableをTrueとした際に、そのプロパティのupdate関数が
         # オペレータを呼び出すのを抑制する
@@ -855,7 +860,6 @@ def draw_font_context(context, font_id, text, outline=False,
         draw_font(font_id, text, outline_color)
     else:
         draw_font(font_id, text)
-
 
 
 def get_background_color(context, y=None):
@@ -1695,7 +1699,7 @@ def draw_measure(context, event):
                 x = mco[0] + 20
             y = data.mcbox_x[1]
             wbox = (x, y - th - margin * 2,
-                       tw + margin * 2, th + margin * 2)
+                    tw + margin * 2, th + margin * 2)
             draw_box_text(wbox, text)
 
             # Height Box ------------------------------------------------------
@@ -1768,7 +1772,7 @@ def draw_measure(context, event):
                 context, unit_system, (v1W - v2W).length)
             tw, _ = blf.dimensions(font.id, text)
             _width, height = rotated_bbox(tw + margin * 2, th + margin * 2,
-                                         - math.atan2(*(v2R - v1R).yx))
+                                          - math.atan2(*(v2R - v1R).yx))
             hvec = (v2R - v1R).normalized()
             vvec = Matrix.Rotation(-math.pi / 2, 2) * hvec
             v = (v2R + v1R) / 2 + (ssmain + height / 2) * vvec
@@ -1892,7 +1896,6 @@ def draw_measure(context, event):
             bgl.glVertex2f(data.mcbox_y[0], v1R[1])
             bgl.glVertex2f(data.mcbox_y[0], mco[1])
             bgl.glEnd()
-
 
     bgl.glEnable(bgl.GL_BLEND)
     if use_fill:
@@ -2298,7 +2301,7 @@ def draw_handler_remove():
         logger.debug("SpaceImageEditor.draw_handler_remove(..., 'WINDOW')")
     if data.handle_node:
         bpy.types.SpaceNodeEditor.draw_handler_remove(data.handle_node,
-            'WINDOW')
+                                                      'WINDOW')
         data.handle_node = None
         logger.debug("SpaceNodeEditor.draw_handler_remove(..., 'WINDOW')")
 

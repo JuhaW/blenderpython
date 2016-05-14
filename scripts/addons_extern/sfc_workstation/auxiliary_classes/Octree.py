@@ -22,12 +22,14 @@ import bpy
 from mathutils import Matrix, Vector
 from .OctreeNode import OctreeNode
 
+
 class Octree():
-    def __init__(self, root_center = Vector(),
-                 root_half_size = 0, max_indices_per_leaf = 1):
+
+    def __init__(self, root_center=Vector(),
+                 root_half_size=0, max_indices_per_leaf=1):
         OctreeNode.max_indices_per_leaf = max_indices_per_leaf
         self.root =\
-            OctreeNode(center = root_center, half_size = root_half_size)
+            OctreeNode(center=root_center, half_size=root_half_size)
 
         # Create a catalog that maps each index to its respective node in the
         # octree.
@@ -79,8 +81,8 @@ class Octree():
         # Create the new root node.
         octant_offset = old_root_half_size * old_root.offset_map[key]
         self.root = OctreeNode(
-            center = old_root_center - octant_offset,
-            half_size = 2 * old_root_half_size,
+            center=old_root_center - octant_offset,
+            half_size=2 * old_root_half_size,
         )
         root = self.root
 
@@ -132,14 +134,14 @@ class Octree():
                 abs(offset.x) > root_half_size or
                 abs(offset.y) > root_half_size or
                 abs(offset.z) > root_half_size
-            ): 
+            ):
                 # An empty root node can be replaced.
                 if not (root.child_map or root.indices):
                     minimum_half_size = max(
                         abs(offset.x), abs(offset.y), abs(offset.z)
                     )
                     self.root = OctreeNode(
-                        center = root.center, half_size = minimum_half_size
+                        center=root.center, half_size=minimum_half_size
                     )
                     root = self.root
 
@@ -151,7 +153,7 @@ class Octree():
             # Insert the index into the root node.
             root.insert_index(index, coordinate_map, catalog)
 
-    def insert_object(self, mesh_object, space = 'WORLD'):
+    def insert_object(self, mesh_object, space='WORLD'):
         # Only mesh objects can be inserted into the octree.
         if mesh_object.type != 'MESH':
             raise Exception(
@@ -161,26 +163,26 @@ class Octree():
         # Ensure that a valid coordinate system is specified.
         if space not in {'OBJECT', 'WORLD'}:
             raise Exception((
-                    "Invalid space argument '{0}' not found in " +
-                    "('OBJECT', 'WORLD')"
-                ).format(space)
+                "Invalid space argument '{0}' not found in " +
+                "('OBJECT', 'WORLD')"
+            ).format(space)
             )
 
         # Write Edit mode's data to the mesh object, if necessary.
         if mesh_object.mode != 'OBJECT':
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
         # Generate the coordinate map.
         vertices = mesh_object.data.vertices
         if space == 'OBJECT':
             coordinate_map = {
-                vertex.index : vertex.co.copy()
+                vertex.index: vertex.co.copy()
                 for vertex in vertices
             }
         else:
             matrix_world = mesh_object.matrix_world
             coordinate_map = {
-                vertex.index : matrix_world * vertex.co
+                vertex.index: matrix_world * vertex.co
                 for vertex in vertices
             }
 
@@ -244,4 +246,4 @@ class Octree():
         self.contract_root()
 
     def reset(self):
-        self.__init__(max_indices_per_leaf = self.root.max_indices_per_leaf)
+        self.__init__(max_indices_per_leaf=self.root.max_indices_per_leaf)

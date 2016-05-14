@@ -1,4 +1,4 @@
-#bl_info = {
+# bl_info = {
 #    "name": "Spacebar File",
 #    "author": "Multiple Authors, mkbreuer",
 #    "version": (0,1),
@@ -11,8 +11,6 @@
 #    "category": "User Menu"}
 
 
-
-
 import bpy
 from bpy import *
 
@@ -22,20 +20,20 @@ from bpy import *
 ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ###
 #############################################################################################################################################################
 #############################################################################################################################################################
- 
- 
-######  File Menu  ##################-------------------------------------------------------                         
-######  File Menu  ##################-------------------------------------------------------                          
+
+
+# File Menu  ##################-------------------------------------------------------
+# File Menu  ##################-------------------------------------------------------
 
 class VIEW3D_Space_File(bpy.types.Menu):
     bl_label = "File Menu"
-    bl_idname = "space_file"  
+    bl_idname = "space_file"
 
-    def draw(self, context):       
+    def draw(self, context):
         layout = self.layout
         settings = context.tool_settings
         layout.operator_context = 'INVOKE_REGION_WIN'
-		
+
         layout.operator_context = 'INVOKE_AREA'
         layout.operator("wm.read_homefile", text="New", icon='NEW')
         layout.operator("wm.open_mainfile", text="Open...", icon='FILE_FOLDER')
@@ -62,26 +60,25 @@ class VIEW3D_Space_File(bpy.types.Menu):
         layout.operator("wm.save_homefile", icon='SAVE_PREFS')
         layout.operator("wm.read_factory_settings", icon='LOAD_FACTORY')
 
-        
         layout.separator()
 
         layout.operator_context = 'EXEC_AREA'
         if bpy.data.is_dirty and context.user_preferences.view.use_quit_dialog:
             layout.operator_context = 'INVOKE_SCREEN'  # quit dialog
-        layout.operator("wm.quit_blender", text="Quit", icon='QUIT')  
+        layout.operator("wm.quit_blender", text="Quit", icon='QUIT')
 
 
-######  Import-Export Menu  ##################-------------------------------------------------------                         
-######  Import-Export Menu  ##################-------------------------------------------------------                          
+# Import-Export Menu  ##################-------------------------------------------------------
+# Import-Export Menu  ##################-------------------------------------------------------
 
 class VIEW3D_Space_ImExport(bpy.types.Menu):
     bl_label = "Im-Export"
-    bl_idname = "space_imexport"  
+    bl_idname = "space_imexport"
 
-    def draw(self, context):       
+    def draw(self, context):
         layout = self.layout
         settings = context.tool_settings
-        layout.operator_context = 'INVOKE_REGION_WIN'	
+        layout.operator_context = 'INVOKE_REGION_WIN'
 
         layout.menu("INFO_MT_file_import", icon='IMPORT')
         layout.menu("INFO_MT_file_export", icon='EXPORT')
@@ -96,38 +93,37 @@ class VIEW3D_Space_ImExport(bpy.types.Menu):
         layout.separator()
 
         layout.operator("object.make_local")
-        layout.operator("object.proxy_make")             
+        layout.operator("object.proxy_make")
 
         layout.separator()
 
-        layout.menu("INFO_MT_file_external_data", icon='EXTERNAL_DATA')                
+        layout.menu("INFO_MT_file_external_data", icon='EXTERNAL_DATA')
 
 
 ###########################################################################################################################################################
 ###########################################################################################################################################################
-### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register 
-### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register 
+# Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register
+# Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register
 ###########################################################################################################################################################
 ###########################################################################################################################################################
 
 
 def register():
 
-    bpy.utils.register_class(VIEW3D_Space_File)    
-    bpy.utils.register_class(VIEW3D_Space_ImExport)  
-    
-def unregister():
-  
-    bpy.utils.unregister_class(VIEW3D_Space_File)
-    bpy.utils.unregister_class(VIEW3D_Space_ImExport)          
+    bpy.utils.register_class(VIEW3D_Space_File)
+    bpy.utils.register_class(VIEW3D_Space_ImExport)
 
-    #bpy.utils.unregister_module(__name__)  
+
+def unregister():
+
+    bpy.utils.unregister_class(VIEW3D_Space_File)
+    bpy.utils.unregister_class(VIEW3D_Space_ImExport)
+
+    # bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":
-    register() 	
+    register()
 
     # The menu can also be called from scripts
-    #bpy.ops.wm.call_menu(name=VIEW3D_Space_File.bl_idname)
+    # bpy.ops.wm.call_menu(name=VIEW3D_Space_File.bl_idname)
     bpy.ops.wm.call_menu(name=VIEW3D_Space_ImExport.bl_idname)
-
-

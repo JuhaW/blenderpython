@@ -26,38 +26,37 @@ bl_info = {
     "wiki_url": "https://www.youtube.com/watch?v=-uxy9irGr80",
     "tracker_url": "http://blenderlounge.fr/forum/viewtopic.php?f=26&t=1064",
     "category": "Material"}
-    
+
 import bpy
 from bpy.types import AddonPreferences
 from . utils import register_matcap_pcoll, unregister_matcap_pcoll
 from . ui import *
 from . operators import AutoMatcapCollectionGroup
 
-                           
 
 class AutoMatcapPreferences(AddonPreferences):
     bl_idname = __name__
     matcaps_path = bpy.props.StringProperty(
-            name="Your matcaps path",
-            maxlen=1024,
-            subtype='DIR_PATH') 
-            
+        name="Your matcaps path",
+        maxlen=1024,
+        subtype='DIR_PATH')
+
     def draw(self, context):
-        layout = self.layout  
-        
+        layout = self.layout
+
         split = layout.split(percentage=1)
 
         col = split.column()
         sub = col.column(align=True)
         sub.prop(self, "matcaps_path")
-    
-    
-    
+
+
 def register():
     bpy.utils.register_module(__name__)
     register_matcap_pcoll()
     bpy.types.VIEW3D_PT_view3d_shading.append(display_auto_matcap_panel)
     bpy.types.WindowManager.automatcap_settings = bpy.props.PointerProperty(type=AutoMatcapCollectionGroup)
+
 
 def unregister():
     del bpy.types.WindowManager.automatcap_settings

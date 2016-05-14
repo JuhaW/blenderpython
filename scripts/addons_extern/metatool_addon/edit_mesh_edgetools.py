@@ -68,7 +68,7 @@
 # <pep8 compliant>
 # ^^ Maybe. . . . :P
 
-#bl_info = {
+# bl_info = {
 #    "name": "EdgeTools",
 #    "author": "Paul Marshall",
 #    "version": (0, 8),
@@ -82,7 +82,9 @@
 #    "category": "Mesh"}
 
 
-import bpy, bmesh, mathutils
+import bpy
+import bmesh
+import mathutils
 from math import acos, pi, radians, sqrt, tan
 from mathutils import Matrix, Vector
 from mathutils.geometry import (distance_point_to_plane,
@@ -99,6 +101,8 @@ from bpy.props import (BoolProperty,
 integrated = False
 
 # Quick an dirty method for getting the sign of a number:
+
+
 def sign(number):
     return (number > 0) - (number < 0)
 
@@ -116,7 +120,7 @@ def is_parallel(v1, v2, v3, v4):
 # This is for the special case where the edge is parallel to an axis.  In this
 # the projection onto the XY plane will fail so it will have to be handled
 # differently.  This tells us if and how:
-def is_axial(v1, v2, error = 0.000002):
+def is_axial(v1, v2, error=0.000002):
     vector = v2 - v1
     # Don't need to store, but is easier to read:
     vec0 = vector[0] > -error and vector[0] < error
@@ -146,7 +150,7 @@ def is_same_co(v1, v2):
 # is_face_planar
 #
 # Tests a face to see if it is planar.
-def is_face_planar(face, error = 0.0005):
+def is_face_planar(face, error=0.0005):
     for v in face.verts:
         d = distance_point_to_plane(v.co, face.verts[0].co, face.normal)
         if bpy.app.debug:
@@ -160,15 +164,15 @@ def is_face_planar(face, error = 0.0005):
 #
 # Starts with an edge.  Then scans for linked, selected edges and builds a
 # list with them in "order", starting at one end and moving towards the other.
-def order_joined_edges(edge, edges = [], direction = 1):
+def order_joined_edges(edge, edges=[], direction=1):
     if len(edges) == 0:
         edges.append(edge)
         edges[0] = edge
 
     if bpy.app.debug:
-        print(edge, end = ", ")
-        print(edges, end = ", ")
-        print(direction, end = "; ")
+        print(edge, end=", ")
+        print(edges, end=", ")
+        print(direction, end="; ")
 
     # Robustness check: direction cannot be zero
     if direction == 0:
@@ -201,7 +205,7 @@ def order_joined_edges(edge, edges = [], direction = 1):
                 newList.extend(order_joined_edges(e, edges, direction))
 
     if bpy.app.debug:
-        print(newList, end = ", ")
+        print(newList, end=", ")
         print(direction)
 
     return newList
@@ -235,8 +239,8 @@ def distance_point_line(pt, line_p1, line_p2):
 #   - C-Spline and Bezier curves do not end on p2_co as they are supposed to.
 #   - B-Spline just fails.  Epically.
 #   - Add more methods as I come across them.  Who said flexibility was bad?
-def interpolate_line_line(p1_co, p1_dir, p2_co, p2_dir, segments, tension = 1,
-                          typ = 'BEZIER', include_ends = False):
+def interpolate_line_line(p1_co, p1_dir, p2_co, p2_dir, segments, tension=1,
+                          typ='BEZIER', include_ends=False):
     pieces = []
     fraction = 1 / segments
     # Form: p1, tangent 1, p2, tangent 2
@@ -249,9 +253,9 @@ def interpolate_line_line(p1_co, p1_dir, p2_co, p2_dir, segments, tension = 1,
         p1_dir = p1_dir + p1_co
         p2_dir = -p2_dir + p2_co
     elif typ == 'BSPLINE':
-##        Supposed poly matrix for a cubic b-spline:
-##        poly = [[-1, 3, -3, 1], [3, -6, 3, 0],
-##                [-3, 0, 3, 0], [1, 4, 1, 0]]
+        # Supposed poly matrix for a cubic b-spline:
+        # poly = [[-1, 3, -3, 1], [3, -6, 3, 0],
+        # [-3, 0, 3, 0], [1, 4, 1, 0]]
         # My own invention to try to get something that somewhat acts right.
         # This is semi-quadratic rather than fully cubic:
         poly = [[0, -1, 0, 1], [1, -2, 1, 0],
@@ -349,7 +353,7 @@ def interpolate_line_line(p1_co, p1_dir, p2_co, p2_dir, segments, tension = 1,
 #       a line with said vert?  How do I know if that point is "inside" all the
 #       verts?  I have no clue, and haven't been able to find anything on it so
 #       far.  Maybe if someone (actually reads this and) who knows could note?
-def intersect_line_face(edge, face, is_infinite = False, error = 0.000002):
+def intersect_line_face(edge, face, is_infinite=False, error=0.000002):
     int_co = None
 
     # If we are dealing with a non-planar quad:
@@ -589,7 +593,7 @@ def get_next_edge(edge, vert):
         return newEdge
 
 
-def is_planar_edge(edge, error = 0.000002):
+def is_planar_edge(edge, error=0.000002):
     angle = edge.calc_face_angle()
     return (angle < error and angle > -error) or (angle < (180 + error) and angle > (180 - error))
 
@@ -677,16 +681,16 @@ class Extend(bpy.types.Operator):
     bl_description = "Extend the selected edges of vertice pair."
     bl_options = {'REGISTER', 'UNDO'}
 
-    di1 = BoolProperty(name = "Forwards",
-                       description = "Extend the edge forwards",
-                       default = True)
-    di2 = BoolProperty(name = "Backwards",
-                       description = "Extend the edge backwards",
-                       default = False)
-    length = FloatProperty(name = "Length",
-                           description = "Length to extend the edge",
-                           min = 0.0, max = 1024.0,
-                           default = 1.0)
+    di1 = BoolProperty(name="Forwards",
+                       description="Extend the edge forwards",
+                       default=True)
+    di2 = BoolProperty(name="Backwards",
+                       description="Extend the edge backwards",
+                       default=False)
+    length = FloatProperty(name="Length",
+                           description="Length to extend the edge",
+                           min=0.0, max=1024.0,
+                           default=1.0)
 
     def draw(self, context):
         layout = self.layout
@@ -694,16 +698,13 @@ class Extend(bpy.types.Operator):
         layout.prop(self, "di2")
         layout.prop(self, "length")
 
-
     @classmethod
     def poll(cls, context):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
 
-
     def invoke(self, context, event):
         return self.execute(context)
-
 
     def execute(self, context):
         bpy.ops.object.editmode_toggle()
@@ -777,33 +778,33 @@ class Spline(bpy.types.Operator):
     bl_description = "Create a spline interplopation between two edges"
     bl_options = {'REGISTER', 'UNDO'}
 
-    alg = EnumProperty(name = "Spline Algorithm",
-                       items = [('Blender', 'Blender', 'Interpolation provided through \"mathutils.geometry\"'),
-                                ('Hermite', 'C-Spline', 'C-spline interpolation'),
-                                ('Bezier', 'Bézier', 'Bézier interpolation'),
-                                ('B-Spline', 'B-Spline', 'B-Spline interpolation')],
-                       default = 'Bezier')
-    segments = IntProperty(name = "Segments",
-                           description = "Number of segments to use in the interpolation",
-                           min = 2, max = 4096,
-                           soft_max = 1024,
-                           default = 32)
-    flip1 = BoolProperty(name = "Flip Edge",
-                         description = "Flip the direction of the spline on edge 1",
-                         default = False)
-    flip2 = BoolProperty(name = "Flip Edge",
-                         description = "Flip the direction of the spline on edge 2",
-                         default = False)
-    ten1 = FloatProperty(name = "Tension",
-                         description = "Tension on edge 1",
-                         min = -4096.0, max = 4096.0,
-                         soft_min = -8.0, soft_max = 8.0,
-                         default = 1.0)
-    ten2 = FloatProperty(name = "Tension",
-                         description = "Tension on edge 2",
-                         min = -4096.0, max = 4096.0,
-                         soft_min = -8.0, soft_max = 8.0,
-                         default = 1.0)
+    alg = EnumProperty(name="Spline Algorithm",
+                       items=[('Blender', 'Blender', 'Interpolation provided through \"mathutils.geometry\"'),
+                              ('Hermite', 'C-Spline', 'C-spline interpolation'),
+                              ('Bezier', 'Bézier', 'Bézier interpolation'),
+                              ('B-Spline', 'B-Spline', 'B-Spline interpolation')],
+                       default='Bezier')
+    segments = IntProperty(name="Segments",
+                           description="Number of segments to use in the interpolation",
+                           min=2, max=4096,
+                           soft_max=1024,
+                           default=32)
+    flip1 = BoolProperty(name="Flip Edge",
+                         description="Flip the direction of the spline on edge 1",
+                         default=False)
+    flip2 = BoolProperty(name="Flip Edge",
+                         description="Flip the direction of the spline on edge 2",
+                         default=False)
+    ten1 = FloatProperty(name="Tension",
+                         description="Tension on edge 1",
+                         min=-4096.0, max=4096.0,
+                         soft_min=-8.0, soft_max=8.0,
+                         default=1.0)
+    ten2 = FloatProperty(name="Tension",
+                         description="Tension on edge 2",
+                         min=-4096.0, max=4096.0,
+                         soft_min=-8.0, soft_max=8.0,
+                         default=1.0)
 
     def draw(self, context):
         layout = self.layout
@@ -817,16 +818,13 @@ class Spline(bpy.types.Operator):
         layout.prop(self, "ten2")
         layout.prop(self, "flip2")
 
-
     @classmethod
     def poll(cls, context):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
 
-
     def invoke(self, context, event):
         return self.execute(context)
-
 
     def execute(self, context):
         bpy.ops.object.editmode_toggle()
@@ -915,39 +913,39 @@ class Ortho(bpy.types.Operator):
     bl_description = ""
     bl_options = {'REGISTER', 'UNDO'}
 
-    vert1 = BoolProperty(name = "Vertice 1",
-                         description = "Enable edge creation for vertice 1.",
-                         default = True)
-    vert2 = BoolProperty(name = "Vertice 2",
-                         description = "Enable edge creation for vertice 2.",
-                         default = True)
-    vert3 = BoolProperty(name = "Vertice 3",
-                         description = "Enable edge creation for vertice 3.",
-                         default = True)
-    vert4 = BoolProperty(name = "Vertice 4",
-                         description = "Enable edge creation for vertice 4.",
-                         default = True)
-    pos = BoolProperty(name = "+",
-                       description = "Enable positive direction edges.",
-                       default = True)
-    neg = BoolProperty(name = "-",
-                       description = "Enable negitive direction edges.",
-                       default = True)
-    angle = FloatProperty(name = "Angle",
-                          description = "Angle off of the originating edge",
-                          min = 0.0, max = 180.0,
-                          default = 90.0)
-    length = FloatProperty(name = "Length",
-                           description = "Length of created edges.",
-                           min = 0.0, max = 1024.0,
-                           default = 1.0)
+    vert1 = BoolProperty(name="Vertice 1",
+                         description="Enable edge creation for vertice 1.",
+                         default=True)
+    vert2 = BoolProperty(name="Vertice 2",
+                         description="Enable edge creation for vertice 2.",
+                         default=True)
+    vert3 = BoolProperty(name="Vertice 3",
+                         description="Enable edge creation for vertice 3.",
+                         default=True)
+    vert4 = BoolProperty(name="Vertice 4",
+                         description="Enable edge creation for vertice 4.",
+                         default=True)
+    pos = BoolProperty(name="+",
+                       description="Enable positive direction edges.",
+                       default=True)
+    neg = BoolProperty(name="-",
+                       description="Enable negitive direction edges.",
+                       default=True)
+    angle = FloatProperty(name="Angle",
+                          description="Angle off of the originating edge",
+                          min=0.0, max=180.0,
+                          default=90.0)
+    length = FloatProperty(name="Length",
+                           description="Length of created edges.",
+                           min=0.0, max=1024.0,
+                           default=1.0)
 
     # For when only one edge is selected (Possible feature to be testd):
-    plane = EnumProperty(name = "Plane",
-                         items = [("XY", "X-Y Plane", "Use the X-Y plane as the plane of creation"),
-                                  ("XZ", "X-Z Plane", "Use the X-Z plane as the plane of creation"),
-                                  ("YZ", "Y-Z Plane", "Use the Y-Z plane as the plane of creation")],
-                         default = "XY")
+    plane = EnumProperty(name="Plane",
+                         items=[("XY", "X-Y Plane", "Use the X-Y plane as the plane of creation"),
+                                ("XZ", "X-Z Plane", "Use the X-Z plane as the plane of creation"),
+                                ("YZ", "Y-Z Plane", "Use the Y-Z plane as the plane of creation")],
+                         default="XY")
 
     def draw(self, context):
         layout = self.layout
@@ -956,7 +954,7 @@ class Ortho(bpy.types.Operator):
         layout.prop(self, "vert2")
         layout.prop(self, "vert3")
         layout.prop(self, "vert4")
-        row = layout.row(align = False)
+        row = layout.row(align=False)
         row.alignment = 'EXPAND'
         row.prop(self, "pos")
         row.prop(self, "neg")
@@ -968,10 +966,8 @@ class Ortho(bpy.types.Operator):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
 
-
     def invoke(self, context, event):
         return self.execute(context)
-
 
     def execute(self, context):
         bpy.ops.object.editmode_toggle()
@@ -1035,12 +1031,12 @@ class Ortho(bpy.types.Operator):
 
         # Perform any additional rotations:
         matrix = Matrix.Rotation(radians(90 + self.angle), 3, vectors[2])
-        vectors.append(matrix * -vectors[3]) # vectors[5]
+        vectors.append(matrix * -vectors[3])  # vectors[5]
         matrix = Matrix.Rotation(radians(90 - self.angle), 3, vectors[2])
-        vectors.append(matrix * vectors[4]) # vectors[6]
-        vectors.append(matrix * vectors[3]) # vectors[7]
+        vectors.append(matrix * vectors[4])  # vectors[6]
+        vectors.append(matrix * vectors[3])  # vectors[7]
         matrix = Matrix.Rotation(radians(90 + self.angle), 3, vectors[2])
-        vectors.append(matrix * -vectors[4]) # vectors[8]
+        vectors.append(matrix * -vectors[4])  # vectors[8]
 
         # Perform extrusions and displacements:
         # There will be a total of 8 extrusions.  One for each vert of each edge.
@@ -1083,37 +1079,36 @@ class Shaft(bpy.types.Operator):
     shaftType = 0
 
     # For tracking if the user has changed selection:
-    last_edge = IntProperty(name = "Last Edge",
-                            description = "Tracks if user has changed selected edge",
-                            min = 0, max = 1,
-                            default = 0)
+    last_edge = IntProperty(name="Last Edge",
+                            description="Tracks if user has changed selected edge",
+                            min=0, max=1,
+                            default=0)
     last_flip = False
 
-    edge = IntProperty(name = "Edge",
-                       description = "Edge to shaft around.",
-                       min = 0, max = 1,
-                       default = 0)
-    flip = BoolProperty(name = "Flip Second Edge",
-                        description = "Flip the percieved direction of the second edge.",
-                        default = False)
-    radius = FloatProperty(name = "Radius",
-                           description = "Shaft Radius",
-                           min = 0.0, max = 1024.0,
-                           default = 1.0)
-    start = FloatProperty(name = "Starting Angle",
-                          description = "Angle to start the shaft at.",
-                          min = -360.0, max = 360.0,
-                          default = 0.0)
-    finish = FloatProperty(name = "Ending Angle",
-                           description = "Angle to end the shaft at.",
-                           min = -360.0, max = 360.0,
-                           default = 360.0)
-    segments = IntProperty(name = "Shaft Segments",
-                           description = "Number of sgements to use in the shaft.",
-                           min = 1, max = 4096,
-                           soft_max = 512,
-                           default = 32)
-
+    edge = IntProperty(name="Edge",
+                       description="Edge to shaft around.",
+                       min=0, max=1,
+                       default=0)
+    flip = BoolProperty(name="Flip Second Edge",
+                        description="Flip the percieved direction of the second edge.",
+                        default=False)
+    radius = FloatProperty(name="Radius",
+                           description="Shaft Radius",
+                           min=0.0, max=1024.0,
+                           default=1.0)
+    start = FloatProperty(name="Starting Angle",
+                          description="Angle to start the shaft at.",
+                          min=-360.0, max=360.0,
+                          default=0.0)
+    finish = FloatProperty(name="Ending Angle",
+                           description="Angle to end the shaft at.",
+                           min=-360.0, max=360.0,
+                           default=360.0)
+    segments = IntProperty(name="Shaft Segments",
+                           description="Number of sgements to use in the shaft.",
+                           min=1, max=4096,
+                           soft_max=512,
+                           default=32)
 
     def draw(self, context):
         layout = self.layout
@@ -1127,12 +1122,10 @@ class Shaft(bpy.types.Operator):
         layout.prop(self, "start")
         layout.prop(self, "finish")
 
-
     @classmethod
     def poll(cls, context):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
-
 
     def invoke(self, context, event):
         # Make sure these get reset each time we run:
@@ -1140,7 +1133,6 @@ class Shaft(bpy.types.Operator):
         self.edge = 0
 
         return self.execute(context)
-
 
     def execute(self, context):
         bpy.ops.object.editmode_toggle()
@@ -1258,7 +1250,7 @@ class Shaft(bpy.types.Operator):
         # We will need a series of rotation matrices.  We could use one which
         # would be faster but also might cause propagation of error.
 ##        matrices = []
-##        for i in range(numV):
+# for i in range(numV):
 ##            matrices.append(Matrix.Rotation((rads * i) + rotRange[0], 3, axis))
         matrices = [Matrix.Rotation((rads * i) + rotRange[0], 3, axis) for i in range(numV)]
 
@@ -1329,11 +1321,11 @@ class Shaft(bpy.types.Operator):
 
             # Faces:
             # There is a problem with this right now
-##            for i in range(len(edges)):
-##                for j in range(numE):
-##                    f = bFaces.new((newVerts[i], newVerts[i + 1],
-##                                    newVerts[i + (numV * j) + 1], newVerts[i + (numV * j)]))
-##                    f.normal_update()
+# for i in range(len(edges)):
+# for j in range(numE):
+# f = bFaces.new((newVerts[i], newVerts[i + 1],
+# newVerts[i + (numV * j) + 1], newVerts[i + (numV * j)]))
+# f.normal_update()
         else:
             # Vertices:
             for i in range(numV * 2):
@@ -1372,18 +1364,18 @@ class Slice(bpy.types.Operator):
     bl_description = "Cuts edges at the plane defined by a selected face."
     bl_options = {'REGISTER', 'UNDO'}
 
-    make_copy = BoolProperty(name = "Make Copy",
-                             description = "Make new vertices at intersection points instead of spliting the edge",
-                             default = False)
-    rip = BoolProperty(name = "Rip",
-                       description = "Split into two edges that DO NOT share an intersection vertice.",
-                       default = False)
-    pos = BoolProperty(name = "Positive",
-                       description = "Remove the portion on the side of the face normal",
-                       default = False)
-    neg = BoolProperty(name = "Negative",
-                       description = "Remove the portion on the side opposite of the face normal",
-                       default = False)
+    make_copy = BoolProperty(name="Make Copy",
+                             description="Make new vertices at intersection points instead of spliting the edge",
+                             default=False)
+    rip = BoolProperty(name="Rip",
+                       description="Split into two edges that DO NOT share an intersection vertice.",
+                       default=False)
+    pos = BoolProperty(name="Positive",
+                       description="Remove the portion on the side of the face normal",
+                       default=False)
+    neg = BoolProperty(name="Negative",
+                       description="Remove the portion on the side opposite of the face normal",
+                       default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -1395,16 +1387,13 @@ class Slice(bpy.types.Operator):
             layout.prop(self, "pos")
             layout.prop(self, "neg")
 
-
     @classmethod
     def poll(cls, context):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
 
-
     def invoke(self, context, event):
         return self.execute(context)
-
 
     def execute(self, context):
         bpy.ops.object.editmode_toggle()
@@ -1476,7 +1465,7 @@ class Slice(bpy.types.Operator):
 
                 # More debug info - I think this can stay.
                 if bpy.app.debug:
-                    print("Intersection", end = ': ')
+                    print("Intersection", end=': ')
                     print(intersection)
 
                 # If an intersection exists find the distance of each of the end
@@ -1501,19 +1490,19 @@ class Slice(bpy.types.Operator):
                             newV1.co = intersection
 
                             if bpy.app.debug:
-                                print("newV1 created", end = '; ')
+                                print("newV1 created", end='; ')
 
                             newV2 = bVerts.new()
                             newV2.co = intersection
 
                             if bpy.app.debug:
-                                print("newV2 created", end = '; ')
+                                print("newV2 created", end='; ')
 
                             newE1 = bEdges.new((v1, newV1))
                             newE2 = bEdges.new((v2, newV2))
 
                             if bpy.app.debug:
-                                print("new edges created", end = '; ')
+                                print("new edges created", end='; ')
 
                             bEdges.remove(e)
 
@@ -1543,9 +1532,9 @@ class Project(bpy.types.Operator):
     bl_description = "Projects the selected vertices/edges onto the selected plane."
     bl_options = {'REGISTER', 'UNDO'}
 
-    make_copy = BoolProperty(name = "Make Copy",
-                             description = "Make a duplicate of the vertices instead of moving it",
-                             default = False)
+    make_copy = BoolProperty(name="Make Copy",
+                             description="Make a duplicate of the vertices instead of moving it",
+                             default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -1556,10 +1545,8 @@ class Project(bpy.types.Operator):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
 
-
     def invoke(self, context, event):
         return self.execute(context)
-
 
     def execute(self, context):
         bpy.ops.object.editmode_toggle()
@@ -1613,40 +1600,37 @@ class Project_End(bpy.types.Operator):
     bl_description = "Projects the vertice of the selected edges closest to a plane onto that plane."
     bl_options = {'REGISTER', 'UNDO'}
 
-    make_copy = BoolProperty(name = "Make Copy",
-                             description = "Make a duplicate of the vertice instead of moving it",
-                             default = False)
-    keep_length = BoolProperty(name = "Keep Edge Length",
-                               description = "Maintain edge lengths",
-                               default = False)
-    use_force = BoolProperty(name = "Use opposite vertices",
-                             description = "Force the usage of the vertices at the other end of the edge",
-                             default = False)
-    use_normal = BoolProperty(name = "Project along normal",
-                              description = "Use the plane's normal as the projection direction",
-                              default = False)
+    make_copy = BoolProperty(name="Make Copy",
+                             description="Make a duplicate of the vertice instead of moving it",
+                             default=False)
+    keep_length = BoolProperty(name="Keep Edge Length",
+                               description="Maintain edge lengths",
+                               default=False)
+    use_force = BoolProperty(name="Use opposite vertices",
+                             description="Force the usage of the vertices at the other end of the edge",
+                             default=False)
+    use_normal = BoolProperty(name="Project along normal",
+                              description="Use the plane's normal as the projection direction",
+                              default=False)
 
     def draw(self, context):
         layout = self.layout
 ##        layout.prop(self, "keep_length")
         if not self.keep_length:
             layout.prop(self, "use_normal")
-##        else:
+# else:
 ##            self.report({'ERROR_INVALID_INPUT'}, "Maintaining edge length not yet supported")
 ##            self.report({'WARNING'}, "Projection may result in unexpected geometry")
         layout.prop(self, "make_copy")
         layout.prop(self, "use_force")
-
 
     @classmethod
     def poll(cls, context):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
 
-
     def invoke(self, context, event):
         return self.execute(context)
-
 
     def execute(self, context):
         bpy.ops.object.editmode_toggle()
@@ -1755,26 +1739,26 @@ class Fillet(bpy.types.Operator):
     bl_description = "Fillet the selected edges."
     bl_options = {'REGISTER', 'UNDO'}
 
-    radius = FloatProperty(name = "Radius",
-                           description = "Radius of the edge fillet",
-                           min = 0.00001, max = 1024.0,
-                           default = 0.5)
-    prop = EnumProperty(name = "Propagation",
-                        items = [("m", "Minimal", "Minimal edge propagation"),
-                                 ("t", "Tangential", "Tangential edge propagation")],
-                        default = "m")
-    prop_fac = FloatProperty(name = "Propagation Factor",
-                             description = "Corner detection sensitivity factor for tangential propagation",
-                             min = 0.0, max = 100.0,
-                             default = 25.0)
-    deg_seg = FloatProperty(name = "Degrees/Section",
-                            description = "Approximate degrees per section",
-                            min = 0.00001, max = 180.0,
-                            default = 10.0)
-    res = IntProperty(name = "Resolution",
-                      description = "Resolution of the fillet",
-                      min = 1, max = 1024,
-                      default = 8)
+    radius = FloatProperty(name="Radius",
+                           description="Radius of the edge fillet",
+                           min=0.00001, max=1024.0,
+                           default=0.5)
+    prop = EnumProperty(name="Propagation",
+                        items=[("m", "Minimal", "Minimal edge propagation"),
+                               ("t", "Tangential", "Tangential edge propagation")],
+                        default="m")
+    prop_fac = FloatProperty(name="Propagation Factor",
+                             description="Corner detection sensitivity factor for tangential propagation",
+                             min=0.0, max=100.0,
+                             default=25.0)
+    deg_seg = FloatProperty(name="Degrees/Section",
+                            description="Approximate degrees per section",
+                            min=0.00001, max=180.0,
+                            default=10.0)
+    res = IntProperty(name="Resolution",
+                      description="Resolution of the fillet",
+                      min=1, max=1024,
+                      default=8)
 
     def draw(self, context):
         layout = self.layout
@@ -1785,16 +1769,13 @@ class Fillet(bpy.types.Operator):
         layout.prop(self, "deg_seg")
         layout.prop(self, "res")
 
-
     @classmethod
     def poll(cls, context):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
 
-
     def invoke(self, context, event):
         return self.execute(context)
-
 
     def execute(self, context):
         bpy.ops.object.editmode_toggle()
@@ -1828,7 +1809,6 @@ class Fillet(bpy.types.Operator):
         for e in edges:
             axis_points = fillet_axis(e, self.radius)
 
-
         bm.to_mesh(bpy.context.active_object.data)
         bpy.ops.object.editmode_toggle()
         return {'FINISHED'}
@@ -1849,10 +1829,8 @@ class Intersect_Line_Face(bpy.types.Operator):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
 
-
     def invoke(self, context, event):
         return self.execute(context)
-
 
     def execute(self, context):
         # Make sure we really are in debug mode:
@@ -1912,9 +1890,9 @@ class VIEW3D_MT_edit_mesh_edgetools(bpy.types.Menu):
         layout.operator("mesh.edgetools_project")
         layout.operator("mesh.edgetools_project_end")
         if bpy.app.debug:
-            ## Not ready for prime-time yet:
+            # Not ready for prime-time yet:
             layout.operator("mesh.edgetools_fillet")
-            ## For internal testing ONLY:
+            # For internal testing ONLY:
             layout.operator("mesh.edgetools_ilf")
         # If TinyCAD VTX exists, add it to the menu.
         # @todo This does not work.
@@ -1931,15 +1909,15 @@ def menu_func(self, context):
 
 # define classes for registration
 classes = [VIEW3D_MT_edit_mesh_edgetools,
-    Extend,
-    Spline,
-    Ortho,
-    Shaft,
-    Slice,
-    Project,
-    Project_End,
-    Fillet,
-    Intersect_Line_Face]
+           Extend,
+           Spline,
+           Ortho,
+           Shaft,
+           Slice,
+           Project,
+           Project_End,
+           Fillet,
+           Intersect_Line_Face]
 
 
 # registering and menu integration
@@ -1953,7 +1931,8 @@ def register():
     # the edge tools menu if it exists.  This should make the UI a little nicer
     # for users.
     # @todo Remove TinyCAD VTX menu entries and add them too EdgeTool's menu
-    import inspect, os.path
+    import inspect
+    import os.path
 
     path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     if os.path.isfile(path + "\mesh_edge_intersection_tools.py"):
@@ -1973,4 +1952,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

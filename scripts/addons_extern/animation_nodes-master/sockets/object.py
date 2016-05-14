@@ -4,6 +4,7 @@ from .. events import propertyChanged
 from .. base_types.socket import AnimationNodeSocket
 from .. utils.id_reference import tryToFindObjectReference
 
+
 class ObjectSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_ObjectSocket"
     bl_label = "Object Socket"
@@ -13,27 +14,30 @@ class ObjectSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     storable = False
     comparable = True
 
-    objectName = StringProperty(update = propertyChanged)
-    objectCreationType = StringProperty(default = "")
+    objectName = StringProperty(update=propertyChanged)
+    objectCreationType = StringProperty(default="")
 
     def drawProperty(self, layout, text):
-        row = layout.row(align = True)
+        row = layout.row(align=True)
 
         scene = self.nodeTree.scene
-        if scene is None: scene = bpy.context.scene
-        row.prop_search(self, "objectName",  scene, "objects", icon = "NONE", text = text)
+        if scene is None:
+            scene = bpy.context.scene
+        row.prop_search(self, "objectName", scene, "objects", icon="NONE", text=text)
 
         if self.objectCreationType != "":
-            self.invokeFunction(row, "createObject", icon = "PLUS")
+            self.invokeFunction(row, "createObject", icon="PLUS")
 
-        self.invokeFunction(row, "assignActiveObject", icon = "EYEDROPPER")
+        self.invokeFunction(row, "assignActiveObject", icon="EYEDROPPER")
 
     def getValue(self):
-        if self.objectName == "": return None
+        if self.objectName == "":
+            return None
 
         object = tryToFindObjectReference(self.objectName)
         name = getattr(object, "name", "")
-        if name != self.objectName: self.objectName = name
+        if name != self.objectName:
+            self.objectName = name
         return object
 
     def setProperty(self, data):
@@ -52,7 +56,8 @@ class ObjectSocket(bpy.types.NodeSocket, AnimationNodeSocket):
 
     def createObject(self):
         type = self.objectCreationType
-        if type == "MESH": data = bpy.data.meshes.new("Mesh")
+        if type == "MESH":
+            data = bpy.data.meshes.new("Mesh")
         if type == "CURVE":
             data = bpy.data.curves.new("Curve", "CURVE")
             data.dimensions = "3D"

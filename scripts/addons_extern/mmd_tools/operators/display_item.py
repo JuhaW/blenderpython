@@ -20,6 +20,7 @@ class AddDisplayItemFrame(Operator):
         item.name = 'Display Frame'
         return {'FINISHED'}
 
+
 class RemoveDisplayItemFrame(Operator):
     bl_idname = 'mmd_tools.remove_display_item_frame'
     bl_label = 'Remove Display Item Frame'
@@ -36,6 +37,7 @@ class RemoveDisplayItemFrame(Operator):
             mmd_root.active_display_item_frame -= 1
         return {'FINISHED'}
 
+
 class MoveUpDisplayItemFrame(Operator):
     bl_idname = 'mmd_tools.move_up_display_item_frame'
     bl_label = 'Move Up Display Item Frame'
@@ -49,9 +51,10 @@ class MoveUpDisplayItemFrame(Operator):
         if mmd_root.active_display_item_frame <= 0:
             return {'FINISHED'}
 
-        mmd_root.display_item_frames.move(mmd_root.active_display_item_frame, mmd_root.active_display_item_frame-1)
+        mmd_root.display_item_frames.move(mmd_root.active_display_item_frame, mmd_root.active_display_item_frame - 1)
         mmd_root.active_display_item_frame -= 1
         return {'FINISHED'}
+
 
 class MoveDownDisplayItemFrame(Operator):
     bl_idname = 'mmd_tools.move_down_display_item_frame'
@@ -63,12 +66,13 @@ class MoveDownDisplayItemFrame(Operator):
         obj = context.active_object
         root = mmd_model.Model.findRoot(obj)
         mmd_root = root.mmd_root
-        if len( mmd_root.display_item_frames)-1 <= mmd_root.active_display_item_frame:
+        if len(mmd_root.display_item_frames) - 1 <= mmd_root.active_display_item_frame:
             return {'FINISHED'}
 
-        mmd_root.display_item_frames.move(mmd_root.active_display_item_frame, mmd_root.active_display_item_frame+1)
+        mmd_root.display_item_frames.move(mmd_root.active_display_item_frame, mmd_root.active_display_item_frame + 1)
         mmd_root.active_display_item_frame += 1
         return {'FINISHED'}
+
 
 class AddDisplayItem(Operator):
     bl_idname = 'mmd_tools.add_display_item'
@@ -85,6 +89,7 @@ class AddDisplayItem(Operator):
         item.name = 'Display Item'
         return {'FINISHED'}
 
+
 class RemoveDisplayItem(Operator):
     bl_idname = 'mmd_tools.remove_display_item'
     bl_label = 'Remove Display Item Frame'
@@ -100,6 +105,7 @@ class RemoveDisplayItem(Operator):
         frame.active_item -= 1
         return {'FINISHED'}
 
+
 class MoveUpDisplayItem(Operator):
     bl_idname = 'mmd_tools.move_up_display_item'
     bl_label = 'Move Up Display Item Frame'
@@ -114,9 +120,10 @@ class MoveUpDisplayItem(Operator):
         if frame.active_item <= 0:
             return {'FINISHED'}
 
-        frame.items.move(frame.active_item, frame.active_item-1)
+        frame.items.move(frame.active_item, frame.active_item - 1)
         frame.active_item -= 1
         return {'FINISHED'}
+
 
 class MoveDownDisplayItem(Operator):
     bl_idname = 'mmd_tools.move_down_display_item'
@@ -129,12 +136,13 @@ class MoveDownDisplayItem(Operator):
         root = mmd_model.Model.findRoot(obj)
         mmd_root = root.mmd_root
         frame = mmd_root.display_item_frames[mmd_root.active_display_item_frame]
-        if len(frame.items)-1 <= frame.active_item:
+        if len(frame.items) - 1 <= frame.active_item:
             return {'FINISHED'}
 
-        frame.items.move(frame.active_item, frame.active_item+1)
+        frame.items.move(frame.active_item, frame.active_item + 1)
         frame.active_item += 1
         return {'FINISHED'}
+
 
 class SelectCurrentDisplayItem(Operator):
     bl_idname = 'mmd_tools.select_current_display_item'

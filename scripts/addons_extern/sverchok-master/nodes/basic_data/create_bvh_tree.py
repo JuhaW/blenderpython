@@ -35,17 +35,17 @@ class SvBVHtreeNode(bpy.types.Node, SverchCustomTreeNode):
         while len(inputs) > 1:
             inputs.remove(inputs[-1])
         if self.Mod == "FromObject":
-            inputs[0].name= "Objects"
-            inputs[0].hide= 0
+            inputs[0].name = "Objects"
+            inputs[0].hide = 0
         elif self.Mod == "FromBMesh":
-            inputs[0].name= "bmesh_list"
-            inputs[0].hide= 0
+            inputs[0].name = "bmesh_list"
+            inputs[0].hide = 0
         else:
-            inputs[0].hide= 1
+            inputs[0].hide = 1
             inputs.new('VerticesSocket', 'Verts')
             inputs.new('StringsSocket', 'Polys')
 
-    Modes = ['FromObject','FromBMesh','FromSVdata']
+    Modes = ['FromObject', 'FromBMesh', 'FromSVdata']
     Mod = EnumProperty(name="getmodes", default=Modes[0], items=e(Modes), update=mode_change)
 
     def sv_init(self, context):
@@ -64,7 +64,7 @@ class SvBVHtreeNode(bpy.types.Node, SverchCustomTreeNode):
             for i in self.inputs[0].sv_get():
                 bvh.append(BVHTree.FromBMesh(i))
         else:
-            for i,i2 in zip(self.inputs[1].sv_get(),self.inputs[2].sv_get()):
+            for i, i2 in zip(self.inputs[1].sv_get(), self.inputs[2].sv_get()):
                 bvh.append(BVHTree.FromPolygons(i, i2, all_triangles=False, epsilon=0.0))
         self.outputs[0].sv_set(bvh)
 

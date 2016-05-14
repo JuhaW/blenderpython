@@ -61,12 +61,12 @@ class ListLengthNode(bpy.types.Node, SverchCustomTreeNode):
         if isinstance(data, (float, int)):
             return 1
         if level == 1:
-            return [self.count(obj, level-1) for obj in data]
+            return [self.count(obj, level - 1) for obj in data]
         elif level == 2:
-            out = [self.count(obj, level-1) for obj in data]
+            out = [self.count(obj, level - 1) for obj in data]
             return out
         elif level > 2:  # flatten all but last level, we should preserve more detail than this
-            out = [self.count(obj, level-1) for obj in data]
+            out = [self.count(obj, level - 1) for obj in data]
             return [list(itertools.chain.from_iterable(obj)) for obj in out]
         else:
             return len(data)

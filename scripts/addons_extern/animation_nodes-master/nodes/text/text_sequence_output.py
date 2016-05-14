@@ -3,6 +3,7 @@ from bpy.props import *
 from ... utils.layout import writeText
 from ... base_types.node import AnimationNode
 
+
 class TextSequenceOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_TextSequenceOutputNode"
     bl_label = "Text Sequence Output"
@@ -30,7 +31,7 @@ class TextSequenceOutputNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if self.errorMessage != "":
-            writeText(layout, self.errorMessage, width = 25, icon = "ERROR")
+            writeText(layout, self.errorMessage, width=25, icon="ERROR")
 
     def drawAdvanced(self, layout):
         writeText(layout, "Possible values for 'X Align' are 'LEFT', 'CENTER' and 'RIGHT'")
@@ -41,14 +42,22 @@ class TextSequenceOutputNode(bpy.types.Node, AnimationNode):
         yield "    self.errorMessage = ''"
 
         s = self.inputs
-        if s["Text"].isUsed:        yield "    sequence.text = text"
-        if s["Size"].isUsed:        yield "    sequence.font_size = size"
-        if s["Shadow"].isUsed:      yield "    sequence.use_shadow = shadow"
-        if s["X Align"].isUsed:       yield "    self.setXAlignment(sequence, xAlign)"
-        if s["Y Align"].isUsed:       yield "    self.setYAlignment(sequence, yAlign)"
-        if s["X Location"].isUsed:  yield "    sequence.location[0] = xLocation"
-        if s["Y Location"].isUsed:  yield "    sequence.location[1] = yLocation"
-        if s["Wrap Width"].isUsed:  yield "    sequence.wrap_width = wrapWidth"
+        if s["Text"].isUsed:
+            yield "    sequence.text = text"
+        if s["Size"].isUsed:
+            yield "    sequence.font_size = size"
+        if s["Shadow"].isUsed:
+            yield "    sequence.use_shadow = shadow"
+        if s["X Align"].isUsed:
+            yield "    self.setXAlignment(sequence, xAlign)"
+        if s["Y Align"].isUsed:
+            yield "    self.setYAlignment(sequence, yAlign)"
+        if s["X Location"].isUsed:
+            yield "    sequence.location[0] = xLocation"
+        if s["Y Location"].isUsed:
+            yield "    sequence.location[1] = yLocation"
+        if s["Wrap Width"].isUsed:
+            yield "    sequence.wrap_width = wrapWidth"
 
     def setXAlignment(self, sequence, align):
         if align in ("LEFT", "CENTER", "RIGHT"):

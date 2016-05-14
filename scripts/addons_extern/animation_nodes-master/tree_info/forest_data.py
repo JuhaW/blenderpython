@@ -2,7 +2,9 @@ from itertools import chain
 from collections import defaultdict
 from .. utils.nodes import getAnimationNodeTrees, iterAnimationNodesSockets
 
+
 class ForestData:
+
     def __init__(self):
         self._reset()
 
@@ -61,10 +63,9 @@ class ForestData:
                 chainedSockets = chain(node.inputs, node.outputs)
                 chainedSocketIDs = chain(inputIDs, outputIDs)
                 for socket, socketID in zip(chainedSockets, chainedSocketIDs):
-                        dataTypeBySocket[socketID] = socket.dataType
-                        if hasattr(socket, "updateProperty"):
-                            socketsThatNeedUpdate.add(socketID)
-
+                    dataTypeBySocket[socketID] = socket.dataType
+                    if hasattr(socket, "updateProperty"):
+                        socketsThatNeedUpdate.add(socketID)
 
     def insertLinks(self, links):
         linkedSocketsWithReroutes = self.linkedSocketsWithReroutes

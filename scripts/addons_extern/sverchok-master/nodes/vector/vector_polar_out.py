@@ -22,25 +22,28 @@ from bpy.props import FloatProperty, EnumProperty
 from sverchok.node_tree import SverchCustomTreeNode, StringsSocket
 from sverchok.data_structure import updateNode, match_long_repeat
 
+
 def cylindrical(v, mode):
-    x,y,z = v
-    rho = sqrt(x*x + y*y)
-    phi = atan2(y,x)
+    x, y, z = v
+    rho = sqrt(x * x + y * y)
+    phi = atan2(y, x)
     if mode == "degrees":
         phi = degrees(phi)
     return rho, phi, z
 
+
 def spherical(v, mode):
-    x,y,z = v
-    rho = sqrt(x*x + y*y + z*z)
+    x, y, z = v
+    rho = sqrt(x * x + y * y + z * z)
     if rho == 0.0:
         return 0.0, 0.0, 0.0
-    theta = acos(z/rho)
-    phi = atan2(y,x)
+    theta = acos(z / rho)
+    phi = atan2(y, x)
     if mode == "degrees":
         phi = degrees(phi)
         theta = degrees(theta)
     return rho, phi, theta
+
 
 class VectorPolarOutNode(bpy.types.Node, SverchCustomTreeNode):
     '''Get cylindrical or spherical coordinates from vectors'''
@@ -50,7 +53,7 @@ class VectorPolarOutNode(bpy.types.Node, SverchCustomTreeNode):
 
     coord_modes = [
         ("z", "Cylinder", "Use cylindrical coordinates", 1),
-        ("theta",  "Sphere", "Use spherical coordinates", 2),
+        ("theta", "Sphere", "Use spherical coordinates", 2),
     ]
 
     def coordinate_changed(self, context):
@@ -63,9 +66,9 @@ class VectorPolarOutNode(bpy.types.Node, SverchCustomTreeNode):
     func_dict = {'z': cylindrical, 'theta': spherical}
 
     angle_modes = [
-            ("radians", "Radian", "Use angles in radians", 1),
-            ("degrees", "Degree", "Use angles in degrees", 2)
-        ]
+        ("radians", "Radian", "Use angles in radians", 1),
+        ("degrees", "Degree", "Use angles in degrees", 2)
+    ]
 
     angles_mode = EnumProperty(items=angle_modes, default="radians", update=updateNode)
 
@@ -80,7 +83,7 @@ class VectorPolarOutNode(bpy.types.Node, SverchCustomTreeNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "coordinates", expand=True)
         layout.prop(self, "angles_mode", expand=True)
-    
+
     def process(self):
         if not (self.outputs['rho'].is_linked or self.outputs['phi'].is_linked or self.outputs[self.coordinates].is_linked):
             return
@@ -109,12 +112,11 @@ class VectorPolarOutNode(bpy.types.Node, SverchCustomTreeNode):
             self.outputs['phi'].sv_set(result_phis)
         if self.outputs[self.coordinates].is_linked:
             self.outputs[self.coordinates].sv_set(result_zs)
-    
+
+
 def register():
     bpy.utils.register_class(VectorPolarOutNode)
 
 
 def unregister():
     bpy.utils.unregister_class(VectorPolarOutNode)
-
-

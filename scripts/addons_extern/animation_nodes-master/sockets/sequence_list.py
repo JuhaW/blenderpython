@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class SequenceListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_SequenceListSocket"
     bl_label = "Sequence List Socket"

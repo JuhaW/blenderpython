@@ -50,13 +50,14 @@ else:
 
 import bpy
 
+
 class CurveExtraToolPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_category = "Tools"
     bl_label = "Curve Extra Tools"
     bl_options = {'DEFAULT_CLOSED'}
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -70,13 +71,13 @@ class CurveExtraToolPanel(bpy.types.Panel):
             col.operator("curve.edit_bevel_curve")
             col.operator("curve.hide_bevel_objects")
 
-        if obj and obj.type =='CURVE':
+        if obj and obj.type == 'CURVE':
             col.label(text="Bevel Curve Convert:")
             col.operator("curve.convert_beveled_curve_to_meshes")
             col.operator("curve.convert_beveled_curve_to_separated_meshes")
             col.operator("curve.convert_beveled_curve_to_merged_mesh")
             col.operator("curve.convert_beveled_curve_to_union_mesh")
-            #c.operator("curve.convert_to_mesh_with_options")
+            # c.operator("curve.convert_to_mesh_with_options")
             col.label(text="Edit Outline:")
             col.operator("object.curve_outline")
             col.label(text="Properties:")
@@ -85,13 +86,14 @@ class CurveExtraToolPanel(bpy.types.Panel):
             col.operator("curve.simplify")
             col.label(text="Set Multi Origin:")
             col.operator("object.change_multiple_curve_origin")
-        if context.mode =='EDIT_CURVE':
+        if context.mode == 'EDIT_CURVE':
             col.operator("curve.finish_edit_bevel")
             col.label(text="Selection:")
             col.operator('curve.select_point', text='Select previous').action = 'PREVIOUS'
             col.operator('curve.select_point', text='Select next').action = 'NEXT'
             col.operator('curve.select_point', text='Select first').action = 'FIRST'
             col.operator('curve.select_point', text='Select last').action = 'LAST'
+
 
 class CurveToolsPrefs(bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -101,13 +103,13 @@ class CurveToolsPrefs(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(context.scene, "Enable_Tab_01", text="info", icon="INFO")   
+        layout.prop(context.scene, "Enable_Tab_01", text="info", icon="INFO")
         if context.scene.Enable_Tab_01:
             row = layout.row()
             layout.label(text="----Curve Tools----")
             layout.label(text="Extended Curve Tools")
 
-        layout.prop(context.scene, "Enable_Tab_02", text="Curve Objects", icon="INFO")  
+        layout.prop(context.scene, "Enable_Tab_02", text="Curve Objects", icon="INFO")
         if context.scene.Enable_Tab_02:
             row = layout.row()
             layout.label(text="Add Plants: Sapling & Ivy Gen, Add Iterative Tree(panel)")
@@ -121,10 +123,10 @@ class CurveToolsPrefs(bpy.types.AddonPreferences):
             layout.label(text="Curve Simplify: Simplify Curves")
             layout.label(text="Tubes & Pipes: Create Solid Tubes & Pipes(panel)")
 
+
 def register():
     bpy.utils.register_module(__name__)
     # Add "Extras" menu to the "Add Mesh" menu
-
 
 
 def unregister():

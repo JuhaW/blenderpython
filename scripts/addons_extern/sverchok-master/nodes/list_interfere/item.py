@@ -20,9 +20,7 @@ import bpy
 from bpy.props import BoolProperty, IntProperty, StringProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (changable_sockets, repeat_last, updateNode,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
-
-
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 # ListItem2
@@ -78,14 +76,14 @@ class ListItem2Node(bpy.types.Node, SverchCustomTreeNode):
                     items = [[self.item]]
 
                 if 'Item' in self.outputs and self.outputs['Item'].is_linked:
-                    if self.level-1:
-                        out = self.get(data, self.level-1, items, self.get_items)
+                    if self.level - 1:
+                        out = self.get(data, self.level - 1, items, self.get_items)
                     else:
                         out = self.get_items(data, items[0])
                     SvSetSocketAnyType(self, 'Item', out)
                 if 'Other' in self.outputs and self.outputs['Other'].is_linked:
-                    if self.level-1:
-                        out = self.get(data, self.level-1, items, self.get_other)
+                    if self.level - 1:
+                        out = self.get(data, self.level - 1, items, self.get_other)
                     else:
                         out = self.get_other(data, items[0])
                     SvSetSocketAnyType(self, 'Other', out)
@@ -105,7 +103,7 @@ class ListItem2Node(bpy.types.Node, SverchCustomTreeNode):
             m_items = items.copy()
             for idx, item in enumerate(items):
                 if item < 0:
-                    m_items[idx] = len(data)-abs(item)
+                    m_items[idx] = len(data) - abs(item)
             for i in sorted(set(m_items), reverse=True):
                 if i < len(data) and i > -1:
                     del data[i]
@@ -119,11 +117,12 @@ class ListItem2Node(bpy.types.Node, SverchCustomTreeNode):
     def get(self, data, level, items, f):
         if level == 1:
             item_iter = repeat_last(items)
-            return [self.get(obj, level-1, next(item_iter), f) for obj in data]
+            return [self.get(obj, level - 1, next(item_iter), f) for obj in data]
         elif level:
-            return [self.get(obj, level-1, items, f) for obj in data]
+            return [self.get(obj, level - 1, items, f) for obj in data]
         else:
             return f(data, items)
+
 
 def register():
     bpy.utils.register_class(ListItem2Node)

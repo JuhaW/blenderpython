@@ -52,8 +52,8 @@ class HdrObject:
                     break
 
         if x < self.origin.x or x > (self.origin.x + self.width) or \
-            y < self.origin.y or y > (self.origin.y + self.height) or \
-            y < 0 or y > reg.height:
+                y < self.origin.y or y > (self.origin.y + self.height) or \
+                y < 0 or y > reg.height:
             return False
         return True
 
@@ -67,7 +67,7 @@ class HdrObject:
         for reg in self.view3d_area.regions:
             if reg.type == 'WINDOW':
                 if x < 20 or x > (reg.width - 20) or \
-                    y < 20 or y > (reg.height - 20):
+                        y < 20 or y > (reg.height - 20):
                     return True
                 else:
                     break
@@ -83,6 +83,7 @@ class HdrClass:
         pass
 
     class grab:
+
         class spot:
             pass
 
@@ -191,8 +192,8 @@ class HdrClass:
             self.set_view3d_area(self.view3d_area)
             self.start = True
             self.handler1 = bpy.types.SpaceView3D.draw_handler_add(
-                                   Hdr_load_callback,
-                                   (self, context), 'WINDOW', 'POST_PIXEL')
+                Hdr_load_callback,
+                (self, context), 'WINDOW', 'POST_PIXEL')
             self.isActive = True
             return True
         else:
@@ -200,7 +201,7 @@ class HdrClass:
 
     def activateBGLcallback(self, context):
         self.handler2 = bpy.types.SpaceView3D.draw_handler_add(
-                    Draw_hdr_callback, (self, context), 'WINDOW', 'POST_PIXEL')
+            Draw_hdr_callback, (self, context), 'WINDOW', 'POST_PIXEL')
         self.view3d_area = context.area
         self.set_view3d_area(self.view3d_area)
         bpy.ops.sunpos.hdr('INVOKE_DEFAULT')
@@ -463,11 +464,11 @@ def hdr_G(event):
 ############################################################################
 
 Key_function = dict([('LEFT_CTRL', key_Ctrl), ('LEFT_ALT', key_Alt),
-                    ('RIGHT_CTRL', key_Ctrl), ('RIGHT_ALT', key_Alt),
-                    ('MIDDLEMOUSE', key_MiddleMouse),
-                    ('LEFTMOUSE', key_LeftMouse),
-                    ('RIGHTMOUSE', key_Esc), ('ESC', key_Esc),
-                    ('G', key_G), ('H', key_H), ('F1', key_H)])
+                     ('RIGHT_CTRL', key_Ctrl), ('RIGHT_ALT', key_Alt),
+                     ('MIDDLEMOUSE', key_MiddleMouse),
+                     ('LEFTMOUSE', key_LeftMouse),
+                     ('RIGHTMOUSE', key_Esc), ('ESC', key_Esc),
+                     ('G', key_G), ('H', key_H), ('F1', key_H)])
 
 # ---------------------------------------------------------------------------
 
@@ -548,42 +549,42 @@ def Hdr_load_callback(self, context):
             elif envTex.image == None:
                 Sun.SP.ShowHdr = False
             else:
-               envTex.texture_mapping.rotation.z = 0.0
-               projection = envTex.projection
-               prefs = bpy.context.user_preferences
-               fileName = prefs.filepaths.temporary_directory + "tmpSun.png"
-    
-               st = envTex.image.copy()
-               if projection == "MIRROR_BALL":
-                   st.scale(256, 256)
-                   Hdr.last.image = st.copy()
-                   Hdr.last.image.scale(512, 256)
-                   ConvertToLatLong(st, Hdr.last.image)
-               else:
-                   st.scale(512, 256)
-                   Hdr.last.image = st.copy()
-                   Hdr.last.image.scale(512, 256)
-    
-               if Hdr.make_dummy_file(fileName) == True:
-                   Hdr.last.image.save_render(fileName)
-               Hdr.last.pixels = list(Hdr.last.image.pixels)
+                envTex.texture_mapping.rotation.z = 0.0
+                projection = envTex.projection
+                prefs = bpy.context.user_preferences
+                fileName = prefs.filepaths.temporary_directory + "tmpSun.png"
+
+                st = envTex.image.copy()
+                if projection == "MIRROR_BALL":
+                    st.scale(256, 256)
+                    Hdr.last.image = st.copy()
+                    Hdr.last.image.scale(512, 256)
+                    ConvertToLatLong(st, Hdr.last.image)
+                else:
+                    st.scale(512, 256)
+                    Hdr.last.image = st.copy()
+                    Hdr.last.image.scale(512, 256)
+
+                if Hdr.make_dummy_file(fileName) == True:
+                    Hdr.last.image.save_render(fileName)
+                Hdr.last.pixels = list(Hdr.last.image.pixels)
         except:
             pass
 
         if Sun.SP.ShowHdr:
-           if not Hdr.load_blender_image(fileName):
-               print("Could not load image file: ", Hdr.image.name)
-               Sun.SP.ShowHdr = False
-           else:
-               try:
-                   nt = bpy.context.scene.world.node_tree.nodes
-                   envTex = nt.get(Sun.HDR_texture)
-                   if projection == "MIRROR_BALL":
-                       envTex.texture_mapping.rotation.z = degToRad(270.0)
-                   else:
-                       envTex.texture_mapping.rotation.z = degToRad(90.0)
-               except:
-                   pass
+            if not Hdr.load_blender_image(fileName):
+                print("Could not load image file: ", Hdr.image.name)
+                Sun.SP.ShowHdr = False
+            else:
+                try:
+                    nt = bpy.context.scene.world.node_tree.nodes
+                    envTex = nt.get(Sun.HDR_texture)
+                    if projection == "MIRROR_BALL":
+                        envTex.texture_mapping.rotation.z = degToRad(270.0)
+                    else:
+                        envTex.texture_mapping.rotation.z = degToRad(90.0)
+                except:
+                    pass
 
     if Hdr.start:
         def set_region_data():
@@ -637,6 +638,7 @@ def Hdr_load_callback(self, context):
 
 
 class Pixel:
+
     def __init__(self, r=0.0, g=0.0, b=0.0, a=None, colour=None):
         self.r = r
         self.g = g
@@ -649,13 +651,14 @@ class Pixel:
             if len(colour) > 3:
                 self.a = colour[3]
         if self.a is None:
-                self.a = 1.0
+            self.a = 1.0
 
     def as_tuple(self):
         return (self.r, self.g, self.b, self.a)
 
 
 class ImageBuffer:
+
     def __init__(self, image, clear=False):
         self.image = image
         self.x, self.y = self.image.size
@@ -725,7 +728,7 @@ def Draw_hdr_callback(self, context):
     if context.area != Hdr.view3d_area:
         return
     elif context.area.type == 'PROPERTIES' and \
-        context.space_data.context != 'WORLD':
+            context.space_data.context != 'WORLD':
         return
 
     # Check if window area has changed for sticky zoom

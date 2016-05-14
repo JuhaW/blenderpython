@@ -23,6 +23,7 @@ from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, changable_sockets,
                                      dataCorrect, svQsort)
 
+
 class ListSortNode(bpy.types.Node, SverchCustomTreeNode):
     ''' List Sort '''
     bl_idname = 'ListSortNode'
@@ -55,7 +56,7 @@ class ListSortNode(bpy.types.Node, SverchCustomTreeNode):
     def process(self):
         if not self.outputs['data'].is_linked:
             return
-            
+
         data_ = self.inputs['data'].sv_get()
         data = dataCorrect(data_, nominal_dept=self.level)
         out_ = []
@@ -63,7 +64,6 @@ class ListSortNode(bpy.types.Node, SverchCustomTreeNode):
             out_.append(svQsort(obj))
         out = dataCorrect(out_)
         self.outputs['data'].sv_set(out)
-
 
 
 def register():

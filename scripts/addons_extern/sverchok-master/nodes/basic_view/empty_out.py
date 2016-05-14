@@ -90,7 +90,7 @@ class SvEmptyOutNode(bpy.types.Node, SverchCustomTreeNode):
     def draw_buttons_ext(self, context, layout):
         layout.prop(self, "auto_remove")
 
-    def process(self):    
+    def process(self):
         empty = self.find_empty()
         if not empty:
             empty = self.create_empty()

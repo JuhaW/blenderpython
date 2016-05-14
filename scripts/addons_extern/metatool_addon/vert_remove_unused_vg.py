@@ -1,4 +1,4 @@
-#bl_info = {
+# bl_info = {
 #    "name": "Remove unused Vertex Groups",
 #    "author": "CoDEmanX",
 #    "version": (1, 0),
@@ -28,18 +28,18 @@ class OBJECT_OT_vertex_group_remove_unused(Operator):
 
         ob = context.object
         ob.update_from_editmode()
-        
+
         vgroup_used = {i: False for i, k in enumerate(ob.vertex_groups)}
-        
+
         for v in ob.data.vertices:
             for g in v.groups:
                 if g.weight > 0.0:
                     vgroup_used[g.group] = True
-        
+
         for i, used in sorted(vgroup_used.items(), reverse=True):
             if not used:
                 ob.vertex_groups.remove(ob.vertex_groups[i])
-                
+
         return {'FINISHED'}
 
 

@@ -19,16 +19,14 @@
 bl_info = {
     "name": "TP Display Vertex Group",
     "author": "marvin.k.breuer",
-    "version": (0,1),
+    "version": (0, 1),
     "blender": (2, 7, 7),
     "category": "Tool+"
-    }
-
+}
 
 
 import bpy
 from bpy import *
-
 
 
 class VIEW3D_TP_Display_VertexGroup(bpy.types.Menu):
@@ -36,7 +34,6 @@ class VIEW3D_TP_Display_VertexGroup(bpy.types.Menu):
     bl_label = "Vertex Group [<]"
     bl_idname = "tp_display.vertex_group"
 
-    
     @classmethod
     def poll(cls, context):
         engine = context.scene.render.engine
@@ -53,47 +50,46 @@ class VIEW3D_TP_Display_VertexGroup(bpy.types.Menu):
 
         layout.prop(ob.vertex_groups, "active_index")
 
-        layout.separator()    
+        layout.separator()
 
         layout.operator("object.vertex_group_select", text="Select Group", icon="RESTRICT_SELECT_OFF")
-        layout.operator("object.vertex_group_deselect", text="Deselect Group", icon="RESTRICT_SELECT_ON")    
-            
+        layout.operator("object.vertex_group_deselect", text="Deselect Group", icon="RESTRICT_SELECT_ON")
+
         layout.separator()
-            
+
         layout.operator("object.vertex_group_assign", text="Assign Group", icon="ZOOMIN")
-        layout.operator("object.vertex_group_remove_from", text="Remove Group", icon="ZOOMOUT") 
-            
-        layout.separator()
-                      
-        layout.operator("object.vertex_group_add",icon='GROUP_VERTEX',text="Add Vertex Group")
-        layout.operator("object.vertex_group_remove",icon='GROUP_VERTEX',text="Remove Vertex Group").all=False           
+        layout.operator("object.vertex_group_remove_from", text="Remove Group", icon="ZOOMOUT")
 
         layout.separator()
 
-        layout.menu("MESH_MT_vertex_group_specials", icon='TRIA_RIGHT', text="Vertex Group Specials")	
+        layout.operator("object.vertex_group_add", icon='GROUP_VERTEX', text="Add Vertex Group")
+        layout.operator("object.vertex_group_remove", icon='GROUP_VERTEX', text="Remove Vertex Group").all = False
 
-        layout.separator()           
+        layout.separator()
+
+        layout.menu("MESH_MT_vertex_group_specials", icon='TRIA_RIGHT', text="Vertex Group Specials")
+
+        layout.separator()
 
         layout.prop(context.tool_settings, "vertex_group_weight", text="Weight")
 
 
-
 def register():
 
-    bpy.utils.register_class(VIEW3D_TP_Display_VertexGroup)    
-    
+    bpy.utils.register_class(VIEW3D_TP_Display_VertexGroup)
+
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
         km = kc.keymaps.new(name='Mesh')
         kmi = km.keymap_items.new('wm.call_menu', 'GRLESS', 'PRESS')
-        kmi.properties.name = "tp_display.vertex_group"      
+        kmi.properties.name = "tp_display.vertex_group"
 
 
 def unregister():
-  
-    bpy.utils.unregister_class(VIEW3D_TP_Display_VertexGroup)     
-    
+
+    bpy.utils.unregister_class(VIEW3D_TP_Display_VertexGroup)
+
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
@@ -102,25 +98,11 @@ def unregister():
             if kmi.idname == 'wm.call_menu':
                 if kmi.properties.name == "":
                     km.keymap_items.remove(kmi)
-                    break 
+                    break
 
 
 if __name__ == "__main__":
-    register() 	
+    register()
 
     # The menu can also be called from scripts
     bpy.ops.wm.call_menu(name=VIEW3D_TP_Display_VertexGroup.bl_idname)
-
-
-
-
-
-
-
-
-
-
-
-
-
-

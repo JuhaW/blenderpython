@@ -23,14 +23,14 @@ from bpy.props import BoolProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (sv_Vars, updateNode, multi_socket, changable_sockets,
-                            dataSpoil, dataCorrect, levelsOflist,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     dataSpoil, dataCorrect, levelsOflist,
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 from math import acos, acosh, asin, asinh, atan, atan2, \
-                            atanh,ceil,copysign,cos,cosh,degrees,e, \
-                            erf,erfc,exp,expm1,fabs,factorial,floor, \
-                            fmod,frexp,fsum,gamma,hypot,isfinite,isinf, \
-                            isnan,ldexp,lgamma,log,log10,log1p,log2,modf, \
-                            pi,pow,radians,sin,sinh,sqrt,tan,tanh,trunc
+    atanh, ceil, copysign, cos, cosh, degrees, e, \
+    erf, erfc, exp, expm1, fabs, factorial, floor, \
+    fmod, frexp, fsum, gamma, hypot, isfinite, isinf, \
+    isnan, ldexp, lgamma, log, log10, log1p, log2, modf, \
+    pi, pow, radians, sin, sinh, sqrt, tan, tanh, trunc
 
 
 class Formula2Node(bpy.types.Node, SverchCustomTreeNode):
@@ -67,26 +67,24 @@ class Formula2Node(bpy.types.Node, SverchCustomTreeNode):
             inputsocketname = 'X'
             outputsocketname = ['Result']
             changable_sockets(self, inputsocketname, outputsocketname)
-            
-        
+
     def process(self):
         if self.inputs['X'].is_linked:
             vecs = SvGetSocketAnyType(self, self.inputs['X'])
         else:
             vecs = [[0.0]]
 
-
         # outputs
         if not self.outputs['Result'].is_linked:
             return
-        
+
         list_mult = []
         if self.inputs['n[0]'].is_linked:
             i = 0
             for socket in self.inputs[1:]:
                 if socket.is_linked:
                     list_mult.append(SvGetSocketAnyType(self, socket))
-            #print(list_mult)
+            # print(list_mult)
         code_formula = parser.expr(self.formula).compile()
         # finding nasty levels, make equal nastyness (canonical 0,1,2,3)
         levels = [levelsOflist(vecs)]
@@ -96,18 +94,18 @@ class Formula2Node(bpy.types.Node, SverchCustomTreeNode):
         diflevel = maxlevel - levels[0]
 
         if diflevel:
-            vecs_ = dataSpoil([vecs], diflevel-1)
+            vecs_ = dataSpoil([vecs], diflevel - 1)
             vecs = dataCorrect(vecs_, nominal_dept=2)
         for i, lev in enumerate(levels):
             if i == 0:
                 continue
-            diflevel = maxlevel-lev
+            diflevel = maxlevel - lev
             if diflevel:
-                list_temp = dataSpoil([list_mult[i-1]], diflevel-1)
-                list_mult[i-1] = dataCorrect(list_temp, nominal_dept=2)
-        #print(list_mult)
+                list_temp = dataSpoil([list_mult[i - 1]], diflevel - 1)
+                list_mult[i - 1] = dataCorrect(list_temp, nominal_dept=2)
+        # print(list_mult)
         r = self.inte(vecs, code_formula, list_mult, 3)
-        result = dataCorrect(r, nominal_dept=min((levels[0]-1), 2))
+        result = dataCorrect(r, nominal_dept=min((levels[0] - 1), 2))
 
         SvSetSocketAnyType(self, 'Result', result)
 
@@ -134,9 +132,9 @@ class Formula2Node(bpy.types.Node, SverchCustomTreeNode):
             if v[:6] == 'sv_typ':
                 continue
             abra = sv_Vars[v]
-            exec(str(v)+'=[]')
+            exec(str(v) + '=[]')
             for i, aa_abra in enumerate(abra):
-                eva = str(v)+'.append('+str(aa_abra)+')'
+                eva = str(v) + '.append(' + str(aa_abra) + ')'
                 eval(eva)
 
         for nitem in nlist:
@@ -172,7 +170,7 @@ class Formula2Node(bpy.types.Node, SverchCustomTreeNode):
         ''' enlarge minor n[i] list to size of x list '''
 
         lst.extend([lst[-1] for i in range(equal)])
-        #return lst
+        # return lst
 
 
 def register():

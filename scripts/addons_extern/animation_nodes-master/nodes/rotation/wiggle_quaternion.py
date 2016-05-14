@@ -5,11 +5,12 @@ from ... events import propertyChanged
 from ... base_types.node import AnimationNode
 from ... algorithms.perlin_noise import perlinNoise
 
+
 class QuaternionWiggleNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_QuaternionWiggleNode"
     bl_label = "Quaternion Wiggle"
 
-    nodeSeed = IntProperty(update = propertyChanged)
+    nodeSeed = IntProperty(update=propertyChanged)
 
     def create(self):
         self.inputs.new("an_FloatSocket", "Seed", "seed")
@@ -23,7 +24,7 @@ class QuaternionWiggleNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_QuaternionSocket", "Quaternion", "quaternion")
 
     def draw(self, layout):
-        layout.prop(self, "nodeSeed", text = "Node Seed")
+        layout.prop(self, "nodeSeed", text="Node Seed")
 
     def execute(self, seed, evolution, speed, amplitude, octaves, persistance):
         quaternion = Quaternion()

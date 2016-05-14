@@ -2,7 +2,9 @@ import bpy
 from .. import problems
 from .. utils.nodes import idToNode, idToSocket
 
+
 class NodeNetwork:
+
     def __init__(self, nodeIDs, forestData):
         self.nodeIDs = nodeIDs
         self.forestData = forestData
@@ -27,7 +29,8 @@ class NodeNetwork:
         elif loopNodeAmount == 0:
             if self.groupInAmount == 0 and self.groupOutAmount == 1:
                 self.identifier = self.groupOutputNode.groupInputIdentifier
-                if self.identifier == "": self.identifier = None
+                if self.identifier == "":
+                    self.identifier = None
             elif self.groupInAmount == 1 and self.groupOutAmount == 0:
                 self.type = "Group"
             elif self.groupInAmount == 1 and self.groupOutAmount == 1:
@@ -43,9 +46,12 @@ class NodeNetwork:
                 if idToNode(self.loopInputIDs[0]).identifier == possibleIdentifiers[0]:
                     self.type = "Loop"
 
-        if self.type == "Script": owner = self.scriptNode
-        elif self.type == "Group": owner = self.groupInputNode
-        elif self.type == "Loop": owner = self.loopInputNode
+        if self.type == "Script":
+            owner = self.scriptNode
+        elif self.type == "Group":
+            owner = self.groupInputNode
+        elif self.type == "Loop":
+            owner = self.loopInputNode
 
         if self.type in ("Group", "Loop", "Script"):
             self.identifier = owner.identifier
@@ -67,15 +73,14 @@ class NodeNetwork:
         self.invokeSubprogramIDs = []
 
         appendToList = {
-            "an_GroupInputNode" :            self.groupInputIDs.append,
-            "an_GroupOutputNode" :           self.groupOutputIDs.append,
-            "an_LoopInputNode" :             self.loopInputIDs.append,
-            "an_LoopGeneratorOutputNode" :   self.generatorOutputIDs.append,
-            "an_ReassignLoopParameterNode" : self.reassignParameterIDs.append,
-            "an_LoopBreakNode" :             self.breakIDs.append,
-            "an_ScriptNode" :                self.scriptIDs.append,
-            "an_InvokeSubprogramNode" :      self.invokeSubprogramIDs.append }
-
+            "an_GroupInputNode": self.groupInputIDs.append,
+            "an_GroupOutputNode": self.groupOutputIDs.append,
+            "an_LoopInputNode": self.loopInputIDs.append,
+            "an_LoopGeneratorOutputNode": self.generatorOutputIDs.append,
+            "an_ReassignLoopParameterNode": self.reassignParameterIDs.append,
+            "an_LoopBreakNode": self.breakIDs.append,
+            "an_ScriptNode": self.scriptIDs.append,
+            "an_InvokeSubprogramNode": self.invokeSubprogramIDs.append}
 
         typeByNode = self.forestData.typeByNode
         for nodeID in self.nodeIDs:
@@ -122,23 +127,31 @@ class NodeNetwork:
 
     @property
     def ownerNode(self):
-        try: return idToNode(self.forestData.nodeByIdentifier[self.identifier])
-        except: return None
+        try:
+            return idToNode(self.forestData.nodeByIdentifier[self.identifier])
+        except:
+            return None
 
     @property
     def groupInputNode(self):
-        try: return idToNode(self.groupInputIDs[0])
-        except: return None
+        try:
+            return idToNode(self.groupInputIDs[0])
+        except:
+            return None
 
     @property
     def groupOutputNode(self):
-        try: return idToNode(self.groupOutputIDs[0])
-        except: return None
+        try:
+            return idToNode(self.groupOutputIDs[0])
+        except:
+            return None
 
     @property
     def loopInputNode(self):
-        try: return idToNode(self.loopInputIDs[0])
-        except: return None
+        try:
+            return idToNode(self.loopInputIDs[0])
+        except:
+            return None
 
     @property
     def generatorOutputNodes(self):
@@ -154,9 +167,10 @@ class NodeNetwork:
 
     @property
     def scriptNode(self):
-        try: return idToNode(self.scriptIDs[0])
-        except: return None
-
+        try:
+            return idToNode(self.scriptIDs[0])
+        except:
+            return None
 
     def getSortedAnimationNodes(self):
         '''

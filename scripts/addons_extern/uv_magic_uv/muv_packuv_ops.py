@@ -123,7 +123,7 @@ class MUV_PackUV(bpy.types.Operator):
                         # find two same UV pair for transfering UV
                         face_pair_1 = isl['faces'][0:2]
                         face_pair_2 = []
-                        
+
                         face_sorted_1 = isl['faces']
                         face_sorted_2 = []
                         for f1 in face_sorted_1:
@@ -151,10 +151,9 @@ class MUV_PackUV(bpy.types.Operator):
 
         # pack UV
         for gidx in range(num_group):
-            group = list(filter(lambda i:i['group']==gidx, island_info))
+            group = list(filter(lambda i: i['group'] == gidx, island_info))
             for f in group[0]['faces']:
                 bm.faces[f['face_idx']].select = True
-
 
         bmesh.update_edit_mesh(obj.data)
 
@@ -163,7 +162,7 @@ class MUV_PackUV(bpy.types.Operator):
 
         # copy/paste UV among same island
         for gidx in range(num_group):
-            group = list(filter(lambda i:i['group']==gidx, island_info))
+            group = list(filter(lambda i: i['group'] == gidx, island_info))
             if len(group) <= 1:
                 continue
             for g in group[1:]:
@@ -174,7 +173,6 @@ class MUV_PackUV(bpy.types.Operator):
         bmesh.update_edit_mesh(obj.data)
 
         return {'FINISHED'}
-
 
     def __parse_island(self, bm, uv_layer, face_idx, faces_left, island):
         if face_idx in faces_left:
@@ -198,5 +196,3 @@ class MUV_PackUV(bpy.types.Operator):
             self.__parse_island(bm, uv_layer, face_idx, faces_left, current_island)
             uv_island_lists.append(current_island)
         return uv_island_lists
-
-

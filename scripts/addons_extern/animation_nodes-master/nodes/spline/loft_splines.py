@@ -12,6 +12,7 @@ sampleDistributionTypeItems = [
     ("RESOLUTION", "Resolution", ""),
     ("UNIFORM", "Uniform", "")]
 
+
 class LoftSplinesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_LoftSplinesNode"
     bl_label = "Loft Splines"
@@ -20,11 +21,11 @@ class LoftSplinesNode(bpy.types.Node, AnimationNode):
         self.inputs["Smoothness"].hide = self.interpolationType != "BEZIER"
         propertyChanged(self, context)
 
-    interpolationType = EnumProperty(name = "Interpolation Type", default = "BEZIER", items = interpolationTypeItems, update = settingChanged)
+    interpolationType = EnumProperty(name="Interpolation Type", default="BEZIER", items=interpolationTypeItems, update=settingChanged)
 
-    resolution = IntProperty(name = "Resolution", default = 100, min = 2, description = "Increase to have a more accurate evaluation", update = propertyChanged)
-    splineDistributionType = EnumProperty(name = "Spline Distribution", default = "RESOLUTION", items = sampleDistributionTypeItems, update = propertyChanged)
-    surfaceDistributionType = EnumProperty(name = "Surface Distribution", default = "RESOLUTION", items = sampleDistributionTypeItems, update = propertyChanged)
+    resolution = IntProperty(name="Resolution", default=100, min=2, description="Increase to have a more accurate evaluation", update=propertyChanged)
+    splineDistributionType = EnumProperty(name="Spline Distribution", default="RESOLUTION", items=sampleDistributionTypeItems, update=propertyChanged)
+    surfaceDistributionType = EnumProperty(name="Surface Distribution", default="RESOLUTION", items=sampleDistributionTypeItems, update=propertyChanged)
 
     def create(self):
         self.inputs.new("an_SplineListSocket", "Splines", "splines")
@@ -47,7 +48,7 @@ class LoftSplinesNode(bpy.types.Node, AnimationNode):
         self.settingChanged(bpy.context)
 
     def draw(self, layout):
-        layout.prop(self, "interpolationType", text = "")
+        layout.prop(self, "interpolationType", text="")
 
     def drawAdvanced(self, layout):
         col = layout.column()
@@ -58,12 +59,17 @@ class LoftSplinesNode(bpy.types.Node, AnimationNode):
     def execute(self, splines, splineSamples, surfaceSamples, cyclic, smoothness, start, end):
         def canExecute():
             for spline in splines:
-                if not spline.isEvaluable: return False
-            if len(splines) < 2: return False
-            if splineSamples < 2: return False
-            if surfaceSamples < 2: return False
+                if not spline.isEvaluable:
+                    return False
+            if len(splines) < 2:
+                return False
+            if splineSamples < 2:
+                return False
+            if surfaceSamples < 2:
+                return False
             isRealCyclic = cyclic and start == 0.0 and end == 1.0
-            if isRealCyclic and surfaceSamples < 3: return False
+            if isRealCyclic and surfaceSamples < 3:
+                return False
             return True
 
         for spline in splines:
@@ -73,13 +79,14 @@ class LoftSplinesNode(bpy.types.Node, AnimationNode):
             vertices, polygons = loftSplines(splines,
                                              splineSamples,
                                              surfaceSamples,
-                                             type = self.interpolationType,
-                                             cyclic = cyclic,
-                                             smoothness = smoothness,
-                                             uniformConverterResolution = self.resolution,
-                                             splineDistributionType = self.splineDistributionType,
-                                             surfaceDistributionType = self.surfaceDistributionType,
-                                             startSurfaceParameter = start,
-                                             endSurfaceParameter = end)
+                                             type=self.interpolationType,
+                                             cyclic=cyclic,
+                                             smoothness=smoothness,
+                                             uniformConverterResolution=self.resolution,
+                                             splineDistributionType=self.splineDistributionType,
+                                             surfaceDistributionType=self.surfaceDistributionType,
+                                             startSurfaceParameter=start,
+                                             endSurfaceParameter=end)
             return vertices, polygons
-        else: return [], []
+        else:
+            return [], []

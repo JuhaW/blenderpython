@@ -6,7 +6,8 @@ from ... base_types.node import AnimationNode
 pivotTypeItems = [
     ("CENTER", "Center", "Use the center of the polygon as pivot", "NONE", 0),
     ("WORLD_ORIGIN", "World", "Use the (0, 0, 0) vector as pivot for all polygons", "NONE", 1),
-    ("CUSTOM", "Custom", "Use a custom vector as pivot", "NONE", 2) ]
+    ("CUSTOM", "Custom", "Use a custom vector as pivot", "NONE", 2)]
+
 
 class TransformPolygonNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_TransformPolygonNode"
@@ -15,15 +16,15 @@ class TransformPolygonNode(bpy.types.Node, AnimationNode):
     def pivotTypeChanged(self, context):
         self.generateSockets()
 
-    pivotType = EnumProperty(name = "Pivot Type", default = "CENTER",
-        items = pivotTypeItems, update = pivotTypeChanged)
+    pivotType = EnumProperty(name="Pivot Type", default="CENTER",
+                             items=pivotTypeItems, update=pivotTypeChanged)
 
     def create(self):
         self.generateSockets()
         self.outputs.new("an_PolygonSocket", "Polygon", "polygon")
 
     def draw(self, layout):
-        layout.prop(self, "pivotType", text = "Pivot")
+        layout.prop(self, "pivotType", text="Pivot")
 
     @keepNodeState
     def generateSockets(self):

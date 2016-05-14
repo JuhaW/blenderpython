@@ -3539,7 +3539,7 @@ def ignore_instance():
     for obj in bpy.data.objects:
         if not obj.select \
                 or obj.type != 'MESH' and obj.type != 'CURVE':
-                continue
+            continue
 
         dataname = obj.type + obj.data.name
 

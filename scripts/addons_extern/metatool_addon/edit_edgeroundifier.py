@@ -17,7 +17,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-#bl_info = {
+# bl_info = {
 #    "name": "Edge Roundifier",
 #    "category": "Mesh",
 #    'author': 'Piotr Komisarczyk (komi3D)',
@@ -41,6 +41,7 @@ from mathutils import Vector
 # variable controlling all print functions
 debug = False
 
+
 def debugPrint(*text):
     if debug:
         for t in text:
@@ -51,10 +52,12 @@ def debugPrint(*text):
 ####################### Geometry and math calcualtion methods #####################
 
 class CalculationHelper:
+
     def __init__(self):
         '''
         Constructor
         '''
+
     def getLineCoefficientsPerpendicularToVectorInPoint(self, point, vector):
         x, y, z = point
         xVector, yVector, zVector = vector
@@ -72,7 +75,7 @@ class CalculationHelper:
                 return (x, x)
             elif delta < 0:
                 return None
-            else :
+            else:
                 x1 = (-b - math.sqrt(delta)) / (2 * a)
                 x2 = (-b + math.sqrt(delta)) / (2 * a)
                 return (x1, x2)
@@ -84,13 +87,13 @@ class CalculationHelper:
     def getCoefficientsForLineThrough2Points(self, point1, point2):
         x1, y1, z1 = point1
         x2, y2, z2 = point2
-        #TODO how to handle other planes YZ, XZ???
+        # TODO how to handle other planes YZ, XZ???
         xabs = math.fabs(x2 - x1)
         yabs = math.fabs(y2 - y1)
         debugPrint("XABS = ", xabs)
         debugPrint("YABS = ", yabs)
         if xabs <= 0.0001:
-            return None #this means line x= edgeCenterX
+            return None  # this means line x= edgeCenterX
         if yabs <= 0.0001:
             A = 0
             B = y1
@@ -108,7 +111,7 @@ class CalculationHelper:
         f = 1 + math.pow(A, 2)
         g = -2 * a + 2 * A * B - 2 * A * b
         h = math.pow(B, 2) - 2 * b * B - math.pow(radius, 2) + math.pow(a, 2) + math.pow(b, 2)
-        coef = [f,g,h]
+        coef = [f, g, h]
         roots = self.getQuadraticRoots(coef)
         if roots != None:
             x1 = roots[0]
@@ -118,7 +121,7 @@ class CalculationHelper:
             return (point1, point2)
         else:
             return None
-        
+
     def getLineCircleIntersectionsWhenXPerpendicular(self, xValue, circleMidPoint, radius):
         # (x - a)**2 + (y - b)**2 = r**2 - circle equation
         # x = xValue - line equation
@@ -127,8 +130,8 @@ class CalculationHelper:
         a, b = circleMidPoint
         f = 1
         g = -2 * b
-        h = math.pow(a, 2) + math.pow(b, 2) + math.pow(xValue, 2) - 2* a * xValue  -math.pow(radius, 2)
-        coef = [f,g,h]
+        h = math.pow(a, 2) + math.pow(b, 2) + math.pow(xValue, 2) - 2 * a * xValue - math.pow(radius, 2)
+        coef = [f, g, h]
         roots = self.getQuadraticRoots(coef)
         if roots != None:
             y1 = roots[0]
@@ -142,7 +145,7 @@ class CalculationHelper:
     def getEdgeLength(self, point1, point2):
         x1, y1, z1 = point1
         x2, y2, z2 = point2
-        #TODO assupmtion Z=0
+        # TODO assupmtion Z=0
         length = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2) + math.pow(z2 - z1, 2))
         return length
 
@@ -168,38 +171,39 @@ class CalculationHelper:
 
     def getCenterBetween2VertsXYZ(self, vert1, vert2):
         vector = self.getVectorBetween2VertsXYZ(vert1, vert2)
-        halfvector = [vector[0]/2,vector[1]/2,vector[2]/2]
+        halfvector = [vector[0] / 2, vector[1] / 2, vector[2] / 2]
         center = (vert1[0] + halfvector[0], vert1[1] + halfvector[1], vert1[2] + halfvector[2])
         return center
 
 ########################################################
 ################# SELECTION METHODS ####################
 
+
 class SelectionHelper:
+
     def selectVertexInMesh(self, mesh, vertex):
-        bpy.ops.object.mode_set(mode = "OBJECT")
+        bpy.ops.object.mode_set(mode="OBJECT")
         for v in mesh.vertices:
             if (v.co[0] == vertex[0]) and (v.co[1] == vertex[1]) and (v.co[2] == vertex[2]):
                 v.select = True
                 break
 
-        bpy.ops.object.mode_set(mode = "EDIT")
-        
+        bpy.ops.object.mode_set(mode="EDIT")
+
     def getSelectedVertex(self, mesh):
-        bpy.ops.object.mode_set(mode = "OBJECT")
+        bpy.ops.object.mode_set(mode="OBJECT")
         for v in mesh.vertices:
-            if v.select == True :
-                bpy.ops.object.mode_set(mode = "EDIT")
+            if v.select == True:
+                bpy.ops.object.mode_set(mode="EDIT")
                 return v
 
-        bpy.ops.object.mode_set(mode = "EDIT")
+        bpy.ops.object.mode_set(mode="EDIT")
         return None
 
     def refreshMesh(self, bm, mesh):
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
         bm.to_mesh(mesh)
-        bpy.ops.object.mode_set(mode = 'EDIT')
-
+        bpy.ops.object.mode_set(mode='EDIT')
 
 
 ###################################################################################
@@ -210,49 +214,49 @@ class EdgeRoundifier(bpy.types.Operator):
     bl_label = "Edge Roundifier"  # display name in the interface.
     bl_options = {'REGISTER', 'UNDO'}  # enable undo for the operator.
 
-    threshold=0.0005 #used for remove doubles and edge selection at the end
-#TODO: 
+    threshold = 0.0005  # used for remove doubles and edge selection at the end
+# TODO:
 # 1) offset - move arcs perpendicular to edges
 # 2) allow other spin axes X and Y (global)
 
-    r = bpy.props.FloatProperty(name = '', default = 1, min = 0.00001, max = 1000.0, step = 0.1, precision = 3)
-    a = bpy.props.FloatProperty(name = '', default = 180, min = 0.1, max = 180.0, step = 0.5, precision = 1)
-    n = bpy.props.IntProperty(name = '', default = 4, min = 1, max = 100, step = 1)
-    flip = bpy.props.BoolProperty(name = 'flip', default = False)
-    invertAngle = bpy.props.BoolProperty(name = 'invertAngle', default = False)
-    fullCircles = bpy.props.BoolProperty(name = 'fullCircles', default = False)
-    removeDoubles = bpy.props.BoolProperty(name = 'removeDoubles', default = False)
-    #FUTURE TODO: OFFSET
+    r = bpy.props.FloatProperty(name='', default=1, min=0.00001, max=1000.0, step=0.1, precision=3)
+    a = bpy.props.FloatProperty(name='', default=180, min=0.1, max=180.0, step=0.5, precision=1)
+    n = bpy.props.IntProperty(name='', default=4, min=1, max=100, step=1)
+    flip = bpy.props.BoolProperty(name='flip', default=False)
+    invertAngle = bpy.props.BoolProperty(name='invertAngle', default=False)
+    fullCircles = bpy.props.BoolProperty(name='fullCircles', default=False)
+    removeDoubles = bpy.props.BoolProperty(name='removeDoubles', default=False)
+    # FUTURE TODO: OFFSET
     #offset = bpy.props.BoolProperty(name = 'offset', default = False)
-    
-    modeItems = [('Radius', "Radius", ""), ("Angle", "Angle","")]
+
+    modeItems = [('Radius', "Radius", ""), ("Angle", "Angle", "")]
     modeEnum = bpy.props.EnumProperty(
-        items = modeItems,
-        name = '',
-        default = 'Radius',
-        description = "Edge Roundifier mode")
-    
-    angleItems = [('Other', "Other", "User defined angle"),('180', "180", "HemiCircle"), ('120', "120", "TriangleCircle"),
-                    ('90', "90", "QuadCircle"), ('60', "60", "HexagonCircle"),
-                    ('45', "45", "OctagonCircle"), ('30', "30", "12-gonCircle")]
+        items=modeItems,
+        name='',
+        default='Radius',
+        description="Edge Roundifier mode")
+
+    angleItems = [('Other', "Other", "User defined angle"), ('180', "180", "HemiCircle"), ('120', "120", "TriangleCircle"),
+                  ('90', "90", "QuadCircle"), ('60', "60", "HexagonCircle"),
+                  ('45', "45", "OctagonCircle"), ('30', "30", "12-gonCircle")]
 
     angleEnum = bpy.props.EnumProperty(
-        items = angleItems,
-        name = '',
-        default = 'Other',
-        description = "Presets prepare standard angles and calculate proper ray")
+        items=angleItems,
+        name='',
+        default='Other',
+        description="Presets prepare standard angles and calculate proper ray")
 
     refItems = [('ORG', "Origin", "Use Origin Location"), ('CUR', "3D Cursor", "Use 3DCursor Location")]
     referenceLocation = bpy.props.EnumProperty(
-        items = refItems,
-        name = '',
-        default = 'ORG',
-        description = "Reference location used by Edge Roundifier to calculate initial centers of drawn arcs")
+        items=refItems,
+        name='',
+        default='ORG',
+        description="Reference location used by Edge Roundifier to calculate initial centers of drawn arcs")
 
     calc = CalculationHelper()
     sel = SelectionHelper()
 
-    def prepareMesh(self,context):
+    def prepareMesh(self, context):
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.mode_set(mode='EDIT')
 
@@ -264,7 +268,7 @@ class EdgeRoundifier(bpy.types.Operator):
 
     def prepareParameters(self):
 
-        parameters = { "plane" : "XY"}
+        parameters = {"plane": "XY"}
         parameters["radius"] = self.r
         parameters["angle"] = self.a
         parameters["segments"] = self.n
@@ -272,72 +276,71 @@ class EdgeRoundifier(bpy.types.Operator):
         parameters["fullCircles"] = self.fullCircles
         parameters["invertAngle"] = self.invertAngle
         parameters["angleEnum"] = self.angleEnum
-        parameters["modeEnum"] = self.modeEnum 
+        parameters["modeEnum"] = self.modeEnum
         parameters["refObject"] = self.referenceLocation
         parameters["removeDoubles"] = self.removeDoubles
-        #FUTURE TODO OFFSET
+        # FUTURE TODO OFFSET
         #parameters["offset"] = self.offset
         return parameters
 
     def draw(self, context):
         layout = self.layout
         layout.label('Radius < edge_length/2 causes arcs to disappear.')
-        row = layout.row(align = False)
+        row = layout.row(align=False)
         row.label('Mode:')
-        row.prop(self, 'modeEnum', expand = True, text = "a")
-        row = layout.row(align = False)
+        row.prop(self, 'modeEnum', expand=True, text="a")
+        row = layout.row(align=False)
         layout.label('Quick angle:')
-        layout.prop(self, 'angleEnum', expand = True, text = "abv")
-        row = layout.row(align = False)
+        layout.prop(self, 'angleEnum', expand=True, text="abv")
+        row = layout.row(align=False)
         row.label('Angle:')
         row.prop(self, 'a')
-        row = layout.row(align = False)
+        row = layout.row(align=False)
         row.label('Radius:')
         row.prop(self, 'r')
-        row = layout.row(align = True)
+        row = layout.row(align=True)
         row.label('Segments:')
-        row.prop(self, 'n', slider = True)
-        row = layout.row(align = False)
+        row.prop(self, 'n', slider=True)
+        row = layout.row(align=False)
         row.prop(self, 'flip')
         row.prop(self, 'invertAngle')
-        row = layout.row(align = False)
+        row = layout.row(align=False)
         row.prop(self, 'fullCircles')
         row.prop(self, 'removeDoubles')
-        #FUTURE TODO OFFSET
+        # FUTURE TODO OFFSET
         #row.prop(self, 'offset')
-        
+
         layout.label('Reference Location:')
-        layout.prop(self, 'referenceLocation', expand = True, text = "a")
-    
+        layout.prop(self, 'referenceLocation', expand=True, text="a")
+
     def invoke(self, context, event):
-        return context.window_manager.invoke_props_popup(self, event)    
+        return context.window_manager.invoke_props_popup(self, event)
 
     def execute(self, context):
 
         edges, mesh, bm = self.prepareMesh(context)
         parameters = self.prepareParameters()
-        
-        debugPrint ("EDGES ", edges)
-        
+
+        debugPrint("EDGES ", edges)
+
         if len(edges) > 0:
             self.roundifyEdges(edges, parameters, bm, mesh)
 
             if parameters["removeDoubles"] == True:
-                bpy.ops.mesh.select_all(action = "SELECT")
-                bpy.ops.mesh.remove_doubles(threshold = self.threshold)
-                bpy.ops.mesh.select_all(action = "DESELECT")
-            
+                bpy.ops.mesh.select_all(action="SELECT")
+                bpy.ops.mesh.remove_doubles(threshold=self.threshold)
+                bpy.ops.mesh.select_all(action="DESELECT")
+
             self.selectEdgesAfterRoundifier(context, edges)
         else:
             debugPrint("No edges selected!")
             self.report({'INFO'}, "Edge Roundifier: No edges selected!")
-        return {'FINISHED'} 
-       
+        return {'FINISHED'}
+
 ##########################################
     def roundifyEdges(self, edges, parameters, bm, mesh):
         for e in edges:
             self.roundify(e, parameters, bm, mesh)
-
 
     def getEdgeInfoAfterTranslation(self, edge, objectLocation):
         vertices = self.getVerticesFromEdge(edge)
@@ -366,7 +369,6 @@ class EdgeRoundifier(bpy.types.Operator):
         debugPrint("Edge info======================================")
         return OriginalVertices, V1Translated, V2Translated, edgeVector, edgeLength, edgeCenter
 
-
     def roundify(self, edge, parameters, bm, mesh):
         # assumption Z=0 for all vertices
 
@@ -381,7 +383,7 @@ class EdgeRoundifier(bpy.types.Operator):
 
         lineAB = self.calc.getLineCoefficientsPerpendicularToVectorInPoint(edgeCenter, edgeVector)
         debugPrint("Line Coefficients:", lineAB)
-        
+
         circleMidPoint = V1
         circleMidPointOnPlane = (V1[0], V1[1])  # only for Z=0 plane
         radius = parameters["radius"]
@@ -392,7 +394,7 @@ class EdgeRoundifier(bpy.types.Operator):
                 radius, angle = self.CalculateRadiusAndAngleForAnglePresets(parameters["angleEnum"], radius, angle, edgeLength)
             else:
                 radius, angle = self.CalculateRadiusAndAngleForOtherAngle(edgeLength)
-            
+
         debugPrint("RADIUS = ", radius)
         debugPrint("ANGLE = ", angle)
         roots = None
@@ -421,13 +423,12 @@ class EdgeRoundifier(bpy.types.Operator):
             refObjectLocation = bpy.context.scene.cursor_location
 
         chosenSpinCenter = self.getSpinCenterClosestToRefCenter(refObjectLocation, roots, parameters["flip"])
- 
 
         if (parameters["modeEnum"] == "Radius"):
             halfAngle = self.calc.getAngle(edgeCenter, chosenSpinCenter, circleMidPoint)
             angle = 2 * halfAngle[0]  # in radians
-            self.a = math.degrees(angle) # in degrees
-  
+            self.a = math.degrees(angle)  # in degrees
+
         spinAxis = (0, 0, 1)  # Z axis by default
 
         vertIndex = self.getProperVertexIndex(chosenSpinCenter, V1, V2, refObjectLocation)
@@ -439,13 +440,13 @@ class EdgeRoundifier(bpy.types.Operator):
         if(parameters["fullCircles"]):
             angle = 2 * math.pi
 
-        bpy.ops.mesh.select_all(action = "DESELECT")
-        
+        bpy.ops.mesh.select_all(action="DESELECT")
+
         self.sel.selectVertexInMesh(mesh, OriginalVertices[vertIndex])
 
-        bpy.ops.mesh.duplicate() #duplicate selected vertex 
+        bpy.ops.mesh.duplicate()  # duplicate selected vertex
 
-        #FUTURE TODO OFFSET      
+        # FUTURE TODO OFFSET
 #        if parameters["offset"]:
 #            offset = self.getOffsetVectorForTangency(edgeCenter, chosenSpinCenter, radius, self.invertAngle)
 #            self.moveSelectedVertexByVector(mesh,offset)
@@ -456,11 +457,10 @@ class EdgeRoundifier(bpy.types.Operator):
 
         bpy.ops.mesh.spin(
             steps=steps,
-            dupli=False, 
-            angle=angle, 
-            center=chosenSpinCenter, 
+            dupli=False,
+            angle=angle,
+            center=chosenSpinCenter,
             axis=spinAxis)
-
 
 
 ##########################################
@@ -470,7 +470,7 @@ class EdgeRoundifier(bpy.types.Operator):
             edgeCentSpinCentVector = self.calc.getVectorBetween2VertsXYZ(edgeCenter, chosenSpinCenter)
         else:
             edgeCentSpinCentVector = self.calc.getVectorBetween2VertsXYZ(chosenSpinCenter, edgeCenter)
-            
+
         vectorLength = self.calc.getVectorLength(edgeCentSpinCentVector)
         if invertAngle == False:
             offsetLength = radius - vectorLength
@@ -481,12 +481,12 @@ class EdgeRoundifier(bpy.types.Operator):
                         offsetLength * normalizedVector[1],
                         offsetLength * normalizedVector[2])
         return offsetVector
-    
+
     def moveSelectedVertexByVector(self, mesh, offset):
         vert = self.sel.getSelectedVertex(mesh)
-        vert.co.x =  vert.co.x + offset[0]
-        vert.co.y =  vert.co.y + offset[1]
-        vert.co.z =  vert.co.z + offset[2]
+        vert.co.x = vert.co.x + offset[0]
+        vert.co.y = vert.co.y + offset[1]
+        vert.co.z = vert.co.z + offset[2]
 
     def translateRoots(self, roots, objectLocation):
         # translationVector = self.calc.getVectorBetween2VertsXYZ(objectLocation, [0,0,0])
@@ -496,20 +496,20 @@ class EdgeRoundifier(bpy.types.Operator):
 
     def translateByVector(self, point, vector):
         translated = (point[0] + vector[0],
-        point[1] + vector[1],
-        point[2] + vector[2])
+                      point[1] + vector[1],
+                      point[2] + vector[2])
         return translated
 
     def CalculateRadiusAndAngleForOtherAngle(self, edgeLength):
         degAngle = self.a
         angle = math.radians(degAngle)
-        self.r = radius = edgeLength / (2 * math.sin(angle/2)) 
+        self.r = radius = edgeLength / (2 * math.sin(angle / 2))
         return radius, angle
 
     def CalculateRadiusAndAngleForAnglePresets(self, mode, initR, initA, edgeLength):
         radius = initR
         angle = initA
-          
+
         if mode == "180":
             radius = edgeLength / 2
             angle = math.pi
@@ -523,18 +523,17 @@ class EdgeRoundifier(bpy.types.Operator):
             radius = edgeLength
             angle = math.pi / 3
         elif mode == "45":
-            radius = edgeLength / (2 * math.sin(math.pi/8)) 
-            angle = math.pi / 4    
+            radius = edgeLength / (2 * math.sin(math.pi / 8))
+            angle = math.pi / 4
         elif mode == "30":
-            radius = edgeLength / (2 * math.sin(math.pi/12)) 
-            angle = math.pi / 6      
+            radius = edgeLength / (2 * math.sin(math.pi / 12))
+            angle = math.pi / 6
         self.a = math.degrees(angle)
         self.r = radius
-        debugPrint ("mode output, radius = ", radius, "angle = ", angle)
+        debugPrint("mode output, radius = ", radius, "angle = ", angle)
         return radius, angle
 
     #
-
 
     def getTheOtherIndex(self, vertexIndex):
         if vertexIndex == 0:
@@ -558,7 +557,6 @@ class EdgeRoundifier(bpy.types.Operator):
                 return 0  # V1
             if V2[0] > E[0]:
                 return 1  # V2
-
 
         # horizontal edge
         if S[0] == E[0] and S[1] < E[1]:
@@ -607,7 +605,6 @@ class EdgeRoundifier(bpy.types.Operator):
                 return 1  # V1
 
         return 0
-        
 
     def getSpinCenterClosestToRefCenter(self, objLocation, roots, flip):
         root0Distance = self.calc.getEdgeLength(objLocation, roots[0])
@@ -622,21 +619,21 @@ class EdgeRoundifier(bpy.types.Operator):
         else:
             return roots[chosenId]
 
-    def addMissingCoordinate(self,roots,axisOffset):
-        #TODO add X or Y or Z = 0, current assumption is Z = 0
+    def addMissingCoordinate(self, roots, axisOffset):
+        # TODO add X or Y or Z = 0, current assumption is Z = 0
         if roots != None:
             for root in roots:
                 root.append(axisOffset)
         return roots
 
-    def getSelectedEdges(self,bm):
+    def getSelectedEdges(self, bm):
         listOfSelectedEdges = []
         for e in bm.edges:
             if e.select == True:
                 debugPrint("edges:", e)
                 listOfSelectedEdges.append(e)
         return listOfSelectedEdges
-    
+
     def selectEdgesAfterRoundifier(self, context, edges):
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.mode_set(mode='EDIT')
@@ -647,28 +644,26 @@ class EdgeRoundifier(bpy.types.Operator):
         for selectedEdge in edges:
             for e in bmnew.edges:
                 if math.fabs(e.verts[0].co.x - selectedEdge.verts[0].co.x) <= self.threshold \
-                and math.fabs(e.verts[0].co.y - selectedEdge.verts[0].co.y) <= self.threshold \
-                and math.fabs(e.verts[0].co.y - selectedEdge.verts[0].co.y) <= self.threshold \
-                and math.fabs(e.verts[1].co.x - selectedEdge.verts[1].co.x) <= self.threshold \
-                and math.fabs(e.verts[1].co.y - selectedEdge.verts[1].co.y) <= self.threshold \
-                and math.fabs(e.verts[1].co.y - selectedEdge.verts[1].co.y) <= self.threshold:
+                        and math.fabs(e.verts[0].co.y - selectedEdge.verts[0].co.y) <= self.threshold \
+                        and math.fabs(e.verts[0].co.y - selectedEdge.verts[0].co.y) <= self.threshold \
+                        and math.fabs(e.verts[1].co.x - selectedEdge.verts[1].co.x) <= self.threshold \
+                        and math.fabs(e.verts[1].co.y - selectedEdge.verts[1].co.y) <= self.threshold \
+                        and math.fabs(e.verts[1].co.y - selectedEdge.verts[1].co.y) <= self.threshold:
                     e.select_set(True)
-                    
+
         bpy.ops.object.mode_set(mode='OBJECT')
         bmnew.to_mesh(mesh)
         bmnew.free()
         bpy.ops.object.mode_set(mode='EDIT')
 
-                    
     def deselectEdges(self, bm):
         for edge in bm.edges:
             edge.select_set(False)
-    
 
-    def getVerticesFromEdge(self,edge):
+    def getVerticesFromEdge(self, edge):
         v1 = edge.verts[0]
         v2 = edge.verts[1]
-        return (v1,v2)
+        return (v1, v2)
 
     def debugPrintEdgesInfo(self, edges):
         debugPrint("=== Selected edges ===")
@@ -679,17 +674,17 @@ class EdgeRoundifier(bpy.types.Operator):
             debugPrint(v2.co.x, v2.co.y, v2.co.z)
             debugPrint("----------")
 
-        
     @classmethod
     def poll(cls, context):
         return (context.scene.objects.active.type == 'MESH') and (context.scene.objects.active.mode == 'EDIT')
 
+
 def draw_item(self, context, event):
     self.layout.operator_context = 'INVOKE_DEFAULT'
     self.layout.operator('mesh.edge_roundifier')
-    return context.window_manager.draw_item_props_popup(self, event)    
+    return context.window_manager.draw_item_props_popup(self, event)
 
- 
+
 def register():
     bpy.utils.register_class(EdgeRoundifier)
     bpy.types.VIEW3D_MT_edit_mesh_edges.append(draw_item)
@@ -701,6 +696,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
-
-

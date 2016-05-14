@@ -11,6 +11,7 @@ keyDataTypeItems = [
     ("Float", "Float", "", "NONE", 3)
 ]
 
+
 class ObjectIDKeyNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ObjectIDKeyNode"
     bl_label = "Object ID Key"
@@ -19,9 +20,9 @@ class ObjectIDKeyNode(bpy.types.Node, AnimationNode):
     def keyDataTypeChanged(self, context):
         self.recreateOutputs()
 
-    keyDataType = EnumProperty(name = "Key Data Type",
-        items = keyDataTypeItems, update = keyDataTypeChanged)
-    keyName = StringProperty(name = "Key Name", update = executionCodeChanged)
+    keyDataType = EnumProperty(name="Key Data Type",
+                               items=keyDataTypeItems, update=keyDataTypeChanged)
+    keyName = StringProperty(name="Key Name", update=executionCodeChanged)
 
     def create(self):
         self.inputs.new("an_ObjectSocket", "Object", "object").defaultDrawType = "PROPERTY_ONLY"
@@ -29,14 +30,14 @@ class ObjectIDKeyNode(bpy.types.Node, AnimationNode):
 
     def drawAdvanced(self, layout):
         col = layout.column()
-        col.prop(self, "keyDataType", text = "Type")
-        col.prop(self, "keyName", text = "Name")
+        col.prop(self, "keyDataType", text="Type")
+        col.prop(self, "keyName", text="Name")
 
     def draw(self, layout):
         col = layout.column()
         col.scale_y = 1.5
         text = "Choose ID Key" if self.keyName == "" else repr(self.keyName)
-        self.invokeIDKeyChooser(col, "assignIDKey", text = text, icon = "VIEWZOOM")
+        self.invokeIDKeyChooser(col, "assignIDKey", text=text, icon="VIEWZOOM")
 
     def assignIDKey(self, dataType, name):
         self.keyDataType = dataType

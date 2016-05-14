@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class InterpolationListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_InterpolationListSocket"
     bl_label = "Interpolation List Socket"

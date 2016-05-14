@@ -1,14 +1,17 @@
 import bpy
 from .. utils.blender_ui import PieMenuHelper
 
+
 class SelectionPie(bpy.types.Menu, PieMenuHelper):
     bl_idname = "an.selection_pie"
     bl_label = "Selection Pie"
 
     @classmethod
     def poll(cls, context):
-        try: return context.active_node.isAnimationNode
-        except: return False
+        try:
+            return context.active_node.isAnimationNode
+        except:
+            return False
 
     def drawLeft(self, layout):
         layout.operator("an.select_dependencies")

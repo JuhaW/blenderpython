@@ -21,7 +21,7 @@ from bpy.props import FloatProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, Vector_generate, Vector_degenerate,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 # "coauthor": "Alessandro Zomparelli (sketchesofcode)"
 
@@ -50,29 +50,29 @@ class AdaptivePolsNode(bpy.types.Node, SverchCustomTreeNode):
         layout.prop(self, "width_coef", text="donor width")
 
     def lerp(self, v1, v2, v3, v4, v):
-        v12 = v1 + (v2-v1)*v[0] + ((v2-v1)/2)
-        v43 = v4 + (v3-v4)*v[0] + ((v3-v4)/2)
-        return v12 + (v43-v12)*v[1] + ((v43-v12)/2)
+        v12 = v1 + (v2 - v1) * v[0] + ((v2 - v1) / 2)
+        v43 = v4 + (v3 - v4) * v[0] + ((v3 - v4) / 2)
+        return v12 + (v43 - v12) * v[1] + ((v43 - v12) / 2)
 
     def lerp2(self, v1, v2, v3, v4, v, x, y):
-        v12 = v1 + (v2-v1)*v[0]*x + ((v2-v1)/2)
-        v43 = v4 + (v3-v4)*v[0]*x + ((v3-v4)/2)
-        return v12 + (v43-v12)*v[1]*y + ((v43-v12)/2)
+        v12 = v1 + (v2 - v1) * v[0] * x + ((v2 - v1) / 2)
+        v43 = v4 + (v3 - v4) * v[0] * x + ((v3 - v4) / 2)
+        return v12 + (v43 - v12) * v[1] * y + ((v43 - v12) / 2)
 
     def lerp3(self, v1, v2, v3, v4, v, x, y, z):
         loc = self.lerp2(v1.co, v2.co, v3.co, v4.co, v, x, y)
         nor = self.lerp(v1.normal, v2.normal, v3.normal, v4.normal, v)
         nor.normalize()
         #print (loc, nor, v[2], z)
-        return loc + nor*v[2]*z
+        return loc + nor * v[2] * z
 
     def process(self):
         # достаём два слота - вершины и полики
         if 'Vertices' in self.outputs and self.outputs['Vertices'].links:
             if (self.inputs['PolsR'].links
-               and self.inputs['VersR'].links
-               and self.inputs['VersD'].links
-               and self.inputs['PolsD'].links):
+                    and self.inputs['VersR'].links
+                    and self.inputs['VersD'].links
+                    and self.inputs['PolsD'].links):
 
                 if self.inputs['Z_Coef'].links:
                     z_coef = SvGetSocketAnyType(self, self.inputs['Z_Coef'])[0]
@@ -84,7 +84,7 @@ class AdaptivePolsNode(bpy.types.Node, SverchCustomTreeNode):
                 polsD = SvGetSocketAnyType(self, self.inputs['PolsD'])  # donor many objects [:]
                 versD_ = SvGetSocketAnyType(self, self.inputs['VersD'])  # donor
                 versD = Vector_generate(versD_)
-                ##### it is needed for normals of vertices
+                # it is needed for normals of vertices
                 new_me = bpy.data.meshes.new('recepient')
                 new_me.from_pydata(versR, [], polsR)
                 new_me.update(calc_edges=True)
@@ -98,11 +98,11 @@ class AdaptivePolsNode(bpy.types.Node, SverchCustomTreeNode):
                     n_faces = len(pD)
 
                     xx = [x[0] for x in vD]
-                    x0 = (self.width_coef) / (max(xx)-min(xx))
+                    x0 = (self.width_coef) / (max(xx) - min(xx))
                     yy = [y[1] for y in vD]
-                    y0 = (self.width_coef) / (max(yy)-min(yy))
+                    y0 = (self.width_coef) / (max(yy) - min(yy))
                     zz = [z[2] for z in vD]
-                    zzz = (max(zz)-min(zz))
+                    zzz = (max(zz) - min(zz))
                     if zzz:
                         z0 = 1 / zzz
                     else:
@@ -114,7 +114,7 @@ class AdaptivePolsNode(bpy.types.Node, SverchCustomTreeNode):
 
                     for j, pR in enumerate(polsR):
 
-                        last = len(pR)-1
+                        last = len(pR) - 1
                         vs = [new_ve[v] for v in pR]  # new_ve  - temporery data
                         if z_coef:
                             if j < len(z_coef):

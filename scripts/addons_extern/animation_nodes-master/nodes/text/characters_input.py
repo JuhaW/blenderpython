@@ -8,6 +8,7 @@ special = "!$%&/()=?*+#'-_.:,;" + '"'
 lineBreak = "\n"
 allChars = lower + upper + digits + special
 
+
 class CharactersNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_CharactersNode"
     bl_label = "Characters"

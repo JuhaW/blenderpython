@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class ScaleMatrixNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ScaleMatrixNode"
     bl_label = "Scale Matrix"

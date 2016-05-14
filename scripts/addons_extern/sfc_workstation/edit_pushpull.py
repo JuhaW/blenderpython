@@ -26,7 +26,7 @@ bl_info = {
     "blender": (2, 75, 0),
     "location": "View3D > TOOLS > Tools > Mesh Tools > Add: > Extrude Menu (Alt + E)",
     "description": "Push and pull face entities to sculpt 3d models",
-    "wiki_url" : "http://blenderartists.org/forum/showthread.php?376618-Addon-Push-Pull-Face",
+    "wiki_url": "http://blenderartists.org/forum/showthread.php?376618-Addon-Push-Pull-Face",
     "category": "Mesh"}
 
 import bpy
@@ -34,7 +34,8 @@ import bmesh
 from mathutils import Vector
 from bpy.props import FloatProperty
 
-def intersect_bound_box_edge_edge(a1, a2, b1, b2, precision = 0.0001):
+
+def intersect_bound_box_edge_edge(a1, a2, b1, b2, precision=0.0001):
     bbx1 = sorted([a1[0], a2[0]])
     bbx2 = sorted([b1[0], b2[0]])
     if ((bbx1[0] - precision) <= bbx2[1]) and (bbx1[1] >= (bbx2[0] - precision)):
@@ -52,7 +53,8 @@ def intersect_bound_box_edge_edge(a1, a2, b1, b2, precision = 0.0001):
     else:
         return False
 
-def list_BVH(edges1, edges2, precision = 0.0001):
+
+def list_BVH(edges1, edges2, precision=0.0001):
     tmp_set1 = set()
     tmp_set2 = set()
     for ed1 in edges1:
@@ -62,14 +64,15 @@ def list_BVH(edges1, edges2, precision = 0.0001):
                 a2 = ed1.verts[1]
                 b1 = ed2.verts[0]
                 b2 = ed2.verts[1]
-                intersect = intersect_bound_box_edge_edge(a1.co, a2.co, b1.co, b2.co, precision = precision)
+                intersect = intersect_bound_box_edge_edge(a1.co, a2.co, b1.co, b2.co, precision=precision)
                 if intersect:
                     tmp_set1.add(ed1)
                     tmp_set2.add(ed2)
 
     return tmp_set1, tmp_set2
 
-def intersect_edges_edges(edges1, edges2, ignore = {}, precision = 4):
+
+def intersect_edges_edges(edges1, edges2, ignore={}, precision=4):
     fprec = .1**precision
     new_edges1 = set()
     new_edges2 = set()
@@ -82,31 +85,31 @@ def intersect_edges_edges(edges1, edges2, ignore = {}, precision = 4):
                 a2 = ed1.verts[1]
                 b1 = ed2.verts[0]
                 b2 = ed2.verts[1]
-                
+
                 if a1 in {b1, b2} or a2 in {b1, b2}:
                     continue
 
-                v1 = a2.co-a1.co
-                v2 = b2.co-b1.co
-                v3 = a1.co-b1.co
-                
+                v1 = a2.co - a1.co
+                v2 = b2.co - b1.co
+                v3 = a1.co - b1.co
+
                 cross1 = v3.cross(v1)
                 cross2 = v3.cross(v2)
-                lc1 = cross1.x+cross1.y+cross1.z
-                lc2 = cross2.x+cross2.y+cross2.z
-                
-                if lc1 != 0 and lc2 != 0:
-                    coplanar = (cross1/lc1).cross(cross2/lc2).to_tuple(2) == (0,0,0) #cross cross is very inaccurate
-                else:
-                    coplanar = (cross1).cross(cross2).to_tuple(2) == (0,0,0)
-                
-                if coplanar: 
-                    cross3 = v2.cross(v1)
-                    lc3 = cross3.x+cross3.y+cross3.z
+                lc1 = cross1.x + cross1.y + cross1.z
+                lc2 = cross2.x + cross2.y + cross2.z
 
-                    if abs(lc3) > fprec:                        
-                        fac1 = lc2/lc3
-                        fac2 = lc1/lc3
+                if lc1 != 0 and lc2 != 0:
+                    coplanar = (cross1 / lc1).cross(cross2 / lc2).to_tuple(2) == (0, 0, 0)  # cross cross is very inaccurate
+                else:
+                    coplanar = (cross1).cross(cross2).to_tuple(2) == (0, 0, 0)
+
+                if coplanar:
+                    cross3 = v2.cross(v1)
+                    lc3 = cross3.x + cross3.y + cross3.z
+
+                    if abs(lc3) > fprec:
+                        fac1 = lc2 / lc3
+                        fac2 = lc1 / lc3
                         if 0 <= fac1 <= 1 and 0 <= fac2 <= 1:
                             rfac1 = round(fac1, precision)
                             rfac2 = round(fac2, precision)
@@ -134,16 +137,16 @@ def intersect_edges_edges(edges1, edges2, ignore = {}, precision = 4):
 
                             if nv1 != nv2:
                                 targetmap[nv1] = nv2
-                        #else:                            
+                        # else:
                             #print('not intersect')
-                    #else:
-                        #print('colinear')
-                #else:
+                    # else:
+                        # print('colinear')
+                # else:
                     #print('not coplanar')
     if new_edges1 or new_edges2:
         edges1.update(new_edges1)
         edges2.update(new_edges2)
-        ned, tar = intersect_edges_edges(edges1, edges2, ignore = exclude, precision = precision)
+        ned, tar = intersect_edges_edges(edges1, edges2, ignore=exclude, precision=precision)
         if tar != targetmap:
             new_edges1.update(ned["new_edges1"])
             new_edges2.update(ned["new_edges2"])
@@ -155,6 +158,7 @@ def intersect_edges_edges(edges1, edges2, ignore = {}, precision = 4):
         return {"new_edges1": new_edges1,
                 "new_edges2": new_edges2
                 }, targetmap
+
 
 class Push_Pull_Face(bpy.types.Operator):
     """Push and pull face entities to sculpt 3d models with ngons"""
@@ -170,7 +174,7 @@ class Push_Pull_Face(bpy.types.Operator):
         op = context.window_manager.operators
         #print([o.name for o in op])
         if op and op[-1].name == 'Translate':
-            #print('-------------------')
+            # print('-------------------')
             sface = self.bm.faces.active
             if not sface:
                 for face in self.bm.faces:
@@ -183,9 +187,9 @@ class Push_Pull_Face(bpy.types.Operator):
             for v in sface.verts:
                 for ed in v.link_edges:
                     set_edges.add(ed)
-            bm_edges = set(self.bm.edges)#.difference_update(set_edges)
+            bm_edges = set(self.bm.edges)  # .difference_update(set_edges)
             bm_edges.difference_update(set_edges)
-            set_edges, bm_edges = list_BVH(set_edges, bm_edges, precision = 0.0001)
+            set_edges, bm_edges = list_BVH(set_edges, bm_edges, precision=0.0001)
             new_edges, targetmap = intersect_edges_edges(set_edges, bm_edges)
             if targetmap:
                 bmesh.ops.weld_verts(self.bm, targetmap=targetmap)
@@ -215,16 +219,16 @@ class Push_Pull_Face(bpy.types.Operator):
             face = selection
             geom = []
             for edge in face.edges:
-                if abs(edge.calc_face_angle(0) - 1.5707963267948966) < 0.01: #self.angle_tolerance:
+                if abs(edge.calc_face_angle(0) - 1.5707963267948966) < 0.01:  # self.angle_tolerance:
                     geom.append(edge)
 
-            dict = bmesh.ops.extrude_discrete_faces(self.bm, faces = [face])
+            dict = bmesh.ops.extrude_discrete_faces(self.bm, faces=[face])
             bpy.ops.mesh.select_all(action='DESELECT')
             for face in dict['faces']:
                 self.bm.faces.active = face
                 face.select = True
                 sface = face
-            dfaces = bmesh.ops.dissolve_edges(self.bm, edges = geom, use_verts=True, use_face_split=False)
+            dfaces = bmesh.ops.dissolve_edges(self.bm, edges=geom, use_verts=True, use_face_split=False)
             bmesh.update_edit_mesh(self.mesh, tessface=True, destructive=True)
             bpy.ops.transform.translate('INVOKE_DEFAULT', constraint_axis=(False, False, True), constraint_orientation='NORMAL', release_confirm=True)
 
@@ -235,16 +239,18 @@ class Push_Pull_Face(bpy.types.Operator):
         self.cancel = False
         return {'RUNNING_MODAL'}
 
-def operator_draw(self,context):
+
+def operator_draw(self, context):
     layout = self.layout
     col = layout.column(align=True)
     col.operator("mesh.push_pull_face", text="Push/Pull Face")
-    
+
 
 def register():
     bpy.utils.register_class(Push_Pull_Face)
     bpy.types.VIEW3D_MT_edit_mesh_extrude.append(operator_draw)
     bpy.types.VIEW3D_MT_edit_mesh_faces.prepend(operator_draw)
+
 
 def unregister():
     bpy.types.VIEW3D_MT_edit_mesh_extrude.remove(operator_draw)
@@ -253,5 +259,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
-

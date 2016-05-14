@@ -24,7 +24,9 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy
-import os,sys,colorsys
+import os
+import sys
+import colorsys
 
 import mathutils
 from mathutils import Vector, Matrix
@@ -41,12 +43,12 @@ isBusy = False
 isRendering = False
 lastFrameUpdated = 0.0
 frameChangeCount = 0
-      
+
 # Objects are managed by name prefix. Customize here...
-OBJECT_PREFIX = "fiber_"      	#For master control object naming.
+OBJECT_PREFIX = "fiber_"  # For master control object naming.
 FIBER_OB_PREFIX = "bf_"			# For curves that get generated.
-ENTRY_NAME = "Fiber"			#For new list entries.
-                
+ENTRY_NAME = "Fiber"  # For new list entries.
+
 MAX_NAME_SIZE = 64
 GLOBAL_ZERO_PADDING = 6             # The number of zeros to padd strings with when converting INTs to STRINGs.
 DELIMITER = ","
@@ -56,6 +58,8 @@ DELIMITER = ","
 #####################################################################
 SHOW_MESSAGES = True
 MSG_PREFIX = "fiber> "
+
+
 def to_console(passedItem):
     if SHOW_MESSAGES == True:
         if len(passedItem) == 0:
@@ -67,7 +71,9 @@ def to_console(passedItem):
 #####################################################################
 # Memory Management.
 #####################################################################
-def removeCurveFromMemory (passedName):
+
+
+def removeCurveFromMemory(passedName):
     # Extra test because this can crash Blender if not done correctly.
     result = False
     curve = bpy.data.curves.get(passedName)
@@ -78,7 +84,7 @@ def removeCurveFromMemory (passedName):
                 can_continue = True
             except:
                 can_continue = False
-            
+
             if can_continue == True:
                 try:
                     bpy.data.curves.remove(curve)
@@ -93,21 +99,24 @@ def removeCurveFromMemory (passedName):
                 to_console("removeCurveFromMemory: Unable to clear users for MESH, something is holding a reference to it.")
                 result = False
         else:
-            to_console ("removeCurveFromMemory: Unable to remove CURVE because it still has [" + str(curve.users) + "] users.")
+            to_console("removeCurveFromMemory: Unable to remove CURVE because it still has [" + str(curve.users) + "] users.")
     else:
         # We could not fetch it, it does not exist in memory, essentially removed.
         result = True
     return result
-    
+
 #####################################################################
 # Name management
-##################################################################### 
-def returnAllObjectNames (scene):
+#####################################################################
+
+
+def returnAllObjectNames(scene):
     # NOTE: This returns all object names in the passed scene.
     result = []
     for ob in scene.objects:
         result.append(ob.name)
-    return result 
+    return result
+
 
 def returnObjectNamesLike(passedScene, passedName):
     # Return objects named like our passedName in the passed scene.
@@ -121,18 +130,22 @@ def returnObjectNamesLike(passedScene, passedName):
             result.append(name)
     return result
 
+
 def returnNameForNumber(passedFrame):
     frame_number = str(passedFrame)
     post_fix = frame_number.zfill(GLOBAL_ZERO_PADDING)
     return post_fix
+
 
 def returnNameDroppedPrefix(ob):
     # Use only right half of name, i.e. discard xxxx_ prefix.
     lst_name = ob.name.split('_')
     return lst_name[1]
 
-def returnFiberOBName (passedName,face_index):
-    return  "%s%s_%s" % (FIBER_OB_PREFIX,passedName,returnNameForNumber(face_index))
-    
-def returnFiberCurveName (passedName,face_index):
-    return  "%scu_%s_%s" % (FIBER_OB_PREFIX,passedName,returnNameForNumber(face_index))
+
+def returnFiberOBName(passedName, face_index):
+    return "%s%s_%s" % (FIBER_OB_PREFIX, passedName, returnNameForNumber(face_index))
+
+
+def returnFiberCurveName(passedName, face_index):
+    return "%scu_%s_%s" % (FIBER_OB_PREFIX, passedName, returnNameForNumber(face_index))

@@ -19,10 +19,10 @@
 bl_info = {
     "name": "TP Display Curve & Surface",
     "author": "marvin.k.breuer",
-    "version": (0,1),
+    "version": (0, 1),
     "blender": (2, 7, 7),
     "category": "Tool+"
-    }
+}
 
 
 import bpy
@@ -31,11 +31,11 @@ from bpy import *
 
 class VIEW3D_TP_Display_CurveSurface(bpy.types.Menu):
     bl_label = "Curve & Surface [CTRL+F]"
-    bl_idname = "tp_display.curve_surface" 
-    
+    bl_idname = "tp_display.curve_surface"
+
     @classmethod
     def poll(cls, context):
-        return ((context.mode == 'EDIT_CURVE' or 'EDIT_SURFACE'))    
+        return ((context.mode == 'EDIT_CURVE' or 'EDIT_SURFACE'))
 
     def draw(self, context):
         layout = self.layout
@@ -48,73 +48,72 @@ class VIEW3D_TP_Display_CurveSurface(bpy.types.Menu):
 
         layout.separator()
 
-        layout.operator("curve.duplicate_move","Duplicate", icon = "MOD_BOOLEAN")          
-        layout.operator("curve.extrude_move","Extrude & Move")
-        layout.operator("curve.make_segment", icon = "RIGHTARROW_THIN")
-
-        layout.separator()
-        
-        layout.menu("tp_curve.subdivide", icon = "IPO_QUINT")
+        layout.operator("curve.duplicate_move", "Duplicate", icon="MOD_BOOLEAN")
+        layout.operator("curve.extrude_move", "Extrude & Move")
+        layout.operator("curve.make_segment", icon="RIGHTARROW_THIN")
 
         layout.separator()
 
-        layout.operator("curve.split", icon = "MOD_DISPLACE")                
-        layout.operator("curve.separate")             
-        
-        layout.separator()                
-        
+        layout.menu("tp_curve.subdivide", icon="IPO_QUINT")
+
+        layout.separator()
+
+        layout.operator("curve.split", icon="MOD_DISPLACE")
+        layout.operator("curve.separate")
+
+        layout.separator()
+
         edit_object = context.edit_object
 
         if edit_object.type == 'CURVE':
-            
-            layout.operator("transform.tilt", icon = "FILE_REFRESH")
+
+            layout.operator("transform.tilt", icon="FILE_REFRESH")
             layout.operator("curve.tilt_clear")
 
         layout.separator()
 
-        layout.operator_menu_enum("curve.handle_type_set", "type", icon = "IPO_BEZIER")
+        layout.operator_menu_enum("curve.handle_type_set", "type", icon="IPO_BEZIER")
         layout.operator("curve.normals_make_consistent")
-            
+
         layout.separator()
 
-        layout.operator("curve.switch_direction", icon = "ARROW_LEFTRIGHT")
+        layout.operator("curve.switch_direction", icon="ARROW_LEFTRIGHT")
 
-        layout.operator("curve.spline_weight_set")             
-        
+        layout.operator("curve.spline_weight_set")
+
         edit_object = context.edit_object
         if edit_object.type == 'CURVE':
-        
+
             layout.operator("curve.radius_set")
 
         layout.separator()
 
-        layout.operator("curve.cyclic_toggle")               
-        
-        layout.separator()
-
-        layout.menu("VIEW3D_MT_hook", icon = "HOOK")
+        layout.operator("curve.cyclic_toggle")
 
         layout.separator()
 
-        layout.menu("VIEW3D_MT_edit_curve_showhide", icon = "VISIBLE_IPO_ON")           
+        layout.menu("VIEW3D_MT_hook", icon="HOOK")
 
+        layout.separator()
+
+        layout.menu("VIEW3D_MT_edit_curve_showhide", icon="VISIBLE_IPO_ON")
 
 
 class VIEW3D_TP_Display_CurveSubdivide(bpy.types.Menu):
     bl_label = "Curve Subdivide"
     bl_idname = "tp_curve.subdivide"
-    
+
     def draw(self, context):
         layout = self.layout
 
-        layout.operator("curve.subdivide", text="1 Cut").number_cuts=1        
-        layout.operator("curve.subdivide", text="2 Cuts").number_cuts=2
-        layout.operator("curve.subdivide", text="3 Cuts").number_cuts=3
-        layout.operator("curve.subdivide", text="4 Cuts").number_cuts=4
-        layout.operator("curve.subdivide", text="5 Cuts").number_cuts=5        
-        layout.operator("curve.subdivide", text="6 Cuts").number_cuts=6 
+        layout.operator("curve.subdivide", text="1 Cut").number_cuts = 1
+        layout.operator("curve.subdivide", text="2 Cuts").number_cuts = 2
+        layout.operator("curve.subdivide", text="3 Cuts").number_cuts = 3
+        layout.operator("curve.subdivide", text="4 Cuts").number_cuts = 4
+        layout.operator("curve.subdivide", text="5 Cuts").number_cuts = 5
+        layout.operator("curve.subdivide", text="6 Cuts").number_cuts = 6
 
-bpy.utils.register_class(VIEW3D_TP_Display_CurveSubdivide)         
+bpy.utils.register_class(VIEW3D_TP_Display_CurveSubdivide)
 
 
 def register():
@@ -126,13 +125,13 @@ def register():
     if kc:
         km = kc.keymaps.new(name='Curve')
         kmi = km.keymap_items.new('wm.call_menu', 'F', 'PRESS', ctrl=True)
-        kmi.properties.name = "tp_display.curve_surface"      
-     
+        kmi.properties.name = "tp_display.curve_surface"
+
 
 def unregister():
-  
+
     bpy.utils.unregister_class(VIEW3D_TP_Display_CurveSurface)
-          
+
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
@@ -141,21 +140,11 @@ def unregister():
             if kmi.idname == 'wm.call_menu':
                 if kmi.properties.name == "":
                     km.keymap_items.remove(kmi)
-                    break 
-           
+                    break
+
 
 if __name__ == "__main__":
-    register() 	
+    register()
 
     # The menu can also be called from scripts
     bpy.ops.wm.call_menu(name=VIEW3D_TP_Display_CurveSurface.bl_idname)
-
-
-
-
-
-
-
-
-
-

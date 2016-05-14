@@ -55,13 +55,13 @@ class MUV_FlipRot(bpy.types.Operator):
         bm = bmesh.from_edit_mesh(obj.data)
         if muv_common.check_version(2, 73, 0) >= 0:
             bm.faces.ensure_lookup_table()
-        
+
         # get UV layer
         if not bm.loops.layers.uv:
             self.report({'WARNING'}, "Object must have more than one UV map.")
             return {'CANCELLED'}
         uv_layer = bm.loops.layers.uv.verify()
-        
+
         # get selected face
         dest_uvs = []
         dest_pin_uvs = []

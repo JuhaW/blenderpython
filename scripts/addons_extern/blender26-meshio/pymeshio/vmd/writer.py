@@ -4,12 +4,13 @@ import struct
 from .. import common
 from .. import vmd
 
+
 def write(ios, motion):
     """
     """
     assert(isinstance(ios, io.IOBase))
     assert(isinstance(motion, vmd.Motion))
-    writer=common.BinaryWriter(ios)
+    writer = common.BinaryWriter(ios)
 
     # 30 bytes
     writer.write_bytes(b"Vocaloid Motion Data 0002", 30)
@@ -46,4 +47,3 @@ def write(ios, motion):
     writer.write_uint(0, 4)
 
     return True
-

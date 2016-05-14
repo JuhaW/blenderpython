@@ -96,8 +96,8 @@ def get_images_in_editors(context):
 
 # calculate for 3d-view
 def sync_calc_callback(self, context, area, region):
-    mid_x = region.width/2.0
-    mid_y = region.height/2.0
+    mid_x = region.width / 2.0
+    mid_y = region.height / 2.0
     width = region.width
     height = region.height
 
@@ -115,9 +115,9 @@ def sync_calc_callback(self, context, area, region):
 
     def transform_loc(loc):
         vec = total_mat * loc
-        vec = mathutils.Vector([vec[0]/vec[3], vec[1]/vec[3], vec[2]/vec[3]])
-        x = int(mid_x + vec[0]*width/2.0)
-        y = int(mid_y + vec[1]*height/2.0)
+        vec = mathutils.Vector([vec[0] / vec[3], vec[1] / vec[3], vec[2] / vec[3]])
+        x = int(mid_x + vec[0] * width / 2.0)
+        y = int(mid_y + vec[1] * height / 2.0)
 
         return([x, y])
 
@@ -129,8 +129,8 @@ def sync_calc_callback(self, context, area, region):
 
     # edges
     locs = [[mesh.vertices[mesh.edges[edge].vertices[0]].co.to_4d(),
-        mesh.vertices[mesh.edges[edge].vertices[1]].co.to_4d()] \
-        for edge in self.overlay_edges]
+             mesh.vertices[mesh.edges[edge].vertices[1]].co.to_4d()]
+            for edge in self.overlay_edges]
     self.position_edges = []
     for v1, v2 in locs:
         self.position_edges.append(transform_loc(v1))
@@ -138,10 +138,10 @@ def sync_calc_callback(self, context, area, region):
 
     # faces
     locs = [[mesh.vertices[mesh.faces[face].vertices[0]].co.to_4d(),
-        mesh.vertices[mesh.faces[face].vertices[1]].co.to_4d(),
-        mesh.vertices[mesh.faces[face].vertices[2]].co.to_4d(),
-        mesh.vertices[mesh.faces[face].vertices[3]].co.to_4d(),] \
-        for face in self.overlay_faces]
+             mesh.vertices[mesh.faces[face].vertices[1]].co.to_4d(),
+             mesh.vertices[mesh.faces[face].vertices[2]].co.to_4d(),
+             mesh.vertices[mesh.faces[face].vertices[3]].co.to_4d(), ]
+            for face in self.overlay_faces]
     self.position_faces = []
     for v1, v2, v3, v4 in locs:
         self.position_faces.append(transform_loc(v1))
@@ -210,30 +210,30 @@ def toolmode_draw_callback(self, context):
     else:
         return
     blend_dic = {"MIX": "Mix",
-        "ADD": "Add",
-        "SUB": "Subtract",
-        "MUL": "Multiply",
-        "LIGHTEN": "Lighten",
-        "DARKEN": "Darken",
-        "ERASE_ALPHA": "Erase Alpha",
-        "ADD_ALPHA": "Add Alpha",
-        "OVERLAY": "Overlay",
-        "HARDLIGHT": "Hard light",
-        "COLORBURN": "Color burn",
-        "LINEARBURN": "Linear burn",
-        "COLORDODGE": "Color dodge",
-        "SCREEN": "Screen",
-        "SOFTLIGHT": "Soft light",
-        "PINLIGHT": "Pin light",
-        "VIVIDLIGHT": "Vivid light",
-        "LINEARLIGHT": "Linear light",
-        "DIFFERENCE": "Difference",
-        "EXCLUSION": "Exclusion",
-        "HUE": "Hue",
-        "SATURATION": "Saturation",
-        "LUMINOSITY": "Luminosity",
-        "COLOR": "Color"
-        }
+                 "ADD": "Add",
+                 "SUB": "Subtract",
+                 "MUL": "Multiply",
+                 "LIGHTEN": "Lighten",
+                 "DARKEN": "Darken",
+                 "ERASE_ALPHA": "Erase Alpha",
+                 "ADD_ALPHA": "Add Alpha",
+                 "OVERLAY": "Overlay",
+                 "HARDLIGHT": "Hard light",
+                 "COLORBURN": "Color burn",
+                 "LINEARBURN": "Linear burn",
+                 "COLORDODGE": "Color dodge",
+                 "SCREEN": "Screen",
+                 "SOFTLIGHT": "Soft light",
+                 "PINLIGHT": "Pin light",
+                 "VIVIDLIGHT": "Vivid light",
+                 "LINEARLIGHT": "Linear light",
+                 "DIFFERENCE": "Difference",
+                 "EXCLUSION": "Exclusion",
+                 "HUE": "Hue",
+                 "SATURATION": "Saturation",
+                 "LUMINOSITY": "Luminosity",
+                 "COLOR": "Color"
+                 }
     brush = context.tool_settings.image_paint.brush
     text = brush.name + " - " + blend_dic[brush.blend]
 
@@ -249,7 +249,7 @@ def toolmode_draw_callback(self, context):
             return
         brush_x, brush_y = context.window_manager["tpp_toolmode_brushloc"]
         brush_x -= blf.dimensions(0, text)[0] / 2
-        bgl.glColor4f(0.6, 0.6, 0.6, min(1.0, (1.0 - dt)*2))
+        bgl.glColor4f(0.6, 0.6, 0.6, min(1.0, (1.0 - dt) * 2))
         blf.position(0, brush_x, brush_y, 0)
         blf.draw(0, text)
 
@@ -276,7 +276,7 @@ def remove_props():
 # in 2D screen coords, with the origin at bottom-left, +x right,
 # +y up.
 #
-def do_snap( sx, sy, mx, my ):
+def do_snap(sx, sy, mx, my):
     # compute delta between current mouse position and
     # start position
     dx = mx - sx
@@ -285,7 +285,7 @@ def do_snap( sx, sy, mx, my ):
     ady = abs(dy)
 
     # if delta is "close enough" to the diagonal
-    if abs( ady - adx ) < 0.5 * max(adx, ady):
+    if abs(ady - adx) < 0.5 * max(adx, ady):
 
         # use a simple algorithm to snap based on horizontal
         # distance (could use vertical distance, or could use
@@ -299,7 +299,7 @@ def do_snap( sx, sy, mx, my ):
         else:
             x = mx
             y = my
-    elif ( adx > ady ):
+    elif (adx > ady):
         # closer to y-axis, snap vertical
         x = mx
         y = sy
@@ -311,8 +311,6 @@ def do_snap( sx, sy, mx, my ):
     return (x, y)
 
 
-
-
 ##########################################
 #                                        #
 # Classes                                #
@@ -322,6 +320,7 @@ def do_snap( sx, sy, mx, my ):
 class ImageBuffer:
     # based on script by Domino from BlenderArtists
     # licensed GPL v2 or later
+
     def __init__(self, image):
         self.image = image
         self.x, self.y = self.image.size
@@ -354,9 +353,10 @@ class ImageBuffer:
 class PackTree(object):
     # based on python recipe by S W on ActiveState
     # PSF license, 16 oct 2005. (GPL compatible)
+
     def __init__(self, area):
         if len(area) == 2:
-            area = (0,0,area[0],area[1])
+            area = (0, 0, area[0], area[1])
         self.area = area
 
     def get_width(self):
@@ -377,10 +377,10 @@ class PackTree(object):
 
         area = PackTree(area)
         if area.width <= self.width and area.height <= self.height:
-            self.child = [None,None]
-            self.child[0] = PackTree((self.area[0]+area.width, self.area[1], self.area[2], self.area[1] + area.height))
-            self.child[1] = PackTree((self.area[0], self.area[1]+area.height, self.area[2], self.area[3]))
-            return PackTree((self.area[0], self.area[1], self.area[0]+area.width, self.area[1]+area.height))
+            self.child = [None, None]
+            self.child[0] = PackTree((self.area[0] + area.width, self.area[1], self.area[2], self.area[1] + area.height))
+            self.child[1] = PackTree((self.area[0], self.area[1] + area.height, self.area[2], self.area[3]))
+            return PackTree((self.area[0], self.area[1], self.area[0] + area.width, self.area[1] + area.height))
 
 
 ##########################################
@@ -396,7 +396,7 @@ class AddDefaultImage(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return(context.active_object and context.active_object.type=='MESH')
+        return(context.active_object and context.active_object.type == 'MESH')
 
     def invoke(self, context, event):
         ob = context.active_object
@@ -415,7 +415,6 @@ class AutoMergeUV(bpy.types.Operator):
     '''Have UV Merge enabled by default for merge actions'''
     bl_idname = "paint.auto_merge_uv"
     bl_label = "AutoMerge UV"
-
 
     def invoke(self, context, event):
         wm = context.window_manager
@@ -443,7 +442,7 @@ class BrushPopup(bpy.types.Operator):
         if context.space_data.type == 'IMAGE_EDITOR':
             context.space_data.mode = 'PAINT'
         return context.window_manager.\
-                                invoke_props_dialog(self, width=160)
+            invoke_props_dialog(self, width=160)
 
     def execute(self, context):
         return {'FINISHED'}
@@ -459,50 +458,48 @@ class BrushPopup(bpy.types.Operator):
         layout = self.layout
         # colour buttons
         col = layout.column()
-        split = col.split(percentage = 0.15)
+        split = col.split(percentage=0.15)
         split.prop(brush, "color", text="")
 
-        #Verticale = 1e-6 = 0.000001
+        # Verticale = 1e-6 = 0.000001
         split.scale_y = 1e-6
         col.template_color_picker(brush, "color", value_slider=True)
         col.scale_y = 1.10
 
         if brush.image_tool in {'DRAW', 'FILL'}:
             if brush.blend not in {'ERASE_ALPHA', 'ADD_ALPHA'}:
-                split = col.split(percentage = 0.30)
+                split = col.split(percentage=0.30)
                 row = col.row(align=True)
                 row.prop(brush, "color", text="")
                 row.prop(brush, "secondary_color", text="")
                 row.separator()
-                row.operator("paint.brush_colors_flip",\
-                                    text="", icon='FILE_REFRESH')
-
+                row.operator("paint.brush_colors_flip",
+                             text="", icon='FILE_REFRESH')
 
         # imagepaint tool operate buttons
         col = layout.split().column()
-        col.template_ID_preview(settings, "brush", \
-                                    new="brush.add", rows=3, cols=8)
+        col.template_ID_preview(settings, "brush",
+                                new="brush.add", rows=3, cols=8)
 
         if brush.image_tool in {'DRAW', 'FILL'}:
-                if settings.palette:
-                    col.template_palette(settings, \
-                                                "palette", color=True)
+            if settings.palette:
+                col.template_palette(settings,
+                                     "palette", color=True)
 
-        row = col.row(align=True)                        #new line
+        row = col.row(align=True)  # new line
         # curve type buttons
         row.operator("brush.curve_preset",
-                        icon="SMOOTHCURVE", text="").shape = 'SMOOTH'
+                     icon="SMOOTHCURVE", text="").shape = 'SMOOTH'
         row.operator("brush.curve_preset",
-                        icon="SPHERECURVE", text="").shape = 'ROUND'
+                     icon="SPHERECURVE", text="").shape = 'ROUND'
         row.operator("brush.curve_preset",
-                        icon="ROOTCURVE", text="").shape = 'ROOT'
+                     icon="ROOTCURVE", text="").shape = 'ROOT'
         row.operator("brush.curve_preset",
-                        icon="SHARPCURVE", text="").shape = 'SHARP'
+                     icon="SHARPCURVE", text="").shape = 'SHARP'
         row.operator("brush.curve_preset",
-                        icon="LINCURVE", text="").shape = 'LINE'
+                     icon="LINCURVE", text="").shape = 'LINE'
         row.operator("brush.curve_preset",
-                        icon="NOCURVE", text="").shape = 'MAX'
-
+                     icon="NOCURVE", text="").shape = 'MAX'
 
         # radius buttons depend...on the current Brush Unified Settings
         col = col.column(align=True)
@@ -511,9 +508,9 @@ class BrushPopup(bpy.types.Operator):
         if brush.use_airbrush:
             row.prop(brush, "rate", text="Rate", slider=True)
         if brush.brush_capabilities.has_smooth_stroke:
-                col.prop(brush, "use_smooth_stroke")
+            col.prop(brush, "use_smooth_stroke")
 
-        row = col.row(align=True)                            #new line
+        row = col.row(align=True)  # new line
         if (unified.use_unified_size):
             row.prop(unified, "size", text="Radius", slider=True)
             row.prop(unified, "use_pressure_size", toggle=True, text="")
@@ -522,7 +519,7 @@ class BrushPopup(bpy.types.Operator):
             row.prop(brush, "use_pressure_size", toggle=True, text="")
 
         # strength buttons
-        row = col.row(align=True)                           #new line
+        row = col.row(align=True)  # new line
         if (unified.use_unified_strength):
             row.prop(unified, "strength", text="Strength", slider=True)
             row.prop(unified, "use_pressure_strength", toggle=True, text="")
@@ -531,7 +528,7 @@ class BrushPopup(bpy.types.Operator):
             row.prop(brush, "use_pressure_strength", toggle=True, text="")
 
         # jitter buttons
-        row = col.row(align=True)                           #new line
+        row = col.row(align=True)  # new line
         if brush.use_relative_jitter:
             row.prop(brush, "jitter", slider=True)
         else:
@@ -539,31 +536,27 @@ class BrushPopup(bpy.types.Operator):
         row.prop(brush, "use_pressure_jitter", toggle=True, text="")
 
         # spacing buttons
-        row = col.row(align=True)                           #new line
+        row = col.row(align=True)  # new line
         row.prop(brush, "spacing", slider=True)
         row.prop(brush, "use_space", toggle=True, text="", icon="FILE_TICK")
 
-
-
         # use_accumulate
         if capabilities.has_accumulate:
-            row = col.row(align=True)                       #new line
+            row = col.row(align=True)  # new line
             row.prop(brush, "use_accumulate")
 
         # alpha and blending mode buttons
-        row = col.row(align=True)                           #new line
+        row = col.row(align=True)  # new line
         split1 = row.split()
         split1.prop(brush, "use_alpha", text="Alpha")
 
         if brush.image_tool in {'DRAW', 'FILL'}:
             split2 = row.split()
-            split2.row(align=False)                        #new line
+            split2.row(align=False)  # new line
             split2.prop(brush, "blend", text="")
 
         col.separator()
         col.template_ID(settings, "palette", new="palette.new")
-
-
 
 
 class ChangeSelection(bpy.types.Operator):
@@ -572,10 +565,10 @@ class ChangeSelection(bpy.types.Operator):
     bl_label = "Change selection"
 
     mode = bpy.props.EnumProperty(name="Mode",
-        items = (("more", "More", "Select more vertices/edges/faces"),
-            ("less", "Less", "Select less vertices/edges/faces")),
-        description = "Choose whether the selection should be increased or decreased",
-        default = 'more')
+                                  items=(("more", "More", "Select more vertices/edges/faces"),
+                                         ("less", "Less", "Select less vertices/edges/faces")),
+                                  description="Choose whether the selection should be increased or decreased",
+                                  default='more')
 
     @classmethod
     def poll(cls, context):
@@ -585,7 +578,7 @@ class ChangeSelection(bpy.types.Operator):
         bpy.ops.object.mode_set(mode='EDIT')
         if self.mode == 'more':
             bpy.ops.mesh.select_more()
-        else: #self.mode == 'less'
+        else:  # self.mode == 'less'
             bpy.ops.mesh.select_less()
         bpy.ops.object.mode_set(mode='TEXTURE_PAINT')
 
@@ -613,19 +606,19 @@ class DefaultMaterial(bpy.types.Operator):
         mat = bpy.data.materials.new(ob.name)
 
         # diffuse texture
-        tex = bpy.data.textures.new(ob.name+"_DIFF", 'IMAGE')
+        tex = bpy.data.textures.new(ob.name + "_DIFF", 'IMAGE')
         ts = mat.texture_slots.add()
         ts.texture_coords = 'UV'
         ts.texture = tex
         # specular texture
-        tex = bpy.data.textures.new(ob.name+"_SPEC", 'IMAGE')
+        tex = bpy.data.textures.new(ob.name + "_SPEC", 'IMAGE')
         ts = mat.texture_slots.add()
         ts.texture_coords = 'UV'
         ts.use_map_color_diffuse = False
         ts.use_map_specular = True
         ts.texture = tex
         # normal texture
-        tex = bpy.data.textures.new(ob.name+"_NORM", 'IMAGE')
+        tex = bpy.data.textures.new(ob.name + "_NORM", 'IMAGE')
         tex.use_normal_map = True
         ts = mat.texture_slots.add()
         ts.texture_coords = 'UV'
@@ -659,7 +652,7 @@ class GridTexture(bpy.types.Operator):
             tex_image = []
             for mesh in meshes:
                 for mat in mesh.materials:
-                    for tex in [ts.texture for ts in mat.texture_slots if ts and ts.texture.type=='IMAGE' and ts.texture.image]:
+                    for tex in [ts.texture for ts in mat.texture_slots if ts and ts.texture.type == 'IMAGE' and ts.texture.image]:
                         tex_image.append([tex.name, tex.image.name])
             if not tex_image:
                 self.report({'INFO'}, "Couldn't locate textures to operate on")
@@ -698,7 +691,7 @@ class GridTexture(bpy.types.Operator):
                 bpy.data.images.remove(first_image)
 
             return {'FINISHED'}
-        elif Egne =='CYCLES':
+        elif Egne == 'CYCLES':
 
             return {'FINISHED'}
         else:
@@ -712,20 +705,20 @@ class MassLinkAppend(bpy.types.Operator, ImportHelper):
     bl_options = {'REGISTER', 'UNDO'}
 
     active_layer = bpy.props.BoolProperty(name="Active Layer",
-        default=True,
-        description="Put the linked objects on the active layer")
+                                          default=True,
+                                          description="Put the linked objects on the active layer")
     autoselect = bpy.props.BoolProperty(name="Select",
-        default=True,
-        description="Select the linked objects")
+                                        default=True,
+                                        description="Select the linked objects")
     instance_groups = bpy.props.BoolProperty(name="Instance Groups",
-        default=False,
-        description="Create instances for each group as a DupliGroup")
+                                             default=False,
+                                             description="Create instances for each group as a DupliGroup")
     link = bpy.props.BoolProperty(name="Link",
-        default=False,
-        description="Link the objects or datablocks rather than appending")
+                                  default=False,
+                                  description="Link the objects or datablocks rather than appending")
     relative_path = bpy.props.BoolProperty(name="Relative Path",
-        default=True,
-        description="Select the file relative to the blend file")
+                                           default=True,
+                                           description="Select the file relative to the blend file")
 
     def execute(self, context):
         directory, filename = os.path.split(bpy.path.abspath(self.filepath))
@@ -735,8 +728,8 @@ class MassLinkAppend(bpy.types.Operator, ImportHelper):
         for root, dirs, filenames in os.walk(directory):
             for file in filenames:
                 if file.endswith(".blend"):
-                    files.append([root+os.sep, file])
-            break # don't search in subdirectories
+                    files.append([root + os.sep, file])
+            break  # don't search in subdirectories
 
         # append / link objects
         old_selection = context.selected_objects
@@ -748,13 +741,13 @@ class MassLinkAppend(bpy.types.Operator, ImportHelper):
             with bpy.data.libraries.load(directory + filename) as (append_lib, current_lib):
                 ob_names = append_lib.objects
             for name in ob_names:
-                append_libs = [{"name":name} for name in ob_names]
+                append_libs = [{"name": name} for name in ob_names]
             # appending / linking
-            bpy.ops.wm.link_append(filepath=os.sep+filename+os.sep+"Object"+os.sep,
-                filename=name, directory=directory+filename+os.sep+"Object"+os.sep,
-                link=self.link, autoselect=True, active_layer=self.active_layer,
-                relative_path=self.relative_path, instance_groups=self.instance_groups,
-                files=append_libs)
+            bpy.ops.wm.link_append(filepath=os.sep + filename + os.sep + "Object" + os.sep,
+                                   filename=name, directory=directory + filename + os.sep + "Object" + os.sep,
+                                   link=self.link, autoselect=True, active_layer=self.active_layer,
+                                   relative_path=self.relative_path, instance_groups=self.instance_groups,
+                                   files=append_libs)
             if not self.link:
                 bpy.ops.object.mode_set(mode='OBJECT')
                 bpy.ops.object.make_local()
@@ -885,7 +878,7 @@ class SyncSelection(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return(context.active_object and context.active_object.mode=='EDIT')
+        return(context.active_object and context.active_object.mode == 'EDIT')
 
     def modal(self, context, event):
         if self.area:
@@ -962,17 +955,16 @@ class SyncSelection(bpy.types.Operator):
                             bpy.ops.object.mode_set(mode='EDIT')
                             context.tool_settings.mesh_select_mode = old_select_mode
 
-
                             # 3d view callbacks
                             context.window_manager.modal_handler_add(self)
                             self.handle1 = region.callback_add(sync_calc_callback,
-                                (self, context, area, region), "POST_VIEW")
+                                                               (self, context, area, region), "POST_VIEW")
                             self.handle2 = region.callback_add(sync_draw_callback,
-                                (self, context), "POST_PIXEL")
+                                                               (self, context), "POST_PIXEL")
 
                             # image editor callback
                             self.handle3 = context.region.callback_add(sync_draw_callback2,
-                                (self, context), "POST_VIEW")
+                                                                       (self, context), "POST_VIEW")
 
                             break
                     break
@@ -1092,7 +1084,6 @@ class ToggleUVSelectSync(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
 ##########################################
 #                                        #
 # User interface                         #
@@ -1168,8 +1159,7 @@ class Slots_projectpaint(bpy.types.Operator):
         col.separator()
         col.operator("image.save_dirty", text="Save All Images")
 
-
-    def invoke(self, context,event):
+    def invoke(self, context, event):
         if context.space_data.type == 'IMAGE_EDITOR':
             context.space_data.mode = 'PAINT'
         return context.window_manager.invoke_props_dialog(self, width=240)
@@ -1180,51 +1170,50 @@ class Slots_projectpaint(bpy.types.Operator):
 
 # property group containing all properties of the add-on
 class TexturePaintPlusProps(bpy.types.PropertyGroup):
-    sync_enabled = bpy.props.IntProperty(name = "Enabled",
-        description = "internal use",
-        default = 0)
-    toolmode_enabled = bpy.props.IntProperty(name = "Enabled",
-        description = "internal use",
-        default = 0)
-    toolmode_mode = bpy.props.StringProperty(name = "Mode",
-        description = "internal use",
-        default = "")
-    toolmode_tool = bpy.props.StringProperty(name = "Tool",
-        description = "internal use",
-        default = "")
-    line_last = bpy.props.BoolProperty(name = "Last_f",
-                                               description = "Last position valid",
-                                               default = False)
-    line_x = bpy.props.IntProperty(name = "Last_x",
-                                   description = "Last position X",
-                                   default = 0)
-    line_y = bpy.props.IntProperty(name = "Last_y",
-                                   description = "Last position y",
-                                   default = 0)
+    sync_enabled = bpy.props.IntProperty(name="Enabled",
+                                         description="internal use",
+                                         default=0)
+    toolmode_enabled = bpy.props.IntProperty(name="Enabled",
+                                             description="internal use",
+                                             default=0)
+    toolmode_mode = bpy.props.StringProperty(name="Mode",
+                                             description="internal use",
+                                             default="")
+    toolmode_tool = bpy.props.StringProperty(name="Tool",
+                                             description="internal use",
+                                             default="")
+    line_last = bpy.props.BoolProperty(name="Last_f",
+                                       description="Last position valid",
+                                       default=False)
+    line_x = bpy.props.IntProperty(name="Last_x",
+                                   description="Last position X",
+                                   default=0)
+    line_y = bpy.props.IntProperty(name="Last_y",
+                                   description="Last position y",
+                                   default=0)
 
 
-
-classes =   [AddDefaultImage,
-            AutoMergeUV,
-            BrushPopup,
-            ChangeSelection,
-            DefaultMaterial,
-            GridTexture,
-            MassLinkAppend,
-            ReloadImage,
-            ReloadImages,
-            SampleColor,
-            SaveImage,
-            SaveImages,
-            SyncSelection,
-            ToggleAddMultiply,
-            ToggleColorSoftLightScreen,
-            ToggleAlphaMode,
-            ToggleImagePaint,
-            InitPaintBlend,
-            ToggleUVSelectSync,
-            Slots_projectpaint,
-            TexturePaintPlusProps]
+classes = [AddDefaultImage,
+           AutoMergeUV,
+           BrushPopup,
+           ChangeSelection,
+           DefaultMaterial,
+           GridTexture,
+           MassLinkAppend,
+           ReloadImage,
+           ReloadImages,
+           SampleColor,
+           SaveImage,
+           SaveImages,
+           SyncSelection,
+           ToggleAddMultiply,
+           ToggleColorSoftLightScreen,
+           ToggleAlphaMode,
+           ToggleImagePaint,
+           InitPaintBlend,
+           ToggleUVSelectSync,
+           Slots_projectpaint,
+           TexturePaintPlusProps]
 
 
 def menu_func(self, context):
@@ -1278,26 +1267,26 @@ def register():
     init_props()
     for c in classes:
         bpy.utils.register_class(c)
-    bpy.types.WindowManager.tpp = bpy.props.PointerProperty(\
-        type = TexturePaintPlusProps)
+    bpy.types.WindowManager.tpp = bpy.props.PointerProperty(
+        type=TexturePaintPlusProps)
 
     # add ImagePaint keymap entries
     km = bpy.context.window_manager.keyconfigs.default.keymaps['Image Paint']
-    kmi = km.keymap_items.new("paint.toggle_alpha_mode", 'A', 'PRESS') #ok
+    kmi = km.keymap_items.new("paint.toggle_alpha_mode", 'A', 'PRESS')  # ok
     kmi = km.keymap_items.new("wm.context_toggle", 'B', 'PRESS')
     kmi.properties.data_path = "user_preferences.system.use_mipmaps"
-    kmi = km.keymap_items.new("paint.toggle_add_multiply", 'D', 'PRESS')#ok
-    kmi = km.keymap_items.new("paint.toggle_color_soft_light_screen", 'D', 'PRESS', shift=True)#ok
-    kmi = km.keymap_items.new("paint.init_blend_mode", 'D', 'PRESS', alt=True)#ok
+    kmi = km.keymap_items.new("paint.toggle_add_multiply", 'D', 'PRESS')  # ok
+    kmi = km.keymap_items.new("paint.toggle_color_soft_light_screen", 'D', 'PRESS', shift=True)  # ok
+    kmi = km.keymap_items.new("paint.init_blend_mode", 'D', 'PRESS', alt=True)  # ok
     kmi = km.keymap_items.new("paint.sample_color_custom", 'RIGHTMOUSE', 'PRESS', oskey=True)
     kmi = km.keymap_items.new("paint.grid_texture", 'G', 'PRESS')
-    kmi = km.keymap_items.new("paint.save_image", 'S', 'PRESS', alt=True) #?
-    kmi = km.keymap_items.new("view3d.brush_popup", 'W', 'PRESS')#ok
-    kmi = km.keymap_items.new("slots.projectpaint", 'W', 'PRESS', shift=True)#ok
+    kmi = km.keymap_items.new("paint.save_image", 'S', 'PRESS', alt=True)  # ?
+    kmi = km.keymap_items.new("view3d.brush_popup", 'W', 'PRESS')  # ok
+    kmi = km.keymap_items.new("slots.projectpaint", 'W', 'PRESS', shift=True)  # ok
 
     # add 3DView keymap entries
     km = bpy.context.window_manager.keyconfigs.default.keymaps['3D View']
-    kmi = km.keymap_items.new("object.default_material", 'X', 'PRESS', alt=True, ctrl=True)#ok object.add_default_image
+    kmi = km.keymap_items.new("object.default_material", 'X', 'PRESS', alt=True, ctrl=True)  # ok object.add_default_image
     kmi = km.keymap_items.new("object.add_default_image", 'X', 'PRESS', shift=True, alt=True)
 
     # deactivate to prevent clashing------------------------------------
@@ -1308,15 +1297,14 @@ def register():
 
     # add Window keymap entry
     km = bpy.context.window_manager.keyconfigs.default.keymaps['Window']
-    kmi = km.keymap_items.new("wm.mass_link_append", 'F1', 'PRESS', ctrl=True)#ok
-    kmi = km.keymap_items.new("paint.reload_images", 'R', 'PRESS', alt=True, ctrl=True)#ok
-    kmi = km.keymap_items.new("image.save_dirty", 'S','PRESS', alt=True, ctrl=True)#ok
-
+    kmi = km.keymap_items.new("wm.mass_link_append", 'F1', 'PRESS', ctrl=True)  # ok
+    kmi = km.keymap_items.new("paint.reload_images", 'R', 'PRESS', alt=True, ctrl=True)  # ok
+    kmi = km.keymap_items.new("image.save_dirty", 'S', 'PRESS', alt=True, ctrl=True)  # ok
 
     # deactivate and remap to prevent clashing -------------------------
     if bpy.context.user_preferences.inputs.select_mouse == 'RIGHT':
         right_mouse = ['RIGHTMOUSE', 'SELECTIONMOUSE']
-    else: #'LEFT'
+    else:  # 'LEFT'
         right_mouse = ['RIGHTMOUSE', 'ACTIONMOUSE']
     km = bpy.context.window_manager.keyconfigs.default.keymaps['3D View']
     for kmi in km.keymap_items:
@@ -1343,11 +1331,11 @@ def unregister():
     # ImagePaint keymap entries
     km = bpy.context.window_manager.keyconfigs.default.keymaps['Image Paint']
     for kmi in km.keymap_items:
-        if kmi.idname in ["view3d.brush_popup", "paint.toggle_alpha_mode",  "paint.sample_color_custom",
-        "paint.toggle_add_multiply", "paint.toggle_color_soft_light_screen", "paint.init_blend_mode", "paint.grid_texture", "paint.reload_image", "paint.save_image"]:
+        if kmi.idname in ["view3d.brush_popup", "paint.toggle_alpha_mode", "paint.sample_color_custom",
+                          "paint.toggle_add_multiply", "paint.toggle_color_soft_light_screen", "paint.init_blend_mode", "paint.grid_texture", "paint.reload_image", "paint.save_image"]:
             km.keymap_items.remove(kmi)
         elif kmi.idname == "wm.context_toggle":
-            if getattr(kmi.properties, "data_path", False) in [ "active_object.show_wire", "user_preferences.system.use_mipmaps"]:
+            if getattr(kmi.properties, "data_path", False) in ["active_object.show_wire", "user_preferences.system.use_mipmaps"]:
                 km.keymap_items.remove(kmi)
         elif kmi.idname == "wm.context_set_enum":
             if getattr(kmi.properties, "data_path", False) in ["tool_settings.image_paint.brush.blend"]:
@@ -1362,7 +1350,7 @@ def unregister():
     # remap and reactivate original items
     if bpy.context.user_preferences.inputs.select_mouse == 'RIGHT':
         right_mouse = ['RIGHTMOUSE', 'SELECTIONMOUSE']
-    else: #'LEFT'
+    else:  # 'LEFT'
         right_mouse = ['RIGHTMOUSE', 'ACTIONMOUSE']
     km = bpy.context.window_manager.keyconfigs.default.keymaps['3D View']
     for kmi in km.keymap_items:

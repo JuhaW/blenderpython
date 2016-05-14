@@ -29,46 +29,43 @@ bl_info = {
     "category": "User Display"}
 
 
-
-
-import bpy, re
+import bpy
+import re
 from bpy import *
 
 
-###### BoolTool ###################        
+###### BoolTool ###################
 
 class BoolToolMenu(bpy.types.Menu):
     """BoolTool"""
     bl_label = "BoolTool"
     bl_idname = "wkst.booltool"
-    
+
     def draw(self, context):
         layout = self.layout
 
-        layout.operator("btool.boolean_union", text = "Union Brush",icon = "ROTATECOLLECTION")
-        layout.operator("btool.boolean_inters", text ="Intersection Brush",icon = "ROTATECENTER")
-        layout.operator("btool.boolean_diff", text ="Difference Brush",icon = "ROTACTIVE")
-        
+        layout.operator("btool.boolean_union", text="Union Brush", icon="ROTATECOLLECTION")
+        layout.operator("btool.boolean_inters", text="Intersection Brush", icon="ROTATECENTER")
+        layout.operator("btool.boolean_diff", text="Difference Brush", icon="ROTACTIVE")
+
         layout.separator()
 
-        layout.operator("btool.boolean_union_direct", text = "Union Brush",icon = "ROTATECOLLECTION")
-        layout.operator("btool.boolean_inters_direct", text ="Intersection Brush",icon = "ROTATECENTER")
-        layout.operator("btool.boolean_diff_direct", text ="Difference Brush",icon = "ROTACTIVE")
-        
-        layout.separator()  
-              
-        layout.operator("btool.draw_polybrush",icon = "LINE_DATA")
-               
+        layout.operator("btool.boolean_union_direct", text="Union Brush", icon="ROTATECOLLECTION")
+        layout.operator("btool.boolean_inters_direct", text="Intersection Brush", icon="ROTATECENTER")
+        layout.operator("btool.boolean_diff_direct", text="Difference Brush", icon="ROTACTIVE")
+
+        layout.separator()
+
+        layout.operator("btool.draw_polybrush", icon="LINE_DATA")
 
 
-
-#######  Menus Weights  #################                  
+#######  Menus Weights  #################
 
 class VIEW3D_Paint_Weight(bpy.types.Menu):
     """Weights"""
     bl_label = "Weights"
     bl_idname = "wkst.weights"
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -83,14 +80,14 @@ class VIEW3D_Paint_Weight(bpy.types.Menu):
         layout.operator("object.vertex_group_invert", text="Invert")
 
         layout.separator()
-        
+
         layout.operator("object.vertex_group_clean", text="Clean")
         layout.operator("object.vertex_group_quantize", text="Quantize")
         layout.operator("object.vertex_group_levels", text="Levels")
         layout.operator("object.vertex_group_blend", text="Blend")
 
         layout.separator()
-        
+
         layout.operator("object.vertex_group_transfer_weight", text="Transfer Weights")
         layout.operator("object.vertex_group_limit_total", text="Limit Total")
         layout.operator("object.vertex_group_fix", text="Fix Deforms")
@@ -98,10 +95,8 @@ class VIEW3D_Paint_Weight(bpy.types.Menu):
         layout.separator()
 
         layout.operator("paint.weight_set")
-    
-        
 
-        
+
 class VIEW3D_WeightBrush(bpy.types.Menu):
     """Weight Brushes"""
     bl_label = "Weight Brushes"
@@ -109,16 +104,15 @@ class VIEW3D_WeightBrush(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator_context = 'INVOKE_REGION_WIN' 
+        layout.operator_context = 'INVOKE_REGION_WIN'
 
         layout.menu("wkst_vertex", icon='BRUSH_DATA')
-        layout.menu("VIEW3D_MT_brush") 
+        layout.menu("VIEW3D_MT_brush")
 
 bpy.utils.register_class(VIEW3D_WeightBrush)
 
 
-
-#######  Menus Armature  #####################                  
+#######  Menus Armature  #####################
 
 class VIEW3D_MT_EditArmatureTK(bpy.types.Menu):
     """Armature Tools"""
@@ -133,7 +127,7 @@ class VIEW3D_MT_EditArmatureTK(bpy.types.Menu):
         layout.operator("transform.transform", text="Scale Envelope Distance").mode = 'BONE_SIZE'
 
         layout.operator("transform.transform", text="Scale B-Bone Width").mode = 'BONE_SIZE'
-        
+
         layout.separator()
 
         layout.operator("armature.extrude_move")
@@ -152,24 +146,20 @@ class VIEW3D_MT_EditArmatureTK(bpy.types.Menu):
         layout.operator("armature.switch_direction", text="Switch Direction")
 
 
-
-
 class VIEW3D_MT_ArmatureName(bpy.types.Menu):
     """Armature Name"""
     bl_label = "Armature Name"
     bl_idname = "wkst.armature_name"
-    
+
     def draw(self, context):
         layout = self.layout
 
         layout.operator_context = 'EXEC_AREA'
-        
+
         layout.operator("armature.autoside_names", text="AutoName Left/Right").type = 'XAXIS'
         layout.operator("armature.autoside_names", text="AutoName Front/Back").type = 'YAXIS'
         layout.operator("armature.autoside_names", text="AutoName Top/Bottom").type = 'ZAXIS'
         layout.operator("armature.flip_names")
-
-
 
 
 class VIEW3D_MT_ArmatureCut(bpy.types.Menu):
@@ -179,19 +169,17 @@ class VIEW3D_MT_ArmatureCut(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-  
-        layout.operator("armature.subdivide",text="1 Cut").number_cuts=1
-        layout.operator("armature.subdivide",text="2 Cut").number_cuts=2
-        layout.operator("armature.subdivide",text="3 Cut").number_cuts=3
-        layout.operator("armature.subdivide",text="4 Cut").number_cuts=4
-        layout.operator("armature.subdivide",text="5 Cut").number_cuts=5
-        layout.operator("armature.subdivide",text="6 Cut").number_cuts=6     
 
-
+        layout.operator("armature.subdivide", text="1 Cut").number_cuts = 1
+        layout.operator("armature.subdivide", text="2 Cut").number_cuts = 2
+        layout.operator("armature.subdivide", text="3 Cut").number_cuts = 3
+        layout.operator("armature.subdivide", text="4 Cut").number_cuts = 4
+        layout.operator("armature.subdivide", text="5 Cut").number_cuts = 5
+        layout.operator("armature.subdivide", text="6 Cut").number_cuts = 6
 
 
 #######  Menus Pose  ####################
-                  
+
 class VIEW3D_MT_PoseCopy(bpy.types.Menu):
     """Pose Copy"""
     bl_label = "Pose Copy"
@@ -203,9 +191,8 @@ class VIEW3D_MT_PoseCopy(bpy.types.Menu):
         layout.operator("pose.copy")
         layout.operator("pose.paste")
         layout.operator("pose.paste", text="Paste X-Flipped Pose").flipped = True
-        
-        layout.separator()
 
+        layout.separator()
 
 
 class VIEW3D_MT_PoseNames(bpy.types.Menu):
@@ -224,8 +211,7 @@ class VIEW3D_MT_PoseNames(bpy.types.Menu):
         layout.operator("pose.flip_names")
 
 
-               
-#######  AnimationPlayer  ################## 
+#######  AnimationPlayer  ##################
 
 class VIEW3D_AnimationPlayer(bpy.types.Menu):
     """Animation Player"""
@@ -242,18 +228,16 @@ class VIEW3D_AnimationPlayer(bpy.types.Menu):
         layout.operator("screen.frame_jump", text="Jump REW", icon='REW').end = False
         layout.operator("screen.keyframe_jump", text="Previous FR", icon='PREV_KEYFRAME').next = False
         layout.operator("screen.animation_play", text="Reverse", icon='PLAY_REVERSE').reverse = True
-        
+
         layout.operator("screen.animation_play", text="PLAY", icon='PLAY')
-        
+
         layout.operator("screen.animation_play", text="Stop", icon='PAUSE')
-        
+
         layout.operator("screen.keyframe_jump", text="Next FR", icon='NEXT_KEYFRAME').next = True
-        layout.operator("screen.frame_jump", text="Jump FF", icon='FF').end = True    
+        layout.operator("screen.frame_jump", text="Jump FF", icon='FF').end = True
 
 
-
-                
-#######  Lock View  ################# 
+#######  Lock View  #################
 
 class VIEW3D_LockView(bpy.types.Menu):
     bl_label = "Lock View to..."
@@ -265,7 +249,7 @@ class VIEW3D_LockView(bpy.types.Menu):
         layout.operator_context = 'INVOKE_REGION_WIN'
 
         view = context.space_data
-        
+
         layout.label("To Object:")
 
         layout.prop(view, "lock_object", text="")
@@ -274,19 +258,16 @@ class VIEW3D_LockView(bpy.types.Menu):
         if lock_object:
             if lock_object.type == 'ARMATURE':
                 layout.prop_search(view, "lock_bone", lock_object.data,
-                                "edit_bones" if lock_object.mode == 'EDIT'
-                                else "bones",
-                                text="")
+                                   "edit_bones" if lock_object.mode == 'EDIT'
+                                   else "bones",
+                                   text="")
         else:
             layout.prop(view, "lock_cursor", text="Lock to Cursor")
 
         layout.prop(view, "lock_camera")
 
 
-
-
-
-#######  Render Menu  #################                  
+#######  Render Menu  #################
 
 class VIEW3D_RenderView(bpy.types.Menu):
     """Render Menu"""
@@ -304,47 +285,42 @@ class VIEW3D_RenderView(bpy.types.Menu):
         scene = context.scene
         obj = context.object
 
-
         layout.operator("render.render", text="Still", icon='RENDER_STILL')
         layout.operator("render.render", text="Animation", icon='RENDER_ANIMATION').animation = True
 
         layout.separator()
-         
+
         layout.operator("render.opengl", text="Still_OpenGL", icon='RENDER_STILL')
         layout.operator("render.opengl", text="Anim_OpenGL", icon='RENDER_ANIMATION').animation = True
         layout.menu("INFO_MT_opengl_render")
 
         layout.separator()
 
-        layout.operator("render.view_show") 
-        
+        layout.operator("render.view_show")
+
         layout.separator()
 
         props = layout.operator("object.isolate_type_render")
         props = layout.operator("object.hide_render_clear_all")
 
         layout.separator()
-            
+
         if not scene.use_preview_range:
             layout.prop(scene, "frame_start", text="Start Frame")
             layout.prop(scene, "frame_end", text="End Frame")
         else:
             layout.prop(scene, "frame_preview_start", text="Start Frame")
             layout.prop(scene, "frame_preview_end", text="End Frame")
-            
-        
+
         layout.separator()
-                
+
         view = context.space_data
-        
+
         layout.prop(view, "use_render_border")
-        layout.operator("view3d.render_border", text="Draw Render Border...")   
+        layout.operator("view3d.render_border", text="Draw Render Border...")
 
 
-
-
-
-#######  Render Menu  #####################                  
+#######  Render Menu  #####################
 
 class VIEW3D_SpecialExtras(bpy.types.Menu):
     """Type Special"""
@@ -360,9 +336,9 @@ class VIEW3D_SpecialExtras(bpy.types.Menu):
         layout = self.layout
 
         scene = context.scene
-        obj = context.object          
+        obj = context.object
 
-        #layout.separator()
+        # layout.separator()
 
         if obj.type == 'CAMERA':
             layout.operator_context = 'INVOKE_REGION_WIN'
@@ -392,24 +368,20 @@ class VIEW3D_SpecialExtras(bpy.types.Menu):
                 props.input_scale = 0.02
                 props.header_text = "DOF Distance: %.3f"
 
-            layout.separator()  
-                      
+            layout.separator()
 
-            view3d = context.space_data.region_3d            
+            view3d = context.space_data.region_3d
             cam = context.scene.camera.data
-                                            
+
             if view3d.view_perspective == 'CAMERA':
                 layout = self.layout
-                
+
                 layout.operator("view3d.render_border_camera", text="Camera as Render Border", icon="FULLSCREEN_ENTER")
-                       
+
                 if cam.show_passepartout:
                     layout.prop(cam, "passepartout_alpha", text="Passepartout")
                 else:
                     layout.prop(cam, "show_passepartout")
-        
-
-                       
 
         if obj.type in {'CURVE', 'FONT'}:
             layout.operator_context = 'INVOKE_REGION_WIN'
@@ -512,11 +484,9 @@ class VIEW3D_SpecialExtras(bpy.types.Menu):
                     props.header_text = "Clip End: %.2f"
 
 
-
-
 def register():
-    bpy.utils.register_class(BoolToolMenu)         
-    bpy.utils.register_class(VIEW3D_Paint_Weight)    
+    bpy.utils.register_class(BoolToolMenu)
+    bpy.utils.register_class(VIEW3D_Paint_Weight)
     bpy.utils.register_class(VIEW3D_MT_EditArmatureTK)
     bpy.utils.register_class(VIEW3D_MT_ArmatureName)
     bpy.utils.register_class(VIEW3D_MT_ArmatureCut)
@@ -528,11 +498,12 @@ def register():
     bpy.utils.register_class(VIEW3D_RenderView)
     bpy.utils.register_class(VIEW3D_SpecialExtras)
 
-    #bpy.utils.register_module(__name__) 
+    # bpy.utils.register_module(__name__)
+
 
 def unregister():
-    bpy.utils.unregister_class(BoolToolMenu)         
-    bpy.utils.unregister_class(VIEW3D_Paint_Weight)    
+    bpy.utils.unregister_class(BoolToolMenu)
+    bpy.utils.unregister_class(VIEW3D_Paint_Weight)
     bpy.utils.unregister_class(VIEW3D_MT_EditArmatureTK)
     bpy.utils.unregister_class(VIEW3D_MT_ArmatureName)
     bpy.utils.unregister_class(VIEW3D_MT_ArmatureCut)
@@ -542,50 +513,10 @@ def unregister():
     bpy.utils.unregister_class(VIEW3D_AnimationPlayer)
     bpy.utils.unregister_class(VIEW3D_LockView)
     bpy.utils.unregister_class(VIEW3D_RenderView)
-    bpy.utils.unregister_class(VIEW3D_SpecialExtras)    
-    
-    #bpy.utils.unregister_module(__name__)  
+    bpy.utils.unregister_class(VIEW3D_SpecialExtras)
+
+    # bpy.utils.unregister_module(__name__)
 
 
 if __name__ == "__main__":
-    register() 	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    register()

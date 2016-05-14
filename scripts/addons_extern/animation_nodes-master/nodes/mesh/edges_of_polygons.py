@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class an_EdgesOfPolygonsNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_EdgesOfPolygonsNode"
     bl_label = "Edges of Polygons"

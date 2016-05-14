@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class VertexListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_VertexListSocket"
     bl_label = "Vertex List Socket"

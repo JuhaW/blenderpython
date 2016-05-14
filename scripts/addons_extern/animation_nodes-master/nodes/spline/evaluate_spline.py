@@ -4,6 +4,7 @@ from mathutils import Vector
 from ... base_types.node import AnimationNode
 from . spline_evaluation_base import SplineEvaluationBase
 
+
 class EvaluateSplineNode(bpy.types.Node, AnimationNode, SplineEvaluationBase):
     bl_idname = "an_EvaluateSplineNode"
     bl_label = "Evaluate Spline"
@@ -15,7 +16,7 @@ class EvaluateSplineNode(bpy.types.Node, AnimationNode, SplineEvaluationBase):
         self.outputs.new("an_VectorSocket", "Tangent", "tangent")
 
     def draw(self, layout):
-        layout.prop(self, "parameterType", text = "")
+        layout.prop(self, "parameterType", text="")
 
     def drawAdvanced(self, layout):
         col = layout.column()

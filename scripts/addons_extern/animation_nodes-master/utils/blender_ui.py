@@ -1,10 +1,12 @@
 import bpy
 from mathutils import Vector
 
+
 def iterActiveSpacesByType(type):
     for space in iterActiveSpaces():
         if space.type == type:
             yield space
+
 
 def iterActiveSpaces():
     for area in iterAreas():
@@ -15,15 +17,18 @@ def getAreaWithType(type):
     for area in iterAreasByType(type):
         return area
 
+
 def iterAreasByType(type):
     for area in iterAreas():
         if area.type == type:
             yield area
 
+
 def iterAreas():
     for screen in iterActiveScreens():
         for area in screen.areas:
             yield area
+
 
 def iterActiveScreens():
     for windowManager in bpy.data.window_managers:
@@ -35,6 +40,7 @@ def redrawAll():
     for area in iterAreas():
         area.tag_redraw()
 
+
 def isViewportRendering():
     return any([space.viewport_shade == "RENDERED" for space in iterActiveSpacesByType("VIEW_3D")])
 
@@ -43,15 +49,18 @@ def convertToRegionLocation(region, x, y):
     factor = getDpiFactor()
     x *= factor
     y *= factor
-    return Vector(region.view2d.view_to_region(x, y, clip = False))
+    return Vector(region.view2d.view_to_region(x, y, clip=False))
+
 
 def getDpiFactor():
     return getDpi() / 72
+
 
 def getDpi():
     systemPreferences = bpy.context.user_preferences.system
     retinaFactor = getattr(systemPreferences, "pixel_size", 1)
     return systemPreferences.dpi * retinaFactor
+
 
 def executeInAreaType(areaType):
     def changeAreaTypeDecorator(function):
@@ -67,6 +76,7 @@ def executeInAreaType(areaType):
 
 
 class PieMenuHelper:
+
     def draw(self, context):
         pie = self.layout.menu_pie()
         self.drawLeft(pie)
@@ -102,5 +112,5 @@ class PieMenuHelper:
     def drawBottomRight(self, layout):
         self.empty(layout)
 
-    def empty(self, layout, text = ""):
+    def empty(self, layout, text=""):
         layout.row().label(text)

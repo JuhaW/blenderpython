@@ -3,6 +3,7 @@ from bpy.props import *
 from ... events import propertyChanged
 from ... base_types.node import AnimationNode
 
+
 class TrimTextNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_TrimTextNode"
     bl_label = "Trim Text"
@@ -12,12 +13,12 @@ class TrimTextNode(bpy.types.Node, AnimationNode):
         propertyChanged()
 
     autoEnd = BoolProperty(
-        default = False, update = settingChanged,
-        description = "Use the length of the text as trim-end")
+        default=False, update=settingChanged,
+        description="Use the length of the text as trim-end")
 
     allowNegativeIndex = BoolProperty(
-        default = False, update = settingChanged,
-        description = "Negative indices start from the end")
+        default=False, update=settingChanged,
+        description="Negative indices start from the end")
 
     def create(self):
         self.inputs.new("an_StringSocket", "Text", "text")
@@ -26,13 +27,14 @@ class TrimTextNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_StringSocket", "Text", "outText")
 
     def draw(self, layout):
-        layout.prop(self, "autoEnd", text = "Auto End")
-        layout.prop(self, "allowNegativeIndex", text = "Negative Indices")
+        layout.prop(self, "autoEnd", text="Auto End")
+        layout.prop(self, "allowNegativeIndex", text="Negative Indices")
 
     def execute(self, text, start, end):
         textLength = len(text)
 
-        if self.autoEnd: end = textLength
+        if self.autoEnd:
+            end = textLength
 
         minIndex = -textLength if self.allowNegativeIndex else 0
         start = min(max(minIndex, start), textLength)

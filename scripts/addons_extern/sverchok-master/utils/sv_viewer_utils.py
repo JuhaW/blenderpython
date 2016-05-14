@@ -15,7 +15,6 @@ def matrix_sanitizer(matrix):
 
 
 def natural_plus_one(object_names):
-
     ''' sorts ['Alpha', 'Alpha1', 'Alpha11', 'Alpha2', 'Alpha23']
         into ['Alpha', 'Alpha1', 'Alpha2', 'Alpha11', 'Alpha23']
         and returns (23+1)
@@ -29,7 +28,7 @@ def natural_plus_one(object_names):
     natural_sort = sorted(object_names, key=extended_sort)
     last = natural_sort[-1]
     num = extended_sort(last)
-    return num+1
+    return num + 1
 
 
 def get_random_init():

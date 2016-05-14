@@ -14,7 +14,6 @@
 # http://creativecommons.org/licenses/by-sa/3.0/                #
 
 
-
 if "bpy" in locals():
     import importlib
     importlib.reload(tessellate_numpy)
@@ -32,27 +31,28 @@ from mathutils import Vector
 #bpy.types.Panel.vertexgroup = bpy.props.StringProperty()
 
 bl_info = {
-	"name": "Tissue",
-	"author": "Alessandro Zomparelli (Co-de-iT)",
-	"version": (0, 2),
-	"blender": (2, 7, 4),
-	"location": "",
-	"description": "Tools for Computational Design",
-	"warning": "",
-	"wiki_url": "https://github.com/alessandro-zomparelli/tissue/wiki",
-	"tracker_url": "https://plus.google.com/u/0/+AlessandroZomparelli/",
-	"category": "Mesh"}
+    "name": "Tissue",
+    "author": "Alessandro Zomparelli (Co-de-iT)",
+    "version": (0, 2),
+    "blender": (2, 7, 4),
+    "location": "",
+    "description": "Tools for Computational Design",
+    "warning": "",
+    "wiki_url": "https://github.com/alessandro-zomparelli/tissue/wiki",
+    "tracker_url": "https://plus.google.com/u/0/+AlessandroZomparelli/",
+    "category": "Mesh"}
+
 
 def register():
     bpy.utils.register_module(__name__)
-    #tessellate.register()
+    # tessellate.register()
     #bpy.types.Object.tissue_tessellate = bpy.props.PointerProperty(tessellate_numpy.tissue_tessellate_props)
     #bpy.types.Panel.vertexgroup = bpy.props.StringProperty()
     bpy.types.Object.tissue_tessellate = bpy.props.PointerProperty(type=tessellate_numpy.tissue_tessellate_prop)
 
 
 def unregister():
-    #bpy.utils.register_module(__name__)
+    # bpy.utils.register_module(__name__)
     tessellate_numpy.unregister()
     colors_groups_exchanger.unregister()
 

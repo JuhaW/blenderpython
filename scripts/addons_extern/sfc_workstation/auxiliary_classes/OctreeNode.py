@@ -20,16 +20,17 @@
 
 from mathutils import Vector
 
+
 class OctreeNode():
     max_indices_per_leaf = 1
     offset_map = {
-        '+++' : Vector((1, 1, 1)), '---' : Vector((-1, -1, -1)),
-        '++-' : Vector((1, 1, -1)), '--+' : Vector((-1, -1, 1)),
-        '+-+' : Vector((1, -1, 1)), '-+-' : Vector((-1, 1, -1)),
-        '+--' : Vector((1, -1, -1)), '-++' : Vector((-1, 1, 1))
+        '+++': Vector((1, 1, 1)), '---': Vector((-1, -1, -1)),
+        '++-': Vector((1, 1, -1)), '--+': Vector((-1, -1, 1)),
+        '+-+': Vector((1, -1, 1)), '-+-': Vector((-1, 1, -1)),
+        '+--': Vector((1, -1, -1)), '-++': Vector((-1, 1, 1))
     }
 
-    def __init__(self, center = Vector(), half_size = 0, parent = None):
+    def __init__(self, center=Vector(), half_size=0, parent=None):
         self.center = center
         self.child_map = dict()
         self.half_size = half_size
@@ -73,8 +74,8 @@ class OctreeNode():
                 child_half_size = self.half_size / 2
                 octant_offset = child_half_size * self.offset_map[key]
                 child_map[key] = OctreeNode(
-                    center = center + octant_offset,
-                    half_size = child_half_size, parent = self
+                    center=center + octant_offset,
+                    half_size=child_half_size, parent=self
                 )
 
             # Recursively insert the index into the child node.
@@ -131,8 +132,8 @@ class OctreeNode():
                         child_half_size = self.half_size / 2
                         octant_offset = child_half_size * self.offset_map[key]
                         child_map[key] = OctreeNode(
-                            center = center + octant_offset,
-                            half_size = child_half_size, parent = self
+                            center=center + octant_offset,
+                            half_size=child_half_size, parent=self
                         )
 
                     # Recursively insert the index into the child node.
@@ -167,7 +168,7 @@ class OctreeNode():
             self.query_indices_in_node(query_result)
 
         # The node partially intersects with the query box.
-        else: 
+        else:
             # If the partially intersecting node is internal, recursively query
             # its child nodes for indices that are within the box.
             child_map = self.child_map

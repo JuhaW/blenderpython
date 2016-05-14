@@ -2,6 +2,7 @@ import bpy
 from bpy.props import *
 from ... base_types.node import AnimationNode
 
+
 class ProjectPointOnLineNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ProjectPointOnLineNode"
     bl_label = "Project Point on Line"
@@ -24,7 +25,7 @@ class ProjectPointOnLineNode(bpy.types.Node, AnimationNode):
 
         yield "if lineStart == lineEnd: projection, factor = lineStart, 0.0"
         yield "else: projection, factor = mathutils.geometry.intersect_point_line(point, lineStart, lineEnd)"
-        
+
         if isLinked["distance"]:
             yield "distance = (projection - point).length"
 

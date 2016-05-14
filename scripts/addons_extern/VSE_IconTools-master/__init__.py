@@ -20,7 +20,7 @@
 bl_info = {
     "name": "VSE IconTools",
     "author": "MKBreuer",
-    "version": (0,1),
+    "version": (0, 1),
     "blender": (2, 7, 6),
     "location": "View3D",
     "description": "IconTools to VSE Header",
@@ -28,53 +28,48 @@ bl_info = {
     "wiki_url": "",
     "tracker_url": "",
     "category": "Sequencer"
-    }
+}
 
 
-
-
-import sys, os
+import sys
+import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'VSE_IconTools-master'))
-   
-    
- 
+
+
 if "bpy" in locals():
     import imp
-    
 
-    imp.reload(vse_function_to_header)    
-    
+    imp.reload(vse_function_to_header)
+
     print("Reloaded multifiles")
-    
-    
+
 
 else:
 
-    from . import  vse_function_to_header 
-    
+    from . import vse_function_to_header
+
     print("Imported multifiles")
 
 
-################################################### 
+###################################################
 
 
-import vse_function_to_header  
+import vse_function_to_header
 
 import bpy
 
 
-###################################################  
+###################################################
 
 
 def register():
 
-   vse_function_to_header.register()    
-   
- 
-def unregister():  
+    vse_function_to_header.register()
 
-   vse_function_to_header.unregister()   
-  
+
+def unregister():
+
+    vse_function_to_header.unregister()
+
 if __name__ == "__main__":
     register()
-    

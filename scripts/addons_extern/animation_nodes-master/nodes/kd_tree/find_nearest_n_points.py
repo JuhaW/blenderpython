@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class FindNearestNPointsInKDTreeNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_FindNearestNPointsInKDTreeNode"
     bl_label = "Find Nearest Points"

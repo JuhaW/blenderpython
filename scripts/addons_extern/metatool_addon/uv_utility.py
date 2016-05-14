@@ -17,7 +17,7 @@
 # END GPL LICENSE BLOCK #####
 
 
-#bl_info = {
+# bl_info = {
 #    "name": "UV Utility",
 #    "author": "Paul Geraskin",
 #    "version": (0, 1),
@@ -104,6 +104,7 @@ class UV_IC_Base(UV_IC_Panel, Panel):
         col.operator("uvutil.remove_active", text="Remove Active UV")
 """
 
+
 class UV_IC_ChangeIndex(Operator):
     bl_idname = "uvutil.change_index"
     bl_label = "Change Index"
@@ -128,7 +129,7 @@ class UV_IC_ChangeIndex(Operator):
                     droppedUV.name = tmpuvmap_name
                     # droppedUV.active = True
                     # if scene.UVTexRenderActive == True:
-                      # droppedUV.active_render = True
+                    # droppedUV.active_render = True
 
         return{'FINISHED'}
 
@@ -209,5 +210,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
-

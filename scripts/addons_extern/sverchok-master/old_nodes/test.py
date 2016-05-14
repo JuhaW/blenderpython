@@ -21,8 +21,8 @@ from bpy.props import BoolProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (changable_sockets, multi_socket,
-                            fullList, dataCorrect,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     fullList, dataCorrect,
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class Test1Node(bpy.types.Node, SverchCustomTreeNode):
@@ -103,7 +103,7 @@ class Test1Node(bpy.types.Node, SverchCustomTreeNode):
             if type(obj) not in [int, float]:
                 out.append(self.f(x[i], obj))
             else:
-                out.append(obj+x[i])
+                out.append(obj + x[i])
         return out
 
 
@@ -157,7 +157,7 @@ class Test2Node(bpy.types.Node, SverchCustomTreeNode):
             if type(obj) not in [int, float]:
                 out.append(self.f(x[i], obj))
             else:
-                out.append(obj+x[i])
+                out.append(obj + x[i])
         return out
 
 

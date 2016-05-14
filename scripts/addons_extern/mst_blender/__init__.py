@@ -7,8 +7,10 @@ bl_info = {
     "author": "Patrick Herbers"
 }
 
+
 def register():
-	mst_blender.register()
+    mst_blender.register()
+
 
 def unregister():
-	mst_blender.unregister()
+    mst_blender.unregister()

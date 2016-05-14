@@ -1,8 +1,10 @@
 from bgl import *
 from mathutils import Vector
 
+
 class Rectangle:
-    def __init__(self, x1 = 0, y1 = 0, x2 = 0, y2 = 0):
+
+    def __init__(self, x1=0, y1=0, x2=0, y2=0):
         self.resetPosition(x1, y1, x2, y2)
         self.color = (0.8, 0.8, 0.8, 1.0)
         self.borderColor = (0.1, 0.1, 0.1, 1.0)
@@ -12,11 +14,11 @@ class Rectangle:
     def fromRegionDimensions(cls, region):
         return cls(0, 0, region.width, region.height)
 
-    def resetPosition(self, x1 = 0, y1 = 0, x2 = 0, y2 = 0):
+    def resetPosition(self, x1=0, y1=0, x2=0, y2=0):
         self.x1 = float(x1)
-        self.y1 =  float(y1)
-        self.x2 =  float(x2)
-        self.y2 =  float(y2)
+        self.y1 = float(y1)
+        self.x2 = float(x2)
+        self.y2 = float(y2)
 
     @property
     def width(self):

@@ -14,23 +14,23 @@ def convert_as_icons():
     user_preferences = bpy.context.user_preferences
     addon_prefs = user_preferences.addons[current_dir].preferences
     thumbnails_path = join(addon_prefs.matcaps_path, "Thumbnails")
-    
+
     images_matcaps = [f for f in listdir(addon_prefs.matcaps_path) if isfile(join(addon_prefs.matcaps_path, f))]
-        
-    thumbnails_matcaps = [f for f in listdir(thumbnails_path) if isfile(join(thumbnails_path, f))]  
+
+    thumbnails_matcaps = [f for f in listdir(thumbnails_path) if isfile(join(thumbnails_path, f))]
 
     settings = bpy.context.scene.render.image_settings
 
     settings.file_format = 'PNG'
     settings.color_mode = 'RGBA'
     settings.color_depth = '8'
-    
-    for images in images_matcaps:                
+
+    for images in images_matcaps:
         if images not in thumbnails_matcaps:
             img_name = (images.split("."))[0]
             img = bpy.data.images.load(join(addon_prefs.matcaps_path, images))
             img.scale(256, 256)
-            img.save_render(join(thumbnails_path,img_name + ".png")) 
+            img.save_render(join(thumbnails_path, img_name + ".png"))
 
 
 def save_current_setup():
@@ -39,81 +39,82 @@ def save_current_setup():
     user_preferences = bpy.context.user_preferences
     addon_prefs = user_preferences.addons[current_dir].preferences
     pickle_path = join(addon_prefs.matcaps_path, "Backup_of_scene")
-    
+
     if not os.path.exists(pickle_path):
-            os.makedirs(pickle_path)
-    
+        os.makedirs(pickle_path)
+
     my_dict = {}
     key = "materials"
-      
-    my_dict["render_engine"] = bpy.context.scene.render.engine 
+
+    my_dict["render_engine"] = bpy.context.scene.render.engine
     my_dict["material_mode"] = bpy.context.scene.game_settings.material_mode
-    
+
     for area in bpy.context.screen.areas:
         if area.type == 'VIEW_3D':
             for space in area.spaces:
                 if space.type == 'VIEW_3D':
                     myViewport_shade = space.viewport_shade
-                    
+
     my_dict["viewport_shade"] = myViewport_shade
-    
-    if bpy.context.active_object.active_material:        
+
+    if bpy.context.active_object.active_material:
         for mat in bpy.context.active_object.material_slots:
             list_mat = mat.name
             my_dict.setdefault(key, [])
-            my_dict[key].append(list_mat) 
-                                   
-    else:        
+            my_dict[key].append(list_mat)
+
+    else:
         my_dict["materials"] = "No material"
-            
+
     output = open(join(pickle_path, "backup_setup"), "wb")
     pickle.dump(my_dict, output)
     output.close()
-    
-    
+
+
 def update_matcap_folder(self, context):
     if self.auto_matcap_enabled:
-        
+
         current_dir = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
         user_preferences = bpy.context.user_preferences
         addon_prefs = user_preferences.addons[current_dir].preferences
         thumbnails_path = join(addon_prefs.matcaps_path, "Thumbnails")
-    
+
         # Test if "Thumbnails" folder exist. If not, we create it
         if not os.path.exists(thumbnails_path):
             os.makedirs(thumbnails_path)
-        
-        # We get back the list of the names of matcaps without the extension of file 
+
+        # We get back the list of the names of matcaps without the extension of file
         images_matcaps = [f.split(".")[0] for f in listdir(addon_prefs.matcaps_path) if isfile(join(addon_prefs.matcaps_path, f))]
-        
+
         # Same as matcaps but for the thumbanils
-        thumbnails_matcaps = [f.split(".")[0] for f in listdir(thumbnails_path) if isfile(join(thumbnails_path, f))] 
-        
+        thumbnails_matcaps = [f.split(".")[0] for f in listdir(thumbnails_path) if isfile(join(thumbnails_path, f))]
+
         for images in images_matcaps:
             if images not in thumbnails_matcaps:
                 convert_as_icons()
                 update_matcap_preview()
-                
+
         for images in thumbnails_matcaps:
             if images not in images_matcaps:
                 os.remove(join(thumbnails_path, images + ".png"))
                 update_matcap_preview()
-        
+
         save_current_setup()
         bpy.ops.material.setup_matcap()
-        
+
     else:
         bpy.ops.object.restore_setup()
-        
+
+
 def update_matcap_preview():
     global matcap_preview_collections
     matcap_preview_collections = {}
     register_matcap_pcoll()
-    
+
 
 def update_matcap(self, context):
     bpy.ops.material.setup_matcap()
-    
+
 
 def enumPreviewsFromDirectoryItems(self, context):
     """EnumProperty callback"""
@@ -124,7 +125,7 @@ def enumPreviewsFromDirectoryItems(self, context):
 
     current_dir = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
     user_preferences = bpy.context.user_preferences
-    addon_prefs = user_preferences.addons[current_dir].preferences    
+    addon_prefs = user_preferences.addons[current_dir].preferences
     directory = join(addon_prefs.matcaps_path, "Thumbnails")
     # Get the preview collection (defined in register func).
     pcoll = matcap_preview_collections["main"]
@@ -149,26 +150,26 @@ def enumPreviewsFromDirectoryItems(self, context):
 
     pcoll.matcap_previews = enum_items
     pcoll.matcap_previews_dir = directory
-    
+
     return pcoll.matcap_previews
 
 
-def register_matcap_pcoll():  
+def register_matcap_pcoll():
     from bpy.types import WindowManager
     from bpy.props import (
-            EnumProperty,
-            BoolProperty)
+        EnumProperty,
+        BoolProperty)
 
     WindowManager.matcap_previews = EnumProperty(
-            items=enumPreviewsFromDirectoryItems,
-            update=update_matcap)
-                    
+        items=enumPreviewsFromDirectoryItems,
+        update=update_matcap)
+
     WindowManager.auto_matcap_enabled = BoolProperty(
-            name="Auto matcap",
-            description="Configure automatically the scene for using custom matcaps",
-            default=False,
-            update=update_matcap_folder)
-                               
+        name="Auto matcap",
+        description="Configure automatically the scene for using custom matcaps",
+        default=False,
+        update=update_matcap_folder)
+
     import bpy.utils.previews
     wm = bpy.context.window_manager
     pcoll = bpy.utils.previews.new()

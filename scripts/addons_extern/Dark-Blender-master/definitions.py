@@ -1,8 +1,11 @@
-import bpy, bmesh, time
+import bpy
+import bmesh
+import time
 from math import *
 from mathutils import Vector
 
 #//////////////////// - BASIC DEFINITIONS - ///////////////////////
+
 
 def FocusObject(target):
 
@@ -13,10 +16,11 @@ def FocusObject(target):
     if target.hide_select is True:
         target.hide_select = False
 
-    #### Select and make target active
+    # Select and make target active
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.scene.objects.active = bpy.data.objects[target.name]
     bpy.ops.object.select_pattern(pattern=target.name)
+
 
 def SelectObject(target):
 
@@ -29,6 +33,7 @@ def SelectObject(target):
 
     target.select = True
 
+
 def ActivateObject(target):
 
     # If the target isnt visible, MAKE IT FUCKING VISIBLE.
@@ -40,9 +45,10 @@ def ActivateObject(target):
 
     bpy.context.scene.objects.active = bpy.data.objects[target.name]
 
+
 def DuplicateObject(target):
 
-    #### Select and make target active
+    # Select and make target active
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.scene.objects.active = bpy.data.objects[target.name]
     bpy.ops.object.select_pattern(pattern=target.name)
@@ -60,9 +66,10 @@ def DuplicateObject(target):
     # To preserve the scale, it has to be applied.  Sorreh!
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
+
 def DuplicateObjects(targets):
 
-    #### Select and make target active
+    # Select and make target active
     bpy.ops.object.select_all(action='DESELECT')
 
     for target in targets:
@@ -82,6 +89,7 @@ def DuplicateObjects(targets):
     # To preserve the scale, it has to be applied.  Sorreh!
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
+
 def DeleteObject(target):
 
     # This needs proper data deletion, and all delete operations need to use this
@@ -90,6 +98,7 @@ def DeleteObject(target):
 
     # Currently removing just in case...
     DeleteObjectByMemory(target)
+
 
 def DeleteObjectByMemory(target):
 
@@ -105,9 +114,10 @@ def DeleteObjectByMemory(target):
 
     return
 
+
 def MoveObject(target, context, location):
-	# This doesnt need the cursor, and will ensure nothing is animated
-	# in the process
+        # This doesnt need the cursor, and will ensure nothing is animated
+        # in the process
 
     print(">>> Moving Object <<<")
 
@@ -134,10 +144,10 @@ def MoveObject(target, context, location):
     #bpy.data.scenes[bpy.context.scene.name].cursor_location = location
 
     # Focus the object
-    #FocusObject(target)
+    # FocusObject(target)
 
     # SNAP IT
-    #bpy.ops.view3D.snap_selected_to_cursor()
+    # bpy.ops.view3D.snap_selected_to_cursor()
 
     print("Object", target.name, "moved.... ", target.location)
 
@@ -150,8 +160,8 @@ def MoveObject(target, context, location):
 
 
 def MoveObjects(targetLead, targets, context, location):
-	# This doesnt need the cursor, and will ensure nothing is animated
-	# in the process
+        # This doesnt need the cursor, and will ensure nothing is animated
+        # in the process
 
     print(">>>> Moving Objects <<<<")
 
@@ -212,7 +222,6 @@ def MoveObjects(targetLead, targets, context, location):
         print("Object", object.name, "moved.... ", object.location)
 
         object.lock_location = lockTransformSel
-
 
     # Restore the previous setting
     context.scene.tool_settings.use_keyframe_insert_auto = autoKey

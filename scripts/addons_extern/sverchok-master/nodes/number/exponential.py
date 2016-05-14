@@ -24,14 +24,16 @@ from bpy.props import IntProperty, FloatProperty, EnumProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, match_long_repeat
 
+
 def rescale(seq, maxValue):
     if maxValue:
         actualMax = max(map(abs, seq))
         if actualMax == 0.0:
             return result
-        return [x*maxValue/actualMax for x in seq]
+        return [x * maxValue / actualMax for x in seq]
     else:
         return seq
+
 
 def exponential_e(x0, alpha, nmin, nmax, maxValue):
     result = []
@@ -41,6 +43,7 @@ def exponential_e(x0, alpha, nmin, nmax, maxValue):
 
     return rescale(result, maxValue)
 
+
 def exponential_b(x0, base, nmin, nmax, maxValue):
     result = []
     for n in list(range(int(nmin), int(nmax))) + [nmax]:
@@ -48,6 +51,7 @@ def exponential_b(x0, base, nmin, nmax, maxValue):
         result.append(x)
 
     return rescale(result, maxValue)
+
 
 class SvGenExponential(bpy.types.Node, SverchCustomTreeNode):
     ''' Generate exponential sequence '''
@@ -68,11 +72,11 @@ class SvGenExponential(bpy.types.Node, SverchCustomTreeNode):
     alpha_ = FloatProperty(
         name='alpha', description='Coefficient in exp(alpha*n)',
         default=0.1, update=updateNode)
-    
+
     base_ = FloatProperty(
         name='base', description='Base of exponent - in base^n',
         default=2.0, update=updateNode)
-    
+
     nmin_ = IntProperty(
         name='N from', description='Minimal value of N',
         default=0, update=updateNode)
@@ -83,7 +87,7 @@ class SvGenExponential(bpy.types.Node, SverchCustomTreeNode):
 
     modes = [
         ("alpha_", "Log", "Specify coefficient in exp(alpha*n)", 1),
-        ("base_",  "Base", "Specify base in base^n", 2),
+        ("base_", "Base", "Specify base in base^n", 2),
     ]
 
     def mode_change(self, context):
@@ -93,7 +97,7 @@ class SvGenExponential(bpy.types.Node, SverchCustomTreeNode):
     mode = EnumProperty(items=modes, default='alpha_', update=mode_change)
 
     func_dict = {'alpha_': exponential_e,
-                 'base_': exponential_b }
+                 'base_': exponential_b}
 
     def sv_init(self, context):
         self.inputs.new('StringsSocket', "X0").prop_name = 'x0_'
@@ -135,4 +139,3 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(SvGenExponential)
-

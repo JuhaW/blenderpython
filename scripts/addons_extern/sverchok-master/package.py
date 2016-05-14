@@ -12,6 +12,7 @@ file_excludes = [".directory",
                  "kdev4",
                  "~"]
 
+
 def zipfolder(foldername, target_dir):
     zipobj = zipfile.ZipFile(foldername + '.zip', 'w', zipfile.ZIP_DEFLATED)
     rootlen = len(target_dir) + 1
@@ -28,4 +29,4 @@ def zipfolder(foldername, target_dir):
                 zipobj.write(fn, fn[rootlen:])
 
 #zipfolder(addon_folder, target_folder)
-#sys.exit()
+# sys.exit()

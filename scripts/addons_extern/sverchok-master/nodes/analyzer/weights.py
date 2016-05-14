@@ -33,7 +33,7 @@ class SvVertexGroupNode(bpy.types.Node, SverchCustomTreeNode):
     vertex_group = StringProperty(default='', update=updateNode)
     object_ref = StringProperty(default='', update=updateNode)
 
-    def draw_buttons(self, context,   layout):
+    def draw_buttons(self, context, layout):
         layout.prop_search(self, 'object_ref', bpy.data, 'objects')
         ob = bpy.data.objects[self.object_ref]
         if ob.type == 'MESH':
@@ -41,7 +41,7 @@ class SvVertexGroupNode(bpy.types.Node, SverchCustomTreeNode):
 
     def draw_buttons_ext(self, context, layout):
         row = layout.row(align=True)
-        row.prop(self,    "clear",   text="clear unindexed")
+        row.prop(self, "clear", text="clear unindexed")
         row.prop(self, "fade_speed", text="Clearing speed")
 
     def sv_init(self, context):

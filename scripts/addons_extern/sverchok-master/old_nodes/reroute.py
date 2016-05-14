@@ -28,7 +28,7 @@ class SvReRouteNode(bpy.types.Node, SverchCustomTreeNode):
     bl_idname = 'SvReRouteNode'
     bl_label = 'Reroute'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    
+
     typ = StringProperty(name='typ', default='')
     newsock = BoolProperty(name='newsock', default=False)
 
@@ -36,7 +36,7 @@ class SvReRouteNode(bpy.types.Node, SverchCustomTreeNode):
         self.hide = True
         self.inputs.new("StringsSocket", "In")
         self.outputs.new("StringsSocket", "Out")
-        
+
     def update(self):
 
         if not 'Out' in self.outputs:
@@ -45,12 +45,12 @@ class SvReRouteNode(bpy.types.Node, SverchCustomTreeNode):
             in_socket = 'In'
             out_socket = ['Out']
             changable_sockets(self, in_socket, out_socket)
-    
+
     def process(self):
         if self.outputs[0].links:
             data = SvGetSocketAnyType(self, self.inputs[0], deepcopy=False)
             SvSetSocketAnyType(self, 'Out', data)
-        
+
 
 def register():
     bpy.utils.register_class(SvReRouteNode)

@@ -8,26 +8,26 @@ from sverchok.data_structure import updateNode, match_long_repeat, SvSetSocketAn
 
 
 def sphere_verts(U, V, Radius, Separate):
-    theta = radians(360/U)
-    phi = radians(180/(V-1))
+    theta = radians(360 / U)
+    phi = radians(180 / (V - 1))
     if Separate:
-        pts = [[ [0, 0, Radius] for i in range(U) ]]
+        pts = [[[0, 0, Radius] for i in range(U)]]
     else:
         pts = [[0, 0, Radius]]
-    for i in range(1, V-1):
+    for i in range(1, V - 1):
         pts_u = []
-        sin_phi_i = sin(phi*i)
+        sin_phi_i = sin(phi * i)
         for j in range(U):
-            X = Radius*cos(theta*j)*sin_phi_i
-            Y = Radius*sin(theta*j)*sin_phi_i
-            Z = Radius*cos(phi*i)
+            X = Radius * cos(theta * j) * sin_phi_i
+            Y = Radius * sin(theta * j) * sin_phi_i
+            Z = Radius * cos(phi * i)
             pts_u.append([X, Y, Z])
         if Separate:
             pts.append(pts_u)
         else:
             pts.extend(pts_u)
     if Separate:
-        points_top = [ [0, 0, -Radius] for i in range(U) ]
+        points_top = [[0, 0, -Radius] for i in range(U)]
         pts.append(points_top)
     else:
         pts.append([0, 0, -Radius])
@@ -35,30 +35,30 @@ def sphere_verts(U, V, Radius, Separate):
 
 
 def sphere_edges(U, V):
-    nr_pts = U*V-(U-1)*2
+    nr_pts = U * V - (U - 1) * 2
     listEdg = []
-    for i in range(V-2):
-        listEdg.extend([[j+1+U*i, j+2+U*i] for j in range(U-1)])
-        listEdg.append([U*(i+1), U*(i+1)-U+1])
-    listEdg.extend([[i+1, i+1+U] for i in range(U*(V-3))])
-    listEdg.extend([[0, i+1] for i in range(U)])
-    listEdg.extend([[nr_pts-1, i+nr_pts-U-1] for i in range(U)])
+    for i in range(V - 2):
+        listEdg.extend([[j + 1 + U * i, j + 2 + U * i] for j in range(U - 1)])
+        listEdg.append([U * (i + 1), U * (i + 1) - U + 1])
+    listEdg.extend([[i + 1, i + 1 + U] for i in range(U * (V - 3))])
+    listEdg.extend([[0, i + 1] for i in range(U)])
+    listEdg.extend([[nr_pts - 1, i + nr_pts - U - 1] for i in range(U)])
     listEdg.reverse()
     return listEdg
 
 
 def sphere_faces(U, V):
-    nr_pts = U*V-(U-1)*2
+    nr_pts = U * V - (U - 1) * 2
     listPln = []
-    for i in range(V-3):
-        listPln.append([U*i+2*U, 1+U*i+U, 1+U*i,  U*i+U])
-        listPln.extend([[1+U*i+j+U, 2+U*i+j+U, 2+U*i+j, 1+U*i+j] for j in range(U-1)])
+    for i in range(V - 3):
+        listPln.append([U * i + 2 * U, 1 + U * i + U, 1 + U * i, U * i + U])
+        listPln.extend([[1 + U * i + j + U, 2 + U * i + j + U, 2 + U * i + j, 1 + U * i + j] for j in range(U - 1)])
 
-    for i in range(U-1):
-        listPln.append([1+i, 2+i, 0])
-        listPln.append([i+nr_pts-U, i+nr_pts-1-U, nr_pts-1])
+    for i in range(U - 1):
+        listPln.append([1 + i, 2 + i, 0])
+        listPln.append([i + nr_pts - U, i + nr_pts - 1 - U, nr_pts - 1])
     listPln.append([U, 1, 0])
-    listPln.append([nr_pts-1-U, nr_pts-2, nr_pts-1])
+    listPln.append([nr_pts - 1 - U, nr_pts - 2, nr_pts - 1])
     return listPln
 
 
@@ -117,7 +117,6 @@ class SphereNode(bpy.types.Node, SverchCustomTreeNode):
         if self.outputs['Polygons'].is_linked:
             faces = [sphere_faces(u, v) for u, v, r in zip(*params)]
             SvSetSocketAnyType(self, 'Polygons', faces)
-
 
 
 def register():

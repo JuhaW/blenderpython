@@ -2,17 +2,18 @@ import bpy
 import mathutils
 import math
 
+
 class MMDCamera:
+
     def __init__(self, obj):
         if obj.type != 'EMPTY':
             if obj.parent is None or obj.type != 'CAMERA':
-                raise ValueError('%s is not MMDCamera'%str(obj))
+                raise ValueError('%s is not MMDCamera' % str(obj))
             obj = obj.parent
         if obj.type == 'EMPTY' and obj.mmd_type == 'CAMERA':
             self.__emptyObj = obj
         else:
-            raise ValueError('%s is not MMDCamera'%str(obj))
-
+            raise ValueError('%s is not MMDCamera' % str(obj))
 
     @staticmethod
     def isMMDCamera(obj):
@@ -39,9 +40,9 @@ class MMDCamera:
         empty.mmd_camera.persp = True
         cameraObj.parent = empty
         cameraObj.data.sensor_fit = 'VERTICAL'
-        cameraObj.location = mathutils.Vector((0,0,0))
+        cameraObj.location = mathutils.Vector((0, 0, 0))
         cameraObj.rotation_mode = 'XYZ'
-        cameraObj.rotation_euler = mathutils.Vector((math.radians(90.0),0,0))
+        cameraObj.rotation_euler = mathutils.Vector((math.radians(90.0), 0, 0))
         cameraObj.lock_location = (True, False, True)
         cameraObj.lock_rotation = (True, True, True)
         cameraObj.lock_scale = (True, True, True)

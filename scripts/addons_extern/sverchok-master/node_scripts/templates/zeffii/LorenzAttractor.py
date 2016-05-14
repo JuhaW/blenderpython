@@ -5,7 +5,7 @@ def sv_main(N=1000):
 
     verts = []
     out_sockets = [
-        ['v','verts', [verts]]
+        ['v', 'verts', [verts]]
     ]
 
     i = 0
@@ -24,6 +24,6 @@ def sv_main(N=1000):
         z1 = z0 + h * (x0 * y0 - c * z0)
         x0, y0, z0 = x1, y1, z1
 
-        add_vert((x1,y1,z1))
+        add_vert((x1, y1, z1))
 
     return in_sockets, out_sockets

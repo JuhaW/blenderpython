@@ -43,7 +43,7 @@ class SvBMoutputNode(bpy.types.Node, SverchCustomTreeNode):
         if v.is_linked:
             bml = self.inputs['bmesh_list'].sv_get()
             for i in bml:
-                V,E,P = pydata_from_bmesh(i)
+                V, E, P = pydata_from_bmesh(i)
                 vlist.append(V)
                 elist.append(E)
                 plist.append(P)

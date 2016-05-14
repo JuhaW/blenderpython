@@ -4,13 +4,14 @@ from ... utils.code import isCodeValid
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
 
+
 class ObjectAttributeInputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ObjectAttributeInputNode"
     bl_label = "Object Attribute Input"
     bl_width_default = 160
 
-    attribute = StringProperty(name = "Attribute", default = "",
-        update = executionCodeChanged)
+    attribute = StringProperty(name="Attribute", default="",
+                               update=executionCodeChanged)
 
     errorMessage = StringProperty()
 
@@ -19,9 +20,9 @@ class ObjectAttributeInputNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_GenericSocket", "Value", "value")
 
     def draw(self, layout):
-        layout.prop(self, "attribute", text = "")
+        layout.prop(self, "attribute", text="")
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon = "ERROR")
+            layout.label(self.errorMessage, icon="ERROR")
 
     def getExecutionCode(self):
         code = self.evaluationExpression
@@ -30,7 +31,8 @@ class ObjectAttributeInputNode(bpy.types.Node, AnimationNode):
             self.errorMessage = "Invalid Syntax"
             yield "value = None"
             return
-        else: self.errorMessage = ""
+        else:
+            self.errorMessage = ""
 
         yield "try:"
         yield "    self.errorMessage = ''"
@@ -41,5 +43,7 @@ class ObjectAttributeInputNode(bpy.types.Node, AnimationNode):
 
     @property
     def evaluationExpression(self):
-        if self.attribute.startswith("["): return "value = object" + self.attribute
-        else: return "value = object." + self.attribute
+        if self.attribute.startswith("["):
+            return "value = object" + self.attribute
+        else:
+            return "value = object." + self.attribute

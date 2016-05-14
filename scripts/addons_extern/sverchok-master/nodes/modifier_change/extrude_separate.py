@@ -27,8 +27,10 @@ from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, match_long_repeat, fullList
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata, pydata_from_bmesh
 
+
 def Matrix_degenerate(ms):
-    return [[ j[:] for j in M ] for M in ms]
+    return [[j[:] for j in M] for M in ms]
+
 
 class SvExtrudeSeparateNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Extrude separate faces '''
@@ -37,11 +39,11 @@ class SvExtrudeSeparateNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     height_ = FloatProperty(name="Height", description="Extrusion amount",
-                default=0.0,
-                update=updateNode)
+                            default=0.0,
+                            update=updateNode)
     scale_ = FloatProperty(name="Scale", description="Extruded faces scale",
-                default=1.0, min=0.0,
-                update=updateNode)
+                           default=1.0, min=0.0,
+                           update=updateNode)
 
     def sv_init(self, context):
         self.inputs.new('VerticesSocket', "Vertices", "Vertices")
@@ -56,7 +58,7 @@ class SvExtrudeSeparateNode(bpy.types.Node, SverchCustomTreeNode):
         self.outputs.new('StringsSocket', 'Polygons')
         self.outputs.new('StringsSocket', 'ExtrudedPolys')
         self.outputs.new('StringsSocket', 'OtherPolys')
-  
+
     def process(self):
         # inputs
         if not (self.inputs['Vertices'].is_linked and self.inputs['Polygons'].is_linked):
@@ -69,7 +71,7 @@ class SvExtrudeSeparateNode(bpy.types.Node, SverchCustomTreeNode):
         faces_s = self.inputs['Polygons'].sv_get(default=[[]])
         masks_s = self.inputs['Mask'].sv_get(default=[[1]])
         heights_s = self.inputs['Height'].sv_get()
-        scales_s  = self.inputs['Scale'].sv_get()
+        scales_s = self.inputs['Scale'].sv_get()
 
         result_vertices = []
         result_edges = []
@@ -82,8 +84,8 @@ class SvExtrudeSeparateNode(bpy.types.Node, SverchCustomTreeNode):
         offset = 0
         for vertices, edges, faces, masks, heights, scales in zip(*meshes):
             fullList(heights, len(faces))
-            fullList(scales,  len(faces))
-            fullList(masks,  len(faces))
+            fullList(scales, len(faces))
+            fullList(masks, len(faces))
 
             bm = bmesh_from_pydata(vertices, edges, faces)
             extruded_faces = bmesh.ops.extrude_discrete_faces(bm, faces=bm.faces)['faces']
@@ -96,7 +98,7 @@ class SvExtrudeSeparateNode(bpy.types.Node, SverchCustomTreeNode):
                 dr = face.normal * height
                 center = face.calc_center_median()
                 translation = Matrix.Translation(center)
-                rotation = face.normal.rotation_difference((0,0,1)).to_matrix().to_4x4()
+                rotation = face.normal.rotation_difference((0, 0, 1)).to_matrix().to_4x4()
                 #rotation = autorotate(z, face.normal).inverted()
                 m = translation * rotation
                 bmesh.ops.scale(bm, vec=(scale, scale, scale), space=m.inverted(), verts=face.verts)
@@ -124,6 +126,7 @@ class SvExtrudeSeparateNode(bpy.types.Node, SverchCustomTreeNode):
         if self.outputs['OtherPolys'].is_linked:
             self.outputs['OtherPolys'].sv_set(result_other_faces)
 
+
 def register():
     bpy.utils.register_class(SvExtrudeSeparateNode)
 
@@ -133,4 +136,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-

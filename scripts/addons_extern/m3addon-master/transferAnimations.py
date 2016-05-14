@@ -32,37 +32,36 @@ if __name__ == "__main__":
     parser.add_argument('outputFile', help="name of the new m3 file to create")
     args = parser.parse_args()
 
-
-    m3Model = m3.loadModel(args.m3File) 
+    m3Model = m3.loadModel(args.m3File)
     m3aModel = m3.loadModel(args.m3aFile)
     outputFile = args.outputFile
     sameFormat = True
 
-    if (len(m3Model.sequences) > 0 and len(m3aModel.sequences) > 0 ):
+    if (len(m3Model.sequences) > 0 and len(m3aModel.sequences) > 0):
         if m3Model.sequences[0].structureDescription != m3aModel.sequences[0].structureDescription:
             sameFormat = False
-    if (len(m3Model.sequenceTransformationCollections) > 0 and len(m3aModel.sequenceTransformationCollections) > 0 ):
+    if (len(m3Model.sequenceTransformationCollections) > 0 and len(m3aModel.sequenceTransformationCollections) > 0):
         if m3Model.sequenceTransformationCollections[0].structureDescription != m3aModel.sequenceTransformationCollections[0].structureDescription:
             sameFormat = False
-    if (len(m3Model.sequenceTransformationGroups) > 0 and len(m3aModel.sequenceTransformationGroups) > 0 ):
+    if (len(m3Model.sequenceTransformationGroups) > 0 and len(m3aModel.sequenceTransformationGroups) > 0):
         if m3Model.sequenceTransformationGroups[0].structureDescription != m3aModel.sequenceTransformationGroups[0].structureDescription:
             sameFormat = False
-    if (len(m3Model.sts) > 0 and len(m3aModel.sts) > 0 ):
+    if (len(m3Model.sts) > 0 and len(m3aModel.sts) > 0):
         if m3Model.sts[0].structureDescription != m3aModel.sts[0].structureDescription:
             sameFormat = False
 
     if not sameFormat:
         sys.stderr.write("The animation data has been stored in differnt formats\n")
         sys.exit(1)
-            
+
     if m3Model.uniqueUnknownNumber != m3aModel.uniqueUnknownNumber:
         sys.stderr.write("The animations / the m3a file has not been made for the m3 file\n")
         sys.exit(1)
-    
+
     m3aAnimationNames = set()
     for seq in m3aModel.sequences:
         m3aAnimationNames.add(seq.name)
-        
+
     m3AnimationNames = set()
     for seq in m3Model.sequences:
         m3AnimationNames.add(seq.name)
@@ -93,7 +92,5 @@ if __name__ == "__main__":
         stg.stcIndices = newSTCIndices
         m3Model.sequences.append(sequence)
         m3Model.sequenceTransformationGroups.append(stg)
-    
-    
-    m3.saveAndInvalidateModel(m3Model, outputFile)
 
+    m3.saveAndInvalidateModel(m3Model, outputFile)

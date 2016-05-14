@@ -35,7 +35,7 @@
 bl_info = {
     "name": "Create multi Bounding Box",
     "author": "sambler",
-    "version": (1,1),
+    "version": (1, 1),
     "blender": (2, 73, 0),
     "location": "View3D > Add > Mesh > Create Bounding Box",
     "description": "Create an individual mesh cube matching the bounding box of each selected object",
@@ -51,6 +51,7 @@ from bpy.props import BoolProperty, FloatVectorProperty
 import mathutils
 from bpy_extras import object_utils
 
+
 class CreateMultiBoundingBox(bpy.types.Operator, object_utils.AddObjectHelper):
     """Create a mesh cube that encompasses all selected objects"""
     bl_idname = "mesh.multi_boundbox_add"
@@ -60,17 +61,17 @@ class CreateMultiBoundingBox(bpy.types.Operator, object_utils.AddObjectHelper):
 
     # generic transform props
     view_align = BoolProperty(
-            name="Align to View",
-            default=False,
-            )
+        name="Align to View",
+        default=False,
+    )
     location = FloatVectorProperty(
-            name="Location",
-            subtype='TRANSLATION',
-            )
+        name="Location",
+        subtype='TRANSLATION',
+    )
     rotation = FloatVectorProperty(
-            name="Rotation",
-            subtype='EULER',
-            )
+        name="Rotation",
+        subtype='EULER',
+    )
 
     @classmethod
     def poll(cls, context):
@@ -87,7 +88,7 @@ class CreateMultiBoundingBox(bpy.types.Operator, object_utils.AddObjectHelper):
                  (1, 5, 6, 2),
                  (2, 6, 7, 3),
                  (4, 0, 3, 7),
-                ]
+                 ]
 
         for objname in workobjs:
             obj = bpy.data.objects[objname]
@@ -114,12 +115,15 @@ class CreateMultiBoundingBox(bpy.types.Operator, object_utils.AddObjectHelper):
 
         return {'FINISHED'}
 
+
 def menu_boundbox(self, context):
     self.layout.operator(CreateMultiBoundingBox.bl_idname, text=CreateMultiBoundingBox.bl_label, icon="PLUGIN")
+
 
 def register():
     bpy.utils.register_class(CreateMultiBoundingBox)
     bpy.types.INFO_MT_mesh_add.append(menu_boundbox)
+
 
 def unregister():
     bpy.utils.unregister_class(CreateMultiBoundingBox)

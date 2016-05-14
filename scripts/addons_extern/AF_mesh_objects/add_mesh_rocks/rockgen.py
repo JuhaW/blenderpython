@@ -114,7 +114,7 @@ import bpy
 import math
 import time
 from . import (settings,
-                       utils)
+               utils)
 from bpy_extras import object_utils
 from mathutils import (Color,
                        Vector)
@@ -381,12 +381,12 @@ def randomizeMaterial(material, color, dif_int, rough, spec_int, spec_hard,
         trans.gloss_samples = 32
         trans.falloff = 1.0
         # Needs randomization:
-        material.alpha = -gauss(alpha, 0.05) + 1;
+        material.alpha = -gauss(alpha, 0.05) + 1
         trans.gloss_factor = -gauss(cloudy, 0.05) + 1
         trans.filter = gauss(cloudy, 0.1)
         trans.ior = skewedGauss(mat_IOR, 0.01, [0.25, 4.0], mat_IOR > 2.125)
 
-    #Misc. settings:
+    # Misc. settings:
     material.use_transparent_shadows = True
 
     # Rock textures:
@@ -403,8 +403,8 @@ def randomizeMaterial(material, color, dif_int, rough, spec_int, spec_hard,
         # Set the active material slot:
         material.active_texture_index = i
         # Assign a texture to the active material slot:
-        material.active_texture = bpy.data.textures.new(name = 'stone_tex',
-                                                        type = 'NONE')
+        material.active_texture = bpy.data.textures.new(name='stone_tex',
+                                                        type='NONE')
         # Store the slot to easy coding access:
         slot = material.texture_slots[i]
 
@@ -914,77 +914,77 @@ def generateObject(context, muX, sigmaX, scaleX, upperSkewX, muY, sigmaY,
 
     # Build vertex and face arrays:
     if shape == 1:
-        verts = [(-x[0],-y[0],-z[0]),(x[1],-y[1],-z[1]),(x[2],-y[2],z[2]),
-             (-x[3],y[3],-z[3]),(x[4],y[4],-z[4]),(x[5],y[5],z[5]),
-             (x[6],y[6],z[6]),(x[7],y[7],-z[7])]
-        faces = [[0,1,2],[0,1,7],[3,0,7],[3,4,7],[1,4,7],[3,4,5],[1,2,6],
-                 [1,4,6],[4,5,6],[0,2,6],[0,3,6],[3,5,6]]
+        verts = [(-x[0], -y[0], -z[0]), (x[1], -y[1], -z[1]), (x[2], -y[2], z[2]),
+                 (-x[3], y[3], -z[3]), (x[4], y[4], -z[4]), (x[5], y[5], z[5]),
+                 (x[6], y[6], z[6]), (x[7], y[7], -z[7])]
+        faces = [[0, 1, 2], [0, 1, 7], [3, 0, 7], [3, 4, 7], [1, 4, 7], [3, 4, 5], [1, 2, 6],
+                 [1, 4, 6], [4, 5, 6], [0, 2, 6], [0, 3, 6], [3, 5, 6]]
     elif shape == 2:
-        verts = [(-x[0],y[0],-z[0]),(x[1],-y[1],-z[1]),(x[2],y[2],-z[2]),
-             (-x[3],y[3],-z[3]),(-x[4],-y[4],z[4]),(x[5],y[5],z[5]),
-             (x[6],y[6],z[6]),(-x[7],y[7],z[7])]
-        faces = [[0,1,2],[0,2,3],[0,3,7],[0,7,4],[1,4,5],[0,1,4],[5,1,2],
-                 [5,2,6],[3,2,6],[3,6,7],[5,4,7],[5,6,7]]
+        verts = [(-x[0], y[0], -z[0]), (x[1], -y[1], -z[1]), (x[2], y[2], -z[2]),
+                 (-x[3], y[3], -z[3]), (-x[4], -y[4], z[4]), (x[5], y[5], z[5]),
+                 (x[6], y[6], z[6]), (-x[7], y[7], z[7])]
+        faces = [[0, 1, 2], [0, 2, 3], [0, 3, 7], [0, 7, 4], [1, 4, 5], [0, 1, 4], [5, 1, 2],
+                 [5, 2, 6], [3, 2, 6], [3, 6, 7], [5, 4, 7], [5, 6, 7]]
     elif shape == 3:
-        verts = [(x[0],y[0],z[0]),(x[1],-y[1],-z[1]),(x[2],y[2],-z[2]),
-             (-x[3],y[3],-z[3]),(x[4],-y[4],z[4]),(x[5],y[5],z[5]),
-             (-x[6],y[6],z[6]),(-x[7],-y[7],z[7])]
-        faces = [[0,1,2],[0,2,3],[0,3,6],[0,6,7],[0,7,4],[0,4,1],[5,4,1,2],
-                 [5,6,3,2],[5,4,7,6]]
+        verts = [(x[0], y[0], z[0]), (x[1], -y[1], -z[1]), (x[2], y[2], -z[2]),
+                 (-x[3], y[3], -z[3]), (x[4], -y[4], z[4]), (x[5], y[5], z[5]),
+                 (-x[6], y[6], z[6]), (-x[7], -y[7], z[7])]
+        faces = [[0, 1, 2], [0, 2, 3], [0, 3, 6], [0, 6, 7], [0, 7, 4], [0, 4, 1], [5, 4, 1, 2],
+                 [5, 6, 3, 2], [5, 4, 7, 6]]
     elif shape == 4:
-        verts = [(x[0],y[0],z[0]),(x[1],-y[1],-z[1]),(x[2],y[2],-z[2]),
-             (-x[3],y[3],-z[3]),(-x[4],-y[4],-z[4]),(x[5],-y[5],-z[5]),
-             (x[6],y[6],-z[6]),(x[7],y[7],-z[7]),(-x[8],y[8],-z[8]),
-             (x[9],y[9],-z[9])]
-        faces = [[0,1,6],[0,6,2],[0,2,7],[0,7,3],[0,3,8],[0,8,4],[0,4,5],
-                 [0,5,1],[1,9,2],[2,9,3],[3,9,4],[4,9,1],[1,6,2],[2,7,3],
-                 [3,8,4],[4,5,1]]
+        verts = [(x[0], y[0], z[0]), (x[1], -y[1], -z[1]), (x[2], y[2], -z[2]),
+                 (-x[3], y[3], -z[3]), (-x[4], -y[4], -z[4]), (x[5], -y[5], -z[5]),
+                 (x[6], y[6], -z[6]), (x[7], y[7], -z[7]), (-x[8], y[8], -z[8]),
+                 (x[9], y[9], -z[9])]
+        faces = [[0, 1, 6], [0, 6, 2], [0, 2, 7], [0, 7, 3], [0, 3, 8], [0, 8, 4], [0, 4, 5],
+                 [0, 5, 1], [1, 9, 2], [2, 9, 3], [3, 9, 4], [4, 9, 1], [1, 6, 2], [2, 7, 3],
+                 [3, 8, 4], [4, 5, 1]]
     elif shape == 5:
-        verts = [(x[0],y[0],z[0]),(x[1],-y[1],z[1]),(x[2],y[2],z[2]),
-             (-x[3],y[3],z[3]),(x[4],-y[4],-z[4]),(x[5],y[5],-z[5]),
-             (x[6],y[6],-z[6]),(-x[7],y[7],-z[7]),(-x[8],y[8],-z[8]),
-             (-x[9],-y[9],-z[9])]
-        faces = [[0,1,2],[0,2,3],[0,3,1],[1,4,5],[1,5,2],[2,5,6],[2,6,7],
-                 [2,7,3],[3,7,8],[3,8,9],[3,9,1],[1,9,4],[4,5,9],[5,6,7],
-                 [7,8,9],[9,5,7]]
+        verts = [(x[0], y[0], z[0]), (x[1], -y[1], z[1]), (x[2], y[2], z[2]),
+                 (-x[3], y[3], z[3]), (x[4], -y[4], -z[4]), (x[5], y[5], -z[5]),
+                 (x[6], y[6], -z[6]), (-x[7], y[7], -z[7]), (-x[8], y[8], -z[8]),
+                 (-x[9], -y[9], -z[9])]
+        faces = [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 4, 5], [1, 5, 2], [2, 5, 6], [2, 6, 7],
+                 [2, 7, 3], [3, 7, 8], [3, 8, 9], [3, 9, 1], [1, 9, 4], [4, 5, 9], [5, 6, 7],
+                 [7, 8, 9], [9, 5, 7]]
     elif shape == 6:
-        verts = [(x[0],y[0],z[0]),(x[1],-y[1],-z[1]),(x[2],y[2],-z[2]),
-             (-x[3],y[3],-z[3]),(-x[4],y[4],z[4]),(-x[5],-y[5],z[5]),
-             (-x[6],-y[6],-z[6])]
-        faces = [[0,1,2],[0,2,3,4],[0,1,6,5],[0,4,5],[1,2,3,6],[3,4,5,6]]
+        verts = [(x[0], y[0], z[0]), (x[1], -y[1], -z[1]), (x[2], y[2], -z[2]),
+                 (-x[3], y[3], -z[3]), (-x[4], y[4], z[4]), (-x[5], -y[5], z[5]),
+                 (-x[6], -y[6], -z[6])]
+        faces = [[0, 1, 2], [0, 2, 3, 4], [0, 1, 6, 5], [0, 4, 5], [1, 2, 3, 6], [3, 4, 5, 6]]
     elif shape == 7:
-        verts = [(x[0],y[0],z[0]),(x[1],-y[1],-z[1]),(x[2],y[2],-z[2]),
-             (x[3],y[3],-z[3]),(-x[4],y[4],-z[4]),(-x[5],y[5],z[5]),
-             (-x[6],y[6],z[6]),(-x[7],y[7],-z[7]),(-x[8],-y[8],-z[8]),
-             (-x[9],-y[9],z[9])]
-        faces = [[0,1,2],[0,2,3],[0,5,6],[0,6,9],[0,1,8,9],[0,3,4,5],
-                 [1,2,7,8],[2,3,4,7],[4,5,6,7],[6,7,8,9]]
+        verts = [(x[0], y[0], z[0]), (x[1], -y[1], -z[1]), (x[2], y[2], -z[2]),
+                 (x[3], y[3], -z[3]), (-x[4], y[4], -z[4]), (-x[5], y[5], z[5]),
+                 (-x[6], y[6], z[6]), (-x[7], y[7], -z[7]), (-x[8], -y[8], -z[8]),
+                 (-x[9], -y[9], z[9])]
+        faces = [[0, 1, 2], [0, 2, 3], [0, 5, 6], [0, 6, 9], [0, 1, 8, 9], [0, 3, 4, 5],
+                 [1, 2, 7, 8], [2, 3, 4, 7], [4, 5, 6, 7], [6, 7, 8, 9]]
     elif shape == 8:
-        verts = [(x[0],y[0],z[0]),(x[1],-y[1],-z[1]),(x[2],y[2],-z[2]),
-             (-x[3],y[3],-z[3]),(-x[4],-y[4],-z[4]),(-x[5],-y[5],z[5]),
-             (-x[6],y[6],z[6])]
-        faces = [[0,2,1],[0,1,4],[0,4,5],[0,5,6],[0,6,3,2],[2,1,4,3],
-                 [3,6,5,4]]
+        verts = [(x[0], y[0], z[0]), (x[1], -y[1], -z[1]), (x[2], y[2], -z[2]),
+                 (-x[3], y[3], -z[3]), (-x[4], -y[4], -z[4]), (-x[5], -y[5], z[5]),
+                 (-x[6], y[6], z[6])]
+        faces = [[0, 2, 1], [0, 1, 4], [0, 4, 5], [0, 5, 6], [0, 6, 3, 2], [2, 1, 4, 3],
+                 [3, 6, 5, 4]]
     elif shape == 9:
-        verts = [(-x[0],-y[0],-z[0]),(-x[1],y[1],-z[1]),(-x[2],y[2],z[2]),
-             (-x[3],-y[3],z[3]),(x[4],-y[4],-z[4]),(x[5],y[5],-z[5]),
-             (x[6],y[6],z[6]),(x[7],-y[7],z[7])]
-        faces = [[0,1,6,2],[1,5,7,6],[5,4,3,7],[4,0,2,3],[0,1,5,4],[3,2,6,7]]
+        verts = [(-x[0], -y[0], -z[0]), (-x[1], y[1], -z[1]), (-x[2], y[2], z[2]),
+                 (-x[3], -y[3], z[3]), (x[4], -y[4], -z[4]), (x[5], y[5], -z[5]),
+                 (x[6], y[6], z[6]), (x[7], -y[7], z[7])]
+        faces = [[0, 1, 6, 2], [1, 5, 7, 6], [5, 4, 3, 7], [4, 0, 2, 3], [0, 1, 5, 4], [3, 2, 6, 7]]
     elif shape == 10:
-        verts = [(-x[0],-y[0],-z[0]),(-x[1],y[1],-z[1]),(-x[2],y[2],z[2]),
-             (x[3],-y[3],z[3]),(x[4],y[4],z[4]),(x[5],y[5],-z[5]),
-             (x[6],-y[6],-z[6])]
-        faces = [[0,2,3],[0,3,6],[0,1,5,6],[2,3,4],[0,1,2],[1,2,4,5],[3,4,5,6]]
+        verts = [(-x[0], -y[0], -z[0]), (-x[1], y[1], -z[1]), (-x[2], y[2], z[2]),
+                 (x[3], -y[3], z[3]), (x[4], y[4], z[4]), (x[5], y[5], -z[5]),
+                 (x[6], -y[6], -z[6])]
+        faces = [[0, 2, 3], [0, 3, 6], [0, 1, 5, 6], [2, 3, 4], [0, 1, 2], [1, 2, 4, 5], [3, 4, 5, 6]]
     elif shape == 11:
-        verts = [(-x[0],-y[0],-z[0]),(-x[1],y[1],-z[1]),(-x[2],y[2],z[2]),
-             (x[3],-y[3],z[3]),(x[4],y[4],z[4]),(x[5],y[5],-z[5]),
-             (x[6],-y[6],-z[6])]
-        faces = [[0,2,3],[0,3,6],[0,1,5,6],[2,3,4],[5,6,3],[1,5,3,4],[0,1,4,2]]
+        verts = [(-x[0], -y[0], -z[0]), (-x[1], y[1], -z[1]), (-x[2], y[2], z[2]),
+                 (x[3], -y[3], z[3]), (x[4], y[4], z[4]), (x[5], y[5], -z[5]),
+                 (x[6], -y[6], -z[6])]
+        faces = [[0, 2, 3], [0, 3, 6], [0, 1, 5, 6], [2, 3, 4], [5, 6, 3], [1, 5, 3, 4], [0, 1, 4, 2]]
     else:
-        verts = [(-x[0],-y[0],-z[0]),(-x[1],y[1],-z[1]),(-x[2],-y[2],z[2]),
-             (-x[3],y[3],z[3]),(x[4],-y[4],-z[4]),(x[5],y[5],-z[5]),
-             (x[6],-y[6],z[6]),(x[7],y[7],z[7])]
-        faces = [[0,1,3,2],[0,1,5,4],[0,4,6,2],[7,5,4,6],[7,3,2,6],[7,5,1,3]]
+        verts = [(-x[0], -y[0], -z[0]), (-x[1], y[1], -z[1]), (-x[2], -y[2], z[2]),
+                 (-x[3], y[3], z[3]), (x[4], -y[4], -z[4]), (x[5], y[5], -z[5]),
+                 (x[6], -y[6], z[6]), (x[7], y[7], z[7])]
+        faces = [[0, 1, 3, 2], [0, 1, 5, 4], [0, 4, 6, 2], [7, 5, 4, 6], [7, 3, 2, 6], [7, 5, 1, 3]]
 
 ##    name = "Rock." + str(base + shift).zfill(3)
     name = "rock"
@@ -993,9 +993,9 @@ def generateObject(context, muX, sigmaX, scaleX, upperSkewX, muY, sigmaY,
     obj = createMeshObject(context, verts, [], faces, name)
 
     if scaleDisplace:
-##        bpy.data.objects[name].scale = Vector((averageX, averageY, averageZ))
+        ##        bpy.data.objects[name].scale = Vector((averageX, averageY, averageZ))
         obj.object.scale = Vector((averageX, averageY, averageZ))
-    
+
     # For a slight speed bump / Readability:
 ##    mesh = bpy.data.meshes[name]
     mesh = obj.object.data
@@ -1027,7 +1027,7 @@ def generateObject(context, muX, sigmaX, scaleX, upperSkewX, muY, sigmaY,
         for i in range(18):
             if i in [0, 1, 2, 3, 6, 7, 8, 9, 13, 16]:
                 mesh.edges[i].crease = gauss(0.5, 0.125)
-            elif i in [11,17]:
+            elif i in [11, 17]:
                 mesh.edges[i].crease = gauss(0.25, 0.05)
             else:
                 mesh.edges[i].crease = gauss(0.125, 0.025)
@@ -1061,7 +1061,7 @@ def generateObject(context, muX, sigmaX, scaleX, upperSkewX, muY, sigmaY,
                 mesh.edges[i].crease = gauss(0.125, 0.025)
 
     return obj.object
-##    return name
+# return name
 
 
 # Artifically skews a normal (gaussian) distribution.  This will not create
@@ -1123,10 +1123,10 @@ def skewedGauss(mu, sigma, bounds, upperSkewed=True):
 #   ----------- < sigma < ----------------
 #      1 + mu                  2 - mu
 #
-##def generateBeta(mu, sigma, scale, repitions=1):
+# def generateBeta(mu, sigma, scale, repitions=1):
 ##    results = []
 ##
-##    return results
+# return results
 
 # Creates rock objects:
 def generateRocks(context, scaleX, skewX, scaleY, skewY, scaleZ, skewZ,
@@ -1164,7 +1164,7 @@ def generateRocks(context, scaleX, skewX, scaleY, skewY, scaleZ, skewZ,
         if numOfRocks < 10:
             numOfMats = numOfRocks
         else:
-            numOfMats = math.ceil((1/9) * numOfRocks + (80/9))
+            numOfMats = math.ceil((1 / 9) * numOfRocks + (80 / 9))
 
         # newMat = generateMaterialsList(numOfMats)
         #   *** No longer needed on 9/6/2011 ***
@@ -1178,7 +1178,7 @@ def generateRocks(context, scaleX, skewX, scaleY, skewY, scaleZ, skewZ,
         # Changed as material mapping is no longer needed.
         #   *** Complete 9/6/2011 ***
         for i in range(numOfMats):
-            newMat.append(bpy.data.materials.new(name = 'stone'))
+            newMat.append(bpy.data.materials.new(name='stone'))
             randomizeMaterial(newMat[i], color, mat_bright,
                               mat_rough, mat_spec, mat_hard, mat_use_trans,
                               mat_alpha, mat_cloudy, mat_IOR, mat_mossy,
@@ -1249,9 +1249,9 @@ def generateRocks(context, scaleX, skewX, scaleY, skewY, scaleZ, skewZ,
         #   *** Code is notably slower at high rock counts ***
 
         rock = generateObject(context, muX, sigmaX, scaleX, upperSkewX, muY,
-##        name = generateObject(context, muX, sigmaX, scaleX, upperSkewX, muY,
-                               sigmaY, scaleY, upperSkewY, muZ, sigmaZ, scaleZ,
-                               upperSkewZ, i, lastRock, scaleDisplace, scale_fac)
+                              # name = generateObject(context, muX, sigmaX, scaleX, upperSkewX, muY,
+                              sigmaY, scaleY, upperSkewY, muZ, sigmaZ, scaleZ,
+                              upperSkewZ, i, lastRock, scaleDisplace, scale_fac)
 
 ##        rock = bpy.data.objects[name]
 
@@ -1271,39 +1271,39 @@ def generateRocks(context, scaleX, skewX, scaleY, skewY, scaleZ, skewZ,
         texTypes = ['CLOUDS', 'MUSGRAVE', 'DISTORTED_NOISE', 'STUCCI', 'VORONOI']
         newTex = []
         # The first texture is to give a more ranodm base shape appearance:
-        newTex.append(bpy.data.textures.new(name = 'rock_displacement',
-                                            type = texTypes[1]))
+        newTex.append(bpy.data.textures.new(name='rock_displacement',
+                                            type=texTypes[1]))
         randomizeTexture(newTex[0], 0)
-        newTex.append(bpy.data.textures.new(name = 'rock_displacement',
-                                            type = texTypes[4]))
+        newTex.append(bpy.data.textures.new(name='rock_displacement',
+                                            type=texTypes[4]))
         randomizeTexture(newTex[1], 0)
         if numpy:
-            newTex.append(bpy.data.textures.new(name = 'rock_displacement',
-                                                type = texTypes[int(round(weibull(1, 1)[0] / 2.125))]))
+            newTex.append(bpy.data.textures.new(name='rock_displacement',
+                                                type=texTypes[int(round(weibull(1, 1)[0] / 2.125))]))
             randomizeTexture(newTex[2], 1)
-            newTex.append(bpy.data.textures.new(name = 'rock_displacement',
-                                                type = texTypes[int(round(weibull(1, 1)[0] / 2.125))]))
+            newTex.append(bpy.data.textures.new(name='rock_displacement',
+                                                type=texTypes[int(round(weibull(1, 1)[0] / 2.125))]))
             randomizeTexture(newTex[3], 2)
         else:
-            newTex.append(bpy.data.textures.new(name = 'rock_displacement',
-                                                type = texTypes[int(round(weibull(1, 1) / 2.125))]))
+            newTex.append(bpy.data.textures.new(name='rock_displacement',
+                                                type=texTypes[int(round(weibull(1, 1) / 2.125))]))
             randomizeTexture(newTex[2], 1)
-            newTex.append(bpy.data.textures.new(name = 'rock_displacement',
-                                                type = texTypes[int(round(weibull(1, 1) / 2.125))]))
+            newTex.append(bpy.data.textures.new(name='rock_displacement',
+                                                type=texTypes[int(round(weibull(1, 1) / 2.125))]))
             randomizeTexture(newTex[3], 2)
 
         # Add modifiers:
-        rock.modifiers.new(name = "Subsurf", type = 'SUBSURF')
-        rock.modifiers.new(name = "Subsurf", type = 'SUBSURF')
-        rock.modifiers.new(name = "Displace", type = 'DISPLACE')
-        rock.modifiers.new(name = "Displace", type = 'DISPLACE')
-        rock.modifiers.new(name = "Displace", type = 'DISPLACE')
-        rock.modifiers.new(name = "Displace", type = 'DISPLACE')
+        rock.modifiers.new(name="Subsurf", type='SUBSURF')
+        rock.modifiers.new(name="Subsurf", type='SUBSURF')
+        rock.modifiers.new(name="Displace", type='DISPLACE')
+        rock.modifiers.new(name="Displace", type='DISPLACE')
+        rock.modifiers.new(name="Displace", type='DISPLACE')
+        rock.modifiers.new(name="Displace", type='DISPLACE')
 
         # If smoothing is enabled, allow a little randomness into the
         #   smoothing factor. Then add the smoothing modifier.
         if smooth_fac > 0.0 and smooth_it > 0:
-            rock.modifiers.new(name = "Smooth", type='SMOOTH')
+            rock.modifiers.new(name="Smooth", type='SMOOTH')
             rock.modifiers[6].factor = gauss(smooth_fac, (smooth_fac ** 0.5) / 12)
             rock.modifiers[6].iterations = smooth_it
         # Make a call to random to keep things consistant:
@@ -1334,7 +1334,7 @@ def generateRocks(context, scaleX, skewX, scaleY, skewY, scaleZ, skewZ,
 
         # Set mesh to be smooth and fix the normals:
         utils.smooth(rock.data)
-##        utils.smooth(bpy.data.meshes[name])
+# utils.smooth(bpy.data.meshes[name])
         bpy.ops.object.editmode_toggle()
         bpy.ops.mesh.normals_make_consistent()
         bpy.ops.object.editmode_toggle()
@@ -1386,111 +1386,110 @@ class rocks(bpy.types.Operator):
         description = name + " preset values."
         presets.append((value, name, description))
 
-    preset_values = EnumProperty(items = presets,
-                                 name = "Presets",
-                                 description = "Preset values for some rock types")
+    preset_values = EnumProperty(items=presets,
+                                 name="Presets",
+                                 description="Preset values for some rock types")
 
-    num_of_rocks = IntProperty(name = "Number of rocks",
-                               description = "Number of rocks to generate. WARNING: Slow at high values!",
-                               min = 1, max = 1048576,
-                               soft_max = 20,
-                               default = 1)
+    num_of_rocks = IntProperty(name="Number of rocks",
+                               description="Number of rocks to generate. WARNING: Slow at high values!",
+                               min=1, max=1048576,
+                               soft_max=20,
+                               default=1)
 
-    scale_X = FloatVectorProperty(name = "X scale",
-                                  description = "X axis scaling range.",
-                                  min = 0.0, max = 256.0, step = 1,
-                                  default = defaults[1], size = 2)
-    skew_X = FloatProperty(name = "X skew",
-                           description = "X Skew ratio. 0.5 is no skew.",
-                           min = -1.0, max = 1.0, default = defaults[4])
-    scale_Y = FloatVectorProperty(name = "Y scale",
-                                  description = "Y axis scaling range.",
-                                  min = 0.0, max = 256.0, step = 1,
-                                  default = defaults[2], size = 2)
-    skew_Y = FloatProperty(name = "Y skew",
-                           description = "Y Skew ratio. 0.5 is no skew.",
-                           min = -1.0, max = 1.0, default = defaults[5])
-    scale_Z = FloatVectorProperty(name = "Z scale",
-                                  description = "Z axis scaling range.",
-                                  min = 0.0, max = 256.0, step = 1,
-                                  default = defaults[3], size = 2)
-    skew_Z = FloatProperty(name = "Z skew",
-                           description = "Z Skew ratio. 0.5 is no skew.",
-                           min = -1.0, max = 1.0, default = defaults[6])
-    use_scale_dis = BoolProperty(name = "Scale displace textures",
-                                description = "Scale displacement textures with dimensions.  May cause streched textures.",
-                                default = defaults[7])
-    scale_fac = FloatVectorProperty(name = "Scaling Factor",
-                                    description = "XYZ scaling factor.  1 = no scaling.",
-                                    min = 0.0001, max = 256.0, step = 0.1,
-                                    default = defaults[8], size = 3)
+    scale_X = FloatVectorProperty(name="X scale",
+                                  description="X axis scaling range.",
+                                  min=0.0, max=256.0, step=1,
+                                  default=defaults[1], size=2)
+    skew_X = FloatProperty(name="X skew",
+                           description="X Skew ratio. 0.5 is no skew.",
+                           min=-1.0, max=1.0, default=defaults[4])
+    scale_Y = FloatVectorProperty(name="Y scale",
+                                  description="Y axis scaling range.",
+                                  min=0.0, max=256.0, step=1,
+                                  default=defaults[2], size=2)
+    skew_Y = FloatProperty(name="Y skew",
+                           description="Y Skew ratio. 0.5 is no skew.",
+                           min=-1.0, max=1.0, default=defaults[5])
+    scale_Z = FloatVectorProperty(name="Z scale",
+                                  description="Z axis scaling range.",
+                                  min=0.0, max=256.0, step=1,
+                                  default=defaults[3], size=2)
+    skew_Z = FloatProperty(name="Z skew",
+                           description="Z Skew ratio. 0.5 is no skew.",
+                           min=-1.0, max=1.0, default=defaults[6])
+    use_scale_dis = BoolProperty(name="Scale displace textures",
+                                 description="Scale displacement textures with dimensions.  May cause streched textures.",
+                                 default=defaults[7])
+    scale_fac = FloatVectorProperty(name="Scaling Factor",
+                                    description="XYZ scaling factor.  1 = no scaling.",
+                                    min=0.0001, max=256.0, step=0.1,
+                                    default=defaults[8], size=3)
 
     # @todo Possible to title this section "Physical Properties:"?
-    deform = FloatProperty(name = "Deformation",
-                           description = "Rock deformation",
-                           min = 0.0, max = 1024.0, default = defaults[9])
-    rough = FloatProperty(name = "Roughness",
-                          description = "Rock roughness",
-                          min = 0.0, max = 1024.0, default = defaults[10])
-    detail = IntProperty(name = "Detail level",
-                         description = "Detail level.  WARNING: Slow at high values!",
-                         min = 1, max = 1024, default = defaults[11])
-    display_detail = IntProperty(name = "Display Detail",
-                                 description = "Display detail.  Use a lower value for high numbers of rocks.",
-                                 min = 1, max = 128, default = defaults[12])
-    smooth_fac = FloatProperty(name = "Smooth Factor",
-                               description = "Smoothing factor.  A value of 0 disables.",
-                               min = 0.0, max = 128.0, default = defaults[13])
-    smooth_it = IntProperty(name = "Smooth Iterations",
-                            description = "Smoothing iterations.  A value of 0 disables.",
-                            min = 0, max = 128, default = defaults[14])
+    deform = FloatProperty(name="Deformation",
+                           description="Rock deformation",
+                           min=0.0, max=1024.0, default=defaults[9])
+    rough = FloatProperty(name="Roughness",
+                          description="Rock roughness",
+                          min=0.0, max=1024.0, default=defaults[10])
+    detail = IntProperty(name="Detail level",
+                         description="Detail level.  WARNING: Slow at high values!",
+                         min=1, max=1024, default=defaults[11])
+    display_detail = IntProperty(name="Display Detail",
+                                 description="Display detail.  Use a lower value for high numbers of rocks.",
+                                 min=1, max=128, default=defaults[12])
+    smooth_fac = FloatProperty(name="Smooth Factor",
+                               description="Smoothing factor.  A value of 0 disables.",
+                               min=0.0, max=128.0, default=defaults[13])
+    smooth_it = IntProperty(name="Smooth Iterations",
+                            description="Smoothing iterations.  A value of 0 disables.",
+                            min=0, max=128, default=defaults[14])
 
     # @todo Add material properties
-    mat_enable = BoolProperty(name = "Generate materials",
-                              description = "Generate materials and textures for the rocks",
-                              default = defaults[15])
-    mat_color = FloatVectorProperty(name = "Color",
-                                    description = "Base color settings (RGB)",
-                                    min = 0.0, max = 1.0, default = defaults[16], size = 3, subtype = 'COLOR')
-    mat_bright = FloatProperty(name = "Brightness",
-                               description = "Material brightness",
-                               min = 0.0, max = 1.0, default = defaults[17])
-    mat_rough = FloatProperty(name = "Roughness",
-                              description = "Material roughness",
-                              min = 0.0, max = 5.0, default = defaults[18])
-    mat_spec = FloatProperty(name = "Shine",
-                             description = "Material specularity strength",
-                             min = 0.0, max = 1.0, default = defaults[19])
-    mat_hard = IntProperty(name = "Hardness",
-                           description = "Material hardness",
-                           min = 0, max = 511, default = defaults[20])
-    mat_use_trans = BoolProperty(name = "Use Transparency",
-                                 description = "Enables transparency in rocks (WARNING: SLOW RENDER TIMES)",
-                                 default = defaults[21])
-    mat_alpha = FloatProperty(name = "Alpha",
-                              description = "Transparency of the rocks",
-                              min = 0.0, max = 1.0, default = defaults[22])
-    mat_cloudy = FloatProperty(name = "Cloudy",
-                               description = "How cloudy the transparent rocks look",
-                               min = 0.0, max = 1.0, default = defaults[23])
-    mat_IOR = FloatProperty(name = "IoR",
-                            description = "Index of Refraction",
-                            min = 0.25, max = 4.0, soft_max = 2.5,
-                            default = defaults[24])
-    mat_mossy = FloatProperty(name = "Mossiness",
-                              description = "Amount of mossiness on the rocks",
-                              min = 0.0, max = 1.0, default = defaults[25])
+    mat_enable = BoolProperty(name="Generate materials",
+                              description="Generate materials and textures for the rocks",
+                              default=defaults[15])
+    mat_color = FloatVectorProperty(name="Color",
+                                    description="Base color settings (RGB)",
+                                    min=0.0, max=1.0, default=defaults[16], size=3, subtype='COLOR')
+    mat_bright = FloatProperty(name="Brightness",
+                               description="Material brightness",
+                               min=0.0, max=1.0, default=defaults[17])
+    mat_rough = FloatProperty(name="Roughness",
+                              description="Material roughness",
+                              min=0.0, max=5.0, default=defaults[18])
+    mat_spec = FloatProperty(name="Shine",
+                             description="Material specularity strength",
+                             min=0.0, max=1.0, default=defaults[19])
+    mat_hard = IntProperty(name="Hardness",
+                           description="Material hardness",
+                           min=0, max=511, default=defaults[20])
+    mat_use_trans = BoolProperty(name="Use Transparency",
+                                 description="Enables transparency in rocks (WARNING: SLOW RENDER TIMES)",
+                                 default=defaults[21])
+    mat_alpha = FloatProperty(name="Alpha",
+                              description="Transparency of the rocks",
+                              min=0.0, max=1.0, default=defaults[22])
+    mat_cloudy = FloatProperty(name="Cloudy",
+                               description="How cloudy the transparent rocks look",
+                               min=0.0, max=1.0, default=defaults[23])
+    mat_IOR = FloatProperty(name="IoR",
+                            description="Index of Refraction",
+                            min=0.25, max=4.0, soft_max=2.5,
+                            default=defaults[24])
+    mat_mossy = FloatProperty(name="Mossiness",
+                              description="Amount of mossiness on the rocks",
+                              min=0.0, max=1.0, default=defaults[25])
 
-    use_generate = BoolProperty(name = "Generate Rocks",
-                                description = "Enable actual generation.",
-                                default = defaults[26])
-    use_random_seed = BoolProperty(name = "Use a random seed",
-                                  description = "Create a seed based on time. Causes user seed to be ignored.",
-                                  default = defaults[27])
-    user_seed = IntProperty(name = "User seed",
-                            description = "Use a specific seed for the generator.",
-                            min = 0, max = 1048576, default = defaults[28])
-
+    use_generate = BoolProperty(name="Generate Rocks",
+                                description="Enable actual generation.",
+                                default=defaults[26])
+    use_random_seed = BoolProperty(name="Use a random seed",
+                                   description="Create a seed based on time. Causes user seed to be ignored.",
+                                   default=defaults[27])
+    user_seed = IntProperty(name="User seed",
+                            description="Use a specific seed for the generator.",
+                            min=0, max=1048576, default=defaults[28])
 
     def draw(self, context):
         layout = self.layout
@@ -1535,7 +1534,6 @@ class rocks(bpy.types.Operator):
         if not self.use_random_seed:
             box.prop(self, 'user_seed')
         box.prop(self, 'preset_values')
-
 
     def execute(self, context):
         # The following "if" block loads preset values:

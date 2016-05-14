@@ -28,7 +28,7 @@ class SvRayCastNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     def sv_init(self, context):
-        si,so = self.inputs.new,self.outputs.new
+        si, so = self.inputs.new, self.outputs.new
         si('VerticesSocket', 'start').use_prop = True
         si('VerticesSocket', 'end').use_prop = True
         so('VerticesSocket', "HitP")
@@ -38,12 +38,12 @@ class SvRayCastNode(bpy.types.Node, SverchCustomTreeNode):
         so("MatrixSocket", "hited object matrix")
 
     def process(self):
-        P,N,S,O,M = self.outputs
+        P, N, S, O, M = self.outputs
         rc = []
         st = self.inputs['start'].sv_get()[0]
         en = self.inputs['end'].sv_get()[0]
         st, en = match_long_repeat([st, en])
-        for i,i2 in zip(st,en):
+        for i, i2 in zip(st, en):
             rc.append(bpy.context.scene.ray_cast(i, i2))
         if P.is_linked:
             P.sv_set([[i[3][:] for i in rc]])

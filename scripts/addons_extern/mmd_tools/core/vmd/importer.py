@@ -10,7 +10,9 @@ import mmd_tools.core.lamp as mmd_lamp
 import mmd_tools.core.vmd as vmd
 from mmd_tools import utils
 
+
 class VMDImporter:
+
     def __init__(self, filepath, scale=1.0, use_pmx_bonename=True, convert_mmd_camera=True, convert_mmd_lamp=True, frame_margin=5):
         self.__vmdFile = vmd.File()
         self.__vmdFile.load(filepath=filepath)
@@ -20,15 +22,14 @@ class VMDImporter:
         self.__use_pmx_bonename = use_pmx_bonename
         self.__frame_margin = frame_margin + 1
 
-
     @staticmethod
     def makeVMDBoneLocationToBlenderMatrix(blender_bone):
         mat = mathutils.Matrix([
-                [blender_bone.x_axis.x, blender_bone.x_axis.y, blender_bone.x_axis.z, 0.0],
-                [blender_bone.y_axis.x, blender_bone.y_axis.y, blender_bone.y_axis.z, 0.0],
-                [blender_bone.z_axis.x, blender_bone.z_axis.y, blender_bone.z_axis.z, 0.0],
-                [0.0, 0.0, 0.0, 1.0]
-                ])
+            [blender_bone.x_axis.x, blender_bone.x_axis.y, blender_bone.x_axis.z, 0.0],
+            [blender_bone.y_axis.x, blender_bone.y_axis.y, blender_bone.y_axis.z, 0.0],
+            [blender_bone.z_axis.x, blender_bone.z_axis.y, blender_bone.z_axis.z, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+        ])
         mat2 = mathutils.Matrix([
             [1.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, 1.0, 0.0],
@@ -48,7 +49,7 @@ class VMDImporter:
         mat[0][2], mat[1][2], mat[2][2] = blender_bone.x_axis.z, blender_bone.y_axis.z, blender_bone.z_axis.z
         (vec, angle) = rotation.to_axis_angle()
         v = mathutils.Vector((-vec.x, -vec.z, -vec.y))
-        return mathutils.Quaternion(mat*v, angle).normalized()
+        return mathutils.Quaternion(mat * v, angle).normalized()
 
     @staticmethod
     def __fixRotations(rotation_ary):
@@ -61,8 +62,8 @@ class VMDImporter:
         for q in rotation_ary:
             nq = q.copy()
             nq.negate()
-            t1 = (pq.w-q.w)**2+(pq.x-q.x)**2+(pq.y-q.y)**2+(pq.z-q.z)**2
-            t2 = (pq.w-nq.w)**2+(pq.x-nq.x)**2+(pq.y-nq.y)**2+(pq.z-nq.z)**2
+            t1 = (pq.w - q.w)**2 + (pq.x - q.x)**2 + (pq.y - q.y)**2 + (pq.z - q.z)**2
+            t2 = (pq.w - nq.w)**2 + (pq.x - nq.x)**2 + (pq.y - nq.y)**2 + (pq.z - nq.z)**2
             # t1 = pq.axis.dot(q.axis)
             # t2 = pq.axis.dot(nq.axis)
             if t2 < t1:
@@ -106,7 +107,7 @@ class VMDImporter:
             bpy.ops.object.mode_set(mode='OBJECT')
             for i in hiddenBones:
                 i.hide = True
-            
+
         boneAnim = self.__vmdFile.boneAnimation
 
         pose_bones = armObj.pose.bones
@@ -114,10 +115,10 @@ class VMDImporter:
             pose_bones = utils.makePmxBoneMap(armObj)
         for name, keyFrames in boneAnim.items():
             if name not in pose_bones:
-                print("WARNING: not found bone %s"%str(name))
+                print("WARNING: not found bone %s" % str(name))
                 continue
 
-            keyFrames.sort(key=lambda x:x.frame_number)
+            keyFrames.sort(key=lambda x: x.frame_number)
             bone = pose_bones[name]
             frameNumbers = map(lambda x: x.frame_number, keyFrames)
             mat = self.makeVMDBoneLocationToBlenderMatrix(bone)
@@ -130,10 +131,10 @@ class VMDImporter:
                 bone.rotation_quaternion = rotation
                 bone.keyframe_insert(data_path='location',
                                      group=name,
-                                     frame=frame+self.__frame_margin)
+                                     frame=frame + self.__frame_margin)
                 bone.keyframe_insert(data_path='rotation_quaternion',
                                      group=name,
-                                     frame=frame+self.__frame_margin)
+                                     frame=frame + self.__frame_margin)
 
         rePath = re.compile(r'^pose\.bones\["(.+)"\]\.([a-z_]+)$')
         for fcurve in act.fcurves:
@@ -146,7 +147,7 @@ class VMDImporter:
                 else:
                     idx = 3
                 frames = list(fcurve.keyframe_points)
-                frames.sort(key=lambda kp:kp.co.x)
+                frames.sort(key=lambda kp: kp.co.x)
                 if self.__frame_margin > 1:
                     del frames[0]
                 for i in range(1, len(keyFrames)):
@@ -166,23 +167,23 @@ class VMDImporter:
 
         for name, keyFrames in shapeKeyAnim.items():
             if name not in shapeKeyDict:
-                print("WARNING: not found shape key %s"%str(name))
+                print("WARNING: not found shape key %s" % str(name))
                 continue
             shapeKey = shapeKeyDict[name]
             for i in keyFrames:
                 shapeKey.value = i.weight
                 shapeKey.keyframe_insert(data_path='value',
                                          group=name,
-                                         frame=i.frame_number+self.__frame_margin)
+                                         frame=i.frame_number + self.__frame_margin)
 
     @staticmethod
     def detectCameraChange(fcurve, threshold=10.0):
         frames = list(fcurve.keyframe_points)
         frameCount = len(frames)
-        frames.sort(key=lambda x:x.co[0])
+        frames.sort(key=lambda x: x.co[0])
         for i, f in enumerate(frames):
-            if i+1 < frameCount:
-                n = frames[i+1]
+            if i + 1 < frameCount:
+                n = frames[i + 1]
                 if n.co[0] - f.co[0] <= 1.0 and abs(f.co[1] - n.co[1]) > threshold:
                     f.interpolation = 'CONSTANT'
 
@@ -196,30 +197,30 @@ class VMDImporter:
 
         cameraObj = mmdCameraInstance.camera()
         cameraAnim = self.__vmdFile.cameraAnimation
-        cameraAnim.sort(key=lambda x:x.frame_number)
+        cameraAnim.sort(key=lambda x: x.frame_number)
         for keyFrame in cameraAnim:
             mmdCamera.mmd_camera.angle = math.radians(keyFrame.angle)
             cameraObj.location[1] = keyFrame.distance * self.__scale
             mmdCamera.location = mathutils.Vector((keyFrame.location[0], keyFrame.location[2], keyFrame.location[1])) * self.__scale
             mmdCamera.rotation_euler = mathutils.Vector((keyFrame.rotation[0], keyFrame.rotation[2], keyFrame.rotation[1]))
             mmdCamera.keyframe_insert(data_path='mmd_camera.angle',
-                                           frame=keyFrame.frame_number+self.__frame_margin)
+                                      frame=keyFrame.frame_number + self.__frame_margin)
             cameraObj.keyframe_insert(data_path='location', index=1,
-                                      frame=keyFrame.frame_number+self.__frame_margin)
+                                      frame=keyFrame.frame_number + self.__frame_margin)
             mmdCamera.keyframe_insert(data_path='location',
-                                      frame=keyFrame.frame_number+self.__frame_margin)
+                                      frame=keyFrame.frame_number + self.__frame_margin)
             mmdCamera.keyframe_insert(data_path='rotation_euler',
-                                      frame=keyFrame.frame_number+self.__frame_margin)
+                                      frame=keyFrame.frame_number + self.__frame_margin)
 
         paths = ['rotation_euler', 'mmd_camera.angle', 'location']
         for fcurve in act.fcurves:
             if fcurve.data_path in paths:
-                if fcurve.data_path =='location':
+                if fcurve.data_path == 'location':
                     idx = [0, 2, 1][fcurve.array_index] * 4
                 else:
                     idx = (paths.index(fcurve.data_path) + 3) * 4
                 frames = list(fcurve.keyframe_points)
-                frames.sort(key=lambda kp:kp.co.x)
+                frames.sort(key=lambda kp: kp.co.x)
                 for i in range(1, len(cameraAnim)):
                     interp = cameraAnim[i].interp
                     self.__setInterpolation([interp[idx + j] for j in [0, 2, 1, 3]], frames[i - 1], frames[i])
@@ -232,10 +233,10 @@ class VMDImporter:
     def detectLampChange(fcurve, threshold=0.1):
         frames = list(fcurve.keyframe_points)
         frameCount = len(frames)
-        frames.sort(key=lambda x:x.co[0])
+        frames.sort(key=lambda x: x.co[0])
         for i, f in enumerate(frames):
-            if i+1 < frameCount:
-                n = frames[i+1]
+            if i + 1 < frameCount:
+                n = frames[i + 1]
                 if n.co[0] - f.co[0] <= 1.0 and abs(f.co[1] - n.co[1]) > threshold:
                     f.interpolation = 'CONSTANT'
 
@@ -263,34 +264,31 @@ class VMDImporter:
             lamp.data.color = mathutils.Vector(keyFrame.color)
             bone.location = -(mathutils.Vector((keyFrame.direction[0], keyFrame.direction[2], keyFrame.direction[1])))
             lamp.data.keyframe_insert(data_path='color',
-                                      frame=keyFrame.frame_number+self.__frame_margin)
+                                      frame=keyFrame.frame_number + self.__frame_margin)
             bone.keyframe_insert(data_path='location',
-                                 frame=keyFrame.frame_number+self.__frame_margin)
+                                 frame=keyFrame.frame_number + self.__frame_margin)
 
         for fcurve in armature.animation_data.action.fcurves:
             if fcurve.data_path == bone_data_path:
                 self.detectLampChange(fcurve)
-
-
 
     def assign(self, obj, action_name=None):
         if action_name is None:
             action_name = os.path.splitext(os.path.basename(self.__vmdFile.filepath))[0]
 
         if mmd_camera.MMDCamera.isMMDCamera(obj):
-            self.__assignToCamera(obj, action_name+'_camera')
+            self.__assignToCamera(obj, action_name + '_camera')
         elif mmd_lamp.MMDLamp.isMMDLamp(obj):
-            self.__assignToLamp(obj, action_name+'_lamp')
+            self.__assignToLamp(obj, action_name + '_lamp')
         elif obj.type == 'MESH':
-            self.__assignToMesh(obj, action_name+'_facial')
+            self.__assignToMesh(obj, action_name + '_facial')
         elif obj.type == 'ARMATURE':
-            self.__assignToArmature(obj, action_name+'_bone')
+            self.__assignToArmature(obj, action_name + '_bone')
         elif obj.type == 'CAMERA' and self.__convert_mmd_camera:
             obj = mmd_camera.MMDCamera.convertToMMDCamera(obj)
-            self.__assignToCamera(obj.object(), action_name+'_camera')
+            self.__assignToCamera(obj.object(), action_name + '_camera')
         elif obj.type == 'LAMP' and self.__convert_mmd_lamp:
             obj = mmd_lamp.MMDLamp.convertToMMDLamp(obj)
-            self.__assignToLamp(obj.object(), action_name+'_lamp')
+            self.__assignToLamp(obj.object(), action_name + '_lamp')
         else:
             pass
-

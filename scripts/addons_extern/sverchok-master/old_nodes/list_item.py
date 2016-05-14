@@ -20,7 +20,8 @@ import bpy
 from bpy.props import BoolProperty, IntProperty, StringProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (changable_sockets, repeat_last, updateNode,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
+
 
 class ListItemNode(bpy.types.Node, SverchCustomTreeNode):
     ''' List item '''
@@ -62,28 +63,28 @@ class ListItemNode(bpy.types.Node, SverchCustomTreeNode):
                 data = SvGetSocketAnyType(self, self.inputs['Data'])
 
                 if 'Item' in self.outputs and self.outputs['Item'].links:
-                    out = self.count(data, self.level-1, self.item, True)
+                    out = self.count(data, self.level - 1, self.item, True)
                     SvSetSocketAnyType(self, 'Item', out)
                 if 'Other' in self.outputs and self.outputs['Other'].links:
-                    out = self.count(data, self.level-1, self.item, False)
+                    out = self.count(data, self.level - 1, self.item, False)
                     SvSetSocketAnyType(self, 'Other', out)
 
     def count(self, data, level, item, itself):
         if level:
             out = []
             for obj in data:
-                out.append(self.count(obj, level-1, item, itself))
+                out.append(self.count(obj, level - 1, item, itself))
 
         elif type(data) == tuple:
-            if item > len(data)-1:
-                item = len(data)-1
+            if item > len(data) - 1:
+                item = len(data) - 1
             if itself:
                 out = [data[item]]
             else:
-                out = [data[:item]+data[item+1:]]
+                out = [data[:item] + data[item + 1:]]
         elif type(data) == list:
-            if item > len(data)-1:
-                item = len(data)-1
+            if item > len(data) - 1:
+                item = len(data) - 1
             if itself:
                 out = [data[item]]
             else:
@@ -95,9 +96,11 @@ class ListItemNode(bpy.types.Node, SverchCustomTreeNode):
 
     def update_socket(self, context):
         self.update()
-        
+
+
 def register():
     bpy.utils.register_class(ListItemNode)
+
 
 def unregister():
     bpy.utils.unregister_class(ListItemNode)

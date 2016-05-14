@@ -1,8 +1,9 @@
-# collect edge data and calulate 
+# collect edge data and calulate
 # number of connections for each index
 # by Linus Yng
 
 import collections
+
 
 def sv_main(edges=[[]]):
 
@@ -10,7 +11,7 @@ def sv_main(edges=[[]]):
         ['s', 'Edges', edges],
     ]
 
-    count =[]    
+    count = []
     for pe in edges:
         # build links
         if not pe:
@@ -20,8 +21,8 @@ def sv_main(edges=[[]]):
             for i in edge:
                 node_links[i].update(edge)
                 node_links[i].discard(i)
-        count.append([len(links) for i,links in node_links.items()]) 
-    
+        count.append([len(links) for i, links in node_links.items()])
+
     out_sockets = [
         ['s', 'Connections', count],
     ]

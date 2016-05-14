@@ -8,12 +8,13 @@ from ... graphics.interpolation_preview import InterpolationPreview
 
 interpolationByNode = {}
 
+
 class DebugInterpolationNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_DebugInterpolationNode"
     bl_label = "Debug Interpolation"
     bl_width_default = 160
 
-    resolution = IntProperty(name = "Resolution", min = 5, default = 40)
+    resolution = IntProperty(name="Resolution", min=5, default=40)
 
     def create(self):
         self.inputs.new("an_InterpolationSocket", "Interpolation", "interpolation").defaultDrawType = "PROPERTY_ONLY"
@@ -24,6 +25,7 @@ class DebugInterpolationNode(bpy.types.Node, AnimationNode):
     def execute(self, interpolation):
         interpolationByNode[self.identifier] = interpolation
 
+
 def drawInterpolationPreviews():
     nodes = getNodesByType("an_DebugInterpolationNode")
     nodesInCurrentTree = getattr(bpy.context.space_data.node_tree, "nodes", [])
@@ -31,9 +33,11 @@ def drawInterpolationPreviews():
         if node.name in nodesInCurrentTree and not node.hide:
             drawNodePreview(node)
 
+
 def drawNodePreview(node):
     interpolation = interpolationByNode.get(node.identifier, None)
-    if interpolation is None: return
+    if interpolation is None:
+        return
 
     region = bpy.context.region
     leftBottom = node.getRegionBottomLeft(region)

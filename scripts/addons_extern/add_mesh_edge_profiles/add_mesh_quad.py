@@ -1,26 +1,24 @@
 bl_info = {
-"name": "Quad", 
-"author": "Gert De Roost",
-"version": (0, 1, 0),
-"blender": (2, 6, 3),
-"location": "Add > Mesh",
-"description": "Create Quad primitive.",
-"warning": "",
-"wiki_url": "",
-"tracker_url": "",
-"category": "Add Mesh"}
+    "name": "Quad",
+    "author": "Gert De Roost",
+    "version": (0, 1, 0),
+    "blender": (2, 6, 3),
+    "location": "Add > Mesh",
+    "description": "Create Quad primitive.",
+    "warning": "",
+    "wiki_url": "",
+    "tracker_url": "",
+    "category": "Add Mesh"}
 
 
 if "bpy" in locals():
-	   import imp
+    import imp
 
 
 import bpy
 import bmesh
 import math
 from mathutils import *
-
-
 
 
 class Quad(bpy.types.Operator):
@@ -65,18 +63,18 @@ class Quad(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
-
 def menu_item(self, context):
-	   self.layout.operator(Quad.bl_idname, text="Quad", icon="PLUGIN")
+    self.layout.operator(Quad.bl_idname, text="Quad", icon="PLUGIN")
+
 
 def register():
-	   bpy.utils.register_module(__name__)
-	   bpy.types.INFO_MT_mesh_add.append(menu_item)
+    bpy.utils.register_module(__name__)
+    bpy.types.INFO_MT_mesh_add.append(menu_item)
+
 
 def unregister():
-	   bpy.utils.unregister_module(__name__)
-	   bpy.types.INFO_MT_mesh_add.remove(menu_item)
+    bpy.utils.unregister_module(__name__)
+    bpy.types.INFO_MT_mesh_add.remove(menu_item)
 
 if __name__ == "__main__":
-	   register()
+    register()

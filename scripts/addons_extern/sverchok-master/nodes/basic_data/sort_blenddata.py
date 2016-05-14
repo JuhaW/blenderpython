@@ -48,9 +48,9 @@ class SvSortObjsNode(bpy.types.Node, SverchCustomTreeNode):
                 X = X[0]
             if Cv.is_linked:
                 CV = Cv.sv_get()
-                Y = CV[0] if isinstance(CV[0],list) else CV
+                Y = CV[0] if isinstance(CV[0], list) else CV
             else:
-                Y = eval("[i."+self.Modes+" for i in X]")
+                Y = eval("[i." + self.Modes + " for i in X]")
             X.sort(key=dict(zip(X, Y)).get)
             Oo.sv_set(X)
 

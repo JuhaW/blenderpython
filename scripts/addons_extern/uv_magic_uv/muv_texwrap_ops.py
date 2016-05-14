@@ -71,7 +71,7 @@ def get_dest_uvlist(src_vlist, src_uvlist, dest_vlist):
     ouv = src_uvlist_2d[0].copy()
     rx = 0
     ry = 0
-    #for i in range(len(src_uvlist_2d)):
+    # for i in range(len(src_uvlist_2d)):
     #    for j in range(len(src_uvlist_2d)):
     #        if i != j:
     #            rx_new = (src_uvlist_2d[j].x - src_uvlist_2d[i].x) / (src_vlist_2d[j].x - src_vlist_2d[i].x)
@@ -117,7 +117,7 @@ class MUV_TexWrapCopy(bpy.types.Operator):
             self.report({'WARNING'}, "Object must have more than one UV map.")
             return {'CANCELLED'}
         uv_layer = bm.loops.layers.uv.verify()
-        
+
         # get selected face
         props.src_face_index = -1
         for f in bm.faces:

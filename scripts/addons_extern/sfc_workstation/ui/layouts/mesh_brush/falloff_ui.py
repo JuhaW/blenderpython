@@ -20,30 +20,31 @@
 
 import bpy
 
+
 def draw_falloff_ui(layout):
     addon = bpy.context.user_preferences.addons[__package__.split(".")[0]]
     props = addon.preferences.mesh_brush
 
     col = layout.column()
-    row = col.row(align = True)
+    row = col.row(align=True)
 
     if not props.falloff_ui_is_visible:
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'DISCLOSURE_TRI_RIGHT',
-            emboss = False
+            "wm.context_toggle", text="", icon='DISCLOSURE_TRI_RIGHT',
+            emboss=False
         )
         op.data_path = "{0}.falloff_ui_is_visible".format(props.data_path)
-        row.label(text = "Falloff") 
+        row.label(text="Falloff")
     else:
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'DISCLOSURE_TRI_DOWN',
-            emboss = False
+            "wm.context_toggle", text="", icon='DISCLOSURE_TRI_DOWN',
+            emboss=False
         )
         op.data_path = "{0}.falloff_ui_is_visible".format(props.data_path)
-        row.label(text = "Falloff")
+        row.label(text="Falloff")
 
         row = col.row()
 
-        row.prop(props, "falloff_profile", expand = True, icon_only = True)
+        row.prop(props, "falloff_profile", expand=True, icon_only=True)
         row.alignment = 'CENTER'
         col.separator()

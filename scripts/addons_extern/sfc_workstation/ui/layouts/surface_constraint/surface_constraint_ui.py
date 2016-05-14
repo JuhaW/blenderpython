@@ -20,34 +20,35 @@
 
 import bpy
 
+
 def draw_surface_constraint_ui(layout):
     addon = bpy.context.user_preferences.addons[__package__.split(".")[0]]
     props = addon.preferences.surface_constraint
 
     if not props.settings_ui_is_visible:
-        box = layout.box().column(align = True)
+        box = layout.box().column(align=True)
         row = box.row()
 
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'TRIA_RIGHT', emboss = True
+            "wm.context_toggle", text="", icon='TRIA_RIGHT', emboss=True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
         row.label("Surface Constraint")
         row.operator(
-            "view3d.sct_pick_surface_constraint", text = "", icon = 'HAND'
+            "view3d.sct_pick_surface_constraint", text="", icon='HAND'
         )
     else:
-        col = layout.column(align = True)
-        box = col.box().column(align = True)
+        col = layout.column(align=True)
+        box = col.box().column(align=True)
         row = box.row()
 
-        op = row.operator( 
-            "wm.context_toggle", text = "", icon = 'TRIA_DOWN', emboss = True
+        op = row.operator(
+            "wm.context_toggle", text="", icon='TRIA_DOWN', emboss=True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
-        row.label("Surface Constraint") 
+        row.label("Surface Constraint")
         row.operator(
-            "view3d.sct_pick_surface_constraint", text = "", icon = 'HAND'
+            "view3d.sct_pick_surface_constraint", text="", icon='HAND'
         )
 
         # Generate a collection of mesh objects that are available as targets
@@ -65,10 +66,10 @@ def draw_surface_constraint_ui(layout):
             if props.target not in props.available_targets:
                 props.target = str()
 
-        box = col.box().column(align = True)
-        col = box.column(align = True)
-        row = col.row(align = True)
-        subrow = row.row(align = True)
+        box = col.box().column(align=True)
+        col = box.column(align=True)
+        row = col.row(align=True)
+        subrow = row.row(align=True)
 
         active_object = bpy.context.active_object
         if not (
@@ -76,18 +77,18 @@ def draw_surface_constraint_ui(layout):
             active_object.type == 'MESH' and
             props.target and
             props.target != active_object.name
-           ):
+        ):
             subrow.active = False
 
         subrow.prop(
-            props, "auto_shrinkwrap_is_enabled", text = "", icon = 'AUTO'
+            props, "auto_shrinkwrap_is_enabled", text="", icon='AUTO'
         )
         row.prop_search(
-            props, "target", props, "available_targets", text = "",
-            icon = 'OBJECT_DATA'
+            props, "target", props, "available_targets", text="",
+            icon='OBJECT_DATA'
         )
 
-        row = col.row(align = True)
+        row = col.row(align=True)
 
-        row.prop_menu_enum(props, "direction", text = "", icon = 'SNAP_NORMAL')
-        row.prop(props, "offset", text = "Offset")
+        row.prop_menu_enum(props, "direction", text="", icon='SNAP_NORMAL')
+        row.prop(props, "offset", text="Offset")

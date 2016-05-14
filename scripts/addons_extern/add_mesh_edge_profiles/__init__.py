@@ -26,8 +26,8 @@ bl_info = {
     "location": "View3D > Add > Mesh > Edge Profiles",
     "description": "Add Edge Profile types",
     "warning": "",
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
-        "Scripts/",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"
+    "Scripts/",
     "tracker_url": "",
     "category": "Add Mesh"}
 
@@ -103,6 +103,8 @@ class INFO_MT_mesh_profiles_add(bpy.types.Menu):
 # Register all operators and panels
 
 # Define "Extras" menu
+
+
 def menu_func(self, context):
     self.layout.menu("INFO_MT_mesh_profiles_add", icon="PLUGIN")
 

@@ -27,22 +27,23 @@ from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, match_long_repeat
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata, pydata_from_bmesh
 
+
 class Vertices(object):
     outputs = [
-            ('VerticesSocket', 'YesVertices'),
-            ('VerticesSocket', 'NoVertices'),
-            ('StringsSocket', 'VerticesMask'),
-            ('StringsSocket', 'YesEdges'),
-            ('StringsSocket', 'NoEdges'),
-            ('StringsSocket', 'YesFaces'),
-            ('StringsSocket', 'NoFaces'),
-        ]
+        ('VerticesSocket', 'YesVertices'),
+        ('VerticesSocket', 'NoVertices'),
+        ('StringsSocket', 'VerticesMask'),
+        ('StringsSocket', 'YesEdges'),
+        ('StringsSocket', 'NoEdges'),
+        ('StringsSocket', 'YesFaces'),
+        ('StringsSocket', 'NoFaces'),
+    ]
 
     submodes = [
-            ("Wire", "Wire", "Wire", 1),
-            ("Boundary", "Boundary", "Boundary", 2),
-            ("Interior", "Interior", "Interior", 3)
-        ]
+        ("Wire", "Wire", "Wire", 1),
+        ("Boundary", "Boundary", "Boundary", 2),
+        ("Interior", "Interior", "Interior", 3)
+    ]
 
     default_submode = "Interior"
 
@@ -120,21 +121,22 @@ class Vertices(object):
                 good_edges, bad_edges,
                 good_faces, bad_faces]
 
+
 class Edges(object):
     outputs = [
-            ('StringsSocket', 'YesEdges'),
-            ('StringsSocket', 'NoEdges'),
-            ('StringsSocket', 'Mask'),
-        ]
-    
+        ('StringsSocket', 'YesEdges'),
+        ('StringsSocket', 'NoEdges'),
+        ('StringsSocket', 'Mask'),
+    ]
+
     submodes = [
-            ("Wire", "Wire", "Wire", 1),
-            ("Boundary", "Boundary", "Boundary", 2),
-            ("Interior", "Interior", "Interior", 3),
-            ("Convex", "Convex", "Convex", 4),
-            ("Concave", "Concave", "Concave", 5),
-            ("Contiguous", "Contiguous", "Contiguous", 6),
-        ]
+        ("Wire", "Wire", "Wire", 1),
+        ("Boundary", "Boundary", "Boundary", 2),
+        ("Interior", "Interior", "Interior", 3),
+        ("Convex", "Convex", "Convex", 4),
+        ("Concave", "Concave", "Concave", 5),
+        ("Contiguous", "Contiguous", "Contiguous", 6),
+    ]
 
     default_submode = "Interior"
 
@@ -170,13 +172,14 @@ class Edges(object):
 
         return [good, bad, mask]
 
+
 class Faces(object):
     outputs = [
-            ('StringsSocket', 'Interior'),
-            ('StringsSocket', 'Boundary'),
-            ('StringsSocket', 'BoundaryMask'),
-        ]
-    
+        ('StringsSocket', 'Interior'),
+        ('StringsSocket', 'Boundary'),
+        ('StringsSocket', 'BoundaryMask'),
+    ]
+
     @staticmethod
     def process(bm, submode):
         interior = []
@@ -206,10 +209,10 @@ class SvMeshFilterNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     modes = [
-            ("Vertices", "Vertices", "Filter vertices", 0),
-            ("Edges", "Edges", "Filter edges", 1),
-            ("Faces", "Faces", "Filter faces", 2)
-        ]
+        ("Vertices", "Vertices", "Filter vertices", 0),
+        ("Edges", "Edges", "Filter edges", 1),
+        ("Faces", "Faces", "Filter faces", 2)
+    ]
 
     def update_mode(self, context):
         cls = globals()[self.mode]
@@ -230,9 +233,9 @@ class SvMeshFilterNode(bpy.types.Node, SverchCustomTreeNode):
         updateNode(self, context)
 
     mode = EnumProperty(name="Mode",
-            items=modes,
-            default='Vertices',
-            update=update_mode)
+                        items=modes,
+                        default='Vertices',
+                        update=update_mode)
 
     def get_submodes(self, context):
         cls = globals()[self.mode]
@@ -242,8 +245,8 @@ class SvMeshFilterNode(bpy.types.Node, SverchCustomTreeNode):
             return []
 
     submode = EnumProperty(name="Filter",
-                items = get_submodes,
-                update = update_submode)
+                           items=get_submodes,
+                           update=update_submode)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, 'mode', expand=True)
@@ -279,9 +282,10 @@ class SvMeshFilterNode(bpy.types.Node, SverchCustomTreeNode):
             results.append(outs)
 
         results = zip(*results)
-        for (ocls,oname), result in zip(cls.outputs, results):
+        for (ocls, oname), result in zip(cls.outputs, results):
             if self.outputs[oname].is_linked:
                 self.outputs[oname].sv_set(result)
+
 
 def register():
     bpy.utils.register_class(SvMeshFilterNode)
@@ -289,5 +293,3 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(SvMeshFilterNode)
-
-

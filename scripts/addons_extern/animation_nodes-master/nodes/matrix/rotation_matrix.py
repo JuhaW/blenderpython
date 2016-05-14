@@ -7,7 +7,8 @@ axisItems = [
     ("X", "X", "", "", 0),
     ("Y", "Y", "", "", 1),
     ("Z", "Z", "", "", 2),
-    ("ALL", "All", "", "", 3) ]
+    ("ALL", "All", "", "", 3)]
+
 
 class RotationMatrixNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_RotationMatrixNode"
@@ -16,14 +17,14 @@ class RotationMatrixNode(bpy.types.Node, AnimationNode):
     def axisChanged(self, context):
         self.generateInput()
 
-    axis = EnumProperty(default = "X", items = axisItems, update = axisChanged)
+    axis = EnumProperty(default="X", items=axisItems, update=axisChanged)
 
     def create(self):
         self.generateInput()
         self.outputs.new("an_MatrixSocket", "Matrix", "matrix")
 
     def draw(self, layout):
-        layout.prop(self, "axis", expand = True)
+        layout.prop(self, "axis", expand=True)
 
     def getExecutionCode(self):
         if len(self.axis) == 1:

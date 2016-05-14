@@ -5,7 +5,8 @@ from bpy.props import BoolProperty, IntProperty, FloatProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (fullList, match_long_repeat, updateNode,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
+
 
 class CircleNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Circle '''
@@ -42,19 +43,19 @@ class CircleNode(bpy.types.Node, SverchCustomTreeNode):
 
     def make_verts(self, Angle, Vertices, Radius):
         if Angle < 360:
-            theta = Angle/(Vertices-1)
+            theta = Angle / (Vertices - 1)
         else:
-            theta = Angle/Vertices
+            theta = Angle / Vertices
         listVertX = []
         listVertY = []
         for i in range(Vertices):
-            listVertX.append(Radius*cos(radians(theta*i)))
-            listVertY.append(Radius*sin(radians(theta*i)))
+            listVertX.append(Radius * cos(radians(theta * i)))
+            listVertY.append(Radius * sin(radians(theta * i)))
 
         if Angle < 360 and self.mode_ == 0:
             sigma = radians(Angle)
-            listVertX[-1] = Radius*cos(sigma)
-            listVertY[-1] = Radius*sin(sigma)
+            listVertX[-1] = Radius * cos(sigma)
+            listVertY[-1] = Radius * sin(sigma)
         elif Angle < 360 and self.mode_ == 1:
             listVertX.append(0.0)
             listVertY.append(0.0)
@@ -73,13 +74,13 @@ class CircleNode(bpy.types.Node, SverchCustomTreeNode):
         return points
 
     def make_edges(self, Vertices, Angle):
-        listEdg = [(i, i+1) for i in range(Vertices-1)]
+        listEdg = [(i, i + 1) for i in range(Vertices - 1)]
 
         if Angle < 360 and self.mode_ == 1:
             listEdg.append((0, Vertices))
-            listEdg.append((Vertices-1, Vertices))
+            listEdg.append((Vertices - 1, Vertices))
         else:
-            listEdg.append((0, Vertices-1))
+            listEdg.append((0, Vertices - 1))
         return listEdg
 
     def make_faces(self, Angle, Vertices):
@@ -122,8 +123,10 @@ class CircleNode(bpy.types.Node, SverchCustomTreeNode):
             plg = [self.make_faces(a, v) for a, v, r in zip(*parameters)]
             SvSetSocketAnyType(self, 'Polygons', plg)
 
+
 def register():
     bpy.utils.register_class(CircleNode)
+
 
 def unregister():
     bpy.utils.unregister_class(CircleNode)

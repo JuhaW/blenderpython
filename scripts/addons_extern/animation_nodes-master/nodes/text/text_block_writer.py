@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class TextBlockWriterNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_TextBlockWriterNode"
     bl_label = "Text Block Writer"
@@ -12,6 +13,7 @@ class TextBlockWriterNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_TextBlockSocket", "Text Block", "textBlock")
 
     def execute(self, textBlock, text, enabled):
-        if not enabled or textBlock is None: return textBlock
+        if not enabled or textBlock is None:
+            return textBlock
         textBlock.from_string(text)
         return textBlock

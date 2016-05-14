@@ -19,7 +19,7 @@
 
 # <pep8 compliant>
 
-#bl_info = {
+# bl_info = {
 #    "name": "Offset Edges",
 #    "author": "Hidesato Ikeya",
 #    "version": (0, 2, 6),
@@ -60,7 +60,7 @@ def calc_loop_normal(verts, fallback=Z_UP):
         range_verts = range(0, len(verts))
 
     for i in range_verts:
-        v1co, v2co = verts[i-1].co, verts[i].co
+        v1co, v2co = verts[i - 1].co, verts[i].co
         normal.x += (v1co.y - v2co.y) * (v1co.z + v2co.z)
         normal.y += (v1co.z - v2co.z) * (v1co.x + v2co.x)
         normal.z += (v1co.x - v2co.x) * (v1co.y + v2co.y)
@@ -71,6 +71,7 @@ def calc_loop_normal(verts, fallback=Z_UP):
         normal = fallback
 
     return normal
+
 
 def collect_edges(bm):
     set_edges_orig = set()
@@ -89,6 +90,7 @@ def collect_edges(bm):
         return None
 
     return set_edges_orig
+
 
 def collect_loops(set_edges_orig):
     set_edges_copy = set_edges_orig.copy()
@@ -130,15 +132,16 @@ def collect_loops(set_edges_orig):
                     break
     return loops
 
+
 def get_adj_ix(ix_start, vec_edges, half_loop):
     # Get adjacent edge index, skipping zero length edges
     len_edges = len(vec_edges)
     if half_loop:
         range_right = range(ix_start, len_edges)
-        range_left = range(ix_start-1, -1, -1)
+        range_left = range(ix_start - 1, -1, -1)
     else:
-        range_right = range(ix_start, ix_start+len_edges)
-        range_left = range(ix_start-1, ix_start-1-len_edges, -1)
+        range_right = range(ix_start, ix_start + len_edges)
+        range_left = range(ix_start - 1, ix_start - 1 - len_edges, -1)
 
     ix_right = ix_left = None
     for i in range_right:
@@ -161,6 +164,7 @@ def get_adj_ix(ix_start, vec_edges, half_loop):
             ix_left = ix_right
 
     return ix_right, ix_left
+
 
 def get_adj_faces(edges):
     adj_faces = []
@@ -190,7 +194,7 @@ def get_edge_rail(vert, set_edges_orig):
     vec_inner = None
     for e in vert.link_edges:
         if (e not in set_edges_orig and
-           (e.select or (co_edges_selected == 0 and not e.hide))):
+                (e.select or (co_edges_selected == 0 and not e.hide))):
             v_other = e.other_vert(vert)
             vec = v_other.co - vert.co
             if vec != ZERO_VEC:
@@ -211,6 +215,7 @@ def get_edge_rail(vert, set_edges_orig):
     else:
         return None
 
+
 def get_cross_rail(vec_tan, vec_edge_r, vec_edge_l, normal_r, normal_l):
     # Cross rail is a cross vector between normal_r and normal_l.
 
@@ -224,6 +229,7 @@ def get_cross_rail(vec_tan, vec_edge_r, vec_edge_l, normal_r, normal_l):
         return vec_cross
     else:
         return None
+
 
 def move_verts(width, depth, verts, directions, geom_ex):
     if geom_ex:
@@ -240,6 +246,7 @@ def move_verts(width, depth, verts, directions, geom_ex):
     for v, (vec_width, vec_depth) in zip(verts, directions):
         v.co += width * vec_width + depth * vec_depth
 
+
 def extrude_edges(bm, edges_orig):
     extruded = bmesh.ops.extrude_edge_only(bm, edges=edges_orig)['geom']
     n_edges = n_faces = len(edges_orig)
@@ -253,6 +260,7 @@ def extrude_edges(bm, edges_orig):
 
     return geom
 
+
 def clean(bm, mode, edges_orig, geom_ex=None):
     for f in bm.faces:
         f.select = False
@@ -265,6 +273,7 @@ def clean(bm, mode, edges_orig, geom_ex=None):
     else:
         for e in edges_orig:
             e.select = True
+
 
 def collect_mirror_planes(edit_object):
     mirror_planes = []
@@ -290,6 +299,7 @@ def collect_mirror_planes(edit_object):
                 mirror_planes.append((loc, norm_z, merge_limit))
     return mirror_planes
 
+
 def get_vert_mirror_pairs(set_edges_orig, mirror_planes):
     if mirror_planes:
         set_edges_copy = set_edges_orig.copy()
@@ -313,6 +323,7 @@ def get_vert_mirror_pairs(set_edges_orig, mirror_planes):
     else:
         return None, set_edges_orig
 
+
 def get_mirror_rail(mirror_plane, vec_up):
     p_norm = mirror_plane[1]
     mirror_rail = vec_up.cross(p_norm)
@@ -325,14 +336,15 @@ def get_mirror_rail(mirror_plane, vec_up):
     else:
         return None, vec_up
 
+
 def reorder_loop(verts, edges, lp_normal, adj_faces):
     for i, adj_f in enumerate(adj_faces):
         if adj_f is None:
             continue
-        v1, v2 = verts[i], verts[i+1]
+        v1, v2 = verts[i], verts[i + 1]
         e = edges[i]
         fv = tuple(adj_f.verts)
-        if fv[fv.index(v1)-1] is v2:
+        if fv[fv.index(v1) - 1] is v2:
             # Align loop direction
             verts.reverse()
             edges.reverse()
@@ -352,6 +364,7 @@ def reorder_loop(verts, edges, lp_normal, adj_faces):
 
     return verts, edges, lp_normal, adj_faces
 
+
 def get_directions(lp, vec_upward, normal_fallback, vert_mirror_pairs, **options):
     opt_follow_face = options['follow_face']
     opt_edge_rail = options['edge_rail']
@@ -362,7 +375,7 @@ def get_directions(lp, vec_upward, normal_fallback, vert_mirror_pairs, **options
     set_edges = set(edges)
     lp_normal = calc_loop_normal(verts, fallback=normal_fallback)
 
-    ##### Loop order might be changed below.
+    # Loop order might be changed below.
     if lp_normal.dot(vec_upward) < .0:
         # Make this loop's normal towards vec_upward.
         verts.reverse()
@@ -375,7 +388,7 @@ def get_directions(lp, vec_upward, normal_fallback, vert_mirror_pairs, **options
             reorder_loop(verts, edges, lp_normal, adj_faces)
     else:
         adj_faces = (None, ) * len(edges)
-    ##### Loop order might be changed above.
+    # Loop order might be changed above.
 
     vec_edges = tuple((e.other_vert(v).co - v.co).normalized()
                       for v, e in zip(verts, edges))
@@ -392,7 +405,7 @@ def get_directions(lp, vec_upward, normal_fallback, vert_mirror_pairs, **options
     directions = []
     for i in range(len_verts):
         vert = verts[i]
-        ix_right, ix_left = i, i-1
+        ix_right, ix_left = i, i - 1
 
         VERT_END = False
         if HALF_LOOP:
@@ -466,6 +479,7 @@ def get_directions(lp, vec_upward, normal_fallback, vert_mirror_pairs, **options
 
     return verts, directions
 
+
 def use_cashes(self, context):
     self.caches_valid = True
 
@@ -475,10 +489,13 @@ angle_presets = {'0°': 0,
                  '45°': radians(45),
                  '60°': radians(60),
                  '75°': radians(75),
-                 '90°': radians(90),}
+                 '90°': radians(90), }
+
+
 def assign_angle_presets(self, context):
     use_cashes(self, context)
     self.angle = angle_presets[self.angle_presets]
+
 
 class OffsetEdges(bpy.types.Operator):
     """Offset, Extrude or Move selected Edges"""
@@ -508,7 +525,7 @@ class OffsetEdges(bpy.types.Operator):
         name="Depth mode", default='angle', update=use_cashes)
     angle = bpy.props.FloatProperty(
         name="Angle", default=0, precision=3, step=.1,
-        min=-2*pi, max=2*pi, subtype='ANGLE',
+        min=-2 * pi, max=2 * pi, subtype='ANGLE',
         description="Angle", update=use_cashes)
     flip_angle = bpy.props.BoolProperty(
         name="Flip Angle", default=False,
@@ -534,7 +551,7 @@ class OffsetEdges(bpy.types.Operator):
     caches_valid = bpy.props.BoolProperty(
         name="Caches Valid", default=False,
         options={'HIDDEN'})
-    
+
     angle_presets = bpy.props.EnumProperty(
         items=[('0°', "0°", "0°"),
                ('15°', "15°", "15°"),
@@ -573,7 +590,7 @@ class OffsetEdges(bpy.types.Operator):
         row.prop(self, d_mode)
         row.prop(self, flip, icon='ARROW_LEFTRIGHT', icon_only=True)
         if self.depth_mode == 'angle':
-            layout.prop(self, 'angle_presets', text="Presets", expand=True) 
+            layout.prop(self, 'angle_presets', text="Presets", expand=True)
 
         layout.separator()
 
@@ -585,7 +602,7 @@ class OffsetEdges(bpy.types.Operator):
             row.prop(self, 'edge_rail_only_end', text="OnlyEnd", toggle=True)
 
         layout.prop(self, 'mirror_modifier')
-        
+
         row = layout.row()
         row.operator('mesh.offset_edges', text='Repeat')
         row.operator('wm.operator_defaults', text="Reset")
@@ -593,7 +610,6 @@ class OffsetEdges(bpy.types.Operator):
         if self.follow_face:
             layout.separator()
             layout.prop(self, 'threshold', text='Threshold')
-
 
     def get_offset_infos(self, bm, edit_object):
         if self.caches_valid and self._cache_offset_infos is not None:
@@ -616,7 +632,7 @@ class OffsetEdges(bpy.types.Operator):
             if set_edges:
                 set_edges_orig = set_edges
             else:
-                #self.report({'WARNING'},
+                # self.report({'WARNING'},
                 #            "All selected edges are on mirror planes.")
                 vert_mirror_pairs = None
         else:
@@ -751,6 +767,7 @@ class OffsetEdges(bpy.types.Operator):
         bpy.ops.object.mode_set(mode="EDIT")
         return self.execute(context)
 
+
 class OffsetEdgesMenu(bpy.types.Menu):
     """Offset, Extrude or Move selected Edges"""
     bl_idname = "VIEW3D_MT_edit_mesh_offset_edges"
@@ -768,6 +785,7 @@ class OffsetEdgesMenu(bpy.types.Menu):
 
         mov = layout.operator('mesh.offset_edges', text='Move')
         mov.geometry_mode = 'move'
+
 
 def draw_item(self, context):
     self.layout.menu("VIEW3D_MT_edit_mesh_offset_edges")

@@ -1,13 +1,14 @@
-import bpy, os
+import bpy
+import os
 from bpy.props import IntProperty, StringProperty, BoolProperty
 import subprocess
 
 from . import functions
 
 
-proxy_qualities = [  ( "1", "25%", "" ), ( "2", "50%", "" ),
-                    ( "3", "75%", "" ), ( "4", "100%", "" ),
-                     ( "5", "none", "" )]
+proxy_qualities = [("1", "25%", ""), ("2", "50%", ""),
+                   ("3", "75%", ""), ("4", "100%", ""),
+                   ("5", "none", "")]
 
 
 # functions
@@ -17,7 +18,7 @@ def createdatamosh(context, strip):
     prefs = preferences.addons[__package__].preferences
 
     fileinput = bpy.path.abspath(strip.filepath)
-    fileoutput = fileinput.rpartition(".")[0]+"_datamosh.avi"
+    fileoutput = fileinput.rpartition(".")[0] + "_datamosh.avi"
 
     if prefs.all_keyframes:
         command = "datamosh '{}' -a -o '{}'".format(fileinput, fileoutput)
@@ -27,12 +28,13 @@ def createdatamosh(context, strip):
     os.system(command)
     return fileoutput
 
+
 def createavi(context, strip):
     preferences = context.user_preferences
     prefs = preferences.addons[__package__].preferences
 
     fileinput = bpy.path.abspath(strip.filepath)
-    fileoutput = fileinput.rpartition(".")[0]+"_.avi"
+    fileoutput = fileinput.rpartition(".")[0] + "_.avi"
 
     command = "ffmpeg -i '{}' -vcodec copy '{}'".format(fileinput, fileoutput)
 
@@ -40,20 +42,19 @@ def createavi(context, strip):
     os.system(command)
     return fileoutput
 
+
 def createavimjpeg(context, strip):
     preferences = context.user_preferences
     prefs = preferences.addons[__package__].preferences
 
     fileinput = bpy.path.abspath(strip.filepath)
-    fileoutput = fileinput.rpartition(".")[0]+"_mjpeg.avi"
+    fileoutput = fileinput.rpartition(".")[0] + "_mjpeg.avi"
 
     command = "ffmpeg -i '{}' -vcodec mjpeg -qscale 1 '{}'".format(fileinput, fileoutput)
 
     print(command)
     os.system(command)
     return fileoutput
-
-
 
 
 # classes
@@ -73,8 +74,8 @@ class CreateAvi(bpy.types.Operator):
             return False
 
     size = IntProperty(
-    name='proxysize',
-    default=1)
+        name='proxysize',
+        default=1)
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -83,9 +84,10 @@ class CreateAvi(bpy.types.Operator):
         strips = functions.get_selected_strips(context)
 
         for strip in strips:
-            #deselect all other strips 
-            for i in strips: i.select = False
-            #select current strip
+            # deselect all other strips
+            for i in strips:
+                i.select = False
+            # select current strip
             strip.select = True
             if strip.type == "MOVIE":
                 if self.size == 1:
@@ -93,10 +95,10 @@ class CreateAvi(bpy.types.Operator):
                 elif self.size == 2:
                     fileoutput = createavimjpeg(context, strip)
                 strip.filepath = fileoutput
-        #select all strips again
+        # select all strips again
         for strip in strips:
-            try: 
-                strip.select=True
+            try:
+                strip.select = True
             except ReferenceError:
                 pass
         bpy.ops.sequencer.reload()
@@ -123,18 +125,19 @@ class CreateDatamosh(bpy.types.Operator):
         strips = functions.get_selected_strips(context)
 
         for strip in strips:
-            #deselect all other strips 
-            for i in strips: i.select = False
-            #select current strip
+            # deselect all other strips
+            for i in strips:
+                i.select = False
+            # select current strip
             strip.select = True
             if strip.type == "MOVIE":
                 fileoutput = createdatamosh(context, strip)
                 if prefs.loadglitch:
                     strip.filepath = fileoutput
-        #select all strips again
+        # select all strips again
         for strip in strips:
-            try: 
-                strip.select=True
+            try:
+                strip.select = True
             except ReferenceError:
                 pass
         bpy.ops.sequencer.reload()
@@ -148,11 +151,10 @@ class CreateGlitchToolPanel(bpy.types.Panel):
     bl_space_type = 'SEQUENCE_EDITOR'
     bl_region_type = 'UI'
 
-
     @classmethod
     def poll(self, context):
         if context.space_data.view_type in {'SEQUENCER',
-            'SEQUENCER_PREVIEW'}:
+                                            'SEQUENCER_PREVIEW'}:
             strip = functions.act_strip(context)
             scn = context.scene
             preferences = context.user_preferences
@@ -175,19 +177,11 @@ class CreateGlitchToolPanel(bpy.types.Panel):
         layout = self.layout
 
         layout.operator("sequencer.createavi", text="create avi (same codec)")
-        layout.operator("sequencer.createavi", text="create avi (mjpeg)").size=2
+        layout.operator("sequencer.createavi", text="create avi (mjpeg)").size = 2
 
         strip = functions.act_strip(context)
 
-        layout.prop(prefs,"all_keyframes")
-        layout.prop(prefs,"load_glitch")
+        layout.prop(prefs, "all_keyframes")
+        layout.prop(prefs, "load_glitch")
 
         layout.operator("sequencer.createdatamosh")
-
-        
-
-
-
-
-
-    

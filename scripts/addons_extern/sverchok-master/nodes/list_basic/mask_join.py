@@ -23,7 +23,7 @@ from bpy.props import BoolProperty, IntProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (changable_sockets, updateNode,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class SvMaskJoinNode(bpy.types.Node, SverchCustomTreeNode):
@@ -71,7 +71,7 @@ class SvMaskJoinNode(bpy.types.Node, SverchCustomTreeNode):
             data_t = SvGetSocketAnyType(self, self.inputs['Data True'])
             data_f = SvGetSocketAnyType(self, self.inputs['Data False'])
 
-            data_out = self.get_level(mask, data_t, data_f, self.level-1)
+            data_out = self.get_level(mask, data_t, data_f, self.level - 1)
 
             SvSetSocketAnyType(self, 'Data', data_out)
 

@@ -2,11 +2,13 @@
 import math
 from math import sin, cos, pi
 
+
 def angle_point(center, angle, distance):
     cx, cy = center
     x = cos(angle) * distance
     y = sin(angle) * distance
     return x + cx, y + cy
+
 
 def flat_hump(strands, mx=1, my=1, mz=1, resolution=2):
     num = 4 * resolution
@@ -19,6 +21,7 @@ def flat_hump(strands, mx=1, my=1, mz=1, resolution=2):
         # print(i, x, y, z)
         yield x, y, z
 
+
 def circle_hump(pos, strands, humps, radius=1, mr=1, mz=.2, resolution=2):
     num = 5 * resolution
     dt = 2 * pi / humps * strands / num
@@ -28,11 +31,12 @@ def circle_hump(pos, strands, humps, radius=1, mr=1, mz=.2, resolution=2):
     # print('ds', dt, dr, dz)
     for i in range(num):
         # i += pos
-        rdi = sin(i* dr) * mr
+        rdi = sin(i * dr) * mr
         # print('rdi', rdi, radius, i*dt, i*dz, cos(i*dz) * mz)
         x, y = angle_point((0, 0), i * dt + t0, radius + sin(i * dr) * mr)
         z = cos(i * dz) * mz
         yield x, y, z
+
 
 def strands(strands, humps, radius=1, mr=1, mz=.2, resolution=2):
     positions = [0 for x in range(humps)]

@@ -20,7 +20,8 @@ import bpy
 
 import random
 import math
-import os, sys
+import os
+import sys
 
 from bpy.props import IntProperty
 from bpy.props import FloatProperty
@@ -36,23 +37,22 @@ class Sequencer_Extra_RecursiveLoader(bpy.types.Operator):
     bl_idname = "sequencerextra.recursiveload"
     bl_label = "recursive load"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     recursive = BoolProperty(
         name='recursive',
         description='Load in recursive folders',
         default=False)
-        
+
     recursive_select_by_extension = BoolProperty(
         name='select by extension',
         description='Load only clips with selected extension',
         default=False)
-        
+
     ext = EnumProperty(
         items=functions.movieextdict,
         name="extension",
         default="3")
 
-    
     @classmethod
     def poll(self, context):
         scn = context.scene
@@ -60,21 +60,21 @@ class Sequencer_Extra_RecursiveLoader(bpy.types.Operator):
             return (scn.sequence_editor)
         else:
             return False
-        
+
     def invoke(self, context, event):
         scn = context.scene
         try:
             self.recursive = scn.kr_recursive
             self.recursive_select_by_extension = scn.kr_recursive_select_by_extension
-            self.ext = scn.kr_default_ext 
+            self.ext = scn.kr_default_ext
         except AttributeError:
             functions.initSceneProperties(context)
             self.recursive = scn.kr_recursive
             self.recursive_select_by_extension = scn.kr_recursive_select_by_extension
-            self.ext = scn.kr_default_ext 
-                
-        return context.window_manager.invoke_props_dialog(self)  
-        
+            self.ext = scn.kr_default_ext
+
+        return context.window_manager.invoke_props_dialog(self)
+
     def loader(self, context, filelist):
         scn = context.scene
         if filelist:
@@ -88,28 +88,27 @@ class Sequencer_Extra_RecursiveLoader(bpy.types.Operator):
                     self.report({'ERROR_INVALID_INPUT'}, 'Error loading file ')
                     pass
 
-
     def execute(self, context):
         scn = context.scene
         if self.recursive == True:
-            #recursive
-            self.loader(context, functions.sortlist(\
-            functions.recursive(context, self.recursive_select_by_extension,\
-            self.ext)))
+            # recursive
+            self.loader(context, functions.sortlist(
+                functions.recursive(context, self.recursive_select_by_extension,
+                                    self.ext)))
         else:
-            #non recursive
-            self.loader(context, functions.sortlist(functions.onefolder(\
-            context, self.recursive_select_by_extension, self.ext)))
-        try:   
-            scn.kr_recursive = self.recursive 
-            scn.kr_recursive_select_by_extension = self.recursive_select_by_extension 
-            scn.kr_default_ext = self.ext 
+            # non recursive
+            self.loader(context, functions.sortlist(functions.onefolder(
+                context, self.recursive_select_by_extension, self.ext)))
+        try:
+            scn.kr_recursive = self.recursive
+            scn.kr_recursive_select_by_extension = self.recursive_select_by_extension
+            scn.kr_default_ext = self.ext
         except AttributeError:
             functions.initSceneProperties(context)
             self.recursive = scn.kr_recursive
             self.recursive_select_by_extension = scn.kr_recursive_select_by_extension
             self.ext = scn.kr_default_ext
-            
+
         return {'FINISHED'}
 
 
@@ -123,19 +122,18 @@ class Sequencer_Extra_ReadExifData(bpy.types.Operator):
 
     @classmethod
     def poll(self, context):
-        scn=context.scene
+        scn = context.scene
         if scn and scn.sequence_editor and scn.sequence_editor.active_strip:
             return scn.sequence_editor.active_strip.type in ('IMAGE', 'MOVIE')
         else:
             return False
-
 
     def execute(self, context):
         try:
             exiftool.ExifTool().start()
         except:
             self.report({'ERROR_INVALID_INPUT'},
-            'exiftool not found in PATH')
+                        'exiftool not found in PATH')
             return {'CANCELLED'}
 
         def getexifdata(strip):
@@ -147,7 +145,7 @@ class Sequencer_Extra_ReadExifData(bpy.types.Operator):
                         metadata = et.get_metadata_batch(lista)
                     except UnicodeDecodeError as Err:
                         print(Err)
-                #print(metadata[0])
+                # print(metadata[0])
                 print(len(metadata))
                 return metadata
 
@@ -166,9 +164,9 @@ class Sequencer_Extra_ReadExifData(bpy.types.Operator):
                 for root, dirs, files in os.walk(path):
                     for f in files:
                         if "." + f.rpartition(".")[2].lower() \
-                            in functions.imb_ext_image:
+                                in functions.imb_ext_image:
                             lista.append(f)
-                        #if "."+f.rpartition(".")[2] in imb_ext_movie:
+                        # if "."+f.rpartition(".")[2] in imb_ext_movie:
                         #    lista.append(f)
                 strip.elements
                 lista.sort()
@@ -177,7 +175,7 @@ class Sequencer_Extra_ReadExifData(bpy.types.Operator):
             if strip.type == "IMAGE":
                 path = bpy.path.abspath(strip.directory)
                 os.chdir(path)
-                #get a list of files
+                # get a list of files
                 lista = []
                 for i in strip.elements:
                     lista.append(i.filename)
@@ -188,8 +186,6 @@ class Sequencer_Extra_ReadExifData(bpy.types.Operator):
                 path = bpy.path.abspath(strip.filepath)
                 print([path])
                 return getexifvalues_movie(path)
-            
-            
 
         sce = bpy.context.scene
         frame = sce.frame_current
@@ -213,7 +209,7 @@ class ExifInfoPanel(bpy.types.Panel):
             scn = context.scene
             preferences = context.user_preferences
             prefs = preferences.addons[__package__].preferences
-            
+
             if scn and scn.sequence_editor and scn.sequence_editor.active_strip:
                 if prefs.use_exif_panel:
                     return strip.type in ('MOVIE', 'IMAGE')

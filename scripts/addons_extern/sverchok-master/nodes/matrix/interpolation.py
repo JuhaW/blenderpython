@@ -21,8 +21,8 @@ from mathutils import Matrix
 
 from sverchok.node_tree import SverchCustomTreeNode, MatrixSocket, StringsSocket
 from sverchok.data_structure import (updateNode, fullList,
-                            Matrix_listing, Matrix_generate,
-                            SvGetSocketAnyType, SvSetSocketAnyType)
+                                     Matrix_listing, Matrix_generate,
+                                     SvGetSocketAnyType, SvSetSocketAnyType)
 
 
 # Matrix are assumed to be in format
@@ -59,7 +59,6 @@ class MatrixInterpolationNode(bpy.types.Node, SverchCustomTreeNode):
         A = Matrix_generate(self.inputs['A'].sv_get(default=id_mat))
         B = Matrix_generate(self.inputs['B'].sv_get(default=id_mat))
         factor = self.inputs['Factor'].sv_get()
-
 
         matrixes_ = []
         # match inputs, first matrix A and B using fullList

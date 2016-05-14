@@ -18,14 +18,14 @@
 
 import bpy
 import numpy
-from bpy.props import EnumProperty,StringProperty
+from bpy.props import EnumProperty, StringProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode)
 
 
 def Obm(m):
-        m = [(i,i,"") for i in m]
-        return m
+    m = [(i, i, "") for i in m]
+    return m
 
 
 class SvNumpyArrayNode(bpy.types.Node, SverchCustomTreeNode):
@@ -34,10 +34,10 @@ class SvNumpyArrayNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'numpy_props'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
-    Modes = ['tolist','conj','flatten','reshape','repeat','resize',
-             'transpose','swapaxes','squeeze','partition','searchsorted','round',
-             'take','clip','ptp','all','any','choose','sort','sum','cumsum','mean',
-             'var','std','prod','cumprod']
+    Modes = ['tolist', 'conj', 'flatten', 'reshape', 'repeat', 'resize',
+             'transpose', 'swapaxes', 'squeeze', 'partition', 'searchsorted', 'round',
+             'take', 'clip', 'ptp', 'all', 'any', 'choose', 'sort', 'sum', 'cumsum', 'mean',
+             'var', 'std', 'prod', 'cumprod']
     Mod = EnumProperty(name="getmodes", default="tolist", items=Obm(Modes), update=updateNode)
     st = StringProperty(default='', update=updateNode)
 
@@ -52,8 +52,8 @@ class SvNumpyArrayNode(bpy.types.Node, SverchCustomTreeNode):
     def process(self):
         if self.outputs['Value'].is_linked:
             L = self.inputs['List'].sv_get()
-            L = numpy.array(L) if not isinstance(L,numpy.ndarray) else L
-            Ln = eval("L."+self.Mod+"("+self.st+")")
+            L = numpy.array(L) if not isinstance(L, numpy.ndarray) else L
+            Ln = eval("L." + self.Mod + "(" + self.st + ")")
             self.outputs['Value'].sv_set(Ln)
 
     def update_socket(self, context):

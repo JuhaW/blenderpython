@@ -21,8 +21,9 @@
 import bpy
 from ..function_modules import auto_shrinkwrap_handlers
 
+
 class SurfaceConstraintProps(bpy.types.PropertyGroup):
-    data_path =(
+    data_path = (
         "user_preferences.addons['{0}'].preferences.surface_constraint"
     ).format(__package__.split(".")[0])
 
@@ -86,71 +87,70 @@ class SurfaceConstraintProps(bpy.types.PropertyGroup):
         modifier_uid = self.modifier_uid
         if active_object and modifier_uid:
             modifier_uid_map = {
-                str(modifier.as_pointer()) : modifier
+                str(modifier.as_pointer()): modifier
                 for modifier in active_object.modifiers
             }
             if modifier_uid in modifier_uid_map:
                 modifier = modifier_uid_map[modifier_uid]
 
                 # Apply the modifier.
-                bpy.ops.object.mode_set(mode = 'OBJECT')
-                bpy.ops.object.modifier_apply(modifier = modifier.name)
-                bpy.ops.object.mode_set(mode = 'EDIT')
+                bpy.ops.object.mode_set(mode='OBJECT')
+                bpy.ops.object.modifier_apply(modifier=modifier.name)
+                bpy.ops.object.mode_set(mode='EDIT')
 
     # Surface Constraint Settings
     available_targets =\
-        bpy.props.CollectionProperty(type = bpy.types.PropertyGroup)
+        bpy.props.CollectionProperty(type=bpy.types.PropertyGroup)
     auto_shrinkwrap_is_enabled = bpy.props.BoolProperty(
-        name = "Auto Shrinkwrap",
-        description = (
+        name="Auto Shrinkwrap",
+        description=(
             "Maintain a shrinkwrap modifier on the active mesh object, and " +
             "reapply it after the end of each operation."
         ),
-        default = False,
-        update = update_auto_shrinkwrap
+        default=False,
+        update=update_auto_shrinkwrap
     )
     auto_shrinkwrap_is_enabled_pre_save = bpy.props.BoolProperty(
-        description = (
+        description=(
             "Indicate whether or not automatic shrinkwrapping is enabled " +
             "prior to saving the blend file."
         ),
-        default = False
+        default=False
     )
     auto_shrinkwrap_is_paused = bpy.props.BoolProperty(
-        description =\
-            "Control the execution of the auto shrinkwrap handler.",
-        default = False
+        description="Control the execution of the auto shrinkwrap handler.",
+        default=False
     )
     direction = bpy.props.EnumProperty(
-        name = "Shrinkwrap Direction",
-        description = (
+        name="Shrinkwrap Direction",
+        description=(
             "Shrinkwrap along vertex normals or towards the closest points " +
             "on the target object."
         ),
-        default = 'CLOSEST_POINT',
-        items = [
+        default='CLOSEST_POINT',
+        items=[
             ('CLOSEST_POINT', "Closest Point", ""),
             ('VERTEX_NORMAL', "Vertex Normal", "")
         ]
     )
     offset = bpy.props.FloatProperty(
-        name = "Offset",
-        description = (
+        name="Offset",
+        description=(
             "Distance to keep constrained vertices offset from the target " +
             "mesh object's surface"
         ),
-        default = 0.0,
-        step = 1
+        default=0.0,
+        step=1
     )
     target = bpy.props.StringProperty(
-        name = "Target",
-        description = (
+        name="Target",
+        description=(
             "Target object to which the active mesh object's vertices are " +
             "constrained"
         )
     )
     wrap_method_map =\
-        {'CLOSEST_POINT' : 'NEAREST_SURFACEPOINT', 'VERTEX_NORMAL' : 'PROJECT'}
+        {'CLOSEST_POINT': 'NEAREST_SURFACEPOINT', 'VERTEX_NORMAL': 'PROJECT'}
 
     # Unique Identifiers
     mesh_object_uid = bpy.props.StringProperty()
@@ -159,7 +159,7 @@ class SurfaceConstraintProps(bpy.types.PropertyGroup):
 
     # UI Visibility
     settings_ui_is_visible = bpy.props.BoolProperty(
-        name = "Settings UI Visibility",
-        description = "Show/hide the Settings UI.",
-        default = False
+        name="Settings UI Visibility",
+        description="Show/hide the Settings UI.",
+        default=False
     )

@@ -3,6 +3,7 @@ from bpy.props import *
 from ... utils.layout import writeText
 from ... base_types.node import AnimationNode
 
+
 class ShapeKeyOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ShapeKeyOutputNode"
     bl_label = "Shape Key Output"
@@ -29,7 +30,7 @@ class ShapeKeyOutputNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if self.errorMessage != "":
-            writeText(layout, self.errorMessage, width = 25, icon = "ERROR")
+            writeText(layout, self.errorMessage, width=25, icon="ERROR")
 
     def drawAdvanced(self, layout):
         writeText(layout, "")
@@ -38,9 +39,14 @@ class ShapeKeyOutputNode(bpy.types.Node, AnimationNode):
         yield "if shapeKey is not None:"
 
         s = self.inputs
-        if s["Value"].isUsed:      yield "    shapeKey.value = value"
-        if s["Slider Min"].isUsed: yield "    shapeKey.slider_min = sliderMin"
-        if s["Slider Max"].isUsed: yield "    shapeKey.slider_max = sliderMax"
-        if s["Name"].isUsed:       yield "    shapeKey.name = name"
-        if s["Mute"].isUsed:       yield "    shapeKey.mute = mute"
+        if s["Value"].isUsed:
+            yield "    shapeKey.value = value"
+        if s["Slider Min"].isUsed:
+            yield "    shapeKey.slider_min = sliderMin"
+        if s["Slider Max"].isUsed:
+            yield "    shapeKey.slider_max = sliderMax"
+        if s["Name"].isUsed:
+            yield "    shapeKey.name = name"
+        if s["Mute"].isUsed:
+            yield "    shapeKey.mute = mute"
         yield "    pass"

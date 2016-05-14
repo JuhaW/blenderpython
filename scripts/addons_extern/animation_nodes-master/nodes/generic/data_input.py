@@ -3,6 +3,7 @@ from bpy.props import *
 from ... base_types.node import AnimationNode
 from ... sockets.info import toIdName, getSocketClasses
 
+
 class DataInputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_DataInputNode"
     bl_label = "Data Input"
@@ -11,15 +12,15 @@ class DataInputNode(bpy.types.Node, AnimationNode):
 
     @classmethod
     def getSearchTags(cls):
-        return [(socket.dataType + " Input", {"assignedType" : repr(socket.dataType)})
-                 for socket in getSocketClasses() if socket.hasProperty()]
+        return [(socket.dataType + " Input", {"assignedType": repr(socket.dataType)})
+                for socket in getSocketClasses() if socket.hasProperty()]
 
     def assignedSocketChanged(self, context):
         self.recreateSockets()
 
-    assignedType = StringProperty(default = "Float", update = assignedSocketChanged)
-    showInViewport = BoolProperty(default = False, name = "Show in Viewport",
-        description = "Draw the input of that node in the 'AN' category of the 3D view (Use the node label as name)")
+    assignedType = StringProperty(default="Float", update=assignedSocketChanged)
+    showInViewport = BoolProperty(default=False, name="Show in Viewport",
+                                  description="Draw the input of that node in the 'AN' category of the 3D view (Use the node label as name)")
 
     def create(self):
         self.recreateSockets()
@@ -29,7 +30,7 @@ class DataInputNode(bpy.types.Node, AnimationNode):
 
     def drawAdvanced(self, layout):
         self.invokeSocketTypeChooser(layout, "assignSocketType",
-            socketGroup = "ALL", text = "Change Type", icon = "TRIA_RIGHT")
+                                     socketGroup="ALL", text="Change Type", icon="TRIA_RIGHT")
 
         col = layout.column()
         col.active = self.inputs[0].hasProperty()

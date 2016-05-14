@@ -5,39 +5,41 @@ bl_info = {
     "description": "Simple unfold transition / animation, will separate faces and set up an armature",
     "category": "Animation"}
 
-import bpy, random as R, mathutils
+import bpy
+import random as R
+import mathutils
 from mathutils import geometry as G
 
-bpy.types.WindowManager.modo=bpy.props.EnumProperty(
-    name="", items=[("cursor","3D Cursor", "Use the Distance to 3D Cursor"), ("weight","Weight Map",
-    "Use a Painted Weight map"),("index","Mesh Indices","Use Faces and Vertices index")], 
+bpy.types.WindowManager.modo = bpy.props.EnumProperty(
+    name="", items=[("cursor", "3D Cursor", "Use the Distance to 3D Cursor"), ("weight", "Weight Map",
+                                                                               "Use a Painted Weight map"), ("index", "Mesh Indices", "Use Faces and Vertices index")],
     description="How to Sort Bones for animation", default="cursor")
 bpy.types.WindowManager.flip = bpy.props.BoolProperty(
     name="Flipping Faces", default=False,
     description="Rotate faces around the Center & skip Scaling - keep checked for both operators")
 bpy.types.WindowManager.fold_duration = bpy.props.IntProperty(
-    name="Total Time", min=5, soft_min=25, max=10000, soft_max=2500, default=200, 
+    name="Total Time", min=5, soft_min=25, max=10000, soft_max=2500, default=200,
     description="Total animation length")
 bpy.types.WindowManager.sca_time = bpy.props.IntProperty(
-    name="Scale Time", min=1, max=5000, soft_max=500, default=10, 
+    name="Scale Time", min=1, max=5000, soft_max=500, default=10,
     description="Faces scaling time")
 bpy.types.WindowManager.rot_time = bpy.props.IntProperty(
-    name="Rotation Time", min=1, soft_min=5, max=5000, soft_max=500, default=15, 
+    name="Rotation Time", min=1, soft_min=5, max=5000, soft_max=500, default=15,
     description="Faces rotation time")
 bpy.types.WindowManager.rot_max = bpy.props.IntProperty(
-    name="Angle", min=-180, max=180, default=135, 
+    name="Angle", min=-180, max=180, default=135,
     description="Faces rotation angle")
 bpy.types.WindowManager.fold_noise = bpy.props.IntProperty(
-    name="Noise", min=0, max=500, soft_max=50, default=0, 
+    name="Noise", min=0, max=500, soft_max=50, default=0,
     description="Offset some faces animation")
 bpy.types.WindowManager.bounce = bpy.props.FloatProperty(
-    name="Bounce", min=0, max=10, soft_max=2.5, default=0, 
+    name="Bounce", min=0, max=10, soft_max=2.5, default=0,
     description="Add some bounce to rotation")
 bpy.types.WindowManager.from_point = bpy.props.BoolProperty(
     name="Point", default=False,
     description="Scale faces from a Point instead of from an Edge")
 bpy.types.WindowManager.wiggle_rot = bpy.props.BoolProperty(
-    name="Wiggle", default=False, 
+    name="Wiggle", default=False,
     description="Use all Axis + Random Rotation instead of X Aligned")
 
 
@@ -65,7 +67,8 @@ class Set_Up_Fold(bpy.types.Operator):
         bpy.ops.mesh.remove_doubles(threshold=0.0001, use_unselected=True)
         bpy.ops.object.mode_set()
         old_vg = [vg for vg in obj.vertex_groups if vg.name.startswith("bone.")]
-        for vg in old_vg: obj.vertex_groups.remove(vg)
+        for vg in old_vg:
+            obj.vertex_groups.remove(vg)
         if "UnFold" in obj.modifiers:
             arm = obj.modifiers["UnFold"].object
             rig = arm.data
@@ -87,9 +90,9 @@ class Set_Up_Fold(bpy.types.Operator):
                     for v in f.vertices:
                         try:
                             w = ver[v].groups[i].weight
-                            v_data.append((w,v))
+                            v_data.append((w, v))
                         except:
-                            v_data.append((0,v))
+                            v_data.append((0, v))
                     v_data.sort(reverse=True)
                     v1 = ver[v_data[0][1]].co
                     v2 = ver[v_data[1][1]].co
@@ -111,7 +114,7 @@ class Set_Up_Fold(bpy.types.Operator):
         bpy.ops.mesh.select_all(action="SELECT")
         if wm.modo == "cursor":
             bpy.context.tool_settings.mesh_select_mode = [True, True, True]
-            bpy.ops.mesh.sort_elements(type="CURSOR_DISTANCE", elements={"VERT","EDGE","FACE"})
+            bpy.ops.mesh.sort_elements(type="CURSOR_DISTANCE", elements={"VERT", "EDGE", "FACE"})
         bpy.context.tool_settings.mesh_select_mode = [False, False, True]
         bpy.ops.object.mode_set()
 
@@ -143,8 +146,8 @@ class Set_Up_Fold(bpy.types.Operator):
 
     # crear los huesos y vertex groups
         root = arm.edit_bones.new("bone.000")
-        root.tail = (0,0,0)
-        root.head = (0,0,1)
+        root.tail = (0, 0, 0)
+        root.head = (0, 0, 1)
         root.select = True
         vis = [False, True] + [False] * 30
 
@@ -188,7 +191,8 @@ class Animate_Fold(bpy.types.Operator):
         wm = context.window_manager
 
     # limpiar animacion y obtener lista de huesos
-        if obj.animation_data: obj.animation_data_clear()
+        if obj.animation_data:
+            obj.animation_data_clear()
         bpy.ops.object.mode_set(mode="POSE")
         bones = obj.pose.bones[0].children_recursive
         if wm.flip:
@@ -209,29 +213,29 @@ class Animate_Fold(bpy.types.Operator):
             else:
                 b.scale = (1, 0, 0)
             if not wm.flip:
-                b.keyframe_insert("scale", frame = t )
+                b.keyframe_insert("scale", frame=t)
                 b.scale = (1, 1, 1)
-                b.keyframe_insert("scale", frame = t + wm.sca_time)
+                b.keyframe_insert("scale", frame=t + wm.sca_time)
             if wm.rot_max:
                 b.rotation_mode = "XYZ"
                 if wm.wiggle_rot:
-                    euler = (R.uniform(-rot,rot), R.uniform(-rot,rot), R.uniform(-rot,rot))
+                    euler = (R.uniform(-rot, rot), R.uniform(-rot, rot), R.uniform(-rot, rot))
                 else:
                     euler = (rot, 0, 0)
                 b.rotation_euler = euler
-                b.keyframe_insert("rotation_euler", frame = t )
+                b.keyframe_insert("rotation_euler", frame=t)
             if wm.bounce:
                 val = wm.bounce * -.10
                 b.rotation_euler = (val * euler[0], val * euler[1], val * euler[2])
-                b.keyframe_insert("rotation_euler", frame = t + wm.rot_time + .25 * extra)
+                b.keyframe_insert("rotation_euler", frame=t + wm.rot_time + .25 * extra)
                 val = wm.bounce * .05
                 b.rotation_euler = (val * euler[0], val * euler[1], val * euler[2])
-                b.keyframe_insert("rotation_euler", frame = t + wm.rot_time + .50 * extra )
+                b.keyframe_insert("rotation_euler", frame=t + wm.rot_time + .50 * extra)
                 val = wm.bounce * -.025
                 b.rotation_euler = (val * euler[0], val * euler[1], val * euler[2])
-                b.keyframe_insert("rotation_euler", frame = t + wm.rot_time + .75 * extra )
+                b.keyframe_insert("rotation_euler", frame=t + wm.rot_time + .75 * extra)
             b.rotation_euler = (0, 0, 0)
-            b.keyframe_insert("rotation_euler", frame = t + wm.rot_time + extra )
+            b.keyframe_insert("rotation_euler", frame=t + wm.rot_time + extra)
         return {"FINISHED"}
 
 
@@ -268,6 +272,7 @@ def register():
     bpy.utils.register_class(Set_Up_Fold)
     bpy.utils.register_class(Animate_Fold)
     bpy.utils.register_class(PanelFOLD)
+
 
 def unregister():
     bpy.utils.unregister_class(Set_Up_Fold)

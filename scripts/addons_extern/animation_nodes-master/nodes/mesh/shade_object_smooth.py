@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class ShadeObjectSmooth(bpy.types.Node, AnimationNode):
     bl_idname = "an_ShadeObjectSmoothNode"
     bl_label = "Shade Object Smooth"

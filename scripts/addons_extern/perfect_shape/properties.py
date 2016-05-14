@@ -42,8 +42,8 @@ def object_update(self, context):
                 shape_bm.verts.new(vert.co)
             shape_bm.verts.ensure_lookup_table()
             verts = shape_bm.verts[:]
-            for i in range(len(verts)-1):
-                shape_bm.edges.new((verts[i], verts[i+1 % len(verts)]))
+            for i in range(len(verts) - 1):
+                shape_bm.edges.new((verts[i], verts[i + 1 % len(verts)]))
             bmesh.ops.contextual_create(shape_bm, geom=shape_bm.edges)
             bmesh.ops.triangulate(shape_bm, faces=shape_bm.faces)
             for face in shape_bm.faces:

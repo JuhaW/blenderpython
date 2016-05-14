@@ -16,7 +16,7 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-#bl_info = {
+# bl_info = {
 #    "name": "RGBCMYW Material Creator",
 #    "description": "Creates RGBCMYW Materials for use as selection masks",
 #    "author": "Andy Davies (metalliandy)",
@@ -28,7 +28,7 @@
 #    "wiki_url": "",
 #    "tracker_url": "",
 #    "category": "3D View"}
-#    
+#
 """About this script:-
 This script enables the fast creation of RGBCMYW Materials for use as selection masks during texturing.
 
@@ -48,7 +48,7 @@ Version history:-
 v0.1 - Initial revision."""
 
 import bpy
-  
+
 
 def makeMaterial(name, diffuse, specular, alpha):
     mat = bpy.data.materials.new(name)
@@ -61,7 +61,8 @@ def makeMaterial(name, diffuse, specular, alpha):
     mat.alpha = alpha
     mat.ambient = 1
     return mat
-    
+
+
 def setMaterial(ob, mat):
     me = ob.data
     me.materials.append(mat)
@@ -70,28 +71,28 @@ def setMaterial(ob, mat):
 class OBJECT_OT_RGBCMYW(bpy.types.Operator):
     bl_idname = "materials.rgbcmyw"
     bl_label = "Make RGBCMYW Mats"
-    
+
     def execute(self, context):
         # Create materials
-        red = makeMaterial('Red', (1,0,0), (1,1,1), 1)
-        green = makeMaterial('Green', (0,1,0), (1,1,1), 1)
-        blue = makeMaterial('Blue', (0,0,1), (1,1,1), 1)
-        cyan = makeMaterial('Cyan', (0,1,1), (1,1,1), 1)
-        magenta = makeMaterial('Magenta', (1,0,1), (1,1,1), 1)
-        yellow = makeMaterial('Yellow', (1,1,0), (1,1,1), 1)
-        white = makeMaterial('White', (1,1,1), (1,1,1), 1)
-         
+        red = makeMaterial('Red', (1, 0, 0), (1, 1, 1), 1)
+        green = makeMaterial('Green', (0, 1, 0), (1, 1, 1), 1)
+        blue = makeMaterial('Blue', (0, 0, 1), (1, 1, 1), 1)
+        cyan = makeMaterial('Cyan', (0, 1, 1), (1, 1, 1), 1)
+        magenta = makeMaterial('Magenta', (1, 0, 1), (1, 1, 1), 1)
+        yellow = makeMaterial('Yellow', (1, 1, 0), (1, 1, 1), 1)
+        white = makeMaterial('White', (1, 1, 1), (1, 1, 1), 1)
+
         return{'FINISHED'}
 
 
-#class MakeRGBCMYWMaterialButton(bpy.types.Panel):
+# class MakeRGBCMYWMaterialButton(bpy.types.Panel):
     #bl_label = "RGBCMYW Mats"
     #bl_space_type = "VIEW_3D"
     #bl_region_type = "TOOLS"
-    
-    #def draw(self, context):
+
+    # def draw(self, context):
         #layout = self.layout
-        #layout.operator("materials.rgbcmyw")
+        # layout.operator("materials.rgbcmyw")
 
 
 script_classes = [OBJECT_OT_RGBCMYW]
@@ -99,12 +100,11 @@ script_classes = [OBJECT_OT_RGBCMYW]
 
 def register():
     bpy.utils.register_module(__name__)
-    
+
+
 def unregister():
     bpy.utils.unregister_module(__name__)
-    
+
 
 if __name__ == "__main__":
     register()
-
-

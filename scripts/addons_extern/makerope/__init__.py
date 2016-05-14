@@ -1,4 +1,5 @@
-import bpy, bmesh
+import bpy
+import bmesh
 from bpy.props import *
 
 bl_info = {
@@ -9,18 +10,21 @@ bl_info = {
     "blender": (2, 76, 0),
     "location": "View3D",
     "wiki_url": "",
-    "category": "Object" }
+    "category": "Object"}
+
 
 def getWorld(vco, ob):
     mat = ob.matrix_world
     loc = mat * vco
     return loc
 
+
 def getEnds(ob):
     verts = ob.data.vertices
     for v in verts:
         if v.select:
             return v.co
+
 
 def makeline(ends, line):
     bm = bmesh.new()
@@ -30,6 +34,7 @@ def makeline(ends, line):
     bverts = (bm.verts[0], bm.verts[1])
     bm.edges.new(bverts)
     bm.to_mesh(line)
+
 
 class AddRopeHooks(bpy.types.Operator):
     bl_idname = 'object.add_rope_hooks'
@@ -58,6 +63,7 @@ class AddRopeHooks(bpy.types.Operator):
         obj.select = True
         return{'FINISHED'}
 
+
 class ApplyRope(bpy.types.Operator):
     bl_idname = 'object.apply_rope'
     bl_label = 'Apply Rope'
@@ -83,6 +89,7 @@ class ApplyRope(bpy.types.Operator):
         bpy.context.scene.frame_end = 250
         return{'FINISHED'}
 
+
 class RopeSim(bpy.types.Operator):
     bl_idname = 'object.rope_sim'
     bl_label = 'Simulate Rope'
@@ -98,6 +105,7 @@ class RopeSim(bpy.types.Operator):
         else:
             bpy.ops.screen.animation_play()
         return {'FINISHED'}
+
 
 class MakeRope(bpy.types.Operator):
     """Create a rope between to selected vertices"""
@@ -133,7 +141,7 @@ class MakeRope(bpy.types.Operator):
         bpy.ops.object.mode_set(mode='OBJECT')
 
         vg = obj.vertex_groups.new('rope ends')
-        vg.add(range(0,2), 1.0, 'REPLACE')
+        vg.add(range(0, 2), 1.0, 'REPLACE')
 
         cmod = obj.modifiers.new('Rope', 'CLOTH')
         cmod.point_cache.frame_end = 5000
@@ -141,6 +149,7 @@ class MakeRope(bpy.types.Operator):
         cmod.settings.vertex_group_mass = vg.name
         obj.is_rope = True
         return{'FINISHED'}
+
 
 class MakeRopePanel(bpy.types.Panel):
     bl_label = "Make Rope"
@@ -175,9 +184,11 @@ class MakeRopePanel(bpy.types.Panel):
             box = row.box()
             box.operator('object.apply_rope', text='Apply')
 
+
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.Object.is_rope = bpy.props.BoolProperty(name='Rope Object')
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

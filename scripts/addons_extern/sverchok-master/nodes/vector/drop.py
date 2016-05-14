@@ -21,8 +21,8 @@ import bpy
 from mathutils import Matrix, Vector
 from sverchok.node_tree import SverchCustomTreeNode, MatrixSocket, VerticesSocket
 from sverchok.data_structure import (dataCorrect, Matrix_generate, updateNode,
-                            Vector_generate, Vector_degenerate,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     Vector_generate, Vector_degenerate,
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class VectorDropNode(bpy.types.Node, SverchCustomTreeNode):
@@ -40,21 +40,21 @@ class VectorDropNode(bpy.types.Node, SverchCustomTreeNode):
         # inputs
         if not self.outputs['Vectors'].is_linked:
             return
-                        
+
         vecs_ = self.inputs['Vectors'].sv_get()
 
         vecs = Vector_generate(vecs_)
-        
+
         mats_ = dataCorrect(self.inputs['Matrixes'].sv_get())
         mats = Matrix_generate(mats_)
-        
+
         vectors = self.vecscorrect(vecs, mats)
         SvSetSocketAnyType(self, 'Vectors', vectors)
 
     @staticmethod
     def vecscorrect(vecs, mats):
         out = []
-        lengthve = len(vecs)-1
+        lengthve = len(vecs) - 1
         for i, m in enumerate(mats):
             out_ = []
             k = i
@@ -62,17 +62,17 @@ class VectorDropNode(bpy.types.Node, SverchCustomTreeNode):
                 k = lengthve
             vec_c = Vector((0, 0, 0))
             for v in vecs[k]:
-                vec = v*m
+                vec = v * m
                 out_.append(vec)
                 vec_c += vec
 
             vec_c = vec_c / len(vecs[k])
 
-            v = out_[1]-out_[0]
-            w = out_[2]-out_[0]
-            A = v.y*w.z - v.z*w.y
-            B = -v.x*w.z + v.z*w.x
-            C = v.x*w.y - v.y*w.x
+            v = out_[1] - out_[0]
+            w = out_[2] - out_[0]
+            A = v.y * w.z - v.z * w.y
+            B = -v.x * w.z + v.z * w.x
+            C = v.x * w.y - v.y * w.x
             #D = -out_[0].x*A - out_[0].y*B - out_[0].z*C
 
             norm = Vector((A, B, C)).normalized()
@@ -81,7 +81,7 @@ class VectorDropNode(bpy.types.Node, SverchCustomTreeNode):
             mat_rot_norm = vec0.rotation_difference(norm).to_matrix().to_4x4()
             out_pre = []
             for v in out_:
-                v_out = (v-vec_c) * mat_rot_norm
+                v_out = (v - vec_c) * mat_rot_norm
                 out_pre.append(v_out[:])
 
             out.append(out_pre)

@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class RoundNumberNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_RoundNumberNode"
     bl_label = "Round Number"

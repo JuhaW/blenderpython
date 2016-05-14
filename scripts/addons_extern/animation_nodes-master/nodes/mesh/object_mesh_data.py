@@ -5,6 +5,7 @@ from ... utils.math import extractRotation
 from ... base_types.node import AnimationNode
 from ... data_structures.mesh import Polygon, Vertex
 
+
 class ObjectMeshDataNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ObjectMeshDataNode"
     bl_label = "Object Mesh Data"
@@ -23,7 +24,8 @@ class ObjectMeshDataNode(bpy.types.Node, AnimationNode):
 
     def getExecutionCode(self):
         isLinked = self.getLinkedOutputsDict()
-        if not any(isLinked.values()): return ""
+        if not any(isLinked.values()):
+            return ""
 
         lines = []
         lines.append("meshName = ''")
@@ -46,24 +48,25 @@ class ObjectMeshDataNode(bpy.types.Node, AnimationNode):
         lines.append("else: vertexLocations, edgeIndices, polygonIndices, vertices, polygons = [], [], [], [], []")
         return lines
 
-
     def getMesh(self, object, useModifiers, scene):
         if useModifiers and scene is not None:
             settings = "RENDER" if isRendering() else "PREVIEW"
-            return object.to_mesh(scene = scene, apply_modifiers = True, settings = settings)
+            return object.to_mesh(scene=scene, apply_modifiers=True, settings=settings)
         return object.data
 
     def clearMesh(self, mesh, useModifiers, scene):
-        if useModifiers and scene is not None: bpy.data.meshes.remove(mesh)
-
+        if useModifiers and scene is not None:
+            bpy.data.meshes.remove(mesh)
 
     def getVertexLocations(self, mesh, object, useWorldSpace, copyVertices):
         if useWorldSpace:
             matrix = object.matrix_world
             return [matrix * v.co for v in mesh.vertices]
         else:
-            if copyVertices: return [v.co.copy() for v in mesh.vertices]
-            else: return [v.co for v in mesh.vertices]
+            if copyVertices:
+                return [v.co.copy() for v in mesh.vertices]
+            else:
+                return [v.co for v in mesh.vertices]
 
     def getEdgeIndices(self, mesh):
         return [tuple(edge.vertices) for edge in mesh.edges]

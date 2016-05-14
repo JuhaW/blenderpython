@@ -7,37 +7,38 @@ planeItems = [("XY", "XY", ""), ("XZ", "XZ", ""), ("YZ", "YZ", "")]
 thirdAxisName = {"XY": "z", "XZ": "y", "YZ": "x"}
 thirdAxisTuple = {"XY": "(0, 0, 1)", "XZ": "(0, 1, 0)", "YZ": "(1, 0, 0)"}
 
+
 class ShearMatrixNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ShearMatrixNode"
     bl_label = "Shear Matrix"
 
-    plane = EnumProperty(items = planeItems, update = executionCodeChanged)
-    useThirdAsScale = BoolProperty(name = "Use Third as Scale", default = True, 
-                    description = "Use Third Coordinate as Scale, if not, only use the 2 shear coordinates", 
-                    update = executionCodeChanged)
+    plane = EnumProperty(items=planeItems, update=executionCodeChanged)
+    useThirdAsScale = BoolProperty(name="Use Third as Scale", default=True,
+                                   description="Use Third Coordinate as Scale, if not, only use the 2 shear coordinates",
+                                   update=executionCodeChanged)
 
     def create(self):
         self.inputs.new("an_VectorSocket", "Shear", "shear").value = [1, 1, 1]
         self.outputs.new("an_MatrixSocket", "Matrix", "matrix")
 
     def draw(self, layout):
-        layout.prop(self, "plane", expand = True)
-        layout.prop(self, "useThirdAsScale", 
-                    text = "Use {} as Scale".format(thirdAxisName[self.plane].upper()) )
+        layout.prop(self, "plane", expand=True)
+        layout.prop(self, "useThirdAsScale",
+                    text="Use {} as Scale".format(thirdAxisName[self.plane].upper()))
 
     def getExecutionCode(self):
         plane = self.plane
-        
+
         if self.useThirdAsScale:
             yield ("_scale = mathutils.Matrix.Scale(shear.{}, 4, {})"
-                                .format(thirdAxisName[plane], thirdAxisTuple[plane]) )
+                   .format(thirdAxisName[plane], thirdAxisTuple[plane]))
             yield ("_matrix = mathutils.Matrix.Shear('{}', 4, (shear.{}, shear.{}))"
-                                .format(plane, plane[0].lower(), plane[1].lower()) )
+                   .format(plane, plane[0].lower(), plane[1].lower()))
             yield "matrix = _scale * _matrix"
-        
-        else: 
+
+        else:
             yield ("matrix = mathutils.Matrix.Shear('{}', 4, (shear.{}, shear.{}))"
-                                .format(plane, plane[0].lower(), plane[1].lower()) )
+                   .format(plane, plane[0].lower(), plane[1].lower()))
 
     def getUsedModules(self):
         return ["mathutils"]

@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class BooleanToIntegerNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_BooleanToIntegerNode"
     bl_label = "Boolean to Integer"

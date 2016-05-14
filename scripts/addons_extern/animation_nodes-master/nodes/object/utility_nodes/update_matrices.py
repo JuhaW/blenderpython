@@ -1,6 +1,7 @@
 import bpy
 from .... base_types.node import AnimationNode
 
+
 class UpdateObjectMatricesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_UpdateObjectMatricesNode"
     bl_label = "Update Object Matrices"

@@ -23,7 +23,7 @@ from bpy.props import BoolProperty, IntProperty, FloatProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (fullList, match_long_repeat, updateNode,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class SvCircleNode(bpy.types.Node, SverchCustomTreeNode):
@@ -39,10 +39,10 @@ class SvCircleNode(bpy.types.Node, SverchCustomTreeNode):
                         default=24, min=3,
                         update=updateNode)
     degr_ = FloatProperty(name='Degrees', description='Degrees',
-                          default=360, min=0, max=pi*2, subtype='ANGLE',
+                          default=360, min=0, max=pi * 2, subtype='ANGLE',
                           options={'ANIMATABLE'}, update=updateNode)
     mode_ = BoolProperty(name='mode_', description='Mode',
-                         default=0,  update=updateNode)
+                         default=0, update=updateNode)
 
     def sv_init(self, context):
         self.inputs.new('StringsSocket', "Radius").prop_name = 'rad_'
@@ -58,34 +58,34 @@ class SvCircleNode(bpy.types.Node, SverchCustomTreeNode):
 
     def make_verts(self, Angle, Vertices, Radius):
         if Angle < 360:
-            theta = Angle/(Vertices-1)
+            theta = Angle / (Vertices - 1)
         else:
-            theta = Angle/Vertices
+            theta = Angle / Vertices
         listVertX = []
         listVertY = []
         for i in range(Vertices):
-            listVertX.append(Radius*cos(radians(theta*i)))
-            listVertY.append(Radius*sin(radians(theta*i)))
+            listVertX.append(Radius * cos(radians(theta * i)))
+            listVertY.append(Radius * sin(radians(theta * i)))
 
         if Angle < 360 and self.mode_ == 0:
             sigma = radians(Angle)
-            listVertX[-1] = Radius*cos(sigma)
-            listVertY[-1] = Radius*sin(sigma)
+            listVertX[-1] = Radius * cos(sigma)
+            listVertY[-1] = Radius * sin(sigma)
         elif Angle < 360 and self.mode_ == 1:
             listVertX.append(0.0)
             listVertY.append(0.0)
 
-        points = list((x,y,0) for x,y in zip(listVertX, listVertY) )
+        points = list((x, y, 0) for x, y in zip(listVertX, listVertY))
         return points
 
     def make_edges(self, Vertices, Angle):
-        listEdg = [(i, i+1) for i in range(Vertices-1)]
+        listEdg = [(i, i + 1) for i in range(Vertices - 1)]
 
         if Angle < 360 and self.mode_ == 1:
             listEdg.append((0, Vertices))
-            listEdg.append((Vertices-1, Vertices))
+            listEdg.append((Vertices - 1, Vertices))
         else:
-            listEdg.append((Vertices-1, 0))
+            listEdg.append((Vertices - 1, 0))
         return listEdg
 
     def make_faces(self, Angle, Vertices):

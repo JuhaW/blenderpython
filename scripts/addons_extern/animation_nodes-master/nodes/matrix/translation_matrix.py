@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class TranslationMatrixNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_TranslationMatrixNode"
     bl_label = "Translation Matrix"

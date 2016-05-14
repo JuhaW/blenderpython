@@ -33,7 +33,7 @@ RELOAD_EVENT = False
 # this is set correctly later.
 SVERCHOK_NAME = "sverchok"
 
-#handle for object in node
+# handle for object in node
 temp_handle = {}
 # cache node group update trees it not used, as i see
 # cache_nodes = {}
@@ -90,7 +90,7 @@ def initialize_cnodes():
 def check_update_node(node_name, write=False):
     numb = read_cnodes(node_name)
     etalon = read_cnodes('GLOBAL CNODE')
-    #print('etalon',etalon)
+    # print('etalon',etalon)
     if numb == etalon:
         return False
     else:
@@ -161,15 +161,18 @@ def handle_delete(handle):
     if handle in temp_handle:
         del temp_handle[handle]
 
+
 def handle_read(handle):
     if not (handle in temp_handle):
         return (False, [])
     return (True, temp_handle[handle]['prop'])
 
+
 def handle_write(handle, prop):
     handle_delete(handle)
-    
-    temp_handle[handle] = {"prop" : prop}
+
+    temp_handle[handle] = {"prop": prop}
+
 
 def handle_check(handle, prop):
     if handle in handle_check and \
@@ -226,11 +229,11 @@ def match_long_cycle(lsts):
 # when you intent to use lenght of first list to control WHILE loop duration
 # and you do not want to change the length of the first list, but you want the second list
 # lenght to by not less than the length of the first
-def second_as_first_cycle(F,S):
-    if len(F)>len(S):
+def second_as_first_cycle(F, S):
+    if len(F) > len(S):
         return list(map(list, zip(*zip(*[F, itertools.cycle(S)]))))
     else:
-        return [F,S]
+        return [F, S]
 
 
 # cross matching
@@ -274,6 +277,7 @@ def sv_zip(*iterables):
             result.append(elem)
         yield result
 
+
 def checking_links(process):
     '''Decorator for process method of node.
     This decorator does stanard checks for mandatory input and output links.
@@ -308,6 +312,7 @@ def checking_links(process):
     real_process.__doc__ = process.__doc__
     return real_process
 
+
 def iterate_process(method, matcher, *inputs, node=None):
     '''Shortcut function for usual iteration over set of input lists.
 
@@ -330,6 +335,7 @@ def iterate_process(method, matcher, *inputs, node=None):
         results = [list(method(node, *d)) for d in zip(*data)]
     return list(zip(*results))
 
+
 class Input(object):
     '''Node input socket metainformation descriptor.'''
 
@@ -346,9 +352,10 @@ class Input(object):
 
     def create(self, node):
         return node.inputs.new(self.socktype, self.name, self.identifier)
-    
+
     def get(self, node):
         return node.inputs[self.name].sv_get(default=self.default, deepcopy=self.deepcopy)
+
 
 class Output(object):
     '''Node output socket metainformation descriptor.'''
@@ -367,6 +374,7 @@ class Output(object):
     def set(self, node, value):
         if node.outputs[self.name].is_linked:
             node.outputs[self.name].sv_set(value)
+
 
 def match_inputs(matcher, inputs, outputs):
     '''Decorator for inputs/outputs boilerplate.
@@ -414,6 +422,7 @@ def match_inputs(matcher, inputs, outputs):
 
     return decorator
 
+
 def std_links_processing(matcher):
     '''Shortcut decorator for "standard" inputs/outputs sockets processing routine.
 
@@ -444,10 +453,12 @@ def std_links_processing(matcher):
 # define data floor
 
 # data from nasting to standart: TO container( objects( lists( floats, ), ), )
+
+
 def dataCorrect(data, nominal_dept=2):
     dept = levelsOflist(data)
     output = []
-    if not dept: # for empty lists 
+    if not dept:  # for empty lists
         return []
     if dept < 2:
         return [dept, data]
@@ -461,7 +472,7 @@ def dataSpoil(data, dept):
     if dept:
         out = []
         for d in data:
-            out.append([dataSpoil(d, dept-1)])
+            out.append([dataSpoil(d, dept - 1)])
     else:
         out = data
     return out
@@ -585,13 +596,13 @@ def matrixdef(orig, loc, scale, rot, angle, vec_angle=[[]]):
         ma = de.copy()
 
         if loc[0]:
-            k = min(len(loc[0])-1, i)
+            k = min(len(loc[0]) - 1, i)
             mat_tran = de.Translation(loc[0][k])
             ma *= mat_tran
 
         if vec_angle[0] and rot[0]:
-            k = min(len(rot[0])-1, i)
-            a = min(len(vec_angle[0])-1, i)
+            k = min(len(rot[0]) - 1, i)
+            a = min(len(vec_angle[0]) - 1, i)
 
             vec_a = vec_angle[0][a].normalized()
             vec_b = rot[0][k].normalized()
@@ -600,13 +611,13 @@ def matrixdef(orig, loc, scale, rot, angle, vec_angle=[[]]):
             ma = ma * mat_rot
 
         elif rot[0]:
-            k = min(len(rot[0])-1, i)
-            a = min(len(angle[0])-1, i)
+            k = min(len(rot[0]) - 1, i)
+            a = min(len(angle[0]) - 1, i)
             mat_rot = de.Rotation(radians(angle[0][a]), 4, rot[0][k].normalized())
             ma = ma * mat_rot
 
         if scale[0]:
-            k = min(len(scale[0])-1, i)
+            k = min(len(scale[0]) - 1, i)
             scale2 = scale[0][k]
             id_m = Matrix.Identity(4)
             for j in range(3):
@@ -630,7 +641,7 @@ def create_list(x, y):
 
 
 def enum_item(s):
-    s = [(i,i,"") for i in s]
+    s = [(i, i, "") for i in s]
     return s
 
 
@@ -642,7 +653,7 @@ def preobrazovatel(list_a, levels, level2=1):
         if type(list_a)in [list, tuple]:
             for l in list_a:
                 if type(l) in [list, tuple]:
-                    tmp = preobrazovatel(l, levels, level2+1)
+                    tmp = preobrazovatel(l, levels, level2 + 1)
                     if type(tmp) in [list, tuple]:
                         list_tmp.extend(tmp)
                     else:
@@ -654,9 +665,9 @@ def preobrazovatel(list_a, levels, level2=1):
         if type(list_a) in [list, tuple]:
             for l in list_a:
                 if len(levels) == 1:
-                    tmp = preobrazovatel(l, levels, level2+1)
+                    tmp = preobrazovatel(l, levels, level2 + 1)
                 else:
-                    tmp = preobrazovatel(l, levels[1:], level2+1)
+                    tmp = preobrazovatel(l, levels[1:], level2 + 1)
                 list_tmp.append(tmp if tmp else l)
 
     else:
@@ -691,13 +702,13 @@ def myZip(list_all, level, level2=0):
     elif level > level2:
         if type(list_all) in [list, tuple]:
             list_res = []
-            list_tr = myZip(list_all, level, level2+1)
+            list_tr = myZip(list_all, level, level2 + 1)
             if list_tr is False:
                 list_tr = list_all
             t = []
             for tr in list_tr:
                 if type(list_tr) in [list, tuple]:
-                    list_tl = myZip(tr, level, level2+1)
+                    list_tl = myZip(tr, level, level2 + 1)
                     if list_tl is False:
                         list_tl = list_tr
                     t.extend(list_tl)
@@ -722,20 +733,20 @@ def myZip_2(list_all, level, level2=1):
                 else:
                     list_b.append(l2)
             if level > 1:
-                list_b = subDown(list_b, level-1)
+                list_b = subDown(list_b, level - 1)
             return list_b
 
         list_tmp = []
         if type(list_all) in [list, tuple]:
             for l in list_all:
-                list_b = subDown(l, level-1)
+                list_b = subDown(l, level - 1)
                 list_tmp.append(list_b)
         else:
             list_tmp = list_all
         return list_tmp
 
     list_tmp = list_all.copy()
-    for x in range(level-1):
+    for x in range(level - 1):
         list_tmp = create_listDown(list_tmp, level)
 
     list_r = []
@@ -756,7 +767,7 @@ def myZip_2(list_all, level, level2=1):
 
     list_tmp = list_r
 
-    for lev in range(level-1):
+    for lev in range(level - 1):
         list_tmp = [list_tmp]
 
     return list_tmp
@@ -775,7 +786,7 @@ def joiner(list_all, level, level2=1):
         else:
             list_tmp = list_all
 
-        list_res = joiner(list_tmp, level, level2=level2+1)
+        list_res = joiner(list_tmp, level, level2=level2 + 1)
         list_tmp = [list_res]
 
     if level == level2:
@@ -806,15 +817,15 @@ def wrapper_2(l_etalon, list_a, level):
                 for l in list_a:
                     list_b.append([l])
             else:
-                dc = len(list_a)//count
+                dc = len(list_a) // count
                 for l in range(count):
                     list_c = []
                     for j in range(dc):
-                        list_c.append(list_a[l*dc+j])
+                        list_c.append(list_a[l * dc + j])
                     list_b.append(list_c)
         else:
             for l in list_a:
-                list_b = subWrap(l, level-1, count)
+                list_b = subWrap(l, level - 1, count)
         return list_b
 
     def subWrap_2(l_etalon, len_l, level):
@@ -822,7 +833,7 @@ def wrapper_2(l_etalon, list_a, level):
         if type(l_etalon) in [list, tuple]:
             len_r = len(l_etalon) * len_l
             if level > 1:
-                len_r = subWrap_2(l_etalon[0], len_r, level-1)
+                len_r = subWrap_2(l_etalon[0], len_r, level - 1)
 
         return len_r
 
@@ -830,7 +841,7 @@ def wrapper_2(l_etalon, list_a, level):
     lens_l = subWrap_2(l_etalon, 1, level)
     list_tmp = subWrap(list_a, level, lens_l)
 
-    for l in range(level-1):
+    for l in range(level - 1):
         list_tmp = [list_tmp]
     return list_tmp
 
@@ -858,8 +869,8 @@ def setup_init():
         HEAT_MAP = addon.preferences.heat_map
     else:
         print("Setup of preferences failed")
-    
-    
+
+
 #####################################################
 ###############  heat map system     ################
 #####################################################
@@ -886,7 +897,7 @@ def heat_map_state(state):
                     setattr(node, 'color', color)
                     setattr(node, 'use_custom_color', use)
             ng.sv_user_colors = ""
-            
+
 #####################################################
 ############### update system magic! ################
 #####################################################
@@ -899,7 +910,7 @@ def updateNode(self, context):
     For example a user exposed bpy.prop
     """
     self.process_node(context)
-    
+
 ##############################################################
 ##############################################################
 ############## changable type of socket magic ################
@@ -907,6 +918,7 @@ def updateNode(self, context):
 #################### wellcome to provide #####################
 ##############################################################
 ##############################################################
+
 
 def changable_sockets(node, inputsocketname, outputsocketname):
     '''
@@ -933,10 +945,12 @@ def changable_sockets(node, inputsocketname, outputsocketname):
                     ng.links.new(to_socket, new_out_socket)
             node.id_data.unfreeze(hard=True)
 
+
 def get_socket_type_full(node, inputsocketname):
     socket = node.inputs[inputsocketname]
     other = get_other_socket(socket)
     return other.links[0].from_socket.bl_idname
+
 
 def replace_socket(socket, new_type, new_name=None, new_pos=None):
     '''
@@ -944,9 +958,9 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
     '''
     if new_name is None:
         new_name = socket.name
-    socket.name = new_name    
+    socket.name = new_name
     # quit early
-    #if socket.bl_idname == new_type:
+    # if socket.bl_idname == new_type:
     #    return socket
     ng = socket.id_data
     ng.freeze()
@@ -954,16 +968,16 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
         to_sockets = [l.to_socket for l in socket.links]
         outputs = socket.node.outputs
         if new_pos is None:
-            for i,s in enumerate(outputs):
+            for i, s in enumerate(outputs):
                 if s == socket:
                     node_pos = i
                     break
         else:
             node_pos = new_pos
-            
+
         outputs.remove(socket)
         new_socket = outputs.new(new_type, new_name)
-        outputs.move(len(outputs)-1, node_pos)
+        outputs.move(len(outputs) - 1, node_pos)
         for to_socket in to_sockets:
             ng.links.new(new_socket, to_socket)
     else:
@@ -973,7 +987,7 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
             from_socket = None
         inputs = socket.node.inputs
         if new_pos is None:
-            for i,s in enumerate(inputs):
+            for i, s in enumerate(inputs):
                 if s == socket:
                     node_pos = i
                     break
@@ -981,12 +995,13 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
             node_pos = new_pos
         inputs.remove(socket)
         new_socket = inputs.new(new_type, new_name)
-        inputs.move(len(inputs)-1, node_pos)
+        inputs.move(len(inputs) - 1, node_pos)
         if from_socket:
             ng.links.new(from_socket, new_socket)
     ng.unfreeze()
     return new_socket
-    
+
+
 def get_other_socket(socket):
     """ 
     Get next real upstream socket.
@@ -998,7 +1013,7 @@ def get_other_socket(socket):
         other = socket.links[0].from_socket
         if other.node.bl_idname == 'NodeReroute':
             return get_other_socket(other.node.inputs[0])
-        else:  #other.node.bl_idname == 'WifiInputNode':
+        else:  # other.node.bl_idname == 'WifiInputNode':
             return other
     return None
 
@@ -1017,6 +1032,7 @@ def get_other_socket(socket):
 
 # the named argument min will be replaced soonish.
 
+
 def multi_socket(node, min=1, start=0, breck=False, out_count=None):
     '''
      min - integer, minimal number of sockets, at list 1 needed
@@ -1027,10 +1043,10 @@ def multi_socket(node, min=1, start=0, breck=False, out_count=None):
      node.multi_socket_type - type of socket, as .bl_idname 
 
     '''
-    #probably incorrect state due or init or change of inputs
+    # probably incorrect state due or init or change of inputs
     # do nothing
     ng = node.id_data
-            
+
     if min < 1:
         min = 1
     if out_count is None:
@@ -1056,7 +1072,7 @@ def multi_socket(node, min=1, start=0, breck=False, out_count=None):
             while len(node.outputs) < out_count:
                 length = start + len(node.outputs)
                 if breck:
-                    name = node.base_name + '[' + str(length)+ ']'
+                    name = node.base_name + '[' + str(length) + ']'
                 else:
                     name = node.base_name + str(length)
                 node.outputs.new(node.multi_socket_type, name)
@@ -1072,8 +1088,8 @@ def multi_socket(node, min=1, start=0, breck=False, out_count=None):
 
 # socket.name is not unique... identifier is
 def socket_id(socket):
-    #return hash(socket)
-    return str(hash(socket.id_data.name + socket.node.name + socket.identifier))+socket.node.name+socket.name
+    # return hash(socket)
+    return str(hash(socket.id_data.name + socket.node.name + socket.identifier)) + socket.node.name + socket.name
 
 # For when need a key for use with dict in node
 #  create a string property like this.
@@ -1129,7 +1145,7 @@ def SvGetSocketInfo(socket):
 
     global socket_data_cache
     ng = socket.id_data.name
-    
+
     if socket.is_output:
         s_id = socket_id(socket)
     elif socket.links:
@@ -1179,8 +1195,10 @@ def SvGetSocket(socket, deepcopy=True):
     # not linked
     raise SvNoDataError
 
+
 class SvNoDataError(LookupError):
     pass
+
 
 def reset_socket_cache(ng):
     """
@@ -1188,13 +1206,13 @@ def reset_socket_cache(ng):
     """
     global socket_data_cache
     socket_data_cache[ng.name] = {}
-        
+
 
 ####################################
 # быстрый сортировщик / quick sorter
 ####################################
 
 def svQsort(L):
-    if L: return svQsort([x for x in L[1:] if x<L[0]]) + L[0:1] + svQsort([x for x in L[1:] if x>=L[0]])
+    if L:
+        return svQsort([x for x in L[1:] if x < L[0]]) + L[0:1] + svQsort([x for x in L[1:] if x >= L[0]])
     return []
-

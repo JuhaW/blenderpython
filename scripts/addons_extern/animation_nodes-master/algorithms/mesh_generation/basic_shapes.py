@@ -1,7 +1,8 @@
 import math
 from mathutils import Vector
 
-def gridVertices(xDivisions, yDivisions, xDistance = 1, yDistance = 1, offset = Vector((0, 0, 0))):
+
+def gridVertices(xDivisions, yDivisions, xDistance=1, yDistance=1, offset=Vector((0, 0, 0))):
     vertices = []
     append = vertices.append
     for x in range(xDivisions):
@@ -9,11 +10,13 @@ def gridVertices(xDivisions, yDivisions, xDistance = 1, yDistance = 1, offset = 
             append(Vector((x * xDistance, y * yDistance, 0)) + offset)
     return vertices
 
+
 def tubeVertices(centerPoints, ringPoints, tangents, resolution):
     vertices = []
     for center, pointOnCircle, tangent in zip(centerPoints, ringPoints, tangents):
         vertices.extend(alignedCircleVertices(center, pointOnCircle, tangent, resolution))
     return vertices
+
 
 def alignedCircleVertices(center, pointOnCircle, tangent, resolution):
     dirX = pointOnCircle - center

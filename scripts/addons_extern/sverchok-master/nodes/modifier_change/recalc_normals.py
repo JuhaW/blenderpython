@@ -32,9 +32,9 @@ class SvRecalcNormalsNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     invert = BoolProperty(name="Inside",
-        description="Calculate inside normals",
-        default=False,
-        update=updateNode)
+                          description="Calculate inside normals",
+                          default=False,
+                          update=updateNode)
 
     def sv_init(self, context):
         self.inputs.new('VerticesSocket', "Vertices", "Vertices")
@@ -95,6 +95,7 @@ class SvRecalcNormalsNode(bpy.types.Node, SverchCustomTreeNode):
         if self.outputs['Polygons'].is_linked:
             self.outputs['Polygons'].sv_set(result_faces)
 
+
 def register():
     bpy.utils.register_class(SvRecalcNormalsNode)
 
@@ -104,6 +105,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-
-
-

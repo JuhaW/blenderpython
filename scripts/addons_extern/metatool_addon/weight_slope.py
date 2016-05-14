@@ -21,7 +21,7 @@
 
 # <pep8 compliant>
 
-#bl_info = {
+# bl_info = {
 #    "name": "Slope",
 #    "author": "Michel Anders (varkenvarken)",
 #    "version": (0, 0, 4),
@@ -176,12 +176,12 @@ def register():
     bpy.utils.register_class(Slope2VCol)
     bpy.utils.register_class(Slope2VGroup)
     bpy.types.VIEW3D_MT_paint_weight.append(menu_func_weight)
-    #bpy.types.VIEW3D_MT_paint_vertex.append(menu_func_vcol)
+    # bpy.types.VIEW3D_MT_paint_vertex.append(menu_func_vcol)
 
 
 def unregister():
     bpy.types.IVIEW3D_MT_paint_weight.remove(menu_func_weight)
-    #bpy.types.IVIEW3D_MT_paint_vertex.remove(menu_func_vcol)
+    # bpy.types.IVIEW3D_MT_paint_vertex.remove(menu_func_vcol)
     bpy.utils.unregister_class(Slope2VCol)
     bpy.utils.unregister_class(Slope2VGroup)
 

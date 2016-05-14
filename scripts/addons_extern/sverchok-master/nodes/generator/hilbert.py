@@ -60,14 +60,14 @@ class HilbertNode(bpy.types.Node, SverchCustomTreeNode):
 
         # outputs
         if self.outputs['Vertices'].is_linked:
-            verts = self.hilbert(0.0, 0.0, Step*1.0, 0.0, 0.0, Step*1.0, Integer)
+            verts = self.hilbert(0.0, 0.0, Step * 1.0, 0.0, 0.0, Step * 1.0, Integer)
             SvSetSocketAnyType(self, 'Vertices', [verts])
 
         if self.outputs['Edges'].is_linked:
             listEdg = []
-            r = len(verts)-1
+            r = len(verts) - 1
             for i in range(r):
-                listEdg.append((i, i+1))
+                listEdg.append((i, i + 1))
 
             edg = list(listEdg)
             SvSetSocketAnyType(self, 'Edges', [edg])
@@ -75,19 +75,20 @@ class HilbertNode(bpy.types.Node, SverchCustomTreeNode):
     def hilbert(self, x0, y0, xi, xj, yi, yj, n):
         out = []
         if n <= 0:
-            X = x0 + (xi + yi)/2
-            Y = y0 + (xj + yj)/2
+            X = x0 + (xi + yi) / 2
+            Y = y0 + (xj + yj) / 2
             out.append(X)
             out.append(Y)
             out.append(0)
             return [out]
 
         else:
-            out.extend(self.hilbert(x0,               y0,               yi/2, yj/2, xi/2, xj/2, n - 1))
-            out.extend(self.hilbert(x0 + xi/2,        y0 + xj/2,        xi/2, xj/2, yi/2, yj/2, n - 1))
-            out.extend(self.hilbert(x0 + xi/2 + yi/2, y0 + xj/2 + yj/2, xi/2, xj/2, yi/2, yj/2, n - 1))
-            out.extend(self.hilbert(x0 + xi/2 + yi,   y0 + xj/2 + yj,  -yi/2,-yj/2,-xi/2,-xj/2, n - 1))
+            out.extend(self.hilbert(x0, y0, yi / 2, yj / 2, xi / 2, xj / 2, n - 1))
+            out.extend(self.hilbert(x0 + xi / 2, y0 + xj / 2, xi / 2, xj / 2, yi / 2, yj / 2, n - 1))
+            out.extend(self.hilbert(x0 + xi / 2 + yi / 2, y0 + xj / 2 + yj / 2, xi / 2, xj / 2, yi / 2, yj / 2, n - 1))
+            out.extend(self.hilbert(x0 + xi / 2 + yi, y0 + xj / 2 + yj, -yi / 2, -yj / 2, -xi / 2, -xj / 2, n - 1))
             return out
+
 
 def register():
     bpy.utils.register_class(HilbertNode)

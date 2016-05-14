@@ -20,6 +20,7 @@
 
 import bpy
 
+
 def draw_smooth_vertices_ui(layout):
     addon = bpy.context.user_preferences.addons[__package__.split(".")[0]]
     props = addon.preferences.smooth_vertices
@@ -29,32 +30,32 @@ def draw_smooth_vertices_ui(layout):
         row = box.row()
 
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'TRIA_RIGHT', emboss = True
+            "wm.context_toggle", text="", icon='TRIA_RIGHT', emboss=True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
         row.label("Smooth Vertices")
         row.operator(
-            "mesh.sct_smooth_vertices", text = "", icon = 'MOD_SMOOTH'
+            "mesh.sct_smooth_vertices", text="", icon='MOD_SMOOTH'
         )
     else:
-        col = layout.column(align = True)
+        col = layout.column(align=True)
         box = col.box()
         row = box.row()
 
-        op = row.operator( 
-            "wm.context_toggle", text = "", icon = 'TRIA_DOWN', emboss = True
+        op = row.operator(
+            "wm.context_toggle", text="", icon='TRIA_DOWN', emboss=True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
-        row.label("Smooth Vertices") 
+        row.label("Smooth Vertices")
         row.operator(
-            "mesh.sct_smooth_vertices", text = "", icon = 'MOD_SMOOTH'
+            "mesh.sct_smooth_vertices", text="", icon='MOD_SMOOTH'
         )
 
         box = col.box()
 
         box.prop(props, "iterations")
 
-        col = box.column(align = True)
+        col = box.column(align=True)
 
         col.prop(props, "boundary_is_locked")
         col.prop(props, "only_selected_are_affected")

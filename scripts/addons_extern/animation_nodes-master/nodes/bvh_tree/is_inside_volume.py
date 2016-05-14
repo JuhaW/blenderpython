@@ -9,6 +9,7 @@ direction1 = Vector((random(), random(), random())).normalized()
 direction2 = Vector((random(), random(), random())).normalized()
 direction3 = Vector((random(), random(), random())).normalized()
 
+
 class IsInsideVolumeBVHTreeNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_IsInsideVolumeBVHTreeNode"
     bl_label = "Is Inside Volume"
@@ -20,8 +21,10 @@ class IsInsideVolumeBVHTreeNode(bpy.types.Node, AnimationNode):
 
     def execute(self, bvhTree, vector):
         hits1 = self.countHits(bvhTree, vector, direction1)
-        if hits1 == 0: return False
-        if hits1 == 1: return True
+        if hits1 == 0:
+            return False
+        if hits1 == 1:
+            return True
 
         hits2 = self.countHits(bvhTree, vector, direction2)
         if hits1 % 2 == hits2 % 2:

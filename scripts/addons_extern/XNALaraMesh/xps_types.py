@@ -49,14 +49,14 @@ class XpsVertex:
 
     def __copy__(self):
         return XpsVertex(
-                self.id,
-                self.co[:],
-                self.norm[:],
-                self.vColor[:],
-                self.uv[:],
-                self.boneWeights
-                )
-    
+            self.id,
+            self.co[:],
+            self.norm[:],
+            self.vColor[:],
+            self.uv[:],
+            self.boneWeights
+        )
+
 
 class XpsTexture:
 

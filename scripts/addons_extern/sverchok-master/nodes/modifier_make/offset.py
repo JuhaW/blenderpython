@@ -68,40 +68,40 @@ class SvOffsetNode(bpy.types.Node, SverchCustomTreeNode):
     def process(self):
 
         if self.outputs['Vers'].links and self.inputs['Vers'].links:
-                vertices = Vector_generate(SvGetSocketAnyType(self, self.inputs['Vers']))
-                faces = SvGetSocketAnyType(self, self.inputs['Pols'])
-                offset = self.inputs['Offset'].sv_get()[0]
-                nsides = self.inputs['N sides'].sv_get()[0][0]
-                radius = self.inputs['Radius'].sv_get()[0]
-                #print(radius,nsides,offset)
-                outv = []
-                oute = []
-                outo = []
-                outn = []
-                for verts_obj, faces_obj in zip(vertices, faces):
-                    # this is for one object
-                    fullList(offset, len(faces_obj))
-                    fullList(radius, len(faces_obj))
-                    verlen = set(range(len(verts_obj)))
-                    bme = bmesh_from_pydata(verts_obj, [], faces_obj)
-                    geom_in = bme.verts[:]+bme.edges[:]+bme.faces[:]
-                    bmesh.ops.recalc_face_normals(bme, faces=bme.faces[:])
-                    list_0 = [f.index for f in bme.faces]
-                    # calculation itself
-                    result = \
-                        self.Offset_pols(bme, list_0, offset, radius, nsides, verlen)
-                    outv.append(result[0])
-                    oute.append(result[1])
-                    outo.append(result[2])
-                    outn.append(result[3])
-                if self.outputs['Vers'].links:
-                    SvSetSocketAnyType(self, 'Vers', outv)
-                if self.outputs['Edgs'].links:
-                    SvSetSocketAnyType(self, 'Edgs', oute)
-                if self.outputs['OutPols'].links:
-                    SvSetSocketAnyType(self, 'OutPols', outo)
-                if self.outputs['InPols'].links:
-                    SvSetSocketAnyType(self, 'InPols', outn)
+            vertices = Vector_generate(SvGetSocketAnyType(self, self.inputs['Vers']))
+            faces = SvGetSocketAnyType(self, self.inputs['Pols'])
+            offset = self.inputs['Offset'].sv_get()[0]
+            nsides = self.inputs['N sides'].sv_get()[0][0]
+            radius = self.inputs['Radius'].sv_get()[0]
+            # print(radius,nsides,offset)
+            outv = []
+            oute = []
+            outo = []
+            outn = []
+            for verts_obj, faces_obj in zip(vertices, faces):
+                # this is for one object
+                fullList(offset, len(faces_obj))
+                fullList(radius, len(faces_obj))
+                verlen = set(range(len(verts_obj)))
+                bme = bmesh_from_pydata(verts_obj, [], faces_obj)
+                geom_in = bme.verts[:] + bme.edges[:] + bme.faces[:]
+                bmesh.ops.recalc_face_normals(bme, faces=bme.faces[:])
+                list_0 = [f.index for f in bme.faces]
+                # calculation itself
+                result = \
+                    self.Offset_pols(bme, list_0, offset, radius, nsides, verlen)
+                outv.append(result[0])
+                oute.append(result[1])
+                outo.append(result[2])
+                outn.append(result[3])
+            if self.outputs['Vers'].links:
+                SvSetSocketAnyType(self, 'Vers', outv)
+            if self.outputs['Edgs'].links:
+                SvSetSocketAnyType(self, 'Edgs', oute)
+            if self.outputs['OutPols'].links:
+                SvSetSocketAnyType(self, 'OutPols', outo)
+            if self.outputs['InPols'].links:
+                SvSetSocketAnyType(self, 'InPols', outn)
 
     # #################
     #   part from ofset operator in extra tools
@@ -224,11 +224,11 @@ class SvOffsetNode(bpy.types.Node, SverchCustomTreeNode):
                 # bm_faces.index_update()
 
             # keeping triangulation of polygons commented
-            #if en0 == 'opt0':
+            # if en0 == 'opt0':
             for k in dict_0:
                 if len(dict_0[k]) > 2:
                     bm_faces.new(dict_0[k])
-            #if en0 == 'opt1':
+            # if en0 == 'opt1':
             #    for k_ in dict_0:
             #        q_ = dict_0[k_][0]
             #        dict_0[k_].pop(0)

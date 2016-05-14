@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class InvertNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_InvertNode"
     bl_label = "Invert Boolean"

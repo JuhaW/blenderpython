@@ -33,7 +33,7 @@ class MatrixGenNode(bpy.types.Node, SverchCustomTreeNode):
         s.use_prop = True
         s = self.inputs.new('VerticesSocket', "Scale")
         s.use_prop = True
-        s.prop = (1, 1 , 1)
+        s.prop = (1, 1, 1)
         s = self.inputs.new('VerticesSocket', "Rotation")
         s.use_prop = True
         s.prop = (0, 0, 1)
@@ -41,7 +41,7 @@ class MatrixGenNode(bpy.types.Node, SverchCustomTreeNode):
         self.outputs.new('MatrixSocket', "Matrix")
 
     def process(self):
-        L,S,R,A = self.inputs
+        L, S, R, A = self.inputs
         Ma = self.outputs[0]
         if not Ma.is_linked:
             return

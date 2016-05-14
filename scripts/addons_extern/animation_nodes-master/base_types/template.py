@@ -5,21 +5,24 @@ from .. tree_info import getNodeByIdentifier
 from .. nodes.system import subprogram_sockets
 from .. utils.nodes import newNodeAtCursor, invokeTranslation
 
+
 class Template:
     bl_options = {"INTERNAL"}
     nodeOffset = (0, 0)
     menuWidth = 400
 
-    usedMenu = BoolProperty(default = False)
+    usedMenu = BoolProperty(default=False)
 
     @classmethod
     def poll(cls, context):
-        try: return context.space_data.node_tree.bl_idname == "an_AnimationNodeTree"
-        except: return False
+        try:
+            return context.space_data.node_tree.bl_idname == "an_AnimationNodeTree"
+        except:
+            return False
 
     def invoke(self, context, event):
         if hasattr(self, "drawDialog"):
-            return context.window_manager.invoke_props_dialog(self, width = self.menuWidth)
+            return context.window_manager.invoke_props_dialog(self, width=self.menuWidth)
         if hasattr(self, "drawMenu") and getattr(self, "needsMenu", False):
             self.usedMenu = True
             context.window_manager.popup_menu(self.drawPopupMenu)
@@ -51,20 +54,24 @@ class Template:
     def insert(self):
         pass
 
-    def newNode(self, type, x = 0, y = 0, move = True, mouseOffset = True, label = ""):
-        node = self.nodeTree.nodes.new(type = type)
+    def newNode(self, type, x=0, y=0, move=True, mouseOffset=True, label=""):
+        node = self.nodeTree.nodes.new(type=type)
         node.location = (x, y)
         node.label = label
-        if mouseOffset: self.nodesToOffset.append(node)
-        if move: self.nodesToMove.append(node)
+        if mouseOffset:
+            self.nodesToOffset.append(node)
+        if move:
+            self.nodesToMove.append(node)
         return node
 
     def newLink(self, fromSocket, toSocket):
         self.nodeTree.links.new(toSocket, fromSocket)
 
     def nodeByIdentifier(self, identifier):
-        try: return getNodeByIdentifier(identifier)
-        except: return None
+        try:
+            return getNodeByIdentifier(identifier)
+        except:
+            return None
 
     def offsetNodesToMouse(self):
         tempNode = newNodeAtCursor("an_DebugNode")

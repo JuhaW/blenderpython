@@ -11,4 +11,3 @@ def sv_main(se=[]):
         ['s', 'out', [[[out]]]]]
 
     return in_sockets, out_sockets
-

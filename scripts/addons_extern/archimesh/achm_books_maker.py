@@ -67,7 +67,7 @@ class AchmBooks(bpy.types.Operator):
     afn = bpy.props.IntProperty(name='Affinity', min=0, max=10, default=5,
                                 description='Number of books with same rotation angle')
 
-    # Materials        
+    # Materials
     crt_mat = bpy.props.BoolProperty(name="Create default Cycles materials",
                                      description="Create default materials for "
                                                  "Cycles render.", default=True)
@@ -129,7 +129,7 @@ class AchmBooks(bpy.types.Operator):
     # noinspection PyUnusedLocal
     def execute(self, context):
         if bpy.context.mode == "OBJECT":
-            # Create shelves    
+            # Create shelves
             create_book_mesh(self)
             return {'FINISHED'}
         else:
@@ -161,7 +161,7 @@ def generate_books(self):
     location = bpy.context.scene.cursor_location
     myloc = copy.copy(location)  # copy location to keep 3D cursor position
 
-    # Create 
+    # Create
     lastx = myloc.x
     ox = 0
     oy = 0
@@ -241,7 +241,7 @@ def create_book(objname, sx, sy, sz, px, py, pz, mat, frx,
     # gap Randomness
     ri = random.randint(10, 150)
     gap = ri / 100000
-    # Randomness X   
+    # Randomness X
     if ox == 0:
         ri = random.randint(0, int(frx * 1000))
         factor = ri / 1000

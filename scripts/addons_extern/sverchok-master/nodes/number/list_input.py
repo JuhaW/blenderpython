@@ -84,7 +84,7 @@ class SvListInputNode(bpy.types.Node, SverchCustomTreeNode):
             for i in range(self.v_int):
                 row = col.row(align=True)
                 for j in range(3):
-                    row.prop(self, 'vector_list', index=i*3+j, text='XYZ'[j])
+                    row.prop(self, 'vector_list', index=i * 3 + j, text='XYZ'[j])
         else:
             col = layout.column(align=True)
             for i in range(self.int_):
@@ -97,10 +97,11 @@ class SvListInputNode(bpy.types.Node, SverchCustomTreeNode):
             elif self.mode == 'float_list':
                 data = [list(self.float_list[:self.int_])]
             elif self.mode == 'vector':
-                c = self.v_int*3
+                c = self.v_int * 3
                 v_l = list(self.vector_list)
                 data = [list(zip(v_l[0:c:3], v_l[1:c:3], v_l[2:c:3]))]
             self.outputs[0].sv_set(data)
+
 
 def register():
     bpy.utils.register_class(SvListInputNode)

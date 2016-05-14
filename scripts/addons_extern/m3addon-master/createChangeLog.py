@@ -27,12 +27,13 @@ import time
 
 modelFileName = sys.argv[1]
 
+
 class ChangeLogCreator:
-    
+
     def __init__(self, modelFileName, logFileName):
         self.modelFileName = modelFileName
         self.logFileName = logFileName
-    
+
     def createChangeLog(self):
         self.logFile = open(self.logFileName, "w")
         try:
@@ -53,19 +54,19 @@ class ChangeLogCreator:
                     previousModel = currentModel
                 time.sleep(0.1)
         finally:
-           self.logFile.close()
-                
+            self.logFile.close()
+
     def compareM3Structures(self, previous, current, structurePath):
         previousType = previous.structureDescription
         currentType = current.structureDescription
         if currentType.structureName != previousType.structureName:
             self.log("%s changed its structure type from %s to %s" % (structurePath, previousType.structureName, currentType.structureName))
             return
-        
+
         if currentType.structureVersion != previousType.structureVersion:
             self.log("%s changed its structure version from %s to %s" % (structurePath, previousType.structureVersion, currentType.structureVersion))
             return
-        
+
         for field in previousType.fields:
             fieldPath = structurePath + "." + field.name
             previousFieldContent = getattr(previous, field.name)
@@ -76,7 +77,7 @@ class ChangeLogCreator:
                 currentLength = len(currentFieldContent)
                 previousLength = len(previousFieldContent)
                 if len(currentFieldContent) != previousLength:
-                    self.log("The length of %s changed from %d to %d" % (fieldPath, previousLength, currentLength ))
+                    self.log("The length of %s changed from %d to %d" % (fieldPath, previousLength, currentLength))
                 else:
                     elementIndex = 0
                     for previousElement, currentElement in zip(previousFieldContent, currentFieldContent):
@@ -84,12 +85,12 @@ class ChangeLogCreator:
                         self.compareM3Structures(previousElement, currentElement, elementPath)
                         elementIndex += 1
             else:
-                    
+
                 if currentFieldContent != previousFieldContent:
-                    if field.name != "animId" and field.name != "uniqueUnknownNumber" :
+                    if field.name != "animId" and field.name != "uniqueUnknownNumber":
                         if isinstance(field, m3.IntField):
                             previousFieldContentStr = hex(previousFieldContent)
-                            currentFieldContentStr = hex(currentFieldContent) 
+                            currentFieldContentStr = hex(currentFieldContent)
                         else:
                             previousFieldContentStr = str(previousFieldContent)
                             currentFieldContentStr = str(currentFieldContent)
@@ -97,12 +98,10 @@ class ChangeLogCreator:
                     else:
                         self.changedAnimationIds += 1
 
-            
-    
     def log(self, message):
         self.logFile.write(str(message) + "\n")
-        print(message) 
-    
+        print(message)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('m3File', help="The m3 file for which a change log should be created")

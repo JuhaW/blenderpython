@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class VectorLengthNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_VectorLengthNode"
     bl_label = "Vector Length"

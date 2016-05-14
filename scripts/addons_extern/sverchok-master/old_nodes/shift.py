@@ -21,7 +21,7 @@ from bpy.props import BoolProperty, IntProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, StringsSocket
 from sverchok.data_structure import (updateNode, changable_sockets,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class ShiftNode(bpy.types.Node, SverchCustomTreeNode):
@@ -59,7 +59,7 @@ class ShiftNode(bpy.types.Node, SverchCustomTreeNode):
     def process(self):
         if not self.outputs["data"].is_linked:
             return
-            
+
         data = self.inputs['data'].sv_get()
         number = self.inputs["shift"].sv_get()
         output = self.shift(data, number, self.enclose, self.level)
@@ -70,22 +70,22 @@ class ShiftNode(bpy.types.Node, SverchCustomTreeNode):
         if level:
             list_all = []
             for idx, obj in enumerate(list_a):
-                list_all.append(self.shift(obj, shift, check_enclose, level-1, idx))
+                list_all.append(self.shift(obj, shift, check_enclose, level - 1, idx))
 
         else:
             list_all = []
             if type(list_a) == list:
-                indx = min(cou, len(shift)-1)
+                indx = min(cou, len(shift) - 1)
                 for i, l in enumerate(list_a):
                     if type(l) == tuple:
                         l = list(l[:])
-                    k = min(len(shift[indx])-1, i)
+                    k = min(len(shift[indx]) - 1, i)
                     n = shift[indx][k]
                     n_ = min(abs(n), len(l))
                     if n < 0:
                         list_out = l[:-n_]
                         if check_enclose:
-                            list_out = l[-n_:]+list_out
+                            list_out = l[-n_:] + list_out
                     else:
                         list_out = l[n_:]
                         if check_enclose:

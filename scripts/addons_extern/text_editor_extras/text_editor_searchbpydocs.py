@@ -19,15 +19,13 @@ def search_bpydocs(input_string):
         webbrowser.open(''.join([s_head, s_path, s_slug, s_term, s_tail]))
     except:
         print('unable to browse docs online')
-        
 
 
 class TextSearchBpyDocs(bpy.types.Operator):
     bl_label = ""
     bl_idname = "txt.search_bpydocs"
-    
+
     def execute(self, context):
         bpy.ops.text.copy()
         search_bpydocs(context.window_manager.clipboard)
         return {'FINISHED'}
-

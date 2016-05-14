@@ -20,7 +20,7 @@
 
 bl_info = {
     "name": "Mesh: Icicle/Snowflake",
-    "author":"Eoin Brennan (Mayeoin Bread)",
+    "author": "Eoin Brennan (Mayeoin Bread)",
     "version": (0, 1, 0),
     "blender": (2, 74, 0),
     "location": "View3D > Add > Mesh",
@@ -44,6 +44,7 @@ else:
 
 import bpy
 
+
 class INFO_MT_mesh_icy_add(bpy.types.Menu):
     # Define the "Ice" menu
     bl_idname = "INFO_MT_mesh_ice_add"
@@ -53,21 +54,25 @@ class INFO_MT_mesh_icy_add(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.operator("mesh.icicle_gen",
-            text="Icicle Generator")
+                        text="Icicle Generator")
         layout.operator("mesh.snowflake",
-            text="Snowflake")
+                        text="Snowflake")
 
 # Register all operators and panels
 
 # Define "Extras" menu
+
+
 def menu_func(self, context):
     self.layout.menu("INFO_MT_mesh_ice_add", text="Ice & Snow")
+
 
 def register():
     bpy.utils.register_module(__name__)
 
     # Add "Extras" menu to the "Add Mesh" menu
     bpy.types.INFO_MT_mesh_add.append(menu_func)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

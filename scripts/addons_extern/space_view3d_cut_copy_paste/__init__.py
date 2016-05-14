@@ -96,209 +96,220 @@ It can paste even in a different file, but it will always append everything
 # be safely pasted.
 copy_paste_modes = {'OBJECT', 'EDIT_MESH', 'EDIT_CURVE', 'EDIT_SURFACE', 'EDIT_ARMATURE', 'EDIT_METABALL'}
 
+
 def compress_b64(b):
     # Somewhat strangely, compresslevel=1 not just works twice as fast
     # than compresslevel=9, but also results in lower size %)
     # (Tested on Suzanne subsurfed 3 times)
     return base64.b64encode(bz2.compress(b, 1)).decode('ascii')
 
+
 def decompress_b64(c):
     return bz2.decompress(base64.b64decode(c.encode('ascii')))
+
 
 def def_read_funcs(_stream):
     read = _stream.read
     unpack = struct.unpack
-    
+
     def read_H():
         return unpack('!H', read(2))[0]
-    
+
     def read_I():
         return unpack('!I', read(4))[0]
-    
+
     def read_i():
         return unpack('!i', read(4))[0]
-    
+
     def read_f():
         return unpack('!f', read(4))[0]
-    
+
     def read_d():
         return unpack('!d', read(8))[0]
-    
+
     def read_bool():
         return unpack('!?', read(1))[0]
-    
+
     def read_ddd():
         return unpack('!ddd', read(24))
-    
+
     def read_str():
         return read(read_H()).decode('utf-8')
-    
+
     def deserializer_float(elem, layer):
         elem[layer] = unpack('!f', read(4))[0]
-    
+
     def deserializer_int(elem, layer):
         elem[layer] = unpack('!i', read(4))[0]
-    
+
     def deserializer_string(elem, layer):
         # string layer is exposed as bytes, max len is 255
         elem[layer] = read(unpack('!B', read(1))[0])
-    
+
     def deserializer_deform(elem, layer):
         dvert = elem[layer]
-        if not hasattr(dvert, "items"): return # Blender supports this since some version
+        if not hasattr(dvert, "items"):
+            return  # Blender supports this since some version
         count = unpack('!i', read(4))[0]
         for i in range(count):
             group_index = unpack('!i', read(4))[0]
             weight = unpack('!f', read(4))[0]
             dvert[group_index] = weight
-    
+
     def deserializer_vector(elem, layer):
         elem[layer] = unpack('!ddd', read(24))
-    
+
     def deserializer_color(elem, layer):
         elem[layer] = unpack('!fff', read(12))
-    
+
     def deserializer_uv(elem, layer):
         elem[layer].pin_uv = unpack('!?', read(1))[0]
         elem[layer].uv = unpack('!ff', read(8))
-    
+
     def deserializer_tex(elem, layer):
         facetex = elem[layer]
         if not hasattr(facetex, "image"):
-            return # Blender supports this since some version
+            return  # Blender supports this since some version
         else:
-            pass # TODO
-    
+            pass  # TODO
+
     def deserializer_skin(value):
         elem[layer].radius = unpack('!ff', read(8))
         elem[layer].use_loose = unpack('!?', read(1))[0]
         elem[layer].use_root = unpack('!?', read(1))[0]
-    
+
     def deserializer_freestyle(value):
-        pass # Not implemented as of Blender 2.74
-    
-    return {k:v for k, v in locals().items() if not k.startswith("_")}
+        pass  # Not implemented as of Blender 2.74
+
+    return {k: v for k, v in locals().items() if not k.startswith("_")}
+
 
 def def_write_funcs(_stream):
     write = _stream.write
     pack = struct.pack
-    
+
     def write_str(s):
         b = s.encode('utf-8')
         write(pack('!H', len(b)))
         write(b)
-    
+
     def serializer_float(value):
         write(pack('!f', value))
-    
+
     def serializer_int(value):
         write(pack('!i', value))
-    
+
     def serializer_string(value):
         # string layer is exposed as bytes, max len is 255
         write(pack('!B', len(value)))
         write(value)
-    
+
     def serializer_deform(value):
         if not hasattr(value, "items"):
-            write(pack('!i', 0)) # Blender supports this since some version
+            write(pack('!i', 0))  # Blender supports this since some version
         else:
             items = value.items()
             write(pack('!i', len(items)))
             for group_index, weight in items:
                 write(pack('!i', group_index))
                 write(pack('!f', weight))
-    
+
     def serializer_vector(value):
         write(pack('!ddd', *value))
-    
+
     def serializer_color(value):
         write(pack('!fff', *value))
-    
+
     def serializer_uv(value):
         write(pack('!?', value.pin_uv))
         write(pack('!ff', *value.uv))
-    
+
     def serializer_tex(value):
         if not hasattr(value, "image"):
-            return # Blender supports this since some version
+            return  # Blender supports this since some version
         else:
-            pass # TODO
-    
+            pass  # TODO
+
     def serializer_skin(value):
         write(pack('!ff', *value.radius))
         write(pack('!?', value.use_loose))
         write(pack('!?', value.use_root))
-    
+
     def serializer_freestyle(value):
-        pass # Not implemented as of Blender 2.74
-    
-    return {k:v for k, v in locals().items() if not k.startswith("_")}
+        pass  # Not implemented as of Blender 2.74
+
+    return {k: v for k, v in locals().items() if not k.startswith("_")}
+
 
 class ChunkWriter:
+
     def __init__(self, stream, name):
         self.stream = stream
-        
+
         b = name.encode('utf-8')
         stream.write(struct.pack('!H', len(b)))
         stream.write(b)
-        
+
         self.size_pos = stream.tell()
         stream.write(struct.pack('!I', 0))
-        
+
         self.pos = stream.tell()
-    
+
     def __enter__(self):
         return self
-    
+
     def __exit__(self, type, value, traceback):
         pos = self.stream.tell()
         self.stream.seek(self.size_pos)
         self.stream.write(struct.pack('!I', pos - self.pos))
         self.stream.seek(pos)
 
+
 class ChunkReader:
+
     def __init__(self, stream, expected_name=None):
         self.stream = stream
-        
+
         read = stream.read
         unpack = struct.unpack
-        
+
         try:
             n = unpack('!H', read(2))[0]
         except struct.error:
             n = None
-        
+
         if n is None:
             assert not expected_name
             self.name = None
             self.size = 0
             self.end = stream.tell()
             return
-        
+
         self.name = read(n).decode('utf-8')
-        
+
         if expected_name:
             assert self.name == expected_name
-        
+
         self.size = unpack('!I', read(4))[0]
-        
+
         self.end = stream.tell() + self.size
-    
+
     def __bool__(self):
         return self.stream.tell() < self.end
-    
+
     def __enter__(self):
         return self
-    
+
     def __exit__(self, type, value, traceback):
         self.stream.seek(self.end)
-    
+
     def skip(self):
         self.stream.seek(self.end)
 
+
 def is_view3d(context):
     return ((context.area.type == 'VIEW_3D') and (context.region.type == 'WINDOW'))
+
 
 def get_view_rotation(context):
     v3d = context.space_data
@@ -311,16 +322,18 @@ def get_view_rotation(context):
 # We can't use the same clipboard file, because Blender keeps reference
 # to a library after appending from it (-> forbids to save files with
 # that filepath).
+
+
 def make_clipboard_path():
     # LOCAL is blender's executable location,
     # and Blender must always start from ASCII path
     # (at least until non-ASCII problems are fixed)
-    #resource_path = bpy.utils.resource_path('LOCAL') # USER SYSTEM
+    # resource_path = bpy.utils.resource_path('LOCAL') # USER SYSTEM
     resource_path = bpy.app.tempdir
-    
+
     lib_paths = set(os.path.normcase(bpy.path.abspath(lib.filepath))
                     for lib in bpy.data.libraries)
-    
+
     startkey = str(int(time.clock())).replace(".", "_") + "_"
     i = 0
     while True:
@@ -330,41 +343,45 @@ def make_clipboard_path():
             return path
         i += 1
 
+
 def remove_clipboard_files():
-    resource_path = bpy.utils.resource_path('LOCAL') # USER SYSTEM
-    
+    resource_path = bpy.utils.resource_path('LOCAL')  # USER SYSTEM
+
     filemask = os.path.join(resource_path, "clipboard.*.blend")
     for path in glob.glob(filemask):
         os.remove(path)
 
+
 def is_clipboard_path(path):
-    resource_path = bpy.utils.resource_path('LOCAL') # USER SYSTEM
-    
+    resource_path = bpy.utils.resource_path('LOCAL')  # USER SYSTEM
+
     resource_path = os.path.normcase(resource_path)
     path = os.path.normcase(bpy.path.abspath(path))
-    
+
     if path.startswith(resource_path):
         path = path[len(resource_path):]
         if path.startswith(os.path.sep):
             path = path[1:]
         if path.startswith("clipboard.") and path.endswith(".blend"):
             return True
-    
+
     return False
 
+
 def data_clipboard_path():
-    resource_path = bpy.utils.resource_path('LOCAL') # USER SYSTEM
+    resource_path = bpy.utils.resource_path('LOCAL')  # USER SYSTEM
     return os.path.normcase(os.path.join(resource_path, "clipboard.data"))
+
 
 @addon.Panel(space_type='VIEW_3D', region_type='TOOLS', category="Tools", label="Copy/Paste")
 class VIEW3D_PT_copy_paste:
-    coordsystem_icons = {'GLOBAL':'WORLD', 'LOCAL':'MANIPUL'}
-    
+    coordsystem_icons = {'GLOBAL': 'WORLD', 'LOCAL': 'MANIPUL'}
+
     def draw(self, context):
         layout = NestedLayout(self.layout)
-        
+
         opts = addon.preferences
-        
+
         with layout.row(True)(enabled=(context.mode in copy_paste_modes)):
             layout.prop(opts, "external", text="", icon='URL')
             layout.prop(opts, "append", text="", icon='LINK_BLEND')
@@ -372,26 +389,28 @@ class VIEW3D_PT_copy_paste:
             layout.prop(opts, "paste_at_cursor", text="", icon='CURSOR')
             layout.prop(opts, "move_to_mouse", text="", icon='RESTRICT_SELECT_OFF')
             layout.prop(opts, "align_to_view", text="", icon='CAMERA_DATA')
-            
+
             coordsystem = opts.actual_coordsystem(context)
             icon = self.coordsystem_icons[coordsystem]
             layout.prop_menu_enum(opts, "coordinate_system", text="", icon=icon)
 
+
 @addon.Operator(idname="view3d.copy", label="Copy objects/elements", description="Copy objects/elements")
 class OperatorCopy:
     force_copy = False | -prop()
-    
+
     @classmethod
     def poll(cls, context):
-        if context.mode not in copy_paste_modes: return False
+        if context.mode not in copy_paste_modes:
+            return False
         return context.selected_objects
-    
+
     def write_object(self, json_data, context):
         wm = context.window_manager
         opts = addon.preferences
-        
+
         self_is_clipboard = False
-        
+
         # Cut operation deletes objects from the scene after copying,
         # so we have to store them somewhere else (-> force_copy=True).
         if opts.external or self.force_copy:
@@ -402,16 +421,16 @@ class OperatorCopy:
             self_library = path
         else:
             self_library = ""
-        
+
         libraries = {}
         libraries_inv = {}
-        
+
         def library_id(obj):
             if obj.library:
                 path = bpy.path.abspath(obj.library.filepath)
             else:
                 path = self_library
-            
+
             if path in libraries:
                 return libraries[path]
             # JSON turns all keys into strings anyway
@@ -419,35 +438,35 @@ class OperatorCopy:
             libraries[path] = id
             libraries_inv[id] = path
             return id
-        
+
         objects = {}
         parents = {}
         active_obj = context.object
-        
+
         for obj in context.selected_objects:
             if obj == active_obj:
                 json_data["active_object"] = obj.name
                 json_data["active_object_library"] = library_id(obj)
-            
+
             objects[obj.name] = library_id(obj)
-            
+
             if obj.parent:
                 parents[obj.name] = (obj.parent.name, obj.parent_bone)
-        
+
         json_data["objects"] = objects
         json_data["parents"] = parents
-        
+
         json_data["libraries"] = libraries_inv
-        
+
         if self_library and (self_library in libraries):
             if self_is_clipboard:
                 remove_clipboard_files()
                 bpy.ops.wm.save_as_mainfile(filepath=self_library,
-                    check_existing=False, copy=True)
+                                            check_existing=False, copy=True)
             else:
                 # make sure the file is up-to-date
                 bpy.ops.wm.save_mainfile(check_existing=False)
-    
+
     def write_mesh(self, obj, stream):
         iofuncs = def_write_funcs(stream)
         # No faster way around. In Python 3.x, we have
@@ -465,7 +484,7 @@ class OperatorCopy:
         serializer_tex = iofuncs["serializer_tex"]
         serializer_skin = iofuncs["serializer_skin"]
         serializer_freestyle = iofuncs["serializer_freestyle"]
-        
+
         serializers = {}
         serializers["verts.float"] = serializer_float
         serializers["verts.int"] = serializer_int
@@ -474,38 +493,38 @@ class OperatorCopy:
         serializers["verts.deform"] = serializer_deform
         serializers["verts.shape"] = serializer_vector
         serializers["verts.skin"] = serializer_skin
-        
+
         serializers["edges.float"] = serializer_float
         serializers["edges.int"] = serializer_int
         serializers["edges.string"] = serializer_string
         serializers["edges.bevel_weight"] = serializer_float
         serializers["edges.crease"] = serializer_float
         serializers["edges.freestyle"] = serializer_freestyle
-        
+
         serializers["loops.float"] = serializer_float
         serializers["loops.int"] = serializer_int
         serializers["loops.string"] = serializer_string
         serializers["loops.color"] = serializer_color
         serializers["loops.uv"] = serializer_uv
-        
+
         serializers["faces.float"] = serializer_float
         serializers["faces.int"] = serializer_int
         serializers["faces.string"] = serializer_string
         serializers["faces.tex"] = serializer_tex
         serializers["faces.freestyle"] = serializer_freestyle
-        
+
         # A ~bug? Iterating layers.*.items() yields BMLayerItem,
         # and iterating layers.*.values() yields (item_name, BMLayerItem)
-        
+
         # Seems like just removing all the unselected vertices is
         # the easiest way -- only the relevant edges, loops, faces
         # and layer data remain.
         # After removal, order of elements does not change,
         # and linked elements don't have to be checked for is_valid
         # (removed ones simply don't come up in the iteration).
-        
+
         bm = bmesh.from_edit_mesh(obj.data).copy()
-        
+
         i = 0
         with ChunkWriter(stream, "verts"):
             for v in bm.verts:
@@ -515,7 +534,7 @@ class OperatorCopy:
                     i += 1
                 else:
                     bm.verts.remove(v)
-        
+
         i = 0
         with ChunkWriter(stream, "edges"):
             for e in bm.edges:
@@ -525,7 +544,7 @@ class OperatorCopy:
                 write(pack('!?', e.smooth))
                 e.index = i
                 i += 1
-        
+
         i = 0
         with ChunkWriter(stream, "faces"):
             for f in bm.faces:
@@ -537,111 +556,111 @@ class OperatorCopy:
                 write(pack('!?', f.smooth))
                 f.index = i
                 i += 1
-        
-        select_types = {bmesh.types.BMVert:b'V',
-                        bmesh.types.BMEdge:b'E',
-                        bmesh.types.BMFace:b'F'}
-        
+
+        select_types = {bmesh.types.BMVert: b'V',
+                        bmesh.types.BMEdge: b'E',
+                        bmesh.types.BMFace: b'F'}
+
         with ChunkWriter(stream, "select_history"):
             for elem in bm.select_history:
                 write(select_types[type(elem)])
                 write(pack('!I', elem.index))
-        
+
         def serialize_loops():
             with ChunkWriter(stream, "loops"):
                 for k in dir(bm.loops.layers):
                     if k.startswith("_"):
                         continue
-                    
+
                     layers = getattr(bm.loops.layers, k)
-                    
+
                     serializer = serializers["loops." + k]
-                    
+
                     with ChunkWriter(stream, k):
                         for layer_name in layers.keys():
                             layer = layers[layer_name]
-                            
+
                             with ChunkWriter(stream, layer_name):
                                 for f in bm.faces:
                                     for l in f.loops:
                                         serializer(l[layer])
-        
+
         with ChunkWriter(stream, "layers"):
             for seq_type in ("verts", "edges", "faces"):
                 seq = getattr(bm, seq_type)
                 seq_layers = seq.layers
-                
+
                 with ChunkWriter(stream, seq_type):
                     for k in dir(seq_layers):
                         if k.startswith("_"):
                             continue
-                        
+
                         layers = getattr(seq_layers, k)
-                        
+
                         serializer = serializers[seq_type + "." + k]
-                        
+
                         with ChunkWriter(stream, k):
                             for layer_name in layers.keys():
                                 layer = layers[layer_name]
-                                
+
                                 with ChunkWriter(stream, layer_name):
                                     for elem in seq:
                                         serializer(elem[layer])
-                        
+
                         if seq_type == "faces":
                             # bm.loops (BMLoopsSeq) are not iterable %)
                             serialize_loops()
-        
+
         bm.free()
-    
+
     def write_curve(self, json_data, context):
         obj = context.object
         data = obj.data
-        
+
         curve_buffers = {
-            "splines":{
-                "bezier_points":{
-                    None:{"select":["select_control_point",
-                                    "select_left_handle",
-                                    "select_right_handle"]},
-                    "co":None,
-                    "handle_left":None,
-                    "handle_left_type":None,
-                    "handle_right":None,
-                    "handle_right_type":None,
-                    "radius":None,
-                    "tilt":None,
-                    "weight":None,
+            "splines": {
+                "bezier_points": {
+                    None: {"select": ["select_control_point",
+                                      "select_left_handle",
+                                      "select_right_handle"]},
+                    "co": None,
+                    "handle_left": None,
+                    "handle_left_type": None,
+                    "handle_right": None,
+                    "handle_right_type": None,
+                    "radius": None,
+                    "tilt": None,
+                    "weight": None,
                 },
-                "material_index":None,
-                "order_u":None,
-                "order_v":None,
-                "points":{
-                    None:{"select":["select"]},
-                    "co":None,
-                    "radius":None,
-                    "tilt":None,
-                    "weight":None,
-                    "weight_softbody":None,
+                "material_index": None,
+                "order_u": None,
+                "order_v": None,
+                "points": {
+                    None: {"select": ["select"]},
+                    "co": None,
+                    "radius": None,
+                    "tilt": None,
+                    "weight": None,
+                    "weight_softbody": None,
                 },
-                "radius_interpolation":None,
-                "resolution_u":None,
-                "resolution_v":None,
-                "tilt_interpolation":None,
-                "type":None,
-                "use_bezier_u":None,
-                "use_bezier_v":None,
-                "use_cyclic_u":None,
-                "use_cyclic_v":None,
-                "use_endpoint_u":None,
-                "use_endpoint_v":None,
-                "use_smooth":None,
+                "radius_interpolation": None,
+                "resolution_u": None,
+                "resolution_v": None,
+                "tilt_interpolation": None,
+                "type": None,
+                "use_bezier_u": None,
+                "use_bezier_v": None,
+                "use_cyclic_u": None,
+                "use_cyclic_v": None,
+                "use_endpoint_u": None,
+                "use_endpoint_v": None,
+                "use_smooth": None,
             },
         }
-        
-        output = {"splines":[]}
+
+        output = {"splines": []}
         write_buffers(data, curve_buffers, output)
-        
+
         # Remove splines without selected points
         spline = output["splines"][0]
         i = 0
@@ -654,35 +673,35 @@ class OperatorCopy:
                     v.pop(i)
             else:
                 i += 1
-        
+
         print()
         print(output)
-        
+
         pass
-    
+
     def write_meta(self, json_data, context):
         obj = context.object
         data = obj.data
-        
+
         meta_buffers = {
-            "elements":{
+            "elements": {
                 # !!! Blender does not expose metaelement selection!
-                #None:{"select":["select"]},
-                "co":None,
-                "radius":None,
-                "rotation":None,
-                "size_x":None,
-                "size_y":None,
-                "size_z":None,
-                "stiffness":None,
-                "type":None,
-                "use_negative":None,
+                # None:{"select":["select"]},
+                "co": None,
+                "radius": None,
+                "rotation": None,
+                "size_x": None,
+                "size_y": None,
+                "size_z": None,
+                "stiffness": None,
+                "type": None,
+                "use_negative": None,
             },
         }
-        
-        output = {"elements":[]}
+
+        output = {"elements": []}
         write_buffers(data, meta_buffers, output)
-        
+
         # Leave only active element
         element = output["elements"][0]
         i = 0
@@ -692,99 +711,99 @@ class OperatorCopy:
             else:
                 for k, v in element.items():
                     v.pop(i)
-        
+
         print()
         print(output)
-        
+
         pass
-    
+
     def write_armature(self, json_data, context):
         obj = context.object
         data = obj.data
-        
+
         armature_buffers = {
-            "edit_bones":{
-                #None:{"select":["select", "select_head", "select_tail"]},
+            "edit_bones": {
+                # None:{"select":["select", "select_head", "select_tail"]},
                 # No, better use just body selection status
-                None:{"select":["select"]},
-                "bbone_in":None,
-                "bbone_out":None,
-                "bbone_segments":None,
-                "bbone_x":None,
-                "bbone_z":None,
-                "envelope_distance":None,
-                "envelope_weight":None,
-                "head":None,
-                "head_radius":None,
-                "layers":None,
-                "lock":None,
-                "matrix":None,
-                "name":None,
-                "parent":None,
-                "roll":None,
-                "show_wire":None,
-                "tail":None,
-                "tail_radius":None,
-                "use_connect":None,
-                "use_cyclic_offset":None,
-                "use_deform":None,
-                "use_envelope_multiply":None,
-                "use_inherit_rotation":None,
-                "use_inherit_scale":None,
-                "use_local_location":None,
+                None: {"select": ["select"]},
+                "bbone_in": None,
+                "bbone_out": None,
+                "bbone_segments": None,
+                "bbone_x": None,
+                "bbone_z": None,
+                "envelope_distance": None,
+                "envelope_weight": None,
+                "head": None,
+                "head_radius": None,
+                "layers": None,
+                "lock": None,
+                "matrix": None,
+                "name": None,
+                "parent": None,
+                "roll": None,
+                "show_wire": None,
+                "tail": None,
+                "tail_radius": None,
+                "use_connect": None,
+                "use_cyclic_offset": None,
+                "use_deform": None,
+                "use_envelope_multiply": None,
+                "use_inherit_rotation": None,
+                "use_inherit_scale": None,
+                "use_local_location": None,
             },
         }
-        
-        output = {"edit_bones":[]}
+
+        output = {"edit_bones": []}
         write_buffers(data, armature_buffers, output)
-        
+
         print()
         print(output)
-        
+
         pass
-    
+
     def execute(self, context):
         wm = context.window_manager
         opts = addon.preferences
-        
-        json_data = {"content":"Blender 3D-clipboard"}
-        
+
+        json_data = {"content": "Blender 3D-clipboard"}
+
         json_data["cursor"] = tuple(context.space_data.cursor_location)
-        
+
         if is_view3d(context):
             json_data["view"] = tuple(get_view_rotation(context))
-        
+
         if 'EDIT' in context.mode:
             obj = context.object
-            
+
             json_data["type"] = obj.type
             json_data["matrix"] = [tuple(v) for v in obj.matrix_world]
-            
+
             if opts.external:
                 stream = io.BytesIO()
             else:
                 stream = open(data_clipboard_path(), "wb")
-            
+
             if obj.type == 'MESH':
                 self.write_mesh(obj, stream)
             elif obj.type in ('CURVE', 'SURFACE'):
                 stream.close()
-                return {'CANCELLED'} # for now
+                return {'CANCELLED'}  # for now
                 self.write_curve(json_data, context)
             elif obj.type == 'META':
                 stream.close()
-                return {'CANCELLED'} # for now
+                return {'CANCELLED'}  # for now
                 # !!! Since currently we can't access metaelement's
                 # selection status from Python, copying metaelements
                 # isn't very useful (though it might be worth to
                 # at least make a crutch by copying the active element)
-                #return {'CANCELLED'}
+                # return {'CANCELLED'}
                 self.write_meta(json_data, context)
             elif obj.type == 'ARMATURE':
                 stream.close()
-                return {'CANCELLED'} # for now
+                return {'CANCELLED'}  # for now
                 self.write_armature(json_data, context)
-            
+
             if opts.external:
                 b = stream.getvalue()
                 stream.close()
@@ -794,40 +813,41 @@ class OperatorCopy:
         else:
             json_data["type"] = 'OBJECT'
             json_data["matrix"] = [tuple(v) for v in Matrix()]
-            
+
             self.write_object(json_data, context)
-        
-        wm.clipboard = json.dumps(json_data, separators=(',',':'))
-        
+
+        wm.clipboard = json.dumps(json_data, separators=(',', ':'))
+
         return {'FINISHED'}
+
 
 @addon.Operator(idname="view3d.paste", label="Paste objects/elements", description="Paste objects/elements")
 class OperatorPaste:
     data_types = {'OBJECT', 'MESH', 'CURVE', 'SURFACE', 'META', 'ARMATURE'}
-    
+
     @classmethod
     def poll(cls, context):
         return context.mode in copy_paste_modes
-    
+
     def read_clipboard_object(self, json_data, context):
         self.active_object = json_data.get("active_object", "")
         assert isinstance(self.active_object, str)
-        
+
         active_object_library = json_data.get("active_object_library", "")
         active_object_library = str(active_object_library)
-        
+
         self.parents = json_data.get("parents", {})
         assert isinstance(self.parents, dict)
         for k, v in self.parents.items():
             assert len(v) == 2
             assert isinstance(v[0], str) and isinstance(v[1], str)
-        
+
         objects = json_data["objects"]
         assert isinstance(objects, dict) and objects
-        
+
         libraries = json_data["libraries"]
         assert isinstance(libraries, dict) and libraries
-        
+
         # Make sure library paths are absolute and
         # that this file is marked a special way
         this_path = os.path.normcase(bpy.data.filepath)
@@ -837,9 +857,9 @@ class OperatorPaste:
                 continue
             lib_path = os.path.normcase(bpy.path.abspath(lib_path))
             libraries[id] = ("" if lib_path == this_path else lib_path)
-        
+
         self.active_object_library = libraries.get(active_object_library, None)
-        
+
         # Gather all objects under their respective libraries
         self.libraries = {}
         for obj_name, id in objects.items():
@@ -850,24 +870,24 @@ class OperatorPaste:
                 obj_names = set()
                 self.libraries[lib_path] = obj_names
             obj_names.add(obj_name)
-    
+
     def read_clipboard(self, context):
         wm = context.window_manager
-        
+
         json_data = json.loads(wm.clipboard)
         assert json_data["content"] == "Blender 3D-clipboard"
-        
+
         self.data_type = json_data["type"]
         assert self.data_type in self.data_types
-        
+
         self.matrix = Matrix(json_data["matrix"])
         assert len(self.matrix) == 4
-        
+
         self.cursor = Vector(json_data.get("cursor", (0, 0, 0)))
         assert len(self.cursor) == 3
-        
+
         self.view = Quaternion(json_data.get("view", Quaternion()))
-        
+
         if self.data_type == 'OBJECT':
             self.read_clipboard_object(json_data, context)
         else:
@@ -879,7 +899,7 @@ class OperatorPaste:
                 # TODO: see what actual exceptions can appear
                 print(exc)
                 raise ValueError
-    
+
     def add_pivot(self, p, active):
         p = p.to_3d()
         if self.pivot_count == 0:
@@ -894,7 +914,7 @@ class OperatorPaste:
         if active:
             self.pivot_active += p
             self.pivot_active_count += 1
-    
+
     def calc_transform(self, context, obj):
         opts = addon.preferences
         coordsystem = opts.actual_coordsystem(context)
@@ -906,42 +926,42 @@ class OperatorPaste:
             transform = Matrix()
             transform_pivot = obj.matrix_world
         return not_local, transform, transform_pivot
-    
+
     def process_object(self, context):
         if context.mode != 'OBJECT':
             self.report({'WARNING'},
                         "To paste objects, you must be in the Object mode")
             return True
-        
+
         bpy.ops.object.select_all(action='DESELECT')
-        
+
         opts = addon.preferences
-        
+
         scene = context.scene
-        
+
         old_to_new = {}
         new_to_old = {}
-        
+
         def add_obj(new_obj, obj_name, lib_path):
             scene.objects.link(new_obj)
-            
+
             new_obj.select = True
-            
+
             is_active = False
-            
+
             if self.active_object_library is not None:
                 if ((obj_name == self.active_object) and
-                    (lib_path == self.active_object_library)):
-                        scene.objects.active = new_obj
-                        is_active = True
-            
+                        (lib_path == self.active_object_library)):
+                    scene.objects.active = new_obj
+                    is_active = True
+
             self.add_pivot(new_obj.matrix_world.translation, is_active)
-            
+
             old_to_new[obj_name] = new_obj
             new_to_old[new_obj] = obj_name
-        
+
         load = bpy.data.libraries.load
-        
+
         for lib_path, obj_names in self.libraries.items():
             if not lib_path:
                 link = not opts.append
@@ -955,23 +975,23 @@ class OperatorPaste:
                         new_obj.data = obj.data.copy()
                     add_obj(new_obj, obj_name, lib_path)
                 continue
-            
+
             if not os.path.isfile(lib_path):
-                continue # report a warning?
-            
+                continue  # report a warning?
+
             link = not (opts.append or is_clipboard_path(lib_path))
-            
+
             obj_names = list(obj_names)
-            
+
             with load(lib_path, link) as (data_from, data_to):
-                data_to.objects = list(obj_names) # <-- ALWAYS COPY!
-            
+                data_to.objects = list(obj_names)  # <-- ALWAYS COPY!
+
             for i, new_obj in enumerate(data_to.objects):
                 if new_obj is not None:
                     add_obj(new_obj, obj_names[i], lib_path)
-        
+
         scene.update()
-        
+
         # Restore parent relations (Blender actually adds a relationship
         # if both parent and child are imported, but for some reason
         # the imported parent doesn't affect the imported children.
@@ -985,53 +1005,54 @@ class OperatorPaste:
                     obj.parent = parent
                     obj.parent_bone = parent_info[1]
                     obj.matrix_world = mw
-        
+
         # In Object mode the coordsystem option is not used
         # (ambiguous and the same effects can be achieved relatively easily)
-        
+
         if opts.link_ghost_objects:
             # make sure all groups' objects are present at least in 1 scene (so that they can be deleted)
             # (to circumvent the [intentional] Blender behavior reported in https://developer.blender.org/T44890)
             for group in bpy.data.groups:
                 for obj in group.objects:
-                    if obj.users_scene: continue
+                    if obj.users_scene:
+                        continue
                     scene.objects.link(obj)
-    
+
     def process_mesh(self, context, stream):
         if context.mode not in {'OBJECT', 'EDIT_MESH', 'EDIT_CURVE'}:
             self.report({'WARNING'}, "Mesh data can be pasted only in Object, Edit Mesh and Edit Curve modes")
             return True
-        
+
         if context.mode == 'EDIT_CURVE':
             bpy.ops.curve.select_all(action='DESELECT')
-            
+
             obj = context.object
             self.process_mesh_curve(obj, context, stream)
         else:
             if context.mode == 'OBJECT':
                 bpy.ops.object.select_all(action='DESELECT')
-                
+
                 mesh = bpy.data.meshes.new("PastedMesh")
                 obj = bpy.data.objects.new("PastedMesh", mesh)
                 if context.object:
                     obj.matrix_world = context.object.matrix_world.copy()
-                
+
                 context.scene.objects.link(obj)
                 context.scene.update()
                 context.scene.objects.active = obj
                 obj.select = True
-                
+
                 with ToggleObjectMode('EDIT'):
                     self.process_mesh_mesh(obj, context, stream)
             else:
                 bpy.ops.mesh.select_all(action='DESELECT')
-                
+
                 obj = context.object
                 self.process_mesh_mesh(obj, context, stream)
-    
+
     def process_mesh_curve(self, obj, context, stream):
         not_local, transform, transform_pivot = self.calc_transform(context, obj)
-        
+
         iofuncs = def_read_funcs(stream)
         read = iofuncs["read"]
         unpack = iofuncs["unpack"]
@@ -1040,14 +1061,14 @@ class OperatorPaste:
         read_I = iofuncs["read_I"]
         read_bool = iofuncs["read_bool"]
         read_ddd = iofuncs["read_ddd"]
-        
+
         verts = []
         with ChunkReader(stream, "verts") as chunk:
             while chunk:
                 verts.append(read_ddd())
-        
+
         connections = [[] for v in verts]
-        
+
         edges = []
         with ChunkReader(stream, "edges") as chunk:
             while chunk:
@@ -1057,9 +1078,9 @@ class OperatorPaste:
                 vi1 = read_I()
                 connections[vi1].append(ei)
                 edges.append((vi0, vi1))
-                read_bool() # seam
-                read_bool() # smooth
-        
+                read_bool()  # seam
+                read_bool()  # smooth
+
         faces = []
         with ChunkReader(stream, "faces") as chunk:
             while chunk:
@@ -1068,29 +1089,29 @@ class OperatorPaste:
                 n_loops = read_H()
                 for i in range(n_loops):
                     f.append((read_I(), read_I()))
-                read_H() # material_index
-                read_bool() # smooth
-        
+                read_H()  # material_index
+                read_bool()  # smooth
+
         active_vertex = -1
         with ChunkReader(stream, "select_history") as chunk:
             elem_type = read(1)
             elem_id = read_I()
             if elem_type == b'V':
                 active_vertex = elem_id
-        
+
         used_edges = [False] * len(edges)
-        
+
         splines = []
         cyclic_splines = []
-        
+
         for f in faces:
             spline = []
             cyclic_splines.append(spline)
-            
+
             for vi, ei in f:
                 used_edges[ei] = True
                 spline.append(vi)
-        
+
         def other_vert(ei, vi):
             e = edges[ei]
             if e[0] == vi:
@@ -1098,7 +1119,7 @@ class OperatorPaste:
             elif e[1] == vi:
                 return e[0]
             return -1
-        
+
         def other_edge(vi, ei):
             c = connections[vi]
             if len(c) != 2:
@@ -1108,21 +1129,21 @@ class OperatorPaste:
             elif c[1] == ei:
                 return c[0]
             return -1
-        
+
         # link non-cyclic edges
         for vi, c in enumerate(connections):
             if len(c) == 2:
                 continue
-            
+
             vi0 = vi
-            
+
             for ei in c:
                 if used_edges[ei]:
                     continue
-                
+
                 spline = []
                 splines.append(spline)
-                
+
                 vi = vi0
                 while True:
                     spline.append(vi)
@@ -1131,17 +1152,17 @@ class OperatorPaste:
                     used_edges[ei] = True
                     vi = other_vert(ei, vi)
                     ei = other_edge(vi, ei)
-        
+
         # link cyclic edges
         for vi, c in enumerate(connections):
             if (len(c) != 2) or used_edges[c[0]] or used_edges[c[1]]:
                 continue
-            
+
             ei = c[0]
-            
+
             spline = []
             cyclic_splines.append(spline)
-            
+
             while True:
                 spline.append(vi)
                 if (ei == -1) or used_edges[ei]:
@@ -1149,7 +1170,7 @@ class OperatorPaste:
                 used_edges[ei] = True
                 vi = other_vert(ei, vi)
                 ei = other_edge(vi, ei)
-        
+
         def set_point(point, vi):
             co = Vector(verts[vi])
             p = transform_pivot * co
@@ -1158,7 +1179,7 @@ class OperatorPaste:
                 co = transform * co
             point.co = co.to_4d()
             point.select = True
-        
+
         for s in cyclic_splines:
             spline = obj.data.splines.new('POLY')
             spline.use_cyclic_u = True
@@ -1166,17 +1187,17 @@ class OperatorPaste:
             points.add(len(s) - 1)
             for i, vi in enumerate(s):
                 set_point(points[i], vi)
-        
+
         for s in splines:
             spline = obj.data.splines.new('POLY')
             points = spline.points
             points.add(len(s) - 1)
             for i, vi in enumerate(s):
                 set_point(points[i], vi)
-    
+
     def process_mesh_mesh(self, obj, context, stream):
         not_local, transform, transform_pivot = self.calc_transform(context, obj)
-        
+
         iofuncs = def_read_funcs(stream)
         read = iofuncs["read"]
         unpack = iofuncs["unpack"]
@@ -1195,7 +1216,7 @@ class OperatorPaste:
         deserializer_tex = iofuncs["deserializer_tex"]
         deserializer_skin = iofuncs["deserializer_skin"]
         deserializer_freestyle = iofuncs["deserializer_freestyle"]
-        
+
         deserializers = {}
         deserializers["verts.float"] = deserializer_float
         deserializers["verts.int"] = deserializer_int
@@ -1204,41 +1225,41 @@ class OperatorPaste:
         deserializers["verts.deform"] = deserializer_deform
         deserializers["verts.shape"] = deserializer_vector
         deserializers["verts.skin"] = deserializer_skin
-        
+
         deserializers["edges.float"] = deserializer_float
         deserializers["edges.int"] = deserializer_int
         deserializers["edges.string"] = deserializer_string
         deserializers["edges.bevel_weight"] = deserializer_float
         deserializers["edges.crease"] = deserializer_float
         deserializers["edges.freestyle"] = deserializer_freestyle
-        
+
         deserializers["loops.float"] = deserializer_float
         deserializers["loops.int"] = deserializer_int
         deserializers["loops.string"] = deserializer_string
         deserializers["loops.color"] = deserializer_color
         deserializers["loops.uv"] = deserializer_uv
-        
+
         deserializers["faces.float"] = deserializer_float
         deserializers["faces.int"] = deserializer_int
         deserializers["faces.string"] = deserializer_string
         deserializers["faces.tex"] = deserializer_tex
         deserializers["faces.freestyle"] = deserializer_freestyle
-        
+
         if 'EDIT' in obj.mode:
             bm = bmesh.from_edit_mesh(obj.data)
         else:
             bm = bmesh.new()
-        
+
         verts = []
         edges = []
         faces = []
-        
+
         with ChunkReader(stream, "verts") as chunk:
             while chunk:
                 v = bm.verts.new(read_ddd())
                 verts.append(v)
                 v.select = True
-        
+
         with ChunkReader(stream, "edges") as chunk:
             while chunk:
                 vi0 = read_I()
@@ -1248,7 +1269,7 @@ class OperatorPaste:
                 e.select = True
                 e.seam = read_bool()
                 e.smooth = read_bool()
-        
+
         with ChunkReader(stream, "faces") as chunk:
             while chunk:
                 f = bm.faces.new(verts[(read_I(), read_I())[0]]
@@ -1257,9 +1278,9 @@ class OperatorPaste:
                 f.select = True
                 f.material_index = read_H()
                 f.smooth = read_bool()
-        
+
         active_verts = ()
-        
+
         bm.select_history.clear()
         with ChunkReader(stream, "select_history") as chunk:
             while chunk:
@@ -1275,31 +1296,31 @@ class OperatorPaste:
                     elem = faces[elem_id]
                     active_verts = elem.verts
                 bm.select_history.add(elem)
-        
+
         chunk = ChunkReader(stream)
         if chunk.name == "layers":
-            elems = {"verts":verts, "edges":edges, "faces":faces}
+            elems = {"verts": verts, "edges": edges, "faces": faces}
             chunk_layers = chunk
-            
+
             while chunk_layers:
                 chunk_seq = ChunkReader(stream)
                 seq_type = chunk_seq.name
                 seq = getattr(bm, seq_type)
                 seq_layers = seq.layers
-                
+
                 while chunk_seq:
                     chunk_k = ChunkReader(stream)
                     k = chunk_k.name
-                    
+
                     if (seq_type == "faces") and (k == "loops"):
                         chunk_loops = chunk_k
                         while chunk_loops:
                             chunk_k = ChunkReader(stream)
                             k = chunk_k.name
-                            
+
                             layers = getattr(bm.loops.layers, k)
                             deserializer = deserializers["loops." + k]
-                            
+
                             while chunk_k:
                                 chunk_layer = ChunkReader(stream)
                                 layer_name = chunk_layer.name
@@ -1308,16 +1329,16 @@ class OperatorPaste:
                                     #layer = layers.new(layer_name)
                                     chunk_layer.skip()
                                     continue
-                                
+
                                 while chunk_layer:
                                     for f in faces:
                                         for l in f.loops:
                                             deserializer(l, layer)
                         continue
-                    
+
                     layers = getattr(seq_layers, k)
                     deserializer = deserializers[seq_type + "." + k]
-                    
+
                     while chunk_k:
                         chunk_layer = ChunkReader(stream)
                         layer_name = chunk_layer.name
@@ -1327,11 +1348,11 @@ class OperatorPaste:
                             #layer = layers.new(layer_name)
                             chunk_layer.skip()
                             continue
-                        
+
                         while chunk_layer:
                             for elem in elems[seq_type]:
                                 deserializer(elem, layer)
-        
+
         for v in verts:
             # ATTENTION!
             # Vector can be transformed only via M*V, not V*M!
@@ -1339,42 +1360,42 @@ class OperatorPaste:
             if not_local:
                 v.co = transform * v.co
             self.add_pivot(p, v in active_verts)
-        
+
         bm.normal_update()
-        
+
         if 'EDIT' not in obj.mode:
             bm.to_mesh(obj.data)
             bm.free()
-    
+
     def process_curve(self, context):
         if context.mode not in {'OBJECT', 'EDIT_MESH', 'EDIT_CURVE'}:
             self.report({'WARNING'}, "Curve data can be pasted only in Object, Edit Mesh and Edit Curve modes")
             return True
-    
+
     def process_surface(self, context):
         if context.mode not in {'OBJECT', 'EDIT_SURFACE'}:
             self.report({'WARNING'}, "Surface data can be pasted only in Object and Edit Surface modes")
             return True
-    
+
     def process_meta(self, context):
         if context.mode not in {'OBJECT', 'EDIT_MESH', 'EDIT_METABALL'}:
             self.report({'WARNING'}, "Metaelement data can be pasted only in Object, Edit Mesh and Edit Meta modes")
             return True
-    
+
     def process_armature(self, context):
         if context.mode not in {'OBJECT', 'EDIT_MESH', 'EDIT_ARMATURE'}:
             self.report({'WARNING'}, "Armature data can be pasted only in Object, Edit Mesh and Edit Armature modes")
             return True
-    
+
     def execute(self, context):
         try:
             self.read_clipboard(context)
         except (TypeError, KeyError, ValueError, AssertionError):
             self.report({'WARNING'}, "Incompatible format of clipboard data")
             return True
-        
+
         opts = addon.preferences
-        
+
         pivot_mode = context.space_data.pivot_point
         self.pivot_count = 0
         self.pivot_min = None
@@ -1382,28 +1403,28 @@ class OperatorPaste:
         self.pivot_average = Vector()
         self.pivot_active = Vector()
         self.pivot_active_count = 0
-        
+
         bpy.ops.ed.undo_push(message="Before Paste")
-        
+
         if self.data_type == 'OBJECT':
             if self.process_object(context):
                 bpy.ops.ed.undo()
                 return {'CANCELLED'}
         else:
             handler = getattr(self, "process_" + self.data_type.lower())
-            
+
             if self.serialized_data:
                 stream = io.BytesIO(self.serialized_data)
             else:
                 stream = open(data_clipboard_path(), "rb")
                 #stream = io.BufferedReader(stream)
-            
+
             if handler(context, stream):
                 stream.close()
                 bpy.ops.ed.undo()
                 return {'CANCELLED'}
             stream.close()
-            
+
             """
             try:
                 if handler(context):
@@ -1417,12 +1438,12 @@ class OperatorPaste:
                             "Incompatible format of clipboard data")
                 return {'CANCELLED'}
             """
-        
+
         if self.pivot_count == 0:
             # No objects were added %)
-            #bpy.ops.ed.undo()
+            # bpy.ops.ed.undo()
             return {'CANCELLED'}
-        
+
         pivot = (Vector(self.pivot_min) + Vector(self.pivot_max)) * 0.5
         if pivot_mode == 'ACTIVE_ELEMENT':
             if self.pivot_active_count:
@@ -1431,54 +1452,56 @@ class OperatorPaste:
             pivot = self.pivot_average * (1.0 / self.pivot_count)
         elif pivot_mode == 'CURSOR':
             pivot = self.cursor
-        
+
         if is_view3d(context) and opts.append:
             if opts.paste_at_cursor:
                 v3d = context.space_data
                 cursor = v3d.cursor_location
                 bpy.ops.transform.translate(value=(cursor - pivot), proportional='DISABLED')
                 pivot = cursor
-            
+
             if opts.align_to_view:
                 view = get_view_rotation(context)
                 dq = view * self.view.inverted()
                 axis, angle = dq.to_axis_angle()
                 bpy.ops.transform.rotate('EXEC_SCREEN', value=angle, axis=axis, proportional='DISABLED')
-            
+
             if opts.move_to_mouse:
                 region = context.region
                 rv3d = context.region_data
                 coord = self.mouse_coord
                 dest = region_2d_to_location_3d(region, rv3d, coord, pivot)
                 bpy.ops.transform.translate(value=(dest - pivot), proportional='DISABLED')
-        
+
         bpy.ops.ed.undo_push(message="Paste")
-        
+
         if opts.append:
             return bpy.ops.transform.transform('INVOKE_DEFAULT')
         else:
             return {'FINISHED'}
-    
+
     def invoke(self, context, event):
         self.mouse_coord = Vector((event.mouse_region_x, event.mouse_region_y))
         return self.execute(context)
 
+
 @addon.Operator(idname="view3d.cut", label="Cut objects/elements", description="Cut objects/elements")
 class OperatorCut:
+
     @classmethod
     def poll(cls, context):
         return bpy.ops.view3d.copy.poll()
-    
+
     def execute(self, context):
         bpy.ops.ed.undo_push(message="Before Cut")
         bpy.ops.view3d.copy(force_copy=True)
-        
+
         if 'EDIT' in context.mode:
             obj = bpy.context.object
-            
+
             if obj.type == 'MESH':
                 bm = bmesh.from_edit_mesh(obj.data)
-                
+
                 for v in bm.verts:
                     if v.select:
                         can_remove = True
@@ -1493,7 +1516,7 @@ class OperatorCut:
                                     break
                             if can_remove:
                                 bm.verts.remove(v)
-                
+
                 for e in bm.edges:
                     if e.select:
                         can_remove = True
@@ -1503,7 +1526,7 @@ class OperatorCut:
                                 break
                         if can_remove:
                             bm.edges.remove(e)
-                
+
                 for f in bm.faces:
                     if f.select:
                         bm.faces.remove(f)
@@ -1514,12 +1537,13 @@ class OperatorCut:
                 # Don't remove if they have zero users, since they are still needed for appending/linking
                 if obj.users == 0:
                     bpy.data.objects.remove(obj)
-        
+
         bpy.ops.ed.undo_push(message="Cut")
-        
+
         context.area.tag_redraw()
-        
+
         return {'FINISHED'}
+
 
 @addon.Preferences.Include
 class ThisAddonPreferences:
@@ -1534,15 +1558,17 @@ class ThisAddonPreferences:
         ('GLOBAL', "Global", "Global"),
         ('LOCAL', "Local", "Local"),
     ])
+
     def actual_coordsystem(self, context=None):
         if self.coordinate_system == 'CONTEXT':
             is_edit = ('EDIT' in (context or bpy.context).mode)
             return ('LOCAL' if is_edit else 'GLOBAL')
         return self.coordinate_system
 
+
 def register():
     addon.register()
-    
+
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
@@ -1554,6 +1580,7 @@ def register():
         kmi = km.keymap_items.new('view3d.paste', 'INSERT', 'PRESS', shift=True)
         kmi = km.keymap_items.new('view3d.cut', 'DEL', 'PRESS', shift=True)
 
+
 def unregister():
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
@@ -1563,5 +1590,5 @@ def unregister():
         KeyMapUtils.remove("view3d.copy", place=kc)
         KeyMapUtils.remove("view3d.paste", place=kc)
         KeyMapUtils.remove("view3d.cut", place=kc)
-    
+
     addon.unregister()

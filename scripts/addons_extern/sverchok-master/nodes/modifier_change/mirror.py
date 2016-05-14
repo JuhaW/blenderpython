@@ -26,13 +26,15 @@ from bpy.props import StringProperty, EnumProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, SvSetSocketAnyType, SvGetSocketAnyType, match_long_repeat
 
+
 def mirrorPoint(vertex, vert_a):
     vert = []
     a = Vector(vert_a)
     for i in vertex:
         v = Vector(i)
-        vert.append((v+2*(a-v))[:])
+        vert.append((v + 2 * (a - v))[:])
     return vert
+
 
 def mirrorAxis(vertex, vert_a, vert_b):
     vert = []
@@ -41,15 +43,16 @@ def mirrorAxis(vertex, vert_a, vert_b):
     c = b - a
     for i in vertex:
         v = Vector(i)
-        #Intersection point in vector A-B from point V
+        # Intersection point in vector A-B from point V
         pq = v - a
         w2 = pq - ((pq.dot(c) / c.length_squared) * c)
         x = v - w2
 
-        mat = Matrix.Translation(2*(v - w2 - v))
+        mat = Matrix.Translation(2 * (v - w2 - v))
         mat_rot = Matrix.Rotation(radians(360), 4, c)
-        vert.append(((mat*mat_rot)*v)[:])
+        vert.append(((mat * mat_rot) * v)[:])
     return vert
+
 
 def mirrorPlane(vertex, matrix):
     vert = []
@@ -57,12 +60,13 @@ def mirrorPlane(vertex, matrix):
     eul = a.to_euler()
     normal = Vector((0.0, 0.0, 1.0))
     normal.rotate(eul)
-    tras = Matrix.Translation(2*a.to_translation())
+    tras = Matrix.Translation(2 * a.to_translation())
     for i in vertex:
         v = Vector(i)
         r = v.reflect(normal)
-        vert.append((tras*r)[:])
+        vert.append((tras * r)[:])
     return vert
+
 
 class SvMirrorNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Mirroring  '''
@@ -91,7 +95,7 @@ class SvMirrorNode(bpy.types.Node, SverchCustomTreeNode):
                 self.inputs.new('VerticesSocket', "Vert B", "Vert B")
             else:
                 while len(self.inputs) > n:
-                    self.inputs.remove(self.inputs[-1])                
+                    self.inputs.remove(self.inputs[-1])
                 self.inputs.new('VerticesSocket', "Vert A", "Vert A")
                 self.inputs.new('VerticesSocket', "Vert B", "Vert B")
 
@@ -110,8 +114,8 @@ class SvMirrorNode(bpy.types.Node, SverchCustomTreeNode):
     ]
 
     mode = EnumProperty(name="mode", description="mode",
-                          default='VERTEX', items=modes,
-                          update=mode_change)
+                        default='VERTEX', items=modes,
+                        update=mode_change)
     current_mode = StringProperty(default="VERTEX")
 
     def sv_init(self, context):

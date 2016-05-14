@@ -9,12 +9,13 @@ from ... base_types.node import AnimationNode
 
 variableNames = list("xyzabcdefghijklmnopqrstuvw")
 
+
 class ExpressionNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ExpressionNode"
     bl_label = "Expression"
     bl_width_default = 200
 
-    def settingChanged(self, context = None):
+    def settingChanged(self, context=None):
         self.executionError = ""
         self.containsSyntaxError = not isCodeValid(self.expression)
         executionCodeChanged()
@@ -22,17 +23,17 @@ class ExpressionNode(bpy.types.Node, AnimationNode):
     def outputTypeChanged(self, context):
         self.recreateOutputSocket()
 
-    expression = StringProperty(name = "Expression", update = settingChanged)
+    expression = StringProperty(name="Expression", update=settingChanged)
     containsSyntaxError = BoolProperty()
     executionError = StringProperty()
 
-    debugMode = BoolProperty(name = "Debug Mode", update = executionCodeChanged, default = True,
-        description = "Show detailed error messages in the node but is slower.")
+    debugMode = BoolProperty(name="Debug Mode", update=executionCodeChanged, default=True,
+                             description="Show detailed error messages in the node but is slower.")
 
-    moduleNames = StringProperty(name = "Modules", default = "math", update = executionCodeChanged,
-        description = "Comma separated module names which can be used inside the expression")
+    moduleNames = StringProperty(name="Modules", default="math", update=executionCodeChanged,
+                                 description="Comma separated module names which can be used inside the expression")
 
-    outputIsList = BoolProperty(name = "Output is List", default = False, update = outputTypeChanged)
+    outputIsList = BoolProperty(name="Output is List", default=False, update=outputTypeChanged)
 
     def create(self):
         self.inputs.new("an_NodeControlSocket", "New Input")
@@ -40,18 +41,19 @@ class ExpressionNode(bpy.types.Node, AnimationNode):
 
     def recreateOutputSocket(self):
         idName = "an_GenericListSocket" if self.outputIsList else "an_GenericSocket"
-        if self.outputs[0].bl_idname == idName: return
+        if self.outputs[0].bl_idname == idName:
+            return
         self.outputs.clear()
         self.outputs.new(idName, "Result", "result")
 
     def draw(self, layout):
-        layout.prop(self, "expression", text = "")
+        layout.prop(self, "expression", text="")
         if self.containsSyntaxError:
-            layout.label("Syntax Error", icon = "ERROR")
+            layout.label("Syntax Error", icon="ERROR")
         if self.executionError != "":
             row = layout.row()
-            row.label(self.executionError, icon = "ERROR")
-            self.invokeFunction(row, "clearErrorMessage", icon = "X", emboss = False)
+            row.label(self.executionError, icon="ERROR")
+            self.invokeFunction(row, "clearErrorMessage", icon="X", emboss=False)
 
     def drawAdvanced(self, layout):
         layout.prop(self, "debugMode")
@@ -61,11 +63,11 @@ class ExpressionNode(bpy.types.Node, AnimationNode):
     def drawControlSocket(self, layout, socket):
         left, right = splitAlignment(layout)
         left.label(socket.name)
-        self.invokeSocketTypeChooser(right, "newInputSocket", icon = "ZOOMIN", emboss = False)
+        self.invokeSocketTypeChooser(right, "newInputSocket", icon="ZOOMIN", emboss=False)
 
     @property
     def inputVariables(self):
-        return {socket.identifier : socket.text for socket in self.inputs}
+        return {socket.identifier: socket.text for socket in self.inputs}
 
     def getExecutionCode(self):
         expression = self.expression.strip()
@@ -79,7 +81,8 @@ class ExpressionNode(bpy.types.Node, AnimationNode):
                     "except:",
                     "    result = None",
                     "    self.executionError = str(sys.exc_info()[1])"]
-        else: return "result = " + expression
+        else:
+            return "result = " + expression
 
     def getUsedModules(self):
         moduleNames = re.split("\W+", self.moduleNames)
@@ -92,9 +95,11 @@ class ExpressionNode(bpy.types.Node, AnimationNode):
     def edit(self):
         emptySocket = self.inputs["New Input"]
         directOrigin = emptySocket.directOrigin
-        if directOrigin is None: return
+        if directOrigin is None:
+            return
         dataOrigin = emptySocket.dataOrigin
-        if dataOrigin.dataType == "Node Control": return
+        if dataOrigin.dataType == "Node Control":
+            return
         socket = self.newInputSocket(dataOrigin.dataType)
         emptySocket.removeLinks()
         socket.linkWith(directOrigin)
@@ -119,7 +124,8 @@ class ExpressionNode(bpy.types.Node, AnimationNode):
     def getNewSocketName(self):
         inputs = self.inputsByText
         for name in variableNames:
-            if name not in inputs: return name
+            if name not in inputs:
+                return name
         return "x"
 
     def socketChanged(self):

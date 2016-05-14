@@ -2,6 +2,7 @@ import bpy
 from mathutils import Matrix
 from .. base_types.socket import AnimationNodeSocket
 
+
 class MatrixSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_MatrixSocket"
     bl_label = "Matrix Socket"

@@ -3,11 +3,12 @@ from bpy.props import *
 from ... base_types.node import AnimationNode
 from ... tree_info import getNodesByType
 
+
 class DebugLoopNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_DebugLoopNode"
     bl_label = "Debug Loop"
 
-    textBlockName = StringProperty(name = "Text")
+    textBlockName = StringProperty(name="Text")
 
     def create(self):
         self.inputs.new("an_NodeControlSocket", "...", "control")
@@ -16,7 +17,8 @@ class DebugLoopNode(bpy.types.Node, AnimationNode):
     def edit(self):
         controlSocket = self.inputs[-1]
         directOrigin = controlSocket.directOrigin
-        if directOrigin is None: return
+        if directOrigin is None:
+            return
         socket = self.newInput()
         socket.linkWith(directOrigin)
         controlSocket.removeLinks()
@@ -30,16 +32,16 @@ class DebugLoopNode(bpy.types.Node, AnimationNode):
         return socket
 
     def draw(self, layout):
-        layout.prop_search(self, "textBlockName",  bpy.data, "texts", text = "")
+        layout.prop_search(self, "textBlockName", bpy.data, "texts", text="")
 
     def drawAdvanced(self, layout):
-        col = layout.column(align = True)
+        col = layout.column(align=True)
         for i, socket in enumerate(self.inputs[:-1]):
-            col.prop(socket, '["dataWidth"]', text = "Width " + str(i + 1))
+            col.prop(socket, '["dataWidth"]', text="Width " + str(i + 1))
 
     @property
     def inputVariables(self):
-        return {socket.identifier : "data_" + str(i) for i, socket in enumerate(self.inputs)}
+        return {socket.identifier: "data_" + str(i) for i, socket in enumerate(self.inputs)}
 
     def getExecutionCode(self):
         names = ["data_" + str(i) for i in range(len(self.inputs[:-1]))]
@@ -47,12 +49,15 @@ class DebugLoopNode(bpy.types.Node, AnimationNode):
 
     def writeDebugData(self, dataList):
         textBlock = self.textBlock
-        if textBlock is None: return
+        if textBlock is None:
+            return
 
         texts = []
         for data, socket in zip(dataList, self.inputs):
-            if isinstance(data, float): text = str(round(data, 5))
-            else: text = str(data)
+            if isinstance(data, float):
+                text = str(round(data, 5))
+            else:
+                text = str(data)
             texts.append(text.rjust(socket["dataWidth"]))
 
         textBlock.write(" ".join(texts))
@@ -62,7 +67,9 @@ class DebugLoopNode(bpy.types.Node, AnimationNode):
     def textBlock(self):
         return bpy.data.texts.get(self.textBlockName)
 
+
 def clearDebugLoopTextBlocks(nodeTree):
     for node in getNodesByType("an_DebugLoopNode"):
         textBlock = node.textBlock
-        if textBlock: textBlock.clear()
+        if textBlock:
+            textBlock.clear()

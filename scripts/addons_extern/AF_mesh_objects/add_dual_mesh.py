@@ -38,11 +38,14 @@ import bpy
 import bmesh
 from bpy_extras.object_utils import AddObjectHelper, object_data_add
 
+
 def is_boundary(edge):
     return len(edge.link_loops) == 1
 
+
 def edge_midpoint(edge):
     return (edge.verts[0].co + edge.verts[1].co) / 2
+
 
 def make_dual_bmesh(bm_orig, preserve_boundary):
     bm = bmesh.new()
@@ -59,14 +62,16 @@ def make_dual_bmesh(bm_orig, preserve_boundary):
             vert = bm.verts.new(midpoint)
             edge_to_vert[edge.index] = vert
     for vert in bm_orig.verts:
-        if not vert.is_manifold: continue
+        if not vert.is_manifold:
+            continue
         has_boundarys = any(is_boundary(loop.edge) for loop in vert.link_loops)
         if has_boundarys:
             # Copy up this vertex itself into new mesh
             if preserve_boundary:
                 vert_vert = bm.verts.new(vert.co)
             for l in vert.link_loops:
-                if not is_boundary(l.edge): continue
+                if not is_boundary(l.edge):
+                    continue
                 new_verts = []
                 if preserve_boundary:
                     new_verts.append(vert_vert)
@@ -91,10 +96,12 @@ def make_dual_bmesh(bm_orig, preserve_boundary):
                 assert l.vert == vert
                 next_face = l.face.index
                 new_verts.append(face_to_vert[next_face])
-                if next_face == first_face: break
+                if next_face == first_face:
+                    break
             if len(new_verts) >= 3:
                 bm.faces.new(new_verts)
     return bm
+
 
 def make_dual_bmesh_blend(bm_orig, blend_factor, preserve_boundary, bm, sk):
     loop_to_vert = []
@@ -102,7 +109,7 @@ def make_dual_bmesh_blend(bm_orig, blend_factor, preserve_boundary, bm, sk):
     for face in bm_orig.faces:
         face_center = face.calc_center_median()
         for loop in face.loops:
-            v = face_center * blend_factor + loop.vert.co * (1-blend_factor)
+            v = face_center * blend_factor + loop.vert.co * (1 - blend_factor)
             vert = bm.verts.new(v)
             if sk:
                 vert[sk] = face_center
@@ -110,10 +117,11 @@ def make_dual_bmesh_blend(bm_orig, blend_factor, preserve_boundary, bm, sk):
     # Create two vertices for every boundary
     edge_to_verts = {}
     for edge in bm_orig.edges:
-        if not is_boundary(edge): continue
+        if not is_boundary(edge):
+            continue
         midpoint = edge_midpoint(edge)
         edge_to_verts[edge.index] = [
-            bm.verts.new(midpoint * blend_factor + v.co *(1-blend_factor))
+            bm.verts.new(midpoint * blend_factor + v.co * (1 - blend_factor))
             for v in edge.verts]
         if sk:
             for vert in edge_to_verts[edge.index]:
@@ -143,19 +151,21 @@ def make_dual_bmesh_blend(bm_orig, blend_factor, preserve_boundary, bm, sk):
             loop1, loop2 = edge.link_loops
             loop1p = loop1.link_loop_next
             loop2p = loop2.link_loop_next
-            face  = bm.faces.new([loop_to_vert[loop.index]
-                                  for loop in [loop2p, loop2, loop1p, loop1]])
+            face = bm.faces.new([loop_to_vert[loop.index]
+                                 for loop in [loop2p, loop2, loop1p, loop1]])
         face.material_index = 1
     # And a face for each vertex
     for vert in bm_orig.verts:
-        if not vert.is_manifold: continue
+        if not vert.is_manifold:
+            continue
         has_boundarys = any(is_boundary(loop.edge) for loop in vert.link_loops)
         if has_boundarys:
             # Copy up this vertex itself into new mesh
             if preserve_boundary:
                 vert_vert = bm.verts.new(vert.co)
             for l in vert.link_loops:
-                if not is_boundary(l.edge): continue
+                if not is_boundary(l.edge):
+                    continue
                 new_verts = []
                 if preserve_boundary:
                     new_verts.append(vert_vert)
@@ -181,7 +191,8 @@ def make_dual_bmesh_blend(bm_orig, blend_factor, preserve_boundary, bm, sk):
                 l = l.link_loop_prev.link_loop_radial_next
                 assert l.vert == vert
                 new_verts.append(loop_to_vert[l.index])
-                if l == first_loop: break
+                if l == first_loop:
+                    break
             if len(new_verts) >= 3:
                 face = bm.faces.new(new_verts)
                 face.material_index = 2
@@ -203,7 +214,7 @@ class AddDualMeshOperator(bpy.types.Operator, AddObjectHelper):
     blend_factor = bpy.props.FloatProperty(
         name="Blending Factor",
         description="Similarity to dual mesh, from original mesh",
-        default=0.5,min=0,max=1)
+        default=0.5, min=0, max=1)
 
     use_shape_keys = bpy.props.BoolProperty(
         name="Use Shape Keys",
@@ -223,8 +234,8 @@ class AddDualMeshOperator(bpy.types.Operator, AddObjectHelper):
         layout.prop(self, "use_blending")
         col = layout.column()
         col.enabled = self.use_blending
-        col.prop(self,"blend_factor")
-        col.prop(self,"use_shape_keys")
+        col.prop(self, "blend_factor")
+        col.prop(self, "use_shape_keys")
 
     def execute(self, context):
         orig_obj = obj = context.active_object
@@ -239,13 +250,13 @@ class AddDualMeshOperator(bpy.types.Operator, AddObjectHelper):
             bm = make_dual_bmesh(bm_orig, self.preserve_boundary)
         else:
             mat = bpy.data.materials.new("Faces")
-            mat.diffuse_color = (1,0,0)
+            mat.diffuse_color = (1, 0, 0)
             obj.data.materials.append(mat)
             mat = bpy.data.materials.new("Edges")
-            mat.diffuse_color = (0,1,0)
+            mat.diffuse_color = (0, 1, 0)
             obj.data.materials.append(mat)
             mat = bpy.data.materials.new("Vertices")
-            mat.diffuse_color = (0,0,1)
+            mat.diffuse_color = (0, 0, 1)
             obj.data.materials.append(mat)
             if self.use_shape_keys:
                 blend_factor = 0

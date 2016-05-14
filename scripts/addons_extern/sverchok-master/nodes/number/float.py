@@ -36,7 +36,7 @@ class FloatNode(bpy.types.Node, SverchCustomTreeNode):
     # inside the update function, either directly
     # or indirectly by setting a property that will trigger another
     # update event
-    
+
     def update_value(self, context):
         if self.float_ < self.minim:
             self.float_ = self.minim
@@ -45,32 +45,32 @@ class FloatNode(bpy.types.Node, SverchCustomTreeNode):
             self.float_ = self.maxim
             return  # recursion protection
         self.process_node(context)
-        
+
     def update_max(self, context):
         if self.maxim < self.minim:
             self.maxim = self.minim + 1
             return
         if self.float_ > self.maxim:
             self.float_ = self.maxim
-    
+
     def update_min(self, context):
         if self.minim > self.maxim:
-            self.minim = self.maxim-1
-            return 
+            self.minim = self.maxim - 1
+            return
         if self.float_ < self.minim:
             self.float_ = self.minim
-    
+
     float_ = FloatProperty(name='Float', description='float number',
                            default=1.0,
                            options={'ANIMATABLE'}, update=update_value)
     maxim = FloatProperty(name='max', description='maximum',
-                       default=1000,
-                       update=update_max)
+                          default=1000,
+                          update=update_max)
     minim = FloatProperty(name='min', description='minimum',
-                       default=-1000,
-                       update=update_min)
+                          default=-1000,
+                          update=update_min)
     to3d = BoolProperty(name='to3d', description='show in 3d panel',
-                       default=True)
+                        default=True)
 
     def sv_init(self, context):
         self.inputs.new('StringsSocket', "Float").prop_name = 'float_'
@@ -88,13 +88,14 @@ class FloatNode(bpy.types.Node, SverchCustomTreeNode):
             return str(round(self.float_, 3))
         else:
             return self.bl_label
-            
+
     def process(self):
         # inputs
         Float = min(max(float(self.inputs[0].sv_get()[0][0]), self.minim), self.maxim)
         # outputs
         if self.outputs['Float'].is_linked:
             SvSetSocketAnyType(self, 'Float', [[Float]])
+
 
 def register():
     bpy.utils.register_class(FloatNode)
@@ -105,7 +106,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-
-
-
-

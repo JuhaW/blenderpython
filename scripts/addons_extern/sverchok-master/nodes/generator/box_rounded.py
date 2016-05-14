@@ -90,7 +90,7 @@ def round_cube(
         sagitta = radius - radius * sqrt(id2 * id2 / 3. - id2 + 1.)
 
     # Extrusion per axis
-    exyz = [0. if s < 2. * (radius - sagitta) else (s - 2. * (radius - sagitta))*0.5 for s in size]
+    exyz = [0. if s < 2. * (radius - sagitta) else (s - 2. * (radius - sagitta)) * 0.5 for s in size]
     ex, ey, ez = exyz
 
     dxyz = [0, 0, 0]      # extrusion divisions per axis
@@ -113,7 +113,7 @@ def round_cube(
     uvlt = []
     v = vi
     for j in range(1, steps + 1):
-        v2 = v*v
+        v2 = v * v
         uvlt.append((v, v2, radius * sqrt(18. - 6. * v2) / 6.))
         v = vi + j * step_size  # v += step_size # instead of accumulating errors
         # clear fp errors / signs at axis
@@ -122,12 +122,12 @@ def round_cube(
 
     # Sides built left to right bottom up
     #         xp yp zp  xd  yd  zd
-    sides = ((0, 2, 1, (-1,  1,  1)),   # Y+ Front
-             (1, 2, 0, (-1, -1,  1)),   # X- Left
-             (0, 2, 1, (1, -1,  1)),   # Y- Back
-             (1, 2, 0, (1,  1,  1)),   # X+ Right
-             (0, 1, 2, (-1,  1, -1)),   # Z- Bottom
-             (0, 1, 2, (-1, -1,  1)))   # Z+ Top
+    sides = ((0, 2, 1, (-1, 1, 1)),   # Y+ Front
+             (1, 2, 0, (-1, -1, 1)),   # X- Left
+             (0, 2, 1, (1, -1, 1)),   # Y- Back
+             (1, 2, 0, (1, 1, 1)),   # X+ Right
+             (0, 1, 2, (-1, 1, -1)),   # Z- Bottom
+             (0, 1, 2, (-1, -1, 1)))   # Z+ Top
 
     # side vertex index table (for sphere)
     svit = [[[] for i in range(steps)] for i in range(6)]
@@ -178,7 +178,7 @@ def round_cube(
 
             for j in range(steps):  # rows
                 v, v2, mv2 = uvlt[j]
-                tv2mh = 1./3. * v2 - 0.5
+                tv2mh = 1. / 3. * v2 - 0.5
                 hv2 = 0.5 * v2
 
                 if j == hemi and rij:
@@ -301,47 +301,47 @@ def round_cube(
         if oa4:  # special case
             hemi += 1
         for j, row in enumerate(rows[:-1]):
-            tri = odd_aligned and (oa4 and not j or rows[j+1][-1] < 0)
+            tri = odd_aligned and (oa4 and not j or rows[j + 1][-1] < 0)
             for i, vi in enumerate(row[:-1]):
                 # odd_aligned triangle corners
                 if vi < 0:
                     if not j and not i:
-                        faces.append((row[i+1], rows[j+1][i+1], rows[j+1][i]))
+                        faces.append((row[i + 1], rows[j + 1][i + 1], rows[j + 1][i]))
                 elif oa4 and not i and j == len(rows) - 2:
-                    faces.append((vi, row[i+1], rows[j+1][i+1]))
+                    faces.append((vi, row[i + 1], rows[j + 1][i + 1]))
                 elif tri and i == len(row) - 2:
                     if j:
-                        faces.append((vi, row[i+1], rows[j+1][i]))
+                        faces.append((vi, row[i + 1], rows[j + 1][i]))
                     else:
                         if oa4 or arcdiv > 1:
-                            faces.append((vi, rows[j+1][i+1], rows[j+1][i]))
+                            faces.append((vi, rows[j + 1][i + 1], rows[j + 1][i]))
                         else:
-                            faces.append((vi, row[i+1], rows[j+1][i]))
+                            faces.append((vi, row[i + 1], rows[j + 1][i]))
                 # subdiv = EDGES (not ALL)
                 elif subdiv and len(rows[j + 1]) < len(row) and (i >= hemi):
 
                     if (i == hemi):
                         faces.append((
                             vi,
-                            row[i+1+dxyz[xp]],
-                            rows[j+1+dxyz[yp]][i+1+dxyz[xp]],
-                            rows[j+1+dxyz[yp]][i]))
+                            row[i + 1 + dxyz[xp]],
+                            rows[j + 1 + dxyz[yp]][i + 1 + dxyz[xp]],
+                            rows[j + 1 + dxyz[yp]][i]))
                     elif i > hemi + dxyz[xp]:
                         faces.append((
-                            vi, row[i+1],
-                            rows[j+1][i+1-dxyz[xp]],
-                            rows[j+1][i-dxyz[xp]]))
+                            vi, row[i + 1],
+                            rows[j + 1][i + 1 - dxyz[xp]],
+                            rows[j + 1][i - dxyz[xp]]))
 
                 elif subdiv and len(rows[j + 1]) > len(row) and (i >= hemi):
                     if (i > hemi):
-                        faces.append((vi, row[i+1], rows[j+1][i+1+dxyz[xp]], rows[j+1][i+dxyz[xp]]))
+                        faces.append((vi, row[i + 1], rows[j + 1][i + 1 + dxyz[xp]], rows[j + 1][i + dxyz[xp]]))
 
                 elif subdiv and len(row) < len(rows[0]) and i == hemi:
                     pass
 
                 else:
                     # Most faces...
-                    faces.append((vi, row[i+1], rows[j+1][i+1], rows[j+1][i]))
+                    faces.append((vi, row[i + 1], rows[j + 1][i + 1], rows[j + 1][i]))
         if oa4:
             hemi -= 1
 
@@ -393,7 +393,6 @@ class SvBoxRoundedNode(bpy.types.Node, SverchCustomTreeNode):
         if not self.inputs['vector_size'].is_linked:
             return
 
-    
         inputs = self.inputs
         outputs = self.outputs
 
@@ -425,7 +424,7 @@ class SvBoxRoundedNode(bpy.types.Node, SverchCustomTreeNode):
                 'size': args,
                 'div_type': div_types[i],
                 'odd_axis_align': axis_aligns[i]
-                })
+            })
             # print(multi_dict[i])
 
         out = list(zip(*[round_cube(**kwargs) for kwargs in multi_dict]))

@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class ShapeKeyListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_ShapeKeyListSocket"
     bl_label = "Shape Key List Socket"

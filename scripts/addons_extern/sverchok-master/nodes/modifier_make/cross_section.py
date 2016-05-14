@@ -22,7 +22,7 @@ from mathutils import Vector, Matrix
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, Vector_generate, Vector_degenerate,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 def section(cut_me_vertices, cut_me_edges, mx, pp, pno, FILL=False, TRI=True):
@@ -40,7 +40,7 @@ def section(cut_me_vertices, cut_me_edges, mx, pp, pno, FILL=False, TRI=True):
         A = normal.x
         B = normal.y
         C = normal.z
-        D = (A*point.x+B*point.y+C*point.z)*-1
+        D = (A * point.x + B * point.y + C * point.z) * -1
 
         if A < 0.0:
             A *= -1
@@ -51,7 +51,7 @@ def section(cut_me_vertices, cut_me_edges, mx, pp, pno, FILL=False, TRI=True):
         return (A, B, C, D)
 
     def point_on_plane(v1, ep):
-        formula = ep[0]*v1.x+ep[1]*v1.y+ep[2]*v1.z+ep[3]
+        formula = ep[0] * v1.x + ep[1] * v1.y + ep[2] * v1.z + ep[3]
         if formula == 0.0:
             return True
         else:
@@ -84,21 +84,21 @@ def section(cut_me_vertices, cut_me_edges, mx, pp, pno, FILL=False, TRI=True):
         vert2 = ed.vertices[1]
         v2 = new_me.vertices[vert2].co * mx.transposed()
 
-        vec = v2-v1
+        vec = v2 - v1
         mul = vec * pno
         if mul == 0.0:
             if not point_on_plane(v1, ep):
                 # parallel and not on plane
                 continue
 
-        epv = ep[0]*vec.x + ep[1]*vec.y + ep[2]*vec.z
+        epv = ep[0] * vec.x + ep[1] * vec.y + ep[2] * vec.z
         if epv == 0:
             t0 = 0
         else:
-            t0 = -(ep[0]*v1.x+ep[1]*v1.y+ep[2]*v1.z + ep[3]) / epv
+            t0 = -(ep[0] * v1.x + ep[1] * v1.y + ep[2] * v1.z + ep[3]) / epv
 
-        pq = vec*t0+v1
-        if (pq-v1).length <= vec.length and (pq-v2).length <= vec.length:
+        pq = vec * t0 + v1
+        if (pq - v1).length <= vec.length and (pq - v2).length <= vec.length:
             verts.append(pq)
             ed_xsect[ed.key] = len(ed_xsect)
 
@@ -238,8 +238,8 @@ class CrossSectionNode(bpy.types.Node, SverchCustomTreeNode):
                 verts_pre_out = []
                 edges_pre_out = []
                 for idx_mob, matrix in enumerate(matrixs):
-                    idx_vob = min(idx_mob, len(verts_ob)-1)
-                    idx_epob = min(idx_mob, len(edg_pols_ob)-1)
+                    idx_vob = min(idx_mob, len(verts_ob) - 1)
+                    idx_epob = min(idx_mob, len(edg_pols_ob) - 1)
                     matrix = Matrix(matrix)
 
                     x_me = section(verts_ob[idx_vob], edg_pols_ob[idx_epob], matrix, pp, pno, self.fill_check, self.tri)
@@ -263,7 +263,6 @@ class CrossSectionNode(bpy.types.Node, SverchCustomTreeNode):
             pass
         #    self.outputs['vertices'].VerticesProperty = str([])
         #    self.outputs['edges'].StringsProperty = str([])
-
 
 
 def register():

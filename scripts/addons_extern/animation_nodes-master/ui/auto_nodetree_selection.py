@@ -4,10 +4,12 @@ from .. utils.nodes import getAnimationNodeTrees
 
 treeNameBySpace = {}
 
+
 @eventHandler("SCENE_UPDATE_POST")
 def updateAutoNodeTreeSelection(scene):
     nodeTrees = getAnimationNodeTrees()
-    if len(nodeTrees) == 0: return
+    if len(nodeTrees) == 0:
+        return
 
     for space in getAnimationNodeEditorSpaces():
         spaceHash = str(hash(space))
@@ -21,6 +23,7 @@ def updateAutoNodeTreeSelection(scene):
         treeName = getattr(space.node_tree, "name", None)
         if treeName is not None:
             treeNameBySpace[spaceHash] = treeName
+
 
 def getAnimationNodeEditorSpaces():
     spaces = []

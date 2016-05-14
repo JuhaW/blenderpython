@@ -428,9 +428,9 @@ def register():
         bpy.utils.register_class(cls)
 
     bpy.types.Material.use_driver_update_tag = bpy.props.BoolProperty(
-            name='Driver Update Tag', default=False)
+        name='Driver Update Tag', default=False)
     bpy.types.Texture.use_driver_update_tag = bpy.props.BoolProperty(
-            name='Driver Update Tag', default=False)
+        name='Driver Update Tag', default=False)
 
     bpy.app.handlers.scene_update_pre.append(callback_scene_update_pre)
 

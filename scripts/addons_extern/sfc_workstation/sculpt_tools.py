@@ -29,49 +29,54 @@ bl_info = {
     "tracker_url": "",
     "category": "Sculpting"}
 
-    
-import bpy, mathutils, bmesh
-from bpy.props import *
 
+import bpy
+import mathutils
+import bmesh
+from bpy.props import *
 
 
 # helper function for face selection
 def objSelectFaces(obj, mode):
-    
-    #store active object
+
+    # store active object
     activeObj = bpy.context.active_object
-    
-    #store the mode of the active object
+
+    # store the mode of the active object
     oldMode = activeObj.mode
-    
-    #perform selection
+
+    # perform selection
     bpy.context.scene.objects.active = obj
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action=mode)
-    
-    #restore old active object and mode
+
+    # restore old active object and mode
     bpy.ops.object.mode_set(mode=oldMode)
     bpy.context.scene.objects.active = activeObj
 
-#helper function to duplicate an object    
+# helper function to duplicate an object
+
+
 def objDuplicate(obj):
 
     activeObj = bpy.context.active_object
-    oldMode = activeObj.mode    
+    oldMode = activeObj.mode
 
     bpy.ops.object.mode_set(mode='OBJECT')
-    bpy.ops.object.select_all(action = 'DESELECT')
-    bpy.ops.object.select_pattern(pattern = obj.name)
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.select_pattern(pattern=obj.name)
     bpy.ops.object.duplicate()
     objCopy = bpy.context.selected_objects[0]
 
     bpy.context.scene.objects.active = activeObj
     bpy.ops.object.mode_set(mode=oldMode)
     return objCopy
-    
+
+
 def objDiagonal(obj):
-    return ((obj.dimensions[0]**2)+(obj.dimensions[1]**2)+(obj.dimensions[2]**2))**0.5
-    
+    return ((obj.dimensions[0]**2) + (obj.dimensions[1]**2) + (obj.dimensions[2]**2))**0.5
+
+
 def objDelete(obj):
     rem = obj
     remname = rem.data.name
@@ -90,20 +95,21 @@ class BooleanMeshDeformOperator(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object is not None and len(bpy.context.selected_objects)==2
+        return context.active_object is not None and len(bpy.context.selected_objects) == 2
 
     def execute(self, context):
         activeObj = context.active_object
-        for SelectedObject in bpy.context.selected_objects :
-            if SelectedObject != activeObj :
+        for SelectedObject in bpy.context.selected_objects:
+            if SelectedObject != activeObj:
                 md = activeObj.modifiers.new('mesh_deform', 'MESH_DEFORM')
                 md.object = SelectedObject
                 bpy.ops.object.meshdeform_bind(modifier="mesh_deform")
                 bpy.context.scene.objects.active = SelectedObject
-                SelectedObject.draw_type="WIRE"
+                SelectedObject.draw_type = "WIRE"
                 bpy.ops.object.mode_set(mode='EDIT')
         return {'FINISHED'}
-    
+
+
 class ModApplyOperator(bpy.types.Operator):
     '''Applies all modifiers for all selected objects. Also works in sculpt or edit mode.'''
     bl_idname = "boolean.mod_apply"
@@ -116,12 +122,12 @@ class ModApplyOperator(bpy.types.Operator):
 
     def execute(self, context):
         activeObj = context.active_object
-        for SelectedObject in bpy.context.selected_objects :
-               
+        for SelectedObject in bpy.context.selected_objects:
+
             bpy.context.scene.objects.active = SelectedObject
-            oldMode = SelectedObject.mode    
+            oldMode = SelectedObject.mode
             bpy.ops.object.mode_set(mode='OBJECT')
-            for md in SelectedObject.modifiers :
+            for md in SelectedObject.modifiers:
                 # apply the modifier
                 try:
                     bpy.ops.object.modifier_apply(apply_as='DATA', modifier=md.name)
@@ -130,42 +136,44 @@ class ModApplyOperator(bpy.types.Operator):
             bpy.ops.object.mode_set(mode=oldMode)
         bpy.context.scene.objects.active = activeObj
         return {'FINISHED'}
-    
+
+
 class RemeshOperator(bpy.types.Operator):
     '''Remesh an object at the given octree depth'''
     bl_idname = "sculpt.remesh"
     bl_label = "Sculpt Remesh"
 
     bl_options = {'REGISTER', 'UNDO'}
+
     @classmethod
     def poll(cls, context):
         return context.active_object is not None
-    
-    def draw(self, context): 
-        if context.active_object.mode != 'SCULPT':   
+
+    def draw(self, context):
+        if context.active_object.mode != 'SCULPT':
             wm = context.window_manager
             layout = self.layout
             layout.prop(wm, "remeshDepthInt", text="Depth")
             layout.prop(wm, "remeshSubdivisions", text="Subdivisions")
             layout.prop(wm, "remeshPreserveShape", text="Preserve Shape")
-        
+
     def execute(self, context):
         # add a smooth remesh modifier
         ob = context.active_object
         wm = context.window_manager
         oldMode = ob.mode
-        
-        dyntopoOn = False;
-        if context.active_object.mode == 'SCULPT': 
+
+        dyntopoOn = False
+        if context.active_object.mode == 'SCULPT':
             if context.sculpt_object.use_dynamic_topology_sculpting:
                 dyntopoOn = True
                 bpy.ops.sculpt.dynamic_topology_toggle()
-        
+
         bpy.ops.object.mode_set(mode='OBJECT')
-        
-        if wm.remeshPreserveShape:            
+
+        if wm.remeshPreserveShape:
             obCopy = objDuplicate(ob)
-        
+
         md = ob.modifiers.new('sculptremesh', 'REMESH')
         md.mode = 'SMOOTH'
         md.octree_depth = wm.remeshDepthInt
@@ -174,34 +182,32 @@ class RemeshOperator(bpy.types.Operator):
 
         # apply the modifier
         bpy.ops.object.modifier_apply(apply_as='DATA', modifier="sculptremesh")
-        
+
         if wm.remeshSubdivisions > 0:
             mdsub = ob.modifiers.new('RemeshSubSurf', 'SUBSURF')
             mdsub.levels = wm.remeshSubdivisions
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier="RemeshSubSurf")
-        
-        
-        if wm.remeshPreserveShape:            
+
+        if wm.remeshPreserveShape:
             md2 = ob.modifiers.new('RemeshShrinkwrap', 'SHRINKWRAP')
             md2.wrap_method = 'PROJECT'
             md2.use_negative_direction = True
             md2.use_positive_direction = True
             md2.target = obCopy
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier="RemeshShrinkwrap")
-            
+
             bpy.data.scenes[0].objects.unlink(obCopy)
             bpy.data.objects.remove(obCopy)
-        
+
         bpy.ops.object.mode_set(mode=oldMode)
-        
+
         if dyntopoOn == True:
             bpy.ops.sculpt.dynamic_topology_toggle()
-        
+
         ob.select = True
         return {'FINISHED'}
-        
 
-        
+
 class XMirrorOperator(bpy.types.Operator):
     '''Applies an X-axis mirror modifier to the selected object. If more objects are selected, they will be mirrored around the active object.'''
     bl_idname = "boolean.mod_xmirror"
@@ -211,13 +217,13 @@ class XMirrorOperator(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return context.active_object is not None
-    
+
     def execute(self, context):
         activeObj = context.active_object
-        if len(bpy.context.selected_objects)>1 :
-            for SelectedObject in bpy.context.selected_objects :
-                if SelectedObject != activeObj :
-                    oldMode = SelectedObject.mode    
+        if len(bpy.context.selected_objects) > 1:
+            for SelectedObject in bpy.context.selected_objects:
+                if SelectedObject != activeObj:
+                    oldMode = SelectedObject.mode
 
                     bpy.context.scene.objects.active = SelectedObject
 
@@ -228,11 +234,11 @@ class XMirrorOperator(bpy.types.Operator):
 
                     bpy.ops.object.mode_set(mode=oldMode)
                     bpy.context.scene.objects.active = activeObj
-                    
-        #if there's only one object selected, apply straight fo the active obj.
-        if len(bpy.context.selected_objects)==1 :
 
-            oldMode = activeObj.mode    
+        # if there's only one object selected, apply straight fo the active obj.
+        if len(bpy.context.selected_objects) == 1:
+
+            oldMode = activeObj.mode
 
             bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -241,7 +247,7 @@ class XMirrorOperator(bpy.types.Operator):
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier=md.name)
 
             bpy.ops.object.mode_set(mode=oldMode)
-                
+
         return {'FINISHED'}
 
 
@@ -254,13 +260,13 @@ class YMirrorOperator(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return context.active_object is not None
-    
+
     def execute(self, context):
         activeObj = context.active_object
-        if len(bpy.context.selected_objects)>1 :
-            for SelectedObject in bpy.context.selected_objects :
-                if SelectedObject != activeObj :
-                    oldMode = SelectedObject.mode    
+        if len(bpy.context.selected_objects) > 1:
+            for SelectedObject in bpy.context.selected_objects:
+                if SelectedObject != activeObj:
+                    oldMode = SelectedObject.mode
 
                     bpy.context.scene.objects.active = SelectedObject
 
@@ -269,14 +275,13 @@ class YMirrorOperator(bpy.types.Operator):
                     md = SelectedObject.modifiers.new('ymirror', 'MIRROR')
                     md.mirror_object = activeObj
 
-
                     bpy.ops.object.mode_set(mode=oldMode)
                     bpy.context.scene.objects.active = activeObj
-                    
-        #if there's only one object selected, apply straight fo the active obj.
-        if len(bpy.context.selected_objects)==1 :
 
-            oldMode = activeObj.mode    
+        # if there's only one object selected, apply straight fo the active obj.
+        if len(bpy.context.selected_objects) == 1:
+
+            oldMode = activeObj.mode
 
             bpy.ops.object.mode_set(mode='OBJECT')
 
@@ -285,10 +290,10 @@ class YMirrorOperator(bpy.types.Operator):
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier=md.name)
 
             bpy.ops.object.mode_set(mode=oldMode)
-                
+
         return {'FINISHED'}
-    
-            
+
+
 class DoubleSidedOffOperator(bpy.types.Operator):
     '''Turn off double sided for all objects'''
     bl_idname = "boolean.double_sided_off"
@@ -303,14 +308,15 @@ class DoubleSidedOffOperator(bpy.types.Operator):
             mesh.show_double_sided = False
         return {'FINISHED'}
 
+
 class SymmetrizeBoolMesh(bpy.types.Operator):
     """Copies one side of the mesh to the other along the chosen axis"""
     bl_idname = "boolean.grease_symm"
     bl_label = "Bool Mesh Symm Function"
     bl_options = {'REGISTER', 'UNDO'}
-    
-    symm_int = bpy.props.FloatProperty(name="Threshold", min = 0.0001, max = 1, default = .001)       
-    
+
+    symm_int = bpy.props.FloatProperty(name="Threshold", min=0.0001, max=1, default=.001)
+
     @classmethod
     def poll(cls, context):
         return context.active_object is not None and context.active_object.mode == 'OBJECT' and context.active_object.type == 'MESH' or context.active_object is not None and context.active_object.mode == 'VERTEX_PAINT'
@@ -321,50 +327,50 @@ class SymmetrizeBoolMesh(bpy.types.Operator):
         mode_curr = context.active_object.mode
         func.object.editmode_toggle()
         func.mesh.select_all(action='SELECT')
-        func.mesh.symmetrize(direction = wm.bolsymm, threshold= self.symm_int)
+        func.mesh.symmetrize(direction=wm.bolsymm, threshold=self.symm_int)
         func.mesh.remove_doubles()
         func.object.editmode_toggle()
         if mode_curr == 'VERTEX_PAINT':
             func.object.mode_set(mode='VERTEX_PAINT')
         return {'FINISHED'}
-    
-    
+
+
 ##################################################
 class MaskExtractOperator(bpy.types.Operator):
     """Extracts the masked area into a new mesh"""
     bl_idname = "boolean.mask_extract"
     bl_label = "Mask Extract"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     @classmethod
     def poll(cls, context):
         return context.active_object is not None and context.active_object.mode == 'SCULPT'
-    
-    def draw(self, context): 
+
+    def draw(self, context):
         wm = context.window_manager
         layout = self.layout
         layout.prop(wm, "extractStyleEnum", text="Style")
         layout.prop(wm, "extractDepthFloat", text="Depth")
         layout.prop(wm, "extractOffsetFloat", text="Offset")
         layout.prop(wm, "extractSmoothIterationsInt", text="Smooth Iterations")
-    
+
     def execute(self, context):
         wm = context.window_manager
         activeObj = context.active_object
-        
+
         # This is a hackish way to support redo functionality despite sculpt mode having its own undo system.
         # The set of conditions here is not something the user can create manually from the UI.
         # Unfortunately I haven't found a way to make Undo itself work
-        if  2>len(bpy.context.selected_objects)>0 and \
-            context.selected_objects[0] != activeObj and \
-            context.selected_objects[0].name.startswith("Extracted."):
+        if  2 > len(bpy.context.selected_objects) > 0 and \
+                context.selected_objects[0] != activeObj and \
+                context.selected_objects[0].name.startswith("Extracted."):
             rem = context.selected_objects[0]
             remname = rem.data.name
             bpy.data.scenes[0].objects.unlink(rem)
             bpy.data.objects.remove(rem)
             # remove mesh to prevent memory being cluttered up with hundreds of high-poly objects
             bpy.data.meshes.remove(bpy.data.meshes[remname])
-        
+
         # For multires we need to copy the object and apply the modifiers
         try:
             if activeObj.modifiers["Multires"]:
@@ -376,9 +382,9 @@ class MaskExtractOperator(bpy.types.Operator):
         except:
             use_multires = False
             pass
-            
+
         bpy.ops.object.mode_set(mode='EDIT')
-        
+
         # Automerge will collapse the mesh so we need it off.
         if context.scene.tool_settings.use_mesh_automerge:
             automerge = True
@@ -388,7 +394,7 @@ class MaskExtractOperator(bpy.types.Operator):
 
         # Until python can read sculpt mask data properly we need to rely on the hiding trick
         bpy.ops.mesh.select_all(action='SELECT')
-        bpy.ops.mesh.normals_make_consistent();
+        bpy.ops.mesh.normals_make_consistent()
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode='SCULPT')
         bpy.ops.paint.hide_show(action='HIDE', area='MASKED')
@@ -397,76 +403,78 @@ class MaskExtractOperator(bpy.types.Operator):
         bpy.ops.mesh.reveal()
         bpy.ops.mesh.duplicate_move(MESH_OT_duplicate=None, TRANSFORM_OT_translate=None)
         bpy.ops.object.mode_set(mode='OBJECT')
-        bpy.ops.object.select_all(action = 'DESELECT')
+        bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode='EDIT')
-        
+
         # For multires we already have a copy, so lets use that instead of separate.
         if use_multires == True:
             bpy.ops.mesh.select_all(action='INVERT')
             bpy.ops.mesh.delete(type='FACE')
-            bpy.context.scene.objects.active = objCopy;
+            bpy.context.scene.objects.active = objCopy
         else:
             try:
                 bpy.ops.mesh.separate(type="SELECTED")
-                bpy.context.scene.objects.active = context.selected_objects[0];
+                bpy.context.scene.objects.active = context.selected_objects[0]
             except:
                 bpy.ops.object.mode_set(mode='SCULPT')
                 bpy.ops.paint.hide_show(action='SHOW', area='ALL')
                 return {'FINISHED'}
         bpy.ops.object.mode_set(mode='OBJECT')
-        
+
         # Rename the object for disambiguation
         bpy.context.scene.objects.active.name = "Extracted." + bpy.context.scene.objects.active.name
         bpy.ops.object.mode_set(mode='EDIT')
-        
+
         # Solid mode should create a two-sided mesh
         if wm.extractStyleEnum == 'SOLID':
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.transform.shrink_fatten(value=-wm.extractOffsetFloat) #offset
+            bpy.ops.transform.shrink_fatten(value=-wm.extractOffsetFloat)  # offset
             bpy.ops.mesh.region_to_loop()
             bpy.ops.mesh.select_all(action='INVERT')
-            bpy.ops.mesh.vertices_smooth(repeat = wm.extractSmoothIterationsInt) #smooth everything but border edges to sanitize normals
+            bpy.ops.mesh.vertices_smooth(repeat=wm.extractSmoothIterationsInt)  # smooth everything but border edges to sanitize normals
             bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.mesh.solidify(thickness = -wm.extractDepthFloat)
+            bpy.ops.mesh.solidify(thickness=-wm.extractDepthFloat)
             bpy.ops.mesh.select_all(action='SELECT')
-            if wm.extractSmoothIterationsInt>0: bpy.ops.mesh.vertices_smooth(repeat = wm.extractSmoothIterationsInt)
-            bpy.ops.mesh.normals_make_consistent();
+            if wm.extractSmoothIterationsInt > 0:
+                bpy.ops.mesh.vertices_smooth(repeat=wm.extractSmoothIterationsInt)
+            bpy.ops.mesh.normals_make_consistent()
 
         elif wm.extractStyleEnum == 'SINGLE':
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.transform.shrink_fatten(value=-wm.extractOffsetFloat) #offset
+            bpy.ops.transform.shrink_fatten(value=-wm.extractOffsetFloat)  # offset
             bpy.ops.mesh.region_to_loop()
             bpy.ops.mesh.select_all(action='INVERT')
-            bpy.ops.mesh.vertices_smooth(repeat = wm.extractSmoothIterationsInt) #smooth everything but border edges to sanitize normals
+            bpy.ops.mesh.vertices_smooth(repeat=wm.extractSmoothIterationsInt)  # smooth everything but border edges to sanitize normals
             bpy.ops.mesh.select_all(action='SELECT')
             # This is to create an extra loop and prevent the bottom vertices running up too far in smoothing
             # Tried multiple ways to prevent this and this one seemed best
-            bpy.ops.mesh.inset(thickness=0, depth=wm.extractDepthFloat/1000, use_select_inset=False)
-            bpy.ops.mesh.inset(thickness=0, depth=wm.extractDepthFloat-(wm.extractDepthFloat/1000), use_select_inset=False)
+            bpy.ops.mesh.inset(thickness=0, depth=wm.extractDepthFloat / 1000, use_select_inset=False)
+            bpy.ops.mesh.inset(thickness=0, depth=wm.extractDepthFloat - (wm.extractDepthFloat / 1000), use_select_inset=False)
             bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.mesh.vertices_smooth(repeat = wm.extractSmoothIterationsInt)
+            bpy.ops.mesh.vertices_smooth(repeat=wm.extractSmoothIterationsInt)
             bpy.ops.mesh.normals_make_consistent()
 
         elif wm.extractStyleEnum == 'FLAT':
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.select_all(action='SELECT')
             # Offset doesn't make much sense for Flat mode, so let's add it to the depth to make it a single op.
-            bpy.ops.transform.shrink_fatten(value=-wm.extractDepthFloat-wm.extractOffsetFloat) 
-            if wm.extractSmoothIterationsInt>0: bpy.ops.mesh.vertices_smooth(repeat = wm.extractSmoothIterationsInt)
-            
+            bpy.ops.transform.shrink_fatten(value=-wm.extractDepthFloat - wm.extractOffsetFloat)
+            if wm.extractSmoothIterationsInt > 0:
+                bpy.ops.mesh.vertices_smooth(repeat=wm.extractSmoothIterationsInt)
+
         # clear mask on the extracted mesh
         bpy.ops.object.mode_set(mode='SCULPT')
         bpy.ops.paint.mask_flood_fill(mode='VALUE', value=0)
-        
+
         bpy.ops.object.mode_set(mode='OBJECT')
-        
+
         # make sure to recreate the odd selection situation for redo
         if use_multires:
             bpy.ops.object.select_pattern(pattern=context.active_object.name, case_sensitive=True, extend=False)
         bpy.context.scene.objects.active = activeObj
-        
+
         # restore automerge
         if automerge:
             bpy.data.scenes[context.scene.name].tool_settings.use_mesh_automerge = True
@@ -474,8 +482,8 @@ class MaskExtractOperator(bpy.types.Operator):
         # restore mode for original object
         bpy.ops.object.mode_set(mode='SCULPT')
         return {'FINISHED'}
-    
-    
+
+
 #################################################################
 class GreaseTrim(bpy.types.Operator):
     """Cuts the selected object along the grease pencil stroke"""
@@ -483,16 +491,16 @@ class GreaseTrim(bpy.types.Operator):
     bl_label = "Grease Cut"
     bl_options = {'REGISTER', 'UNDO'}
 
-    @classmethod 
+    @classmethod
     def poll(cls, context):
-        return context.active_object is not None and context.active_object.mode == 'OBJECT' and context.active_object.type == 'MESH'  and 0<len(bpy.context.selected_objects)<=2
+        return context.active_object is not None and context.active_object.mode == 'OBJECT' and context.active_object.type == 'MESH' and 0 < len(bpy.context.selected_objects) <= 2
 
     def execute(self, context):
-        objBBDiagonal = objDiagonal(context.active_object)*2
+        objBBDiagonal = objDiagonal(context.active_object) * 2
         # objBBDiagonal = objBBDiagonal*2
         subdivisions = 32
 
-        if len(bpy.context.selected_objects)==1:
+        if len(bpy.context.selected_objects) == 1:
             try:
                 mesh = bpy.context.active_object
                 bpy.ops.gpencil.convert(type='POLY', timing_mode='LINEAR', use_timing_data=False)
@@ -500,39 +508,39 @@ class GreaseTrim(bpy.types.Operator):
                 mesh = bpy.context.active_object
                 if mesh == bpy.context.selected_objects[0]:
                     ruler = bpy.context.selected_objects[1]
-                else: 
+                else:
                     ruler = bpy.context.selected_objects[0]
                 bpy.context.scene.objects.active = ruler
                 bpy.ops.object.convert(target='MESH')
-                
+
                 rulerDiagonal = objDiagonal(ruler)
                 verts = []
-                
+
                 bm = bmesh.new()
                 bm.from_mesh(ruler.data)
-                
+
                 for v in bm.verts:
                     if len(v.link_edges) == 1:
                         v.select = True
                         verts.append(v)
                 dist = verts[0].co - verts[1].co
-                if dist.length < rulerDiagonal/10:
+                if dist.length < rulerDiagonal / 10:
                     bm.edges.new(verts)
-                
+
                 bm.to_mesh(ruler.data)
-                
+
             except:
                 self.report({'WARNING'}, "Draw a line with grease pencil first")
                 return {'FINISHED'}
-        elif len(bpy.context.selected_objects)==2:
+        elif len(bpy.context.selected_objects) == 2:
             mesh = bpy.context.active_object
-            
+
             if mesh == bpy.context.selected_objects[0]:
                 ruler = bpy.context.selected_objects[1]
-            else: 
+            else:
                 ruler = bpy.context.selected_objects[0]
-            
-            if ruler.type == 'MESH' and len(ruler.data.polygons)>0:
+
+            if ruler.type == 'MESH' and len(ruler.data.polygons) > 0:
                 bpy.context.scene.objects.active = ruler
                 bpy.ops.object.mode_set(mode='EDIT')
                 bpy.ops.mesh.select_mode(type="EDGE")
@@ -544,37 +552,36 @@ class GreaseTrim(bpy.types.Operator):
             elif ruler.type == 'CURVE':
                 bpy.context.scene.objects.active = ruler
                 bpy.ops.object.convert(target='MESH')
-            
-
 
         for area in bpy.context.screen.areas:
             if area.type == 'VIEW_3D':
                 viewZAxis = tuple([z * objBBDiagonal for z in area.spaces[0].region_3d.view_matrix[2][0:3]])
-                negViewZAxis = tuple([z * (-2*objBBDiagonal*(1/subdivisions)) for z in area.spaces[0].region_3d.view_matrix[2][0:3]])
+                negViewZAxis = tuple([z * (-2 * objBBDiagonal * (1 / subdivisions)) for z in area.spaces[0].region_3d.view_matrix[2][0:3]])
                 break
-        
+
         bpy.context.scene.objects.active = ruler
 
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.select_mode(type="EDGE")
-        bpy.ops.transform.translate(value = viewZAxis)
+        bpy.ops.transform.translate(value=viewZAxis)
         for i in range(0, subdivisions):
-            bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":negViewZAxis})
+            bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value": negViewZAxis})
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.normals_make_consistent()
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.context.scene.objects.active = mesh
         bpy.ops.boolean.separate()
-    
+
         return {'FINISHED'}
+
 
 class PurgeAllPencils(bpy.types.Operator):
     """Removes all Grease Pencil Layers"""
     bl_idname = "boolean.purge_pencils"
     bl_label = "Clears all grease pencil user data in the scene"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     @classmethod
     def poll(cls, context):
         return context.active_object is not None
@@ -584,9 +591,8 @@ class PurgeAllPencils(bpy.types.Operator):
             context.scene.grease_pencil.clear()
         for obj in context.scene.objects:
             if not context.scene.objects[obj.name].grease_pencil == None:
-                context.scene.objects[obj.name].grease_pencil.clear() 
-        return {'FINISHED'}   
-
+                context.scene.objects[obj.name].grease_pencil.clear()
+        return {'FINISHED'}
 
 
 ###################################################################
@@ -598,13 +604,13 @@ class BooleanFreezeOperator(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object is not None and len(bpy.context.selected_objects)==1 and context.active_object.frozen == False
+        return context.active_object is not None and len(bpy.context.selected_objects) == 1 and context.active_object.frozen == False
 
     def execute(self, context):
-        
+
         if "Frozen" not in bpy.data.groups:
             bpy.data.groups.new("Frozen")
-        
+
         ob = context.active_object
         obCopy = objDuplicate(ob)
         md = ob.modifiers.new('BoolDecimate', 'DECIMATE')
@@ -613,16 +619,17 @@ class BooleanFreezeOperator(bpy.types.Operator):
         ob.hide_render = True
         obCopy.select = True
         bpy.ops.object.parent_set(type='OBJECT', keep_transform=False)
-        obCopy.name = "Frozen_"+ob.name
+        obCopy.name = "Frozen_" + ob.name
         obCopy.hide = True
         obCopy.hide_select = True
         obCopy.select = False
         ob.select = True
         bpy.ops.object.group_link(group='Frozen')
         ob.frozen = True
-        
+
         return {'FINISHED'}
-        
+
+
 class BooleanUnfreezeOperator(bpy.types.Operator):
     '''Decimates the object temporarily for viewport performance'''
     bl_idname = "boolean.unfreeze"
@@ -631,30 +638,30 @@ class BooleanUnfreezeOperator(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object is not None and len(bpy.context.selected_objects)==1 and context.active_object.frozen == True
+        return context.active_object is not None and len(bpy.context.selected_objects) == 1 and context.active_object.frozen == True
 
     def execute(self, context):
         ob = bpy.context.active_object
-        
+
         for sceneObj in bpy.context.scene.objects:
             if sceneObj.parent == ob:
                 frozen = sceneObj
-        
+
         remname = ob.data.name
-        
-        ob.data = bpy.context.scene.objects['Frozen_'+ob.name].data
-        
+
+        ob.data = bpy.context.scene.objects['Frozen_' + ob.name].data
+
         bpy.data.scenes[bpy.context.scene.name].objects.unlink(frozen)
         bpy.data.objects.remove(frozen)
         # remove mesh to prevent memory being cluttered up with hundreds of high-poly objects
         bpy.data.meshes.remove(bpy.data.meshes[remname])
-        
+
         ob.hide_render = False
-        
+
         bpy.data.groups['Frozen'].objects.unlink(bpy.context.object)
-        
+
         ob.frozen = False
-        
+
         return {'FINISHED'}
 
 
@@ -667,13 +674,13 @@ class BooleanUnionOperator(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object is not None and len(bpy.context.selected_objects)>1
+        return context.active_object is not None and len(bpy.context.selected_objects) > 1
 
     def execute(self, context):
         # add a union boolean modifier
         activeObj = context.active_object
-        for SelectedObject in bpy.context.selected_objects :
-            if SelectedObject != activeObj :
+        for SelectedObject in bpy.context.selected_objects:
+            if SelectedObject != activeObj:
 
                 objSelectFaces(activeObj, 'DESELECT')
                 objSelectFaces(SelectedObject, 'SELECT')
@@ -682,13 +689,14 @@ class BooleanUnionOperator(bpy.types.Operator):
 
                 md = activeObj.modifiers.new('booleanunion', 'BOOLEAN')
                 md.operation = 'UNION'
-                md.object = SelectedObject       
+                md.object = SelectedObject
                 # apply the modifier
                 bpy.ops.object.modifier_apply(apply_as='DATA', modifier="booleanunion")
                 bpy.data.scenes[0].objects.unlink(SelectedObject)
                 bpy.data.objects.remove(SelectedObject)
-        
+
         return {'FINISHED'}
+
 
 class BooleanDifferenceOperator(bpy.types.Operator):
     '''Subtracts the selection from the active object'''
@@ -698,31 +706,32 @@ class BooleanDifferenceOperator(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object is not None and len(bpy.context.selected_objects)>1
+        return context.active_object is not None and len(bpy.context.selected_objects) > 1
 
     def execute(self, context):
         # add a difference boolean modifier
         activeObj = context.active_object
-        for SelectedObject in bpy.context.selected_objects :
-            if SelectedObject != activeObj :
+        for SelectedObject in bpy.context.selected_objects:
+            if SelectedObject != activeObj:
 
-                #deselect all the faces of the active object
+                # deselect all the faces of the active object
                 objSelectFaces(activeObj, 'DESELECT')
 
-                #select all the faces of the selected object
+                # select all the faces of the selected object
                 objSelectFaces(SelectedObject, 'SELECT')
-                
+
                 bpy.context.scene.objects.active = activeObj
-                
+
                 md = activeObj.modifiers.new('booleandifference', 'BOOLEAN')
                 md.operation = 'DIFFERENCE'
-                md.object = SelectedObject       
+                md.object = SelectedObject
                 # apply the modifier
                 bpy.ops.object.modifier_apply(apply_as='DATA', modifier="booleandifference")
                 bpy.data.scenes[0].objects.unlink(SelectedObject)
                 bpy.data.objects.remove(SelectedObject)
-        
+
         return {'FINISHED'}
+
 
 class BooleanIntersectOperator(bpy.types.Operator):
     '''Creates an intersection of all the selected objects'''
@@ -732,32 +741,33 @@ class BooleanIntersectOperator(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object is not None and len(bpy.context.selected_objects)>1
+        return context.active_object is not None and len(bpy.context.selected_objects) > 1
 
     def execute(self, context):
         # add a intersect boolean modifier
         activeObj = context.active_object
-        for SelectedObject in bpy.context.selected_objects :
-            if SelectedObject != activeObj :
-                
-                #deselect all the faces of the active object
+        for SelectedObject in bpy.context.selected_objects:
+            if SelectedObject != activeObj:
+
+                # deselect all the faces of the active object
                 objSelectFaces(activeObj, 'DESELECT')
 
-                #select all the faces of the selected object
+                # select all the faces of the selected object
                 objSelectFaces(SelectedObject, 'SELECT')
-                
+
                 bpy.context.scene.objects.active = activeObj
 
                 md = activeObj.modifiers.new('booleanintersect', 'BOOLEAN')
                 md.operation = 'INTERSECT'
-                md.object = SelectedObject       
-                
+                md.object = SelectedObject
+
                 # apply the modifier
                 bpy.ops.object.modifier_apply(apply_as='DATA', modifier="booleanintersect")
                 bpy.data.scenes[0].objects.unlink(SelectedObject)
                 bpy.data.objects.remove(SelectedObject)
-        
+
         return {'FINISHED'}
+
 
 class BooleanCloneOperator(bpy.types.Operator):
     '''Clones the intersecting part of the mesh'''
@@ -766,33 +776,34 @@ class BooleanCloneOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     #@classmethod
-    #def poll(cls, context):
-        #return context.active_object is not None and len(bpy.context.selected_objects)==2
+    # def poll(cls, context):
+    # return context.active_object is not None and len(bpy.context.selected_objects)==2
 
     def execute(self, context):
         # add a intersect boolean modifier
         activeObj = context.active_object
-        for SelectedObject in bpy.context.selected_objects :
-            if SelectedObject != activeObj :
-                
-                #deselect all the faces of the active object
+        for SelectedObject in bpy.context.selected_objects:
+            if SelectedObject != activeObj:
+
+                # deselect all the faces of the active object
                 objSelectFaces(activeObj, 'DESELECT')
 
-                #select all the faces of the selected object
+                # select all the faces of the selected object
                 objSelectFaces(SelectedObject, 'SELECT')
 
                 md = SelectedObject.modifiers.new('booleanclone', 'BOOLEAN')
                 md.operation = 'INTERSECT'
-                md.object = activeObj       
-                
+                md.object = activeObj
+
                 # apply the modifier
                 bpy.context.scene.objects.active = SelectedObject
                 bpy.ops.object.modifier_apply(apply_as='DATA', modifier="booleanclone")
-                
-                #restore the active object
+
+                # restore the active object
                 bpy.context.scene.objects.active = activeObj
-        
+
         return {'FINISHED'}
+
 
 class BooleanSeparateOperator(bpy.types.Operator):
     '''Separates the active object along the intersection of the selected objects'''
@@ -801,57 +812,56 @@ class BooleanSeparateOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     #@classmethod
-    #def poll(cls, context):
-        #return context.active_object is not None and len(bpy.context.selected_objects)==2
+    # def poll(cls, context):
+    # return context.active_object is not None and len(bpy.context.selected_objects)==2
 
     def execute(self, context):
         # add a intersect boolean modifier
         activeObj = context.active_object
         Selection = bpy.context.selected_objects
-        
-        for SelectedObject in Selection :
-            if SelectedObject != activeObj :
-                
-                #make a copy of the selected object
+
+        for SelectedObject in Selection:
+            if SelectedObject != activeObj:
+
+                # make a copy of the selected object
                 SelectedObjCopy = objDuplicate(SelectedObject)
-                
-                #make a copy of the active object
+
+                # make a copy of the active object
                 activeObjCopy = objDuplicate(activeObj)
 
                 objSelectFaces(activeObjCopy, 'SELECT')
                 objSelectFaces(SelectedObject, 'DESELECT')
-                
-                
+
                 md = SelectedObject.modifiers.new('sepIntersect', 'BOOLEAN')
                 md.operation = 'INTERSECT'
                 md.object = activeObjCopy
-                # apply the modifier 
+                # apply the modifier
                 bpy.context.scene.objects.active = SelectedObject
                 bpy.ops.object.modifier_apply(apply_as='DATA', modifier="sepIntersect")
-                
+
                 objSelectFaces(SelectedObject, 'INVERT')
-                
-                #delete the copy of the active object
+
+                # delete the copy of the active object
                 bpy.data.scenes[0].objects.unlink(activeObjCopy)
                 bpy.data.objects.remove(activeObjCopy)
-        
+
         objSelectFaces(SelectedObjCopy, 'SELECT')
         objSelectFaces(activeObj, 'DESELECT')
-   
+
         md2 = activeObj.modifiers.new('sepDifference', 'BOOLEAN')
         md2.operation = 'DIFFERENCE'
         md2.object = SelectedObjCopy
-        
-        #apply the second modifier
+
+        # apply the second modifier
         bpy.context.scene.objects.active = SelectedObject
         bpy.ops.object.modifier_apply(apply_as='DATA', modifier="sepDifference")
-        
-        #delete the copy of the selected object
+
+        # delete the copy of the selected object
         bpy.data.scenes[0].objects.unlink(SelectedObjCopy)
         bpy.data.objects.remove(SelectedObjCopy)
-        
+
         bpy.context.active_object.select = True
-        
+
         return {'FINISHED'}
 
 
@@ -860,21 +870,21 @@ class ExecuteGreaseCutOperator(bpy.types.Operator):
     bl_idname = "grease.execution"
     bl_label = "Execute Grease Cut"
     bl_options = {'REGISTER', 'UNDO'}
-  
-    remove = bpy.props.BoolProperty(name="Remove Grease Pencil Stroke",  description="Profil", default=False)
-    origin = bpy.props.BoolProperty(name="Origin to Active",  description="Profil", default=False)
+
+    remove = bpy.props.BoolProperty(name="Remove Grease Pencil Stroke", description="Profil", default=False)
+    origin = bpy.props.BoolProperty(name="Origin to Active", description="Profil", default=False)
 
     def execute(self, context):
         bpy.ops.boolean.grease_trim()
         bpy.ops.boolean.grease_trim()
-                                                            
-        for i in range(self.remove):             
+
+        for i in range(self.remove):
             bpy.ops.boolean.purge_pencils()
-                                                            
-        for i in range(self.origin):             
+
+        for i in range(self.origin):
             bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY')
-            
-        return {'FINISHED'}         
+
+        return {'FINISHED'}
 
 
 #####################################################
@@ -973,43 +983,43 @@ class RemeshBooleanPanel(bpy.types.Panel):
             boxrow.prop(edit, "use_grease_pencil_simplify_stroke", text="Simplify")
             box.separator()                                         
             box.operator("boolean.purge_pencils", text='Purge All Grease Pencils')
-"""        
+"""
+
 
 def register():
     bpy.utils.register_module(__name__)
-    
 
-    bpy.types.Object.frozen = BoolProperty(name="frozen", default = False)
-        
-    bpy.types.WindowManager.remeshDepthInt = IntProperty(min = 2, max = 10, default = 4)
-    bpy.types.WindowManager.remeshSubdivisions = IntProperty(min = 0, max = 6, default = 0)
-    bpy.types.WindowManager.remeshPreserveShape = BoolProperty(default = True)
+    bpy.types.Object.frozen = BoolProperty(name="frozen", default=False)
 
-    bpy.types.WindowManager.extractDepthFloat = FloatProperty(min = -10.0, max = 10.0, default = 0.1)
-    bpy.types.WindowManager.extractOffsetFloat = FloatProperty(min = -10.0, max = 10.0, default = 0.0)
+    bpy.types.WindowManager.remeshDepthInt = IntProperty(min=2, max=10, default=4)
+    bpy.types.WindowManager.remeshSubdivisions = IntProperty(min=0, max=6, default=0)
+    bpy.types.WindowManager.remeshPreserveShape = BoolProperty(default=True)
 
-    bpy.types.WindowManager.extractSmoothIterationsInt = IntProperty(min = 0, max = 50, default = 5)
-    
+    bpy.types.WindowManager.extractDepthFloat = FloatProperty(min=-10.0, max=10.0, default=0.1)
+    bpy.types.WindowManager.extractOffsetFloat = FloatProperty(min=-10.0, max=10.0, default=0.0)
+
+    bpy.types.WindowManager.extractSmoothIterationsInt = IntProperty(min=0, max=50, default=5)
+
     bpy.types.WindowManager.extractStyleEnum = EnumProperty(name="Extract style",
-                     items = (("SOLID","Solid",""),
-                              ("SINGLE","Single Sided",""),
-                              ("FLAT","Flat","")),
-                     default = "SOLID")
-    
+                                                            items=(("SOLID", "Solid", ""),
+                                                                   ("SINGLE", "Single Sided", ""),
+                                                                   ("FLAT", "Flat", "")),
+                                                            default="SOLID")
+
     bpy.types.WindowManager.expand_grease_settings = BoolProperty(default=False)
 
     bpy.types.WindowManager.bolsymm = EnumProperty(name="",
-                     items = (("NEGATIVE_X","-X to +X",""),
-                              ("POSITIVE_X","+X to -X",""),
-                              ("NEGATIVE_Y","-Y to +Y",""),
-                              ("POSITIVE_Y","+Y to -Y",""),
-                              ("NEGATIVE_Z","-Z to +Z",""),
-                              ("POSITIVE_Z","+Z to -Z","")),                                                                                           
-                     default = "NEGATIVE_X")
-    
+                                                   items=(("NEGATIVE_X", "-X to +X", ""),
+                                                          ("POSITIVE_X", "+X to -X", ""),
+                                                          ("NEGATIVE_Y", "-Y to +Y", ""),
+                                                          ("POSITIVE_Y", "+Y to -Y", ""),
+                                                          ("NEGATIVE_Z", "-Z to +Z", ""),
+                                                          ("POSITIVE_Z", "+Z to -Z", "")),
+                                                   default="NEGATIVE_X")
+
+
 def unregister():
     bpy.utils.unregister_module(__name__)
-    
 
     try:
         del bpy.types.WindowManager.remeshDepthInt
@@ -1017,7 +1027,7 @@ def unregister():
         del bpy.types.WindowManager.extractDepthFloat
         del bpy.types.WindowManager.extractSmoothIterationsInt
         del bpy.types.WindowManager.bolsymm
-        
+
     except:
         pass
 

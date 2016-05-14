@@ -22,7 +22,7 @@ import bmesh
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, Vector_generate, repeat_last,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 def wireframe(vertices, faces, t, o, replace, boundary, even_offset, relative_offset):
@@ -42,7 +42,7 @@ def wireframe(vertices, faces, t, o, replace, boundary, even_offset, relative_of
     res = bmesh.ops.wireframe(bm, faces=bm.faces[:], thickness=t, offset=o, use_replace=replace,
                               use_boundary=boundary, use_even_offset=even_offset,
                               use_relative_offset=relative_offset)
-    #bmesh.ops.wireframe(bm, faces, thickness, offset, use_replace,
+    # bmesh.ops.wireframe(bm, faces, thickness, offset, use_replace,
     #    use_boundary, use_even_offset, use_crease, crease_weight, thickness, use_relative_offset, material_offset)
     edges = []
     faces = []

@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class FontListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_FontListSocket"
     bl_label = "Font List Socket"

@@ -18,7 +18,6 @@
 # ***** END GPL LICENCE BLOCK *****
 
 
-
 bl_info = {
     "name": "Super Grouper",
     "author": "Paul Geraskin",
@@ -29,8 +28,6 @@ bl_info = {
     "description": "Super Grouper",
     "wiki_url": "",
     "category": "3D View"}
-
-
 
 
 import bpy
@@ -54,8 +51,8 @@ class SG_Group(PropertyGroup):
     # is_wire = BoolProperty(name="", default=False)
     is_locked = BoolProperty(name="", default=False)
     is_selected = BoolProperty(name="", default=False)
-                               # this is just a temporary value as a user can
-                               # select/deselect
+    # this is just a temporary value as a user can
+    # select/deselect
     unique_id = StringProperty(default="")
 
     wire_color = FloatVectorProperty(
@@ -75,8 +72,6 @@ class SG_Other_Settings(PropertyGroup):
     select_all_layers = BoolProperty(name="SelectVisibleLayers", default=True)
     unlock_obj = BoolProperty(name="UnlockObj", default=False)
     unhide_obj = BoolProperty(name="UnhideObj", default=True)
-
-
 
 
 def draw_sgrouper(self, context):
@@ -200,6 +195,7 @@ class SG_named_super_groups(UIList):
 
 bpy.utils.register_class(SG_named_super_groups)
 
+
 def generate_id():
     # Generate unique id
     other_ids = []
@@ -274,7 +270,6 @@ class SG_super_group_add(bpy.types.Operator):
 bpy.utils.register_class(SG_super_group_add)
 
 
-
 class SG_super_group_remove(bpy.types.Operator):
 
     """Remove selected layer group"""
@@ -330,7 +325,6 @@ class SG_super_group_remove(bpy.types.Operator):
 bpy.utils.register_class(SG_super_group_remove)
 
 
-
 class SG_super_group_move(bpy.types.Operator):
 
     """Remove selected layer group"""
@@ -342,7 +336,7 @@ class SG_super_group_move(bpy.types.Operator):
         items=(('UP', 'UP', ''),
                ('DOWN', 'DOWN', '')
                ),
-        default = 'UP'
+        default='UP'
     )
 
     @classmethod
@@ -370,8 +364,6 @@ class SG_super_group_move(bpy.types.Operator):
         return {'FINISHED'}
 
 bpy.utils.register_class(SG_super_group_move)
-
-
 
 
 class SG_clean_object_ids(bpy.types.Operator):
@@ -486,8 +478,6 @@ class SG_toggle_select(bpy.types.Operator):
 bpy.utils.register_class(SG_toggle_select)
 
 
-
-
 class SG_toggle_visibility(bpy.types.Operator):
 
     """Draw a line with the mouse"""
@@ -575,7 +565,7 @@ class SG_change_grouped_objects(bpy.types.Operator):
                ('DEFAULT_COLOR_WIRE', 'DEFAULT_COLOR_WIRE', ''),
                ('LOCKING', 'LOCKING', '')
                ),
-        default = 'DEFAULT_COLOR_WIRE'
+        default='DEFAULT_COLOR_WIRE'
     )
 
     list_objects = ['LOCKING']
@@ -640,7 +630,7 @@ class SG_change_selected_objects(bpy.types.Operator):
                ('SHOW_WIRE', 'SHOW_WIRE', ''),
                ('HIDE_WIRE', 'HIDE_WIRE', '')
                ),
-        default = 'MATERIAL_SHADE'
+        default='MATERIAL_SHADE'
     )
     sg_do_with_groups = [
         'COLOR_WIRE', 'DEFAULT_COLOR_WIRE', 'LOCKED', 'UNLOCKED']
@@ -715,8 +705,6 @@ class SG_add_to_group(bpy.types.Operator):
 bpy.utils.register_class(SG_add_to_group)
 
 
-
-
 class SG_remove_from_group(bpy.types.Operator):
     bl_idname = "super_grouper.super_remove_from_group"
     bl_label = "Add"
@@ -744,7 +732,6 @@ class SG_remove_from_group(bpy.types.Operator):
         return {'FINISHED'}
 
 bpy.utils.register_class(SG_remove_from_group)
-
 
 
 def SG_add_property_to_obj(prop_name, obj):
@@ -838,28 +825,7 @@ def check_same_ids():
     other_ids = None
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def register():
-
 
     bpy.utils.register_module(__name__)
 
@@ -885,4 +851,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-    

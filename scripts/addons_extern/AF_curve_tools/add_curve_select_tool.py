@@ -223,13 +223,13 @@ class CURVE_OT_select_point(bpy.types.Operator):
 
 
 def draw_func(self, context):
-        layout = self.layout
-        col = layout.column(align=True)
-        col.label(text="Selection:")
-        col.operator('curve.select_point', text='Select previous').action = 'PREVIOUS'
-        col.operator('curve.select_point', text='Select next').action = 'NEXT'
-        col.operator('curve.select_point', text='Select first').action = 'FIRST'
-        col.operator('curve.select_point', text='Select last').action = 'LAST'
+    layout = self.layout
+    col = layout.column(align=True)
+    col.label(text="Selection:")
+    col.operator('curve.select_point', text='Select previous').action = 'PREVIOUS'
+    col.operator('curve.select_point', text='Select next').action = 'NEXT'
+    col.operator('curve.select_point', text='Select first').action = 'FIRST'
+    col.operator('curve.select_point', text='Select last').action = 'LAST'
 
 
 def menu_func(self, context):
@@ -258,14 +258,14 @@ def register():
         'curve.select_point',
         'LEFT_BRACKET',
         'PRESS'
-        )
+    )
     km_prev.properties.action = 'PREVIOUS'
 
     km_next = km.keymap_items.new(
         'curve.select_point',
         'RIGHT_BRACKET',
         'PRESS'
-        )
+    )
     km_next.properties.action = 'NEXT'
 
     km_first = km.keymap_items.new(
@@ -274,7 +274,7 @@ def register():
         'PRESS',
         shift=True,
         ctrl=True
-        )
+    )
     km_first.properties.action = 'FIRST'
 
     km_last = km.keymap_items.new(
@@ -283,7 +283,7 @@ def register():
         'PRESS',
         shift=True,
         ctrl=True
-        )
+    )
     km_last.properties.action = 'LAST'
 
     # Also add shortcuts for adding the next/previous point to the selection.
@@ -292,14 +292,14 @@ def register():
         'LEFT_BRACKET',
         'PRESS',
         shift=True
-        )
+    )
 
     km_add_next = km.keymap_items.new(
         'curve.select_next',
         'RIGHT_BRACKET',
         'PRESS',
         shift=True
-        )
+    )
 
     addon_keymaps.append((km, km_prev))
     addon_keymaps.append((km, km_next))

@@ -12,7 +12,7 @@ from bpy.props import (StringProperty,
                        CollectionProperty,
                        PointerProperty,
                        EnumProperty)
-                       
+
 from bpy.types import Operator
 
 from sound_drivers.utils import getSpeaker, set_channel_idprop_rna, unique_name
@@ -22,12 +22,13 @@ notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 octaves = range(-1, 10)
 
 midi_notes = ["%s%d" % (n, o) for o in octaves for n in notes]
-#pop off the last 4
+# pop off the last 4
 
 
 for i in range(4):
     midi_notes.pop()
-    
+
+
 def notesplit(s):
     notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B', '#']
     i = 0
@@ -37,6 +38,7 @@ def notesplit(s):
 
 midifile = {}
 
+
 def peek_midi_file(context, filepath, use_some_setting):
     print(filepath)
     prefs = context.user_preferences.addons["sound_drivers"].preferences
@@ -45,31 +47,31 @@ def peek_midi_file(context, filepath, use_some_setting):
     import smf
     pin_id = getattr(context.space_data, "pin_id", None)
     sp = pin_id if pin_id is not None else context.object.data
-    sound = sp.sound  
-    
+    sound = sp.sound
+
     f = smf.SMF(filepath)
     midi = {}
     tracks = {}
     for t in f.tracks:
-        track = {} 
+        track = {}
         for e in t.events:
             #print(e.decode(), e.time_seconds)
             s = e.decode()
-            #print(s.startswith("Note"))
-            
+            # print(s.startswith("Note"))
+
             if s.startswith("Instrument"):
                 #print("INSTRUMENT", s)
                 track["name"] = "Track %d" % (t.track_number)
                 track["index"] = t.track_number
-                
+
                 track["instrument"] = s.title()
-                
+
             elif s.startswith("Time Signature"):
                 track["time_sig"] = s
-                
+
             elif s.startswith("Tempo"):
                 track["tempo"] = s
-                
+
             elif s.startswith("Key Signature"):
                 print("KEYSIG", s)
                 track["keysig"] = s
@@ -79,8 +81,8 @@ def peek_midi_file(context, filepath, use_some_setting):
                 idx = int(s.split(" ")[-1])
                 s = midi_instruments[idx]
                 track["name"] = "Track %d" % (t.track_number)
-                track["instrument"] = s.title() 
-                track["index"] = t.track_number               
+                track["instrument"] = s.title()
+                track["index"] = t.track_number
             elif s.startswith("Controller"):
                 continue
                 print("CONTROLLER", s)
@@ -92,28 +94,28 @@ def peek_midi_file(context, filepath, use_some_setting):
             elif s.startswith("End Of Track"):
                 break
             else:
-                #continue
+                # continue
                 print("XXX", s)
         if t.track_number == 0:
             midi = track
-          
+
         if track.get("name", False):
-            tracks.setdefault(track["name"], track) 
-            
+            tracks.setdefault(track["name"], track)
+
     sound.midifile.filepath = filepath
     sound.midifile.tracks.clear()
-    
+
     for k, track in tracks.items():
         t = sound.midifile.tracks.add()
         t.name = track["name"]
-        
-        t.data_dic = json.dumps(track)
-        print("-"*77)
-        print(k, tracks[k])
-    
 
-    return    
-    
+        t.data_dic = json.dumps(track)
+        print("-" * 77)
+        print(k, tracks[k])
+
+    return
+
+
 def read_midi_file(context, filepath, use_some_setting):
     print(filepath)
     prefs = context.user_preferences.addons["sound_drivers"].preferences
@@ -122,7 +124,7 @@ def read_midi_file(context, filepath, use_some_setting):
     import smf
     pin_id = context.space_data.pin_id
     sp = pin_id if pin_id is not None else context.object.data
-    
+
     channels = [c for sp in context.scene.objects if sp.type == 'SPEAKER' for c in sp.data.channels]
     midichannels = []
     f = smf.SMF(filepath)
@@ -131,7 +133,7 @@ def read_midi_file(context, filepath, use_some_setting):
         print("TRACK : %s" % t.track_number)
         a = {}
         #a = bpy.data.actions.new("MidiAction")
-        
+
         print(channels)
         channel_name = unique_name(channels, 'AA')
         channels.append(channel_name)
@@ -144,8 +146,8 @@ def read_midi_file(context, filepath, use_some_setting):
         a["channel_name"] = channel_name
         a['MIDI'] = True
         #sp.animation_data.action = a
-        a["keyframe_points"] = {} # list of tups (dp, frame, value)
-        
+        a["keyframe_points"] = {}  # list of tups (dp, frame, value)
+
         '''
         for i, n in enumerate(midi_notes):
             channel = "%s%d" % (channel_name, i)
@@ -157,8 +159,8 @@ def read_midi_file(context, filepath, use_some_setting):
         for e in t.events:
             #print(e.decode(), e.time_seconds)
             s = e.decode()
-            #print(s.startswith("Note"))
-            
+            # print(s.startswith("Note"))
+
             if s.startswith("Instrument"):
                 #print("INSTRUMENT", s)
                 a["name"] = "MIDI:%s (trk %d)" % (s.title(), t.track_number)
@@ -168,7 +170,7 @@ def read_midi_file(context, filepath, use_some_setting):
                 #print("PROGCHA", s)
                 # this could be instrument too
                 idx = int(s.split(" ")[-1])
-                #print(midi_instruments[idx])
+                # print(midi_instruments[idx])
                 a["name"] = "MIDI:%s (trk %d)" % (midi_instruments[idx].title(), t.track_number)
             elif s.startswith("Controller"):
                 continue
@@ -185,11 +187,11 @@ def read_midi_file(context, filepath, use_some_setting):
                 #print("CC", c[0])
                 v = int(c[3].replace(" velocity ", ""))
                 if c[0] == "On":
-                    note = c[2].replace(" note ","")
+                    note = c[2].replace(" note ", "")
                     #print("ON key[%s] = %d @ %fs" % (note, v, e.time_seconds))
                 elif c[0] == "Off":
                     v = 0
-                    note = c[2].replace(" note ","")
+                    note = c[2].replace(" note ", "")
                     #print("OFF key[%s] = %d @ %fs" % (note, v, e.time_seconds))
                 #print("NOTE>>>>", notesplit(note))
                 if note not in midi_notes:
@@ -197,25 +199,25 @@ def read_midi_file(context, filepath, use_some_setting):
                     continue
                 channel = "%s%i" % (channel_name, midi_notes.index(note))
                 fcurve = a["keyframe_points"].setdefault(channel, [])
-                fcurve.append(( e.time_seconds * context.scene.render.fps, v))
+                fcurve.append((e.time_seconds * context.scene.render.fps, v))
                 #sp[channel] = v
                 #a["keyframe_points"].append(('["%s"]' % channel, e.time_seconds * context.scene.render.fps, v))
             else:
-                #continue
+                # continue
                 print("XXX", s)
-        
+
         if len(a["keyframe_points"].keys()):
-            midichannels.append(channel_name)          
+            midichannels.append(channel_name)
             midifile["TRACK : %s" % t.track_number] = a
-    
+
     print(midichannels)
-    
+
     keys = ["name", "wavfile", "start", "end", "row_height", "Channels", "channel_name", "MIDI"]
     actions = []
     for k in midifile.keys():
-        print("-"*77)
+        print("-" * 77)
         print(midifile[k]["name"])
-        
+
         tracks = midifile[k]["keyframe_points"]
 
         action = bpy.data.actions.new("MidiAction")
@@ -229,11 +231,11 @@ def read_midi_file(context, filepath, use_some_setting):
             #fc = action.fcurves.new('["%s"]' % t)
             # make the fcurves
             sp[t] = 0
-            sp.keyframe_insert('["%s"]' % t, frame=1)        
+            sp.keyframe_insert('["%s"]' % t, frame=1)
             for kfp in kfps:
                 f, v = kfp
                 sp[t] = v
-                sp.keyframe_insert('["%s"]' % t, frame=f)        
+                sp.keyframe_insert('["%s"]' % t, frame=f)
             print("KFPS", t, len(tracks[t]))
         actions.append(action)
 
@@ -249,24 +251,23 @@ def read_midi_file(context, filepath, use_some_setting):
                 del(a["wavfile"])
                 a.user_clear()
                 actions.remove(a)
-                #bpy.data.actions.remove(a)
-                #print("REMOVED")
+                # bpy.data.actions.remove(a)
+                # print("REMOVED")
             except:
                 print("XCPT")
                 continue
             print("WTF")
-            continue 
+            continue
 
-            
-        a["Channels"] = len(a.fcurves) 
-        channel_name = a["channel_name"] 
+        a["Channels"] = len(a.fcurves)
+        channel_name = a["channel_name"]
 
         for fc in a.fcurves:
 
             for kp in fc.keyframe_points:
                 kp.interpolation = 'CONSTANT'
             fc_range, points = fc.minmax
-            cn = fc.data_path.replace('["','').replace('"]', '')
+            cn = fc.data_path.replace('["', '').replace('"]', '')
             #print(channel_name, cn)
             n = int(cn.replace(channel_name, ''))
             f = pow(2, (n - 69) / 12.0) * 440
@@ -279,8 +280,8 @@ def read_midi_file(context, filepath, use_some_setting):
                                    high,
                                    fc_range,
                                    fc_range,
-                                   is_music=True)        
-        
+                                   is_music=True)
+
             vcns = ["%s%d" % (channel_name, i) for i in
                     range(len(midi_notes))]
 
@@ -296,14 +297,15 @@ def read_midi_file(context, filepath, use_some_setting):
 
 
 ts = []
+
+
 def glonk(self, context):
     peek_midi_file(context, self.filepath, self.use_setting)
-    print("GLONK",self.filepath, self.filename)
+    print("GLONK", self.filepath, self.filename)
 
 
-    
 class BakeMIDI(Operator, ImportHelper):
-#class BakeMIDI(Operator, ImportHelper):
+    # class BakeMIDI(Operator, ImportHelper):
     """Bake using Midi File"""
     bl_idname = "sound_drivers.import_midi"  # important since its how bpy.ops.import_test.some_data is constructed
     bl_label = "Bake MIDI"
@@ -312,42 +314,42 @@ class BakeMIDI(Operator, ImportHelper):
     #filename_ext = ".txt"
 
     filter_glob = StringProperty(
-            default="*.mid;*.midi",
-            options={'HIDDEN'},
-            )
+        default="*.mid;*.midi",
+        options={'HIDDEN'},
+    )
 
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
     use_setting = BoolProperty(
-            name="All Tracks",
-            description="All Tracks",
-            default=True,
-            update=glonk
-            )
+        name="All Tracks",
+        description="All Tracks",
+        default=True,
+        update=glonk
+    )
 
     type = EnumProperty(
-            name="Example Enum",
-            description="Choose between two items",
-            items=(('OPT_A', "First Option", "Description one"),
-                   ('OPT_B', "Second Option", "Description two")),
-            default='OPT_A',
-           
-            )
+        name="Example Enum",
+        description="Choose between two items",
+        items=(('OPT_A', "First Option", "Description one"),
+               ('OPT_B', "Second Option", "Description two")),
+        default='OPT_A',
+
+    )
     filename = StringProperty(update=glonk)
     filepath = StringProperty(
-            name="File Path",
-            description="Filepath used for importing the file",
-            maxlen=1024,
-            subtype='FILE_PATH',
-            #update=glonk,
-            )
-    
+        name="File Path",
+        description="Filepath used for importing the file",
+        maxlen=1024,
+        subtype='FILE_PATH',
+        # update=glonk,
+    )
+
     def invoke(self, context, event):
         print("INVOKE MIDI")
         wm = context.window_manager
         wm.fileselect_add(self)
         return {'RUNNING_MODAL'}
-    
+
     def draw(self, context):
         layout = self.layout
         layout.label(self.filename)
@@ -367,6 +369,7 @@ class BakeMIDI(Operator, ImportHelper):
         return {'FINISHED'}
 # midi file
 
+
 class SD_MIDIFilesPanel(bpy.types.Panel):
     """MidFiles Panel"""
     bl_label = "MIDI Files"
@@ -384,9 +387,9 @@ class SD_MIDIFilesPanel(bpy.types.Panel):
     def draw(self, context):
         sp = getSpeaker(context)
         #sound = sp.sound
-        
+
         layout = self.layout
-        
+
         #layout.prop(sound, "midi_file")
         op = layout.operator("sound_drivers.import_midi")
         #op.filepath = sound.midi_file
@@ -398,8 +401,10 @@ def get_value(prop):
         return dic.get(prop)
     return get
 
+
 def get(self):
     return 4
+
 
 def regdic():
     propdic = {"data_dic": StringProperty(),
@@ -407,21 +412,21 @@ def regdic():
                "instrument": property(get_value("instrument")),
                "is_selected": BoolProperty(default=False),
                }
-               
+
     SD_MIDIFileTrack = type("SD_MIDIFileTrack", (PropertyGroup,), propdic)
     register_class(SD_MIDIFileTrack)
-    
+
     propdic = {"filepath": StringProperty(subtype='FILE_PATH'),
                "tracks": CollectionProperty(type=SD_MIDIFileTrack),
-              
-              }
+
+               }
 
     SD_MIDIFile = type("SD_MIDIFile", (PropertyGroup,), propdic)
     register_class(SD_MIDIFile)
 
     bpy.types.Sound.midifile = PointerProperty(type=SD_MIDIFile)
-    
-    
+
+
 def register():
     regdic()
     register_class(BakeMIDI)

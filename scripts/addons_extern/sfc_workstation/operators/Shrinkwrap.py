@@ -23,6 +23,7 @@ from ..auxiliary_classes.VertexFilter import VertexFilter
 from ..auxiliary_classes.VertexProperties import VertexProperties
 from ..function_modules.modifiers import apply_shrinkwrap
 
+
 class Shrinkwrap(bpy.types.Operator):
     bl_idname = "mesh.sct_shrinkwrap"
     bl_label = "Shrinkwrap"
@@ -86,7 +87,7 @@ class Shrinkwrap(bpy.types.Operator):
 
         # Only proceed if at least one vertex remains following the filtration
         # steps.
-        if not vertex_indices: 
+        if not vertex_indices:
             # Reactivate automatic shrinkwrapping, if necessary.
             if initially_auto_shrinkwrap_is_enabled:
                 surface_constraint_props.auto_shrinkwrap_is_enabled = True
@@ -95,12 +96,12 @@ class Shrinkwrap(bpy.types.Operator):
 
         # Shrinkwrap the vertices to the surface constraint's target.
         apply_shrinkwrap(
-            offset = surface_constraint_props.offset,
-            target = surface_constraint_props.target,
-            wrap_method = surface_constraint_props.wrap_method_map[
+            offset=surface_constraint_props.offset,
+            target=surface_constraint_props.target,
+            wrap_method=surface_constraint_props.wrap_method_map[
                 surface_constraint_props.direction
             ],
-            affected_indices = vertex_indices
+            affected_indices=vertex_indices
         )
 
         # Reactivate automatic shrinkwrapping, if necessary.

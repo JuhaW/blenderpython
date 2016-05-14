@@ -47,7 +47,7 @@ global pathStyleHtml
 def write_html(outpath, include_render, only_render, include_header, include_story, threshold, include_images,
                include_links, typecolor, webserver, include_borders, grease):
     # -------------------------------
-    # extract path and filename 
+    # extract path and filename
     # -------------------------------
     (filepath, filename) = os.path.split(outpath)
     print("=====================================================")
@@ -66,7 +66,7 @@ def write_html(outpath, include_render, only_render, include_header, include_sto
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    # Styles    
+    # Styles
     # if webserver, put style outside images
     global pathStyleHtml
     if webserver is False:
@@ -100,7 +100,7 @@ def write_html(outpath, include_render, only_render, include_header, include_sto
     copy_binfile(os.path.join(fromimg, "c.gif"), os.path.join(pathStyle, "c.gif"))
 
     # -------------------------------
-    # export the images 
+    # export the images
     # to a new folder
     # -------------------------------
     if include_images is True:
@@ -226,7 +226,7 @@ def setcameraview():
 #
 # sizeX/Y define the maximum box
 # for final image
-# 
+#
 # Return new image sizes.
 # ------------------------------------------
 def ratio(width, height, sizex=128, sizey=128):
@@ -525,7 +525,7 @@ def html_storyboard(rootpath, fhandle, filehtm, only_render, include_story, thre
                 k = frame.frame_number
                 if f <= k <= t:
                     klist.append(k)
- 
+
     klist.sort()
     if len(klist) == 0:
         return
@@ -809,7 +809,7 @@ def save_image(rootpath, filename, myimage):
         mode = settings.color_mode
         depth = settings.color_depth
 
-        # Apply new info and save        
+        # Apply new info and save
         settings.file_format = 'PNG'
         settings.color_mode = find_color_mode(myimage)
         settings.color_depth = '8'

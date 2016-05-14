@@ -1,5 +1,6 @@
 activeFunctions = set()
 
+
 def noRecursion(function):
     """The decorated function should not return any values"""
     def wrapper(*args, **kwargs):
@@ -11,8 +12,10 @@ def noRecursion(function):
             return result
     return wrapper
 
+
 def noCallbackRecursion(function):
     """The decorated function should not return any values"""
+
     def wrapper(self, context):
         identifier = id(function)
         if identifier not in activeFunctions:

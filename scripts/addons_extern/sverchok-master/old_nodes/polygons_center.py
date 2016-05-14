@@ -21,7 +21,7 @@ from mathutils import Vector, Matrix, geometry
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import SvSetSocketAnyType, SvGetSocketAnyType, \
-                        Vector_generate, Vector_degenerate
+    Vector_generate, Vector_degenerate
 
 
 class CentersPolsNode(bpy.types.Node, SverchCustomTreeNode):
@@ -42,12 +42,12 @@ class CentersPolsNode(bpy.types.Node, SverchCustomTreeNode):
         if self.outputs['Centers'].is_linked or self.outputs['Normals'].is_linked or \
                 self.outputs['Origins'].is_linked or self.outputs['Norm_abs'].is_linked:
             if 'Polygons' in self.inputs and 'Vertices' in self.inputs \
-                and self.inputs['Polygons'].is_linked and self.inputs['Vertices'].is_linked:
+                    and self.inputs['Polygons'].is_linked and self.inputs['Vertices'].is_linked:
 
                 pols_ = SvGetSocketAnyType(self, self.inputs['Polygons'])
                 vers_tupls = SvGetSocketAnyType(self, self.inputs['Vertices'])
                 vers_vects = Vector_generate(vers_tupls)
-                
+
                 # make mesh temp утилитарно - удалить в конце
                 mat_collect = []
                 normals_out = []
@@ -61,16 +61,16 @@ class CentersPolsNode(bpy.types.Node, SverchCustomTreeNode):
                     norm_abs = []
                     for p in pols:
                         # medians
-                        # it calcs middle point of opposite edges, 
+                        # it calcs middle point of opposite edges,
                         # than finds length vector between this two points
                         v0 = versv[p[0]]
                         v1 = versv[p[1]]
                         v2 = versv[p[2]]
-                        lp=len(p)
+                        lp = len(p)
                         if lp >= 4:
-                            l = ((lp-2)//2) + 2
+                            l = ((lp - 2) // 2) + 2
                             v3 = versv[p[l]]
-                            poi_2 = (v2+v3)/2
+                            poi_2 = (v2 + v3) / 2
                             # normals
                             norm = geometry.normal(v0, v1, v2, v3)
                             normals.append(norm)
@@ -79,19 +79,19 @@ class CentersPolsNode(bpy.types.Node, SverchCustomTreeNode):
                             # normals
                             norm = geometry.normal(v0, v1, v2)
                             normals.append(norm)
-                        poi_1 = (v0+v1)/2
+                        poi_1 = (v0 + v1) / 2
                         vm = poi_2 - poi_1
                         medians.append(vm)
                         # centrs
-                        x,y,z = zip(*[verst[poi] for poi in p])
-                        x,y,z = sum(x)/len(x), sum(y)/len(y), sum(z)/len(z)
-                        current_center = Vector((x,y,z))
+                        x, y, z = zip(*[verst[poi] for poi in p])
+                        x, y, z = sum(x) / len(x), sum(y) / len(y), sum(z) / len(z)
+                        current_center = Vector((x, y, z))
                         centrs.append(current_center)
                         # normal absolute !!!
                         # это совершенно нормально!!! ;-)
-                        norm_abs.append(current_center+norm)
-                        
-                    norm_abs_out.append(norm_abs)    
+                        norm_abs.append(current_center + norm)
+
+                    norm_abs_out.append(norm_abs)
                     origins.append(centrs)
                     normals_out.extend(normals)
                     mat_collect_ = []
@@ -104,11 +104,11 @@ class CentersPolsNode(bpy.types.Node, SverchCustomTreeNode):
                         vecy = Vector((1e-6, 1, 0)) * q_rot2
                         q_rot1 = vecy.rotation_difference(med).to_matrix().to_4x4()
                         # loc is matrix * rot vector * rot vector
-                        M = loc*q_rot1*q_rot0
-                        lM = [ j[:] for j in M ]
+                        M = loc * q_rot1 * q_rot0
+                        lM = [j[:] for j in M]
                         mat_collect_.append(lM)
                     mat_collect.extend(mat_collect_)
-                
+
                 SvSetSocketAnyType(self, 'Centers', mat_collect)
                 SvSetSocketAnyType(self, 'Norm_abs', Vector_degenerate(norm_abs_out))
                 SvSetSocketAnyType(self, 'Origins', Vector_degenerate(origins))
@@ -121,9 +121,6 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(CentersPolsNode)
-    
+
 if __name__ == '__main__':
     register()
-
-
-

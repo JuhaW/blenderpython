@@ -2,6 +2,7 @@ import bpy
 from .... events import isRendering
 from .... base_types.node import AnimationNode
 
+
 class GetSelectedObjectsNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_GetSelectedObjectsNode"
     bl_label = "Get Selected Objects"
@@ -20,4 +21,4 @@ class GetSelectedObjectsNode(bpy.types.Node, AnimationNode):
             return context.selected_objects, context.active_object
 
     def draw(self, layout):
-        layout.label("Disabled During Rendering", icon = "INFO")
+        layout.label("Disabled During Rendering", icon="INFO")

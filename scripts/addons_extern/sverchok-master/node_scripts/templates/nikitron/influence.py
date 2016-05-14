@@ -1,6 +1,7 @@
 import numpy as np
 
-def sv_main(indexes=[],vertices=[]):
+
+def sv_main(indexes=[], vertices=[]):
 
     in_sockets = [
         ['s', 'indexes', indexes],

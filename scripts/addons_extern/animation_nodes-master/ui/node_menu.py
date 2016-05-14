@@ -6,41 +6,44 @@ from .. utils.nodes import getAnimationNodeTrees
 
 mainBaseDataTypes = ("Object", "Integer", "Float", "Vector", "String")
 
+
 def drawMenu(self, context):
-    if context.space_data.tree_type != "an_AnimationNodeTree": return
+    if context.space_data.tree_type != "an_AnimationNodeTree":
+        return
 
     layout = self.layout
     layout.operator_context = "INVOKE_DEFAULT"
 
-    layout.operator("an.node_search", text = "Search", icon = "VIEWZOOM")
+    layout.operator("an.node_search", text="Search", icon="VIEWZOOM")
     layout.separator()
-    layout.menu("an_number_menu", text = "Number", icon = "LINENUMBERS_ON")
-    layout.menu("an_vector_menu", text = "Vector", icon = "MAN_TRANS")
-    layout.menu("an_rotation_menu", text = "Rotation", icon = "MAN_ROT")
-    layout.menu("an_matrix_menu", text = "Matrix", icon = "GRID")
-    layout.menu("an_text_menu", text = "Text", icon = "SORTALPHA")
-    layout.menu("an_boolean_menu", text = "Boolean", icon = "INLINK")
-    layout.menu("an_color_menu", text = "Color", icon = "COLOR")
-    layout.menu("an_list_menu", text = "List", icon = "WORDWRAP_ON")
+    layout.menu("an_number_menu", text="Number", icon="LINENUMBERS_ON")
+    layout.menu("an_vector_menu", text="Vector", icon="MAN_TRANS")
+    layout.menu("an_rotation_menu", text="Rotation", icon="MAN_ROT")
+    layout.menu("an_matrix_menu", text="Matrix", icon="GRID")
+    layout.menu("an_text_menu", text="Text", icon="SORTALPHA")
+    layout.menu("an_boolean_menu", text="Boolean", icon="INLINK")
+    layout.menu("an_color_menu", text="Color", icon="COLOR")
+    layout.menu("an_list_menu", text="List", icon="WORDWRAP_ON")
     layout.separator()
-    layout.menu("an_object_menu", text = "Object", icon = "OBJECT_DATAMODE")
-    layout.menu("an_mesh_menu", text = "Mesh", icon = "MESH_DATA")
-    layout.menu("an_spline_menu", text = "Spline", icon = "CURVE_DATA")
-    layout.menu("an_particles_menu", text = "Particles", icon = "PARTICLE_DATA")
+    layout.menu("an_object_menu", text="Object", icon="OBJECT_DATAMODE")
+    layout.menu("an_mesh_menu", text="Mesh", icon="MESH_DATA")
+    layout.menu("an_spline_menu", text="Spline", icon="CURVE_DATA")
+    layout.menu("an_particles_menu", text="Particles", icon="PARTICLE_DATA")
     layout.separator()
-    layout.menu("an_animation_menu", text = "Animation", icon = "RENDER_ANIMATION")
-    layout.menu("an_interpolation_menu", text = "Interpolation", icon = "IPO_BEZIER")
-    layout.menu("an_fcurve_menu", text = "FCurves", icon = "IPO")
-    layout.menu("an_material_menu", text = "Material", icon = "MATERIAL_DATA")
-    layout.menu("an_sound_menu", text = "Sound", icon = "SPEAKER")
-    layout.menu("an_sequence_menu", text = "Sequence", icon = "SEQUENCE")
+    layout.menu("an_animation_menu", text="Animation", icon="RENDER_ANIMATION")
+    layout.menu("an_interpolation_menu", text="Interpolation", icon="IPO_BEZIER")
+    layout.menu("an_fcurve_menu", text="FCurves", icon="IPO")
+    layout.menu("an_material_menu", text="Material", icon="MATERIAL_DATA")
+    layout.menu("an_sound_menu", text="Sound", icon="SPEAKER")
+    layout.menu("an_sequence_menu", text="Sequence", icon="SEQUENCE")
     layout.separator()
-    layout.menu("an_geometry_menu", text = "Geometry", icon = "MOD_DISPLACE")
-    layout.menu("an_kdtree_bvhtree_menu", text = "KD & BVH Tree", icon = "STICKY_UVS_LOC")
+    layout.menu("an_geometry_menu", text="Geometry", icon="MOD_DISPLACE")
+    layout.menu("an_kdtree_bvhtree_menu", text="KD & BVH Tree", icon="STICKY_UVS_LOC")
     layout.separator()
-    layout.menu("an_debug_menu", text = "Debug", icon = "INFO")
-    layout.menu("an_subprograms_menu", text = "Subprograms", icon = "FILE_SCRIPT")
-    layout.menu("an_layout_menu", text = "Layout", icon = "IMGDISPLAY")
+    layout.menu("an_debug_menu", text="Debug", icon="INFO")
+    layout.menu("an_subprograms_menu", text="Subprograms", icon="FILE_SCRIPT")
+    layout.menu("an_layout_menu", text="Layout", icon="IMGDISPLAY")
+
 
 def drawNodeTreeChooser(layout, context):
     activeNodeTree = context.space_data.node_tree
@@ -50,11 +53,12 @@ def drawNodeTreeChooser(layout, context):
         col = layout.column()
         col.scale_y = 1.6
         if len(nodeTrees) == 0:
-            col.operator("an.create_node_tree", text = "New Node Tree", icon = "PLUS")
+            col.operator("an.create_node_tree", text="New Node Tree", icon="PLUS")
         else:
             for nodeTree in nodeTrees:
-                props = col.operator("an.select_node_tree", text = "Select '{}'".format(nodeTree.name), icon = "EYEDROPPER")
+                props = col.operator("an.select_node_tree", text="Select '{}'".format(nodeTree.name), icon="EYEDROPPER")
                 props.nodeTreeName = nodeTree.name
+
 
 class NumberMenu(bpy.types.Menu):
     bl_idname = "an_number_menu"
@@ -62,17 +66,17 @@ class NumberMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        insertNode(layout, "an_DataInputNode", "Integer", {"assignedType" : repr("Integer")})
-        insertNode(layout, "an_DataInputNode", "Float", {"assignedType" : repr("Float")})
-        insertNode(layout, "an_CreateListNode", "Integer List", {"assignedType" : repr("Integer")})
-        insertNode(layout, "an_CreateListNode", "Float List", {"assignedType" : repr("Float")})
-        insertNode(layout, "an_FloatRangeListNode", "Integer Range", {"dataType" : repr("Integer")})
-        insertNode(layout, "an_FloatRangeListNode", "Float Range", {"dataType" : repr("Float")})
+        insertNode(layout, "an_DataInputNode", "Integer", {"assignedType": repr("Integer")})
+        insertNode(layout, "an_DataInputNode", "Float", {"assignedType": repr("Float")})
+        insertNode(layout, "an_CreateListNode", "Integer List", {"assignedType": repr("Integer")})
+        insertNode(layout, "an_CreateListNode", "Float List", {"assignedType": repr("Float")})
+        insertNode(layout, "an_FloatRangeListNode", "Integer Range", {"dataType": repr("Integer")})
+        insertNode(layout, "an_FloatRangeListNode", "Float Range", {"dataType": repr("Float")})
         insertNode(layout, "an_ParseNumberNode", "Parse Number")
         layout.separator()
         insertNode(layout, "an_RandomNumberNode", "Randomize")
         insertNode(layout, "an_FloatWiggleNode", "Wiggle")
-        insertNode(layout, "an_MixDataNode", "Mix", {"dataType" : repr("Float")})
+        insertNode(layout, "an_MixDataNode", "Mix", {"dataType": repr("Float")})
         insertNode(layout, "an_MapRangeNode", "Map Range")
         layout.separator()
         insertNode(layout, "an_FloatClampNode", "Clamp")
@@ -81,6 +85,7 @@ class NumberMenu(bpy.types.Menu):
         insertNode(layout, "an_RoundNumberNode", "Round")
         insertNode(layout, "an_FloatMathNode", "Math")
         insertNode(layout, "an_NumberListMathNode", "List Math")
+
 
 class VectorMenu(bpy.types.Menu):
     bl_idname = "an_vector_menu"
@@ -91,11 +96,11 @@ class VectorMenu(bpy.types.Menu):
         insertNode(layout, "an_SeparateVectorNode", "Separate")
         insertNode(layout, "an_CombineVectorNode", "Combine")
         insertNode(layout, "an_VectorFromValueNode", "From Value")
-        insertNode(layout, "an_CreateListNode", "List", {"assignedType" : repr("Vector")})
+        insertNode(layout, "an_CreateListNode", "List", {"assignedType": repr("Vector")})
         layout.separator()
         insertNode(layout, "an_RandomVectorNode", "Randomize")
         insertNode(layout, "an_VectorWiggleNode", "Wiggle")
-        insertNode(layout, "an_MixDataNode", "Mix", {"dataType" : repr("Vector")})
+        insertNode(layout, "an_MixDataNode", "Mix", {"dataType": repr("Vector")})
         layout.separator()
         insertNode(layout, "an_VectorDistanceNode", "Distance")
         insertNode(layout, "an_ProjectPointOnLineNode", "Distance to Line")
@@ -110,6 +115,7 @@ class VectorMenu(bpy.types.Menu):
         insertNode(layout, "an_TransformVectorNode", "Transform Vector")
         insertNode(layout, "an_TransformVectorListNode", "Transform Vector List")
 
+
 class RotationMenu(bpy.types.Menu):
     bl_idname = "an_rotation_menu"
     bl_label = "Rotation Menu"
@@ -118,23 +124,23 @@ class RotationMenu(bpy.types.Menu):
         layout = self.layout
         insertNode(layout, "an_DirectionToRotationNode", "Direction to Rotation")
         insertNode(layout, "an_RotationToDirectionNode", "Rotation to Direction")
-        insertNode(layout, "an_ConvertRotationsNode", "Convert Rotation Types", {"conversionType" : repr("MATRIX_TO_EULER")})
+        insertNode(layout, "an_ConvertRotationsNode", "Convert Rotation Types", {"conversionType": repr("MATRIX_TO_EULER")})
         layout.separator()
         insertNode(layout, "an_SeparateEulerNode", "Separate Euler")
         insertNode(layout, "an_CombineEulerNode", "Combine Euler")
-        insertNode(layout, "an_CreateListNode", "List", {"assignedType" : repr("Euler")})
+        insertNode(layout, "an_CreateListNode", "List", {"assignedType": repr("Euler")})
         layout.separator()
         insertNode(layout, "an_EulerMathNode", "Euler Math")
-        insertNode(layout, "an_MixDataNode", "Euler Mix", {"dataType" : repr("Euler")})
+        insertNode(layout, "an_MixDataNode", "Euler Mix", {"dataType": repr("Euler")})
         insertNode(layout, "an_RandomEulerNode", "Random Euler")
         insertNode(layout, "an_EulerWiggleNode", "Euler Wiggle")
         layout.separator()
         insertNode(layout, "an_SeparateQuaternionNode", "Separate Quaternion")
         insertNode(layout, "an_CombineQuaternionNode", "Combine Quaternion")
-        insertNode(layout, "an_CreateListNode", "List", {"assignedType" : repr("Quaternion")})
+        insertNode(layout, "an_CreateListNode", "List", {"assignedType": repr("Quaternion")})
         layout.separator()
         insertNode(layout, "an_QuaternionMathNode", "Quaternion Math")
-        insertNode(layout, "an_MixDataNode", "Quaternion Mix", {"dataType" : repr("Quaternion")})
+        insertNode(layout, "an_MixDataNode", "Quaternion Mix", {"dataType": repr("Quaternion")})
         insertNode(layout, "an_RandomQuaternionNode", "Random Quaternion")
         insertNode(layout, "an_QuaternionWiggleNode", "Quaternion Wiggle")
         layout.separator()
@@ -149,7 +155,7 @@ class MatrixMenu(bpy.types.Menu):
         layout = self.layout
         insertNode(layout, "an_DecomposeMatrixNode", "Decompose")
         insertNode(layout, "an_ComposeMatrixNode", "Compose")
-        insertNode(layout, "an_CreateListNode", "List", {"assignedType" : repr("Matrix")})
+        insertNode(layout, "an_CreateListNode", "List", {"assignedType": repr("Matrix")})
         layout.separator()
         insertNode(layout, "an_TranslationMatrixNode", "Translation")
         insertNode(layout, "an_RotationMatrixNode", "Rotation")
@@ -157,9 +163,10 @@ class MatrixMenu(bpy.types.Menu):
         insertNode(layout, "an_ShearMatrixNode", "Shear")
         insertNode(layout, "an_MatrixCombineNode", "Combine")
         layout.separator()
-        insertNode(layout, "an_MixDataNode", "Mix", {"dataType" : repr("Matrix")})
+        insertNode(layout, "an_MixDataNode", "Mix", {"dataType": repr("Matrix")})
         insertNode(layout, "an_InvertMatrixNode", "Invert")
         insertNode(layout, "an_MatrixMathNode", "Math")
+
 
 class TextMenu(bpy.types.Menu):
     bl_idname = "an_text_menu"
@@ -167,8 +174,8 @@ class TextMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        insertNode(layout, "an_DataInputNode", "Input", {"assignedType" : repr("String")})
-        insertNode(layout, "an_CreateListNode", "List", {"assignedType" : repr("String")})
+        insertNode(layout, "an_DataInputNode", "Input", {"assignedType": repr("String")})
+        insertNode(layout, "an_CreateListNode", "List", {"assignedType": repr("String")})
         insertNode(layout, "an_RandomStringNode", "Randomize")
         insertNode(layout, "an_CharactersNode", "Characters")
         insertNode(layout, "an_TimecodeGeneratorNode", "Timecode Generator")
@@ -190,18 +197,20 @@ class TextMenu(bpy.types.Menu):
         insertNode(layout, "an_SeparateTextObjectNode", "Object Separate")
         insertNode(layout, "an_TextObjectOutputNode", "Object Output")
 
+
 class BooleanMenu(bpy.types.Menu):
     bl_idname = "an_boolean_menu"
     bl_label = "Boolean Menu"
 
     def draw(self, context):
         layout = self.layout
-        insertNode(layout, "an_DataInputNode", "Boolean", {"assignedType" : repr("Boolean")})
+        insertNode(layout, "an_DataInputNode", "Boolean", {"assignedType": repr("Boolean")})
         insertNode(layout, "an_InvertNode", "Invert")
         insertNode(layout, "an_CompareNode", "Compare")
         insertNode(layout, "an_LogicOperatorsNode", "Logic")
         insertNode(layout, "an_SwitchNode", "Switch")
         insertNode(layout, "an_BooleanToIntegerNode", "Boolean to Integer")
+
 
 class ColorMenu(bpy.types.Menu):
     bl_idname = "an_color_menu"
@@ -212,8 +221,9 @@ class ColorMenu(bpy.types.Menu):
         insertNode(layout, "an_ChooseColorNode", "Choose Color")
         insertNode(layout, "an_CombineColorNode", "Combine Color")
         insertNode(layout, "an_SeparateColorNode", "Separate Color")
-        insertNode(layout, "an_MixDataNode", "Mix", {"dataType" : repr("Color")})
+        insertNode(layout, "an_MixDataNode", "Mix", {"dataType": repr("Color")})
         insertNode(layout, "an_SetVertexColorNode", "Set Vertex Color")
+
 
 class ListMenu(bpy.types.Menu):
     bl_idname = "an_list_menu"
@@ -221,8 +231,8 @@ class ListMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.menu("an_create_list_menu", text = "Create")
-        layout.menu("an_combine_list_menu", text = "Combine")
+        layout.menu("an_create_list_menu", text="Create")
+        layout.menu("an_combine_list_menu", text="Combine")
         insertNode(layout, "an_AppendListNode", "Append")
         layout.separator()
         insertNode(layout, "an_GetListElementNode", "Get Element")
@@ -240,6 +250,7 @@ class ListMenu(bpy.types.Menu):
 
         insertNode(layout, "an_ListBooleanOperationsNode", "List Boolean Operations")
 
+
 class CreateListMenu(bpy.types.Menu):
     bl_idname = "an_create_list_menu"
     bl_label = "Create List Menu"
@@ -247,9 +258,10 @@ class CreateListMenu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         for dataType in mainBaseDataTypes:
-            insertNode(layout, "an_CreateListNode", dataType, {"assignedType" : repr(dataType)})
+            insertNode(layout, "an_CreateListNode", dataType, {"assignedType": repr(dataType)})
         layout.separator()
-        layout.menu("an_create_list_menu_extended", text = "More")
+        layout.menu("an_create_list_menu_extended", text="More")
+
 
 class CreateListMenuExtended(bpy.types.Menu):
     bl_idname = "an_create_list_menu_extended"
@@ -259,7 +271,8 @@ class CreateListMenuExtended(bpy.types.Menu):
         layout = self.layout
         for dataType in sorted(getBaseDataTypes()):
             if dataType not in mainBaseDataTypes:
-                insertNode(layout, "an_CreateListNode", dataType, {"assignedType" : repr(dataType)})
+                insertNode(layout, "an_CreateListNode", dataType, {"assignedType": repr(dataType)})
+
 
 class CombineListMenu(bpy.types.Menu):
     bl_idname = "an_combine_list_menu"
@@ -268,9 +281,10 @@ class CombineListMenu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         for dataType in mainBaseDataTypes:
-            insertNode(layout, "an_CombineListsNode", dataType, {"assignedType" : repr(dataType)})
+            insertNode(layout, "an_CombineListsNode", dataType, {"assignedType": repr(dataType)})
         layout.separator()
-        layout.menu("an_combine_list_menu_extended", text = "More")
+        layout.menu("an_combine_list_menu_extended", text="More")
+
 
 class CombineListMenuExtended(bpy.types.Menu):
     bl_idname = "an_combine_list_menu_extended"
@@ -280,7 +294,8 @@ class CombineListMenuExtended(bpy.types.Menu):
         layout = self.layout
         for dataType in sorted(getBaseDataTypes()):
             if dataType not in mainBaseDataTypes:
-                insertNode(layout, "an_CombineListsNode", dataType, {"assignedType" : repr(dataType)})
+                insertNode(layout, "an_CombineListsNode", dataType, {"assignedType": repr(dataType)})
+
 
 class ObjectMenu(bpy.types.Menu):
     bl_idname = "an_object_menu"
@@ -289,8 +304,8 @@ class ObjectMenu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
 
-        insertNode(layout, "an_DataInputNode", "Object", {"assignedType" : repr("Object")})
-        insertNode(layout, "an_CreateListNode", "List", {"assignedType" : repr("Object")})
+        insertNode(layout, "an_DataInputNode", "Object", {"assignedType": repr("Object")})
+        insertNode(layout, "an_CreateListNode", "List", {"assignedType": repr("Object")})
         insertNode(layout, "an_GetObjectsFromGroupNode", "From Group")
         layout.separator()
         insertNode(layout, "an_ObjectTransformsInputNode", "Transforms Input")
@@ -312,9 +327,10 @@ class ObjectMenu(bpy.types.Menu):
         insertNode(layout, "an_CopyObjectDataNode", "Copy Data")
         insertNode(layout, "an_SetKeyframesNode", "Set Keyframes")
         insertNode(layout, "an_ObjectGroupOperationsNode", "Group Operations")
-        layout.menu("an_object_utils_menu", text = "Utils")
+        layout.menu("an_object_utils_menu", text="Utils")
         layout.separator()
         insertNode(layout, "an_ObjectInstancerNode", "Instancer")
+
 
 class ObjectUtilsMenu(bpy.types.Menu):
     bl_idname = "an_object_utils_menu"
@@ -328,6 +344,7 @@ class ObjectUtilsMenu(bpy.types.Menu):
         insertNode(layout, "an_ResetObjectTransformsNode", "Reset Transformations")
         insertNode(layout, "an_CopyTransformsNode", "Copy Transformations")
         insertNode(layout, "an_GetSelectedObjectsNode", "Get Selected Objects")
+
 
 class MeshMenu(bpy.types.Menu):
     bl_idname = "an_mesh_menu"
@@ -344,16 +361,17 @@ class MeshMenu(bpy.types.Menu):
         insertNode(layout, "an_SeparateMeshDataNode", "Separate")
         insertNode(layout, "an_CombineMeshDataNode", "Combine")
         insertNode(layout, "an_MeshDataFromPolygonsNode", "Mesh Data from Polygons")
-        layout.menu("an_mesh_generators_menu", text = "Generators")
-        layout.menu("an_mesh_operators_menu", text = "Operators")
+        layout.menu("an_mesh_generators_menu", text="Generators")
+        layout.menu("an_mesh_operators_menu", text="Operators")
         layout.separator()
-        insertNode(layout, "an_CreateListNode", "Mesh Data List", {"assignedType" : repr("Mesh Data")})
+        insertNode(layout, "an_CreateListNode", "Mesh Data List", {"assignedType": repr("Mesh Data")})
         insertNode(layout, "an_JoinMeshDataList", "Join Mesh Data List")
         insertNode(layout, "an_CreateBMeshFromMeshData", "BMesh from Mesh Data")
         insertNode(layout, "an_BMeshFromObjectNode", "BMesh from Object")
-        layout.menu("an_mesh_finalizing_menu", text = "Tools")
+        layout.menu("an_mesh_finalizing_menu", text="Tools")
         layout.separator()
         insertNode(layout, "an_MeshObjectOutputNode", "Object Output")
+
 
 class MeshGeneratorsMenu(bpy.types.Menu):
     bl_idname = "an_mesh_generators_menu"
@@ -363,6 +381,7 @@ class MeshGeneratorsMenu(bpy.types.Menu):
         layout = self.layout
         insertNode(layout, "an_LineMeshNode", "Line")
         insertNode(layout, "an_GridMeshNode", "Grid")
+
 
 class MeshOperatorsMenu(bpy.types.Menu):
     bl_idname = "an_mesh_operators_menu"
@@ -377,6 +396,7 @@ class MeshOperatorsMenu(bpy.types.Menu):
         insertNode(layout, "an_CreatePolygonIndicesNode", "Create Polygon Indices")
         insertNode(layout, "an_EdgesOfPolygonsNode", "Edges of Polygons")
 
+
 class MeshFinalizingMenu(bpy.types.Menu):
     bl_idname = "an_mesh_finalizing_menu"
     bl_label = "Mesh Finalizing Menu"
@@ -387,6 +407,7 @@ class MeshFinalizingMenu(bpy.types.Menu):
         insertNode(layout, "an_BMeshRecalculateFaceNormalsNode", "Recalculate Normals")
         insertNode(layout, "an_ShadeObjectSmoothNode", "Shade Object Smooth")
 
+
 class SplineMenu(bpy.types.Menu):
     bl_idname = "an_spline_menu"
     bl_label = "Spline Menu"
@@ -396,7 +417,7 @@ class SplineMenu(bpy.types.Menu):
         insertNode(layout, "an_SplinesFromObjectNode", "Get from Object")
         insertNode(layout, "an_SplineFromPointsNode", "Create from Points")
         insertNode(layout, "an_SplinesFromEdgesNode", "Create from Edges")
-        insertNode(layout, "an_CreateListNode", "List", {"assignedType" : repr("Spline")})
+        insertNode(layout, "an_CreateListNode", "List", {"assignedType": repr("Spline")})
         insertNode(layout, "an_AppendPointToSplineNode", "Append Point")
         layout.separator()
         insertNode(layout, "an_TransformSplineNode", "Transform")
@@ -416,6 +437,7 @@ class SplineMenu(bpy.types.Menu):
         insertNode(layout, "an_LoftSplinesNode", "Loft")
         insertNode(layout, "an_RevolveSplineNode", "Revolve")
 
+
 class AnimationMenu(bpy.types.Menu):
     bl_idname = "an_animation_menu"
     bl_label = "Animation Menu"
@@ -426,12 +448,13 @@ class AnimationMenu(bpy.types.Menu):
         insertNode(layout, "an_DelayTimeNode", "Delay")
         insertNode(layout, "an_RepeatTimeNode", "Repeat")
         layout.separator()
-        insertNode(layout, "an_AnimateDataNode", "Animate Number", {"dataType" : repr("Float")})
-        insertNode(layout, "an_AnimateDataNode", "Animate Vector", {"dataType" : repr("Vector")})
-        insertNode(layout, "an_AnimateDataNode", "Animate Euler", {"dataType" : repr("Euler")})
-        insertNode(layout, "an_AnimateDataNode", "Animate Quaternion", {"dataType" : repr("Quaternion")})
-        insertNode(layout, "an_AnimateDataNode", "Animate Matrix", {"dataType" : repr("Matrix")})
-        insertNode(layout, "an_AnimateDataNode", "Animate Color", {"dataType" : repr("Color")})
+        insertNode(layout, "an_AnimateDataNode", "Animate Number", {"dataType": repr("Float")})
+        insertNode(layout, "an_AnimateDataNode", "Animate Vector", {"dataType": repr("Vector")})
+        insertNode(layout, "an_AnimateDataNode", "Animate Euler", {"dataType": repr("Euler")})
+        insertNode(layout, "an_AnimateDataNode", "Animate Quaternion", {"dataType": repr("Quaternion")})
+        insertNode(layout, "an_AnimateDataNode", "Animate Matrix", {"dataType": repr("Matrix")})
+        insertNode(layout, "an_AnimateDataNode", "Animate Color", {"dataType": repr("Color")})
+
 
 class InterpolationMenu(bpy.types.Menu):
     bl_idname = "an_interpolation_menu"
@@ -445,7 +468,8 @@ class InterpolationMenu(bpy.types.Menu):
         insertNode(layout, "an_MixInterpolationNode", "Mix")
         layout.separator()
         insertNode(layout, "an_EvaluateInterpolationNode", "Evaluate")
-        insertNode(layout, "an_MapRangeNode", "Map Range", {"useInterpolation" : repr(True)})
+        insertNode(layout, "an_MapRangeNode", "Map Range", {"useInterpolation": repr(True)})
+
 
 class MaterialMenu(bpy.types.Menu):
     bl_idname = "an_material_menu"
@@ -455,6 +479,7 @@ class MaterialMenu(bpy.types.Menu):
         layout = self.layout
         insertNode(layout, "an_CyclesMaterialOutputNode", "Cycles Material Output")
         insertNode(layout, "an_ViewportColorNode", "Viewport Color")
+
 
 class ParticlesMenu(bpy.types.Menu):
     bl_idname = "an_particles_menu"
@@ -469,6 +494,7 @@ class ParticlesMenu(bpy.types.Menu):
         insertNode(layout, "an_ParticleListInfoNode", "Particle List Info")
         insertNode(layout, "an_ParticleInfoNode", "Particle Info")
 
+
 class FCurveMenu(bpy.types.Menu):
     bl_idname = "an_fcurve_menu"
     bl_label = "FCurve Menu"
@@ -479,6 +505,7 @@ class FCurveMenu(bpy.types.Menu):
         insertNode(layout, "an_EvaluateFCurveNode", "Evaluate")
         insertNode(layout, "an_FCurveInfoNode", "Info")
         insertNode(layout, "an_FCurveKeyframesNode", "Keyframes")
+
 
 class SoundMenu(bpy.types.Menu):
     bl_idname = "an_sound_menu"
@@ -509,8 +536,8 @@ class GeometryMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        insertNode(layout, "an_ConvertPlaneTypeNode", "Point/Normal to Matrix", {"conversionType" : repr("POINT_NORMAL_TO_MATRIX")})
-        insertNode(layout, "an_ConvertPlaneTypeNode", "Matrix to Point/Normal", {"conversionType" : repr("MATRIX_TO_POINT_NORMAL")})
+        insertNode(layout, "an_ConvertPlaneTypeNode", "Point/Normal to Matrix", {"conversionType": repr("POINT_NORMAL_TO_MATRIX")})
+        insertNode(layout, "an_ConvertPlaneTypeNode", "Matrix to Point/Normal", {"conversionType": repr("MATRIX_TO_POINT_NORMAL")})
         layout.separator()
         insertNode(layout, "an_ProjectPointOnLineNode", "Project Point on Line")
         insertNode(layout, "an_ProjectPointOnPlaneNode", "Project Point on Plane")
@@ -545,6 +572,7 @@ class DebugMenu(bpy.types.Menu):
         insertNode(layout, "an_DebugDrawerNode", "Debug Drawer")
         insertNode(layout, "an_DebugInterpolationNode", "Debug Interpolation")
 
+
 class SubprogramsMenu(bpy.types.Menu):
     bl_idname = "an_subprograms_menu"
     bl_label = "Subprograms Menu"
@@ -557,7 +585,7 @@ class SubprogramsMenu(bpy.types.Menu):
             layout.label("   There are no subprograms yet")
         else:
             for network in getSubprogramNetworks():
-                insertNode(layout, "an_InvokeSubprogramNode", "-  " + network.name, {"subprogramIdentifier" : repr(network.identifier)})
+                insertNode(layout, "an_InvokeSubprogramNode", "-  " + network.name, {"subprogramIdentifier": repr(network.identifier)})
         layout.separator()
         layout.label("New:")
         insertNode(layout, "an_GroupInputNode", "   Group")
@@ -566,21 +594,23 @@ class SubprogramsMenu(bpy.types.Menu):
         layout.separator()
         insertNode(layout, "an_ExpressionNode", "Expression")
 
+
 class LayoutMenu(bpy.types.Menu):
     bl_idname = "an_layout_menu"
     bl_label = "Layout Menu"
 
     def draw(self, context):
         layout = self.layout
-        props = layout.operator("node.add_node", text = "Frame")
+        props = layout.operator("node.add_node", text="Frame")
         props.use_transform = True
         props.type = "NodeFrame"
-        props = layout.operator("node.add_node", text = "Reroute")
+        props = layout.operator("node.add_node", text="Reroute")
         props.use_transform = True
         props.type = "NodeReroute"
 
-def insertNode(layout, type, text, settings = {}, icon = "NONE"):
-    operator = layout.operator("node.add_node", text = text, icon = icon)
+
+def insertNode(layout, type, text, settings={}, icon="NONE"):
+    operator = layout.operator("node.add_node", text=text, icon=icon)
     operator.type = type
     operator.use_transform = True
     for name, value in settings.items():
@@ -589,8 +619,10 @@ def insertNode(layout, type, text, settings = {}, icon = "NONE"):
         item.value = value
     return operator
 
+
 def registerMenu():
     bpy.types.NODE_MT_add.append(drawMenu)
+
 
 def unregisterMenu():
     bpy.types.NODE_MT_add.remove(drawMenu)

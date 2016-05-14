@@ -1,4 +1,5 @@
-import bpy, re
+import bpy
+import re
 from bpy.props import *
 from ... events import propertyChanged
 from ... base_types.node import AnimationNode
@@ -7,7 +8,8 @@ splitTypes = [
     ("Characters", "Characters", ""),
     ("Words", "Words", ""),
     ("Lines", "Lines", ""),
-    ("Regexp", "Regexp", "") ]
+    ("Regexp", "Regexp", "")]
+
 
 class SplitTextNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SplitTextNode"
@@ -19,10 +21,10 @@ class SplitTextNode(bpy.types.Node, AnimationNode):
         propertyChanged()
 
     splitType = EnumProperty(
-        name = "Split Type", default = "Regexp",
-        items = splitTypes, update = splitTypeChanges)
+        name="Split Type", default="Regexp",
+        items=splitTypes, update=splitTypeChanges)
 
-    keepDelimiters = BoolProperty(default = False, update = propertyChanged)
+    keepDelimiters = BoolProperty(default=False, update=propertyChanged)
 
     def create(self):
         self.inputs.new("an_StringSocket", "Text", "text")
@@ -31,9 +33,9 @@ class SplitTextNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_IntegerSocket", "Length", "length")
 
     def draw(self, layout):
-        layout.prop(self, "splitType", text = "Type")
+        layout.prop(self, "splitType", text="Type")
         if self.splitType == "Regexp":
-            layout.prop(self, "keepDelimiters", text = "Keep Delimiters")
+            layout.prop(self, "keepDelimiters", text="Keep Delimiters")
 
     def setHideProperty(self):
         self.inputs["Split By"].hide = not self.splitType == "Regexp"
@@ -41,14 +43,20 @@ class SplitTextNode(bpy.types.Node, AnimationNode):
     def execute(self, text, splitBy):
         textList = []
 
-        if self.splitType == "Characters": textList = list(text)
-        elif self.splitType == "Words": textList = text.split()
-        elif self.splitType == "Lines": textList = text.split("\n")
+        if self.splitType == "Characters":
+            textList = list(text)
+        elif self.splitType == "Words":
+            textList = text.split()
+        elif self.splitType == "Lines":
+            textList = text.split("\n")
 
         elif self.splitType == "Regexp":
-            if splitBy == "": textList = [text]
+            if splitBy == "":
+                textList = [text]
             else:
-                if self.keepDelimiters: textList = re.split("("+splitBy+")", text)
-                else: textList = re.split(splitBy, text)
+                if self.keepDelimiters:
+                    textList = re.split("(" + splitBy + ")", text)
+                else:
+                    textList = re.split(splitBy, text)
 
         return textList, len(textList)

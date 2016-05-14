@@ -99,7 +99,7 @@ upgrade_dict = {
     'ScalarMathNode':
         [['X', 'x'],
          ['Y', 'y']]
-    }
+}
 
 
 #  for new style vertices socket ~ 0.5
@@ -110,10 +110,10 @@ upgrade_dict = {
 #  or use_prop and set default
 
 vertices_socket_upgrade = {
-    'MatrixGenNode' :
-        [['Location', '', True, (0,0,0)],
-         ['Scale', '', True, (1,1,1)],
-         ['Rotation', '', True, (0,0,1)]],
+    'MatrixGenNode':
+        [['Location', '', True, (0, 0, 0)],
+         ['Scale', '', True, (1, 1, 1)],
+         ['Rotation', '', True, (0, 0, 1)]],
 }
 
 # new sockets
@@ -144,7 +144,7 @@ new_socket_dict = {
         [['inputs', 'StringsSocket', 'text', 4]],
     'SvIterateNode':
         [['outputs', 'MatrixSocket', 'Matrices', 3]],
-    }
+}
 
 
 def upgrade_nodes(ng):
@@ -159,7 +159,7 @@ def upgrade_nodes(ng):
             if s_list:
                 if name not in s_list:
                     s_list.new(s_type, name)
-                    s_list.move(len(s_list)-1, pos)
+                    s_list.move(len(s_list) - 1, pos)
 
     for node in [node for node in ng.nodes if node.bl_idname in upgrade_dict]:
         for s_name, p_name in upgrade_dict[node.bl_idname]:
@@ -170,7 +170,7 @@ def upgrade_nodes(ng):
     for n in [n for n in ng.nodes if n.bl_idname in vertices_socket_upgrade]:
         for s_name, p_name, use_prop, default in vertices_socket_upgrade[n.bl_idname]:
             socket = n.inputs.get(s_name)
-            if socket: 
+            if socket:
                 if p_name and not socket.prop_name:
                     socket.prop_name = p_name
                 elif use_prop and not socket.use_prop:

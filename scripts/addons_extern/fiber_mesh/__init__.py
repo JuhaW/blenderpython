@@ -27,12 +27,12 @@
 bl_info = {
     "name": "Bounce Fibers",
     "author": "Liero, Atom",
-    "version": (1,1),
+    "version": (1, 1),
     "blender": (2, 7, 6),
     "location": "View3D > Add > Curve > Bounce Fibers",
     "description": "Creates a set of curves in the shape of mesh.",
     "warning": "This is a parametric object.",
-    "wiki_url":"",
+    "wiki_url": "",
     "tracker_url": "",
     "category": "Add Curve"}
 
@@ -47,12 +47,14 @@ else:
 
 import bpy
 
+
 def register():
-	properties.register()
-	operators.register()
-	ui.register()
+    properties.register()
+    operators.register()
+    ui.register()
+
 
 def unregister():
-	properties.unregister()
-	operators.unregister()
-	ui.unregister()
+    properties.unregister()
+    operators.unregister()
+    ui.unregister()

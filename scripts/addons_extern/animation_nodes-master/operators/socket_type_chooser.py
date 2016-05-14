@@ -5,7 +5,8 @@ from .. sockets.info import getDataTypeItems, getListDataTypeItems
 
 socketGroupItems = [
     ("ALL", "All", ""),
-    ("LIST", "List", "") ]
+    ("LIST", "List", "")]
+
 
 class ChooseSocketType(bpy.types.Operator):
     bl_idname = "an.choose_socket_type"
@@ -14,12 +15,12 @@ class ChooseSocketType(bpy.types.Operator):
 
     def getItems(self, context):
         if self.socketGroup == "ALL":
-            return getDataTypeItems(skipInternalTypes = True)
+            return getDataTypeItems(skipInternalTypes=True)
         if self.socketGroup == "LIST":
             return getListDataTypeItems()
 
-    selectedDataType = EnumProperty(items = getItems)
-    socketGroup = EnumProperty(items = socketGroupItems)
+    selectedDataType = EnumProperty(items=getItems)
+    socketGroup = EnumProperty(items=socketGroupItems)
 
     nodeIdentifier = StringProperty()
     callback = StringProperty()

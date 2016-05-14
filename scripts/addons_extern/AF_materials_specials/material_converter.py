@@ -33,6 +33,7 @@ sceneContext = bpy.types.Scene
 textureNodeSizeX = 150
 textureNodeSizeY = 350
 
+
 def AutoNodeOff():
     mats = bpy.data.materials
     for cmat in mats:
@@ -219,7 +220,7 @@ def createDiffuseNodes(cmat, texCoordNode, mainShader, materialOutput):
         if texNode:
             # print('Generating {} Nodes:'.format(groupName), texNode.image)
             texNode.parent = diffuseFrame
-            placeNode(texNode, -500 - ((texCount-1) * 200), currPosY, textureNodeSizeX, textureNodeSizeY, 0, textureIdx)
+            placeNode(texNode, -500 - ((texCount - 1) * 200), currPosY, textureNodeSizeX, textureNodeSizeY, 0, textureIdx)
 
             # Add mapping node
             textureMapping = TreeNodes.nodes.new(MAPPING_NODE)
@@ -667,7 +668,6 @@ def makeCyclesFromBI(cmat):
     # BI Material to Cycles - Emission map
     createEmissionNodes(cmat, texCoordNode, mainShader, materialOutput)
 
-
     # Texture coordinates
     # list all nodes conected to outputs
     mappingNodes = [link.to_node for output in texCoordNode.outputs for link in output.links]
@@ -730,6 +730,7 @@ class material_restore_bi(bpy.types.Operator):
         AutoNodeOff()
         return {'FINISHED'}
 
+
 class OBJECT_PT_xps_convert(bpy.types.Panel):
     bl_label = "Convert to BI & Cycles Nodes"
     bl_space_type = "PROPERTIES"
@@ -741,14 +742,16 @@ class OBJECT_PT_xps_convert(bpy.types.Panel):
         layout = self.layout
         row = layout.row()
         box = row.box()
-        box.label(text = 'Multi Image Support (Imports)')
+        box.label(text='Multi Image Support (Imports)')
         box.operator("xps_tools.convert_to_cycles_all", text='Convert All to Nodes ', icon='TEXTURE')
         box.operator("xps_tools.convert_to_cycles_selected", text='Convert Active to Nodes', icon='TEXTURE')
         box.operator("xps_tools.restore_bi_materials_all", text='To BI Nodes On', icon='TEXTURE')
 
+
 def register():
     bpy.utils.register_module(__name__)
     pass
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

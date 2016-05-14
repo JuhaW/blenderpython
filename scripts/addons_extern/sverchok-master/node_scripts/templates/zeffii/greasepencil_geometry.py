@@ -1,5 +1,6 @@
 import math
 
+
 def generate_gp3d_stroke(r=1.2):
 
     # get grease pencil data
@@ -20,7 +21,7 @@ def generate_gp3d_stroke(r=1.2):
     else:
         layer = gp.layers[layer_name]
         layer.frames[0].clear()
-    
+
     layer.show_points = True
     layer.color = (0.2, 0.90, .2)
     s = layer.frames[0].strokes.new()
@@ -28,10 +29,10 @@ def generate_gp3d_stroke(r=1.2):
 
     num_verts = 14
     chain = []
-    for i in range(num_verts+1):
+    for i in range(num_verts + 1):
         # mat_rot = mathutils.Matrix.Rotation(((360 / num_verts) * i), 4, axis)
         # chain.append(((v1 - p1) * mat_rot) + p1)
-        theta = (2*math.pi / num_verts) * i
+        theta = (2 * math.pi / num_verts) * i
         coord = ((math.sin(theta) * r, math.cos(theta) * r, 0))
         print(coord)
         chain.append(coord)

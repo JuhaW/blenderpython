@@ -62,12 +62,12 @@ class IVProperties(bpy.types.PropertyGroup):
 def get_canvas(context, pos, ch_count, font_size):
     """Get canvas to be renderred index."""
     sc = context.scene
-    
+
     width = ch_count * font_size * 1.0
     height = font_size * 1.5
 
     center_x, center_y, len_x, len_y = pos.x, pos.y, width, height
-    
+
     x0 = int(center_x - len_x * 0.5)
     y0 = int(center_y - len_y * 0.5)
     x1 = int(center_x + len_x * 0.5)
@@ -77,31 +77,31 @@ def get_canvas(context, pos, ch_count, font_size):
 
 class IVRenderer(bpy.types.Operator):
     """Rendering index"""
-    
+
     bl_idname = "view3d.iv_renderer"
     bl_label = "Index renderer"
 
     __handle = None
     __timer = None
-    
+
     @staticmethod
     def handle_add(self, context):
         IVRenderer.__handle = bpy.types.SpaceView3D.draw_handler_add(
             IVRenderer.render_indices,
             (self, context), 'WINDOW', 'POST_PIXEL')
-    
+
     @staticmethod
     def handle_remove(self, context):
         if IVRenderer.__handle is not None:
             bpy.types.SpaceView3D.draw_handler_remove(
                 IVRenderer.__handle, 'WINDOW')
             IVRenderer.__handle = None
-    
+
     @staticmethod
     def __render_data(context, data):
         for d in data:
             IVRenderer.__render_each_data(context, d)
-    
+
     @staticmethod
     def __render_each_data(context, data):
         sc = context.scene
@@ -132,7 +132,7 @@ class IVRenderer(bpy.types.Operator):
             [rect.x0, rect.y1],
             [rect.x1, rect.y1],
             [rect.x1, rect.y0]
-            ]
+        ]
 
         # render box
         bgl.glEnable(bgl.GL_BLEND)
@@ -239,18 +239,19 @@ class OBJECT_PT_IV(bpy.types.Operator):
     bl_label = "Index Visualizer"
     bl_idname = "view3d.index_vis"
 
+
 def menu(self, context):
-	sc = context.scene
-	layout = self.layout
-	props = context.scene.iv_props
-	if props.running is False:
-		layout.operator(IVOperator.bl_idname, text="Start Index Vis", icon="PLAY")
-	else:
-		layout.operator(IVOperator.bl_idname, text="Stop Index Vis", icon="PAUSE")
-		layout.prop(sc, "iv_box_color")
-		layout.prop(sc, "iv_text_color")
-		layout.label(text="Size:")
-		layout.prop(sc, "iv_font_size", text="Text")
+    sc = context.scene
+    layout = self.layout
+    props = context.scene.iv_props
+    if props.running is False:
+        layout.operator(IVOperator.bl_idname, text="Start Index Vis", icon="PLAY")
+    else:
+        layout.operator(IVOperator.bl_idname, text="Stop Index Vis", icon="PAUSE")
+        layout.prop(sc, "iv_box_color")
+        layout.prop(sc, "iv_text_color")
+        layout.label(text="Size:")
+        layout.prop(sc, "iv_font_size", text="Text")
 
 
 def init_properties():
@@ -295,7 +296,8 @@ classes = [
     IVRenderer,
     IVOperator,
     OBJECT_PT_IV,
-    ]
+]
+
 
 def register():
     for cls in classes:
@@ -306,7 +308,7 @@ def register():
     kc = wm.keyconfigs.addon
     key_assign_list = [
         (IVOperator.bl_idname, "I", "PRESS", True, True, False),
-        ]
+    ]
     if kc:
         km = kc.keymaps.new(name="3D View", space_type="VIEW_3D")
         for (idname, key, event, ctrl, alt, shift) in key_assign_list:
@@ -314,6 +316,7 @@ def register():
                 idname, key, event, ctrl=ctrl, alt=alt, shift=shift)
             addon_keymaps.append((km, kmi))
     bpy.types.VIEW3D_PT_view3d_display.append(menu)
+
 
 def unregister():
     for cls in classes:
@@ -326,4 +329,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

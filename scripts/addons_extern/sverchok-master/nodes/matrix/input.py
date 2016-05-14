@@ -58,7 +58,6 @@ class SvMatrixValueIn(bpy.types.Node, SverchCustomTreeNode):
             SvSetSocketAnyType(self, 'Matrix', m_out)
 
 
-
 def register():
     bpy.utils.register_class(SvMatrixValueIn)
 

@@ -37,17 +37,19 @@ bl_info = {
 
 import bpy
 import bmesh
-from bpy.props import FloatProperty,IntProperty,BoolProperty
-from mathutils import Vector,Matrix,Quaternion
+from bpy.props import FloatProperty, IntProperty, BoolProperty
+from mathutils import Vector, Matrix, Quaternion
 from math import pi, cos, sin
 
 cossin = []
 
-##  Initialize the cossin table based on the number of segments.
+# Initialize the cossin table based on the number of segments.
 #
 #   @param n        The number of segments into which the circle will be
 #                   divided.
 #   @return         None
+
+
 def build_cossin(n):
     global cossin
     cossin = []
@@ -55,15 +57,16 @@ def build_cossin(n):
         a = 2 * pi * i / n
         cossin.append((cos(a), sin(a)))
 
+
 def select_up(axis):
     if (abs(axis[0] / axis.length) < 1e-5
-        and abs(axis[1] / axis.length) < 1e-5):
+            and abs(axis[1] / axis.length) < 1e-5):
         up = Vector((-1, 0, 0))
     else:
         up = Vector((0, 0, 1))
     return up
 
-##  Make a single strut in non-manifold mode.
+# Make a single strut in non-manifold mode.
 #
 #   The strut will be a "cylinder" with @a n sides. The vertices of the
 #   cylinder will be @a od / 2 from the center of the cylinder. Optionally,
@@ -93,6 +96,8 @@ def select_up(axis):
 #   @return         A tuple containing a list of vertices and a list of faces.
 #                   The face vertex indices are accurate only for the list of
 #                   vertices for the created strut.
+
+
 def make_strut(v1, v2, id, od, n, solid, loops):
     v1 = Vector(v1)
     v2 = Vector(v2)
@@ -140,10 +145,10 @@ def make_strut(v1, v2, id, od, n, solid, loops):
     for j in range(fps):
         f = (i - 1) * fps + j
         faces[f] = [base + j, j, (j + 1) % vps, base + (j + 1) % vps]
-    #print(verts,faces)
+    # print(verts,faces)
     return verts, faces
 
-##  Project a point along a vector onto a plane.
+# Project a point along a vector onto a plane.
 #
 #   Really, just find the intersection of the line represented by @a point
 #   and @a dir with the plane represented by @a norm and @a p. However, if
@@ -157,18 +162,20 @@ def make_strut(v1, v2, id, od, n, solid, loops):
 #   @param p        A point through which the plane passes.
 #   @return         A vector representing the projected point, or the
 #                   original point.
+
+
 def project_point(point, dir, norm, p):
     d = (point - p).dot(norm)
     if d >= 0:
-        #the point is already on or in front of the plane
+        # the point is already on or in front of the plane
         return point
     v = dir.dot(norm)
     if v * v < 1e-8:
-        #the plane is unreachable
+        # the plane is unreachable
         return point
     return point - dir * d / v
 
-##  Make a simple strut for debugging.
+# Make a simple strut for debugging.
 #
 #   The strut is just a single quad representing the Z axis of the edge.
 #
@@ -182,6 +189,8 @@ def project_point(point, dir, norm, p):
 #                   number.
 #   @fixme          The face vertex indices should be accurate for the local
 #                   vertices (consistency)
+
+
 def make_debug_strut(mesh, edge_num, edge, od):
     v = [mesh.verts[edge.verts[0].index].co,
          mesh.verts[edge.verts[1].index].co,
@@ -192,7 +201,7 @@ def make_debug_strut(mesh, edge_num, edge, od):
           edge_num * 4 + 2, edge_num * 4 + 3]]
     return v, f
 
-##  Make a cylinder with ends clipped to the end-planes of the edge.
+# Make a cylinder with ends clipped to the end-planes of the edge.
 #
 #   The strut is just a single quad representing the Z axis of the edge.
 #
@@ -206,6 +215,8 @@ def make_debug_strut(mesh, edge_num, edge, od):
 #                   number.
 #   @fixme          The face vertex indices should be accurate for the local
 #                   vertices (consistency)
+
+
 def make_clipped_cylinder(mesh, edge_num, edge, od):
     n = len(cossin)
     cyl = [None] * n
@@ -235,7 +246,7 @@ def make_clipped_cylinder(mesh, edge_num, edge, od):
         f[i][3] = base + (i * 2 + 2) % (n * 2)
     return v, f
 
-##  Represent a vertex in the base mesh, with additional information.
+# Represent a vertex in the base mesh, with additional information.
 #
 #   These vertices are @b not shared between edges.
 #
@@ -246,11 +257,14 @@ def make_clipped_cylinder(mesh, edge_num, edge, od):
 #   @var planes List of vectors representing the normals of the planes that
 #               bisect the angle between this vert's edge and each other
 #               adjacant edge.
+
+
 class SVert:
-    ##  Create a vertex holding additional information about the bmesh vertex.
+    # Create a vertex holding additional information about the bmesh vertex.
     #   @param bmvert   The bmesh vertex for which additional information is
     #                   to be stored.
     #   @param bmedge   The edge to which this vertex is attached.
+
     def __init__(self, bmvert, bmedge, edge):
         self.index = bmvert.index
         self.edge = edge
@@ -258,11 +272,12 @@ class SVert:
         edges.remove(bmedge)
         self.edges = tuple(map(lambda e: e.index, edges))
         self.planes = []
+
     def calc_planes(self, edges):
         for ed in self.edges:
-            self.planes.append (calc_plane_normal(self.edge, edges[ed]))
+            self.planes.append(calc_plane_normal(self.edge, edges[ed]))
 
-##  Represent an edge in the base mesh, with additional information.
+# Represent an edge in the base mesh, with additional information.
 #
 #   Edges do not share vertices so that the edge is always on the front (back?
 #   must verify) side of all the planes attached to its vertices. If the
@@ -284,27 +299,31 @@ class SVert:
 #                   verts[1] along the negative y axis.
 #   @var z          The z axis of the edges local frame of reference.
 #                   Initially invalid.
-class SEdge:
-    def __init__(self, bmesh, bmedge):
 
+
+class SEdge:
+
+    def __init__(self, bmesh, bmedge):
 
         self.index = bmedge.index
         self.bmedge = bmedge
         bmesh.verts.ensure_lookup_table()
-        self.verts = (SVert (bmedge.verts[0], bmedge, self),
-                      SVert (bmedge.verts[1], bmedge, self))
+        self.verts = (SVert(bmedge.verts[0], bmedge, self),
+                      SVert(bmedge.verts[1], bmedge, self))
         self.y = (bmesh.verts[self.verts[0].index].co
                   - bmesh.verts[self.verts[1].index].co)
         self.y.normalize()
         self.x = self.z = None
+
     def set_frame(self, up):
         self.x = self.y.cross(up)
         self.x.normalize()
         self.z = self.x.cross(self.y)
+
     def calc_frame(self, base_edge):
         baxis = base_edge.y
         if (self.verts[0].index == base_edge.verts[0].index
-            or self.verts[1].index == base_edge.verts[1].index):
+                or self.verts[1].index == base_edge.verts[1].index):
             axis = -self.y
         elif (self.verts[0].index == base_edge.verts[1].index
               or self.verts[1].index == base_edge.verts[0].index):
@@ -321,22 +340,26 @@ class SEdge:
             h.normalize()
             # (cos(theta/2), sin(theta/2) * n) where n is the unit vector of the
             # axis rotating baxis onto axis
-            q = Quaternion([baxis.dot (h)] + list(baxis.cross(h)))
+            q = Quaternion([baxis.dot(h)] + list(baxis.cross(h)))
             # rotate the base edge's up around the rotation axis (blender
             # quaternion shortcut:)
             up = q * base_edge.z
         self.set_frame(up)
+
     def calc_vert_planes(self, edges):
         for v in self.verts:
-            v.calc_planes (edges)
+            v.calc_planes(edges)
+
     def bisect_faces(self):
         n1 = self.bmedge.link_faces[0].normal
         if len(self.bmedge.link_faces) > 1:
             n2 = self.bmedge.link_faces[1].normal
             return (n1 + n2).normalized()
         return n1
+
     def calc_simple_frame(self):
         return self.y.cross(select_up(self.y)).normalized()
+
     def find_edge_frame(self, sedges):
         if self.bmedge.link_faces:
             return self.bisect_faces()
@@ -358,6 +381,7 @@ class SEdge:
             return (n1 + n2).normalized()
         return self.calc_simple_frame()
 
+
 def calc_plane_normal(edge1, edge2):
     if edge1.verts[0].index == edge2.verts[0].index:
         axis1 = -edge1.y
@@ -378,21 +402,23 @@ def calc_plane_normal(edge1, edge2):
     # there are infinite solutions).
     return (axis1 + axis2).normalized()
 
+
 def build_edge_frames(edges):
     edge_set = set(edges)
     while edge_set:
-        edge_queue=[edge_set.pop()]
+        edge_queue = [edge_set.pop()]
         edge_queue[0].set_frame(edge_queue[0].find_edge_frame(edges))
         while edge_queue:
             current_edge = edge_queue.pop()
             for i in (0, 1):
                 for e in current_edge.verts[i].edges:
                     edge = edges[e]
-                    if edge.x != None:  #edge already processed
+                    if edge.x != None:  # edge already processed
                         continue
                     edge_set.remove(edge)
                     edge_queue.append(edge)
                     edge.calc_frame(current_edge)
+
 
 def make_manifold_struts(truss_obj, od, segments):
     bpy.context.scene.objects.active = truss_obj
@@ -400,7 +426,7 @@ def make_manifold_struts(truss_obj, od, segments):
     truss_mesh = bmesh.from_edit_mesh(truss_obj.data).copy()
     bpy.ops.object.editmode_toggle()
     edges = [None] * len(truss_mesh.edges)
-    for i,e in enumerate(truss_mesh.edges):
+    for i, e in enumerate(truss_mesh.edges):
         edges[i] = SEdge(truss_mesh, e)
     build_edge_frames(edges)
     verts = []
@@ -412,6 +438,7 @@ def make_manifold_struts(truss_obj, od, segments):
         verts += v
         faces += f
     return verts, faces
+
 
 def make_simple_struts(truss_mesh, id, od, segments, solid, loops):
     vps = 2
@@ -438,12 +465,13 @@ def make_simple_struts(truss_mesh, id, od, segments, solid, loops):
             verts[vbase + i] = v[i]
         for i in range(len(f)):
             faces[fbase + i] = f[i]
-        #if not base % 12800:
+        # if not base % 12800:
         #    print (base * 100 / len(verts))
         vbase += vps * segments
         fbase += fps * segments
-    #print(verts,faces)
+    # print(verts,faces)
     return verts, faces
+
 
 def create_struts(self, context, id, od, segments, solid, loops, manifold):
     build_cossin(segments)
@@ -472,6 +500,7 @@ def create_struts(self, context, id, od, segments, solid, loops, manifold):
     bpy.context.user_preferences.edit.use_global_undo = True
     return {'FINISHED'}
 
+
 class Struts(bpy.types.Operator):
     """Add one or more struts meshes based on selected truss meshes"""
     bl_idname = "mesh.generate_struts"
@@ -479,23 +508,23 @@ class Struts(bpy.types.Operator):
     bl_description = """Add one or more struts meshes based on selected truss meshes"""
     bl_options = {'REGISTER', 'UNDO'}
 
-    id = FloatProperty(name = "Inside Diameter",
-                       description = "diameter of inner surface",
-                       min = 0.0,
-                       soft_min = 0.0,
-                       max = 100,
-                       soft_max = 100,
-                       default = 0.04)
-    od = FloatProperty(name = "Outside Diameter",
-                       description = "diameter of outer surface",
-                       min = 0.001,
-                       soft_min = 0.001,
-                       max = 100,
-                       soft_max = 100,
-                       default = 0.05)
+    id = FloatProperty(name="Inside Diameter",
+                       description="diameter of inner surface",
+                       min=0.0,
+                       soft_min=0.0,
+                       max=100,
+                       soft_max=100,
+                       default=0.04)
+    od = FloatProperty(name="Outside Diameter",
+                       description="diameter of outer surface",
+                       min=0.001,
+                       soft_min=0.001,
+                       max=100,
+                       soft_max=100,
+                       default=0.05)
     manifold = BoolProperty(name="Manifold",
-                         description="Connect struts to form a single solid.",
-                         default=False)
+                            description="Connect struts to form a single solid.",
+                            default=False)
     solid = BoolProperty(name="Solid",
                          description="Create inner surface.",
                          default=False)
@@ -509,15 +538,18 @@ class Struts(bpy.types.Operator):
                            default=12)
 
     def execute(self, context):
-        keywords = self.as_keywords ()
+        keywords = self.as_keywords()
         return create_struts(self, context, **keywords)
 
+
 def menu_func(self, context):
-    self.layout.operator(Struts.bl_idname, text = "Struts", icon='PLUGIN')
+    self.layout.operator(Struts.bl_idname, text="Struts", icon='PLUGIN')
+
 
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.INFO_MT_mesh_add.append(menu_func)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

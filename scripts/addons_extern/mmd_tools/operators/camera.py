@@ -4,6 +4,7 @@ from bpy.types import Operator
 
 import mmd_tools.core.camera as mmd_camera
 
+
 class ConvertToMMDCamera(Operator):
     bl_idname = 'mmd_tools.convert_to_mmd_camera'
     bl_label = 'Convert to MMD Camera'

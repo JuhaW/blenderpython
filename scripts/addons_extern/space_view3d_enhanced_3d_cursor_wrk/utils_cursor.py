@@ -58,12 +58,14 @@ addon = AddonManager()
 #============================================================================#
 
 # ====== MODULE GLOBALS / CONSTANTS ====== #
-tmp_name = chr(0x10ffff) # maximal Unicode value
+tmp_name = chr(0x10ffff)  # maximal Unicode value
 epsilon = 0.000001
 
 # ===== MATH / GEOMETRY UTILITIES ===== #
+
+
 def prepare_grid_mesh(bm, nx=1, ny=1, sx=1.0, sy=1.0,
-                      z=0.0, xyz_indices=(0,1,2)):
+                      z=0.0, xyz_indices=(0, 1, 2)):
     vertices = []
     for i in range(nx + 1):
         x = 2 * (i / nx) - 1
@@ -87,28 +89,31 @@ def prepare_grid_mesh(bm, nx=1, ny=1, sx=1.0, sy=1.0,
                      vertices[j1 + i1 * nxmax],
                      vertices[j + i1 * nxmax]]
             bm.faces.new(verts)
-    #return
+    # return
+
 
 def prepare_gridbox_mesh(subdiv=1):
     bm = bmesh.new()
 
     sides = [
-        (-1, (0,1,2)), # -Z
-        (1, (1,0,2)), # +Z
-        (-1, (1,2,0)), # -Y
-        (1, (0,2,1)), # +Y
-        (-1, (2,0,1)), # -X
-        (1, (2,1,0)), # +X
-        ]
+        (-1, (0, 1, 2)),  # -Z
+        (1, (1, 0, 2)),  # +Z
+        (-1, (1, 2, 0)),  # -Y
+        (1, (0, 2, 1)),  # +Y
+        (-1, (2, 0, 1)),  # -X
+        (1, (2, 1, 0)),  # +X
+    ]
 
     for side in sides:
         prepare_grid_mesh(bm, nx=subdiv, ny=subdiv,
-            z=side[0], xyz_indices=side[1])
+                          z=side[0], xyz_indices=side[1])
 
     return bm
 
 # ===== UTILITY FUNCTIONS ===== #
 cursor_stick_pos_cache = None
+
+
 def update_stick_to_obj(context):
     global cursor_stick_pos_cache
 
@@ -138,6 +143,7 @@ def update_stick_to_obj(context):
         # (eats 50% of my CPU if called each frame)
         context.space_data.cursor_location = pos
 
+
 def get_cursor_location(v3d=None, scene=None):
     if v3d:
         pos = v3d.cursor_location
@@ -147,6 +153,8 @@ def get_cursor_location(v3d=None, scene=None):
     return pos.copy()
 
 set_cursor_location__reset_stick = True
+
+
 def set_cursor_location(pos, v3d=None, scene=None):
     pos = pos.to_3d().copy()
 
@@ -161,6 +169,7 @@ def set_cursor_location(pos, v3d=None, scene=None):
 
     if set_cursor_location__reset_stick:
         set_stick_obj(scene, None)
+
 
 def set_stick_obj(scene, name=None, pos=None):
     settings_scene = scene.cursor_3d_tools_settings
@@ -185,12 +194,14 @@ def set_stick_obj(scene, name=None, pos=None):
 #   the pre-chosen screen names may not exist
 #   in the user's blend.
 
+
 def propagate_settings_to_all_screens(settings):
     # At least the most vital "user preferences" stuff
     for screen in bpy.data.screens:
         _settings = screen.cursor_3d_tools_settings
         _settings.auto_register_keymaps = settings.auto_register_keymaps
         _settings.free_coord_precision = settings.free_coord_precision
+
 
 def find_settings():
     #wm = bpy.data.window_managers[0]
@@ -210,6 +221,7 @@ def find_settings():
 
     return settings
 
+
 def find_runtime_settings():
     wm = bpy.data.window_managers[0]
     try:
@@ -219,6 +231,7 @@ def find_runtime_settings():
         runtime_settings = None
 
     return runtime_settings
+
 
 def KeyMapItemSearch(idname, place=None):
     if isinstance(place, bpy.types.KeyMap):
@@ -235,9 +248,10 @@ def KeyMapItemSearch(idname, place=None):
             for kmi in KeyMapItemSearch(idname, keyconfig):
                 yield kmi
 
+
 def IsKeyMapItemEvent(kmi, event):
     event_any = (event.shift or event.ctrl or event.alt or event.oskey)
-    event_key_modifier = 'NONE' # no such info in event
+    event_key_modifier = 'NONE'  # no such info in event
     return ((kmi.type == event.type) and
             (kmi.value == event.value) and
             (kmi.shift == event.shift) and
@@ -248,7 +262,10 @@ def IsKeyMapItemEvent(kmi, event):
             (kmi.key_modifier == event_key_modifier))
 
 # ===== DRAWING UTILITIES ===== #
+
+
 class GfxCell:
+
     def __init__(self, w, h, color=None, alpha=None, draw=None):
         self.w = w
         self.h = h
@@ -288,6 +305,7 @@ class GfxCell:
 
         draw_rect(xy[0], xy[1], w, h)
 
+
 class TextCell(GfxCell):
     font_id = 0
 
@@ -305,7 +323,7 @@ class TextCell(GfxCell):
         self.text = str(text)
         dims = blf.dimensions(self.font_id, self.text)
         self.w = dims[0]
-        dims = blf.dimensions(self.font_id, "dp") # fontheight
+        dims = blf.dimensions(self.font_id, "dp")  # fontheight
         self.h = dims[1]
 
     def draw(self, x, y, align=(0, 0)):
@@ -333,6 +351,7 @@ def draw_text(x, y, value, font_id=0, align=(0, 0), font_height=None):
     blf.position(font_id, x, y, 0)
     blf.draw(font_id, value)
 
+
 def draw_rect(x, y, w, h, margin=0, outline=False):
     if w < 0:
         x += w
@@ -357,6 +376,7 @@ def draw_rect(x, y, w, h, margin=0, outline=False):
     bgl.glVertex2i(x + w + margin, y + h + margin)
     bgl.glVertex2i(x - margin, y + h + margin)
     bgl.glEnd()
+
 
 def append_round_rect(verts, x, y, w, h, rw, rh=None):
     if rh is None:
@@ -398,6 +418,7 @@ def append_round_rect(verts, x, y, w, h, rw, rh=None):
     a1 = math.pi * 2.0
     append_oval_segment(verts, x, y + h, rw, rh, a0, a1, n)
 
+
 def append_oval_segment(verts, x, y, rw, rh, a0, a1, n, skip_last=False):
     nmax = n - 1
     da = a1 - a0
@@ -407,23 +428,26 @@ def append_oval_segment(verts, x, y, rw, rh, a0, a1, n, skip_last=False):
         dy = math.cos(a) * rh
         verts.append((x + int(dx), y + int(dy)))
 
+
 def draw_line(p0, p1, c=None):
     if c is not None:
-        bgl.glColor4f(c[0], c[1], c[2], \
-            (c[3] if len(c) > 3 else 1.0))
+        bgl.glColor4f(c[0], c[1], c[2],
+                      (c[3] if len(c) > 3 else 1.0))
     bgl.glBegin(bgl.GL_LINE_STRIP)
     bgl.glVertex3f(p0[0], p0[1], p0[2])
     bgl.glVertex3f(p1[0], p1[1], p1[2])
     bgl.glEnd()
 
+
 def draw_line_2d(p0, p1, c=None):
     if c is not None:
-        bgl.glColor4f(c[0], c[1], c[2], \
-            (c[3] if len(c) > 3 else 1.0))
+        bgl.glColor4f(c[0], c[1], c[2],
+                      (c[3] if len(c) > 3 else 1.0))
     bgl.glBegin(bgl.GL_LINE_STRIP)
     bgl.glVertex2f(p0[0], p0[1])
     bgl.glVertex2f(p1[0], p1[1])
     bgl.glEnd()
+
 
 def draw_line_hidden_depth(p0, p1, c, a0=1.0, a1=0.5, s0=None, s1=None):
     bgl.glEnable(bgl.GL_DEPTH_TEST)
@@ -438,6 +462,7 @@ def draw_line_hidden_depth(p0, p1, c, a0=1.0, a1=0.5, s0=None, s1=None):
     if s1 is not None:
         gl_enable(bgl.GL_LINE_STIPPLE, int(bool(s1)))
     draw_line(p0, p1)
+
 
 def draw_arrow(p0, x, y, z, n_scl=0.2, ort_scl=0.035):
     p1 = p0 + z
@@ -461,6 +486,7 @@ def draw_arrow(p0, x, y, z, n_scl=0.2, ort_scl=0.035):
     p3 = p2 + (x + y) * ort_scl
     bgl.glVertex3f(p3[0], p3[1], p3[2])
     bgl.glEnd()
+
 
 def draw_arrow_2d(p0, n, L, arrow_len, arrow_width):
     p1 = p0 + n * L
@@ -487,23 +513,24 @@ def draw_arrow_2d(p0, n, L, arrow_len, arrow_width):
 
 # OpenGl helper functions/data
 gl_state_info = {
-    bgl.GL_MATRIX_MODE:(bgl.GL_INT, 1),
-    bgl.GL_PROJECTION_MATRIX:(bgl.GL_DOUBLE, 16),
-    bgl.GL_LINE_WIDTH:(bgl.GL_FLOAT, 1),
-    bgl.GL_BLEND:(bgl.GL_BYTE, 1),
-    bgl.GL_LINE_STIPPLE:(bgl.GL_BYTE, 1),
-    bgl.GL_COLOR:(bgl.GL_FLOAT, 4),
-    bgl.GL_SMOOTH:(bgl.GL_BYTE, 1),
-    bgl.GL_DEPTH_TEST:(bgl.GL_BYTE, 1),
-    bgl.GL_DEPTH_WRITEMASK:(bgl.GL_BYTE, 1),
+    bgl.GL_MATRIX_MODE: (bgl.GL_INT, 1),
+    bgl.GL_PROJECTION_MATRIX: (bgl.GL_DOUBLE, 16),
+    bgl.GL_LINE_WIDTH: (bgl.GL_FLOAT, 1),
+    bgl.GL_BLEND: (bgl.GL_BYTE, 1),
+    bgl.GL_LINE_STIPPLE: (bgl.GL_BYTE, 1),
+    bgl.GL_COLOR: (bgl.GL_FLOAT, 4),
+    bgl.GL_SMOOTH: (bgl.GL_BYTE, 1),
+    bgl.GL_DEPTH_TEST: (bgl.GL_BYTE, 1),
+    bgl.GL_DEPTH_WRITEMASK: (bgl.GL_BYTE, 1),
 }
 gl_type_getters = {
-    bgl.GL_INT:bgl.glGetIntegerv,
-    bgl.GL_DOUBLE:bgl.glGetFloatv, # ?
-    bgl.GL_FLOAT:bgl.glGetFloatv,
-    #bgl.GL_BYTE:bgl.glGetFloatv, # Why GetFloat for getting byte???
-    bgl.GL_BYTE:bgl.glGetBooleanv, # maybe like that?
+    bgl.GL_INT: bgl.glGetIntegerv,
+    bgl.GL_DOUBLE: bgl.glGetFloatv,  # ?
+    bgl.GL_FLOAT: bgl.glGetFloatv,
+    # bgl.GL_BYTE:bgl.glGetFloatv, # Why GetFloat for getting byte???
+    bgl.GL_BYTE: bgl.glGetBooleanv,  # maybe like that?
 }
+
 
 def gl_get(state_id):
     type, size = gl_state_info[state_id]
@@ -511,11 +538,13 @@ def gl_get(state_id):
     gl_type_getters[type](state_id, buf)
     return (buf if (len(buf) != 1) else buf[0])
 
+
 def gl_enable(state_id, enable):
     if enable:
         bgl.glEnable(state_id)
     else:
         bgl.glDisable(state_id)
+
 
 def gl_matrix_to_buffer(m):
     tempMat = [m[i][j] for i in range(4) for j in range(4)]
@@ -523,10 +552,14 @@ def gl_matrix_to_buffer(m):
 
 # =========================== GATHER PARTICLES ============================= #
 #============================================================================#
+
+
 class Particle:
     pass
 
+
 class View3D_Cursor(Particle):
+
     def __init__(self, context):
         assert context.space_data.type == 'VIEW_3D'
         self.v3d = context.space_data
@@ -563,7 +596,9 @@ class View3D_Cursor(Particle):
     def get_initial_matrix(self):
         return self.initial_matrix
 
+
 class View3D_Object(Particle):
+
     def __init__(self, obj):
         self.obj = obj
 
@@ -572,44 +607,58 @@ class View3D_Object(Particle):
         # or even maybe not bounded by constraints %)
         return self.obj.matrix_world.to_translation()
 
+
 class View3D_EditMesh_Vertex(Particle):
     pass
+
 
 class View3D_EditMesh_Edge(Particle):
     pass
 
+
 class View3D_EditMesh_Face(Particle):
     pass
+
 
 class View3D_EditSpline_Point(Particle):
     pass
 
+
 class View3D_EditSpline_BezierPoint(Particle):
     pass
+
 
 class View3D_EditSpline_BezierHandle(Particle):
     pass
 
+
 class View3D_EditMeta_Element(Particle):
     pass
+
 
 class View3D_EditBone_Bone(Particle):
     pass
 
+
 class View3D_EditBone_HeadTail(Particle):
     pass
+
 
 class View3D_PoseBone(Particle):
     pass
 
+
 class UV_Cursor(Particle):
     pass
+
 
 class UV_Vertex(Particle):
     pass
 
+
 class UV_Edge(Particle):
     pass
+
 
 class UV_Face(Particle):
     pass
@@ -622,6 +671,8 @@ class UV_Face(Particle):
 # - as reference point(s) for cursor transformation
 # Note: particles 'dragged' by Proportional Editing
 # are a separate issue (they can come and go).
+
+
 def gather_particles(**kwargs):
     context = kwargs.get("context", bpy.context)
 
@@ -644,10 +695,10 @@ def gather_particles(**kwargs):
         context_mode = kwargs.get("context_mode", context.mode)
 
         selected_objects = kwargs.get("selected_objects",
-            context.selected_objects)
+                                      context.selected_objects)
 
         active_object = kwargs.get("active_object",
-            context.active_object)
+                                   context.active_object)
 
         if context_mode == 'OBJECT':
             for obj in selected_objects:
@@ -663,10 +714,10 @@ def gather_particles(**kwargs):
         # -> object.mode_set seem to somehow conflict
         # with Undo/Redo mechanisms.
         elif active_object and active_object.data and \
-        (context_mode in {
-        'EDIT_MESH', 'EDIT_METABALL',
-        'EDIT_CURVE', 'EDIT_SURFACE',
-        'EDIT_ARMATURE', 'POSE'}):
+            (context_mode in {
+                'EDIT_MESH', 'EDIT_METABALL',
+                'EDIT_CURVE', 'EDIT_SURFACE',
+                'EDIT_ARMATURE', 'POSE'}):
 
             m = active_object.matrix_world
 
@@ -707,7 +758,7 @@ def gather_particles(**kwargs):
                         matrix_world * active_element
 
                 # Currently there is no API for element.select
-                #for element in active_object.data.elements:
+                # for element in active_object.data.elements:
                 #    if element.select:
                 #        positions.append(element.co)
             elif context_mode == 'EDIT_ARMATURE':
@@ -767,7 +818,7 @@ def gather_particles(**kwargs):
                         if point.select_control_point:
                             n = nL + nR
                         elif point.select_left_handle or \
-                             point.select_right_handle:
+                                point.select_right_handle:
                             n = nL + nR
                         else:
                             if point.select_left_handle:
@@ -831,29 +882,29 @@ def gather_particles(**kwargs):
 
         cursor_pos = get_cursor_location(v3d=space_data)
 
-    #elif area_type == 'IMAGE_EDITOR':
+    # elif area_type == 'IMAGE_EDITOR':
         # currently there is no way to get UV editor's
         # offset (and maybe some other parameters
         # required to implement these operators)
         #cursor_pos = space_data.uv_editor.cursor_location
 
-    #elif area_type == 'EMPTY':
-    #elif area_type == 'GRAPH_EDITOR':
-    #elif area_type == 'OUTLINER':
-    #elif area_type == 'PROPERTIES':
-    #elif area_type == 'FILE_BROWSER':
-    #elif area_type == 'INFO':
-    #elif area_type == 'SEQUENCE_EDITOR':
-    #elif area_type == 'TEXT_EDITOR':
-    #elif area_type == 'AUDIO_WINDOW':
-    #elif area_type == 'DOPESHEET_EDITOR':
-    #elif area_type == 'NLA_EDITOR':
-    #elif area_type == 'SCRIPTS_WINDOW':
-    #elif area_type == 'TIMELINE':
-    #elif area_type == 'NODE_EDITOR':
-    #elif area_type == 'LOGIC_EDITOR':
-    #elif area_type == 'CONSOLE':
-    #elif area_type == 'USER_PREFERENCES':
+    # elif area_type == 'EMPTY':
+    # elif area_type == 'GRAPH_EDITOR':
+    # elif area_type == 'OUTLINER':
+    # elif area_type == 'PROPERTIES':
+    # elif area_type == 'FILE_BROWSER':
+    # elif area_type == 'INFO':
+    # elif area_type == 'SEQUENCE_EDITOR':
+    # elif area_type == 'TEXT_EDITOR':
+    # elif area_type == 'AUDIO_WINDOW':
+    # elif area_type == 'DOPESHEET_EDITOR':
+    # elif area_type == 'NLA_EDITOR':
+    # elif area_type == 'SCRIPTS_WINDOW':
+    # elif area_type == 'TIMELINE':
+    # elif area_type == 'NODE_EDITOR':
+    # elif area_type == 'LOGIC_EDITOR':
+    # elif area_type == 'CONSOLE':
+    # elif area_type == 'USER_PREFERENCES':
 
     else:
         print("gather_particles() not implemented for '{}'".format(area_type))
@@ -878,13 +929,14 @@ def gather_particles(**kwargs):
         # in v3d: BOUNDING_BOX_CENTER, in UV editor: CENTER
         pivots['CENTER'] = bbox_center.copy()
 
-    csu = CoordinateSystemUtility(scene, space_data, region_data, \
-        pivots, normal_system)
+    csu = CoordinateSystemUtility(scene, space_data, region_data,
+                                  pivots, normal_system)
 
     return particles, csu
 
+
 def calc_median_bbox_pivots(positions):
-    median = None # pos can be 3D or 2D
+    median = None  # pos can be 3D or 2D
     bbox = [None, None]
 
     n = 0
@@ -901,6 +953,7 @@ def calc_median_bbox_pivots(positions):
 
     return median, bbox_center
 
+
 def extend_bbox(bbox, pos):
     try:
         bbox[0] = tuple(min(e0, e1) for e0, e1 in zip(bbox[0], pos))
@@ -913,28 +966,30 @@ def extend_bbox(bbox, pos):
 #============================================================================#
 
 # ====== COORDINATE SYSTEM UTILITY ====== #
+
+
 class CoordinateSystemUtility:
     pivot_name_map = {
-        'CENTER':'CENTER',
-        'BOUNDING_BOX_CENTER':'CENTER',
-        'MEDIAN':'MEDIAN',
-        'MEDIAN_POINT':'MEDIAN',
-        'CURSOR':'CURSOR',
-        'INDIVIDUAL_ORIGINS':'INDIVIDUAL',
-        'ACTIVE_ELEMENT':'ACTIVE',
-        'WORLD':'WORLD',
-        'SURFACE':'SURFACE', # ?
-        'BOOKMARK':'BOOKMARK',
+        'CENTER': 'CENTER',
+        'BOUNDING_BOX_CENTER': 'CENTER',
+        'MEDIAN': 'MEDIAN',
+        'MEDIAN_POINT': 'MEDIAN',
+        'CURSOR': 'CURSOR',
+        'INDIVIDUAL_ORIGINS': 'INDIVIDUAL',
+        'ACTIVE_ELEMENT': 'ACTIVE',
+        'WORLD': 'WORLD',
+        'SURFACE': 'SURFACE',  # ?
+        'BOOKMARK': 'BOOKMARK',
     }
     pivot_v3d_map = {
-        'CENTER':'BOUNDING_BOX_CENTER',
-        'MEDIAN':'MEDIAN_POINT',
-        'CURSOR':'CURSOR',
-        'INDIVIDUAL':'INDIVIDUAL_ORIGINS',
-        'ACTIVE':'ACTIVE_ELEMENT',
+        'CENTER': 'BOUNDING_BOX_CENTER',
+        'MEDIAN': 'MEDIAN_POINT',
+        'CURSOR': 'CURSOR',
+        'INDIVIDUAL': 'INDIVIDUAL_ORIGINS',
+        'ACTIVE': 'ACTIVE_ELEMENT',
     }
 
-    def __init__(self, scene, space_data, region_data, \
+    def __init__(self, scene, space_data, region_data,
                  pivots, normal_system):
         self.space_data = space_data
         self.region_data = region_data
@@ -997,7 +1052,7 @@ class CoordinateSystemUtility:
             if pivot == 'INDIVIDUAL':
                 pivot = 'MEDIAN'
 
-            #if pivot == 'ACTIVE':
+            # if pivot == 'ACTIVE':
             #    print(self.pivots)
 
             try:
@@ -1019,6 +1074,8 @@ class CoordinateSystemUtility:
         return to_matrix4x4(matrix, pos)
 
 # ====== TRANSFORM ORIENTATION UTILITIES ====== #
+
+
 class TransformOrientationUtility:
     special_systems = {"Surface", "Scaled"}
     predefined_systems = {
@@ -1031,8 +1088,8 @@ class TransformOrientationUtility:
         self.v3d = v3d
         self.rv3d = rv3d
 
-        self.custom_systems = [item for item in scene.orientations \
-            if item.name not in self.special_systems]
+        self.custom_systems = [item for item in scene.orientations
+                               if item.name not in self.special_systems]
 
         self.is_custom = False
         self.custom_id = -1
@@ -1072,8 +1129,8 @@ class TransformOrientationUtility:
             self.is_custom = name not in self.predefined_systems
 
             if self.is_custom:
-                self.custom_id = next((i for i, v in \
-                    enumerate(self.custom_systems) if v.name == name), -1)
+                self.custom_id = next((i for i, v in
+                                       enumerate(self.custom_systems) if v.name == name), -1)
 
             if name in self.special_systems:
                 # Ensure such system exists
@@ -1105,7 +1162,7 @@ class TransformOrientationUtility:
                 matrix = active_obj.matrix_world.to_3x3()
                 if name == "Scaled":
                     self.get_custom(name).matrix = matrix
-                else: # 'LOCAL', 'GIMBAL', ['NORMAL'] for now
+                else:  # 'LOCAL', 'GIMBAL', ['NORMAL'] for now
                     matrix[0].normalize()
                     matrix[1].normalize()
                     matrix[2].normalize()
@@ -1120,6 +1177,8 @@ class TransformOrientationUtility:
                 self.scene, name, Matrix())
 
 # Is there a less cumbersome way to create transform orientation?
+
+
 def create_transform_orientation(scene, name=None, matrix=None):
     active_obj = scene.objects.active
     prev_mode = None
@@ -1154,19 +1213,21 @@ def create_transform_orientation(scene, name=None, matrix=None):
     return tfm_orient
 
 # ====== VIEW UTILITY CLASS ====== #
+
+
 class ViewUtility:
     methods = dict(
-        get_locks = lambda: {},
-        set_locks = lambda locks: None,
-        get_position = lambda: Vector(),
-        set_position = lambda: None,
-        get_rotation = lambda: Quaternion(),
-        get_direction = lambda: Vector((0, 0, 1)),
-        get_viewpoint = lambda: Vector(),
-        get_matrix = lambda: Matrix(),
-        get_point = lambda xy, pos: \
-            Vector((xy[0], xy[1], 0)),
-        get_ray = lambda xy: tuple(
+        get_locks=lambda: {},
+        set_locks=lambda locks: None,
+        get_position=lambda: Vector(),
+        set_position=lambda: None,
+        get_rotation=lambda: Quaternion(),
+        get_direction=lambda: Vector((0, 0, 1)),
+        get_viewpoint=lambda: Vector(),
+        get_matrix=lambda: Matrix(),
+        get_point=lambda xy, pos:
+        Vector((xy[0], xy[1], 0)),
+        get_ray=lambda xy: tuple(
             Vector((xy[0], xy[1], 0)),
             Vector((xy[0], xy[1], 1)),
             False),
@@ -1186,10 +1247,11 @@ class ViewUtility:
         if self.implementation:
             for name in self.methods:
                 setattr(self, name,
-                    getattr(self.implementation, name))
+                        getattr(self.implementation, name))
         else:
             for name, value in self.methods.items():
                 setattr(self, name, value)
+
 
 class View3DUtility:
     lock_types = {"lock_cursor": False, "lock_object": None, "lock_bone": ""}
@@ -1203,7 +1265,7 @@ class View3DUtility:
     # ====== GET VIEW MATRIX AND ITS COMPONENTS ====== #
     def get_locks(self):
         v3d = self.space_data
-        return {k:getattr(v3d, k) for k in self.lock_types}
+        return {k: getattr(v3d, k) for k in self.lock_types}
 
     def set_locks(self, locks):
         v3d = self.space_data
@@ -1346,7 +1408,10 @@ class View3DUtility:
         return a, b, clip
 
 # ====== SNAP UTILITY CLASS ====== #
+
+
 class SnapUtility:
+
     def __init__(self, context):
         if context.area.type == 'VIEW_3D':
             v3d = context.space_data
@@ -1367,7 +1432,9 @@ class SnapUtility:
     def snap(self, *args, **kwargs):
         return self.implementation.snap(*args, **kwargs)
 
+
 class SnapUtilityBase:
+
     def __init__(self):
         self.targets = set()
         # TODO: set to current blend settings?
@@ -1400,8 +1467,8 @@ class SnapUtilityBase:
             self.axes_coords = kwargs["axes_coords"]
 
     # ====== CURSOR REPOSITIONING ====== #
-    def snap(self, xy, src_matrix, initial_matrix, do_raycast, \
-        alt_snap, vu, csu, modify_Surface, use_object_centers):
+    def snap(self, xy, src_matrix, initial_matrix, do_raycast,
+             alt_snap, vu, csu, modify_Surface, use_object_centers):
 
         v3d = csu.space_data
 
@@ -1437,7 +1504,7 @@ class SnapUtilityBase:
             set_stick_obj(csu.tou.scene, None)
 
             raycast = None
-            snap_to_obj = (snap_type != 'INCREMENT') #or use_object_centers
+            snap_to_obj = (snap_type != 'INCREMENT')  # or use_object_centers
             snap_to_obj = snap_to_obj and (snap_type is not None)
             if snap_to_obj:
                 a, b, clip = vu.get_ray(xy)
@@ -1530,7 +1597,7 @@ class SnapUtilityBase:
                                                   start + direction)
                         if i_p is not None:
                             pos = i_p[1]
-        #end if do_raycast
+        # end if do_raycast
 
         try:
             sys_matrix_inv = sys_matrix.inverted()
@@ -1558,13 +1625,14 @@ class SnapUtilityBase:
 
         return res_matrix
 
+
 class Snap3DUtility(SnapUtilityBase):
-    grid_steps = {False:1.0, True:0.1}
+    grid_steps = {False: 1.0, True: 0.1}
 
     cube_verts = [Vector((i, j, k))
-        for i in (-1, 1)
-        for j in (-1, 1)
-        for k in (-1, 1)]
+                  for i in (-1, 1)
+                  for j in (-1, 1)
+                  for k in (-1, 1)]
 
     def __init__(self, scene, shade):
         SnapUtilityBase.__init__(self)
@@ -1573,14 +1641,14 @@ class Snap3DUtility(SnapUtilityBase):
         self.cache = MeshCache(scene, convert_types)
 
         # ? seems that dict is enough
-        self.bbox_cache = {}#collections.OrderedDict()
+        self.bbox_cache = {}  # collections.OrderedDict()
         self.sys_matrix_key = [0.0] * 9
 
         bm = prepare_gridbox_mesh(subdiv=2)
         mesh = bpy.data.meshes.new(tmp_name)
         bm.to_mesh(mesh)
         mesh.update(calc_tessface=True)
-        #mesh.calc_tessface()
+        # mesh.calc_tessface()
 
         self.bbox_obj = self.cache._make_obj(mesh, None)
         self.bbox_obj.hide = True
@@ -1599,8 +1667,8 @@ class Snap3DUtility(SnapUtilityBase):
         to_exclude = set(to_exclude)
 
         for target in to_include:
-            if only_solid and ((target.draw_type == 'BOUNDS') \
-                    or (target.draw_type == 'WIRE')):
+            if only_solid and ((target.draw_type == 'BOUNDS')
+                               or (target.draw_type == 'WIRE')):
                 to_exclude.add(target)
 
         SnapUtilityBase.update_targets(self, to_include, to_exclude)
@@ -1647,7 +1715,7 @@ class Snap3DUtility(SnapUtilityBase):
             bbox = [None, None]
 
             variant = ('RAW' if (self.editmode and
-                       (obj.type == 'MESH') and (obj.mode == 'EDIT'))
+                                 (obj.type == 'MESH') and (obj.mode == 'EDIT'))
                        else 'PREVIEW')
             mesh_obj = self.cache.get(obj, variant, reuse=False)
             if (mesh_obj is None) or self.shade_bbox or \
@@ -1684,11 +1752,11 @@ class Snap3DUtility(SnapUtilityBase):
     #   than already picked position?
     # Perhaps these "optimizations" aren't worth the overhead.
 
-    def raycast(self, a, b, clip, view_dir, is_bbox, \
+    def raycast(self, a, b, clip, view_dir, is_bbox,
                 sys_matrix, sys_matrix_inv, is_local, x_ray):
         # If we need to interpolate normals or snap to
         # vertices/edges, we must convert mesh.
-        #force = (self.interpolation != 'NEVER') or \
+        # force = (self.interpolation != 'NEVER') or \
         #    (self.snap_type in {'VERTEX', 'EDGE'})
         # Actually, we have to always convert, since
         # we need to get face at least to find tangential.
@@ -1709,8 +1777,8 @@ class Snap3DUtility(SnapUtilityBase):
                 continue
 
             if is_bbox:
-                obj = self.get_bbox_obj(obj, \
-                    sys_matrix, sys_matrix_inv, is_local)
+                obj = self.get_bbox_obj(obj,
+                                        sys_matrix, sys_matrix_inv, is_local)
             elif obj.draw_type == 'BOUNDS':
                 # Outside of BBox, there is no meaningful visual snapping
                 # for such display mode
@@ -1733,16 +1801,16 @@ class Snap3DUtility(SnapUtilityBase):
             r = (bb_max - bb_min).length * 0.5
             sec = intersect_line_sphere(la, lb, c, r, False)
             if sec[0] is None:
-                continue # no intersection with the bounding sphere
+                continue  # no intersection with the bounding sphere
 
             if not is_bbox:
                 # Ensure we work with raycastable object.
                 variant = ('RAW' if (edit and
-                           (obj.type == 'MESH') and (obj.mode == 'EDIT'))
+                                     (obj.type == 'MESH') and (obj.mode == 'EDIT'))
                            else 'PREVIEW')
                 obj = self.cache.get(obj, variant, reuse=(not force))
                 if (obj is None) or (not obj.data.polygons):
-                    continue # the object has no raycastable geometry
+                    continue  # the object has no raycastable geometry
 
             # If ray must be infinite, ensure that
             # endpoints are outside of bounding volume
@@ -1769,7 +1837,7 @@ class Snap3DUtility(SnapUtilityBase):
                     # However, in Edit mode in Local View we have
                     # no luck -- during the edit mode, mesh is
                     # inaccessible (thus no mesh data for raycasting).
-                    #print(repr(e))
+                    # print(repr(e))
                     face_id = -1
 
             if face_id == -1:
@@ -1783,7 +1851,7 @@ class Snap3DUtility(SnapUtilityBase):
             if (L is None) or (l < L):
                 res = (lp, ln, face_id, obj, p, m, la, lb, orig_obj)
                 L = l
-        #end for
+        # end for
 
         return res
 
@@ -1804,14 +1872,14 @@ class Snap3DUtility(SnapUtilityBase):
         # Since introduction of "use object centers",
         # this check is useless (use_object_centers overrides
         # even INCREMENT snapping)
-        #if self.snap_type not in {'VERTEX', 'EDGE', 'FACE', 'VOLUME'}:
+        # if self.snap_type not in {'VERTEX', 'EDGE', 'FACE', 'VOLUME'}:
         #    return None
 
         # key shouldn't depend on system origin;
         # for bbox calculation origin is always zero
-        #if csu.tou.get() != "Surface":
+        # if csu.tou.get() != "Surface":
         #    sys_matrix = csu.get_matrix().to_3x3()
-        #else:
+        # else:
         #    sys_matrix = csu.get_matrix('LOCAL').to_3x3()
         sys_matrix = csu.get_matrix().to_3x3()
         sys_matrix_key = list(c for v in sys_matrix for c in v)
@@ -1829,15 +1897,15 @@ class Snap3DUtility(SnapUtilityBase):
 
         # In this context, Volume represents BBox :P
         is_bbox = (self.snap_type == 'VOLUME')
-        is_local = (csu.tou.get() in \
-            {'LOCAL', "Scaled"})
+        is_local = (csu.tou.get() in
+                    {'LOCAL', "Scaled"})
 
-        res = self.raycast(a, b, clip, view_dir, \
-            is_bbox, sys_matrix, sys_matrix_inv, is_local, True)
+        res = self.raycast(a, b, clip, view_dir,
+                           is_bbox, sys_matrix, sys_matrix_inv, is_local, True)
 
         if res is None:
-            res = self.raycast(a, b, clip, view_dir, \
-                is_bbox, sys_matrix, sys_matrix_inv, is_local, False)
+            res = self.raycast(a, b, clip, view_dir,
+                               is_bbox, sys_matrix, sys_matrix_inv, is_local, False)
 
         # Occlusion-based edge/vertex snapping will be
         # too inefficient in Python (well, even without
@@ -1904,7 +1972,7 @@ class Snap3DUtility(SnapUtilityBase):
                         if not use_smooth:
                             q = 0.5
                         ln = obj.data.vertices[v1].normal * q + \
-                             obj.data.vertices[v0].normal * (1.0 - q)
+                            obj.data.vertices[v0].normal * (1.0 - q)
                         t1 = dp
                         L = l
 
@@ -1981,10 +2049,10 @@ class Snap3DUtility(SnapUtilityBase):
         # are print()ed beforehand.
 
         co = [obj.data.vertices[vi].co.copy()
-            for vi in face.vertices]
+              for vi in face.vertices]
 
         normals = [obj.data.vertices[vi].normal.copy()
-            for vi in face.vertices]
+                   for vi in face.vertices]
 
         if len(face.vertices) != 3:
             tris = tessellate_polygon([co])
@@ -1996,12 +2064,14 @@ class Snap3DUtility(SnapUtilityBase):
             i0, i1, i2 = 0, 1, 2
 
         n = barycentric_transform(p, co[i0], co[i1], co[i2],
-            normals[i0], normals[i1], normals[i2])
+                                  normals[i0], normals[i1], normals[i2])
         n.normalize()
 
         return n
 
 # ===== TRANSFORM EXTRA OPTIONS ===== #
+
+
 @addon.PropertyGroup
 class TransformExtraOptionsProp:
     use_relative_coords = True | prop("Consider existing transformation as the starting point", "Relative coordinates")
@@ -2015,11 +2085,15 @@ class TransformExtraOptionsProp:
     use_comma_separator = True | prop("Use comma separator when copying/pasting coordinate values (instead of Tab character)", "Use comma separator")
 
 # ===== 3D VECTOR LOCATION ===== #
+
+
 @addon.PropertyGroup
 class LocationProp:
     pos = Vector() | prop("xyz coords", "xyz")
 
 # ===== HISTORY ===== #
+
+
 def update_history_max_size(self, context):
     settings = find_settings()
 
@@ -2048,6 +2122,7 @@ def update_history_max_size(self, context):
         # update history.max_size if it's not inside the limits
         history.max_size = str(int_size)
 
+
 def update_history_id(self, context):
     scene = bpy.context.scene
 
@@ -2075,12 +2150,13 @@ def update_history_id(self, context):
                 history.last_id = history.curr_id
             history.curr_id = history.current_id
 
+
 @addon.PropertyGroup
 class CursorHistoryProp:
     max_size_limit = 500
-    
+
     update_cursor_on_id_change = True
-    
+
     show_trace = False | prop("Show history trace", "Trace")
     max_size = "50" | prop("History max size", "Size", update=update_history_max_size)
     current_id = 50 | prop("Current position in cursor location history", "Index", min=0, max=50)
@@ -2089,7 +2165,7 @@ class CursorHistoryProp:
     curr_id = bpy.props.IntProperty(options={'HIDDEN'})
     last_id = bpy.props.IntProperty(options={'HIDDEN'})
 
-    def get_pos(self, id = None):
+    def get_pos(self, id=None):
         if id is None:
             id = self.current_id
 
@@ -2140,6 +2216,8 @@ class CursorHistoryProp:
 #============================================================================#
 
 # A base class for emulating ID-datablock behavior
+
+
 @addon.PropertyGroup
 class PseudoIDBlockBase:
     # TODO: use normal metaprogramming?
@@ -2285,15 +2363,15 @@ class PseudoIDBlockBase:
             return None
 
     def indexof(self, key):
-        return next((i for i, v in enumerate(self.collection) \
-            if v.name == key), -1)
+        return next((i for i, v in enumerate(self.collection)
+                     if v.name == key), -1)
 
         # Which is more Pythonic?
 
-        #for i, item in enumerate(self.collection):
+        # for i, item in enumerate(self.collection):
         #    if item.name == key:
         #        return i
-        #return -1 # non-existing index
+        # return -1 # non-existing index
 
     def update_enum(self):
         names = []
@@ -2352,10 +2430,13 @@ class PseudoIDBlockBase:
 #============================================================================#
 
 # ===== BOOKMARK ===== #
+
+
 @addon.PropertyGroup
 class BookmarkProp:
     name = "" | prop("bookmark name", "name")
     pos = Vector() | prop("xyz coords", "xyz")
+
 
 @addon.PropertyGroup
 class BookmarkIDBlock(PseudoIDBlockBase):
@@ -2370,6 +2451,7 @@ class BookmarkIDBlock(PseudoIDBlockBase):
     icon = 'CURSOR'
 
     collection, active, enum = PseudoIDBlockBase.create_props(BookmarkProp, "Bookmark")
+
 
 @addon.Operator(idname="scene.cursor_3d_new_bookmark", label="New Bookmark", description="Add a new bookmark")
 class NewCursor3DBookmark:
@@ -2398,8 +2480,10 @@ class NewCursor3DBookmark:
 
         return {'FINISHED'}
 
+
 @addon.Operator(idname="scene.cursor_3d_delete_bookmark", label="Delete Bookmark", description="Delete active bookmark")
 class DeleteCursor3DBookmark:
+
     def execute(self, context):
         settings = find_settings()
         library = settings.libraries.get_item()
@@ -2412,8 +2496,10 @@ class DeleteCursor3DBookmark:
 
         return {'FINISHED'}
 
+
 @addon.Operator(idname="scene.cursor_3d_overwrite_bookmark", label="Overwrite", description="Overwrite active bookmark with the current cursor location")
 class OverwriteCursor3DBookmark:
+
     @classmethod
     def poll(cls, context):
         return context.area.type == 'VIEW_3D'
@@ -2441,8 +2527,10 @@ class OverwriteCursor3DBookmark:
 
         return {'FINISHED'}
 
+
 @addon.Operator(idname="scene.cursor_3d_recall_bookmark", label="Recall", description="Move cursor to the active bookmark")
 class RecallCursor3DBookmark:
+
     @classmethod
     def poll(cls, context):
         return context.area.type == 'VIEW_3D'
@@ -2469,8 +2557,10 @@ class RecallCursor3DBookmark:
 
         return {'FINISHED'}
 
+
 @addon.Operator(idname="scene.cursor_3d_swap_bookmark", label="Swap", description="Swap cursor position with the active bookmark")
 class SwapCursor3DBookmark:
+
     @classmethod
     def poll(cls, context):
         return context.area.type == 'VIEW_3D'
@@ -2495,7 +2585,7 @@ class SwapCursor3DBookmark:
 
             bookmark.pos = library.convert_from_abs(context.space_data,
                                                     cusor_pos, True,
-                use_history=False)
+                                                    use_history=False)
         except Exception as exc:
             self.report({'ERROR_INVALID_CONTEXT'}, exc.args[0])
             return {'CANCELLED'}
@@ -2505,13 +2595,18 @@ class SwapCursor3DBookmark:
         return {'FINISHED'}
 
 # Will this be used?
+
+
 @addon.Operator(idname="scene.cursor_3d_snap_selection_to_bookmark", label="Snap Selection", description="Snap selection to the active bookmark")
 class SnapSelectionToCursor3DBookmark:
     pass
 
 # Will this be used?
+
+
 @addon.Operator(idname="scene.cursor_3d_add_empty_at_bookmark", label="Add Empty", description="Add new Empty at the active bookmark")
 class AddEmptyAtCursor3DBookmark:
+
     @classmethod
     def poll(cls, context):
         return context.area.type == 'VIEW_3D'
@@ -2558,6 +2653,8 @@ class AddEmptyAtCursor3DBookmark:
         return {'FINISHED'}
 
 # ===== BOOKMARK LIBRARY ===== #
+
+
 @addon.PropertyGroup
 class BookmarkLibraryProp:
     name = "" | prop("Name of the bookmark library", "Name")
@@ -2570,7 +2667,7 @@ class BookmarkLibraryProp:
         ('CONTEXT', "Context", "Current transform orientation; origin depends on selection"),
     ])
     offset = False | prop("Store/recall relative to the last cursor position", "Offset")
-    
+
     # Returned None means "operation is not aplicable"
     def get_matrix(self, use_history, v3d, warn=True, **kwargs):
         #particles, csu = gather_particles(**kwargs)
@@ -2599,24 +2696,27 @@ class BookmarkLibraryProp:
             pivot = 'WORLD'
         elif self.system == 'LOCAL':
             if not active_obj:
-                if warn: raise Exception("There is no active object")
+                if warn:
+                    raise Exception("There is no active object")
                 return None
             sys_name = 'LOCAL'
             pivot = 'ACTIVE'
         elif self.system == 'SCALED':
             if not active_obj:
-                if warn: raise Exception("There is no active object")
+                if warn:
+                    raise Exception("There is no active object")
                 return None
             sys_name = 'Scaled'
             pivot = 'ACTIVE'
         elif self.system == 'NORMAL':
             if not active_obj or active_obj.mode != 'EDIT':
-                if warn: raise Exception("Active object must be in Edit mode")
+                if warn:
+                    raise Exception("Active object must be in Edit mode")
                 return None
             sys_name = 'NORMAL'
-            pivot = 'MEDIAN' # ?
+            pivot = 'MEDIAN'  # ?
         elif self.system == 'CONTEXT':
-            sys_name = None # use current orientation
+            sys_name = None  # use current orientation
             pivot = None
 
             if active_obj and (active_obj.mode != 'OBJECT'):
@@ -2670,7 +2770,7 @@ class BookmarkLibraryProp:
             bgl.glLineWidth(2)
             bgl.glColor4f(0.0, 1.0, 0.0, 1.0)
             bgl.glBegin(bgl.GL_LINE_STRIP)
-            radius = widget_unit * 0.3 #6
+            radius = widget_unit * 0.3  # 6
             n = 8
             da = 2 * math.pi / n
             x, y = projected
@@ -2688,6 +2788,7 @@ class BookmarkLibraryProp:
 
             # Restore previous OpenGL settings
             gl_enable(bgl.GL_SMOOTH, smooth_prev)
+
 
 @addon.PropertyGroup
 class BookmarkLibraryIDBlock(PseudoIDBlockBase):
@@ -2707,6 +2808,7 @@ class BookmarkLibraryIDBlock(PseudoIDBlockBase):
         library = self.get_item()
         library.bookmarks.update_enum()
 
+
 @addon.Operator(idname="scene.cursor_3d_new_bookmark_library", label="New Library", description="Add a new bookmark library")
 class NewCursor3DBookmarkLibrary(bpy.types.Operator):
     name = "Lib" | prop("Name of the new library", "Name")
@@ -2718,8 +2820,10 @@ class NewCursor3DBookmarkLibrary(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 @addon.Operator(idname="scene.cursor_3d_delete_bookmark_library", label="Delete Library", description="Delete active bookmark library")
 class DeleteCursor3DBookmarkLibrary:
+
     def execute(self, context):
         settings = find_settings()
 
@@ -2743,7 +2847,7 @@ class Cursor3DToolsSettings:
     draw_T1 = True | prop("Display 1st surface tangential", "Surface 1st tangential")
     draw_T2 = True | prop("Display 2nd surface tangential", "Surface 2nd tangential")
     stick_to_obj = True | prop("Move cursor along with object it was snapped to", "Stick to objects")
-    
+
     # HISTORY-RELATED
     history = CursorHistoryProp | prop()
 
@@ -2751,9 +2855,10 @@ class Cursor3DToolsSettings:
     libraries = BookmarkLibraryIDBlock | prop()
     show_bookmarks = True | prop("Show active bookmark in 3D view", "Show bookmarks")
     free_coord_precision = 4 | prop("Number of digits afer comma for displayed coordinate values", "Coord precision", min=0, max=10)
-    
+
     # HERE THERE BE DRAGONS
     auto_register_keymaps = True | prop("Auto Register Keymaps", "Auto Register Keymaps")
+
 
 @addon.PropertyGroup
 class Cursor3DToolsSceneSettings:
@@ -2761,10 +2866,13 @@ class Cursor3DToolsSceneSettings:
     stick_obj_pos = Vector() | prop()
 
 # ===== CURSOR RUNTIME PROPERTIES ===== #
+
+
 @addon.PropertyGroup
 class CursorRuntimeSettings:
     current_monitor_id = 0 | prop()
     surface_pos = Vector() | prop()
+
 
 class CursorDynamicSettings:
     local_matrix = Matrix()

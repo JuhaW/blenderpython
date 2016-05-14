@@ -4,6 +4,7 @@ from ... utils.layout import writeText
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
 
+
 class TextObjectOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_TextObjectOutputNode"
     bl_label = "Text Object Output"
@@ -44,7 +45,7 @@ class TextObjectOutputNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if self.errorMessage != "":
-            writeText(layout, self.errorMessage, width = 25, icon = "ERROR")
+            writeText(layout, self.errorMessage, width=25, icon="ERROR")
 
     def drawAdvanced(self, layout):
         writeText(layout, "Possible values for 'Align' are 'LEFT', 'CENTER', 'RIGHT', 'JUSTIFY' and 'FLUSH'")
@@ -54,25 +55,41 @@ class TextObjectOutputNode(bpy.types.Node, AnimationNode):
         yield "    textObject = object.data"
 
         s = self.inputs
-        if s["Text"].isUsed:                yield "    textObject.body = text"
-        if s["Size"].isUsed:                yield "    textObject.size = size"
-        if s["Extrude"].isUsed:             yield "    textObject.extrude = extrude"
-        if s["Shear"].isUsed:               yield "    textObject.shear = shear"
-        if s["Bevel Depth"].isUsed:         yield "    textObject.bevel_depth = bevelDepth"
-        if s["Bevel Resolution"].isUsed:    yield "    textObject.bevel_resolution = bevelResolution"
+        if s["Text"].isUsed:
+            yield "    textObject.body = text"
+        if s["Size"].isUsed:
+            yield "    textObject.size = size"
+        if s["Extrude"].isUsed:
+            yield "    textObject.extrude = extrude"
+        if s["Shear"].isUsed:
+            yield "    textObject.shear = shear"
+        if s["Bevel Depth"].isUsed:
+            yield "    textObject.bevel_depth = bevelDepth"
+        if s["Bevel Resolution"].isUsed:
+            yield "    textObject.bevel_resolution = bevelResolution"
 
-        if s["Letter Spacing"].isUsed:      yield "    textObject.space_character = letterSpacing"
-        if s["Word Spacing"].isUsed:        yield "    textObject.space_word = wordSpacing"
-        if s["Line Spacing"].isUsed:        yield "    textObject.space_line = lineSpacing"
+        if s["Letter Spacing"].isUsed:
+            yield "    textObject.space_character = letterSpacing"
+        if s["Word Spacing"].isUsed:
+            yield "    textObject.space_word = wordSpacing"
+        if s["Line Spacing"].isUsed:
+            yield "    textObject.space_line = lineSpacing"
 
-        if s["X Offset"].isUsed:            yield "    textObject.offset_x = xOffset"
-        if s["Y Offset"].isUsed:            yield "    textObject.offset_y = yOffset"
-        if s["Align"].isUsed:               yield "    self.setAlignment(textObject, align)"
+        if s["X Offset"].isUsed:
+            yield "    textObject.offset_x = xOffset"
+        if s["Y Offset"].isUsed:
+            yield "    textObject.offset_y = yOffset"
+        if s["Align"].isUsed:
+            yield "    self.setAlignment(textObject, align)"
 
-        if s["Font"].isUsed:                yield "    textObject.font = font"
-        if s["Bold Font"].isUsed:           yield "    textObject.font_bold = fontBold"
-        if s["Italic Font"].isUsed:         yield "    textObject.font_italic = fontItalic"
-        if s["Bold Italic Font"].isUsed:    yield "    textObject.font_bold_italic = fontBoldItalic"
+        if s["Font"].isUsed:
+            yield "    textObject.font = font"
+        if s["Bold Font"].isUsed:
+            yield "    textObject.font_bold = fontBold"
+        if s["Italic Font"].isUsed:
+            yield "    textObject.font_italic = fontItalic"
+        if s["Bold Italic Font"].isUsed:
+            yield "    textObject.font_bold_italic = fontBoldItalic"
 
     def setAlignment(self, textObject, align):
         if align in ("LEFT", "CENTER", "RIGHT", "JUSTIFY", "FLUSH"):

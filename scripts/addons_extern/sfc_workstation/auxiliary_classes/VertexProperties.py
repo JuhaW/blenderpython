@@ -21,7 +21,9 @@
 import bmesh
 import bpy
 
+
 class VertexProperties():
+
     def __init__(self):
         self.mesh_object = None
 
@@ -38,10 +40,10 @@ class VertexProperties():
             )
         if invalid_properties:
             raise Exception((
-                    "Invalid vertex property set {0}.  Parameter " +
-                    "\"properties\" expects a subset of " +
-                    "('BOUNDARY', 'MANIFOLD', 'HIDDEN', 'SELECTED')."
-                ).format(invalid_properties)
+                "Invalid vertex property set {0}.  Parameter " +
+                "\"properties\" expects a subset of " +
+                "('BOUNDARY', 'MANIFOLD', 'HIDDEN', 'SELECTED')."
+            ).format(invalid_properties)
             )
 
         mesh_object = self.mesh_object

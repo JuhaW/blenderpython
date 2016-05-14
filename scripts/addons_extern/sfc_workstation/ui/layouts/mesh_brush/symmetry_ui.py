@@ -20,47 +20,48 @@
 
 import bpy
 
+
 def draw_symmetry_ui(layout):
     addon = bpy.context.user_preferences.addons[__package__.split(".")[0]]
     props = addon.preferences.mesh_brush
 
     col = layout.column()
-    row = col.row(align = True)
+    row = col.row(align=True)
 
     if not props.symmetry_ui_is_visible:
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'DISCLOSURE_TRI_RIGHT',
-            emboss = False
+            "wm.context_toggle", text="", icon='DISCLOSURE_TRI_RIGHT',
+            emboss=False
         )
         op.data_path = "{0}.symmetry_ui_is_visible".format(props.data_path)
-        row.label(text = "Symmetry") 
+        row.label(text="Symmetry")
     else:
         row.operator(
-            "wm.context_toggle", text = "", icon = 'DISCLOSURE_TRI_DOWN',
-            emboss = False
+            "wm.context_toggle", text="", icon='DISCLOSURE_TRI_DOWN',
+            emboss=False
         ).data_path = "{0}.symmetry_ui_is_visible".format(props.data_path)
-        row.label(text = "Symmetry")
+        row.label(text="Symmetry")
 
-        subcol = col.column(align = True)
-        row = subcol.row(align = True)
+        subcol = col.column(align=True)
+        row = subcol.row(align=True)
 
-        row.prop(props, "symmetry_type", expand = True)
+        row.prop(props, "symmetry_type", expand=True)
 
-        row = subcol.row(align = True)
+        row = subcol.row(align=True)
 
         row.prop(
-            props, "x_axis_symmetry_is_enabled", text = "X", toggle = True
+            props, "x_axis_symmetry_is_enabled", text="X", toggle=True
         )
         row.prop(
-            props, "y_axis_symmetry_is_enabled", text = "Y", toggle = True
+            props, "y_axis_symmetry_is_enabled", text="Y", toggle=True
         )
         row.prop(
-            props, "z_axis_symmetry_is_enabled", text = "Z", toggle = True
+            props, "z_axis_symmetry_is_enabled", text="Z", toggle=True
         )
 
         if props.symmetry_type == 'RADIAL':
-            row = subcol.row(align = True)
+            row = subcol.row(align=True)
 
-            row.prop(props, "radial_count", text = "Count")
+            row.prop(props, "radial_count", text="Count")
 
         col.separator()

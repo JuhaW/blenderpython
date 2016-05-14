@@ -2,6 +2,7 @@ import bpy
 import bmesh
 from .. base_types.socket import AnimationNodeSocket
 
+
 class BMeshSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_BMeshSocket"
     bl_label = "BMesh Socket"

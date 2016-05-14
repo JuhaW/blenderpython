@@ -22,7 +22,7 @@ import bmesh
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, repeat_last, dataCorrect,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata
 
 
@@ -33,7 +33,7 @@ def fill_holes(vertices, edges, s):
 
     if len(edges[0]) != 2:
         return False
-    
+
     bm = bmesh_from_pydata(vertices, edges, [])
     res = bmesh.ops.holes_fill(bm, edges=bm.edges[:], sides=s)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
@@ -99,7 +99,6 @@ class SvFillHolesNode(bpy.types.Node, SverchCustomTreeNode):
 
             if 'polygons' in self.outputs and self.outputs['polygons'].is_linked:
                 SvSetSocketAnyType(self, 'polygons', polys_out)
-
 
 
 def register():

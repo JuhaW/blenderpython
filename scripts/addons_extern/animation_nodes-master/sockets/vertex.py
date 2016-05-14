@@ -3,6 +3,7 @@ from mathutils import Vector
 from .. data_structures.mesh import Vertex
 from .. base_types.socket import AnimationNodeSocket
 
+
 class VertexSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_VertexSocket"
     bl_label = "Vertex Socket"
@@ -13,9 +14,9 @@ class VertexSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     comparable = False
 
     def getValue(self):
-        return Vertex(location = Vector((0, 0, 0)),
-                      normal = Vector((0, 0, 1)),
-                      groupWeights = [])
+        return Vertex(location=Vector((0, 0, 0)),
+                      normal=Vector((0, 0, 1)),
+                      groupWeights=[])
 
     def getCopyExpression(self):
         return "value.copy()"

@@ -50,7 +50,6 @@ class SverchokUpdateObjectIn(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
 class Sv3DViewObjInUpdater(bpy.types.Operator, object):
 
     """Operator which runs its self from a timer"""

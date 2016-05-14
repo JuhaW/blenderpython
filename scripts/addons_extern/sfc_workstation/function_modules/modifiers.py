@@ -20,13 +20,14 @@
 
 import bpy
 
-def apply_shrinkwrap(offset, target, wrap_method, affected_indices = list()):
+
+def apply_shrinkwrap(offset, target, wrap_method, affected_indices=list()):
     # Check the wrap_method parameter.
     if wrap_method not in {'PROJECT', 'NEAREST_SURFACEPOINT', 'NEAREST_VERTEX'}:
         raise Exception((
-                "Invalid target argument '{0}' not found in " +
-                "('PROJECT', 'NEAREST_SURFACEPOINT', 'NEAREST_VERTEX')"
-            ).format(wrap_method)
+            "Invalid target argument '{0}' not found in " +
+            "('PROJECT', 'NEAREST_SURFACEPOINT', 'NEAREST_VERTEX')"
+        ).format(wrap_method)
         )
 
     context = bpy.context
@@ -36,14 +37,14 @@ def apply_shrinkwrap(offset, target, wrap_method, affected_indices = list()):
 
     # Enter Object mode, if necessary.
     if initially_in_edit_mode:
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
     # Group the affected vertex indices.
     vertex_group = active_object.vertex_groups.new("Affected Indices")
     vertex_group.add(affected_indices, 1, 'ADD')
 
     # Add a shrinkwrap modifier to the active object.
-    shrinkwrap_modifier = modifiers.new(name = "", type = 'SHRINKWRAP')
+    shrinkwrap_modifier = modifiers.new(name="", type='SHRINKWRAP')
     shrinkwrap_modifier.offset = offset
     shrinkwrap_modifier.target = bpy.data.objects[target]
     shrinkwrap_modifier.use_keep_above_surface = True
@@ -54,20 +55,21 @@ def apply_shrinkwrap(offset, target, wrap_method, affected_indices = list()):
     # Move the shrinkwrap modifier to the top of the stack.
     while modifiers[0] != shrinkwrap_modifier:
         bpy.ops.object.modifier_move_up(
-            modifier = shrinkwrap_modifier.name
+            modifier=shrinkwrap_modifier.name
         )
 
     # Apply the shrinkwrap modifier.
-    bpy.ops.object.modifier_apply(modifier = shrinkwrap_modifier.name)
+    bpy.ops.object.modifier_apply(modifier=shrinkwrap_modifier.name)
 
     # Delete the vertex group.
     active_object.vertex_groups.remove(vertex_group)
 
     # Return to Edit mode, if necessary.
     if initially_in_edit_mode:
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
 
-def apply_smooth(iterations, affected_indices = list()):
+
+def apply_smooth(iterations, affected_indices=list()):
     context = bpy.context
     active_object = context.active_object
     initially_in_edit_mode = context.mode == 'EDIT_MESH'
@@ -75,26 +77,26 @@ def apply_smooth(iterations, affected_indices = list()):
 
     # Group the affected vertex indices.
     if active_object.mode == 'EDIT':
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
     vertex_group = active_object.vertex_groups.new("Affected Indices")
     vertex_group.add(affected_indices, 1, 'ADD')
 
     # Add a smooth modifier to the active object.
-    smooth_modifier = modifiers.new(name = "", type = 'SMOOTH')
+    smooth_modifier = modifiers.new(name="", type='SMOOTH')
     smooth_modifier.factor = 1.0
     smooth_modifier.iterations = iterations
     smooth_modifier.vertex_group = vertex_group.name
 
     # Move the smooth modifier to the top of the stack.
     while modifiers[0] != smooth_modifier:
-        bpy.ops.object.modifier_move_up(modifier = smooth_modifier.name)
+        bpy.ops.object.modifier_move_up(modifier=smooth_modifier.name)
 
     # Apply the smooth modifier.
-    bpy.ops.object.modifier_apply(modifier = smooth_modifier.name) 
+    bpy.ops.object.modifier_apply(modifier=smooth_modifier.name)
 
     # Delete the vertex group.
-    active_object.vertex_groups.remove(vertex_group) 
+    active_object.vertex_groups.remove(vertex_group)
 
     # Return to Edit mode, if necessary.
     if initially_in_edit_mode:
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')

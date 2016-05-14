@@ -1,6 +1,7 @@
 import bpy
 from bpy.props import *
 
+
 class SwitchTreeOperator(bpy.types.Operator):
     bl_idname = "an.switch_tree"
     bl_label = "Switch Tree"

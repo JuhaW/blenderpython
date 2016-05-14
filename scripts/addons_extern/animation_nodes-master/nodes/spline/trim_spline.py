@@ -2,6 +2,7 @@ import bpy
 from ... base_types.node import AnimationNode
 from . spline_evaluation_base import SplineEvaluationBase
 
+
 class TrimSplineNode(bpy.types.Node, AnimationNode, SplineEvaluationBase):
     bl_idname = "an_TrimSplineNode"
     bl_label = "Trim Spline"
@@ -13,7 +14,7 @@ class TrimSplineNode(bpy.types.Node, AnimationNode, SplineEvaluationBase):
         self.outputs.new("an_SplineSocket", "Spline", "trimmedSpline")
 
     def draw(self, layout):
-        layout.prop(self, "parameterType", text = "")
+        layout.prop(self, "parameterType", text="")
 
     def drawAdvanced(self, layout):
         col = layout.column()

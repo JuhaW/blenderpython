@@ -24,13 +24,14 @@ from bpy.props import FloatProperty, IntProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, match_long_repeat
 
+
 def randomize(vertices, random_x, random_y, random_z):
     result = []
-    for x,y,z in vertices:
+    for x, y, z in vertices:
         rx = random.uniform(-random_x, random_x)
         ry = random.uniform(-random_y, random_y)
         rz = random.uniform(-random_z, random_z)
-        r = (x+rx, y+ry, z+rz)
+        r = (x + rx, y + ry, z + rz)
         result.append(r)
     return result
 
@@ -42,17 +43,17 @@ class SvRandomizeVerticesNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     random_x_ = FloatProperty(name='X amplitude', description='Amplitude of randomization along X axis',
-                           default=0.0, min=0.0,
-                           update=updateNode)
+                              default=0.0, min=0.0,
+                              update=updateNode)
     random_y_ = FloatProperty(name='Y amplitude', description='Amplitude of randomization along Y axis',
-                           default=0.0, min=0.0,
-                           update=updateNode)
+                              default=0.0, min=0.0,
+                              update=updateNode)
     random_z_ = FloatProperty(name='Z amplitude', description='Amplitude of randomization along Z axis',
-                           default=0.0, min=0.0,
-                           update=updateNode)
+                              default=0.0, min=0.0,
+                              update=updateNode)
     random_seed_ = IntProperty(name='Seed', description='Random seed',
-                           default=0,
-                           update=updateNode)
+                               default=0,
+                               update=updateNode)
 
     def sv_init(self, context):
         self.inputs.new('VerticesSocket', "Vertices")
@@ -82,6 +83,7 @@ class SvRandomizeVerticesNode(bpy.types.Node, SverchCustomTreeNode):
             result = [randomize(vs, rx, ry, rz) for vs, rx, ry, rz in zip(*parameters)]
 
             self.outputs['Vertices'].sv_set(result)
+
 
 def register():
     bpy.utils.register_class(SvRandomizeVerticesNode)

@@ -1,13 +1,15 @@
-import bpy, bmesh
+import bpy
+import bmesh
 from bpy.props import *
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
+
 
 class BMeshRecalculateFaceNormalsNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_BMeshRecalculateFaceNormalsNode"
     bl_label = "BMesh Recalculate Normals"
 
-    invert = BoolProperty(name = "Invert Normals", update = executionCodeChanged)
+    invert = BoolProperty(name="Invert Normals", update=executionCodeChanged)
 
     def create(self):
         self.inputs.new("an_BMeshSocket", "BMesh", "bm").dataIsModified = True

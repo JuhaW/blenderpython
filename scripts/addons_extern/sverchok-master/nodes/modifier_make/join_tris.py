@@ -68,7 +68,6 @@ class SvJoinTrianglesNode(bpy.types.Node, SverchCustomTreeNode):
         col.prop(self, 'limit', text='limit')
         pass
 
-
     def process(self):
         if not self.outputs['Polygons'].is_linked:
             return
@@ -93,7 +92,6 @@ class SvJoinTrianglesNode(bpy.types.Node, SverchCustomTreeNode):
             SvSetSocketAnyType(self, 'Vertices', verts_out)
 
         SvSetSocketAnyType(self, 'Polygons', polys_out)
-
 
 
 def register():

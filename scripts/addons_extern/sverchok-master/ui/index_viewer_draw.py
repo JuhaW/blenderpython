@@ -42,8 +42,8 @@ def generate_points(width, height):
 
     width += 2
     height += 4
-    width = ((width/2) - amp) + 2
-    height -= (2*amp)
+    width = ((width / 2) - amp) + 2
+    height -= (2 * amp)
 
     pos_list, final_list = [], []
 
@@ -56,7 +56,7 @@ def generate_points(width, height):
         pos_list.append([x, -y])
 
     w_list, h_list = [1, -1, -1, 1], [-1, -1, 1, 1]
-    slice_list = [[i, i+4] for i in range(0, n_points, 3)]
+    slice_list = [[i, i + 4] for i in range(0, n_points, 3)]
 
     for idx, (start, end) in enumerate(slice_list):
         point_array = pos_list[start:end]
@@ -81,7 +81,7 @@ def get_points(index):
     return point_dict[width]
 
 
-## end of util functions
+# end of util functions
 
 def tag_redraw_all_view3d():
     context = bpy.context
@@ -101,7 +101,7 @@ def callback_enable(n_id, draw_verts, draw_edges, draw_faces, draw_matrix, draw_
         return
     handle_pixel = SpaceView3D.draw_handler_add(
         draw_callback_px, (
-           n_id, draw_verts, draw_edges, draw_faces, draw_matrix, draw_bg, settings, text),
+            n_id, draw_verts, draw_edges, draw_faces, draw_matrix, draw_bg, settings, text),
         'WINDOW', 'POST_PIXEL')
     callback_dict[n_id] = handle_pixel
     tag_redraw_all_view3d()
@@ -136,9 +136,9 @@ def draw_callback_px(n_id, draw_verts, draw_edges, draw_faces, draw_matrix, draw
     data_text = text
 
     if (data_vector, data_matrix) == (0, 0):
-    #    callback_disable(n_id)
-    #   not sure that it is safe to disable the callback in callback
-    #   just return instead.
+        #    callback_disable(n_id)
+        #   not sure that it is safe to disable the callback in callback
+        #   just return instead.
         return
 
     region = context.region
@@ -184,7 +184,7 @@ def draw_callback_px(n_id, draw_verts, draw_edges, draw_faces, draw_matrix, draw
             bgl.glColor4f(*rgb2)
             bgl.glBegin(bgl.GL_POLYGON)
             for pointx, pointy in polyline:
-                bgl.glVertex2f(pointx+x, pointy+y)
+                bgl.glVertex2f(pointx + x, pointy + y)
             bgl.glEnd()
 
         ''' draw text '''
@@ -222,7 +222,7 @@ def draw_callback_px(n_id, draw_verts, draw_edges, draw_faces, draw_matrix, draw
 
         if data_edges and display_edge_index:
             for edge_index, (idx1, idx2) in enumerate(data_edges[obj_index]):
-                
+
                 v1 = Vector(final_verts[idx1])
                 v2 = Vector(final_verts[idx2])
                 loc = v1 + ((v2 - v1) / 2)

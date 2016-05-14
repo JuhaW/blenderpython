@@ -113,7 +113,7 @@ class MUV_TransUVPaste(bpy.types.Operator):
         # parse selection history
         for i in range(len(all_sel_faces)):
             if i > 0 and i % 2 != 0:
-                sel_faces = [all_sel_faces[i-1], all_sel_faces[i]]
+                sel_faces = [all_sel_faces[i - 1], all_sel_faces[i]]
                 active_face = all_sel_faces[i]
 
                 # parse all faces according to selection history
@@ -178,7 +178,7 @@ def main_parse(self, active_obj, bm, uv_layer, sel_faces, active_face, active_fa
         af_vec = shared_edge.verts[0].co + (edge_vec_1 * (edge_vec_len * 0.5))
         af_vec = (af_vec - af_center).normalized()
 
-        #print(af_vec.cross(edge_vec_1).dot(dot_n))
+        # print(af_vec.cross(edge_vec_1).dot(dot_n))
         if af_vec.cross(edge_vec_1).dot(dot_n) > 0:
             vert1 = shared_edge.verts[0]
             vert2 = shared_edge.verts[1]

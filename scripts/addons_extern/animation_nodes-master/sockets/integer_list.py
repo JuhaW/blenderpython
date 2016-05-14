@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class IntegerListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_IntegerListSocket"
     bl_label = "Integer List Socket"

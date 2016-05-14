@@ -15,4 +15,3 @@ offset = 0
 for field in structureDescription.fields:
     print("%s: %s" % (offset, field.name))
     offset += field.size
-

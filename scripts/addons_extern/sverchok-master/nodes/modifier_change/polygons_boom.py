@@ -42,7 +42,7 @@ class PolygonBoomNode(bpy.types.Node, SverchCustomTreeNode):
         if 'vertices' in self.outputs and self.outputs['vertices'].is_linked or \
                 'edg_pol' in self.outputs and self.outputs['edg_pol'].is_linked:
             if 'vertices' in self.inputs and self.inputs['vertices'].is_linked and \
-                'edg_pol' in self.inputs and self.inputs['edg_pol'].is_linked:
+                    'edg_pol' in self.inputs and self.inputs['edg_pol'].is_linked:
                 vertices = SvGetSocketAnyType(self, self.inputs['vertices'])
                 edgs_pols = SvGetSocketAnyType(self, self.inputs['edg_pol'])
             else:

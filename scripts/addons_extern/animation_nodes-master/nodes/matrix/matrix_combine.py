@@ -4,6 +4,7 @@ import functools
 from mathutils import Matrix
 from ... base_types.node import AnimationNode
 
+
 class MatrixCombineNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_MatrixCombineNode"
     bl_label = "Combine Matrices"

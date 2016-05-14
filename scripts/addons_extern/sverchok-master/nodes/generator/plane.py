@@ -38,15 +38,15 @@ def make_plane(int_x, int_y, step_x, step_y, separate):
     fullList(step_x, int_x[0])
     fullList(step_y, int_y[0])
 
-    for i in range(int_x[0]-1):
+    for i in range(int_x[0] - 1):
         v = Vector(vertices[i]) + Vector((step_x[i], 0.0, 0.0))
         vertices.append(v[:])
 
-    a = [int_y[0] if separate else int_y[0]-1]
+    a = [int_y[0] if separate else int_y[0] - 1]
     for i in range(a[0]):
         out = []
         for j in range(int_x[0]):
-            out.append(vertices[j+int_x[0]*i])
+            out.append(vertices[j + int_x[0] * i])
         for j in out:
             v = Vector(j) + Vector((0.0, step_y[i], 0.0))
             vertices.append(v[:])
@@ -56,25 +56,25 @@ def make_plane(int_x, int_y, step_x, step_y, separate):
     edges = []
     edges_S = []
     for i in range(int_y[0]):
-        for j in range(int_x[0]-1):
-            edges.append((int_x[0]*i+j, int_x[0]*i+j+1))
+        for j in range(int_x[0] - 1):
+            edges.append((int_x[0] * i + j, int_x[0] * i + j + 1))
 
     if separate:
         out = []
-        for i in range(int_x[0]-1):
+        for i in range(int_x[0] - 1):
             out.append(edges[i])
         edges_S.append(out)
-        for i in range(int_y[0]-1):
+        for i in range(int_y[0] - 1):
             edges_S.append(edges_S[0])
     else:
         for i in range(int_x[0]):
-            for j in range(int_y[0]-1):
-                edges.append((int_x[0]*j+i, int_x[0]*j+i+int_x[0]))
+            for j in range(int_y[0] - 1):
+                edges.append((int_x[0] * j + i, int_x[0] * j + i + int_x[0]))
 
     polygons = []
-    for i in range(int_x[0]-1):
-        for j in range(int_y[0]-1):
-            polygons.append((int_x[0]*j+i, int_x[0]*j+i+1, int_x[0]*j+i+int_x[0]+1, int_x[0]*j+i+int_x[0]))
+    for i in range(int_x[0] - 1):
+        for j in range(int_y[0] - 1):
+            polygons.append((int_x[0] * j + i, int_x[0] * j + i + 1, int_x[0] * j + i + int_x[0] + 1, int_x[0] * j + i + int_x[0]))
 
     if separate:
         return vertices_S, edges_S, []

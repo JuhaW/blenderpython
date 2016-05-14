@@ -3,6 +3,7 @@
 from bpy.types import Operator
 from mmd_tools import auto_scene_setup
 
+
 class SetFrameRange(Operator):
     bl_idname = 'mmd_tools.set_frame_range'
     bl_label = 'Set range'

@@ -27,6 +27,7 @@ bl_info = {
     "category": "Add Mesh"
 }
 
+
 def desocultar(quien):
     if quien == "todo":
         for ob in bpy.data.objects:
@@ -34,17 +35,22 @@ def desocultar(quien):
     else:
         bpy.data.objects[quien].hide = False
 
+
 def deseleccionar_todo():
     bpy.ops.object.select_all(action='DESELECT')
-        
+
+
 def seleccionar_todo():
     bpy.ops.object.select_all(action='SELECT')
+
 
 def salir_de_editmode():
     if bpy.context.mode == "EDIT" or bpy.context.mode == "EDIT_CURVE" or bpy.context.mode == "EDIT_MESH":
         bpy.ops.object.mode_set(mode='OBJECT')
 
 # Clear scene:
+
+
 def reset_scene():
     desocultar("todo")
     # el play back al principio
@@ -62,34 +68,38 @@ def reset_scene():
     # vuelvo al contexto donde estaba
     seleccionar_todo()
     bpy.ops.object.delete(use_global=False)
-    
+
+
 def entrar_en_editmode():
     if bpy.context.mode == "OBJECT":
-        bpy.ops.object.mode_set(mode='EDIT')    
+        bpy.ops.object.mode_set(mode='EDIT')
+
 
 def select_all_in_edit_mode(ob):
     if ob.mode != 'EDIT':
         entrar_en_editmode()
     bpy.ops.mesh.select_all(action="DESELECT")
-    bpy.context.tool_settings.mesh_select_mode = (True , False , False)
+    bpy.context.tool_settings.mesh_select_mode = (True, False, False)
     salir_de_editmode()
     for v in ob.data.vertices:
         if not v.select:
             v.select = True
     entrar_en_editmode()
-    #bpy.ops.mesh.select_all(action="SELECT")        
+    # bpy.ops.mesh.select_all(action="SELECT")
+
 
 def deselect_all_in_edit_mode(ob):
     if ob.mode != 'EDIT':
         entrar_en_editmode()
     bpy.ops.mesh.select_all(action="DESELECT")
-    bpy.context.tool_settings.mesh_select_mode = (True , False , False)
+    bpy.context.tool_settings.mesh_select_mode = (True, False, False)
     salir_de_editmode()
     for v in ob.data.vertices:
         if not v.select:
             v.select = False
     entrar_en_editmode()
-    #bpy.ops.mesh.select_all(action="DESELECT")
+    # bpy.ops.mesh.select_all(action="DESELECT")
+
 
 def which_vertex_are_selected(ob):
     for v in ob.data.vertices:
@@ -97,26 +107,32 @@ def which_vertex_are_selected(ob):
             print(str(v.index))
             print("el vertice " + str(v.index) + " esta seleccionado")
 
+
 def seleccionar_por_nombre(nombre):
     scn = bpy.context.scene
     bpy.data.objects[nombre].select = True
     scn.objects.active = bpy.data.objects[nombre]
 
+
 def deseleccionar_por_nombre(nombre):
     scn = bpy.context.scene
     bpy.data.objects[nombre].select = False
-    
+
+
 def crear_vertices(ob):
     ob.data.vertices.add(1)
     ob.data.update
 
+
 def borrar_elementos_seleccionados(tipo):
     if tipo == "vertices":
-        bpy.ops.mesh.delete(type='VERT')        
+        bpy.ops.mesh.delete(type='VERT')
+
 
 def tab_editmode():
     bpy.ops.object.editmode_toggle()
-        
+
+
 def obtener_coords_vertex_seleccionados():
     coordenadas_de_vertices = []
     for ob in bpy.context.selected_objects:
@@ -124,23 +140,28 @@ def obtener_coords_vertex_seleccionados():
         if ob.type == 'MESH':
             for v in ob.data.vertices:
                 if v.select:
-                    coordenadas_de_vertices.append([v.co[0],v.co[1],v.co[2]])
-            #print(coordenadas_de_vertices[0])
+                    coordenadas_de_vertices.append([v.co[0], v.co[1], v.co[2]])
+            # print(coordenadas_de_vertices[0])
             return coordenadas_de_vertices[0]
 
-def crear_locator(pos):
-    bpy.ops.object.empty_add(type='PLAIN_AXES', radius=1, view_align=False, location=(pos[0],pos[1],pos[2]), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
 
-def extruir_vertices(longitud, cuantos_segmentos):    
-    bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"mirror":False}, TRANSFORM_OT_translate={"value":(longitud/cuantos_segmentos, 0, 0), "constraint_axis":(True, False, False), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
+def crear_locator(pos):
+    bpy.ops.object.empty_add(type='PLAIN_AXES', radius=1, view_align=False, location=(pos[0], pos[1], pos[2]), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
+
+
+def extruir_vertices(longitud, cuantos_segmentos):
+    bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"mirror": False}, TRANSFORM_OT_translate={"value": (longitud / cuantos_segmentos, 0, 0), "constraint_axis": (True, False, False), "constraint_orientation": 'GLOBAL', "mirror": False, "proportional": 'DISABLED', "proportional_edit_falloff": 'SMOOTH', "proportional_size": 1, "snap": False, "snap_target": 'CLOSEST', "snap_point": (0, 0, 0), "snap_align": False, "snap_normal": (0, 0, 0), "gpencil_strokes": False, "texture_space": False, "remove_on_cancel": False, "release_confirm": False})
+
 
 def select_all_vertex_in_curve_bezier(bc):
     for i in range(len(bc.data.splines[0].points)):
         bc.data.splines[0].points[i].select = True
 
+
 def deselect_all_vertex_in_curve_bezier(bc):
     for i in range(len(bc.data.splines[0].points)):
         bc.data.splines[0].points[i].select = False
+
 
 def ocultar_relationships():
     #bpy.context.space_data.show_relationship_lines = False
@@ -149,29 +170,32 @@ def ocultar_relationships():
             area.spaces[0].show_relationship_lines = False
 
 # addomizando:
+
+
 class ClothRope(bpy.types.Operator):
     bl_idname = "clot.rope"
     bl_label = "Rope Cloth"
     # Defaults:
-    #longitud=10
-    #cuantos_segmentos=70
-    #calidad_de_colision=20
-    #substeps=50
-    # para que desde el primer punto hasta el ultimo, entre 
+    # longitud=10
+    # cuantos_segmentos=70
+    # calidad_de_colision=20
+    # substeps=50
+    # para que desde el primer punto hasta el ultimo, entre
     # medias tenga x segmentos debo sumarle 1 a la cantidad:
     #cuantos_segmentos += 1
     ropelenght = IntProperty(name="longitud", default=5)
-    ropesegments = IntProperty(name="rsegments", default=5) 
-    qcr = IntProperty(name="qualcolr", min = 1, max = 20, default=20)
-    substeps = IntProperty(name="rsubsteps", min = 4, max = 80, default=50)
+    ropesegments = IntProperty(name="rsegments", default=5)
+    qcr = IntProperty(name="qualcolr", min=1, max=20, default=20)
+    substeps = IntProperty(name="rsubsteps", min=4, max=80, default=50)
     resrope = IntProperty(name="resr", default=5)
-    radiusrope =  FloatProperty(name="radius", min = 0.04, max = 1, default=0.04)
-    hide_emptys = BoolProperty(name="hemptys", default=False)    
-    def execute(self,context):        
-        # chicha ###############################################################      
+    radiusrope = FloatProperty(name="radius", min=0.04, max=1, default=0.04)
+    hide_emptys = BoolProperty(name="hemptys", default=False)
+
+    def execute(self, context):
+        # chicha ###############################################################
         reset_scene()
         longitud = self.ropelenght
-        # para que desde el primer punto hasta el ultimo, entre 
+        # para que desde el primer punto hasta el ultimo, entre
         # medias tenga x segmentos debo sumarle 1 a la cantidad:
         #cuantos_segmentos += 1
         cuantos_segmentos = self.ropesegments + 1
@@ -188,27 +212,27 @@ class ClothRope(bpy.types.Operator):
         ob = bpy.context.selected_objects[0]
         # renombrar:
         ob.name = "cuerda"
-        entrar_en_editmode() # entramos en edit mode
+        entrar_en_editmode()  # entramos en edit mode
         select_all_in_edit_mode(ob)
-        #seleccionar_todo() # ya viene por default seleccionado
+        # seleccionar_todo() # ya viene por default seleccionado
         borrar_elementos_seleccionados("vertices")
-        salir_de_editmode() # salimos de edit mode
-        crear_vertices(ob) # creamos un vertex
+        salir_de_editmode()  # salimos de edit mode
+        crear_vertices(ob)  # creamos un vertex
         # creando el grupo Group para el PIN
         # Group contiene los vertices del pin y Group.001 contiene la linea unica principal
-        entrar_en_editmode() # entramos en edit mode
-        bpy.ops.object.vertex_group_add() # creamos un grupo
+        entrar_en_editmode()  # entramos en edit mode
+        bpy.ops.object.vertex_group_add()  # creamos un grupo
         select_all_in_edit_mode(ob)
-        bpy.ops.object.vertex_group_assign() # y lo asignamos
+        bpy.ops.object.vertex_group_assign()  # y lo asignamos
         # los hooks van a la curva no a la guia poligonal...
         # creo el primer hook sin necesidad de crear luego el locator a mano:
-        #bpy.ops.object.hook_add_newob()
-        salir_de_editmode() # salimos de edit mode
+        # bpy.ops.object.hook_add_newob()
+        salir_de_editmode()  # salimos de edit mode
         ob.vertex_groups[0].name = "Pin"
         deseleccionar_todo()
         seleccionar_por_nombre("cuerda")
         # hago los extrudes del vertice:
-        for i in range(cuantos_segmentos):    
+        for i in range(cuantos_segmentos):
             entrar_en_editmode()
             extruir_vertices(longitud, cuantos_segmentos)
             # y los ELIMINO del grupo PIN
@@ -217,29 +241,29 @@ class ClothRope(bpy.types.Operator):
             pos = obtener_coords_vertex_seleccionados()
             # los hooks van a la curva no a la guia poligonal...
             # creo el hook sin necesidad de crear el locator a mano:
-            #bpy.ops.object.hook_add_newob()
-            salir_de_editmode() # salimos de edit mode
+            # bpy.ops.object.hook_add_newob()
+            salir_de_editmode()  # salimos de edit mode
             # creo el locator en su sitio
             crear_locator(pos)
             deseleccionar_todo()
             seleccionar_por_nombre("cuerda")
         deseleccionar_todo()
-        seleccionar_por_nombre("cuerda")    
+        seleccionar_por_nombre("cuerda")
         # vuelvo a seleccionar la cuerda
         entrar_en_editmode()
-        pos = obtener_coords_vertex_seleccionados() # y obtenemos su posicion
+        pos = obtener_coords_vertex_seleccionados()  # y obtenemos su posicion
         salir_de_editmode()
         # creamos el ultimo locator
         crear_locator(pos)
         deseleccionar_todo()
-        seleccionar_por_nombre("cuerda")        
-        entrar_en_editmode() # entramos en edit mode
-        bpy.ops.object.vertex_group_add() # CREANDO GRUPO GUIA MAESTRA
+        seleccionar_por_nombre("cuerda")
+        entrar_en_editmode()  # entramos en edit mode
+        bpy.ops.object.vertex_group_add()  # CREANDO GRUPO GUIA MAESTRA
         select_all_in_edit_mode(ob)
-        bpy.ops.object.vertex_group_assign() # y lo asignamos
+        bpy.ops.object.vertex_group_assign()  # y lo asignamos
         ob.vertex_groups[1].name = "Guide_rope"
         # extruimos la curva para que tenga un minimo grosor para colisionar
-        bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"mirror":False}, TRANSFORM_OT_translate={"value":(0, 0.005, 0), "constraint_axis":(False, True, False), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
+        bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"mirror": False}, TRANSFORM_OT_translate={"value": (0, 0.005, 0), "constraint_axis": (False, True, False), "constraint_orientation": 'GLOBAL', "mirror": False, "proportional": 'DISABLED', "proportional_edit_falloff": 'SMOOTH', "proportional_size": 1, "snap": False, "snap_target": 'CLOSEST', "snap_point": (0, 0, 0), "snap_align": False, "snap_normal": (0, 0, 0), "gpencil_strokes": False, "texture_space": False, "remove_on_cancel": False, "release_confirm": False})
         bpy.ops.object.vertex_group_remove_from()
         deselect_all_in_edit_mode(ob)
         salir_de_editmode()
@@ -253,17 +277,17 @@ class ClothRope(bpy.types.Operator):
         seleccionar_por_nombre("cuerda")
         entrar_en_editmode()
         bpy.ops.mesh.select_all(action="DESELECT")
-        bpy.context.tool_settings.mesh_select_mode = (True , False , False)
+        bpy.context.tool_settings.mesh_select_mode = (True, False, False)
         salir_de_editmode()
-        gi = ob.vertex_groups["Guide_rope"].index # get group index
+        gi = ob.vertex_groups["Guide_rope"].index  # get group index
         for v in ob.data.vertices:
-          for g in v.groups:
-            if g.group == gi: # compare with index in VertexGroupElement
-              v.select = True
+            for g in v.groups:
+                if g.group == gi:  # compare with index in VertexGroupElement
+                    v.select = True
         entrar_en_editmode()
-        # ya tenemos la guia seleccionada:      
+        # ya tenemos la guia seleccionada:
         # la duplicamos:
-        bpy.ops.mesh.duplicate_move(MESH_OT_duplicate={"mode":1}, TRANSFORM_OT_translate={"value":(0, 0, 0), "constraint_axis":(False, False, False), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
+        bpy.ops.mesh.duplicate_move(MESH_OT_duplicate={"mode": 1}, TRANSFORM_OT_translate={"value": (0, 0, 0), "constraint_axis": (False, False, False), "constraint_orientation": 'GLOBAL', "mirror": False, "proportional": 'DISABLED', "proportional_edit_falloff": 'SMOOTH', "proportional_size": 1, "snap": False, "snap_target": 'CLOSEST', "snap_point": (0, 0, 0), "snap_align": False, "snap_normal": (0, 0, 0), "gpencil_strokes": False, "texture_space": False, "remove_on_cancel": False, "release_confirm": False})
         # separamos por seleccion:
         bpy.ops.mesh.separate(type='SELECTED')
         salir_de_editmode()
@@ -279,13 +303,13 @@ class ClothRope(bpy.types.Operator):
             if eo.type == 'EMPTY':
                 if eo.name != "Rope":
                     emptys.append(eo)
-        #print(emptys)
+        # print(emptys)
         # cuantos puntos tiene la becier:
-        #len(bpy.data.objects['cuerda.001'].data.splines[0].points)
+        # len(bpy.data.objects['cuerda.001'].data.splines[0].points)
         # seleccionar y deseleccionar:
         #bpy.data.objects['cuerda.001'].data.splines[0].points[0].select = True
         bc = bpy.data.objects['cuerda.001']
-        n = 0 
+        n = 0
         for e in emptys:
             deseleccionar_todo()
             seleccionar_por_nombre(e.name)
@@ -296,16 +320,16 @@ class ClothRope(bpy.types.Operator):
             bpy.ops.object.hook_add_selob(use_bone=False)
             salir_de_editmode()
             n = n + 1
-        #entrar_en_editmode()
+        # entrar_en_editmode()
         ob = bpy.data.objects['cuerda']
-        n = 0 
+        n = 0
         for e in emptys:
             deseleccionar_todo()
             seleccionar_por_nombre(e.name)
             seleccionar_por_nombre(ob.name)
             entrar_en_editmode()
             bpy.ops.mesh.select_all(action="DESELECT")
-            bpy.context.tool_settings.mesh_select_mode = (True , False , False)
+            bpy.context.tool_settings.mesh_select_mode = (True, False, False)
             salir_de_editmode()
             for v in ob.data.vertices:
                 if v.select:
@@ -313,12 +337,12 @@ class ClothRope(bpy.types.Operator):
             ob.data.vertices[n].select = True
             entrar_en_editmode()
             bpy.ops.object.vertex_parent_set()
-            #deselect_all_in_edit_mode(ob)
+            # deselect_all_in_edit_mode(ob)
             salir_de_editmode()
             n = n + 1
         ########################################################################
         # ocultar los emptys: ##################################################
-        #for e in emptys:
+        # for e in emptys:
             deseleccionar_todo()
         #    seleccionar_por_nombre(e.name)
         #    bpy.context.object.hide = True
@@ -335,7 +359,7 @@ class ClothRope(bpy.types.Operator):
         bpy.context.object.data.fill_mode = 'FULL'
         bpy.context.object.data.bevel_depth = self.radiusrope
         bpy.context.object.data.bevel_resolution = self.resrope
-        #################################################################################                                
+        #################################################################################
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -350,7 +374,7 @@ class ClothRope(bpy.types.Operator):
         rowsub0.prop(self, "ropelenght", text='Length')
         rowsub0.prop(self, "ropesegments", text='Segments')
         rowsub0.prop(self, "radiusrope", text='Radius')
-        
+
         col.label("Quality Settings:")
         col.prop(self, "resrope", text='Resolution curve')
         col.prop(self, "qcr", text='Quality Collision')
@@ -358,28 +382,30 @@ class ClothRope(bpy.types.Operator):
 
 bpy.utils.register_class(ClothRope)
 
+
 class BallRope(bpy.types.Operator):
     bl_idname = "ball.rope"
     bl_label = "Rope Ball"
     # defaults rope ball
     ropelenght2 = IntProperty(name="longitud", default=10)
-    ropesegments2 = IntProperty(name="rsegments", min = 0, max = 999, default=6) 
-    radiuscubes =  FloatProperty(name="radius", default=0.5)
-    radiusrope =  FloatProperty(name="radius", default=0.4)
-    worldsteps = IntProperty(name="worldsteps", min = 60, max = 1000, default=250)
-    solveriterations = IntProperty(name="solveriterations", min = 10, max = 100, default=50)
+    ropesegments2 = IntProperty(name="rsegments", min=0, max=999, default=6)
+    radiuscubes = FloatProperty(name="radius", default=0.5)
+    radiusrope = FloatProperty(name="radius", default=0.4)
+    worldsteps = IntProperty(name="worldsteps", min=60, max=1000, default=250)
+    solveriterations = IntProperty(name="solveriterations", min=10, max=100, default=50)
     massball = IntProperty(name="massball", default=1)
     resrope = IntProperty(name="resolucion", default=4)
     grados = FloatProperty(name="grados", default=45)
     separacion = FloatProperty(name="separacion", default=0.1)
     hidecubes = BoolProperty(name="hidecubes", default=False)
+
     def execute(self, context):
         world_steps = self.worldsteps
-        solver_iterations = self.solveriterations 
+        solver_iterations = self.solveriterations
         longitud = self.ropelenght2
-        segmentos = self.ropesegments2+2 # hago un + 2 para que los segmentos sean los que hay entre los dos extremos... 
+        segmentos = self.ropesegments2 + 2  # hago un + 2 para que los segmentos sean los que hay entre los dos extremos...
         offset_del_suelo = 1
-        offset_del_suelo_real = (longitud/2)+(segmentos/2)
+        offset_del_suelo_real = (longitud / 2) + (segmentos / 2)
         radio = self.radiuscubes
         radiorope = self.radiusrope
         masa = self.massball
@@ -390,8 +416,8 @@ class BallRope(bpy.types.Operator):
         reset_scene()
         # suelo:
         bpy.ops.mesh.primitive_cube_add(radius=1, view_align=False, enter_editmode=False, location=(0, 0, 0), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
-        bpy.context.object.scale.x = 10+longitud
-        bpy.context.object.scale.y = 10+longitud
+        bpy.context.object.scale.x = 10 + longitud
+        bpy.context.object.scale.y = 10 + longitud
         bpy.context.object.scale.z = 0.05
         bpy.context.object.name = "groundplane"
         bpy.ops.rigidbody.objects_add(type='PASSIVE')
@@ -402,17 +428,17 @@ class BallRope(bpy.types.Operator):
             # si es 0 le digo que empieza desde 1
             if i == 0:
                 i = offset_del_suelo
-            else: # si no es 0 les tengo que sumar uno para que no se pisen al empezar el primero desde 1
-                i = i+offset_del_suelo
-            separacion = longitud*2/segmentos # distancia entre los cubos link
-            bpy.ops.mesh.primitive_cube_add(radius=1, view_align=False, enter_editmode=False, location=(0, 0, i*separacion), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
+            else:  # si no es 0 les tengo que sumar uno para que no se pisen al empezar el primero desde 1
+                i = i + offset_del_suelo
+            separacion = longitud * 2 / segmentos  # distancia entre los cubos link
+            bpy.ops.mesh.primitive_cube_add(radius=1, view_align=False, enter_editmode=False, location=(0, 0, i * separacion), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
             bpy.ops.rigidbody.objects_add(type='ACTIVE')
             bpy.context.object.name = "CubeLink"
             if n != 0:
                 bpy.context.object.draw_type = 'WIRE'
                 bpy.context.object.hide_render = True
             n += 1
-            bpy.context.object.scale.z = (longitud*2)/(segmentos*2)-separation
+            bpy.context.object.scale.z = (longitud * 2) / (segmentos * 2) - separation
             #bpy.context.object.scale.x = bpy.context.object.scale.z
             #bpy.context.object.scale.y = bpy.context.object.scale.z
             bpy.context.object.scale.x = radio
@@ -420,17 +446,17 @@ class BallRope(bpy.types.Operator):
             cuboslink.append(bpy.context.object)
         for i in range(len(cuboslink)):
             deseleccionar_todo()
-            if i != len(cuboslink)-1:
+            if i != len(cuboslink) - 1:
                 nombre1 = cuboslink[i]
-                nombre2 = cuboslink[i+1]
+                nombre2 = cuboslink[i + 1]
                 seleccionar_por_nombre(nombre1.name)
                 seleccionar_por_nombre(nombre2.name)
                 bpy.ops.rigidbody.connect()
         seleccionar_por_nombre
-        for i in range(segmentos-1):
+        for i in range(segmentos - 1):
             if i == 0:
                 seleccionar_por_nombre("Constraint")
-            else: 
+            else:
                 if i <= 9 and i > 0:
                     seleccionar_por_nombre("Constraint.00" + str(i))
                 else:
@@ -442,7 +468,7 @@ class BallRope(bpy.types.Operator):
             for c in bpy.context.selected_objects:
                 c.rigid_body_constraint.type = 'POINT'
         deseleccionar_todo()
-        
+
         # creamos la curva bezier:
         bpy.ops.curve.primitive_bezier_curve_add(radius=1, view_align=False, enter_editmode=False, location=(0, 0, 0), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
         bpy.context.object.name = "Cuerda"
@@ -456,10 +482,10 @@ class BallRope(bpy.types.Operator):
             # si es 0 le digo que empieza desde 1 es el offset desde el suelo...
             if i == 0:
                 i = offset_del_suelo
-            else: # si no es 0 les tengo que sumar uno para que no se pisen al empezar el primero desde 1
-                i = i+offset_del_suelo
+            else:  # si no es 0 les tengo que sumar uno para que no se pisen al empezar el primero desde 1
+                i = i + offset_del_suelo
             salir_de_editmode()
-            #entrar_en_editmode()
+            # entrar_en_editmode()
             tab_editmode()
             if i == 1:
                 # selecciono todos los vertices y los  borro
@@ -469,38 +495,38 @@ class BallRope(bpy.types.Operator):
                 bpy.ops.curve.vertex_add(location=(x, y, z))
             else:
                 # extruimos el resto:
-                bpy.ops.curve.extrude_move(CURVE_OT_extrude={"mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, z/i), "constraint_axis":(False, False, True), "constraint_orientation":'GLOBAL', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False})
+                bpy.ops.curve.extrude_move(CURVE_OT_extrude={"mode": 'TRANSLATION'}, TRANSFORM_OT_translate={"value": (0, 0, z / i), "constraint_axis": (False, False, True), "constraint_orientation": 'GLOBAL', "mirror": False, "proportional": 'DISABLED', "proportional_edit_falloff": 'SMOOTH', "proportional_size": 1, "snap": False, "snap_target": 'CLOSEST', "snap_point": (0, 0, 0), "snap_align": False, "snap_normal": (0, 0, 0), "gpencil_strokes": False, "texture_space": False, "remove_on_cancel": False, "release_confirm": False})
             bpy.ops.object.hook_add_selob(use_bone=False)
             salir_de_editmode()
             bpy.context.object.data.bevel_resolution = resolucion
             deseleccionar_todo()
-            
+
         # creando la esfera ball:
         deseleccionar_todo()
         seleccionar_por_nombre(cuboslink[0].name)
         entrar_en_editmode()
-        z = cuboslink[0].scale.z+longitud/2
+        z = cuboslink[0].scale.z + longitud / 2
         bpy.ops.view3d.snap_cursor_to_selected()
         bpy.ops.mesh.primitive_uv_sphere_add(view_align=False, enter_editmode=False, layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
-        bpy.ops.transform.translate(value=(0, 0, -z+2), constraint_axis=(False, False, True), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
-        bpy.ops.transform.resize(value=(longitud/2, longitud/2, longitud/2), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+        bpy.ops.transform.translate(value=(0, 0, -z + 2), constraint_axis=(False, False, True), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+        bpy.ops.transform.resize(value=(longitud / 2, longitud / 2, longitud / 2), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
         deselect_all_in_edit_mode(cuboslink[0])
         salir_de_editmode()
         bpy.ops.object.shade_smooth()
         bpy.context.object.rigid_body.mass = masa
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
-        
+
         # lo subo todo para arriba un poco mas:
         seleccionar_todo()
         deseleccionar_por_nombre("groundplane")
         bpy.ops.transform.translate(value=(0, 0, offset_del_suelo_real), constraint_axis=(False, False, True), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
         deseleccionar_todo()
-        seleccionar_por_nombre(cuboslink[-1].name)        
+        seleccionar_por_nombre(cuboslink[-1].name)
         bpy.ops.rigidbody.objects_add(type='PASSIVE')
 
         bpy.context.scene.rigidbody_world.steps_per_second = world_steps
-        bpy.context.scene.rigidbody_world.solver_iterations= solver_iterations
+        bpy.context.scene.rigidbody_world.solver_iterations = solver_iterations
 
         # para mover todo desde el primero de arriba:
         seleccionar_por_nombre(cuboslink[-1].name)
@@ -512,7 +538,7 @@ class BallRope(bpy.types.Operator):
         bpy.ops.transform.rotate(value=rotrope, axis=(1, 0, 0), constraint_axis=(True, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
         bpy.context.space_data.pivot_point = 'MEDIAN_POINT'
         deseleccionar_todo()
-        
+
         seleccionar_por_nombre("Cuerda")
         bpy.context.object.data.fill_mode = 'FULL'
         bpy.context.object.data.bevel_depth = radiorope
@@ -546,20 +572,22 @@ class BallRope(bpy.types.Operator):
         rowsub3 = col.row()
         rowsub3.prop(self, "grados", text='Degrees')
         rowsub3.prop(self, "separacion", text='Separation Link Cubes')
-                
+
         col.label("Quality Settings:")
         col.prop(self, "resrope", text='Resolution Rope')
         col.prop(self, "massball", text='Ball Mass')
         col.prop(self, "worldsteps", text='World Steps')
         col.prop(self, "solveriterations", text='Solver Iterarions')
-        
+
 bpy.utils.register_class(BallRope)
+
 
 class DialogPanel(bpy.types.Panel):
     bl_label = "Rope Creator"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_category = "RopeCreator"
+
     def draw(self, context):
         layout = self.layout
         context = bpy.context
@@ -571,8 +599,11 @@ class DialogPanel(bpy.types.Panel):
         col.operator("ball.rope")
 
 #   Registration
+
+
 def register():
     bpy.utils.register_module(__name__)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

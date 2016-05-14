@@ -14,6 +14,7 @@ from .utils import AddonPreferences, SpaceProperty, operator_call
 import bpy
 from bpy_extras import view3d_utils
 
+
 class MESH_MT_CombinedMenu(bpy.types.Menu):
     bl_idname = "mesh.addon_combined_component_menu"
     bl_label = "Components"
@@ -24,16 +25,20 @@ class MESH_MT_CombinedMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        
+
         mode = context.tool_settings.mesh_select_mode
-        if mode[0]: layout.menu("VIEW3D_MT_edit_mesh_vertices")
-        if mode[1]: layout.menu("VIEW3D_MT_edit_mesh_edges")
-        if mode[2]: layout.menu("VIEW3D_MT_edit_mesh_faces")
+        if mode[0]:
+            layout.menu("VIEW3D_MT_edit_mesh_vertices")
+        if mode[1]:
+            layout.menu("VIEW3D_MT_edit_mesh_edges")
+        if mode[2]:
+            layout.menu("VIEW3D_MT_edit_mesh_faces")
+
 
 class MESH_OT_CallContextMenu(bpy.types.Operator):
     bl_idname = "mesh.addon_call_context_menu"
     bl_label = "Context Menu"
-    
+
     @classmethod
     def poll(cls, context):
         return context.mode == 'EDIT_MESH'
@@ -42,16 +47,19 @@ class MESH_OT_CallContextMenu(bpy.types.Operator):
         mode = context.tool_settings.mesh_select_mode
         num = sum(int(m) for m in mode)
         if num == 1:
-            if mode[0]: return bpy.ops.wm.call_menu(name="VIEW3D_MT_edit_mesh_vertices")
-            if mode[1]: return bpy.ops.wm.call_menu(name="VIEW3D_MT_edit_mesh_edges")
-            if mode[2]: return bpy.ops.wm.call_menu(name="VIEW3D_MT_edit_mesh_faces")
+            if mode[0]:
+                return bpy.ops.wm.call_menu(name="VIEW3D_MT_edit_mesh_vertices")
+            if mode[1]:
+                return bpy.ops.wm.call_menu(name="VIEW3D_MT_edit_mesh_edges")
+            if mode[2]:
+                return bpy.ops.wm.call_menu(name="VIEW3D_MT_edit_mesh_faces")
         else:
             return bpy.ops.wm.call_menu(name=MESH_MT_CombinedMenu.bl_idname)
-        
+
 classes = [
     MESH_MT_CombinedMenu,
     MESH_OT_CallContextMenu
-    ]
+]
 
 addon_keymaps = []
 
@@ -63,6 +71,7 @@ def register():
     wm = bpy.context.window_manager
     km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
     kmi = km.keymap_items.new('mesh.addon_call_context_menu', 'RIGHTMOUSE', 'DOUBLE_CLICK')
+
 
 def unregister():
     for cls in classes[::-1]:

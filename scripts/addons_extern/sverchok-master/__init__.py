@@ -147,7 +147,7 @@ def register():
     # this is used to access preferences, should/could be hidden
     # in an interface
     data_structure.SVERCHOK_NAME = __name__
-    print("** version: ", bl_info['version']," **")
+    print("** version: ", bl_info['version'], " **")
     print("** Have a nice day with sverchok  **\n")
     ascii_print.logo()
 

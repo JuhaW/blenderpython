@@ -28,11 +28,11 @@ class SvGetDataObjectNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Object ID Get'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
-    M = ['actions','brushes','filepath','grease_pencil','groups',
-         'images','libraries','linestyles','masks','materials',
-         'movieclips','node_groups','particles','scenes','screens','shape_keys',
-         'sounds','speakers','texts','textures','worlds','objects']
-    T = ['MESH','CURVE','SURFACE','META','FONT','ARMATURE','LATTICE','EMPTY','CAMERA','LAMP','SPEAKER']
+    M = ['actions', 'brushes', 'filepath', 'grease_pencil', 'groups',
+         'images', 'libraries', 'linestyles', 'masks', 'materials',
+         'movieclips', 'node_groups', 'particles', 'scenes', 'screens', 'shape_keys',
+         'sounds', 'speakers', 'texts', 'textures', 'worlds', 'objects']
+    T = ['MESH', 'CURVE', 'SURFACE', 'META', 'FONT', 'ARMATURE', 'LATTICE', 'EMPTY', 'CAMERA', 'LAMP', 'SPEAKER']
 
     Modes = EnumProperty(name="getmodes", default="objects", items=e(M), update=updateNode)
     Types = EnumProperty(name="getmodes", default="MESH", items=e(T), update=updateNode)
@@ -50,7 +50,7 @@ class SvGetDataObjectNode(bpy.types.Node, SverchCustomTreeNode):
         sob = self.outputs['Objects']
         if not sob.is_linked:
             return
-        L = getattr(bpy.data,self.Modes)
+        L = getattr(bpy.data, self.Modes)
         if self.Modes != 'objects':
             sob.sv_set(L[:])
         else:

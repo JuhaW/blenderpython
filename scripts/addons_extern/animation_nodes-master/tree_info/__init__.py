@@ -37,21 +37,24 @@ def update():
     global _needsUpdate
     _needsUpdate = False
 
+
 def updateIfNecessary():
     if _needsUpdate:
         update()
+
 
 def treeChanged():
     global _needsUpdate
     _needsUpdate = True
 
 
-
 def getNodeByIdentifier(identifier):
     return idToNode(_forestData.nodeByIdentifier[identifier])
 
+
 def getIdentifierAmount():
     return len(_forestData.nodeByIdentifier)
+
 
 @updateAndRetryOnException
 def getNodesByType(idName):
@@ -67,6 +70,7 @@ def getDirectlyLinkedSockets(socket):
     linkedIDs = _forestData.linkedSocketsWithReroutes[socketID]
     return [idToSocket(linkedID) for linkedID in linkedIDs]
 
+
 def getDirectlyLinkedSocket(socket):
     socketID = socket.toID()
     linkedSocketIDs = _forestData.linkedSocketsWithReroutes[socketID]
@@ -79,15 +83,18 @@ def getLinkedSockets(socket):
     linkedIDs = _forestData.linkedSockets[socketID]
     return [idToSocket(linkedID) for linkedID in linkedIDs]
 
+
 def getLinkedSocket(socket):
     socketID = socket.toID()
     linkedIDs = _forestData.linkedSockets[socketID]
     if len(linkedIDs) > 0:
         return idToSocket(linkedIDs[0])
 
+
 def iterSocketsThatNeedUpdate():
     for socketID in _forestData.socketsThatNeedUpdate:
         yield idToSocket(socketID)
+
 
 def getUndefinedNodes():
     return [idToNode(nodeID) for nodeID in _forestData.nodesByType["NodeUndefined"]]
@@ -103,12 +110,13 @@ def getOriginNodes(node):
             linkedNodeIDs.add(linkedSocketID[0])
     return [idToNode(nodeID) for nodeID in linkedNodeIDs]
 
+
 def getAllDataLinkIDs():
     linkDataIDs = set()
     dataType = _forestData.dataTypeBySocket
     for socketID, linkedIDs in _forestData.linkedSockets.items():
         for linkedID in linkedIDs:
-            if socketID[1]: # check which one is origin/target
+            if socketID[1]:  # check which one is origin/target
                 linkDataIDs.add((socketID, linkedID, dataType[socketID], dataType[linkedID]))
             else:
                 linkDataIDs.add((linkedID, socketID, dataType[linkedID], dataType[socketID]))
@@ -124,6 +132,7 @@ def keepNodeState(function):
 
 # keep node links
 
+
 def keepNodeLinks(function):
     def wrapper(node, *args, **kwargs):
         connections = getNodeConnections(node)
@@ -131,6 +140,7 @@ def keepNodeLinks(function):
         setConnections(connections)
         return output
     return wrapper
+
 
 def getNodeConnections(node):
     nodeID = node.toID()
@@ -141,12 +151,16 @@ def getNodeConnections(node):
             connections.append((socketID, linkedID))
     return connections
 
+
 def setConnections(connections):
     for id1, id2 in connections:
-        try: idToSocket(id1).linkWith(idToSocket(id2))
-        except: pass
+        try:
+            idToSocket(id1).linkWith(idToSocket(id2))
+        except:
+            pass
 
 # keep socket values
+
 
 def keepSocketValues(function):
     def wrapper(node, *args, **kwargs):
@@ -156,13 +170,16 @@ def keepSocketValues(function):
         return output
     return wrapper
 
+
 def getSocketValues(node):
     inputs = [getSocketData(socket) for socket in node.inputs]
     outputs = [getSocketData(socket) for socket in node.outputs]
     return inputs, outputs
 
+
 def getSocketData(socket):
     return (socket.identifier, socket.dataType, socket.getProperty(), socket.hide, socket.isUsed)
+
 
 def setSocketValues(node, inputs, outputs):
     inputsByIdentifier = node.inputsByIdentifier
@@ -185,22 +202,29 @@ def setSocketValues(node, inputs, outputs):
 def getNetworkWithNode(node):
     return _networks.networkByNode[node.toID()]
 
+
 def getNetworks():
     return _networks.networks
+
 
 def getSubprogramNetworks():
     return [network for network in _networks.networks if network.isSubnetwork]
 
-def getNetworksByType(type = "Main"):
+
+def getNetworksByType(type="Main"):
     return [network for network in _networks.networks if network.type == type]
+
 
 def getNetworkByIdentifier(identifier):
     for network in getNetworks():
-        if network.identifier == identifier: return network
+        if network.identifier == identifier:
+            return network
     return None
+
 
 def getNetworksByNodeTree(nodeTree):
     return [network for network in getNetworks() if network.treeName == nodeTree.name]
+
 
 def getSubprogramNetworksByNodeTree(nodeTree):
     return [network for network in _networks.networks if network.isSubnetwork and network.treeName == nodeTree.name]

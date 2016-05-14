@@ -1,27 +1,27 @@
-#brik_load_0_1.py
+# brik_load_0_1.py
 
 # ***** BEGIN MIT LICENSE BLOCK *****
 #
-#Script Copyright (c) 2010 Marcus P. Jenkins (Blenderartists user name FunkyWyrm)
+# Script Copyright (c) 2010 Marcus P. Jenkins (Blenderartists user name FunkyWyrm)
 # Modified by Kees Brouwer (Blenderartists user name Wraaah)
 #
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 #
 # ***** END MIT LICENCE BLOCK *****
 # --------------------------------------------------------------------------
@@ -57,13 +57,13 @@ ragdoll.
     
     This would allow for a single spawn point to load all structure data.
 '''
-#print('###########################')
+# print('###########################')
 #print('RUNNING brik_load_0_1.py')
 
 import bge
 import mathutils
 from mathutils import Vector, Quaternion
-    
+
 scene = bge.logic.getCurrentScene()
 cont = bge.logic.getCurrentController()
 
@@ -71,71 +71,73 @@ objects = scene.objectsInactive
 
 spawn_point = cont.owner
 
+
 def load_data(data_cont):
 
     data_file = data_cont.script
-    #remove whitespaces
+    # remove whitespaces
     data_file = data_file.replace(" ", "")
     lines = data_file.splitlines(False)
-    
+
     bone_hitbox = {}
     bone_rigidbody = {}
     bone_loc = {}
     constraint_settings = {}
     constraint_settings["constraint_name"] = ""
     constraints = {}
-    
+
     for line in lines:
-        
+
         if (len(line) == 0) or (line.count("''") != 0):
-            #ignore short lines or lines (starting) with ''
+            # ignore short lines or lines (starting) with ''
             pass
         elif line.count(":") != 0:
-            #bone, hitbox, rigidbody link
+            # bone, hitbox, rigidbody link
             items = line.split(":")
             bone_name = items[0]
             bone_hitbox[bone_name] = items[1]
             bone_rigidbody[bone_name] = items[2]
             if len(items) == 4:
                 bone_loc[bone_name] = items[3]
-            
+
         elif line.count("=") == 1:
-            #Constraint settings
+            # Constraint settings
             par, value = line.split("=")
             if par == "constraint_name":
                 prev_name = constraint_settings["constraint_name"]
                 if prev_name != "":
-                    #save previous constraint
+                    # save previous constraint
                     constraints[prev_name] = constraint_settings
-                    
+
                     constraint_settings = {}
             constraint_settings[par] = value
-            
+
         else:
-            #main settings
+            # main settings
             armature_name = line
-    #save last constraint
+    # save last constraint
     constraints[constraint_settings["constraint_name"]] = constraint_settings
 
     return bone_hitbox, bone_rigidbody, bone_loc, constraints, armature_name
 #    spawn_point['mob_object'] = armature.name
-    
+
+
 def main():
-#    mob_total = spawn_point['brik_mob_count']
-            
-#    for count in range(0, mob_total+1):
-    
+    #    mob_total = spawn_point['brik_mob_count']
+
+    #    for count in range(0, mob_total+1):
+
     for cont in spawn_point.controllers:
-#       #if cont.name[:-8] == 'brik_ragdoll_data_'+str(count):
-        if cont.name[:] == 'brik_ragdoll_data_0':#removed -8,Wraaah
+        #       #if cont.name[:-8] == 'brik_ragdoll_data_'+str(count):
+        if cont.name[:] == 'brik_ragdoll_data_0':  # removed -8,Wraaah
             data_cont = cont
-                
+
             bone_hitbox, bone_rigidbody, bone_loc, constraints, armature_name = load_data(data_cont)
             armature = objects[armature_name]
             armature["bone_hitbox"] = bone_hitbox
             armature["bone_rigidbody"] = bone_rigidbody
             armature["bone_loc"] = bone_loc
             armature["constraints"] = constraints
-        
+
 if __name__ == '__main__':
     main()

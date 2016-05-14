@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class TransformVectorListNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_TransformVectorListNode"
     bl_label = "Transform Vector List"

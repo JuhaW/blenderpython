@@ -170,13 +170,13 @@ def generate_id(other_ids):
     return uniq_numb
 
 
-## CODE FOR SELECTED BMESH ---
-#def get_selected_bmesh(bm):
+# CODE FOR SELECTED BMESH ---
+# def get_selected_bmesh(bm):
     #sel_verts = get_selected_bmverts(bm)
     #sel_edges = [e for e in bm.edges if e.select]
     #sel_faces = [f for f in bm.faces if f.select]
 
-    #return [sel_verts, sel_edges, sel_faces]
+    # return [sel_verts, sel_edges, sel_faces]
 
 
 def get_selected_bmverts(bm):
@@ -273,7 +273,7 @@ def get_verts_bounds(verts, obj, x_axis, y_axis, z_axis, local_space):
             elif z_check < z_min:
                 z_min = z_check
 
-    return ( x_max + abs(x_min), y_max + abs(y_min), z_max + abs(z_min), center )
+    return (x_max + abs(x_min), y_max + abs(y_min), z_max + abs(z_min), center)
 
 
 def get_vertices_size(verts, obj):
@@ -325,8 +325,9 @@ def multiply_local_vecs(vec1, vec2):
     vec1[1] *= vec2[1]
     vec1[2] *= vec2[2]
 
+
 def multiply_vecs(vec1, vec2):
-    vec3 = Vector( (0.0, 0.0, 0.0) )
+    vec3 = Vector((0.0, 0.0, 0.0))
     vec3[0] = vec1[0] * vec2[0]
     vec3[1] = vec1[1] * vec2[1]
     vec3[2] = vec1[2] * vec2[2]
@@ -340,7 +341,7 @@ def get_verts_from_ids(ids, id_layer, bm):
 
     for vert in bm.verts:
         if vert[id_layer] in ids:
-            #print(vert[id_layer])
+            # print(vert[id_layer])
             verts_dict[vert[id_layer]] = vert
 
     for id_this in ids:

@@ -34,8 +34,9 @@ import bpy
 import bmesh
 from mathutils.geometry import intersect_line_line
 
-def main(context,vaxis,gpAxis):
-    axisdict = {"X":0,"Y":1,"Z":2}
+
+def main(context, vaxis, gpAxis):
+    axisdict = {"X": 0, "Y": 1, "Z": 2}
     mesh = bpy.context.object
     bm = bmesh.from_edit_mesh(mesh.data)
     axis = axisdict[vaxis]
@@ -45,44 +46,43 @@ def main(context,vaxis,gpAxis):
             imen = -1000
             imay = 1000
             punto = vertice.co + mesh.location
-            jj= [point.co for point in bpy.context.object.grease_pencil.layers.active.frames[0].strokes[0].points]
+            jj = [point.co for point in bpy.context.object.grease_pencil.layers.active.frames[0].strokes[0].points]
             for point in bpy.data.grease_pencil[0].layers.active.frames[0].strokes[-1].points:
                 if point.co[gpaxis] < punto[gpaxis] and point.co[gpaxis] > imen:
                     imen = point.co[gpaxis]
                     men = point.co
                 if point.co[gpaxis] > punto[gpaxis] and point.co[gpaxis] < imay:
                     imay = point.co[gpaxis]
-                    may = point.co                       
-            try :
+                    may = point.co
+            try:
                 may
                 men
             except:
                 print("wrong projection axis!")
                 break
-       
+
             if axis == 0:
                 try:
-                    vertice.co = (intersect_line_line(men,may,punto,(punto[0]+1,punto[1],punto[2]))[0][0],
-                        vertice.co.y,
-                        vertice.co.z)   
+                    vertice.co = (intersect_line_line(men, may, punto, (punto[0] + 1, punto[1], punto[2]))[0][0],
+                                  vertice.co.y,
+                                  vertice.co.z)
                 except:
-                    pass        
+                    pass
             if axis == 1:
                 try:
                     vertice.co = (vertice.co.x,
-                        intersect_line_line(men,may,punto,(punto[0],punto[1]+1,punto[2]))[0][1],
-                        vertice.co.z)         
+                                  intersect_line_line(men, may, punto, (punto[0], punto[1] + 1, punto[2]))[0][1],
+                                  vertice.co.z)
                 except:
-                    pass                                  
-            if axis == 2:    
-                try:                           
+                    pass
+            if axis == 2:
+                try:
                     vertice.co = (vertice.co.x,
-                        vertice.co.y,
-                        intersect_line_line(men,may,punto,(punto[0],punto[1],punto[2]+1))[0][2])     
+                                  vertice.co.y,
+                                  intersect_line_line(men, may, punto, (punto[0], punto[1], punto[2] + 1))[0][2])
                 except:
-                    pass              
+                    pass
     bmesh.update_edit_mesh(mesh.data)
-
 
 
 class SimpleOperator(bpy.types.Operator):
@@ -90,35 +90,35 @@ class SimpleOperator(bpy.types.Operator):
     bl_idname = "object.project_grease_pencil"
     bl_label = "Project Grease Pencil"
     bl_options = {"REGISTER", "UNDO"}
-    
+
     @classmethod
     def poll(cls, context):
         return context.active_object is not None
 
     gpAxis = bpy.props.EnumProperty(
-            name="Grease Pencil:",
-            description="Grease pencil Along Axis",
-            items=(("X", "Along X", "Along X Axis"),
-                   ("Y", "Along Y", "Along Y Axis"),
-                   ("Z", "Along Z", "Along Z Axis")),
-            default="Z",
-            )
+        name="Grease Pencil:",
+        description="Grease pencil Along Axis",
+        items=(("X", "Along X", "Along X Axis"),
+               ("Y", "Along Y", "Along Y Axis"),
+               ("Z", "Along Z", "Along Z Axis")),
+        default="Z",
+    )
 
     Axis = bpy.props.EnumProperty(
-            name="Vertices Axis:",
-            description="Select axis for project vertices",
-            items=(("X", "Along X", "Along X Axis"),
-                   ("Y", "Along Y", "Along Y Axis"),
-                   ("Z", "Along Z", "Along Z Axis")),
-            default="X",
-            )
+        name="Vertices Axis:",
+        description="Select axis for project vertices",
+        items=(("X", "Along X", "Along X Axis"),
+               ("Y", "Along Y", "Along Y Axis"),
+               ("Z", "Along Z", "Along Z Axis")),
+        default="X",
+    )
 
     def execute(self, context):
 
         if bpy.context.object.grease_pencil == None:
             self.report({'ERROR'}, "You must set Grease Pencil!")
-        else:    
-            main(context,self.Axis,self.gpAxis)
+        else:
+            main(context, self.Axis, self.gpAxis)
         return {'FINISHED'}
 
 
@@ -132,4 +132,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

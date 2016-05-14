@@ -9,11 +9,12 @@ splineTypeItems = [
     ("BEZIER", "Bezier", "Each control point has two handles"),
     ("POLY", "Poly", "Linear interpolation between the spline points")]
 
+
 class SplineFromPointsNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SplineFromPointsNode"
     bl_label = "Spline from Points"
 
-    splineType = EnumProperty(name = "Spline Type", items = splineTypeItems, update = propertyChanged)
+    splineType = EnumProperty(name="Spline Type", items=splineTypeItems, update=propertyChanged)
 
     def create(self):
         self.inputs.new("an_VectorListSocket", "Points", "points")
@@ -21,11 +22,13 @@ class SplineFromPointsNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_SplineSocket", "Spline", "spline")
 
     def draw(self, layout):
-        layout.prop(self, "splineType", text = "")
+        layout.prop(self, "splineType", text="")
 
     def execute(self, points, cyclic):
-        if self.splineType == "BEZIER": spline = BezierSpline()
-        if self.splineType == "POLY": spline = PolySpline()
+        if self.splineType == "BEZIER":
+            spline = BezierSpline()
+        if self.splineType == "POLY":
+            spline = PolySpline()
         spline.appendPoints(points)
         spline.isCyclic = cyclic
         return spline

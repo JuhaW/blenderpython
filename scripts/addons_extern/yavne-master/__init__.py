@@ -17,13 +17,13 @@
 
 
 bl_info = {
-    'name' : 'Y.A.V.N.E.',
-    'description' : 'Yet another vertex normal editor',
-    'location' : '3D View > Tool Shelf > Shading/UVs',
-    'author' : 'Brett Fedack',
-    'version' : (1, 0),
-    'blender' : (2, 76, 0),
-    'category' : 'Mesh'
+    'name': 'Y.A.V.N.E.',
+    'description': 'Yet another vertex normal editor',
+    'location': '3D View > Tool Shelf > Shading/UVs',
+    'author': 'Brett Fedack',
+    'version': (1, 0),
+    'blender': (2, 76, 0),
+    'category': 'Mesh'
 }
 
 if 'bpy' not in locals():
@@ -37,8 +37,10 @@ else:
     imp.reload(panel)
     imp.reload(preferences)
 
+
 def register():
     bpy.utils.register_module(__name__)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

@@ -5,6 +5,7 @@ parameterTypeItems = [
     ("RESOLUTION", "Resolution", ""),
     ("UNIFORM", "Uniform", "")]
 
+
 class SplineEvaluationBase:
 
     def parameterTypeChanged(self, context):
@@ -12,14 +13,14 @@ class SplineEvaluationBase:
         executionCodeChanged()
 
     parameterType = EnumProperty(
-        name = "Parameter Type",
-        default = "UNIFORM",
-        items = parameterTypeItems,
-        update = parameterTypeChanged)
+        name="Parameter Type",
+        default="UNIFORM",
+        items=parameterTypeItems,
+        update=parameterTypeChanged)
 
     resolution = IntProperty(
-        name = "Resolution",
-        min = 2,
-        default = 100,
-        update = propertyChanged,
-        description = "Increase to have a more accurate evaluation if the type is set to Length")
+        name="Resolution",
+        min=2,
+        default=100,
+        update=propertyChanged,
+        description="Increase to have a more accurate evaluation if the type is set to Length")

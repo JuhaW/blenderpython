@@ -34,35 +34,37 @@ import bpy
 from bpy.props import *
 import os
 
+
 def import_object_petunia(obname):
-	opath = "//petunia_original.blend\\Group\\" + obname
-	s = os.sep
-	dpath=''
-	fpath=''
-	for p in bpy.utils.script_paths():
-		
-		testfname= p + '%saddons_extern%sAF_add_character%spetunia_original.blend' % (s,s,s)
-		print(testfname)
-		if os.path.isfile(testfname):
-			fname=testfname
-			dpath = p + \
-			'%saddons_extern%sAF_add_character%spetunia_original.blend\\Group\\' % (s, s, s)
-			break
-	# DEBUG
-	#print('import_object: ' + opath)
+    opath = "//petunia_original.blend\\Group\\" + obname
+    s = os.sep
+    dpath = ''
+    fpath = ''
+    for p in bpy.utils.script_paths():
 
-	bpy.ops.wm.append(
-			filepath=opath,
-			filename=obname,
-			directory=dpath,
-			filemode=1,
-			link=False,
-			autoselect=True,
-			active_layer=True,
-			instance_groups=False)
+        testfname = p + '%saddons_extern%sAF_add_character%spetunia_original.blend' % (s, s, s)
+        print(testfname)
+        if os.path.isfile(testfname):
+            fname = testfname
+            dpath = p + \
+                '%saddons_extern%sAF_add_character%spetunia_original.blend\\Group\\' % (s, s, s)
+            break
+    # DEBUG
+    #print('import_object: ' + opath)
 
-	for ob in bpy.context.selected_objects:
-		ob.location = bpy.context.scene.cursor_location
+    bpy.ops.wm.append(
+        filepath=opath,
+        filename=obname,
+        directory=dpath,
+        filemode=1,
+        link=False,
+        autoselect=True,
+        active_layer=True,
+        instance_groups=False)
+
+    for ob in bpy.context.selected_objects:
+        ob.location = bpy.context.scene.cursor_location
+
 
 class Import_Petunia(bpy.types.Operator):
     '''Imports a rigidbody recorder'''
@@ -75,35 +77,37 @@ class Import_Petunia(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 def import_object_mancandy(obname):
-	opath = "//mancandy.blend\\Group\\" + obname
-	s = os.sep
-	dpath=''
-	fpath=''
-	for p in bpy.utils.script_paths():
-		
-		testfname= p + '%saddons_extern%sAF_add_character%smancandy.blend' % (s,s,s)
-		print(testfname)
-		if os.path.isfile(testfname):
-			fname=testfname
-			dpath = p + \
-			'%saddons_extern%sAF_add_character%smancandy.blend\\Group\\' % (s, s, s)
-			break
-	# DEBUG
-	#print('import_object: ' + opath)
+    opath = "//mancandy.blend\\Group\\" + obname
+    s = os.sep
+    dpath = ''
+    fpath = ''
+    for p in bpy.utils.script_paths():
 
-	bpy.ops.wm.append(
-			filepath=opath,
-			filename=obname,
-			directory=dpath,
-			filemode=1,
-			link=False,
-			autoselect=True,
-			active_layer=True,
-			instance_groups=False)
+        testfname = p + '%saddons_extern%sAF_add_character%smancandy.blend' % (s, s, s)
+        print(testfname)
+        if os.path.isfile(testfname):
+            fname = testfname
+            dpath = p + \
+                '%saddons_extern%sAF_add_character%smancandy.blend\\Group\\' % (s, s, s)
+            break
+    # DEBUG
+    #print('import_object: ' + opath)
 
-	for ob in bpy.context.selected_objects:
-		ob.location = bpy.context.scene.cursor_location
+    bpy.ops.wm.append(
+        filepath=opath,
+        filename=obname,
+        directory=dpath,
+        filemode=1,
+        link=False,
+        autoselect=True,
+        active_layer=True,
+        instance_groups=False)
+
+    for ob in bpy.context.selected_objects:
+        ob.location = bpy.context.scene.cursor_location
+
 
 class Import_Mancandy(bpy.types.Operator):
     '''Imports a rigidbody recorder'''
@@ -116,6 +120,7 @@ class Import_Mancandy(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class INFO_MT_mesh_petunia_add(bpy.types.Menu):
     # Define the "mesh objects" menu
     bl_idname = "INFO_MT_object_petunia"
@@ -125,9 +130,9 @@ class INFO_MT_mesh_petunia_add(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.operator("object.import_petunia",
-            text="Petunia")
+                        text="Petunia")
         layout.operator("object.import_mancandy",
-            text="Mancandy")
+                        text="Mancandy")
 
 
 # Register all operators and panels

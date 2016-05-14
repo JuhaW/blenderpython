@@ -3,6 +3,7 @@ from bpy.props import *
 from .. events import propertyChanged
 from .. base_types.socket import AnimationNodeSocket
 
+
 class FontSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_FontSocket"
     bl_label = "Font Socket"
@@ -12,12 +13,12 @@ class FontSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     storable = False
     comparable = True
 
-    fontName = StringProperty(update = propertyChanged)
+    fontName = StringProperty(update=propertyChanged)
 
     def drawProperty(self, layout, text):
-        row = layout.row(align = True)
-        row.prop_search(self, "fontName",  bpy.data, "fonts", icon = "NONE", text = text)
-        self.invokeFunction(row, "assignFontOfActiveObject", icon = "EYEDROPPER")
+        row = layout.row(align=True)
+        row.prop_search(self, "fontName", bpy.data, "fonts", icon="NONE", text=text)
+        self.invokeFunction(row, "assignFontOfActiveObject", icon="EYEDROPPER")
 
     def getValue(self):
         return bpy.data.fonts.get(self.fontName)

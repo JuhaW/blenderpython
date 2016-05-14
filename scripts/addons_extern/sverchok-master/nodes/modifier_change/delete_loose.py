@@ -58,11 +58,11 @@ class SvDeleteLooseNode(bpy.types.Node, SverchCustomTreeNode):
                     for i in p:
                         if i >= len(ve):
                             deli.append(i)
-                    if deli and (len(p)-len(deli)) >= 2:
+                    if deli and (len(p) - len(deli)) >= 2:
                         print(deli)
                         for k in deli:
                             p.remove(k)
-                    elif (len(p)-len(deli)) <= 1:
+                    elif (len(p) - len(deli)) <= 1:
                         delp.append(p)
                 if delp:
                     for d in delp:

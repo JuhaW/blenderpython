@@ -1,6 +1,7 @@
 import bpy
 from sverchok.node_tree import SverchCustomTreeNode
 
+
 class ToolsNode(bpy.types.Node, SverchCustomTreeNode):
     ''' NOT USED '''
     bl_idname = 'ToolsNode'
@@ -17,7 +18,7 @@ class ToolsNode(bpy.types.Node, SverchCustomTreeNode):
         col.template_color_picker
         u = "Update "
         #col.operator(SverchokUpdateAll.bl_idname, text=u)
-        op = col.operator(SverchokUpdateCurrent.bl_idname, text=u+self.id_data.name)
+        op = col.operator(SverchokUpdateCurrent.bl_idname, text=u + self.id_data.name)
         op.node_group = self.id_data.name
         #box = layout.box()
 
@@ -31,5 +32,3 @@ class ToolsNode(bpy.types.Node, SverchCustomTreeNode):
     def update(self):
         self.use_custom_color = True
         self.color = (1.0, 0.0, 0.0)
-        
-

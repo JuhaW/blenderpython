@@ -1,4 +1,5 @@
-import bpy, colorsys
+import bpy
+import colorsys
 from bpy.props import *
 from ... tree_info import keepNodeState
 from ... base_types.node import AnimationNode
@@ -14,6 +15,7 @@ targetTypeItems = [
     ("HSL", "HSL", "Hue, Saturation, Lightness"),
     ("YIQ", "YIQ", "Luma, Chrominance")]
 
+
 class SeparateColorNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SeparateColorNode"
     bl_label = "Separate Color"
@@ -22,8 +24,8 @@ class SeparateColorNode(bpy.types.Node, AnimationNode):
     def targetTypeChanged(self, context):
         self.recreateOutputs()
 
-    targetType = EnumProperty(name = "Target Type", items = targetTypeItems,
-                                    default = "RGB", update = targetTypeChanged)
+    targetType = EnumProperty(name="Target Type", items=targetTypeItems,
+                              default="RGB", update=targetTypeChanged)
 
     def create(self):
         self.inputs.new("an_ColorSocket", "Color", "color")
@@ -53,16 +55,20 @@ class SeparateColorNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_FloatSocket", "Alpha", "alpha")
 
     def draw(self, layout):
-        layout.prop(self, "targetType", expand = True)
+        layout.prop(self, "targetType", expand=True)
 
     def drawLabel(self):
         return "{}a from Color".format(self.targetType)
 
     def getExecutionCode(self):
-        if self.targetType == "RGB":    yield "r, g, b = color[0], color[1], color[2]"
-        elif self.targetType == "HSV":  yield "h, s, v = colorsys.rgb_to_hsv(color[0], color[1], color[2])"
-        elif self.targetType == "HSL":  yield "h, l, s = colorsys.rgb_to_hls(color[0], color[1], color[2])"
-        elif self.targetType == "YIQ":  yield "y, i, q = colorsys.rgb_to_yiq(color[0], color[1], color[2])"
+        if self.targetType == "RGB":
+            yield "r, g, b = color[0], color[1], color[2]"
+        elif self.targetType == "HSV":
+            yield "h, s, v = colorsys.rgb_to_hsv(color[0], color[1], color[2])"
+        elif self.targetType == "HSL":
+            yield "h, l, s = colorsys.rgb_to_hls(color[0], color[1], color[2])"
+        elif self.targetType == "YIQ":
+            yield "y, i, q = colorsys.rgb_to_yiq(color[0], color[1], color[2])"
         yield "alpha = color[3]"
 
     def getUsedModules(self):

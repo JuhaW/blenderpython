@@ -2,6 +2,7 @@ import bpy
 from ... base_types.node import AnimationNode
 from ... algorithms.interpolation import mixedInterpolation, assignArguments
 
+
 class MixInterpolationNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_MixInterpolationNode"
     bl_label = "Mix Interpolation"

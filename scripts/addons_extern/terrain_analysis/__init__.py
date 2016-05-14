@@ -18,47 +18,48 @@
 #  ***** GPL LICENSE BLOCK *****
 
 bl_info = {
-	"name": "[bgis] Terrain analysis",
-	"description": "Analyse height, slope and aspect of a terrain mesh",
-	"author": "This script is public domain",
-	'license': 'GPL',
-	'deps': '',
-	"version": (1, 0),
-	"blender": (2, 7, 0),
-	"location": "3D View > GIS Tools || Node editor > Properties",
-	"warning": "",
-	'wiki_url': 'https://github.com/domlysz/BlenderGIS/wiki',
-	'tracker_url': '',
-	'link': '',
-	"category": "Node"}
+    "name": "[bgis] Terrain analysis",
+    "description": "Analyse height, slope and aspect of a terrain mesh",
+    "author": "This script is public domain",
+    'license': 'GPL',
+    'deps': '',
+    "version": (1, 0),
+    "blender": (2, 7, 0),
+    "location": "3D View > GIS Tools || Node editor > Properties",
+    "warning": "",
+    'wiki_url': 'https://github.com/domlysz/BlenderGIS/wiki',
+    'tracker_url': '',
+    'link': '',
+    "category": "Node"}
 
-#http://wiki.blender.org/index.php/Dev:Py/Scripts/Cookbook/Code_snippets/Multi-File_packages
-#Work with F8 but doesn't work when user disable/enable addon in user prefs (in this cas 'bpy' in locals() return False)
+# http://wiki.blender.org/index.php/Dev:Py/Scripts/Cookbook/Code_snippets/Multi-File_packages
+# Work with F8 but doesn't work when user disable/enable addon in user prefs (in this cas 'bpy' in locals() return False)
 if "bpy" in locals():
-	import importlib
-	if "reclassify" in locals():
-		importlib.reload(reclassify)
-	if "nodes_builder" in locals():
-		importlib.reload(nodes_builder)
+    import importlib
+    if "reclassify" in locals():
+        importlib.reload(reclassify)
+    if "nodes_builder" in locals():
+        importlib.reload(nodes_builder)
 else:
-	from . import reclassify, nodes_builder
+    from . import reclassify, nodes_builder
 
 import bpy
 
-	
+
 def register():
-	bpy.utils.register_module(__name__)
-	#bpy.utils.register_class(Reclass_panel)
+    bpy.utils.register_module(__name__)
+    # bpy.utils.register_class(Reclass_panel)
+
 
 def unregister():
-	bpy.utils.unregister_module(__name__)
-	# > clear existing ui list
-	del bpy.types.Scene.uiListCollec
-	del bpy.types.Scene.uiListIndex
-	del bpy.types.Scene.colorRampPreview
-	del bpy.types.Scene.useColors
-	# > clear existing handlers
-	bpy.app.handlers.scene_update_post.clear()
+    bpy.utils.unregister_module(__name__)
+    # > clear existing ui list
+    del bpy.types.Scene.uiListCollec
+    del bpy.types.Scene.uiListIndex
+    del bpy.types.Scene.colorRampPreview
+    del bpy.types.Scene.useColors
+    # > clear existing handlers
+    bpy.app.handlers.scene_update_post.clear()
 
 if __name__ == "__main__":
-	register()
+    register()

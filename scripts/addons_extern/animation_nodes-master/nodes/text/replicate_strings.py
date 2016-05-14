@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class ReplicateStringsNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ReplicateStringsNode"
     bl_label = "Replicate Text"

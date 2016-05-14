@@ -44,7 +44,6 @@ class FormulaNode(bpy.types.Node, SverchCustomTreeNode):
         self.inputs.new('StringsSocket', "n[.]", "n[.]")
         self.outputs.new('StringsSocket', "Result", "Result")
 
-
     def update(self):
         # inputs
         if not self.inputs:
@@ -57,7 +56,7 @@ class FormulaNode(bpy.types.Node, SverchCustomTreeNode):
 
     def process(self):
         vecs = self.inputs['X'].sv_get(default=[[0]])
-        
+
         list_mult = []
         for idx, socket in enumerate(self.inputs[1:-1]):
             if socket.is_linked and \
@@ -67,7 +66,7 @@ class FormulaNode(bpy.types.Node, SverchCustomTreeNode):
                 list_mult.extend(mult)
             else:
                 list_mult.extend([[0]])
-                
+
         if len(list_mult) == 0:
             list_mult = [[0.0]]
 

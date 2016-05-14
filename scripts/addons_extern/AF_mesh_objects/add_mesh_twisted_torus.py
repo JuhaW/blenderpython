@@ -10,6 +10,8 @@ from math import cos, sin, pi
 # verts/edges/faces ... List of vertices/edges/faces for the
 #                       new mesh (as used in from_pydata).
 # name ... Name of the new mesh (& object).
+
+
 def create_mesh_object(context, verts, edges, faces, name):
 
     # Create new mesh
@@ -25,6 +27,7 @@ def create_mesh_object(context, verts, edges, faces, name):
     return object_utils.object_data_add(context, mesh, operator=None)
 
 # A very simple "bridge" tool.
+
 
 def createFaces(vertIdx1, vertIdx2, closed=False, flipped=False):
     faces = []
@@ -69,17 +72,18 @@ def createFaces(vertIdx1, vertIdx2, closed=False, flipped=False):
                 face = [vertIdx2[num], vertIdx1[0], vertIdx2[num + 1]]
             else:
                 face = [vertIdx2[num], vertIdx1[num],
-                    vertIdx1[num + 1], vertIdx2[num + 1]]
+                        vertIdx1[num + 1], vertIdx2[num + 1]]
             faces.append(face)
         else:
             if fan:
                 face = [vertIdx1[0], vertIdx2[num], vertIdx2[num + 1]]
             else:
                 face = [vertIdx1[num], vertIdx2[num],
-                    vertIdx2[num + 1], vertIdx1[num + 1]]
+                        vertIdx2[num + 1], vertIdx1[num + 1]]
             faces.append(face)
 
     return faces
+
 
 def add_twisted_torus(major_rad, minor_rad, major_seg, minor_seg, twists):
     PI_2 = pi * 2.0
@@ -125,6 +129,7 @@ def add_twisted_torus(major_rad, minor_rad, major_seg, minor_seg, twists):
 
     return verts, faces
 
+
 class AddTwistedTorus(bpy.types.Operator):
     """Add a torus mesh"""
     bl_idname = "mesh.primitive_twisted_torus_add"
@@ -132,45 +137,45 @@ class AddTwistedTorus(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
 
     major_radius = FloatProperty(name="Major Radius",
-        description="Radius from the origin to the" \
-            " center of the cross section",
-        min=0.01,
-        max=100.0,
-        default=1.0)
+                                 description="Radius from the origin to the"
+                                 " center of the cross section",
+                                 min=0.01,
+                                 max=100.0,
+                                 default=1.0)
     minor_radius = FloatProperty(name="Minor Radius",
-        description="Radius of the torus' cross section",
-        min=0.01,
-        max=100.0,
-        default=0.25)
+                                 description="Radius of the torus' cross section",
+                                 min=0.01,
+                                 max=100.0,
+                                 default=0.25)
     major_segments = IntProperty(name="Major Segments",
-        description="Number of segments for the main ring of the torus",
-        min=3,
-        max=256,
-        default=48)
+                                 description="Number of segments for the main ring of the torus",
+                                 min=3,
+                                 max=256,
+                                 default=48)
     minor_segments = IntProperty(name="Minor Segments",
-        description="Number of segments for the minor ring of the torus",
-        min=3,
-        max=256,
-        default=12)
+                                 description="Number of segments for the minor ring of the torus",
+                                 min=3,
+                                 max=256,
+                                 default=12)
     twists = IntProperty(name="Twists",
-        description="Number of twists of the torus",
-        min=0,
-        max=256,
-        default=1)
+                         description="Number of twists of the torus",
+                         min=0,
+                         max=256,
+                         default=1)
 
     use_abso = BoolProperty(name="Use Int+Ext Controls",
-        description="Use the Int / Ext controls for torus dimensions",
-        default=False)
+                            description="Use the Int / Ext controls for torus dimensions",
+                            default=False)
     abso_major_rad = FloatProperty(name="Exterior Radius",
-        description="Total Exterior Radius of the torus",
-        min=0.01,
-        max=100.0,
-        default=1.0)
+                                   description="Total Exterior Radius of the torus",
+                                   min=0.01,
+                                   max=100.0,
+                                   default=1.0)
     abso_minor_rad = FloatProperty(name="Inside Radius",
-        description="Total Interior Radius of the torus",
-        min=0.01,
-        max=100.0,
-        default=0.5)
+                                   description="Total Interior Radius of the torus",
+                                   min=0.01,
+                                   max=100.0,
+                                   default=0.5)
 
     def execute(self, context):
 

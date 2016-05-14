@@ -38,15 +38,15 @@ class SvFilterObjsNode(bpy.types.Node, SverchCustomTreeNode):
 
     def draw_buttons(self, context, layout):
         if not self.inputs['mask'].is_linked:
-            layout.prop(self,  "formula", text="")
+            layout.prop(self, "formula", text="")
 
     def process(self):
-        In1,In2 = self.inputs
-        O1,O2 = self.outputs
+        In1, In2 = self.inputs
+        O1, O2 = self.outputs
         objs = In1.sv_get()
         if isinstance(objs[0], list):
             objs = objs[0]
-        out1,out2 = [],[]
+        out1, out2 = [], []
         if In2.is_linked:
             m = In2.sv_get()
             if isinstance(m[0], list):

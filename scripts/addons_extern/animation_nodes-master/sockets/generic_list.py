@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class GenericListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_GenericListSocket"
     bl_label = "GenericListSocket"

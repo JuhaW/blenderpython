@@ -3,7 +3,9 @@ from bpy.props import IntProperty, BoolProperty, FloatProperty, EnumProperty, Po
 from bpy.types import Menu, Panel, AddonPreferences, PropertyGroup, UIList
 from rna_prop_ui import PropertyPanel
 
-#Generates the UI panel inside the 3D view
+# Generates the UI panel inside the 3D view
+
+
 class GX_Export(Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"

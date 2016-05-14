@@ -175,4 +175,3 @@ def interpolate(x, y, x_new, axis=-1, out=None):
     wj = xi - x[bb]
 
     return ((wj * d[bb] + c[bb]) * wj + b[bb]) * wj + y[bb]
-

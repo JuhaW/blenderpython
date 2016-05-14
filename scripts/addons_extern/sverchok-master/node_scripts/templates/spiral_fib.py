@@ -1,8 +1,8 @@
 def sv_main(n=1000, c=0.1):
 
     in_sockets = [
-        ['s', 'Number of points',  n],
-        ['s', 'Scale Factor',  c]
+        ['s', 'Number of points', n],
+        ['s', 'Scale Factor', c]
     ]
 
     from math import sin, cos, radians, pi, sqrt

@@ -3,11 +3,12 @@ from bpy.props import *
 from ... events import propertyChanged
 from ... base_types.node import AnimationNode
 
+
 class ViewportColorNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ViewportColorNode"
     bl_label = "Viewport Color"
 
-    materialName = StringProperty(update = propertyChanged)
+    materialName = StringProperty(update=propertyChanged)
 
     def create(self):
         self.inputs.new("an_ColorSocket", "Color", "color")
@@ -17,7 +18,10 @@ class ViewportColorNode(bpy.types.Node, AnimationNode):
 
     def execute(self, color):
         material = bpy.data.materials.get(self.materialName)
-        if material is None: return
+        if material is None:
+            return
 
-        try: material.diffuse_color = color[:3]
-        except: pass
+        try:
+            material.diffuse_color = color[:3]
+        except:
+            pass

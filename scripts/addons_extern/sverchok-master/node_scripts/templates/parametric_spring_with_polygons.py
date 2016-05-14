@@ -7,15 +7,13 @@ def sv_main(n_verts=12, prad=1.2, crad=0.5, n_iter=4, n_turns=7, height=6):
 
     # in boilerplate, could be less verbose
     in_sockets = [
-        ['s', "num_verts",  n_verts],
+        ['s', "num_verts", n_verts],
         ['s', "profile_radius", prad],
         ['s', "coil_radius", crad],
         ['s', "num_iterations_per_turn", n_iter],
         ['s', "num_turns", n_turns],
         ['s', "height", height]
     ]
-
-    
 
     def make_coil():
 

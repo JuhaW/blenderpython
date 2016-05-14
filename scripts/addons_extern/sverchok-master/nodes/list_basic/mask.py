@@ -52,11 +52,11 @@ class MaskListNode(bpy.types.Node, SverchCustomTreeNode):
         inputsocketname = 'data'
         outputsocketname = ['dataTrue', 'dataFalse']
         changable_sockets(self, inputsocketname, outputsocketname)
-        
+
     def process(self):
         inputs = self.inputs
         outputs = self.outputs
-    
+
         data = inputs['data'].sv_get()
         mask = inputs['mask'].sv_get(default=[[1, 0]])
 
@@ -94,7 +94,7 @@ class MaskListNode(bpy.types.Node, SverchCustomTreeNode):
         if level > 1:
             if isinstance(list_a, (list, tuple)):
                 for idx, l in enumerate(list_a):
-                    l2 = self.putCurrentLevelList(l, list_b, mask_l, level-1, idx)
+                    l2 = self.putCurrentLevelList(l, list_b, mask_l, level - 1, idx)
                     result_t.append(l2[0])
                     result_f.append(l2[1])
                     mask_out.append(l2[2])
@@ -104,13 +104,13 @@ class MaskListNode(bpy.types.Node, SverchCustomTreeNode):
                 print('AHTUNG!!!')
                 return list_a
         else:
-            indx = min(len(mask_l)-1, idx)
+            indx = min(len(mask_l) - 1, idx)
             mask = mask_l[indx]
             mask_0 = copy(mask)
             while len(mask) < len(list_a):
                 if len(mask_0) == 0:
                     mask_0 = [1, 0]
-                mask = mask+mask_0
+                mask = mask + mask_0
 
             for idx, l in enumerate(list_a):
                 tmp = list_b.pop(0)
@@ -129,7 +129,7 @@ class MaskListNode(bpy.types.Node, SverchCustomTreeNode):
         if level > 1:
             if isinstance(list_a, (list, tuple)):
                 for l in list_a:
-                    l2 = self.getCurrentLevelList(l, level-1)
+                    l2 = self.getCurrentLevelList(l, level - 1)
                     if isinstance(l2, (list, tuple)):
                         list_b.extend(l2)
                     else:

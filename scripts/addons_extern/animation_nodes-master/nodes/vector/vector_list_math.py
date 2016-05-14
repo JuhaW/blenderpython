@@ -5,21 +5,22 @@ from ... base_types.node import AnimationNode
 
 operationItems = [
     ("ADD", "Add", "", "", 0),
-    ("AVERAGE", "Average", "", "", 1) ]
+    ("AVERAGE", "Average", "", "", 1)]
+
 
 class VectorListMathNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_VectorListMathNode"
     bl_label = "Vector List Math"
 
-    operation = EnumProperty(name = "Operation", default = "ADD",
-        items = operationItems, update = executionCodeChanged)
+    operation = EnumProperty(name="Operation", default="ADD",
+                             items=operationItems, update=executionCodeChanged)
 
     def create(self):
         self.inputs.new("an_VectorListSocket", "Vector List", "vectors")
         self.outputs.new("an_VectorSocket", "Result", "result")
 
     def draw(self, layout):
-        layout.prop(self, "operation", text = "")
+        layout.prop(self, "operation", text="")
 
     def getExecutionCode(self):
         if self.operation in ("ADD", "AVERAGE"):

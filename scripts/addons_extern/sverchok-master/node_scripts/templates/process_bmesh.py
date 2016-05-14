@@ -2,6 +2,7 @@ import bpy
 import bmesh
 from sverchok.utils.sv_bmesh_utils import pydata_from_bmesh
 
+
 def sv_main(radius=0.3):
     verts_out = []
     edges_out = []
@@ -23,7 +24,7 @@ def sv_main(radius=0.3):
 
         verts_out.append([verts])
         edges_out.append([edges])
-        bm.free() 
+        bm.free()
 
     out_sockets = [
         ['v', 'verts', verts_out],

@@ -313,7 +313,7 @@ classes = [
     SelModeVertFace,
     SelModeEdgeFace,
     SelModeVertEdgeFace,
-    ]
+]
 
 addon_keymaps = []
 

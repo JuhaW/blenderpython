@@ -6,11 +6,12 @@ from . basic_shapes import tubeVertices
 # Loft
 ###################################
 
-def loftSplines(splines, 
+
+def loftSplines(splines,
                 nSplineSamples, nSurfaceSamples, *,
-                type = "LINEAR", cyclic = False, smoothness = 1,
-                uniformConverterResolution = 100, splineDistributionType = "RESOLUTION", surfaceDistributionType = "RESOLUTION",
-                startSurfaceParameter = 0.0, endSurfaceParameter = 1.0):
+                type="LINEAR", cyclic=False, smoothness=1,
+                uniformConverterResolution=100, splineDistributionType="RESOLUTION", surfaceDistributionType="RESOLUTION",
+                startSurfaceParameter=0.0, endSurfaceParameter=1.0):
 
     vertices = []
 
@@ -19,7 +20,7 @@ def loftSplines(splines,
     if splineDistributionType == "RESOLUTION":
         samples = [spline.getSamples(nSplineSamples) for spline in splines]
     elif splineDistributionType == "UNIFORM":
-        samples = [spline.getUniformSamples(nSplineSamples, resolution = uniformConverterResolution) for spline in splines]
+        samples = [spline.getUniformSamples(nSplineSamples, resolution=uniformConverterResolution) for spline in splines]
 
     for points in zip(*samples):
         if type == "BEZIER":
@@ -34,11 +35,12 @@ def loftSplines(splines,
         amount = nSurfaceSamples + int(isRealCyclic)
 
         if surfaceDistributionType == "RESOLUTION":
-            vertices.extend(spline.getSamples(amount, start = startSurfaceParameter, end = endSurfaceParameter))
+            vertices.extend(spline.getSamples(amount, start=startSurfaceParameter, end=endSurfaceParameter))
         elif surfaceDistributionType == "UNIFORM":
-            vertices.extend(spline.getUniformSamples(amount, resolution = uniformConverterResolution, start = startSurfaceParameter, end = endSurfaceParameter))
+            vertices.extend(spline.getUniformSamples(amount, resolution=uniformConverterResolution, start=startSurfaceParameter, end=endSurfaceParameter))
 
-        if isRealCyclic: del vertices[-1]
+        if isRealCyclic:
+            del vertices[-1]
 
     if isRealCyclic:
         polygons = tubeQuadPolygonIndices(nSplineSamples, nSurfaceSamples)
@@ -51,7 +53,7 @@ def loftSplines(splines,
 # Revolve
 ###################################
 
-def revolveProfileAroundAxis(axis, profile, nSplineSamples, nSurfaceSamples, type = "PARAMETER"):
+def revolveProfileAroundAxis(axis, profile, nSplineSamples, nSurfaceSamples, type="PARAMETER"):
     if type == "PARAMETER":
         axisSamples = axis.getSamples(nSplineSamples)
         profileSamples = profile.getSamples(nSplineSamples)

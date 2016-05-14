@@ -31,13 +31,12 @@ class SvCacheNode(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Cache'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
-
     n_id = StringProperty()
-    
+
     cache_amount = IntProperty(default=1, min=0)
     cache_offset = IntProperty(default=1, min=0)
     node_dict = {}
-    
+
     def sv_init(self, context):
         self.inputs.new("StringsSocket", "Data")
         self.outputs.new("StringsSocket", "Data")
@@ -47,23 +46,24 @@ class SvCacheNode(bpy.types.Node, SverchCustomTreeNode):
 
     def update(self):
         changable_sockets(self, "Data", ["Data"])
-        
+
     def process(self):
         n_id = node_id(self)
         data = self.node_dict.get(n_id)
         if not data:
             self.node_dict[n_id] = {}
             data = self.node_dict.get(n_id)
-            
+
         frame_current = bpy.context.scene.frame_current
         out_frame = frame_current - self.cache_offset
         data[frame_current] = self.inputs[0].sv_get()
         out_data = data.get(out_frame, [])
         self.outputs[0].sv_set(out_data)
 
+
 def register():
     bpy.utils.register_class(SvCacheNode)
 
+
 def unregister():
     bpy.utils.unregister_class(SvCacheNode)
-

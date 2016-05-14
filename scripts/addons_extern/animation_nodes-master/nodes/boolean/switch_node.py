@@ -4,6 +4,7 @@ from ... sockets.info import toIdName
 from ... tree_info import keepNodeState
 from ... base_types.node import AnimationNode
 
+
 class SwitchNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SwitchNode"
     bl_label = "Switch"
@@ -12,7 +13,7 @@ class SwitchNode(bpy.types.Node, AnimationNode):
         self.socketIdName = toIdName(self.assignedType)
         self.generateSockets()
 
-    assignedType = StringProperty(update = assignedTypeChanged)
+    assignedType = StringProperty(update=assignedTypeChanged)
     socketIdName = StringProperty()
 
     def create(self):
@@ -25,11 +26,13 @@ class SwitchNode(bpy.types.Node, AnimationNode):
     def getWantedDataType(self):
         for socket in (self.inputs[1], self.inputs[2], self.outputs[0], self.outputs[1]):
             dataOrigin = socket.dataOrigin
-            if dataOrigin is not None: return dataOrigin.dataType
+            if dataOrigin is not None:
+                return dataOrigin.dataType
         return self.inputs[1].dataType
 
     def assignType(self, dataType):
-        if dataType == self.assignedType: return
+        if dataType == self.assignedType:
+            return
         self.assignedType = dataType
 
     def getExecutionCode(self):

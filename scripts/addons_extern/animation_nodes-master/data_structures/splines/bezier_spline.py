@@ -5,6 +5,7 @@ from . base_spline import Spline
 
 
 class BezierSpline(Spline):
+
     def __init__(self):
         self.type = "BEZIER"
         self.points = []
@@ -44,7 +45,8 @@ class BezierSpline(Spline):
     def update(self):
         def recreateSegments():
             self.segments = []
-            if len(self.points) < 2: return
+            if len(self.points) < 2:
+                return
             for left, right in zip(self.points[:-1], self.points[1:]):
                 self.segments.append(BezierSegment(left, right))
             if self.isCyclic:
@@ -64,18 +66,19 @@ class BezierSpline(Spline):
                 parameters.append((parameter + i) / len(self.segments))
         return parameters
 
-    def calculateSmoothHandles(self, strength = 0.3333):
+    def calculateSmoothHandles(self, strength=0.3333):
         neighborSegments = self.getNeighborSegments()
         for segment in neighborSegments:
             segment.calculateSmoothHandles(strength)
 
     def getNeighborSegments(self):
         points = self.points
-        if len(points) < 2: return []
+        if len(points) < 2:
+            return []
         neighborSegments = []
         if self.isCyclic:
             for i, point in enumerate(points):
-                segment = BezierNeighbors(points[i-2].location, points[i-1], point.location)
+                segment = BezierNeighbors(points[i - 2].location, points[i - 1], point.location)
                 neighborSegments.append(segment)
         else:
             neighborSegments.append(BezierNeighbors(points[0].location, points[0], points[1].location))
@@ -105,6 +108,7 @@ class BezierSpline(Spline):
 
 
 class BezierPoint:
+
     def __init__(self, location, leftHandle, rightHandle):
         self.location = location
         self.leftHandle = leftHandle
@@ -120,6 +124,7 @@ class BezierPoint:
 
 
 class BezierSegment:
+
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -169,13 +174,14 @@ class BezierSegment:
 
 
 class BezierNeighbors:
+
     def __init__(self, leftLocation, point, rightLocation):
         self.point = point
         self.leftLocation = leftLocation
         self.rightLocation = rightLocation
 
     # http://stackoverflow.com/questions/13037606/how-does-inkscape-calculate-the-coordinates-for-control-points-for-smooth-edges/13425159#13425159
-    def calculateSmoothHandles(self, strength = 0.3333):
+    def calculateSmoothHandles(self, strength=0.3333):
         vecLeft = self.leftLocation - self.point.location
         vecRight = self.rightLocation - self.point.location
 
@@ -189,7 +195,7 @@ class BezierNeighbors:
             self.point.rightHandle = self.point.location + dir * lenRight * strength
 
     # http://www.antigrain.com/research/bezier_interpolation/
-    def calculateSmoothHandlesOLD(self, strength = 1):
+    def calculateSmoothHandlesOLD(self, strength=1):
         co = self.point.location
         distanceBefore = (co - self.leftLocation).length
         distanceAfter = (co - self.rightLocation).length

@@ -4,6 +4,7 @@ from mathutils import Euler
 from .. events import propertyChanged
 from .. base_types.socket import AnimationNodeSocket
 
+
 class EulerSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_EulerSocket"
     bl_label = "Euler Socket"
@@ -13,14 +14,15 @@ class EulerSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     storable = True
     comparable = False
 
-    value = FloatVectorProperty(default = [0, 0, 0], update = propertyChanged, subtype = "EULER")
+    value = FloatVectorProperty(default=[0, 0, 0], update=propertyChanged, subtype="EULER")
 
     def drawProperty(self, layout, text):
-        col = layout.column(align = True)
-        if text != "": col.label(text)
-        col.prop(self, "value", index = 0, text = "X")
-        col.prop(self, "value", index = 1, text = "Y")
-        col.prop(self, "value", index = 2, text = "Z")
+        col = layout.column(align=True)
+        if text != "":
+            col.label(text)
+        col.prop(self, "value", index=0, text="X")
+        col.prop(self, "value", index=1, text="Y")
+        col.prop(self, "value", index=2, text="Z")
 
     def getValue(self):
         return Euler(self.value)

@@ -4,14 +4,15 @@ from mathutils import Vector
 from ... base_types.node import AnimationNode
 from ... events import propertyChanged
 
+
 class an_EdgesToPlanesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_EdgesToPlanesNode"
     bl_label = "Edges to Planes"
 
     calculateDirection = BoolProperty(
-        name = "Calculate Direction",
-        description = "Calculate a rectangle instead of a parallelogram (takes more time)",
-        default = True, update = propertyChanged)
+        name="Calculate Direction",
+        description="Calculate a rectangle instead of a parallelogram (takes more time)",
+        default=True, update=propertyChanged)
 
     errorMessage = StringProperty()
 
@@ -29,7 +30,7 @@ class an_EdgesToPlanesNode(bpy.types.Node, AnimationNode):
     def draw(self, layout):
         layout.prop(self, "calculateDirection")
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon = "ERROR")
+            layout.label(self.errorMessage, icon="ERROR")
 
     def execute(self, vertices, edges, width, upVector):
         try:
@@ -38,7 +39,6 @@ class an_EdgesToPlanesNode(bpy.types.Node, AnimationNode):
         except IndexError:
             self.errorMessage = "Missing vertices"
             return [], []
-
 
     def calculatePlanes(self, vertices, edges, width, upVector):
         newVertices = []

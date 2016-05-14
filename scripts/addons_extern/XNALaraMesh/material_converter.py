@@ -33,6 +33,7 @@ sceneContext = bpy.types.Scene
 textureNodeSizeX = 150
 textureNodeSizeY = 350
 
+
 def AutoNodeOff():
     mats = bpy.data.materials
     for cmat in mats:
@@ -219,7 +220,7 @@ def createDiffuseNodes(cmat, texCoordNode, mainShader, materialOutput):
         if texNode:
             # print('Generating {} Nodes:'.format(groupName), texNode.image)
             texNode.parent = diffuseFrame
-            placeNode(texNode, -500 - ((texCount-1) * 200), currPosY, textureNodeSizeX, textureNodeSizeY, 0, textureIdx)
+            placeNode(texNode, -500 - ((texCount - 1) * 200), currPosY, textureNodeSizeX, textureNodeSizeY, 0, textureIdx)
 
             # Add mapping node
             textureMapping = TreeNodes.nodes.new(MAPPING_NODE)
@@ -666,7 +667,6 @@ def makeCyclesFromBI(cmat):
 
     # BI Material to Cycles - Emission map
     createEmissionNodes(cmat, texCoordNode, mainShader, materialOutput)
-
 
     # Texture coordinates
     # list all nodes conected to outputs

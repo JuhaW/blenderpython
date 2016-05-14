@@ -5,6 +5,7 @@ from ... utils.selection import getSortedSelectedObjectNames
 from ... sockets.info import (getBaseDataTypeItemsCallback, toIdName, toListIdName,
                               getListDataTypes, toBaseDataType, toListDataType)
 
+
 class CreateListNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_CreateListNode"
     bl_label = "Create List"
@@ -13,7 +14,7 @@ class CreateListNode(bpy.types.Node, AnimationNode):
 
     @classmethod
     def getSearchTags(cls):
-        return [("Create " + dataType, {"assignedType" : repr(toBaseDataType(dataType))})
+        return [("Create " + dataType, {"assignedType": repr(toBaseDataType(dataType))})
                 for dataType in getListDataTypes()]
 
     def assignedTypeChanged(self, context):
@@ -22,7 +23,7 @@ class CreateListNode(bpy.types.Node, AnimationNode):
         self.listIdName = toListIdName(self.baseIdName)
         self.recreateSockets()
 
-    assignedType = StringProperty(update = assignedTypeChanged)
+    assignedType = StringProperty(update=assignedTypeChanged)
     baseIdName = StringProperty()
     listIdName = StringProperty()
 
@@ -30,31 +31,31 @@ class CreateListNode(bpy.types.Node, AnimationNode):
         for socket in self.inputs:
             socket.hide = self.hideInputs
 
-    hideInputs = BoolProperty(name = "Hide Inputs", default = False, update = hideStatusChanged)
+    hideInputs = BoolProperty(name="Hide Inputs", default=False, update=hideStatusChanged)
 
     def create(self):
         self.assignedType = "Float"
 
     def draw(self, layout):
-        row = layout.row(align = True)
+        row = layout.row(align=True)
         self.invokeFunction(row, "newInputSocket",
-            text = "New Input",
-            description = "Create a new input socket",
-            icon = "PLUS")
+                            text="New Input",
+                            description="Create a new input socket",
+                            icon="PLUS")
         self.invokeFunction(row, "removeElementInputs",
-            description = "Remove all inputs.",
-            confirm = True,
-            icon = "X")
+                            description="Remove all inputs.",
+                            confirm=True,
+                            icon="X")
 
         self.drawTypeSpecifics(layout)
 
     def drawAdvanced(self, layout):
         self.invokeSocketTypeChooser(layout, "assignListDataType",
-            socketGroup = "LIST", text = "Change Type", icon = "TRIA_RIGHT")
+                                     socketGroup="LIST", text="Change Type", icon="TRIA_RIGHT")
 
         layout.prop(self, "hideInputs")
 
-        self.invokeFunction(layout, "removeElementInputs", "Remove Inputs", icon = "X")
+        self.invokeFunction(layout, "removeElementInputs", "Remove Inputs", icon="X")
 
         self.drawAdvancedTypeSpecific(layout)
 
@@ -63,7 +64,7 @@ class CreateListNode(bpy.types.Node, AnimationNode):
 
     @property
     def inputVariables(self):
-        return { socket.identifier : "element_" + str(i) for i, socket in enumerate(self.inputs) }
+        return {socket.identifier: "element_" + str(i) for i, socket in enumerate(self.inputs)}
 
     def getExecutionCode(self):
         return "outList = [" + ", ".join(["element_" + str(i) for i, socket in enumerate(self.inputs) if socket.dataType != "Node Control"]) + "]"
@@ -72,7 +73,8 @@ class CreateListNode(bpy.types.Node, AnimationNode):
         self.updateOutputName()
         emptySocket = self.inputs["..."]
         origin = emptySocket.directOrigin
-        if origin is None: return
+        if origin is None:
+            return
         socket = self.newInputSocket()
         socket.linkWith(origin)
         emptySocket.removeLinks()
@@ -80,11 +82,11 @@ class CreateListNode(bpy.types.Node, AnimationNode):
     def assignListDataType(self, listDataType):
         self.assignedType = toBaseDataType(listDataType)
 
-    def assignBaseDataType(self, baseDataType, inputAmount = 2):
+    def assignBaseDataType(self, baseDataType, inputAmount=2):
         self.assignedType = baseDataType
         self.recreateSockets(inputAmount)
 
-    def recreateSockets(self, inputAmount = 2):
+    def recreateSockets(self, inputAmount=2):
         self.inputs.clear()
         self.outputs.clear()
 
@@ -116,7 +118,6 @@ class CreateListNode(bpy.types.Node, AnimationNode):
         for socket in self.inputs[:-1]:
             socket.remove()
 
-
     # type specific stuff
     #############################
 
@@ -126,9 +127,9 @@ class CreateListNode(bpy.types.Node, AnimationNode):
 
     def drawAdvancedTypeSpecific(self, layout):
         if self.assignedType in ("Object", "Spline"):
-            self.invokeFunction(layout, "createInputsForSelectedObjects", text = "From Selection", icon = "PLUS")
+            self.invokeFunction(layout, "createInputsForSelectedObjects", text="From Selection", icon="PLUS")
         if self.assignedType == "Object Group":
-            self.invokeFunction(layout, "createInputsForSelectedObjectGroups", text = "From Selection", icon = "PLUS")
+            self.invokeFunction(layout, "createInputsForSelectedObjectGroups", text="From Selection", icon="PLUS")
 
     def createInputsForSelectedObjects(self):
         names = getSortedSelectedObjectNames()

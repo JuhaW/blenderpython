@@ -1,5 +1,8 @@
-import bpy, random, mathutils
+import bpy
+import random
+import mathutils
 from ... base_types.node import AnimationNode
+
 
 class ParticleSystemsInputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ParticleSystemsInputNode"
@@ -12,7 +15,8 @@ class ParticleSystemsInputNode(bpy.types.Node, AnimationNode):
         self.width += 10
 
     def execute(self, object):
-        if not object: return [], None
+        if not object:
+            return [], None
         particleSystems = object.particle_systems
         active = particleSystems.active
         return list(particleSystems), active

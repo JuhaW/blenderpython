@@ -20,7 +20,9 @@
 
 import bpy
 
+
 class ModalHelper():
+
     def __init__(self):
         # Map a domain of events to the corresponding range of keymap items.
         self.event_map = dict()
@@ -29,8 +31,8 @@ class ModalHelper():
         # method's event loop.
         self.queue = list()
 
-    def generate_event_map(self, keymap_names = list(), operator_ids = set()):
-        # Create a mapping between events and the respective keymap items.  
+    def generate_event_map(self, keymap_names=list(), operator_ids=set()):
+        # Create a mapping between events and the respective keymap items.
         # Supplying keymap names and operator ids filters the map to include
         # only event mappings from certain keymaps for particular operators.
         event_map = self.event_map
@@ -50,10 +52,10 @@ class ModalHelper():
                 # operators, map the event to the keymap item.
                 if operator_ids:
                     partial_event_map = {(
-                            keymap_item.alt, keymap_item.ctrl,
-                            keymap_item.oskey, keymap_item.shift,
-                            keymap_item.type, keymap_item.value
-                        ) : keymap_item
+                        keymap_item.alt, keymap_item.ctrl,
+                        keymap_item.oskey, keymap_item.shift,
+                        keymap_item.type, keymap_item.value
+                    ): keymap_item
                         for keymap_item in keymap.keymap_items
                         if keymap_item.idname in operator_ids
                     }
@@ -62,10 +64,10 @@ class ModalHelper():
                 # the keymap.
                 else:
                     partial_event_map = {(
-                            keymap_item.alt, keymap_item.ctrl,
-                            keymap_item.oskey, keymap_item.shift,
-                            keymap_item.type, keymap_item.value
-                        ) : keymap_item
+                        keymap_item.alt, keymap_item.ctrl,
+                        keymap_item.oskey, keymap_item.shift,
+                        keymap_item.type, keymap_item.value
+                    ): keymap_item
                         for keymap_item in keymap.keymap_items
                     }
 

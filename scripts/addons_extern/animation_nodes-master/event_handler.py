@@ -8,6 +8,7 @@ from . utils.nodes import iterAnimationNodes, getAnimationNodeTrees
 from . execution.units import setupExecutionUnits, finishExecutionUnits
 from . execution.auto_execution import iterAutoExecutionNodeTrees, executeNodeTrees, afterExecution
 
+
 @noRecursion
 def update(events):
     if failsToWriteToIDClasses():
@@ -35,9 +36,11 @@ def failsToWriteToIDClasses():
         scene["AN Prop Test"] = 0
         del scene["AN Prop Test"]
         return False
-    except: return True
+    except:
+        return True
 
 oldNamesHash = 0
+
 
 def didNameChange():
     global oldNamesHash
@@ -47,11 +50,13 @@ def didNameChange():
         return True
     return False
 
+
 def getNamesHash():
     names = set(itertools.chain(
         (tree.name for tree in getAnimationNodeTrees()),
         (node.name for node in iterAnimationNodes())))
     return names
+
 
 def updateSocketProperties():
     for socket in iterSocketsThatNeedUpdate():

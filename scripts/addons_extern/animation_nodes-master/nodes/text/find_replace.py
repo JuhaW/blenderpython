@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class ReplaceTextNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ReplaceTextNode"
     bl_label = "Replace Text"

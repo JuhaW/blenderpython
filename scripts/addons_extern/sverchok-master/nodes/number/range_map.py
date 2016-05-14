@@ -67,14 +67,14 @@ class SvMapRangeNode(bpy.types.Node, SverchCustomTreeNode):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "clamp")
-    
+
     def map_range(self, x_list, old_min, old_max, new_min, new_max):
         old_d = old_max - old_min
         new_d = new_max - new_min
-        scale = new_d/old_d
+        scale = new_d / old_d
 
         def f(x):
-            return new_min + (x-old_min)*scale
+            return new_min + (x - old_min) * scale
 
         if self.clamp:
             return [min(new_max, max(new_min, f(x))) for x in x_list]

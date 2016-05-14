@@ -22,8 +22,8 @@ import bmesh
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, Vector_generate, repeat_last,
-                            SvSetSocketAnyType, SvGetSocketAnyType,
-                            fullList)
+                                     SvSetSocketAnyType, SvGetSocketAnyType,
+                                     fullList)
 
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata
 # by Linus Yng
@@ -39,7 +39,7 @@ def soldify(vertices, faces, t, verlen):
 
     bm = bmesh_from_pydata(vertices, [], faces)
 
-    geom_in = bm.verts[:]+bm.edges[:]+bm.faces[:]
+    geom_in = bm.verts[:] + bm.edges[:] + bm.faces[:]
 
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
     res = bmesh.ops.solidify(bm, geom=geom_in, thickness=t[0])
@@ -108,23 +108,23 @@ class SvSolidifyNode(bpy.types.Node, SverchCustomTreeNode):
             for v, p, t in zip(verts, polys, thickness):
                 verlen = set(range(len(v)))
                 res = soldify(v, p, t, verlen)
-            
+
                 if not res:
                     return
                 verts_out.append(res[0])
                 edges_out.append(res[1])
                 polys_out.append(res[2])
                 newpo_out.append(res[3])
-            
+
             if 'vertices' in self.outputs and self.outputs['vertices'].is_linked:
                 SvSetSocketAnyType(self, 'vertices', verts_out)
-            
+
             if 'edges' in self.outputs and self.outputs['edges'].is_linked:
                 SvSetSocketAnyType(self, 'edges', edges_out)
-            
+
             if 'polygons' in self.outputs and self.outputs['polygons'].is_linked:
                 SvSetSocketAnyType(self, 'polygons', polys_out)
-                
+
             if 'newpols' in self.outputs and self.outputs['newpols'].is_linked:
                 SvSetSocketAnyType(self, 'newpols', newpo_out)
 

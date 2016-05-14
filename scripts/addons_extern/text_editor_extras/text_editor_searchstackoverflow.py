@@ -13,15 +13,13 @@ def search_stack(input_string):
         webbrowser.open(search_string.format(input_string))
     except:
         print('unable to locate stachoverflow')
-        
 
 
 class TextSearchStackOverflow(bpy.types.Operator):
     bl_label = ""
     bl_idname = "txt.search_stack"
-    
+
     def execute(self, context):
         bpy.ops.text.copy()
         search_stack(context.window_manager.clipboard)
         return {'FINISHED'}
-

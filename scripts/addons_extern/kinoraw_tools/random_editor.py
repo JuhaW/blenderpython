@@ -16,12 +16,15 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-import bpy, os, random
+import bpy
+import os
+import random
 from bpy.props import IntProperty, BoolProperty, StringProperty
 
 from . import functions
 
 # CLASSES
+
 
 class RandomScratchOperator(bpy.types.Operator):
     """ Random Scratch Operator """
@@ -38,21 +41,21 @@ class RandomScratchOperator(bpy.types.Operator):
             return False
 
     def invoke(self, context, event):
-        
+
         preferences = context.user_preferences
         random_frames = preferences.addons[__package__].preferences.random_frames
 
         sce = context.scene
-        seq=sce.sequence_editor
-        markers=sce.timeline_markers
+        seq = sce.sequence_editor
+        markers = sce.timeline_markers
         if seq:
-            strip= seq.active_strip
+            strip = seq.active_strip
             if strip != None:
                 if "IN" and "OUT" in markers:
-                    sin=markers["IN"].frame
-                    sout=markers["OUT"].frame
-                    
-                    # select active strip 
+                    sin = markers["IN"].frame
+                    sout = markers["OUT"].frame
+
+                    # select active strip
                     strip = context.scene.sequence_editor.active_strip
                     stripname = strip.name
                     # collect strip names inside the meta
@@ -62,39 +65,38 @@ class RandomScratchOperator(bpy.types.Operator):
                         stripnames.append(i.name)
                     # get strip channel
                     channel = strip.channel
-                    repeat = range(int((sout-sin)/random_frames))
-                    print(sin, sout, sout-sin, (sout-sin)/random_frames, repeat)
+                    repeat = range(int((sout - sin) / random_frames))
+                    print(sin, sout, sout - sin, (sout - sin) / random_frames, repeat)
                     for i in repeat:
-                        
+
                         # select all related strips
                         for j in stripnames:
                             strip = seq.sequences_all[j]
                             strip.select = True
-                        strip = seq.sequences_all[stripname]    
+                        strip = seq.sequences_all[stripname]
                         seq.active_strip = strip
                         # deselect all other strips
                         for j in context.selected_editable_sequences:
                             if j.name not in stripnames:
-                                j.select=False
+                                j.select = False
                         a = bpy.ops.sequencer.duplicate_move()
                         # select new strip
                         newstrip = seq.active_strip
                         # deselect all other strips
                         for j in context.selected_editable_sequences:
                             if j.name != newstrip.name:
-                                j.select=False
+                                j.select = False
                         # random cut
                         newstrip.frame_start = sin + i * random_frames
                         rand = functions.randomframe(newstrip)
                         functions.triminout(newstrip, rand, rand + random_frames)
                         newstrip.frame_start = i * random_frames + sin - newstrip.frame_offset_start
                         newstrip.channel = channel + 1
-                
-                
+
                 else:
                     self.report({'WARNING'}, "there is no IN and OUT")
-            bpy.ops.sequencer.reload()                   
-        return {'FINISHED'} 
+            bpy.ops.sequencer.reload()
+        return {'FINISHED'}
 
 
 class LoadRandomEditOperator(bpy.types.Operator):
@@ -112,28 +114,29 @@ class LoadRandomEditOperator(bpy.types.Operator):
             return False
 
     def invoke(self, context, event):
-        
-        #generate sources_dict
+
+        # generate sources_dict
         sources_dict = functions.get_marker_dict(random_selected_scene, random_number_of_subsets)
-        print("sources: ",sources_dict)
-            
-        #generate cut_list
-        cut_dict = functions.get_cut_dict(currentscene, random_number_of_subsets)  
-        print("cuts: ",cut_dict)
-        
-        #generate random_edit
-        random_edit = functions.random_edit_from_random_subset(cut_dict, sources_dict)    
+        print("sources: ", sources_dict)
+
+        # generate cut_list
+        cut_dict = functions.get_cut_dict(currentscene, random_number_of_subsets)
+        print("cuts: ", cut_dict)
+
+        # generate random_edit
+        random_edit = functions.random_edit_from_random_subset(cut_dict, sources_dict)
         print("random edit")
-        for i in random_edit: print("fr {}: dur: {} / {} {}".format(i[0],i[1],i[2],i[3]))
-        
+        for i in random_edit:
+            print("fr {}: dur: {} / {} {}".format(i[0], i[1], i[2], i[3]))
+
         sce = bpy.context.scene
-        seq=sce.sequence_editor
-        markers=sce.timeline_markers
-        strip= seq.active_strip
+        seq = sce.sequence_editor
+        markers = sce.timeline_markers
+        strip = seq.active_strip
         stripname = strip.name
         if "IN" and "OUT" in markers:
-            sin=markers["IN"].frame
-            sout=markers["OUT"].frame    
+            sin = markers["IN"].frame
+            sout = markers["OUT"].frame
             # collect strip names inside the meta
             stripnames = []
             stripnames.append(strip.name)
@@ -143,37 +146,37 @@ class LoadRandomEditOperator(bpy.types.Operator):
             channel = strip.channel
             #repeat = range(int((sout-sin)/random_frames))
             #print(sin, sout, sout-sin, (sout-sin)/random_frames, repeat)
-            for i in random_edit:    
+            for i in random_edit:
                 # select all related strips
                 for j in stripnames:
                     strip = seq.sequences_all[j]
                     strip.select = True
-                strip = seq.sequences_all[stripname]    
+                strip = seq.sequences_all[stripname]
                 seq.active_strip = strip
                 # deselect all other strips
                 for j in bpy.context.selected_editable_sequences:
                     if j.name not in stripnames:
-                        j.select=False
-                        
+                        j.select = False
+
                 a = bpy.ops.sequencer.duplicate_move()
                 # select new strip
                 newstrip = seq.active_strip
                 # deselect all other strips
                 for j in bpy.context.selected_editable_sequences:
                     if j.name != newstrip.name:
-                        j.select=False
+                        j.select = False
                 # random cut
                 #newstrip.frame_start = sin + i * random_frames
                 #rand = functions.randomframe(newstrip)
-                functions.triminout(newstrip, MARKER, MARKER+DURATION)
+                functions.triminout(newstrip, MARKER, MARKER + DURATION)
                 newstrip.frame_start = i * random_frames + sin - newstrip.frame_offset_start
                 newstrip.channel = channel + 1
         else:
             self.report({'WARNING'}, "there is no IN and OUT")
-        bpy.ops.sequencer.reload()             
-        return {'FINISHED'}      
+        bpy.ops.sequencer.reload()
+        return {'FINISHED'}
 
-    
+
 class RandomEditorPanel(bpy.types.Panel):
     """-_-_-"""
     bl_label = "Random Editor"
@@ -194,7 +197,7 @@ class RandomEditorPanel(bpy.types.Panel):
         else:
             return False
 
-    #def invoke(self, context, event):
+    # def invoke(self, context, event):
 
     def draw_header(self, context):
         layout = self.layout
@@ -213,7 +216,3 @@ class RandomEditorPanel(bpy.types.Panel):
         layout.operator("sequencer.randomscratchoperator")
         layout = self.layout
         layout.operator("sequencer.loadrandomeditoperator")
-        
-        
-
-

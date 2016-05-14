@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class DelayTimeNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_DelayTimeNode"
     bl_label = "Delay Time"

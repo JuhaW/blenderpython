@@ -28,6 +28,7 @@ from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata
 
 from sverchok.utils.csg_core import CSG
 
+
 def Boolean(VA, PA, VB, PB, operation):
     if not all([VA, PA, VB, PB]):
         return False, False
@@ -86,9 +87,9 @@ class SvCSGBooleanNode(bpy.types.Node, SverchCustomTreeNode):
 
     def sv_init(self, context):
         self.inputs.new('VerticesSocket', 'Verts A')
-        self.inputs.new('StringsSocket',  'Polys A')
+        self.inputs.new('StringsSocket', 'Polys A')
         self.inputs.new('VerticesSocket', 'Verts B')
-        self.inputs.new('StringsSocket',  'Polys B')
+        self.inputs.new('StringsSocket', 'Polys B')
 
         self.outputs.new('VerticesSocket', 'Vertices', 'Vertices')
         self.outputs.new('StringsSocket', 'Polygons', 'Polygons')

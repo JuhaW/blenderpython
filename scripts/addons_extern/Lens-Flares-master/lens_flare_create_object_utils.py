@@ -21,31 +21,35 @@ Created by Jacques Lucke
 import bpy
 from lens_flare_utils import *
 
-def newEmpty(name = "Empty", location = [0, 0, 0], hide = False, type = "PLAIN_AXES"):
-	bpy.ops.object.empty_add(location = location, type = type)
-	empty = bpy.context.object
-	empty.name = getPossibleName(name)
-	if hide:
-		bpy.ops.object.hide_view_set(unselected = False)
-	return empty
-	
-def newText(name = "Text", location = [0, 0, 0], text = "text"):
-	bpy.ops.object.text_add(location = location)
-	textObject = bpy.context.object
-	textObject.name = getPossibleName(name)
-	textObject.data.body = text
-	return textObject
-	
-def newPlane(name = "Plane", location = [0, 0, 0], size = 1):
-	bpy.ops.mesh.primitive_plane_add(location = location)
-	plane = bpy.context.object
-	plane.name = getPossibleName(name)
-	plane.scale = [size, size, size]
-	bpy.ops.object.transform_apply(scale = True)
-	return plane
-	
-def newCamera(name = "Camera", location = [0, 0, 0]):
-	bpy.ops.object.camera_add(location = location)
-	camera = bpy.context.object
-	camera.name = getPossibleName(name)
-	return camera
+
+def newEmpty(name="Empty", location=[0, 0, 0], hide=False, type="PLAIN_AXES"):
+    bpy.ops.object.empty_add(location=location, type=type)
+    empty = bpy.context.object
+    empty.name = getPossibleName(name)
+    if hide:
+        bpy.ops.object.hide_view_set(unselected=False)
+    return empty
+
+
+def newText(name="Text", location=[0, 0, 0], text="text"):
+    bpy.ops.object.text_add(location=location)
+    textObject = bpy.context.object
+    textObject.name = getPossibleName(name)
+    textObject.data.body = text
+    return textObject
+
+
+def newPlane(name="Plane", location=[0, 0, 0], size=1):
+    bpy.ops.mesh.primitive_plane_add(location=location)
+    plane = bpy.context.object
+    plane.name = getPossibleName(name)
+    plane.scale = [size, size, size]
+    bpy.ops.object.transform_apply(scale=True)
+    return plane
+
+
+def newCamera(name="Camera", location=[0, 0, 0]):
+    bpy.ops.object.camera_add(location=location)
+    camera = bpy.context.object
+    camera.name = getPossibleName(name)
+    return camera

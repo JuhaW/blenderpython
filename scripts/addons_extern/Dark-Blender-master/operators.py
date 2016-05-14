@@ -1,6 +1,8 @@
-import bpy, bmesh
+import bpy
+import bmesh
 from bpy.types import Operator
 from .definitions import SelectObject, FocusObject, ActivateObject, DuplicateObject, DuplicateObjects, DeleteObject, MoveObject, MoveObjects
+
 
 class DB_Add_Pipe(Operator):
     """Creates a path from the menu."""
@@ -11,7 +13,7 @@ class DB_Add_Pipe(Operator):
     def execute(self, context):
         print(self)
 
-        #Add Pipe
+        # Add Pipe
 #        bpy.ops.object.mode_set(mode = 'OBJECT')
         bpy.ops.curve.primitive_bezier_curve_add(radius=1, view_align=False, enter_editmode=False, location=(0, 0, 0), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
         bpy.context.object.data.resolution_u = 10
@@ -36,24 +38,24 @@ class DB_Auto_Seam(Operator):
     def execute(self, context):
         print(self)
 
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         for obj in bpy.context.selected_objects:
 
             bpy.context.scene.objects.active = obj
 
-            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.select_mode(type="EDGE")
-            bpy.ops.mesh.select_all(action = 'DESELECT')
+            bpy.ops.mesh.select_all(action='DESELECT')
             bpy.ops.mesh.edges_select_sharp(sharpness=0.525344)
             bpy.ops.mesh.mark_seam(clear=False)
-            bpy.ops.mesh.select_all(action = 'SELECT')
+            bpy.ops.mesh.select_all(action='SELECT')
 
             bpy.ops.mesh.remove_doubles()
 
             bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.02)
-            bpy.ops.mesh.select_all(action = 'DESELECT')
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
         self.report({'INFO'}, "Auto Seam Complete.")
 
@@ -69,16 +71,16 @@ class DB_Prep_Dynatopo(Operator):
     def execute(self, context):
         print(self)
 
-        #Dyntopo Sculpt
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        # Dyntopo Sculpt
+        bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.convert(target='MESH')
 
-        bpy.ops.object.mode_set(mode = 'EDIT')
-        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.remove_doubles()
         bpy.ops.mesh.normals_make_consistent(inside=False)
 
-        bpy.ops.object.mode_set(mode = 'SCULPT')
+        bpy.ops.object.mode_set(mode='SCULPT')
         bpy.ops.sculpt.dynamic_topology_toggle()
 
         self.report({'INFO'}, "Prepared mesh for Dymanic Topology.")
@@ -95,20 +97,21 @@ class DB_Extract_Mesh(Operator):
     def execute(self, context):
         print(self)
 
-        #Extract Mesh
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        # Extract Mesh
+        bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.duplicate()
 
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='INVERT')
         bpy.ops.mesh.delete(type='FACE')
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.modifier_add(type='SOLIDIFY')
         bpy.context.object.modifiers["Solidify"].thickness = -0.1
 
         self.report({'INFO'}, "Extracted Mesh.")
 
         return {'FINISHED'}
+
 
 class DB_Generate_HP(Operator):
     """Adds a subdivision modifier and applies additional settings to help create a high-poly mesh."""
@@ -119,26 +122,27 @@ class DB_Generate_HP(Operator):
     def execute(self, context):
         print(self)
 
-        #Generate HP
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        # Generate HP
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         for obj in bpy.context.selected_objects:
 
             bpy.context.scene.objects.active = obj
 
-            bpy.ops.object.mode_set(mode = 'EDIT')
-            bpy.ops.mesh.select_all(action = 'DESELECT')
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_all(action='DESELECT')
             bpy.ops.mesh.edges_select_sharp(sharpness=0.525344)
             bpy.ops.mesh.bevel(offset=0.05, segments=2, profile=1, vertex_only=False)
-            bpy.ops.mesh.select_all(action = 'DESELECT')
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
             bpy.ops.object.subdivision_set(level=3)
             bpy.ops.object.shade_smooth()
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
         self.report({'INFO'}, "High-Poly Mesh Prepared.")
 
         return {'FINISHED'}
+
 
 class DB_Generate_LP(Operator):
     """Decimates and simplifies a high-poly mesh to a low-poly mesh."""
@@ -149,30 +153,30 @@ class DB_Generate_LP(Operator):
     def execute(self, context):
         print(self)
 
-        #Generate LP
+        # Generate LP
 
-        bpy.ops.object.mode_set(mode= 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         bpy.ops.object.convert(target='MESH')
 
         bpy.ops.object.join()
 
-        bpy.context.object.location[0]= 0
-        bpy.ops.object.transform_apply(location=False,rotation=True, scale=False)
+        bpy.context.object.location[0] = 0
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 
         bpy.ops.object.modifier_add(type='EDGE_SPLIT')
         bpy.context.object.modifiers["EdgeSplit"].split_angle = 0.525344
         bpy.ops.object.modifier_apply(apply_as='DATA', modifier="EdgeSplit")
 
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.reveal()
         bpy.ops.mesh.select_mode(type="EDGE")
-        bpy.ops.mesh.select_all(action= 'SELECT')
+        bpy.ops.mesh.select_all(action='SELECT')
 
         bpy.ops.mesh.region_to_loop()
         bpy.ops.mesh.mark_seam(clear=False)
 
-        bpy.ops.mesh.select_all(action= 'SELECT')
+        bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.dissolve_limited()
 
         bpy.ops.mesh.quads_convert_to_tris()
@@ -180,41 +184,42 @@ class DB_Generate_LP(Operator):
 
         bpy.ops.mesh.remove_doubles()
 
-        bpy.ops.mesh.bisect(plane_co=(0,0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False,xstart=376, xend=381, ystart=133, yend=62)
+        bpy.ops.mesh.bisect(plane_co=(0, 0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False, xstart=376, xend=381, ystart=133, yend=62)
 
         bpy.ops.mesh.delete(type='FACE')
 
-        bpy.ops.mesh.select_all(action= 'SELECT')
+        bpy.ops.mesh.select_all(action='SELECT')
 
-        bpy.ops.mesh.bisect(plane_co=(0,0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False,xstart=376, xend=381, ystart=133, yend=62)
+        bpy.ops.mesh.bisect(plane_co=(0, 0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False, xstart=376, xend=381, ystart=133, yend=62)
         bpy.ops.mesh.mark_seam(clear=False)
 
-        bpy.ops.mesh.select_all(action= 'SELECT')
-        bpy.ops.uv.unwrap(method='ANGLE_BASED',margin=0.02)
-        bpy.ops.mesh.select_all(action= 'DESELECT')
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.02)
+        bpy.ops.mesh.select_all(action='DESELECT')
 
-        bpy.ops.object.mode_set(mode= 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.shade_smooth()
 
         bpy.ops.object.modifier_add(type='MIRROR')
-        bpy.ops.object.modifier_apply(apply_as='DATA',modifier="Mirror")
+        bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Mirror")
 
         bpy.ops.object.modifier_add(type='SHRINKWRAP')
         bpy.context.object.modifiers["Shrinkwrap"].show_on_cage = True
         bpy.context.object.modifiers["Shrinkwrap"].use_keep_above_surface = True
 
         bpy.ops.object.modifier_add(type='EDGE_SPLIT')
-        bpy.context.object.modifiers["EdgeSplit"].split_angle= 0.525344
+        bpy.context.object.modifiers["EdgeSplit"].split_angle = 0.525344
 
-        bpy.ops.object.mode_set(mode= 'EDIT')
-        bpy.ops.mesh.select_all(action= 'SELECT')
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.normals_make_consistent(inside=False)
 
-        bpy.ops.object.mode_set(mode= 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         self.report({'INFO'}, "Low-Poly Mesh Prepared.")
 
         return {'FINISHED'}
+
 
 class DB_Quick_Decimate(Operator):
     """Uses the decimate modifier with other settings to quickly decimate a mesh."""
@@ -225,28 +230,29 @@ class DB_Quick_Decimate(Operator):
     def execute(self, context):
         print(self)
 
-        #Quick Decimation
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        # Quick Decimation
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         bpy.ops.object.convert(target='MESH')
 
-        bpy.ops.object.mode_set(mode = 'EDIT')
-        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.remove_doubles()
         bpy.ops.mesh.normals_make_consistent(inside=False)
 
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         bpy.ops.object.modifier_add(type='DECIMATE')
         bpy.context.object.modifiers["Decimate"].ratio = 0.8
         bpy.context.object.modifiers["Decimate"].use_collapse_triangulate = True
         bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Decimate")
 
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         self.report({'INFO'}, "Mesh successfully decimated.")
 
         return {'FINISHED'}
+
 
 class DB_ResymmetriseX(Operator):
     """...ill get back to you on that one."""
@@ -257,8 +263,8 @@ class DB_ResymmetriseX(Operator):
     def execute(self, context):
         print(self)
 
-        #Resym X
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        # Resym X
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         for obj in bpy.context.selected_objects:
 
@@ -266,17 +272,17 @@ class DB_ResymmetriseX(Operator):
 
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=False)
 
-            bpy.ops.object.mode_set(mode = 'EDIT')
-            bpy.ops.mesh.select_all(action = 'SELECT')
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_all(action='SELECT')
             bpy.ops.mesh.bisect(plane_co=(0, 0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False, xstart=376, xend=381, ystart=133, yend=62)
 
             bpy.ops.mesh.delete(type='FACE')
 
-            bpy.ops.mesh.select_all(action= 'SELECT')
+            bpy.ops.mesh.select_all(action='SELECT')
 
-            bpy.ops.mesh.bisect(plane_co=(0,0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False,xstart=376, xend=381, ystart=133, yend=62)
+            bpy.ops.mesh.bisect(plane_co=(0, 0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False, xstart=376, xend=381, ystart=133, yend=62)
 
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
             bpy.ops.object.modifier_add(type='MIRROR')
             bpy.context.object.modifiers["Mirror"].use_clip = True
@@ -287,6 +293,7 @@ class DB_ResymmetriseX(Operator):
 
         return {'FINISHED'}
 
+
 class DB_Quick_Retopo(Operator):
     """...ill get back to you on that one."""
 
@@ -296,19 +303,19 @@ class DB_Quick_Retopo(Operator):
     def execute(self, context):
         print(self)
 
-        #Retopo
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        # Retopo
+        bpy.ops.object.mode_set(mode='OBJECT')
 
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         bpy.ops.object.convert(target='MESH')
 
-        bpy.ops.object.mode_set(mode = 'EDIT')
-        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.remove_doubles()
         bpy.ops.mesh.normals_make_consistent(inside=False)
 
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         bpy.context.scene.tool_settings.use_snap = True
         bpy.context.scene.tool_settings.snap_element = 'FACE'
@@ -321,19 +328,19 @@ class DB_Quick_Retopo(Operator):
         bpy.context.object.modifiers["Wireframe"].use_boundary = True
         bpy.context.object.modifiers["Wireframe"].use_replace = False
 
-        bpy.ops.object.mode_set(mode = 'EDIT')
-        bpy.ops.mesh.select_all(action = 'SELECT')
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.bisect(plane_co=(0, 0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False, xstart=376, xend=381, ystart=133, yend=62)
 
         bpy.ops.mesh.delete(type='FACE')
 
-        bpy.ops.mesh.select_all(action= 'SELECT')
+        bpy.ops.mesh.select_all(action='SELECT')
 
-        bpy.ops.mesh.bisect(plane_co=(0,0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False,xstart=376, xend=381, ystart=133, yend=62)
+        bpy.ops.mesh.bisect(plane_co=(0, 0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False, xstart=376, xend=381, ystart=133, yend=62)
 
-        bpy.ops.mesh.select_all(action = 'DESELECT')
+        bpy.ops.mesh.select_all(action='DESELECT')
 
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         bpy.ops.object.modifier_add(type='MIRROR')
         bpy.context.object.modifiers["Mirror"].use_clip = True
@@ -345,6 +352,7 @@ class DB_Quick_Retopo(Operator):
 
         return {'FINISHED'}
 
+
 class DB_Unfold_Half(Operator):
     """...ill get back to you on that one."""
 
@@ -354,8 +362,8 @@ class DB_Unfold_Half(Operator):
     def execute(self, context):
         print(self)
 
-        #Unfold Half
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        # Unfold Half
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         for obj in bpy.context.selected_objects:
 
@@ -364,22 +372,22 @@ class DB_Unfold_Half(Operator):
             bpy.context.object.location[0] = 0
 
             bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-            bpy.ops.object.mode_set(mode = 'EDIT')
-            bpy.ops.mesh.select_all(action = 'SELECT')
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_all(action='SELECT')
             bpy.ops.mesh.bisect(plane_co=(0, 0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False, xstart=376, xend=381, ystart=133, yend=62)
 
             bpy.ops.mesh.delete(type='FACE')
 
-            bpy.ops.mesh.select_all(action= 'SELECT')
+            bpy.ops.mesh.select_all(action='SELECT')
 
-            bpy.ops.mesh.bisect(plane_co=(0,0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False,xstart=376, xend=381, ystart=133, yend=62)
+            bpy.ops.mesh.bisect(plane_co=(0, 0, 0), plane_no=(1, 0, 0), clear_inner=True, clear_outer=False, xstart=376, xend=381, ystart=133, yend=62)
 
             bpy.ops.mesh.mark_seam(clear=False)
-            bpy.ops.mesh.select_all(action = 'SELECT')
+            bpy.ops.mesh.select_all(action='SELECT')
             bpy.ops.uv.unwrap(method='ANGLE_BASED', margin=0.02)
-            bpy.ops.mesh.select_all(action = 'DESELECT')
+            bpy.ops.mesh.select_all(action='DESELECT')
 
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
             bpy.ops.object.modifier_add(type='MIRROR')
             bpy.context.object.modifiers["Mirror"].use_clip = True
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Mirror")

@@ -2,24 +2,26 @@ bl_info = {"name": "Texture Renamer", "category": "Material"}
 
 import bpy
 
+
 class SimpleOp (bpy.types.Operator):
-    bl_idname="object.rename"
+    bl_idname = "object.rename"
     bl_label = "Renamer"
-   
-    def execute (self, context):
-        for texture in bpy.data.textures :
-            if "Texture" in texture.name and texture.type=="IMAGE":
-                textname=""
+
+    def execute(self, context):
+        for texture in bpy.data.textures:
+            if "Texture" in texture.name and texture.type == "IMAGE":
+                textname = ""
                 for word in bpy.data.textures[texture.name].image.name:
-                    if word!="." :
-                        textname=textname+word
-                    else :
-                        break                       
+                    if word != ".":
+                        textname = textname + word
+                    else:
+                        break
                 texture.name = textname
-            if texture.type!="IMAGE" : #rename specific textures as clouds, environnement map,...
+            if texture.type != "IMAGE":  # rename specific textures as clouds, environnement map,...
                 texture.name = texture.type.lower()
-       
+
         return {'FINISHED'}
+
 
 class HWPl(bpy.types.Panel):
     #"""Creates a Panel in the scene context of the properties editor"""
@@ -41,7 +43,7 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(HWPl)
-    bpy.utils.unregister_class(SimpleOp )
+    bpy.utils.unregister_class(SimpleOp)
 
 if __name__ == "__main__":
     register()

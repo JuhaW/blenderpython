@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class FCurveListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_FCurveListSocket"
     bl_label = "FCurve List Socket"

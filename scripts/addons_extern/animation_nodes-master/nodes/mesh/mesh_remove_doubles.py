@@ -2,6 +2,7 @@ import bpy
 import bmesh
 from ... base_types.node import AnimationNode
 
+
 class BMeshRemoveDoublesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_BMeshRemoveDoublesNode"
     bl_label = "BMesh Remove Doubles"

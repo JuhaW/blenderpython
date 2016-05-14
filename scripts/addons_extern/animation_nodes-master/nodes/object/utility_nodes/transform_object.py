@@ -4,12 +4,13 @@ from mathutils import Matrix
 from .... events import propertyChanged
 from .... base_types.node import AnimationNode
 
+
 class TransformObjectNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_TransformObjectNode"
     bl_label = "Transform Object"
 
-    useCenter = BoolProperty(name = "Use Center", default = True,
-        description = "Use the object location as origin", update = propertyChanged)
+    useCenter = BoolProperty(name="Use Center", default=True,
+                             description="Use the object location as origin", update=propertyChanged)
 
     def create(self):
         self.inputs.new("an_ObjectSocket", "Object", "object").defaultDrawType = "PROPERTY_ONLY"
@@ -20,7 +21,8 @@ class TransformObjectNode(bpy.types.Node, AnimationNode):
         layout.prop(self, "useCenter")
 
     def execute(self, object, matrix):
-        if object is None: return None
+        if object is None:
+            return None
         if self.useCenter:
             offset = Matrix.Translation(object.location)
             transformation = offset * matrix * offset.inverted()

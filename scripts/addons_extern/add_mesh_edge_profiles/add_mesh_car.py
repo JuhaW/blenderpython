@@ -1,26 +1,24 @@
 bl_info = {
-"name": "Car", 
-"author": "Gert De Roost",
-"version": (0, 1, 0),
-"blender": (2, 6, 3),
-"location": "Add > Mesh",
-"description": "Create Car primitive.",
-"warning": "",
-"wiki_url": "",
-"tracker_url": "",
-"category": "Add Mesh"}
+    "name": "Car",
+    "author": "Gert De Roost",
+    "version": (0, 1, 0),
+    "blender": (2, 6, 3),
+    "location": "Add > Mesh",
+    "description": "Create Car primitive.",
+    "warning": "",
+    "wiki_url": "",
+    "tracker_url": "",
+    "category": "Add Mesh"}
 
 
 if "bpy" in locals():
-	   import imp
+    import imp
 
 
 import bpy
 import bmesh
 import math
 from mathutils import *
-
-
 
 
 class Car(bpy.types.Operator):
@@ -62,22 +60,21 @@ class Car(bpy.types.Operator):
         bm.free()
         obj.rotation_quaternion = (Matrix.Rotation(math.radians(90), 3, 'X').to_quaternion())
 
-
         return {'FINISHED'}
 
 
-
-
 def menu_item(self, context):
-	   self.layout.operator(Car.bl_idname, text="Car", icon="PLUGIN")
+    self.layout.operator(Car.bl_idname, text="Car", icon="PLUGIN")
+
 
 def register():
-	   bpy.utils.register_module(__name__)
-	   bpy.types.INFO_MT_mesh_add.append(menu_item)
+    bpy.utils.register_module(__name__)
+    bpy.types.INFO_MT_mesh_add.append(menu_item)
+
 
 def unregister():
-	   bpy.utils.unregister_module(__name__)
-	   bpy.types.INFO_MT_mesh_add.remove(menu_item)
+    bpy.utils.unregister_module(__name__)
+    bpy.types.INFO_MT_mesh_add.remove(menu_item)
 
 if __name__ == "__main__":
-	   register()
+    register()

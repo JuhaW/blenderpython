@@ -12,10 +12,11 @@ from bpy.utils import register_class, unregister_class
 from bpy_extras import object_utils
 
 from sound_drivers.utils import get_driver_settings, propfromtype,\
-                icon_from_bpy_datapath, getSpeaker, getAction,\
-                set_channel_idprop_rna, f, get_context_area
+    icon_from_bpy_datapath, getSpeaker, getAction,\
+    set_channel_idprop_rna, f, get_context_area
 
 # testing scene property context speaker
+
 
 def get_soundspeaker_list(self):
     wf = [a['wavfile'] for a in bpy.data.actions if 'wavfile' in a.keys()]
@@ -25,17 +26,18 @@ def get_soundspeaker_list(self):
                 and sp.data.sound is not None
                 and sp.data.sound.name in wf]
     return speakers
-    #return  [s for s in bpy.data.speakers  if 'vismode' in s.keys() and '_RNA_UI' in s.keys() and 'vismode' in s['_RNA_UI'].keys() and 'context' in s['_RNA_UI']['vismode'].keys()]
+    # return  [s for s in bpy.data.speakers  if 'vismode' in s.keys() and '_RNA_UI' in s.keys() and 'vismode' in s['_RNA_UI'].keys() and 'context' in s['_RNA_UI']['vismode'].keys()]
 
 bpy.types.Scene.soundspeakers = property(get_soundspeaker_list)
 
+
 def get_channel_names(self):
-    channels = [ k[:-1] for k in self.keys() 
-                 if len(k) == 3
-                 and k.endswith('0')]
-    channels = [a['channel_name'] for a in bpy.data.actions 
+    channels = [k[:-1] for k in self.keys()
+                if len(k) == 3
+                and k.endswith('0')]
+    channels = [a['channel_name'] for a in bpy.data.actions
                 if 'channel_name' in a.keys()
-                #and a['channel_name'] in channels
+                # and a['channel_name'] in channels
                 and a['wavfile'] == self.sound.name]
     return list(set(channels))
 
@@ -48,7 +50,7 @@ def set_context_speaker(self, speaker):
         raise TypeError("Context Speaker must be a Speaker type")
         return None
 
-    #look for previous context speaker
+    # look for previous context speaker
     if speaker is None:
         return None
 
@@ -61,10 +63,10 @@ def set_context_speaker(self, speaker):
             s.is_context_speaker = False
     return speaker
 
+
 def get_context_speaker(self):
 
-    #make sure that every speaker has an ['_RNA_UI']['vismode']
-    
+    # make sure that every speaker has an ['_RNA_UI']['vismode']
 
     speakers = [sp for sp in get_soundspeaker_list(self) if
                 sp.is_context_speaker]
@@ -75,6 +77,7 @@ bpy.types.Scene.speaker = property(get_context_speaker, set_context_speaker)
 
 
 class Speaker():
+
     def __init__(self, speaker):
         pass
 
@@ -138,6 +141,8 @@ class SpeakerDataPanel(SpeakerPanel, Panel):
 '''
 Operators
 '''
+
+
 class OBJECT_OT_speaker_add(bpy.types.Operator, object_utils.AddObjectHelper):
     """Add a Speaker to SoundDrive"""
     bl_idname = "object.speaker_add"
@@ -151,10 +156,9 @@ class OBJECT_OT_speaker_add(bpy.types.Operator, object_utils.AddObjectHelper):
     propdic = {}
 
     propfromtype(propdic, bpy.types.OBJECT_OT_speaker_add)
-    for k,v in propdic.items():
+    for k, v in propdic.items():
         exec("%s = v" % k)
         #(OBJECT_OT_speaker_add, k, v)
-
 
     @classmethod
     def poll(cls, context):
@@ -167,7 +171,7 @@ class OBJECT_OT_speaker_add(bpy.types.Operator, object_utils.AddObjectHelper):
             return
         sound = (hasattr(ob, "data") and getattr(ob.data, "sound", None) is not None)
         layout.enabled = (len(context.screen.areas) > 1) and not sound
-        #layout.label(str(sound))
+        # layout.label(str(sound))
         col = layout.column(align=True)
         col.prop(self, 'view_align')
 
@@ -180,7 +184,6 @@ class OBJECT_OT_speaker_add(bpy.types.Operator, object_utils.AddObjectHelper):
         col.label(text="Rotation")
         col.prop(self, 'rotation', text="")
 
-
     def invoke(self, context, event):
         object_utils.object_add_grid_scale_apply_operator(self, context)
         return self.execute(context)
@@ -190,25 +193,25 @@ class OBJECT_OT_speaker_add(bpy.types.Operator, object_utils.AddObjectHelper):
         base = object_utils.object_data_add(context, spk, operator=self)
         ob = base.object
         context.scene.frame_set(1)
-        #return {'FINISHED'}
+        # return {'FINISHED'}
         if not getattr(ob, "animation_data", None):
             d = context.copy()
             info = None
             nla = None
-            #find any area that is not the current area
+            # find any area that is not the current area
             ob.animation_data_create()
             soundtrack = ob.animation_data.nla_tracks.new()
             soundtrack.name = "SoundTrack"
             areas = [a for a in context.screen.areas if a != context.area]
             if len(areas):
                 area = areas[0]
-                t =  area.type
+                t = area.type
                 area.type = 'NLA_EDITOR'
                 d["area"] = area
                 # add an NLA track
                 nla = get_context_area(context, d, area_type='NLA_EDITOR')
                 bpy.ops.nla.soundclip_add(d)
-                soundtrack.select = False #  Otherwise you get track on track.
+                soundtrack.select = False  # Otherwise you get track on track.
                 area.type = t
             else:
                 # ok no override available.. going to have to flip into NLA_ED
@@ -220,7 +223,7 @@ class OBJECT_OT_speaker_add(bpy.types.Operator, object_utils.AddObjectHelper):
             spk.vismode = {'SOUND'}
 
             props = get_context_area(context, {}, area_type='PROPERTIES',
-                                     context_screen = True)
+                                     context_screen=True)
             if props is not None:
                 if getattr(props.spaces.active, "context", None):
                     try:
@@ -237,6 +240,7 @@ class SpeakerSelectorOperator(bpy.types.Operator):
     bl_label = "Set Context Speaker"
     bl_description = "Set Context Speaker"
     contextspeakername = StringProperty(default="")
+
     @classmethod
     def poll(cls, context):
         #global dm
@@ -266,14 +270,14 @@ class SpeakerSelectorOperator(bpy.types.Operator):
         speaker = bpy.data.speakers.get(self.contextspeakername)
         speakers = [speaker]
 
-        actions = [a for a in bpy.data.actions if 'wavfile' in a.keys()]# and "%s%d" % (a['channel_name'],0) in sp.keys()]
+        actions = [a for a in bpy.data.actions if 'wavfile' in a.keys()]  # and "%s%d" % (a['channel_name'],0) in sp.keys()]
         wf = [a["wavfile"] for a in actions]
 
         for speaker in speakers:
             row = layout.row()
             row.label(speaker.name, icon='SPEAKER')
             row = layout.row()
-            #row.separator()
+            # row.separator()
             sounds = [s for s in bpy.data.sounds if s.name in wf]
             for sound in sounds:
                 row = layout.row()
@@ -288,20 +292,23 @@ class SpeakerSelectorOperator(bpy.types.Operator):
                     op = row.operator("soundaction.change", text=text)
                     op.action = a.name
 
+
 def toggle_context_speaker(self, context):
     if self.is_context_speaker:
         context.scene.speaker = self
 
     #context.scene.speaker = self
 
+
 def register():
     bpy.types.Speaker.is_context_speaker = BoolProperty(name="ContextSpeaker",
-                                           description="(Un)Set context Speaker",
-                                           default=False,
-                                           update=toggle_context_speaker)
+                                                        description="(Un)Set context Speaker",
+                                                        default=False,
+                                                        update=toggle_context_speaker)
     register_class(OBJECT_OT_speaker_add)
     register_class(SpeakerDataPanel)
     register_class(SpeakerSelectorOperator)
+
 
 def unregister():
     unregister_class(OBJECT_OT_speaker_add)

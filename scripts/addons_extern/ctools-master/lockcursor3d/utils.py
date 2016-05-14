@@ -750,7 +750,7 @@ class AddonKeyMapUtility:
 
         for km, km_items in display_keymaps:
             if (km.name == idname and km.space_type == spaceid and
-                        km.region_type == regionid):
+                    km.region_type == regionid):
                 self.__draw_km(display_keymaps, km, km_items, children, col,
                                level)
 
@@ -803,7 +803,7 @@ class AddonKeyMapUtility:
             if children:
                 for entry in children:
                     self.__draw_entry(display_keymaps, entry, col,
-                                         level + 1)
+                                      level + 1)
 
             col.separator()
 
@@ -926,7 +926,7 @@ class AddonKeyMapUtility:
 
             # Modifier {kmi.attribute: name} mapping
             key_mod = {"ctrl": "ctrl", "alt": "alt", "shift": "shift",
-                       "cmd": "oskey", "oskey": "oskey", "any": "any",}
+                       "cmd": "oskey", "oskey": "oskey", "any": "any", }
             # KeyMapItem like dict, use for comparing against
             # attr: {states, ...}
             kmi_test_dict = {}
@@ -1087,7 +1087,7 @@ class AddonKeyMapUtility:
         if filter_text or not hierarchy:
             filter_text = filter_text.lower()
             ok = self.__draw_filtered(display_keymaps, filter_type,
-                                         filter_text, col)
+                                      filter_text, col)
         else:
             self.__draw_hierarchy(display_keymaps, col)
             ok = True
@@ -1137,6 +1137,7 @@ class AddonKeyMapUtility:
     # operator ------------------------------------------------------
 
     class __Helper:
+
         def get_mangling(self, attr):
             # TODO: クラス名がマングリングされていた場合はエラーとなる
             addon_prefs = bpy.context.addon_preferences
@@ -1145,6 +1146,7 @@ class AddonKeyMapUtility:
             return getattr(addon_prefs, prefix + attr)
 
     class __Registerable(__Helper):
+
         @classmethod
         def register_class(cls, rename=False):
             import re
@@ -1217,7 +1219,7 @@ class AddonKeyMapUtility:
                 def _get(entry):
                     idname, spaceid, regionid, children = entry
                     if not ('INVALID_MODAL_KEYMAP' and
-                                idname in modal_keymaps):
+                            idname in modal_keymaps):
                         yield entry
                         for e in children:
                             yield from _get(e)
@@ -1352,6 +1354,7 @@ class AddonKeyMapUtility:
             # 左の列を全部描画してから右の列にいかないとおかしな事になる
 
             table = []
+
             def gen_table(entry, row_index, col_index):
                 idname, spaceid, regionid, children = entry
                 if row_index > len(table) - 1:

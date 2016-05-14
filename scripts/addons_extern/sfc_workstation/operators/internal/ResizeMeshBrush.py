@@ -22,6 +22,7 @@ import bpy
 from mathutils import Vector
 from ..MeshBrush import MeshBrush
 
+
 class ResizeMeshBrush(bpy.types.Operator):
     bl_idname = "mesh.sct_resize_mesh_brush"
     bl_label = "Resize Mesh Brush"

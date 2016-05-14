@@ -23,60 +23,60 @@
 #  SUBSCRIBE at Youtube.com/Blendersensei
 #====================================================================
 
-bl_info = {  
- "name": "Zero Brush",  
- "author": "Blender Sensei (Seth Fentress) Blendersensei.com",
- "version": (1, 0, 0),
- "blender": (7, 0, 1),  
- "location": "Found in the properties shelf/ Brush options in tool shelf/ Press SPACE when available for menu",  
- "description": "Zero button texture painting by Blender Sensei",  
- "wiki_url": "http://blendersensei.com/zero-brush",  
- "category": "Sensei Format"}  
+bl_info = {
+    "name": "Zero Brush",
+    "author": "Blender Sensei (Seth Fentress) Blendersensei.com",
+    "version": (1, 0, 0),
+    "blender": (7, 0, 1),
+    "location": "Found in the properties shelf/ Brush options in tool shelf/ Press SPACE when available for menu",
+    "description": "Zero button texture painting by Blender Sensei",
+    "wiki_url": "http://blendersensei.com/zero-brush",
+    "category": "Sensei Format"}
 
 import bpy
 from bpy.props import*
 import os
 from bpy_extras.io_utils import ImportHelper
-#Extra imports for custom brush panel
+# Extra imports for custom brush panel
 from bpy.types import Menu, Panel
 from bl_ui.properties_paint_common import (UnifiedPaintPanel, brush_texture_settings)
 
 
-#Brush Loading==============================================
-#Clean brush names
+# Brush Loading==============================================
+# Clean brush names
 def cleanBrushName(fn):
-    #Strip selected from name
-    newName = ''.join(x for x in fn if x not in 
-    ',<>:""[]{}()/\|!@#$%^&*,.?')
-    #List of stuff to remove from file name
-    toReplace = ['seamless','texture','tex','by:','free', '.com',
-    '.net','.org','the','image','photos', 'original','photo', 'tileable']
-    #Now remove it.
+    # Strip selected from name
+    newName = ''.join(x for x in fn if x not in
+                      ',<>:""[]{}()/\|!@#$%^&*,.?')
+    # List of stuff to remove from file name
+    toReplace = ['seamless', 'texture', 'tex', 'by:', 'free', '.com',
+                 '.net', '.org', 'the', 'image', 'photos', 'original', 'photo', 'tileable']
+    # Now remove it.
     newName = newName.lower()
     for bad in toReplace:
         newName = newName.replace(bad, "")
-    
-    #Recoginze as intentional spaces        
+
+    # Recoginze as intentional spaces
     newName = newName.replace("-", " ")
     newName = newName.replace("_", " ")
-    
-    #Author kill. Remove all after " by " found.
+
+    # Author kill. Remove all after " by " found.
     sep = " by "
     newName = newName.split(sep, 1)[0]
     newName = newName.title()
-    
-    #Parenth kill. Remove all after "(" found.
+
+    # Parenth kill. Remove all after "(" found.
     sep = "("
     newName = newName.split(sep, 1)[0]
     newName = newName.title()
-    
-    #If name to long get rid of spaces
+
+    # If name to long get rid of spaces
     if len(newName) > 20:
-        newName = newName.replace(" ", "")    
-    
-    #18 max characters
+        newName = newName.replace(" ", "")
+
+    # 18 max characters
     newName = newName[:18]
-    
+
     x = 0
     # if first letters blank
     while x < 18:
@@ -86,76 +86,76 @@ def cleanBrushName(fn):
             break
         x += 1
 
-    #Add generic if name to short
+    # Add generic if name to short
     if len(newName) < 1:
         newName = "myBrush"
-    
-    #Seperate new from standard brushes
-    newName = "°" + newName    
+
+    # Seperate new from standard brushes
+    newName = "°" + newName
     return newName
-        
-               
-#Load single brush
+
+
+# Load single brush
 def load_a_brush(context, filepath):
     if os.path.isdir(filepath):
         return
     else:
         try:
             fn = bpy.path.display_name_from_filepath(filepath)
-            #create image and load...
+            # create image and load...
             img = bpy.data.images.load(filepath)
-            img.use_fake_user =True
-            
-            #create a texture
-            tex = bpy.data.textures.new(name =fn, type='IMAGE')
-            #link the img to the texture
+            img.use_fake_user = True
+
+            # create a texture
+            tex = bpy.data.textures.new(name=fn, type='IMAGE')
+            # link the img to the texture
             tex.image = img
-            
+
             settings = bpy.context.tool_settings
-            #Create New brush
+            # Create New brush
             if bpy.context.mode.startswith('PAINT') is True:
-                #switch brush to assure inherited properties
+                # switch brush to assure inherited properties
                 try:
                     settings.image_paint.brush = bpy.data.brushes["Draw"]
                 except:
                     pass
                 bpy.ops.brush.add()
                 brush = bpy.context.tool_settings.image_paint.brush
-                #Set up new brush settings
+                # Set up new brush settings
                 bpy.ops.brush.curve_preset(shape='SHARP')
                 brush.color = (1, 1, 1)
                 brush.strength = 1
-                
+
             elif bpy.context.mode.startswith('SCULPT') is True:
-                #switch brush to assure inherited properties
+                # switch brush to assure inherited properties
                 try:
                     settings.sculpt.brush = bpy.data.brushes["SculptDraw"]
                 except:
                     pass
-                #Create New brush and assign texture
+                # Create New brush and assign texture
                 bpy.ops.brush.add()
                 brush = bpy.context.tool_settings.sculpt.brush
                 bpy.ops.brush.curve_preset(shape='SHARP')
                 brush.strength = 0.125
                 brush.auto_smooth_factor = 0.15
-            
-            #Clean up brush name from file name
-            #Run function, return results to newName
+
+            # Clean up brush name from file name
+            # Run function, return results to newName
             newName = cleanBrushName(fn)
-            
-            #Give brush name cleaned filename
+
+            # Give brush name cleaned filename
             brush.name = newName
-            #Assign texture to brush
+            # Assign texture to brush
             brush.texture = tex
 
-            #Give brush texture icon
+            # Give brush texture icon
             brush.use_custom_icon = True
             brush.icon_filepath = filepath
-            
-            #Change method of brush
+
+            # Change method of brush
             brush.stroke_method = 'DOTS'
             brush.texture_slot.tex_paint_map_mode = 'TILED'
-            #Update brush texture scale option
+            # Update brush texture scale option
             bpy.data.window_managers["WinMan"].texBrushScale = 85
         except:
             pass
@@ -163,45 +163,46 @@ def load_a_brush(context, filepath):
 
 
 class load_single_brush(bpy.types.Operator, ImportHelper):
-    bl_idname = "texture.load_single_brush"  
+    bl_idname = "texture.load_single_brush"
     bl_label = "Brush"
     bl_description = "Load an image (png, jpeg, tiff, etc..) as a brush"
-    
+
     @classmethod
     def poll(cls, context):
         return context.active_object != None
+
     def execute(self, context):
         return load_a_brush(context, self.filepath)
 
 
-#Load a folder of brushes
+# Load a folder of brushes
 def loadbrushes(context, filepath):
     if os.path.isdir(filepath):
-        directory = filepath 
+        directory = filepath
     else:
-        #is a file, find parent directory    
+        # is a file, find parent directory
         li = filepath.split(os.sep)
         directory = filepath.rstrip(li[-1])
-        
+
     files = os.listdir(directory)
     for f in files:
         try:
             fn = f[3:]
-            #create image and load...
-            img = bpy.data.images.load(filepath = directory +os.sep + f)
-            img.use_fake_user =True
-            #create a texture
-            tex = bpy.data.textures.new(name =fn, type='IMAGE')
-            tex.use_fake_user =True
-            #link the img to the texture
+            # create image and load...
+            img = bpy.data.images.load(filepath=directory + os.sep + f)
+            img.use_fake_user = True
+            # create a texture
+            tex = bpy.data.textures.new(name=fn, type='IMAGE')
+            tex.use_fake_user = True
+            # link the img to the texture
             tex.image = img
         except:
             pass
-        
+
         settings = bpy.context.tool_settings
-        #Create New brush
+        # Create New brush
         if bpy.context.mode.startswith('PAINT') is True:
-            #switch brush to assure inherited properties
+            # switch brush to assure inherited properties
             try:
                 settings.image_paint.brush = bpy.data.brushes["Draw"]
             except:
@@ -209,45 +210,45 @@ def loadbrushes(context, filepath):
             bpy.ops.brush.add()
             brush = bpy.context.tool_settings.image_paint.brush
             bpy.ops.brush.curve_preset(shape='SHARP')
-            #Set up new brush settings
+            # Set up new brush settings
             brush.color = (1, 1, 1)
-            
+
         elif bpy.context.mode.startswith('SCULPT') is True:
-            #switch brush to assure inherited properties
+            # switch brush to assure inherited properties
             try:
                 settings.sculpt.brush = bpy.data.brushes["SculptDraw"]
             except:
                 pass
-            #Create New brush and assign texture
+            # Create New brush and assign texture
             bpy.ops.brush.add()
             brush = bpy.context.tool_settings.sculpt.brush
             bpy.ops.brush.curve_preset(shape='SHARP')
             brush.strength = 0.125
             brush.auto_smooth_factor = 0.15
-                   
-        #Clean up brush name from file name
-        fn = bpy.path.display_name_from_filepath(directory +os.sep + f)
+
+        # Clean up brush name from file name
+        fn = bpy.path.display_name_from_filepath(directory + os.sep + f)
         newName = cleanBrushName(fn)
-        
-        #Give brush name of file name
+
+        # Give brush name of file name
         brush.name = newName
         brush.texture = tex
-            
-        #Give brush texture icon
+
+        # Give brush texture icon
         brush.use_custom_icon = True
-        brush.icon_filepath = directory +os.sep + f
-        
-        #Change method of brush
+        brush.icon_filepath = directory + os.sep + f
+
+        # Change method of brush
         brush.stroke_method = 'DOTS'
         brush.texture_slot.tex_paint_map_mode = 'TILED'
-        
-    #Update brush texture scale option
+
+    # Update brush texture scale option
     bpy.data.window_managers["WinMan"].texBrushScale = 85
     return {'FINISHED'}
 
 
 class ImportBrushes(bpy.types.Operator, ImportHelper):
-    bl_idname = "texture.load_brushes"  
+    bl_idname = "texture.load_brushes"
     bl_label = "Brushes"
     bl_description = "Load a folder of images (png, jpeg, tiff, etc..) as brushes"
 
@@ -257,24 +258,24 @@ class ImportBrushes(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         return loadbrushes(context, self.filepath)
-#End of brush loading=============================
+# End of brush loading=============================
 
 
-
-#Brush Menu=======================================        
-#Required to invoke menu
+# Brush Menu=======================================
+# Required to invoke menu
 def justForKix(context):
     pass
+
 
 class SCULPT_MT_brush_menu(bpy.types.Menu):
     """Sculpt Brush"""
     bl_idname = "SCULPT_MT_brush_menu"
     bl_label = "Sculpt Brush"
     bl_options = {'DEFAULT_CLOSED'}
-    
+
     def draw(self, context):
         layout = self.layout
-        
+
         flow = layout.column_flow(columns=4)
         for brush in bpy.data.brushes:
             if brush.use_paint_sculpt:
@@ -282,17 +283,17 @@ class SCULPT_MT_brush_menu(bpy.types.Menu):
                 props = col.operator("wm.context_set_id", text=brush.name)
                 props.data_path = "tool_settings.sculpt.brush"
                 props.value = brush.name
-                
-                
+
+
 class IMAGE_MT_brush_menu(bpy.types.Menu):
     """Paint Brush"""
     bl_idname = "IMAGE_MT_brush_menu"
     bl_label = "Paint Brush"
     bl_options = {'DEFAULT_CLOSED'}
-    
+
     def draw(self, context):
         layout = self.layout
-        
+
         flow = layout.column_flow(columns=4)
         for brush in bpy.data.brushes:
             if brush.use_paint_image:
@@ -312,16 +313,16 @@ class selectBrush(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return context.active_object is not None
-    
+
     def invoke(self, context, event):
         context.window_manager.invoke_props_popup(self, event)
         return {'FINISHED'}
-    
-    #Required to invoke menu
+
+    # Required to invoke menu
     def execute(self, context):
         justForKix(context)
         return {'FINISHED'}
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -332,7 +333,7 @@ class selectBrush(bpy.types.Operator):
         if not context.particle_edit_object:
             flow = layout.column_flow(columns=2)
             for brush in bpy.data.brushes:
-                #Sculpt Brush Menu
+                # Sculpt Brush Menu
                 if context.sculpt_object:
                     if brush.use_paint_sculpt:
                         row = flow.row(align=True)
@@ -340,20 +341,20 @@ class selectBrush(bpy.types.Operator):
                         props = row.operator("wm.context_set_id", text=brush.name)
                         props.data_path = "tool_settings.sculpt.brush"
                         props.value = brush.name
-                #Texture Paint Brush Menu
+                # Texture Paint Brush Menu
                 if context.image_paint_object:
-                    if brush.use_paint_image:    
-                        row = flow.row(align = True)
-                        
+                    if brush.use_paint_image:
+                        row = flow.row(align=True)
+
                         row.label(icon_value=layout.icon(brush))
                         props = row.operator("wm.context_set_id", text=brush.name)
                         props.data_path = "tool_settings.image_paint.brush"
                         props.value = brush.name
         else:
-            #Particle Brush Menu
-            col = layout.column()            
+            # Particle Brush Menu
+            col = layout.column()
             tool = settings.tool
-            
+
             if tool == 'ADD':
                 row = layout.row(align=True)
                 row.prop(brush, "count")
@@ -365,85 +366,85 @@ class selectBrush(bpy.types.Operator):
                 row.prop(brush, "puff_mode", expand=True)
             row = layout.row(align=True)
             row.prop(settings, "tool", expand=True)
-            
 
-#Convert skin object to workable object
+
+# Convert skin object to workable object
 def skinExtractor():
     bpy.ops.object.mode_set(mode='OBJECT')
-    #make armature from the skin
-    realOb = bpy.context.active_object #store original object
+    # make armature from the skin
+    realOb = bpy.context.active_object  # store original object
     armature = len([mod for mod in realOb.modifiers if mod.type == 'ARMATURE'])
     if armature < 1:
-        bpy.ops.object.skin_armature_create(modifier="Skin") #create bones
-        ob = bpy.context.active_object #store the bones
-        #Turn on auto IK
+        bpy.ops.object.skin_armature_create(modifier="Skin")  # create bones
+        ob = bpy.context.active_object  # store the bones
+        # Turn on auto IK
         bones = bpy.context.object.data
         bones.use_auto_ik = True
-        ob.name = realOb.name + "sBones" #Name the bones
-        bpy.context.active_object.select = False #deselect bones
-        bpy.context.object.hide = True #Turn off bones visibility
-        bpy.context.scene.objects.active = realOb #set flesh as active
-        
+        ob.name = realOb.name + "sBones"  # Name the bones
+        bpy.context.active_object.select = False  # deselect bones
+        bpy.context.object.hide = True  # Turn off bones visibility
+        bpy.context.scene.objects.active = realOb  # set flesh as active
+
     bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Skin")
-    realOb.select = True #select flesh
-    bpy.context.space_data.use_occlude_geometry = True #Turn off seethrough
-    #Clean up mesh
+    realOb.select = True  # select flesh
+    bpy.context.space_data.use_occlude_geometry = True  # Turn off seethrough
+    # Clean up mesh
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.normals_make_consistent(inside=False)
     bpy.ops.mesh.vert_connect_nonplanar()
     bpy.ops.mesh.tris_convert_to_quads()
     bpy.ops.object.mode_set(mode='OBJECT')
     for x in range(20):
-        bpy.ops.object.modifier_move_up(modifier="Armature") #send mod to top
-    return{'FINISHED'}            
+        bpy.ops.object.modifier_move_up(modifier="Armature")  # send mod to top
+    return{'FINISHED'}
 
 
-#Mode Change Buttons========================================
+# Mode Change Buttons========================================
 class modeButtons(bpy.types.Operator):
     bl_idname = "object.mode_buttons"
     bl_label = "Button"
     bl_description = "Select Mode: Object | Sculpt | Paint | Particle Strands"
-    modeButton = bpy.props.IntProperty(name = 'modeValue', default = 0)
-            
+    modeButton = bpy.props.IntProperty(name='modeValue', default=0)
+
     def execute(self, context):
         ob = bpy.context.active_object
-        
+
         if ob and ob.type == 'MESH':
             mat = ob.active_material
-            #Save texture layers if leaving texture paint       
+            # Save texture layers if leaving texture paint
             if self.modeButton != 3 and self.modeButton < 5:
-                if bpy.context.mode.startswith('PAINT'):  
+                if bpy.context.mode.startswith('PAINT'):
                     if mat:
                         for ts in mat.texture_slots:
                             if ts and ts.texture.type == 'IMAGE':
-                                if ts.texture_coords  == 'UV':
+                                if ts.texture_coords == 'UV':
                                     image = ts.texture.image
-                                    bpy.ops.image.pack({'edit_image': image}, as_png = True)
+                                    bpy.ops.image.pack({'edit_image': image}, as_png=True)
                         self.report({'INFO'}, "Paint layers saved.")
-    
-            #Object Mode
+
+            # Object Mode
             if self.modeButton == 1:
-                #Turn multires back on
+                # Turn multires back on
                 try:
                     bpy.context.object.modifiers["Multires"].show_viewport = True
                 except:
                     pass
                 bpy.context.space_data.viewport_shade = 'TEXTURED'
                 bpy.ops.object.mode_set(mode='OBJECT')
-            
-            #Sculpt Mode    
+
+            # Sculpt Mode
             elif self.modeButton == 2:
-                #Turn multires back on
+                # Turn multires back on
                 try:
                     bpy.context.object.modifiers["Multires"].show_viewport = True
                 except:
                     pass
                 bpy.ops.object.mode_set(mode='SCULPT')
-                
+
                 if bpy.data.window_managers["WinMan"].fast_mode == True:
                     bpy.context.space_data.viewport_shade = 'SOLID'
-                
-                #Update brush texture scale option
+
+                # Update brush texture scale option
                 try:
                     ts = context.tool_settings.sculpt.brush.texture_slot
                     bpy.data.window_managers["WinMan"].texBrushScale = round((3 - ts.scale[0]) * 33.33333)
@@ -452,24 +453,24 @@ class modeButtons(bpy.types.Operator):
                     texBrushScaleUpdater(self, context)
                 except:
                     pass
-                
-            #Texture Paint Mode     
+
+            # Texture Paint Mode
             elif self.modeButton == 3:
-                #Turn multires back on
+                # Turn multires back on
                 try:
                     bpy.context.object.modifiers["Multires"].show_viewport = True
                 except:
                     pass
-                
-                #Apply skin if exists
+
+                # Apply skin if exists
                 ob = bpy.context.active_object
                 skin = len([mod for mod in ob.modifiers if mod.type == 'SKIN'])
                 if skin:
                     skinExtractor()
-                    self.report({'INFO'}, 
-                    ("Applied Skin modifier to object. Click the 'Eye' icon next" 
-                    " to your character's bones in the outliner to view them."))
-                #Message if didn't make armature
+                    self.report({'INFO'},
+                                ("Applied Skin modifier to object. Click the 'Eye' icon next"
+                                 " to your character's bones in the outliner to view them."))
+                # Message if didn't make armature
                 report = 0
                 for type in ob.modifiers:
                     try:
@@ -478,31 +479,31 @@ class modeButtons(bpy.types.Operator):
                             break
                     except:
                         pass
-                if report == 1:    
-                    self.report({'INFO'}, "Object already has armature. None created for it.")          
+                if report == 1:
+                    self.report({'INFO'}, "Object already has armature. None created for it.")
                 a = 0
-                #Add default color layer if none found
+                # Add default color layer if none found
                 if ob is not None and ob.active_material is not None:
                     for ts in ob.active_material.texture_slots:
                         if ts and ts.texture.type == 'IMAGE':
-                            if ts.texture_coords  == 'UV':
+                            if ts.texture_coords == 'UV':
                                 a += 1
 
                 if a == 0:
                     bpy.ops.object.zb_paint_color()
                 else:
-                    #Change viewport shading to Textured
+                    # Change viewport shading to Textured
                     bpy.context.space_data.viewport_shade = 'TEXTURED'
-                    #Change to GLSL mode
+                    # Change to GLSL mode
                     try:
                         bpy.context.scene.game_settings.material_mode = 'GLSL'
                     except:
                         pass
-                    
-                #Enter texture paint mode    
+
+                # Enter texture paint mode
                 bpy.ops.object.mode_set(mode='TEXTURE_PAINT')
-                
-                #Update brush texture scale option
+
+                # Update brush texture scale option
                 try:
                     ts = context.tool_settings.image_paint.brush.texture_slot
                     bpy.data.window_managers["WinMan"].texBrushScale = round((3 - ts.scale[0]) * 33.33333)
@@ -511,27 +512,27 @@ class modeButtons(bpy.types.Operator):
                     texBrushScaleUpdater(self, context)
                 except:
                     pass
-                
-            #Particle Strands Mode    
+
+            # Particle Strands Mode
             elif self.modeButton == 4:
-                
-                #Turn off multires if in fast mode
+
+                # Turn off multires if in fast mode
                 if bpy.data.window_managers["WinMan"].fast_mode == True:
-                     try:
-                         bpy.context.object.modifiers["Multires"].show_viewport = False
-                     except:
-                         pass
-                bpy.context.space_data.viewport_shade = 'TEXTURED' #Force tex view
-                
-                #Apply skin if exists
+                    try:
+                        bpy.context.object.modifiers["Multires"].show_viewport = False
+                    except:
+                        pass
+                bpy.context.space_data.viewport_shade = 'TEXTURED'  # Force tex view
+
+                # Apply skin if exists
                 ob = bpy.context.active_object
                 skin = len([mod for mod in ob.modifiers if mod.type == 'SKIN'])
                 if skin:
                     skinExtractor()
-                    self.report({'INFO'}, 
-                    ("Applied Skin modifier to object. Click the 'Eye' icon next" 
-                    "to your character's bones in the outliner to view them."))
-                #Message if didn't make armature
+                    self.report({'INFO'},
+                                ("Applied Skin modifier to object. Click the 'Eye' icon next"
+                                 "to your character's bones in the outliner to view them."))
+                # Message if didn't make armature
                 report = 0
                 for type in ob.modifiers:
                     try:
@@ -540,43 +541,45 @@ class modeButtons(bpy.types.Operator):
                             break
                     except:
                         pass
-                if report == 1:    
-                    self.report({'INFO'}, "Object already has armature. None created for it.") 
-                    
-                #If no strands make some    
+                if report == 1:
+                    self.report({'INFO'}, "Object already has armature. None created for it.")
+
+                # If no strands make some
                 if context.active_object.particle_systems.active is None:
-                    #Add generic strands
+                    # Add generic strands
                     bpy.ops.object.add_strands()
                     if not skin:
                         self.report({'INFO'}, "Warning. Particle strands do not render while in sculpt mode.")
                 bpy.ops.object.mode_set(mode='PARTICLE_EDIT')
-                    
+
         else:
-            #If nothing selected or an object that can't use modes
+            # If nothing selected or an object that can't use modes
             if self.modeButton != 1:
                 if self.modeButton != 6:
                     self.report({'INFO'}, "This mode is only for mesh objects.")
-        
-        #Full screen Mode        
+
+        # Full screen Mode
         if self.modeButton == 6:
             bpy.ops.screen.screen_full_area()
-            
-        return{'FINISHED'}   
-			
-#Fast Mode
+
+        return{'FINISHED'}
+
+# Fast Mode
+
+
 def fastModeUpdater(self, context):
     settings = bpy.context.scene
     simplify = settings.render
 
-    #For toggling fast mode on and off
+    # For toggling fast mode on and off
     if self.fast_mode == True:
-        #turn on fast nav for sculpting
+        # turn on fast nav for sculpting
         settings.tool_settings.sculpt.show_low_resolution = True
-        
+
         if context.sculpt_object:
             bpy.context.space_data.viewport_shade = 'SOLID'
-        
-        #disable multires if in particle
+
+        # disable multires if in particle
         if context.particle_edit_object:
             try:
                 bpy.context.object.modifiers["Multires"].show_viewport = False
@@ -587,93 +590,97 @@ def fastModeUpdater(self, context):
                 bpy.context.object.modifiers["Multires"].show_viewport = True
             except:
                 pass
-            
+
         simplify.use_simplify = True
         simplify.simplify_child_particles = 0.0
-        #Restrict user settings to 2-4 sub levels    
+        # Restrict user settings to 2-4 sub levels
         if simplify.simplify_subdivision < 2:
             simplify.simplify_subdivision = 2
-        #Change Blender default to 2 levels
+        # Change Blender default to 2 levels
         elif simplify.simplify_subdivision > 4:
             simplify.simplify_subdivision = 2
-        
+
         try:
             if bpy.data.window_managers["WinMan"].useSimplify == False:
                 bpy.data.window_managers["WinMan"].useSimplify = True
         except:
             pass
-        
+
     if self.fast_mode == False:
         bpy.context.scene.render.use_simplify = False
         settings.tool_settings.sculpt.show_low_resolution = False
         bpy.context.space_data.viewport_shade = 'TEXTURED'
-        
+
         try:
             if bpy.data.window_managers["WinMan"].useSimplify == True:
                 bpy.data.window_managers["WinMan"].useSimplify = False
         except:
             pass
-        
-        #Turn multires back on
+
+        # Turn multires back on
         try:
             bpy.context.object.modifiers["Multires"].show_viewport = True
         except:
             pass
-		
-#TEXTURE PAINT==============================================
-#main layer manager function================================
-def layerManager(context,tn):
+
+# TEXTURE PAINT==============================================
+# main layer manager function================================
+
+
+def layerManager(context, tn):
     ob = context.active_object
     me = ob.data
     mat = ob.active_material
-    #tn is the active texture
-    mat.active_texture_index = tn    
+    # tn is the active texture
+    mat.active_texture_index = tn
     ts = mat.texture_slots[tn]
     try:
-        #make sure it's visible
+        # make sure it's visible
         try:
             ts.use = True
         except:
             pass
-            
-        #Mesh use UVs?
+
+        # Mesh use UVs?
         if not me.uv_textures:
             bpy.ops.mesh.uv_texture_add()
-            
+
         # texture Slot uses UVs?
-        if ts.texture_coords  == 'UV':
+        if ts.texture_coords == 'UV':
             if ts.uv_layer:
-                uvtex = me.uv_textures[ts.uv_layer]       
+                uvtex = me.uv_textures[ts.uv_layer]
             else:
                 uvtex = me.uv_textures.active
-                me.uv_textures.active= uvtex
+                me.uv_textures.active = uvtex
         else:
             uvtex = me.uv_textures.active
-            
+
         uvtex = uvtex.data.values()
-        #get image from texture slot
-        img = ts.texture.image  
-        #get material index
-        m_id = ob.active_material_index 
+        # get image from texture slot
+        img = ts.texture.image
+        # get material index
+        m_id = ob.active_material_index
 
         if img:
-            for f in me.polygons:  
+            for f in me.polygons:
                 if f.material_index == m_id:
                     uvtex[f.index].image = img
         else:
-            for f in me.polygons:  
+            for f in me.polygons:
                 if f.material_index == m_id:
                     uvtex[f.index].image = None
         me.update()
     except:
         pass
-		
-#Select layers
+
+# Select layers
+
+
 class set_active_paint_layer(bpy.types.Operator):
     bl_idname = "object.set_active_paint_layer"
     bl_label = "Set Active Texture Layer"
     bl_description = "Active texture layer"
-    tex_index = IntProperty(name = 'tex_index', default = 0)
+    tex_index = IntProperty(name='tex_index', default=0)
 
     @classmethod
     def poll(cls, context):
@@ -684,17 +691,20 @@ class set_active_paint_layer(bpy.types.Operator):
         layerManager(context, tn)
         return {'FINISHED'}
 
-#Eraser
+# Eraser
+
+
 class shiftEraser(bpy.types.Operator):
     """Shift Eraser"""
     bl_idname = "paint.shift_eraser"
     bl_label = "Shift Eraser"
 
     def execute(self, context):
-        brushBlend = bpy.context.tool_settings.image_paint.brush.blend 
+        brushBlend = bpy.context.tool_settings.image_paint.brush.blend
         bpy.context.window_manager.lastBrushBlend = brushBlend
         bpy.context.tool_settings.image_paint.brush.blend = 'ERASE_ALPHA'
         return {'FINISHED'}
+
 
 class shiftEraserUp(bpy.types.Operator):
     """Shift Eraser Up"""
@@ -704,18 +714,18 @@ class shiftEraserUp(bpy.types.Operator):
     def execute(self, context):
         brushBlend = bpy.context.window_manager.lastBrushBlend
         if brushBlend == "ERASE_ALPHA":
-            brushBlend = "MIX" 
+            brushBlend = "MIX"
         bpy.context.tool_settings.image_paint.brush.blend = brushBlend
-        return {'FINISHED'}	
+        return {'FINISHED'}
 
 
-#Move textures up and down
+# Move textures up and down
 class moveTex(bpy.types.Operator):
     bl_idname = "object.move_texture"
     bl_label = "Move Texture"
     bl_description = "Move texture layer up or down"
-    tex_move_up = IntProperty(name="tex_move_up", default = 0)
-    tex_move_down = IntProperty(name="tex_move_down", default = 0)
+    tex_move_up = IntProperty(name="tex_move_up", default=0)
+    tex_move_down = IntProperty(name="tex_move_down", default=0)
 
     def execute(self, context):
         ob = bpy.context.object
@@ -726,64 +736,63 @@ class moveTex(bpy.types.Operator):
         except (TypeError, IndexError):
             pass
         else:
-			#Bypass Blender's poll restrictions
+                        # Bypass Blender's poll restrictions
             ctx = bpy.context.copy()
             ctx['texture_slot'] = ts
-                
+
         if self.tex_move_up == 1:
             moveType = "UP"
             moveValue = -2
         if self.tex_move_down == 1:
             moveType = "DOWN"
             moveValue = 1
-            
-        #Gap solver
+
+        # Gap solver
         x = 0
         while x == 0:
             tex = slots[mat.active_texture_index + moveValue]
             if tex is None or tex.texture_coords != 'UV':
-                bpy.ops.texture.slot_move(ctx, type= moveType)
+                bpy.ops.texture.slot_move(ctx, type=moveType)
             else:
-                bpy.ops.texture.slot_move(ctx, type= moveType)
+                bpy.ops.texture.slot_move(ctx, type=moveType)
                 self.tex_move_down = 0
                 x = 1
-                
+
         return {'FINISHED'}
 
 
-#Delete texture layer
+# Delete texture layer
 class delTex(bpy.types.Operator):
     bl_idname = "object.delete_texture"
     bl_label = "Delete Texture"
     bl_description = "Delete texture layer"
-    tex_kill = IntProperty(name="tex_kill", default = 0)
+    tex_kill = IntProperty(name="tex_kill", default=0)
 
     def execute(self, context):
         ob = bpy.context.active_object
         mat = ob.active_material
         ts = mat.texture_slots[self.tex_kill]
         texName = mat.texture_slots[self.tex_kill].name
-        
-        #Special case if texture was transparent
+
+        # Special case if texture was transparent
         if ts.use_map_alpha == True:
             mat.use_transparency = False
-            
-        #Special case if texture was specular
+
+        # Special case if texture was specular
         if ts.use_map_color_spec == True:
             mat.specular_color = (1, 1, 1)
             mat.specular_intensity = 0.5
-        
-        #Delete the texture and image
+
+        # Delete the texture and image
         if self.tex_kill > -1:
             if ts:
                 if mat.texture_slots[self.tex_kill]:
-                    #Delete image and texture
+                    # Delete image and texture
                     mat.texture_slots[self.tex_kill].texture.image.user_clear()
                     ts.texture = None
                     mat.texture_slots.clear(self.tex_kill)
-                    
 
-            #Set new active texture if deleted texture was active
+            # Set new active texture if deleted texture was active
             if self.tex_kill == mat.active_texture_index:
                 x = 17
                 while x > -1:
@@ -791,16 +800,16 @@ class delTex(bpy.types.Operator):
                         bpy.ops.object.set_active_paint_layer(tex_index=x)
                         break
                     x -= 1
-                    
+
         return {'FINISHED'}
 
 
-#Save all texture layer images
-class zbSaveLayers(bpy.types.Operator):  
-    bl_idname = "object.zb_save_layers"  
+# Save all texture layer images
+class zbSaveLayers(bpy.types.Operator):
+    bl_idname = "object.zb_save_layers"
     bl_label = "Save My Layers"
     bl_description = "Click this before saving your file or your layers will be lost"
-    
+
     def execute(self, context):
         # Run loop to go through all images and pack them as pngs
         ob = bpy.context.active_object
@@ -809,20 +818,20 @@ class zbSaveLayers(bpy.types.Operator):
             if ob and ob.active_material:
                 for ts in ob.active_material.texture_slots:
                     if ts and ts.texture.type == 'IMAGE':
-                        if ts.texture_coords  == 'UV':
+                        if ts.texture_coords == 'UV':
                             image = ts.texture.image
-                            bpy.ops.image.pack({'edit_image': image}, as_png = True)
+                            bpy.ops.image.pack({'edit_image': image}, as_png=True)
         self.report({'INFO'}, "All paint layers saved.")
-             
+
         return {'FINISHED'}
 
 
-#Texture layer options
+# Texture layer options
 def layerOptions(self, context):
     brushSettings = bpy.context.scene.tool_settings.image_paint
     mat = bpy.context.object.active_material
-    
-    #For Paint Through Button
+
+    # For Paint Through Button
     if self.paint_through == True:
         brushSettings.use_occlude = False
         brushSettings.use_normal_falloff = False
@@ -831,53 +840,53 @@ def layerOptions(self, context):
         brushSettings.use_occlude = True
         brushSettings.use_normal_falloff = True
         brushSettings.use_backface_culling = True
-    
-    #For Disable Shading Button
+
+    # For Disable Shading Button
     if self.disable_shading == True:
         mat.use_shadeless = True
     else:
         mat.use_shadeless = False
-    
-    #For disabling material's shadows
+
+    # For disabling material's shadows
     if self.disable_shadows == True:
         bpy.context.object.active_material.use_shadows = False
     else:
         bpy.context.object.active_material.use_shadows = True
-    
-    #For toggling display only render
+
+    # For toggling display only render
     if self.display_render == True:
         bpy.context.space_data.show_only_render = True
     else:
         bpy.context.space_data.show_only_render = False
-		
 
-#Reset UVs button
+
+# Reset UVs button
 class resetUVs(bpy.types.Operator):
     bl_idname = "object.reset_uvs"
     bl_label = "Reset UV Map"
     bl_description = "Reset object's UV Map: Warning, if your object's mesh has changed your paint layers will be distorted"
-    
+
     def execute(self, context):
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='SELECT')
-        #Use Smart UV project to create a UV Map
+        # Use Smart UV project to create a UV Map
         bpy.ops.uv.smart_project(island_margin=0.03, angle_limit=40)
-        #Average the scale of UVs.
+        # Average the scale of UVs.
         bpy.ops.uv.average_islands_scale()
-        bpy.ops.object.mode_set(mode = 'TEXTURE_PAINT')
-        
+        bpy.ops.object.mode_set(mode='TEXTURE_PAINT')
+
         return{'FINISHED'}
 
 
-#Main texture layer adding function
+# Main texture layer adding function
 def texLayerAdder(layerType, texCol, texOpas, alphaChoice,
-    normalChoice):
-    #Tidy Up Variables
-    ob = bpy.context.active_object 
+                  normalChoice):
+    # Tidy Up Variables
+    ob = bpy.context.active_object
     mat = ob.active_material
     try:
-        #Delete alpha mask or transparent layer if exists
-        #There can be only one
+        # Delete alpha mask or transparent layer if exists
+        # There can be only one
         if layerType == "Transparent" or layerType == "Alpha_Mask":
             if mat:
                 n = 0
@@ -888,93 +897,93 @@ def texLayerAdder(layerType, texCol, texOpas, alphaChoice,
                             tex.texture = None
                             mat.texture_slots.clear(n)
                     n += 1
-     
-        #Test if object has material, create one if not
+
+        # Test if object has material, create one if not
         if ob.active_material is None:
-            
-            #Create a new material and give it the name of the object
+
+            # Create a new material and give it the name of the object
             mat = bpy.data.materials.new(ob.name)
-            #Assign it some properties
+            # Assign it some properties
             mat.diffuse_shader = 'LAMBERT'
             mat.darkness = 0.8
-            
-            #Set up strand material properties
+
+            # Set up strand material properties
             mat.strand.use_tangent_shading = False
             mat.strand.root_size = 2.5
             mat.strand.tip_size = 0.25
             mat.strand.width_fade = 0.5
-            
-            #Assign Material to the active object
+
+            # Assign Material to the active object
             ob.active_material = mat
-        
-        #Get the user input values for creating custom image size.
+
+        # Get the user input values for creating custom image size.
         xAndY = round(bpy.context.window_manager.imgSize)
 
-        #Create transparent image to be used as texture with RNA method
-        img = bpy.data.images.new(ob.name + layerType, xAndY, xAndY, alpha= alphaChoice)
-        #Set alpha and color to none
+        # Create transparent image to be used as texture with RNA method
+        img = bpy.data.images.new(ob.name + layerType, xAndY, xAndY, alpha=alphaChoice)
+        # Set alpha and color to none
         img.pixels[:] = (texCol, texCol, texCol, texOpas) * xAndY * xAndY
-        #Create A New texture and store it in cTex
-        cTex = bpy.data.textures.new( name = ob.name + layerType, type = 'IMAGE')
-        
-        #Get active texture layer for the layer manager
+        # Create A New texture and store it in cTex
+        cTex = bpy.data.textures.new(name=ob.name + layerType, type='IMAGE')
+
+        # Get active texture layer for the layer manager
         activeTex = -1
         for ts in mat.texture_slots:
             activeTex += 1
             if ts is None:
                 break
-            
-        #Add a texture slot and assign it the texture just created
+
+        # Add a texture slot and assign it the texture just created
         mTex = mat.texture_slots.add()
         mTex.texture = cTex
-        
-        #Change mapping to UV now that we have a texture in place
+
+        # Change mapping to UV now that we have a texture in place
         mTex.texture_coords = 'UV'
-        
+
         if normalChoice == True:
-            #Setup Normal mapping
-            mTex.use_map_normal = True 
+            # Setup Normal mapping
+            mTex.use_map_normal = True
             mTex.bump_method = 'BUMP_MEDIUM_QUALITY'
             mTex.normal_factor = 0.0
-                    
-        #Assign the image we created to the texture we created
+
+        # Assign the image we created to the texture we created
         cTex.image = img
-        
-        #Enter edit mode to select all faces
-        bpy.ops.object.mode_set(mode = 'EDIT')
+
+        # Enter edit mode to select all faces
+        bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.select_all(action='SELECT')
-        #Check for UV Map, if not one make one
+        # Check for UV Map, if not one make one
         if not bpy.context.active_object.data.uv_textures:
-            #Use Smart UV project to create a UV Map
+            # Use Smart UV project to create a UV Map
             bpy.ops.uv.smart_project(island_margin=0.03, angle_limit=40)
-            #Average the scale of UVs.
+            # Average the scale of UVs.
             bpy.ops.uv.average_islands_scale()
-        
-        #Use loop to link texture to UV Map of all faces
+
+        # Use loop to link texture to UV Map of all faces
         for uv_face in ob.data.uv_textures.active.data:
             uv_face.image = img
-        
-        #Switch viewport shading to textured
+
+        # Switch viewport shading to textured
         bpy.context.space_data.viewport_shade = 'TEXTURED'
-        #Change shading to GLSL (if possible)
+        # Change shading to GLSL (if possible)
         try:
             bpy.context.scene.game_settings.material_mode = 'GLSL'
         except:
             pass
-        
-        #Exit edit mode and back to texture paint
-        bpy.ops.object.mode_set(mode = 'TEXTURE_PAINT')
-        
-        #Bleed fixer: Setup bleed size to increase with new layer size
+
+        # Exit edit mode and back to texture paint
+        bpy.ops.object.mode_set(mode='TEXTURE_PAINT')
+
+        # Bleed fixer: Setup bleed size to increase with new layer size
         bleed = 3
         if xAndY > 1040:
             dimension = xAndY / 1040
             bleed = round(dimension * 3)
         bpy.context.scene.tool_settings.image_paint.seam_bleed = bleed
 
-        #Set active texture layer
+        # Set active texture layer
         bpy.ops.object.set_active_paint_layer(tex_index=activeTex)
-        #Move it to bottom of list
+        # Move it to bottom of list
         slots = mat.texture_slots
         ts = slots[mat.active_texture_index]
         ctx = bpy.context.copy()
@@ -985,11 +994,13 @@ def texLayerAdder(layerType, texCol, texOpas, alphaChoice,
             x += 1
     except:
         pass
-    return mTex  
-    		
-#Add Color
-class zbPaintColor(bpy.types.Operator):  
-    bl_idname = "object.zb_paint_color"  
+    return mTex
+
+# Add Color
+
+
+class zbPaintColor(bpy.types.Operator):
+    bl_idname = "object.zb_paint_color"
     bl_label = "Add Color"
     bl_description = "This adds a regular texture layer you can paint on"
 
@@ -1000,181 +1011,188 @@ class zbPaintColor(bpy.types.Operator):
         alphaChoice = False
         normalChoice = True
         texLayerAdder(layerType, texOpas, texCol, alphaChoice,
-        normalChoice)
-    
+                      normalChoice)
+
         return {'FINISHED'}
-   
-#Add Bump
-class zbPaintBump(bpy.types.Operator):  
-    bl_idname = "object.zb_paint_bump"  
+
+# Add Bump
+
+
+class zbPaintBump(bpy.types.Operator):
+    bl_idname = "object.zb_paint_bump"
     bl_label = "Add Bump"
     bl_description = 'This adds a texture layer with "Normal Mapping" for a pseudo 3D or "Bump" effect'
 
-    
     def execute(self, context):
-        
+
         layerType = "Bump"
         texCol = 1.0
         texOpas = 0.0
         alphaChoice = True
         normalChoice = True
         mTex = texLayerAdder(layerType, texOpas, texCol, alphaChoice,
-        normalChoice)
-        
-        #Setup bump settings
+                             normalChoice)
+
+        # Setup bump settings
         mTex.use_map_color_diffuse = False
         mTex.normal_factor = 0.6
-        
-        #Switch to draw brush
+
+        # Switch to draw brush
         try:
             brush = bpy.context.tool_settings.image_paint.brush
             brush.use_pressure_strength = False
-            brush.blend = 'MIX' 
+            brush.blend = 'MIX'
             bpy.data.brushes["Draw"].color = (1, 1, 1)
         except:
             pass
-        
+
         return {'FINISHED'}
 
-#Add Specular
-class zbPaintSpecular(bpy.types.Operator):  
-    bl_idname = "object.zb_paint_specular"  
+# Add Specular
+
+
+class zbPaintSpecular(bpy.types.Operator):
+    bl_idname = "object.zb_paint_specular"
     bl_label = "Add Specular"
     bl_description = 'This adds a specular or "Shininess" map which lets you paint where you want the shine'
-    
+
     def execute(self, context):
-        
+
         layerType = "Specular"
         texCol = 0.0
         texOpas = 0.0
         alphaChoice = True
         normalChoice = False
         mTex = texLayerAdder(layerType, texOpas, texCol, alphaChoice,
-        normalChoice)
+                             normalChoice)
 
         ob = bpy.context.active_object
         mat = ob.active_material
-        #Change material properties for specular
+        # Change material properties for specular
         mat.specular_color = (0, 0, 0)
         mat.specular_intensity = 1
-        #Assign the texture properties for specular
+        # Assign the texture properties for specular
         mTex.use_map_color_diffuse = False
         mTex.use_map_color_spec = True
-        
-        #Set up brush to work better with layer type  
+
+        # Set up brush to work better with layer type
         try:
-            brush = bpy.context.tool_settings.image_paint.brush 
+            brush = bpy.context.tool_settings.image_paint.brush
             brush.use_pressure_strength = True
         except:
             pass
-       
+
         return {'FINISHED'}
 
-#Add Transparent
-class zbPaintTransparent(bpy.types.Operator):  
-    bl_idname = "object.zb_paint_transparent"  
+# Add Transparent
+
+
+class zbPaintTransparent(bpy.types.Operator):
+    bl_idname = "object.zb_paint_transparent"
     bl_label = "Add Transparent"
     bl_description = 'This will turn your object invisible and let you paint on it'
-    
+
     def execute(self, context):
-        
+
         layerType = "Transparent"
         texCol = 0.0
         texOpas = 0.0
         alphaChoice = True
         normalChoice = False
         mTex = texLayerAdder(layerType, texOpas, texCol, alphaChoice,
-        normalChoice)
+                             normalChoice)
 
-        #Change material settings to work with transparency
+        # Change material settings to work with transparency
         ob = bpy.context.active_object
         mat = ob.active_material
         mat.use_transparency = True
         mat.transparency_method = 'Z_TRANSPARENCY'
         mat.alpha = 0
-        #Configure rest of transparent texture settings
+        # Configure rest of transparent texture settings
         mTex.use_map_alpha = True
-        #Turn off culling
+        # Turn off culling
         bpy.context.space_data.show_backface_culling = False
-        
-        #Switch to draw brush
+
+        # Switch to draw brush
         try:
             bpy.context.tool_settings.image_paint.brush = bpy.data.brushes['Draw']
             brush = bpy.context.tool_settings.image_paint.brush
-            brush.blend = 'MIX' 
+            brush.blend = 'MIX'
         except:
             pass
 
         return {'FINISHED'}
 
-#Add Alpha Mask
-class zbPaintAlphaMask(bpy.types.Operator):  
-    bl_idname = "object.zb_alpha_mask"  
+# Add Alpha Mask
+
+
+class zbPaintAlphaMask(bpy.types.Operator):
+    bl_idname = "object.zb_alpha_mask"
     bl_label = "Add Alpha Mask"
     bl_description = 'This lets you paint transparency onto your object wherever you choose'
-    
+
     def execute(self, context):
-        
+
         layerType = "Alpha_Mask"
         texCol = 0.0
         texOpas = 0.0
         alphaChoice = True
         normalChoice = False
         mTex = texLayerAdder(layerType, texOpas, texCol, alphaChoice,
-        normalChoice)
-        
-        #Change material settings to work with transparency
-        ob = bpy.context.active_object 
+                             normalChoice)
+
+        # Change material settings to work with transparency
+        ob = bpy.context.active_object
         mat = ob.active_material
         mat.use_transparency = True
         mat.transparency_method = 'Z_TRANSPARENCY'
         mat.alpha = 0
 
-        #Set up the masking bit with the texture
+        # Set up the masking bit with the texture
         mTex.use_map_alpha = True
         mTex.diffuse_color_factor = 0
         mTex.alpha_factor = -1
-        
-        #Turn off culling
+
+        # Turn off culling
         bpy.context.space_data.show_backface_culling = False
-        
-        #Switch to draw brush
+
+        # Switch to draw brush
         try:
             bpy.context.tool_settings.image_paint.brush = bpy.data.brushes['Draw']
             brush = bpy.context.tool_settings.image_paint.brush
-            brush.blend = 'MIX' 
+            brush.blend = 'MIX'
         except:
             pass
-        return {'FINISHED'}            
- 
+        return {'FINISHED'}
 
-#SCULPT MODE================================================
-#Make Sculptable
-class addMultires(bpy.types.Operator):  
-    bl_idname = "object.multires_add"  
+
+# SCULPT MODE================================================
+# Make Sculptable
+class addMultires(bpy.types.Operator):
+    bl_idname = "object.multires_add"
     bl_label = "Make Sculptable"
     bl_description = "Adds multires modifier or converts modifiers into a multires"
-    
+
     def execute(self, context):
-        
+
         ob = bpy.context.active_object
-        
-        #Apply mirror if exists
+
+        # Apply mirror if exists
         mirror = len([mod for mod in ob.modifiers if mod.type == 'MIRROR'])
         if mirror:
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Mirror")
-            #turn on x mirror symmetry if mirror
+            # turn on x mirror symmetry if mirror
             bpy.context.scene.tool_settings.sculpt.use_symmetry_x = True
-            
-        #Apply skin if exists
+
+        # Apply skin if exists
         ob = bpy.context.active_object
         skin = len([mod for mod in ob.modifiers if mod.type == 'SKIN'])
         if skin:
             skinExtractor()
-            self.report({'INFO'}, 
-            ("Applied Skin modifier to object. Click the 'Eye' icon next" 
-            "to your character's bones in the outliner to view them."))
-        #Message if didn't make armature
+            self.report({'INFO'},
+                        ("Applied Skin modifier to object. Click the 'Eye' icon next"
+                         "to your character's bones in the outliner to view them."))
+        # Message if didn't make armature
         report = 0
         for type in ob.modifiers:
             try:
@@ -1183,85 +1201,84 @@ class addMultires(bpy.types.Operator):
                     break
             except:
                 pass
-        if report == 1:    
-            self.report({'INFO'}, "Object already has armature. None created for it.") 
-            
-        #Apply solidify if exists
+        if report == 1:
+            self.report({'INFO'}, "Object already has armature. None created for it.")
+
+        # Apply solidify if exists
         solidify = len([mod for mod in ob.modifiers if mod.type == 'SOLIDIFY'])
         if solidify:
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Solidify")
             bpy.context.object.show_x_ray = False
 
-                               
-        #If has subsurf in Sculpt mode then delete subsurf
+        # If has subsurf in Sculpt mode then delete subsurf
         subsurf = len([mod for mod in ob.modifiers if mod.type == 'SUBSURF'])
         if subsurf:
             newLevels = ob.modifiers["Subsurf"].levels
             bpy.ops.object.modifier_remove(modifier="Subsurf")
             bpy.ops.object.modifier_add(type='MULTIRES')
-            #substitute multires levels with old subsurf levels
+            # substitute multires levels with old subsurf levels
             while newLevels > 0:
                 bpy.ops.object.multires_subdivide(modifier="Multires")
-                bpy.context.object.modifiers["Multires"].levels += 1 
+                bpy.context.object.modifiers["Multires"].levels += 1
                 newLevels -= 1
         else:
-            #Add multires and subdivide
+            # Add multires and subdivide
             bpy.ops.object.modifier_add(type='MULTIRES')
             newLevels = 3
             while newLevels > 0:
                 bpy.ops.object.multires_subdivide(modifier="Multires")
-                bpy.context.object.modifiers["Multires"].levels += 1 
+                bpy.context.object.modifiers["Multires"].levels += 1
                 newLevels -= 1
-                
-        #Make sure multires modifier is at top of stack
+
+        # Make sure multires modifier is at top of stack
         for x in range(20):
             bpy.ops.object.modifier_move_up(modifier="Multires")
-        #unless there's an armature then make it number one
+        # unless there's an armature then make it number one
         try:
             for x in range(20):
                 bpy.ops.object.modifier_move_up(modifier="Armature")
         except:
-            pass 
-            
-        #Add smoothing
+            pass
+
+        # Add smoothing
         bpy.ops.object.shade_smooth()
-        #Send to object mode then back to sculpt to update
+        # Send to object mode then back to sculpt to update
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.mode_set(mode='SCULPT')
         return {'FINISHED'}
-    
 
-#Button to subdivide multires modifier
-class subMultires(bpy.types.Operator):  
-    bl_idname = "object.multires_me_subdivide"  
+
+# Button to subdivide multires modifier
+class subMultires(bpy.types.Operator):
+    bl_idname = "object.multires_me_subdivide"
     bl_label = "More Detail"
     bl_description = "Subdivide your object for more detailed sculpting (Hotkey is W)"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
         ob = bpy.context.active_object
         multires = len([mod for mod in ob.modifiers if mod.type == 'MULTIRES'])
         if multires:
             bpy.ops.object.multires_subdivide(modifier="Multires")
             bpy.context.object.modifiers["Multires"].levels += 1
-            #Update the change by switching modes
+            # Update the change by switching modes
             bpy.ops.object.mode_set(mode='OBJECT')
             bpy.ops.object.mode_set(mode='SCULPT')
-        #For use with hotkey
+        # For use with hotkey
         if not multires:
             bpy.ops.object.multires_add()
         return {'FINISHED'}
-    
-    
-#Button to generate base mesh
-class generateBaseMesh(bpy.types.Operator):  
-    bl_idname = "object.generate_base_mesh"  
+
+
+# Button to generate base mesh
+class generateBaseMesh(bpy.types.Operator):
+    bl_idname = "object.generate_base_mesh"
     bl_label = "Make Base"
     bl_description = "Create low poly shape from sculpture (helps with Particle Mode but will erase current particle strands)"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
-        #Jump to object mode to apply multires
+        # Jump to object mode to apply multires
         bpy.ops.object.mode_set(mode='OBJECT')
         resLevels = bpy.context.object.modifiers["Multires"].levels
         if resLevels < 2:
@@ -1269,45 +1286,47 @@ class generateBaseMesh(bpy.types.Operator):
         else:
             bpy.context.object.modifiers["Multires"].levels = 2
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier="Multires")
-            
-        #Remove particles/Add multires/Return to sculpt
+
+        # Remove particles/Add multires/Return to sculpt
         bpy.ops.object.particle_system_remove()
         bpy.ops.object.modifier_add(type='MULTIRES')
         bpy.ops.object.mode_set(mode='SCULPT')
         return {'FINISHED'}
-    
-#PARTICLE EDIT MODE==========================================
-#Add generic particle strands
-class addStrands(bpy.types.Operator):  
-    bl_idname = "object.add_strands"  
+
+# PARTICLE EDIT MODE==========================================
+# Add generic particle strands
+
+
+class addStrands(bpy.types.Operator):
+    bl_idname = "object.add_strands"
     bl_label = "Add Strands"
     bl_description = "Add particle strands to your object (I.E. Hair/Grass/Fur)"
     bl_options = {'REGISTER', 'UNDO'}
-    
-    #Create generic particle strands
+
+    # Create generic particle strands
     def execute(self, context):
         ob = bpy.context.active_object
-        #Add to name for bug fix
+        # Add to name for bug fix
         par = len(bpy.data.particles)
         parSys = ob.name + "Strands" + "%s" % par
 
         bpy.ops.object.particle_system_add()
         activeSys = context.active_object.particle_systems.active
         activeSys.settings.name = parSys
-        
-        #Set to particle strands
+
+        # Set to particle strands
         bpy.data.particles[parSys].type = 'HAIR'
         bpy.data.particles[parSys].hair_length = 0.15
         bpy.data.particles[parSys].count = 0
-        
-        #Render settings
+
+        # Render settings
         bpy.data.particles[parSys].adaptive_angle = 3
         bpy.data.particles[parSys].use_strand_primitive = True
         bpy.data.particles[parSys].use_hair_bspline = True
         bpy.data.particles[parSys].render_step = 8
         bpy.data.particles[parSys].draw_step = 4
 
-        #Handle particle children
+        # Handle particle children
         bpy.data.particles[parSys].child_type = 'SIMPLE'
         bpy.ops.object.mode_set(mode='PARTICLE_EDIT')
         bpy.data.particles[parSys].child_nbr = 5
@@ -1315,19 +1334,19 @@ class addStrands(bpy.types.Operator):
         bpy.data.particles[parSys].child_length = 0.75
         bpy.data.particles[parSys].child_radius = 0.10
         bpy.data.particles[parSys].roughness_2 = 0.01
-        
-        #Change default tool settings
+
+        # Change default tool settings
         bpy.context.scene.tool_settings.particle_edit.show_particles = True
         bpy.context.scene.tool_settings.particle_edit.draw_step = 3
         bpy.context.scene.tool_settings.particle_edit.tool = 'ADD'
         bpy.context.scene.tool_settings.particle_edit.brush.size = 30
         bpy.context.scene.tool_settings.particle_edit.brush.count = 5
-        
-        #Turn on hair dynamics
+
+        # Turn on hair dynamics
         genPar = bpy.context.object.particle_systems['ParticleSystem']
         genPar.use_hair_dynamics = True
-        
-        #Hair dynamics settings
+
+        # Hair dynamics settings
         ob.particle_systems[0].cloth.settings.pin_stiffness = 1.75
         ob.particle_systems[0].cloth.settings.mass = 0.25
         ob.particle_systems[0].cloth.settings.bending_stiffness = 0.5
@@ -1340,25 +1359,24 @@ class addStrands(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
-#CUSTOM BRUSH PANEL=========================================
-#Must stay at the bottom or causes conflicts.
-#Update brush texture scale option
+# CUSTOM BRUSH PANEL=========================================
+# Must stay at the bottom or causes conflicts.
+# Update brush texture scale option
 def texBrushScaleUpdater(self, context):
     if context.image_paint_object:
         brushTex = bpy.context.tool_settings.image_paint.brush.texture_slot
     if context.sculpt_object:
         brushTex = bpy.context.tool_settings.sculpt.brush.texture_slot
-        
-    #Adjust for percentage display
+
+    # Adjust for percentage display
     val = self.texBrushScale
     val = 3 - (val * 0.03)
     if val == 0:
-       val = 0.10
+        val = 0.10
     brushTex.scale[0] = val
     brushTex.scale[1] = val
     brushTex.scale[2] = val
-    
+
 """
 class View3DPaintPanel(UnifiedPaintPanel):
     bl_space_type = 'VIEW_3D'
@@ -1758,81 +1776,62 @@ class zbPaint(bpy.types.Panel):
 """
 
 
-            
-#Store properties for buttons and user input
+# Store properties for buttons and user input
 class myBlendProperties(bpy.types.PropertyGroup):
-    
-    #Property to store blend mode for eraser
+
+    # Property to store blend mode for eraser
     bpy.types.WindowManager.lastBrushBlend = bpy.props.StringProperty(
-    name = "Last Brush Blend Mode",
-    default = "MIX")
+        name="Last Brush Blend Mode",
+        default="MIX")
 
-    #Set property for image size. Use float so can use step option
+    # Set property for image size. Use float so can use step option
     bpy.types.WindowManager.imgSize = bpy.props.FloatProperty(
-    name="New Layer Size",
-    description = "The size of the next layer you add (width and height)",
-    default = 1024, 
-    min = 128,
-    precision = 0,
-    step = 12800)
-    
-    #Set property for texture brush scale.
+        name="New Layer Size",
+        description="The size of the next layer you add (width and height)",
+        default=1024,
+        min=128,
+        precision=0,
+        step=12800)
+
+    # Set property for texture brush scale.
     bpy.types.WindowManager.texBrushScale = bpy.props.IntProperty(
-    name="Texture Scale",
-    description = "Scales the texture this brush is using",
-    default = 100, 
-    subtype="PERCENTAGE", min=0, max=100,
-    update = texBrushScaleUpdater)
-            
-    #Properties for texture layer options buttons
+        name="Texture Scale",
+        description="Scales the texture this brush is using",
+        default=100,
+        subtype="PERCENTAGE", min=0, max=100,
+        update=texBrushScaleUpdater)
+
+    # Properties for texture layer options buttons
     bpy.types.WindowManager.paint_through = bpy.props.BoolProperty(
-    name = "Paint Through", description = "Paint or erase all the way through your object",
-    update = layerOptions) 
-               
+        name="Paint Through", description="Paint or erase all the way through your object",
+        update=layerOptions)
+
     bpy.types.WindowManager.disable_shading = bpy.props.BoolProperty(
-    name = "Disable Shading", description = 'Disable shading', update = layerOptions)
-    
+        name="Disable Shading", description='Disable shading', update=layerOptions)
+
     bpy.types.WindowManager.disable_shadows = bpy.props.BoolProperty(
-    name = "Disable Shadows", description = "Turn off this object's shadows", update = layerOptions) 
+        name="Disable Shadows", description="Turn off this object's shadows", update=layerOptions)
 
-    #Fast Mode button
+    # Fast Mode button
     bpy.types.WindowManager.fast_mode = bpy.props.BoolProperty(
-    name = "Fast Mode Toggle", description = "Fast Mode (use if Blender's going to slow)", 
-    update = fastModeUpdater)
-    
-        
-#REGISTRATION AND UNREGISTRATION FOR ADDON==================
+        name="Fast Mode Toggle", description="Fast Mode (use if Blender's going to slow)",
+        update=fastModeUpdater)
 
-     
+
+# REGISTRATION AND UNREGISTRATION FOR ADDON==================
+
+
 def register():
-    #Register all classes
+    # Register all classes
     bpy.utils.register_module(__name__)
 
-            
-def unregister():
-    #Unregister all classes
-    bpy.utils.unregister_module(__name__)
-    
-    #Unregister keymaps (takes care of all)
 
-    
+def unregister():
+    # Unregister all classes
+    bpy.utils.unregister_module(__name__)
+
+    # Unregister keymaps (takes care of all)
+
+
 if __name__ == "__main__":
     register()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

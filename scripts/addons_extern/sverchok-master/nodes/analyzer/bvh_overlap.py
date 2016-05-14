@@ -34,7 +34,7 @@ class SvBvhOverlapNode(bpy.types.Node, SverchCustomTreeNode):
         self.outputs.new('StringsSocket', 'outlistB')
 
     def process(self):
-        A,B = self.inputs
+        A, B = self.inputs
         outA, outB = self.outputs
         ZAB = zip(A.sv_get(), B.sv_get())
         if outA.is_linked:

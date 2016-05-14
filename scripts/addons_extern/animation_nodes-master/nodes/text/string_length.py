@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class StringLengthNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_StringLengthNode"
     bl_label = "Text Length"

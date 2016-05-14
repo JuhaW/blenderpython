@@ -19,7 +19,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-#bl_info = {
+# bl_info = {
 #    "name": "Simple Align",
 #    "author": "Gabriel Beaudin (gabhead)",
 #    "version": (0,1),
@@ -94,66 +94,82 @@ class AlignUi(bpy.types.Panel):
 """
 
 
-##Align all
+# Align all
 def main(context):
     for i in bpy.context.selected_objects:
         i.location = bpy.context.active_object.location
         i.rotation_euler = bpy.context.active_object.rotation_euler
 
-## Align Location
+# Align Location
+
 
 def LocAll(context):
     for i in bpy.context.selected_objects:
         i.location = bpy.context.active_object.location
 
+
 def LocX(context):
     for i in bpy.context.selected_objects:
         i.location.x = bpy.context.active_object.location.x
+
 
 def LocY(context):
     for i in bpy.context.selected_objects:
         i.location.y = bpy.context.active_object.location.y
 
+
 def LocZ(context):
     for i in bpy.context.selected_objects:
         i.location.z = bpy.context.active_object.location.z
 
-## Aling Rotation
+# Aling Rotation
+
+
 def RotAll(context):
     for i in bpy.context.selected_objects:
         i.rotation_euler = bpy.context.active_object.rotation_euler
+
 
 def RotX(context):
     for i in bpy.context.selected_objects:
         i.rotation_euler.x = bpy.context.active_object.rotation_euler.x
 
+
 def RotY(context):
     for i in bpy.context.selected_objects:
         i.rotation_euler.y = bpy.context.active_object.rotation_euler.y
 
+
 def RotZ(context):
     for i in bpy.context.selected_objects:
         i.rotation_euler.z = bpy.context.active_object.rotation_euler.z
-## Aling Scale
+# Aling Scale
+
+
 def ScaleAll(context):
     for i in bpy.context.selected_objects:
         i.scale = bpy.context.active_object.scale
+
 
 def ScaleX(context):
     for i in bpy.context.selected_objects:
         i.scale.x = bpy.context.active_object.scale.x
 
+
 def ScaleY(context):
     for i in bpy.context.selected_objects:
         i.scale.y = bpy.context.active_object.scale.y
+
 
 def ScaleZ(context):
     for i in bpy.context.selected_objects:
         i.scale.z = bpy.context.active_object.scale.z
 
-## Classes
+# Classes
 
-## Align All Rotation And Location
+# Align All Rotation And Location
+
+
 class AlignOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align"
@@ -168,7 +184,9 @@ class AlignOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 #######################Align Location########################
-## Align LocationAll
+# Align LocationAll
+
+
 class AlignLocationOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_location_all"
@@ -181,7 +199,9 @@ class AlignLocationOperator(bpy.types.Operator):
     def execute(self, context):
         LocAll(context)
         return {'FINISHED'}
-## Align LocationX
+# Align LocationX
+
+
 class AlignLocationXOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_location_x"
@@ -194,7 +214,9 @@ class AlignLocationXOperator(bpy.types.Operator):
     def execute(self, context):
         LocX(context)
         return {'FINISHED'}
-## Align LocationY
+# Align LocationY
+
+
 class AlignLocationYOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_location_y"
@@ -207,7 +229,9 @@ class AlignLocationYOperator(bpy.types.Operator):
     def execute(self, context):
         LocY(context)
         return {'FINISHED'}
-## Align LocationZ
+# Align LocationZ
+
+
 class AlignLocationZOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_location_z"
@@ -222,7 +246,9 @@ class AlignLocationZOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 #######################Align Rotation########################
-## Align RotationAll
+# Align RotationAll
+
+
 class AlignRotationOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_rotation_all"
@@ -235,7 +261,9 @@ class AlignRotationOperator(bpy.types.Operator):
     def execute(self, context):
         RotAll(context)
         return {'FINISHED'}
-## Align RotationX
+# Align RotationX
+
+
 class AlignRotationXOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_rotation_x"
@@ -248,7 +276,9 @@ class AlignRotationXOperator(bpy.types.Operator):
     def execute(self, context):
         RotX(context)
         return {'FINISHED'}
-## Align RotationY
+# Align RotationY
+
+
 class AlignRotationYOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_rotation_y"
@@ -261,7 +291,9 @@ class AlignRotationYOperator(bpy.types.Operator):
     def execute(self, context):
         RotY(context)
         return {'FINISHED'}
-## Align RotationZ
+# Align RotationZ
+
+
 class AlignRotationZOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_rotation_z"
@@ -275,7 +307,9 @@ class AlignRotationZOperator(bpy.types.Operator):
         RotZ(context)
         return {'FINISHED'}
 #######################Align Scale########################
-## Scale All
+# Scale All
+
+
 class AlignScaleOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_objects_scale_all"
@@ -288,7 +322,9 @@ class AlignScaleOperator(bpy.types.Operator):
     def execute(self, context):
         ScaleAll(context)
         return {'FINISHED'}
-## Align ScaleX
+# Align ScaleX
+
+
 class AlignScaleXOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_objects_scale_x"
@@ -301,7 +337,9 @@ class AlignScaleXOperator(bpy.types.Operator):
     def execute(self, context):
         ScaleX(context)
         return {'FINISHED'}
-## Align ScaleY
+# Align ScaleY
+
+
 class AlignScaleYOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_objects_scale_y"
@@ -314,7 +352,9 @@ class AlignScaleYOperator(bpy.types.Operator):
     def execute(self, context):
         ScaleY(context)
         return {'FINISHED'}
-## Align ScaleZ
+# Align ScaleZ
+
+
 class AlignScaleZOperator(bpy.types.Operator):
     """"""
     bl_idname = "object.align_objects_scale_z"
@@ -328,11 +368,14 @@ class AlignScaleZOperator(bpy.types.Operator):
         ScaleZ(context)
         return {'FINISHED'}
 
-## registring
+# registring
+
+
 def register():
     bpy.utils.register_module(__name__)
 
     pass
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)
@@ -341,4 +384,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

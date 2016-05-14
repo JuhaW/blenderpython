@@ -3,6 +3,7 @@ from bpy.props import *
 from .. events import propertyChanged
 from .. base_types.socket import AnimationNodeSocket
 
+
 class SceneSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_SceneSocket"
     bl_label = "Scene Socket"
@@ -12,18 +13,19 @@ class SceneSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     storable = False
     comparable = True
 
-    sceneName = StringProperty(name = "Scene", update = propertyChanged)
-    useGlobalScene = BoolProperty(name = "Use Global Scene", default = True,
-        description = "Use the global scene for this node tree", update = propertyChanged)
+    sceneName = StringProperty(name="Scene", update=propertyChanged)
+    useGlobalScene = BoolProperty(name="Use Global Scene", default=True,
+                                  description="Use the global scene for this node tree", update=propertyChanged)
 
     def drawProperty(self, layout, text):
-        row = layout.row(align = True)
+        row = layout.row(align=True)
         if self.useGlobalScene:
-            if text != "": text += ": "
+            if text != "":
+                text += ": "
             row.label(text + repr(self.nodeTree.scene.name))
         else:
-            row.prop_search(self, "sceneName",  bpy.data, "scenes", text = text)
-        row.prop(self, "useGlobalScene", text = "", icon = "WORLD")
+            row.prop_search(self, "sceneName", bpy.data, "scenes", text=text)
+        row.prop(self, "useGlobalScene", text="", icon="WORLD")
 
     def getValue(self):
         if self.useGlobalScene:

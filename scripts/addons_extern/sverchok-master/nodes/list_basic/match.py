@@ -21,8 +21,8 @@ from bpy.props import IntProperty, EnumProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (match_short, match_long_cycle, updateNode,
-                            match_long_repeat, match_cross2,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     match_long_repeat, match_cross2,
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 #
 # List Match Node by Linus Yng
@@ -40,10 +40,10 @@ class ListMatchNode(bpy.types.Node, SverchCustomTreeNode):
                         default=1, min=1,
                         update=updateNode)
 
-    modes = [("SHORT", "Short", "Shortest List",    1),
-             ("CYCLE",   "Cycle", "Longest List",   2),
-             ("REPEAT",   "Repeat", "Longest List", 3),
-             ("XREF",   "X-Ref", "Cross reference", 4)]
+    modes = [("SHORT", "Short", "Shortest List", 1),
+             ("CYCLE", "Cycle", "Longest List", 2),
+             ("REPEAT", "Repeat", "Longest List", 3),
+             ("XREF", "X-Ref", "Cross reference", 4)]
 
     mode = EnumProperty(default='REPEAT', items=modes,
                         update=updateNode)
@@ -85,7 +85,7 @@ class ListMatchNode(bpy.types.Node, SverchCustomTreeNode):
 
         # socket handling
         if self.inputs[-1].links:
-            name = 'Data '+str(len(self.inputs))
+            name = 'Data ' + str(len(self.inputs))
             self.inputs.new('StringsSocket', name, name)
             self.outputs.new('StringsSocket', name, name)
         else:
@@ -103,7 +103,7 @@ class ListMatchNode(bpy.types.Node, SverchCustomTreeNode):
                 if type(socket.links[0].from_socket) != type(self.outputs[socket.name]):
                     self.outputs.remove(self.outputs[socket.name])
                     self.outputs.new(socket.links[0].from_socket.bl_idname, socket.name, socket.name)
-                    self.outputs.move(len(self.outputs)-1, idx)
+                    self.outputs.move(len(self.outputs) - 1, idx)
 
     def process(self):
         # check inputs and that there is at least one output
@@ -112,17 +112,17 @@ class ListMatchNode(bpy.types.Node, SverchCustomTreeNode):
             'CYCLE': match_long_cycle,
             'REPEAT': match_long_repeat,
             'XREF': match_cross2
-            }
+        }
         count_inputs = sum(s.is_linked for s in self.inputs)
         count_outputs = sum(s.is_linked for s in self.outputs)
-        if count_inputs == len(self.inputs)-1 and count_outputs:
+        if count_inputs == len(self.inputs) - 1 and count_outputs:
             out = []
             lsts = []
             # get data
             for socket in self.inputs:
                 if socket.is_linked:
                     lsts.append(SvGetSocketAnyType(self, socket))
-            
+
             out = self.match(lsts, self.level, func_dict[self.mode], func_dict[self.mode_final])
 
             # output into linked sockets s

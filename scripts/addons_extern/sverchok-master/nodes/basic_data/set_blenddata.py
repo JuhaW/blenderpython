@@ -32,7 +32,7 @@ class SvSetDataObjectNode(bpy.types.Node, SverchCustomTreeNode):
     formula = StringProperty(name='formula', default='delta_location', update=updateNode)
 
     def draw_buttons(self, context, layout):
-        layout.prop(self,  "formula", text="")
+        layout.prop(self, "formula", text="")
 
     def sv_init(self, context):
         self.inputs.new('StringsSocket', 'Objects')
@@ -51,11 +51,11 @@ class SvSetDataObjectNode(bpy.types.Node, SverchCustomTreeNode):
             if isinstance(v[0], list):
                 v = v[0]
             objs, v = second_as_first_cycle(objs, v)
-            exec("for i, i2 in zip(objs, v):\n    i."+Prop+"= i2")
+            exec("for i, i2 in zip(objs, v):\n    i." + Prop + "= i2")
         elif Ov.is_linked:
-            Ov.sv_set(eval("[i."+Prop+" for i in objs]"))
+            Ov.sv_set(eval("[i." + Prop + " for i in objs]"))
         else:
-            exec("for i in objs:\n    i."+Prop)
+            exec("for i in objs:\n    i." + Prop)
 
 
 def register():

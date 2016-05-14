@@ -10,16 +10,17 @@ from ... tree_info import getNodesByType, keepNodeState
 
 dataByNode = {}
 
+
 class DebugDrawerNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_DebugDrawerNode"
     bl_label = "Debug Drawer"
     bl_width_default = 270
 
-    maxRows = IntProperty(name = "Max Rows", default = 150, min = 0)
-    fontSize = IntProperty(name = "Font Size", default = 12, min = 1, max = 1000)
-    maxListStartElements = IntProperty(name = "Max List Start Elements", default = 15, min = 0)
-    maxListEndElements = IntProperty(name = "Max List End Elements", default = 0, min = 0)
-    oneElementPerLine = BoolProperty(name = "One Element per Line", default = True)
+    maxRows = IntProperty(name="Max Rows", default=150, min=0)
+    fontSize = IntProperty(name="Font Size", default=12, min=1, max=1000)
+    maxListStartElements = IntProperty(name="Max List Start Elements", default=15, min=0)
+    maxListEndElements = IntProperty(name="Max List End Elements", default=0, min=0)
+    oneElementPerLine = BoolProperty(name="One Element per Line", default=True)
 
     errorMessage = StringProperty()
 
@@ -30,16 +31,15 @@ class DebugDrawerNode(bpy.types.Node, AnimationNode):
     def draw(self, layout):
         layout.prop(self, "fontSize")
         if isList(self.dataType):
-            row = layout.row(align = True)
-            row.prop(self, "maxListStartElements", text = "Begin")
-            row.prop(self, "maxListEndElements", text = "End")
+            row = layout.row(align=True)
+            row.prop(self, "maxListStartElements", text="Begin")
+            row.prop(self, "maxListEndElements", text="End")
             layout.prop(self, "oneElementPerLine")
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon = "ERROR")
+            layout.label(self.errorMessage, icon="ERROR")
 
     def drawAdvanced(self, layout):
         layout.prop(self, "maxRows")
-
 
     def edit(self):
         origin = self.inputs[0].dataOrigin
@@ -56,7 +56,8 @@ class DebugDrawerNode(bpy.types.Node, AnimationNode):
     def getExecutionCode(self):
         if "Condition" in self.inputs:
             yield "if condition:"
-        else: yield "if True:"
+        else:
+            yield "if True:"
 
         yield "    self.errorMessage = ''"
         if isList(self.dataType):
@@ -70,7 +71,7 @@ class DebugDrawerNode(bpy.types.Node, AnimationNode):
     def store_Generic(self, data):
         self.debugText = str(data)
 
-    def store_GenericList(self, data, toString = str):
+    def store_GenericList(self, data, toString=str):
         length = len(data)
         text = "List Length: {}\n\n".format(length)
 
@@ -84,7 +85,8 @@ class DebugDrawerNode(bpy.types.Node, AnimationNode):
 
             text += separator.join(self.formatElements(startElements, 0, indicesWidth, toString))
             text += separator + "..."
-            if len(endElements) > 0: text += "\n"
+            if len(endElements) > 0:
+                text += "\n"
             text += separator.join(self.formatElements(endElements, length - len(endElements), indicesWidth, toString))
         else:
             elements = data
@@ -114,10 +116,14 @@ class DebugDrawerNode(bpy.types.Node, AnimationNode):
 
     def getCurrentToStringFunction(self):
         dataType = self.dataType
-        if dataType == "Vector List": return pretty_strings.formatVector
-        if dataType == "Euler List": return pretty_strings.formatEuler
-        if dataType == "Float List": return pretty_strings.formatFloat
-        if dataType == "Quaternion List": return pretty_strings.formatQuaternion
+        if dataType == "Vector List":
+            return pretty_strings.formatVector
+        if dataType == "Euler List":
+            return pretty_strings.formatEuler
+        if dataType == "Float List":
+            return pretty_strings.formatFloat
+        if dataType == "Quaternion List":
+            return pretty_strings.formatQuaternion
         return str
 
 
@@ -128,9 +134,11 @@ def drawDebugTextBoxes():
         if node.name in nodesInCurrentTree and not node.hide and node.errorMessage == "":
             drawDebugTextBox(node)
 
+
 def drawDebugTextBox(node):
     data = dataByNode.get(node.identifier, None)
-    if data is None: return
+    if data is None:
+        return
 
     region = bpy.context.region
     leftBottom = node.getRegionBottomLeft(region)
@@ -138,6 +146,6 @@ def drawDebugTextBox(node):
     width = rightBottom.x - leftBottom.x
 
     textBox = TextBox(data, leftBottom, width,
-                      fontSize = width / node.dimensions.x * node.fontSize,
-                      maxRows = node.maxRows)
+                      fontSize=width / node.dimensions.x * node.fontSize,
+                      maxRows=node.maxRows)
     textBox.draw()

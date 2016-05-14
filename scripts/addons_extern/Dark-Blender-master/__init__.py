@@ -1,4 +1,4 @@
-#This states the metadata for the plugin
+# This states the metadata for the plugin
 bl_info = {
     "name": "Dark Blender R1",
     "author": "Linko, Raven, Crocadillian",
@@ -32,8 +32,10 @@ from . import properties
 from . import user_interface
 from . import operators
 
+
 def register():
     bpy.utils.register_module(__name__)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

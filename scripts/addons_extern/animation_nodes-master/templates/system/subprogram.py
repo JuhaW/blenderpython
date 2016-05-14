@@ -6,16 +6,17 @@ from ... nodes.system.subprogram_sockets import subprogramInterfaceChanged
 subprogramTypeItems = [
     ("GROUP", "Group", ""),
     ("LOOP", "Loop", ""),
-    ("SCRIPT", "Script", "") ]
+    ("SCRIPT", "Script", "")]
+
 
 class EmptySubprogramTemplate(bpy.types.Operator, Template):
     bl_idname = "an.empty_subprogram_template"
     bl_label = "Empty Subprogram"
 
-    subprogramType = EnumProperty(name = "Subprogram Type", items = subprogramTypeItems)
+    subprogramType = EnumProperty(name="Subprogram Type", items=subprogramTypeItems)
 
     # optional
-    targetNodeIdentifier = StringProperty(default = "")
+    targetNodeIdentifier = StringProperty(default="")
 
     def drawDialog(self, layout):
         layout.prop(self, "subprogramType")
@@ -35,7 +36,7 @@ class EmptySubprogramTemplate(bpy.types.Operator, Template):
 
     def insertGroup(self):
         inputNode = self.newNode("an_GroupInputNode")
-        outputNode = self.newNode("an_GroupOutputNode", x = 500)
+        outputNode = self.newNode("an_GroupOutputNode", x=500)
         outputNode.groupInputIdentifier = inputNode.identifier
         return inputNode.identifier
 

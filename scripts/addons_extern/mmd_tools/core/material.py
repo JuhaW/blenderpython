@@ -5,12 +5,14 @@ import os
 
 import bpy
 
-SPHERE_MODE_OFF    = 0
-SPHERE_MODE_MULT   = 1
-SPHERE_MODE_ADD    = 2
+SPHERE_MODE_OFF = 0
+SPHERE_MODE_MULT = 1
+SPHERE_MODE_ADD = 2
 SPHERE_MODE_SUBTEX = 3
 
+
 class FnMaterial(object):
+
     def __init__(self, material=None):
         self.__material = material
 
@@ -56,10 +58,8 @@ class FnMaterial(object):
             logging.warning('Cannot create a texture for %s. No such file.', filepath)
         return texture_slot
 
-
     def remove_texture(self):
         self.__material.texture_slots.clear(0)
-
 
     def create_sphere_texture(self, filepath):
         """ create a texture slot for environment mapping textures of MMD models.
@@ -79,7 +79,6 @@ class FnMaterial(object):
         else:
             logging.warning('Cannot create a texture for %s. No such file.', filepath)
         return texture_slot
-
 
     def remove_sphere_texture(self):
         self.__material.texture_slots.clear(1)

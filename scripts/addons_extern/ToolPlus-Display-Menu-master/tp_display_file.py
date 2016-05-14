@@ -19,10 +19,10 @@
 bl_info = {
     "name": "TP Display File",
     "author": "marvin.k.breuer",
-    "version": (0,1),
+    "version": (0, 1),
     "blender": (2, 7, 7),
     "category": "Tool+"
-    }
+}
 
 
 import bpy
@@ -31,7 +31,7 @@ from bpy import *
 
 class VIEW3D_TP_Display_File(bpy.types.Menu):
     bl_label = "File [ALT+W]"
-    bl_idname = "tp_display.file_menu"  
+    bl_idname = "tp_display.file_menu"
 
     def draw(self, context):
         layout = self.layout
@@ -49,8 +49,8 @@ class VIEW3D_TP_Display_File(bpy.types.Menu):
         layout.operator_context = 'INVOKE_AREA'
         layout.operator("wm.link", text="Link", icon='LINK_BLEND')
         layout.operator("wm.append", text="Append", icon='APPEND_BLEND')
-        layout.menu("INFO_MT_file_previews")   
-             
+        layout.menu("INFO_MT_file_previews")
+
         layout.separator()
 
         layout.menu("INFO_MT_file_import", icon='IMPORT')
@@ -71,7 +71,6 @@ class VIEW3D_TP_Display_File(bpy.types.Menu):
         layout.operator_context = 'INVOKE_AREA'
         layout.operator("wm.save_as_mainfile", text="Save Copy...", icon='SAVE_COPY').copy = True
 
-
         layout.separator()
 
         layout.operator("screen.userpref_show", text="User Preferences...", icon='PREFERENCES')
@@ -88,32 +87,31 @@ class VIEW3D_TP_Display_File(bpy.types.Menu):
 
 class VIEW3D_TP_Display_File_Recover(bpy.types.Menu):
     bl_label = "Revert & Recover"
-    bl_idname = "tp_display.file_recocver"  
+    bl_idname = "tp_display.file_recocver"
 
     def draw(self, context):
         layout = self.layout
         settings = context.tool_settings
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.operator_context = 'INVOKE_AREA'
-        
+
         layout.operator("wm.revert_mainfile", icon='FILE_REFRESH')
         layout.operator("wm.recover_last_session", icon='RECOVER_LAST')
-        layout.operator("wm.recover_auto_save", text="Recover Auto Save...", icon='RECOVER_AUTO')        
-        
+        layout.operator("wm.recover_auto_save", text="Recover Auto Save...", icon='RECOVER_AUTO')
+
 
 class VIEW3D_TP_Display_File_Settings(bpy.types.Menu):
     bl_label = "Start Up"
-    bl_idname = "tp_display.file_settings"  
+    bl_idname = "tp_display.file_settings"
 
     def draw(self, context):
         layout = self.layout
         settings = context.tool_settings
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.operator_context = 'INVOKE_AREA'
-        
-        layout.operator("wm.save_homefile", icon='SAVE_PREFS')
-        layout.operator("wm.read_factory_settings", icon='LOAD_FACTORY')     
 
+        layout.operator("wm.save_homefile", icon='SAVE_PREFS')
+        layout.operator("wm.read_factory_settings", icon='LOAD_FACTORY')
 
 
 def register():
@@ -121,22 +119,22 @@ def register():
     bpy.utils.register_class(VIEW3D_TP_Display_File_Settings)
     bpy.utils.register_class(VIEW3D_TP_Display_File_Recover)
     bpy.utils.register_class(VIEW3D_TP_Display_File)
-        
+
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
 
     if kc:
         km = kc.keymaps.new(name='Window')
         kmi = km.keymap_items.new('wm.call_menu', 'W', 'PRESS', alt=True)
-        kmi.properties.name = "tp_display.file_menu"               
+        kmi.properties.name = "tp_display.file_menu"
 
 
 def unregister():
-  
+
     bpy.utils.unregister_class(VIEW3D_TP_Display_File_Settings)
     bpy.utils.unregister_class(VIEW3D_TP_Display_File_Recover)
     bpy.utils.unregister_class(VIEW3D_TP_Display_File)
-           
+
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
 
@@ -146,22 +144,10 @@ def unregister():
             if kmi.idname == 'wm.call_menu':
                 if kmi.properties.name == "":
                     km.keymap_items.remove(kmi)
-                    break                 
+                    break
 
 if __name__ == "__main__":
-    register() 	
+    register()
 
     # The menu can also be called from scripts
     bpy.ops.wm.call_menu(name=VIEW3D_TP_Display_File.bl_idname)
-
-
-
-
-
-
-
-
-
-
-
-

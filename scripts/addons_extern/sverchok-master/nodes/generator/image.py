@@ -21,7 +21,7 @@ from bpy.props import IntProperty, FloatProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, fullList,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class ImageNode(bpy.types.Node, SverchCustomTreeNode):
@@ -32,7 +32,7 @@ class ImageNode(bpy.types.Node, SverchCustomTreeNode):
 
     def images(self, context):
         return [tuple(3 * [im.name]) for im in bpy.data.images]
-        
+
     name_image = bpy.props.EnumProperty(items=images, name='images')
     R = FloatProperty(name='R', description='R',
                       default=0.30, min=0, max=1,
@@ -104,7 +104,7 @@ class ImageNode(bpy.types.Node, SverchCustomTreeNode):
 
         # outputs
         if 'vecs' in self.outputs and self.outputs['vecs'].is_linked:
-            out = self.make_vertices(IntegerX-1, IntegerY-1, StepX, StepY, self.name_image)
+            out = self.make_vertices(IntegerX - 1, IntegerY - 1, StepX, StepY, self.name_image)
             SvSetSocketAnyType(self, 'vecs', [out])
         else:
             SvSetSocketAnyType(self, 'vecs', [[[]]])
@@ -113,11 +113,11 @@ class ImageNode(bpy.types.Node, SverchCustomTreeNode):
 
             listEdg = []
             for i in range(IntegerY):
-                for j in range(IntegerX-1):
-                    listEdg.append((IntegerX*i+j, IntegerX*i+j+1))
+                for j in range(IntegerX - 1):
+                    listEdg.append((IntegerX * i + j, IntegerX * i + j + 1))
             for i in range(IntegerX):
-                for j in range(IntegerY-1):
-                    listEdg.append((IntegerX*j+i, IntegerX*j+i+IntegerX))
+                for j in range(IntegerY - 1):
+                    listEdg.append((IntegerX * j + i, IntegerX * j + i + IntegerX))
 
             edg = list(listEdg)
             SvSetSocketAnyType(self, 'edgs', [edg])
@@ -127,9 +127,9 @@ class ImageNode(bpy.types.Node, SverchCustomTreeNode):
         if 'pols' in self.outputs and self.outputs['pols'].is_linked:
 
             listPlg = []
-            for i in range(IntegerX-1):
-                for j in range(IntegerY-1):
-                    listPlg.append((IntegerX*j+i, IntegerX*j+i+1, IntegerX*j+i+IntegerX+1, IntegerX*j+i+IntegerX))
+            for i in range(IntegerX - 1):
+                for j in range(IntegerY - 1):
+                    listPlg.append((IntegerX * j + i, IntegerX * j + i + 1, IntegerX * j + i + IntegerX + 1, IntegerX * j + i + IntegerX))
             plg = list(listPlg)
             SvSetSocketAnyType(self, 'pols', [plg])
         else:
@@ -143,21 +143,21 @@ class ImageNode(bpy.types.Node, SverchCustomTreeNode):
         if delitely > leny:
             delitely = leny
         R, G, B = self.R, self.G, self.B
-        xcoef = lenx//delitelx
-        ycoef = leny//delitely
+        xcoef = lenx // delitelx
+        ycoef = leny // delitely
         # copy images data, pixels is created on every access with [i], extreme speedup.
         # http://blender.stackexchange.com/questions/3673/why-is-accessing-image-data-so-slow
         imag = bpy.data.images[image_name].pixels[:]
         vertices = []
         addition = 0
-        for y in range(delitely+1):
-            addition = int(ycoef*y*4*lenx)
-            for x in range(delitelx+1):
+        for y in range(delitely + 1):
+            addition = int(ycoef * y * 4 * lenx)
+            for x in range(delitelx + 1):
                 #  каждый пиксель кодируется RGBA, и записан строкой, без разделения на строки и столбцы.
-                middle = (imag[addition]*R+imag[addition+1]*G+imag[addition+2]*B)*imag[addition+3]
-                vertex = [x*stepx[x], y*stepy[y], middle]
-                vertices.append(vertex) 
-                addition += int(xcoef*4)
+                middle = (imag[addition] * R + imag[addition + 1] * G + imag[addition + 2] * B) * imag[addition + 3]
+                vertex = [x * stepx[x], y * stepy[y], middle]
+                vertices.append(vertex)
+                addition += int(xcoef * 4)
         return vertices
 
 

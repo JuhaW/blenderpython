@@ -51,7 +51,7 @@ def countRange(start=0, step=1, count=10):
     count = max(count, 0)
     if count == 0:
         return []
-    stop = (count*step) + start
+    stop = (count * step) + start
     return list(range(start, stop, step))
 
 
@@ -119,12 +119,13 @@ class GenListRangeInt(bpy.types.Node, SverchCustomTreeNode):
         outputs = self.outputs
         if not outputs[0].is_linked:
             return
-            
+
         param = [inputs[i].sv_get()[0] for i in range(3)]
         f = self.func_dict[self.mode]
         out = [f(*args) for args in zip(*match_long_repeat(param))]
         outputs['Range'].sv_set(out)
-    
+
+
 def register():
     bpy.utils.register_class(GenListRangeInt)
 

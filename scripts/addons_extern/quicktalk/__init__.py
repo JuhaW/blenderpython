@@ -25,7 +25,7 @@
 # Give it an armature if you don't already have one. It needs an armature to
 # attach to the shape keys.
 #
-# Put the 3d cursor near the object's face. It's where we'll 
+# Put the 3d cursor near the object's face. It's where we'll
 # create the panel of bones to control the shape-keys.
 # Click the "Build Shape-Key Panel Armature" button.
 # That'll build a panel of bones that control the shape-keys
@@ -50,10 +50,10 @@
 # Monkey:
 # Hello I'm a monkey
 # Welcome to my cartoon
-# 
+#
 # Dog:
 # Yes, and I'm a dog.
-# 
+#
 # Monkey:
 # Welcome to my cartoon dog.
 # ------------------
@@ -61,9 +61,9 @@
 # Click the "Guess Dialogue Markers" button.
 # This will try to guess where in the timeline
 # there's a change in who speaks and put markers
-# there. It will be wrong, so adjust them so 
+# there. It will be wrong, so adjust them so
 # they are right. You can make them yourself
-# if you need to for some reason, they are just 
+# if you need to for some reason, they are just
 # normal markers but with names ending in "!D"
 #
 # When they're right click the "Guess Line Markers"
@@ -88,7 +88,7 @@
 #
 # If all that sounds long-winded, you do not understand
 # how damn tedious lip-synching is when you have
-# to do it literally frame by frame. 
+# to do it literally frame by frame.
 
 
 bl_info = {
@@ -112,6 +112,8 @@ import string
 # Register the button-panel, the functions we'll use and the
 # user-editable variables like 'script location'.
 #
+
+
 def register():
     bpy.utils.register_class(QuickTalk_AddQuicktalkPanel)
     bpy.utils.register_class(QuickTalk_BuildShapeKeyPanel)
@@ -119,24 +121,24 @@ def register():
     bpy.utils.register_class(QuickTalk_GuessLines)
     bpy.utils.register_class(QuickTalk_GuessWords)
     bpy.utils.register_class(QuickTalk_QuicktalkPlot)
-    bpy.types.Scene.quicktalk_script_file = bpy.props.StringProperty (
-      name = "Script File",
-      default = "",
-      description = "Where is the file defining the script?",
-      subtype = 'FILE_PATH'
+    bpy.types.Scene.quicktalk_script_file = bpy.props.StringProperty(
+        name="Script File",
+        default="",
+        description="Where is the file defining the script?",
+        subtype='FILE_PATH'
     )
-    bpy.types.Scene.quicktalk_dict_file = bpy.props.StringProperty (
-      name = "Dictionary File",
-      default = "",
-      description = "Where is the file defining the phoneme dictionary?",
-      subtype = 'FILE_PATH'
+    bpy.types.Scene.quicktalk_dict_file = bpy.props.StringProperty(
+        name="Dictionary File",
+        default="",
+        description="Where is the file defining the phoneme dictionary?",
+        subtype='FILE_PATH'
     )
-    bpy.types.Scene.quicktalk_bone_option = bpy.props.EnumProperty (
-      items = (('0', 'X-Rotation', 'Create and move bones for X-Rotation'),    
+    bpy.types.Scene.quicktalk_bone_option = bpy.props.EnumProperty(
+        items=(('0', 'X-Rotation', 'Create and move bones for X-Rotation'),
                ('1', 'X-Translation', 'Create and move bones for X-Translation')),
-      name = "Bone Option",
-      default = "0",
-      description = "Move/Make bones with rotation or translation?"
+        name="Bone Option",
+        default="0",
+        description="Move/Make bones with rotation or translation?"
     )
 
 
@@ -151,7 +153,7 @@ def unregister():
     bpy.utils.unregister_class(QuickTalk_GuessWords)
     bpy.utils.unregister_class(QuickTalk_QuicktalkPlot)
     del bpy.types.Scene.quicktalk_script_file
-    del bpy.types.Scene.quicktalk_dict_file 
+    del bpy.types.Scene.quicktalk_dict_file
     del bpy.types.Scene.quicktalk_bone_option
 
 
@@ -165,7 +167,7 @@ class QuickTalk_AddQuicktalkPanel(bpy.types.Panel):
     bl_region_type = "WINDOW"
     bl_context = "object"
     bl_label = "QuickTalk"
- 
+
     def draw(self, context):
         TheCol = self.layout.column(align=True)
         TheCol.prop(context.scene, "quicktalk_bone_option")
@@ -186,176 +188,169 @@ class QuickTalk_BuildShapeKeyPanel(bpy.types.Operator):
     """Build Shape Key Panel In Armature"""    # tooltip
     bl_idname = "object.quicktalk_addpanel"
     bl_label = "Add QuickTalk Synch Panel to Armature"  # display name in the search-menu.
-    bl_options = {'REGISTER', 'UNDO'} 
-
-
+    bl_options = {'REGISTER', 'UNDO'}
 
     ###
     # We arrange the levers in the panel in a spiral
     # so that we can add more at any point and still
     # have close-as-possible to a square
-    # Mat Taylor found a better way than my first 
+    # Mat Taylor found a better way than my first
     # effort.....
     #
-    def getXYSpiral(self,i):
+    def getXYSpiral(self, i):
         n = math.floor(math.sqrt(i))
-        d = i - n*n
+        d = i - n * n
         if(n & 1):
-          x = (n+1)/2
-          y = (n+1)/2
-          if(d<n):
-            y=y+d-n
-          elif(d>n):
-            x=x-d+n
+            x = (n + 1) / 2
+            y = (n + 1) / 2
+            if(d < n):
+                y = y + d - n
+            elif(d > n):
+                x = x - d + n
         else:
-          x = n/2-n
-          y = n/2-n
-          if(d<n):
-            y=y-d+n
-          elif(d>n):
-            x=x+d-n
-        return (x*1.2,y*1.2)
-
+            x = n / 2 - n
+            y = n / 2 - n
+            if(d < n):
+                y = y - d + n
+            elif(d > n):
+                x = x + d - n
+        return (x * 1.2, y * 1.2)
 
     ###
     # Function to add a driver to a shapekey and attach to a bone.
     #
-    def addDriver(self,shapekey,name,destObj,bone):
-        driver = shapekey.driver_add("value") 
+    def addDriver(self, shapekey, name, destObj, bone):
+        driver = shapekey.driver_add("value")
         driver.driver.type = "SCRIPTED"
         if(bpy.context.scene.quicktalk_bone_option == "0"):
-          driver.driver.expression = "val/1.571"  #90 degrees is 1.571 radians
+            driver.driver.expression = "val/1.571"  # 90 degrees is 1.571 radians
         else:
-          driver.driver.expression = "val"
-        
+            driver.driver.expression = "val"
+
         val = driver.driver.variables.new()
-        val.name = "val" 
+        val.name = "val"
         val.type = 'TRANSFORMS'
         val.targets[0].id = destObj
         val.targets[0].bone_target = name
         val.targets[0].transform_space = 'LOCAL_SPACE'
         if(bpy.context.scene.quicktalk_bone_option == "0"):
-          val.targets[0].transform_type = 'ROT_X'
+            val.targets[0].transform_type = 'ROT_X'
         else:
-          val.targets[0].transform_type = 'LOC_X'
-        
+            val.targets[0].transform_type = 'LOC_X'
 
     ###
     # Function to add a bone to the armature's control panel
     #
     def addPanelBone(self, arm, parent, name, num):
-        (x,z) = self.getXYSpiral(num)
+        (x, z) = self.getXYSpiral(num)
         editbone = arm.edit_bones.new(name)
         editbone.parent = parent
-        editbone.head = (parent.head[0]+x,    parent.head[1],parent.head[2]+z)
+        editbone.head = (parent.head[0] + x, parent.head[1], parent.head[2] + z)
         if(bpy.context.scene.quicktalk_bone_option == "0"):
-          editbone.tail = (parent.head[0]+x+0.9,parent.head[1],parent.head[2]+z)
+            editbone.tail = (parent.head[0] + x + 0.9, parent.head[1], parent.head[2] + z)
         else:
-          editbone.tail = (parent.head[0]+x,parent.head[1],parent.head[2]+z-0.8)
-        
-        return editbone
+            editbone.tail = (parent.head[0] + x, parent.head[1], parent.head[2] + z - 0.8)
 
+        return editbone
 
     ###
     # Function to set a bone's constraints
     # to limit it's rotation.
     #
-    def setBoneLimits(self,bone):
+    def setBoneLimits(self, bone):
         bone.rotation_mode = "XYZ"
-        bone.lock_rotation = (True , True, True)
-        bone.lock_location = (True , True, True)
+        bone.lock_rotation = (True, True, True)
+        bone.lock_location = (True, True, True)
         if(bpy.context.scene.quicktalk_bone_option == "0"):
-          bone.lock_rotation = (False, True, True)
-          con = bone.constraints.new("LIMIT_ROTATION");
-          con.use_limit_x = True
-          con.use_limit_y = True
-          con.use_limit_z = True
-          con.min_x = 0
-          con.max_x = 1.571
-          con.min_y = 0
-          con.max_y = 0
-          con.min_z = 0
-          con.max_z = 0
+            bone.lock_rotation = (False, True, True)
+            con = bone.constraints.new("LIMIT_ROTATION")
+            con.use_limit_x = True
+            con.use_limit_y = True
+            con.use_limit_z = True
+            con.min_x = 0
+            con.max_x = 1.571
+            con.min_y = 0
+            con.max_y = 0
+            con.min_z = 0
+            con.max_z = 0
         else:
-          bone.lock_location = (False, True, True)
-          con = bone.constraints.new("LIMIT_LOCATION");
-          con.min_z = 0
-          con.max_z = 0
-          con.max_x = 1
-          con.use_min_x = True
-          con.use_max_x = True
-          con.use_min_y = True
-          con.use_max_y = True
-          con.use_min_z = True
-          con.use_max_z = True
-          con.min_x = 0
-          con.min_y = 0
-          con.max_y = 0
-        con.owner_space= "LOCAL"
-
+            bone.lock_location = (False, True, True)
+            con = bone.constraints.new("LIMIT_LOCATION")
+            con.min_z = 0
+            con.max_z = 0
+            con.max_x = 1
+            con.use_min_x = True
+            con.use_max_x = True
+            con.use_min_y = True
+            con.use_max_y = True
+            con.use_min_z = True
+            con.use_max_z = True
+            con.min_x = 0
+            con.min_y = 0
+            con.max_y = 0
+        con.owner_space = "LOCAL"
 
     ###
     # Execute the "Build Shape-Key Panel in armature" function
     #
-    def execute(self, context): 
-        scene = bpy.context.scene;
+    def execute(self, context):
+        scene = bpy.context.scene
 
         # Get active object
-        shapeObj = scene.objects.active 
+        shapeObj = scene.objects.active
 
-        #Get armature for that object, should be it's parent.
+        # Get armature for that object, should be it's parent.
         armObj = scene.objects.active.parent
         if(not armObj):
-          self.report({"ERROR"},"Can't find parent armature to add bones");
-          return {"CANCELLED"}
-        if(armObj.type!="ARMATURE"):
-          self.report({"ERROR"},"Parent isn't an armature");
-          return {"CANCELLED"}
+            self.report({"ERROR"}, "Can't find parent armature to add bones")
+            return {"CANCELLED"}
+        if(armObj.type != "ARMATURE"):
+            self.report({"ERROR"}, "Parent isn't an armature")
+            return {"CANCELLED"}
 
-        #Get cursor location, relative to armature object
-        #This is where we want the control panel rig to go.
-        x = scene.cursor_location[0]; 
-        y = scene.cursor_location[1]; 
-        z = scene.cursor_location[2]; 
-        x = (x-armObj.location[0])/armObj.scale[0];
-        y = (y-armObj.location[1])/armObj.scale[1];
-        z = (z-armObj.location[2])/armObj.scale[2];
+        # Get cursor location, relative to armature object
+        # This is where we want the control panel rig to go.
+        x = scene.cursor_location[0]
+        y = scene.cursor_location[1]
+        z = scene.cursor_location[2]
+        x = (x - armObj.location[0]) / armObj.scale[0]
+        y = (y - armObj.location[1]) / armObj.scale[1]
+        z = (z - armObj.location[2]) / armObj.scale[2]
 
-        #Select the armature, go to edit mode
+        # Select the armature, go to edit mode
         scene.objects.active = armObj
         bpy.ops.object.mode_set(mode='EDIT')
 
-        #Create the panel root bone.
+        # Create the panel root bone.
         arm = armObj.data
         panelroot = arm.edit_bones.new("Shapes Panel")
-        panelroot.head = (x,y,z)
-        panelroot.tail = (x,y+1,z)
+        panelroot.head = (x, y, z)
+        panelroot.tail = (x, y + 1, z)
 
-        #Add bone for every shape-key, except those starting with !
+        # Add bone for every shape-key, except those starting with !
         shapeKeys = shapeObj.data.shape_keys.key_blocks
-        num = 0;
+        num = 0
         for key in shapeKeys:
-            if((key.name[0:3]=="qt_") or (key.name in ["AI","O","E","U","ETC","L","WQ","MBP","M","FV"])):
-              self.addPanelBone(arm,panelroot,key.name,num)
-              num=num+1
+            if((key.name[0:3] == "qt_") or (key.name in ["AI", "O", "E", "U", "ETC", "L", "WQ", "MBP", "M", "FV"])):
+                self.addPanelBone(arm, panelroot, key.name, num)
+                num = num + 1
 
-        #Select pose mode to edit the rig to set limits
-        bpy.ops.object.mode_set(mode='POSE') 
+        # Select pose mode to edit the rig to set limits
+        bpy.ops.object.mode_set(mode='POSE')
         pose = armObj.pose
         for key in shapeKeys:
-            if((key.name[0:3]=="qt_") or (key.name in ["AI","O","E","U","ETC","L","WQ","MBP","M","FV"])):
-              self.setBoneLimits(pose.bones[key.name])
+            if((key.name[0:3] == "qt_") or (key.name in ["AI", "O", "E", "U", "ETC", "L", "WQ", "MBP", "M", "FV"])):
+                self.setBoneLimits(pose.bones[key.name])
 
-        #Add drivers to the all the shape keys
+        # Add drivers to the all the shape keys
         for key in shapeKeys:
-            if((key.name[0:3]=="qt_") or (key.name in ["AI","O","E","U","ETC","L","WQ","MBP","M","FV"])):
-              self.addDriver(key,key.name,armObj,pose.bones[key.name])
-        
-        #Restore the mode to how it was when we started.
+            if((key.name[0:3] == "qt_") or (key.name in ["AI", "O", "E", "U", "ETC", "L", "WQ", "MBP", "M", "FV"])):
+                self.addDriver(key, key.name, armObj, pose.bones[key.name])
+
+        # Restore the mode to how it was when we started.
         bpy.ops.object.mode_set(mode='OBJECT')
         scene.objects.active = shapeObj
         return {'FINISHED'}
-
 
 
 ###
@@ -363,383 +358,373 @@ class QuickTalk_BuildShapeKeyPanel(bpy.types.Operator):
 #
 class QuickTalk_Script:
 
-  phoneme_dictionary = {}
+    phoneme_dictionary = {}
 
-  ###
-  # Load the script at init
-  #
-  def __init__(self,filename):
-      file = open(bpy.path.abspath(filename),"r")
-      self.lines = file.readlines()
-      file.close()
+    ###
+    # Load the script at init
+    #
+    def __init__(self, filename):
+        file = open(bpy.path.abspath(filename), "r")
+        self.lines = file.readlines()
+        file.close()
 
-      #Parse it
-      self.parsed = "okay"
-      self.voices = {}
-      self.dialogues = []
-      currentVoice = "narator"
-      currentDialogue = {}
-      currentDialogue['voice'] = currentVoice;
-      currentDialogue['lines'] = []
-      currentDialogue['totalwords'] = 0
-      numWords=0
-      for l in self.lines:
-        match = re.search("^([A-Za-z]*):",l)
-        if(match):
-          #Change voice
-          currentVoice = match.group(1).lower()
-          self.voices[currentVoice] = True
-          if(len(currentDialogue['lines'])>0):
+        # Parse it
+        self.parsed = "okay"
+        self.voices = {}
+        self.dialogues = []
+        currentVoice = "narator"
+        currentDialogue = {}
+        currentDialogue['voice'] = currentVoice
+        currentDialogue['lines'] = []
+        currentDialogue['totalwords'] = 0
+        numWords = 0
+        for l in self.lines:
+            match = re.search("^([A-Za-z]*):", l)
+            if(match):
+                # Change voice
+                currentVoice = match.group(1).lower()
+                self.voices[currentVoice] = True
+                if(len(currentDialogue['lines']) > 0):
+                    self.dialogues.append(currentDialogue)
+                currentDialogue = {}
+                currentDialogue['voice'] = currentVoice
+                currentDialogue['lines'] = []
+                currentDialogue['totalwords'] = 0
+                numWords = 0
+            else:
+                # Dialogue line
+                words = l.split()
+                currentLine = []
+                if(len(words) > 0):
+                    for w in words:
+                        w = re.sub('[\W_]+', '', w).lower()  # Remove non alphanumerics
+                        currentLine.append(w)
+                        currentDialogue['totalwords'] = currentDialogue['totalwords'] + 1
+                    currentDialogue['lines'].append(currentLine)
+
+        if(len(currentDialogue['lines']) > 0):
             self.dialogues.append(currentDialogue)
-          currentDialogue = {}
-          currentDialogue['voice'] = currentVoice;
-          currentDialogue['lines'] = []
-          currentDialogue['totalwords'] = 0
-          numWords=0
+        self.dumpScript()
+    ###
+    # Get total number of words in this script
+    #
+
+    def getTotalWords(self):
+        total = 0
+        for d in self.dialogues:
+            total = total + d['totalwords']
+        return total
+
+    ###
+    # Add the dialogue markers
+    #
+    def addDialogueMarkers(self):
+        numFrames = bpy.context.scene.frame_end - bpy.context.scene.frame_start + 1
+        numWords = self.getTotalWords()
+        framesPerWord = numFrames / numWords
+
+        # Switch to a timeline
+        default_frame = bpy.context.scene.frame_current
+        default_area = bpy.context.area.type
+        bpy.context.area.type = ('TIMELINE')
+
+        # Add some markers
+        frame = bpy.context.scene.frame_start
+        for d in self.dialogues:
+            bpy.context.scene.frame_current = frame
+            marker = bpy.ops.marker.add()
+            bpy.ops.marker.rename(name=d['voice'] + "!D")
+            frame = frame + framesPerWord * d['totalwords']
+
+        bpy.context.scene.frame_current = default_frame
+        bpy.context.area.type = default_area
+
+    ###
+    # Add the line markers
+    # Note: We can only have one marker per frame, so
+    # we can't add in the first line from each dialogue.
+    #
+    def addLineMarkers(self):
+        # Switch to a timeline
+        default_frame = bpy.context.scene.frame_current
+        default_area = bpy.context.area.type
+        bpy.context.area.type = ('TIMELINE')
+
+        # Find the dialogue markers
+        dialogueStarts = []
+        for m in bpy.context.scene.timeline_markers:
+            if(m.name[-2:] == "!D"):
+                frame = m.frame
+                dialogueStarts.append(frame)
+        dialogueStarts.append(bpy.context.scene.frame_end)  # Fake one at the end of the scene
+        dialogueStarts = sorted(dialogueStarts)
+
+        # Add line markers for each dialogue
+        n = 0
+        for d in self.dialogues:
+            frame = dialogueStarts[n]
+            start = dialogueStarts[n]
+            n += 1
+            end = dialogueStarts[n]
+            framesPerWord = (end - start) / d['totalwords']
+
+            ln = 0
+            for l in d['lines']:
+                ln = ln + 1
+                if(ln > 1):
+                    bpy.context.scene.frame_current = frame
+                    marker = bpy.ops.marker.add()
+                    name = l[0][0:10] + "!L"
+                    bpy.ops.marker.rename(name=name)
+                frame = frame + framesPerWord * len(l)
+
+        bpy.context.scene.frame_current = default_frame
+        bpy.context.area.type = default_area
+
+    ###
+    # Add the word markers
+    # Note: We can only have one marker per frame, so
+    # we can't add in the first word from each line.
+    #
+    def addWordMarkers(self):
+        # Switch to a timeline
+        default_frame = bpy.context.scene.frame_current
+        default_area = bpy.context.area.type
+        bpy.context.area.type = ('TIMELINE')
+
+        # Find the existing markers
+        lineStarts = []
+        for m in bpy.context.scene.timeline_markers:
+            if((m.name[-2:] == "!D") or (m.name[-2:] == "!L")):
+                frame = m.frame
+                lineStarts.append(frame)
+        lineStarts.append(bpy.context.scene.frame_end)  # Fake one at the end of the scene
+        lineStarts = sorted(lineStarts)
+
+        # Add word markers for each line
+        n = 0
+        for d in self.dialogues:
+            for l in d['lines']:
+                frame = lineStarts[n]
+                start = lineStarts[n]
+                n += 1
+                end = lineStarts[n]
+                framesPerWord = (end - start) / len(l)
+
+                wn = 0
+                for w in l:
+                    wn = wn + 1
+                    if(wn > 1):
+                        bpy.context.scene.frame_current = frame
+                        marker = bpy.ops.marker.add()
+                        name = w[0:10] + "!W"
+                        bpy.ops.marker.rename(name=name)
+                    frame = frame + framesPerWord
+
+        bpy.context.scene.frame_current = default_frame
+        bpy.context.area.type = default_area
+
+    ###
+    # Load Dictionary Function is mostly ripped out
+    # of the Papagayo source code
+    def LoadDictionary(self):
+        mappings = {
+            "AA0": "AI",
+            "AA1": "AI",
+            "AA2": "AI",
+            "AE0": "AI",
+            "AE1": "AI",
+            "AE2": "AI",
+            "AH0": "AI",
+            "AH1": "AI",
+            "AH2": "AI",
+            "AO0": "O",
+            "AO1": "O",
+            "AO2": "O",
+            "AW0": "O",
+            "AW1": "O",
+            "AW2": "O",
+            "AY0": "AI",
+            "AY1": "AI",
+            "AY2": "AI",
+            "B": "MBP",
+            "CH": "ETC",
+            "D": "ETC",
+            "DH": "ETC",
+            "EH0": "E",
+            "EH1": "E",
+            "EH2": "E",
+            "ER0": "E",
+            "ER1": "E",
+            "ER2": "E",
+            "EY0": "E",
+            "EY1": "E",
+            "EY2": "E",
+            "F": "FV",
+            "G": "ETC",
+            "HH": "ETC",
+            "IH0": "AI",
+            "IH1": "AI",
+            "IH2": "AI",
+            "IY0": "E",
+            "IY1": "E",
+            "IY2": "E",
+            "JH": "ETC",
+            "K": "ETC",
+            "L": "L",
+            "M": "MBP",
+            "N": "ETC",
+            "NG": "ETC",
+            "OW0": "O",
+            "OW1": "O",
+            "OW2": "O",
+            "OY0": "WQ",
+            "OY1": "WQ",
+            "OY2": "WQ",
+            "P": "MBP",
+            "R": "ETC",
+            "S": "ETC",
+            "SH": "ETC",
+            "T": "ETC",
+            "TH": "ETC",
+            "UH0": "U",
+            "UH1": "U",
+            "UH2": "U",
+            "UW0": "U",
+            "UW1": "U",
+            "UW2": "U",
+            "V": "FV",
+            "W": "WQ",
+            "Y": "ETC",
+            "Z": "ETC",
+            "ZH": "ETC",
+            "E21": "E",
+        }
+
+        inFile = open(bpy.path.abspath(bpy.context.scene.quicktalk_dict_file), 'r')
+
+        for line in inFile.readlines():
+            if line[0] == '#':
+                continue  # skip comments in the dictionary
+            # strip out leading/trailing whitespace
+            line.strip()
+            line = line.rstrip('\r\n')
+
+            # split into components
+            entry = line.split()
+            if len(entry) == 0:
+                continue
+            # Ditch dules that have (xx) after 'en
+            if entry[0].endswith(')'):
+                continue
+            # add this entry to the in-memory dictionary
+            for i in range(len(entry)):
+                name = entry[0]
+                name = re.sub('[\W_]+', '', name).lower()  # Remove non alphanumerics
+                if i == 0:
+                    self.phoneme_dictionary[name] = []
+                else:
+                    rawentry = entry[i]
+                    try:
+                        entry[i] = entry[i]
+                    except:
+                        print("Unknown phoneme:", entry[i], "in word:", entry[0])
+                    self.phoneme_dictionary[name].append(mappings[entry[i]])
+        inFile.close()
+        inFile = None
+
+    ###
+    # Plot a single dot on a timeline
+    #
+    def plotDot(self, name, value, frame):
+        if((name == "MBP") and (not "MBP" in bpy.context.active_object.pose.bones)):
+            name = "M"
+        if name in bpy.context.active_object.pose.bones:
+            bone = bpy.context.active_object.pose.bones[name]
+            if(bpy.context.scene.quicktalk_bone_option == "0"):
+                bone.rotation_euler = (value, 0, 0)
+                bone.keyframe_insert("rotation_euler", 0, frame, "QuickTalk")  # 0=x, 1=y, 2=z
+            else:
+                bone.location = (value, 0, 0)
+                bone.keyframe_insert("location", 0, frame, "QuickTalk")  # 0=x, 1=y, 2=z
         else:
-          #Dialogue line
-          words = l.split()
-          currentLine = []
-          if(len(words)>0):
-            for w in words:
-              w = re.sub('[\W_]+', '', w).lower()     #Remove non alphanumerics
-              currentLine.append(w)
-              currentDialogue['totalwords'] = currentDialogue['totalwords'] + 1
-            currentDialogue['lines'].append(currentLine)
+            print("Can't find bone to plot " + name + " at " + str(value) + " to " + str(frame))
 
-      if(len(currentDialogue['lines'])>0):
-        self.dialogues.append(currentDialogue)
-      self.dumpScript()
-  ###
-  # Get total number of words in this script
-  # 
-  def getTotalWords(self):
-      total = 0
-      for d in self.dialogues:
-        total = total + d['totalwords']
-      return total
+    ###
+    # Plot a single phoneme to the timeline
+    #
+    def plotPhoneme(self, p, last, start, step):
+        if(p != last):
+            # Only turn it down if it wasn't the last phoneme
+            self.plotDot(p, 0, int(start))
+        self.plotDot(p, 1.571, int(start + step))
+        self.plotDot(p, 0, int(start + step + step))
 
-  ###
-  # Add the dialogue markers
-  #
-  def addDialogueMarkers(self):
-      numFrames = bpy.context.scene.frame_end - bpy.context.scene.frame_start + 1
-      numWords = self.getTotalWords()
-      framesPerWord = numFrames/numWords
+    ###
+    # Plot a specific word at a specific place
+    #
+    def plotWordToTimeline(self, w, frame, length):
+        phonemes = self.phoneme_dictionary[w.lower()]
+        if(length > len(phonemes) * 5):
+                # Obviously this word has a gap after it, fix the length lower
+            length = len(phonemes) * 4
 
-      #Switch to a timeline
-      default_frame = bpy.context.scene.frame_current
-      default_area = bpy.context.area.type
-      bpy.context.area.type = ('TIMELINE')
+        step = length / len(phonemes)
+        current = frame - step / 2
+        lastPhoneme = "non"
+        for p in phonemes:
+            self.plotPhoneme(p, lastPhoneme, current, step)
+            lastPhoneme = p
+            current = current + step
 
-      #Add some markers
-      frame = bpy.context.scene.frame_start
-      for d in self.dialogues:
-        bpy.context.scene.frame_current = frame
-        marker = bpy.ops.marker.add()
-        bpy.ops.marker.rename(name=d['voice']+"!D")
-        frame = frame + framesPerWord*d['totalwords']
+    ###
+    # Plot the phonemes to the timeline.
+    #
+    def plotTimelines(self):
+        # Switch to a timeline
+        default_frame = bpy.context.scene.frame_current
+        default_area = bpy.context.area.type
+        bpy.context.area.type = ('TIMELINE')
 
-      bpy.context.scene.frame_current = default_frame
-      bpy.context.area.type = default_area
+        # Find the word-start markers
+        wordStarts = []
+        for m in bpy.context.scene.timeline_markers:
+            if((m.name[-2:] == "!D") or (m.name[-2:] == "!L") or (m.name[-2:] == "!W")):
+                frame = m.frame
+                wordStarts.append(frame)
+        wordStarts.append(bpy.context.scene.frame_end)  # Fake one at the end of the scene
+        wordStarts = sorted(wordStarts)
 
+        # Add the actual plots
+        selectedobjectname = bpy.context.active_object.name.lower()
+        n = 0
+        for d in self.dialogues:
+            for l in d['lines']:
+                for w in l:
+                    startFrame = wordStarts[n]
+                    n = n + 1
+                    endFrame = wordStarts[n]
+                    if selectedobjectname[0:len(d['voice'])] == d['voice']:
+                        self.plotWordToTimeline(w, startFrame, endFrame - startFrame)
+                    else:
+                        print("Non-Matching speaker: " + selectedobjectname[0:len(d['voice'])] + ":" + d['voice'])
 
-  ###
-  # Add the line markers
-  # Note: We can only have one marker per frame, so
-  # we can't add in the first line from each dialogue.
-  #
-  def addLineMarkers(self):
-      #Switch to a timeline
-      default_frame = bpy.context.scene.frame_current
-      default_area = bpy.context.area.type
-      bpy.context.area.type = ('TIMELINE')
+        bpy.context.scene.frame_current = default_frame
+        bpy.context.area.type = default_area
 
-      #Find the dialogue markers
-      dialogueStarts = []
-      for m in bpy.context.scene.timeline_markers:
-        if(m.name[-2:]=="!D"):
-          frame = m.frame
-          dialogueStarts.append(frame)
-      dialogueStarts.append(bpy.context.scene.frame_end)  #Fake one at the end of the scene
-      dialogueStarts = sorted(dialogueStarts)
+    ###
+    # Debug function to dump script to stdout
+    #
+    def dumpScript(self):
+        for d in self.dialogues:
+            print("Dialogue - " + d['voice'] + " - " + str(d['totalwords']) + " words:")
+            for l in d['lines']:
+                print("     ", end="")
+                for w in l:
+                    print(w, end=" ")
+                print()
 
-      #Add line markers for each dialogue
-      n=0;
-      for d in self.dialogues:
-        frame = dialogueStarts[n];
-        start = dialogueStarts[n]
-        n+=1
-        end = dialogueStarts[n]
-        framesPerWord = (end-start) / d['totalwords']
-
-        ln = 0
-        for l in d['lines']:
-            ln=ln+1
-            if(ln>1):
-              bpy.context.scene.frame_current = frame
-              marker = bpy.ops.marker.add()
-              name=l[0][0:10]+"!L"
-              bpy.ops.marker.rename(name=name)
-            frame = frame + framesPerWord*len(l)
-           
-     
-
-      bpy.context.scene.frame_current = default_frame
-      bpy.context.area.type = default_area
-
-    
-  ###
-  # Add the word markers
-  # Note: We can only have one marker per frame, so
-  # we can't add in the first word from each line.
-  #
-  def addWordMarkers(self):
-      #Switch to a timeline
-      default_frame = bpy.context.scene.frame_current
-      default_area = bpy.context.area.type
-      bpy.context.area.type = ('TIMELINE')
-
-      #Find the existing markers
-      lineStarts = []
-      for m in bpy.context.scene.timeline_markers:
-        if((m.name[-2:]=="!D") or (m.name[-2:]=="!L")):
-          frame = m.frame
-          lineStarts.append(frame)
-      lineStarts.append(bpy.context.scene.frame_end)  #Fake one at the end of the scene
-      lineStarts = sorted(lineStarts)
-
-      #Add word markers for each line
-      n=0;
-      for d in self.dialogues:
-        for l in d['lines']:
-          frame = lineStarts[n];
-          start = lineStarts[n]
-          n+=1
-          end = lineStarts[n]
-          framesPerWord = (end-start) / len(l)
-
-          wn = 0
-          for w in l:
-            wn=wn+1
-            if(wn>1):
-              bpy.context.scene.frame_current = frame
-              marker = bpy.ops.marker.add()
-              name=w[0:10]+"!W"
-              bpy.ops.marker.rename(name=name)
-            frame = frame + framesPerWord
-
-      bpy.context.scene.frame_current = default_frame
-      bpy.context.area.type = default_area
-
-
-  ###
-  # Load Dictionary Function is mostly ripped out
-  # of the Papagayo source code
-  def LoadDictionary(self):
-      mappings = {
-        "AA0":"AI",
-        "AA1":"AI",
-        "AA2":"AI",
-        "AE0":"AI",
-        "AE1":"AI",
-        "AE2":"AI",
-        "AH0":"AI",
-        "AH1":"AI",
-        "AH2":"AI",
-        "AO0":"O",
-        "AO1":"O",
-        "AO2":"O",
-        "AW0":"O",
-        "AW1":"O",
-        "AW2":"O",
-        "AY0":"AI",
-        "AY1":"AI",
-        "AY2":"AI",
-        "B":"MBP",
-        "CH":"ETC",
-        "D":"ETC",
-        "DH":"ETC",
-        "EH0":"E",
-        "EH1":"E",
-        "EH2":"E",
-        "ER0":"E",
-        "ER1":"E",
-        "ER2":"E",
-        "EY0":"E",
-        "EY1":"E",
-        "EY2":"E",
-        "F":"FV",
-        "G":"ETC",
-        "HH":"ETC",
-        "IH0":"AI",
-        "IH1":"AI",
-        "IH2":"AI",
-        "IY0":"E",
-        "IY1":"E",
-        "IY2":"E",
-        "JH":"ETC",
-        "K":"ETC",
-        "L":"L",
-        "M":"MBP",
-        "N":"ETC",
-        "NG":"ETC",
-        "OW0":"O",
-        "OW1":"O",
-        "OW2":"O",
-        "OY0":"WQ",
-        "OY1":"WQ",
-        "OY2":"WQ",
-        "P":"MBP",
-        "R":"ETC",
-        "S":"ETC",
-        "SH":"ETC",
-        "T":"ETC",
-        "TH":"ETC",
-        "UH0":"U",
-        "UH1":"U",
-        "UH2":"U",
-        "UW0":"U",
-        "UW1":"U",
-        "UW2":"U",
-        "V":"FV",
-        "W":"WQ",
-        "Y":"ETC",
-        "Z":"ETC",
-        "ZH":"ETC",
-        "E21":"E",
-      }
-
-
-      inFile = open(bpy.path.abspath(bpy.context.scene.quicktalk_dict_file), 'r')
-
-      for line in inFile.readlines():
-        if line[0] == '#':
-          continue # skip comments in the dictionary
-        # strip out leading/trailing whitespace
-        line.strip()
-        line = line.rstrip('\r\n')
-
-        # split into components
-        entry = line.split()
-        if len(entry) == 0:
-          continue
-        # Ditch dules that have (xx) after 'en
-        if entry[0].endswith(')'):
-          continue
-        # add this entry to the in-memory dictionary
-        for i in range(len(entry)):
-          name = entry[0]
-          name = re.sub('[\W_]+', '', name).lower()     #Remove non alphanumerics
-          if i == 0:
-            self.phoneme_dictionary[name] = []
-          else:
-            rawentry = entry[i]
-            try:
-              entry[i] = entry[i]
-            except:
-              print("Unknown phoneme:", entry[i], "in word:", entry[0])
-            self.phoneme_dictionary[name].append(mappings[entry[i]])
-      inFile.close()
-      inFile = None
-
-
-  ###
-  # Plot a single dot on a timeline
-  #
-  def plotDot(self,name,value,frame):
-    if((name=="MBP") and (not "MBP" in bpy.context.active_object.pose.bones)):
-        name="M"
-    if name in bpy.context.active_object.pose.bones:
-      bone = bpy.context.active_object.pose.bones[name]
-      if(bpy.context.scene.quicktalk_bone_option == "0"):
-        bone.rotation_euler = (value,0,0)
-        bone.keyframe_insert("rotation_euler",0,frame,"QuickTalk")        #0=x, 1=y, 2=z
-      else:
-        bone.location = (value,0,0)
-        bone.keyframe_insert("location",0,frame,"QuickTalk")        #0=x, 1=y, 2=z
-    else:
-      print("Can't find bone to plot "+name+" at "+str(value)+" to "+str(frame))
-
-  ###
-  # Plot a single phoneme to the timeline
-  #
-  def plotPhoneme(self,p,last,start,step):
-    if(p!=last):
-      ##Only turn it down if it wasn't the last phoneme
-      self.plotDot(p,0,int(start))
-    self.plotDot(p,1.571,int(start+step))
-    self.plotDot(p,0,int(start+step+step))
-
-  ###
-  # Plot a specific word at a specific place
-  #
-  def plotWordToTimeline(self,w,frame,length):
-      phonemes = self.phoneme_dictionary[w.lower()] 
-      if(length > len(phonemes) * 5):
-        #Obviously this word has a gap after it, fix the length lower
-        length = len(phonemes) * 4;
-   
-      step = length/len(phonemes)
-      current = frame-step/2
-      lastPhoneme = "non"
-      for p in phonemes:
-        self.plotPhoneme(p,lastPhoneme,current,step)
-        lastPhoneme = p
-        current = current+step
-            
-
-  ###
-  # Plot the phonemes to the timeline.
-  #
-  def plotTimelines(self):
-      #Switch to a timeline
-      default_frame = bpy.context.scene.frame_current
-      default_area = bpy.context.area.type
-      bpy.context.area.type = ('TIMELINE')
-
-      #Find the word-start markers
-      wordStarts = []
-      for m in bpy.context.scene.timeline_markers:
-        if((m.name[-2:]=="!D") or (m.name[-2:]=="!L") or (m.name[-2:]=="!W")):
-          frame = m.frame
-          wordStarts.append(frame)
-      wordStarts.append(bpy.context.scene.frame_end)  #Fake one at the end of the scene
-      wordStarts = sorted(wordStarts)
-
-      #Add the actual plots
-      selectedobjectname = bpy.context.active_object.name.lower()
-      n=0;
-      for d in self.dialogues:
-          for l in d['lines']:
-            for w in l:
-              startFrame = wordStarts[n]
-              n=n+1
-              endFrame = wordStarts[n]
-              if selectedobjectname[0:len(d['voice'])] == d['voice']:
-                self.plotWordToTimeline(w,startFrame,endFrame-startFrame)
-              else:
-                print("Non-Matching speaker: "+selectedobjectname[0:len(d['voice'])]+":"+d['voice'])
-
-      bpy.context.scene.frame_current = default_frame
-      bpy.context.area.type = default_area
-
-
-
-  ###
-  # Debug function to dump script to stdout
-  # 
-  def dumpScript(self):
-      for d in self.dialogues:
-        print("Dialogue - "+d['voice']+" - "+str(d['totalwords'])+" words:")
-        for l in d['lines']:
-          print("     ",end="")
-          for w in l:
-            print(w,end=" ")
-          print()
-          
-#end class script
-
+# end class script
 
 
 ###
@@ -754,22 +739,24 @@ class QuickTalk_GuessDialogue(bpy.types.Operator):
     def execute(self, context):
         script = QuickTalk_Script(context.scene.quicktalk_script_file)
         script.addDialogueMarkers()
-        
+
         return {'FINISHED'}
 
 ###
 # The Guess Line Markers Function
 #
+
+
 class QuickTalk_GuessLines(bpy.types.Operator):
     """Guess Quicktalk Line Markers"""         # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "object.quicktalk_guess_lines" # unique identifier for buttons and menu items to reference.
+    bl_idname = "object.quicktalk_guess_lines"  # unique identifier for buttons and menu items to reference.
     bl_label = "Guess Line Start Markers"  # display name in the interface.
     bl_options = {'REGISTER', 'UNDO'}          # enable undo for the operator.
 
     def execute(self, context):
         script = QuickTalk_Script(context.scene.quicktalk_script_file)
         script.addLineMarkers()
-        
+
         return {'FINISHED'}
 
 
@@ -778,19 +765,21 @@ class QuickTalk_GuessLines(bpy.types.Operator):
 #
 class QuickTalk_GuessWords(bpy.types.Operator):
     """Guess Quicktalk Word Markers"""         # blender will use this as a tooltip for menu items and buttons.
-    bl_idname = "object.quicktalk_guess_words" # unique identifier for buttons and menu items to reference.
+    bl_idname = "object.quicktalk_guess_words"  # unique identifier for buttons and menu items to reference.
     bl_label = "Guess Word Start Markers"  # display name in the interface.
     bl_options = {'REGISTER', 'UNDO'}          # enable undo for the operator.
 
     def execute(self, context):
         script = QuickTalk_Script(context.scene.quicktalk_script_file)
         script.addWordMarkers()
-        
+
         return {'FINISHED'}
 
 ###
 # The Actual Plotting of data to timelines! Finally!
 #
+
+
 class QuickTalk_QuicktalkPlot(bpy.types.Operator):
     """Plot Quicktalk data to timeline"""         # blender will use this as a tooltip for menu items and buttons.
     bl_idname = "object.quicktalk_plot_timeline"   # unique identifier for buttons and menu items to reference.
@@ -801,6 +790,5 @@ class QuickTalk_QuicktalkPlot(bpy.types.Operator):
         script = QuickTalk_Script(context.scene.quicktalk_script_file)
         script.LoadDictionary()
         script.plotTimelines()
-        
-        return {'FINISHED'}
 
+        return {'FINISHED'}

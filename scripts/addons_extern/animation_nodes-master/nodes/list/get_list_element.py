@@ -5,6 +5,7 @@ from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
 from ... sockets.info import getBaseDataTypeItemsCallback, toIdName, toListIdName, isBase, toBaseDataType, isLimitedList, toGeneralListIdName
 
+
 class GetListElementNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_GetListElementNode"
     bl_label = "Get List Element"
@@ -15,17 +16,17 @@ class GetListElementNode(bpy.types.Node, AnimationNode):
         self.listIdName = toListIdName(self.assignedType)
         self.generateSockets()
 
-    assignedType = StringProperty(update = assignedTypeChanged)
+    assignedType = StringProperty(update=assignedTypeChanged)
     baseIdName = StringProperty()
     listIdName = StringProperty()
 
-    clampIndex = BoolProperty(name = "Clamp Index", default = False,
-        description = "Clamp the index between the lowest and highest possible index",
-        update = executionCodeChanged)
+    clampIndex = BoolProperty(name="Clamp Index", default=False,
+                              description="Clamp the index between the lowest and highest possible index",
+                              update=executionCodeChanged)
 
-    allowNegativeIndex = BoolProperty(name = "Allow Negative Index",
-        description = "-2 means the second last list element",
-        update = executionCodeChanged, default = False)
+    allowNegativeIndex = BoolProperty(name="Allow Negative Index",
+                                      description="-2 means the second last list element",
+                                      update=executionCodeChanged, default=False)
 
     def create(self):
         self.assignedType = "Float"
@@ -34,7 +35,7 @@ class GetListElementNode(bpy.types.Node, AnimationNode):
         layout.prop(self, "clampIndex")
         layout.prop(self, "allowNegativeIndex")
         self.invokeSocketTypeChooser(layout, "assignListDataType",
-            socketGroup = "LIST", text = "Change Type", icon = "TRIA_RIGHT")
+                                     socketGroup="LIST", text="Change Type", icon="TRIA_RIGHT")
 
     def drawLabel(self):
         if self.inputs["Index"].isUnlinked:
@@ -70,18 +71,23 @@ class GetListElementNode(bpy.types.Node, AnimationNode):
 
         if listInput is not None:
             idName = listInput.bl_idname
-            if isLimitedList(idName): idName = toGeneralListIdName(idName)
+            if isLimitedList(idName):
+                idName = toGeneralListIdName(idName)
             return toBaseDataType(idName)
-        if fallbackInput is not None: return fallbackInput.dataType
-        if len(elementOutputs) == 1: return elementOutputs[0].dataType
+        if fallbackInput is not None:
+            return fallbackInput.dataType
+        if len(elementOutputs) == 1:
+            return elementOutputs[0].dataType
         return self.outputs["Element"].dataType
 
     def assignListDataType(self, listDataType):
         self.assignType(toBaseDataType(listDataType))
 
     def assignType(self, baseDataType):
-        if not isBase(baseDataType): return
-        if baseDataType == self.assignedType: return
+        if not isBase(baseDataType):
+            return
+        if baseDataType == self.assignedType:
+            return
         self.assignedType = baseDataType
 
     @keepNodeState

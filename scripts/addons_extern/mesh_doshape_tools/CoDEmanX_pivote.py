@@ -9,12 +9,13 @@ bl_info = {
     "wiki_url": "",
     "tracker_url": "",
     "category": "3D View"}
-	
-	
+
+
 import bpy
 
 pivot_prop = bpy.types.SpaceView3D.bl_rna.properties['pivot_point']
 pivot_items = [(item.identifier, item.name, item.description) for item in pivot_prop.enum_items]
+
 
 class VIEW3D_OT_pivot_point_set(bpy.types.Operator):
     __doc__ = pivot_prop.description
@@ -28,7 +29,7 @@ class VIEW3D_OT_pivot_point_set(bpy.types.Operator):
         for area in context.screen.areas:
             if area.type == 'VIEW_3D':
                 return True
-            
+
         return False
 
     def execute(self, context):
@@ -46,12 +47,14 @@ class VIEW3D_MT_pivot_point_set(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         enum = bpy.types.SpaceView3D.bl_rna.properties['pivot_point'].enum_items
-        
+
         for item in reversed(enum):
             layout.operator("view3d.pivot_point_set", text=item.name, icon=item.icon).type = item.identifier
 
+
 def register():
     bpy.utils.register_module(__name__)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

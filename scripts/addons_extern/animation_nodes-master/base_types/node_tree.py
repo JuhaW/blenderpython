@@ -10,36 +10,37 @@ from .. preferences import getBlenderVersion, getAnimationNodesVersion
 from .. tree_info import getNetworksByNodeTree, getSubprogramNetworksByNodeTree
 from .. execution.units import getMainUnitsByNodeTree, setupExecutionUnits, finishExecutionUnits
 
+
 class AutoExecutionProperties(bpy.types.PropertyGroup):
 
-    enabled = BoolProperty(default = True, name = "Enabled",
-        description = "Enable auto execution for this node tree")
+    enabled = BoolProperty(default=True, name="Enabled",
+                           description="Enable auto execution for this node tree")
 
-    sceneUpdate = BoolProperty(default = True, name = "Scene Update",
-        description = "Execute many times per second to react on all changes in real time (deactivated during preview rendering)")
+    sceneUpdate = BoolProperty(default=True, name="Scene Update",
+                               description="Execute many times per second to react on all changes in real time (deactivated during preview rendering)")
 
-    frameChanged = BoolProperty(default = False, name = "Frame Changed",
-        description = "Execute after the frame changed")
+    frameChanged = BoolProperty(default=False, name="Frame Changed",
+                                description="Execute after the frame changed")
 
-    propertyChanged = BoolProperty(default = False, name = "Property Changed",
-        description = "Execute when a attribute in a animation node tree changed")
+    propertyChanged = BoolProperty(default=False, name="Property Changed",
+                                   description="Execute when a attribute in a animation node tree changed")
 
-    treeChanged = BoolProperty(default = False, name = "Tree Changed",
-        description = "Execute when the node tree changes (create/remove links and nodes)")
+    treeChanged = BoolProperty(default=False, name="Tree Changed",
+                               description="Execute when the node tree changes (create/remove links and nodes)")
 
-    minTimeDifference = FloatProperty(name = "Min Time Difference",
-        description = "Auto execute not that often; E.g. only every 0.5 seconds",
-        default = 0.0, min = 0.0, soft_max = 1.0)
+    minTimeDifference = FloatProperty(name="Min Time Difference",
+                                      description="Auto execute not that often; E.g. only every 0.5 seconds",
+                                      default=0.0, min=0.0, soft_max=1.0)
 
-    lastExecutionTimestamp = FloatProperty(default = 0.0)
+    lastExecutionTimestamp = FloatProperty(default=0.0)
 
 
 class LastTreeExecutionInfo(bpy.types.PropertyGroup):
 
-    isDefault = BoolProperty(default = True)
-    executionTime = FloatProperty(name = "Execution Time")
-    blenderVersion = IntVectorProperty(name = "Blender Version", default = (2, 77, 0))
-    animationNodesVersion = IntVectorProperty(name = "Animation Nodes Version", default = (1, 0, 1))
+    isDefault = BoolProperty(default=True)
+    executionTime = FloatProperty(name="Execution Time")
+    blenderVersion = IntVectorProperty(name="Blender Version", default=(2, 77, 0))
+    animationNodesVersion = IntVectorProperty(name="Animation Nodes Version", default=(1, 0, 1))
 
     def updateVersions(self):
         self.blenderVersion = getBlenderVersion()
@@ -58,18 +59,19 @@ class LastTreeExecutionInfo(bpy.types.PropertyGroup):
         numbers = tuple(intVector)
         return "{}.{}.{}".format(*numbers)
 
+
 class AnimationNodeTree(bpy.types.NodeTree):
     bl_idname = "an_AnimationNodeTree"
     bl_label = "Animation"
     bl_icon = "ACTION"
 
-    autoExecution = PointerProperty(type = AutoExecutionProperties)
-    lastExecutionInfo = PointerProperty(type = LastTreeExecutionInfo)
+    autoExecution = PointerProperty(type=AutoExecutionProperties)
+    lastExecutionInfo = PointerProperty(type=LastTreeExecutionInfo)
 
-    sceneName = StringProperty(name = "Scene",
-        description = "The global scene used by this node tree (never none)")
+    sceneName = StringProperty(name="Scene",
+                               description="The global scene used by this node tree (never none)")
 
-    editNodeLabels = BoolProperty(name = "Edit Node Labels", default = False)
+    editNodeLabels = BoolProperty(name="Edit Node Labels", default=False)
 
     def update(self):
         treeChanged()
@@ -79,24 +81,35 @@ class AnimationNodeTree(bpy.types.NodeTree):
             return any([screen.is_animation_playing for screen in iterActiveScreens()])
 
         a = self.autoExecution
-        if not a.enabled: return False
-        if not self.hasMainExecutionUnits: return False
+        if not a.enabled:
+            return False
+        if not self.hasMainExecutionUnits:
+            return False
 
         if isRendering():
-            if "Scene" in events and a.sceneUpdate: return True
-            if "Frame" in events and (a.frameChanged or a.sceneUpdate): return True
+            if "Scene" in events and a.sceneUpdate:
+                return True
+            if "Frame" in events and (a.frameChanged or a.sceneUpdate):
+                return True
         else:
-            if self.timeSinceLastAutoExecution < a.minTimeDifference: return False
+            if self.timeSinceLastAutoExecution < a.minTimeDifference:
+                return False
 
             if isAnimationPlaying():
-                if (a.sceneUpdate or a.frameChanged) and "Frame" in events: return True
+                if (a.sceneUpdate or a.frameChanged) and "Frame" in events:
+                    return True
             elif not isViewportRendering():
-                if "Scene" in events and a.sceneUpdate: return True
-            if "Frame" in events and a.frameChanged: return True
-            if "Property" in events and a.propertyChanged: return True
-            if "Tree" in events and a.treeChanged: return True
+                if "Scene" in events and a.sceneUpdate:
+                    return True
+            if "Frame" in events and a.frameChanged:
+                return True
+            if "Property" in events and a.propertyChanged:
+                return True
+            if "Tree" in events and a.treeChanged:
+                return True
             if events.intersection({"File", "Addon"}) and \
-                (a.sceneUpdate or a.frameChanged or a.propertyChanged or a.treeChanged): return True
+                    (a.sceneUpdate or a.frameChanged or a.propertyChanged or a.treeChanged):
+                    return True
 
         return False
 
@@ -150,6 +163,7 @@ class AnimationNodeTree(bpy.types.NodeTree):
     @property
     def subprogramNetworks(self):
         return getSubprogramNetworksByNodeTree(self)
+
 
 @eventHandler("SCENE_UPDATE_POST")
 def updateSelectedScenes(scene):

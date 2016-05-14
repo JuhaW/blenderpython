@@ -25,7 +25,9 @@ from mathutils import Vector
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (fullList, match_long_repeat, updateNode)
 
+
 class Vertex(object):
+
     def __init__(self, u, v):
         self.index = None
         self.u = u
@@ -36,29 +38,33 @@ class Vertex(object):
             return "<" + str(self.index) + ">"
         else:
             return "<>"
-    
+
     def __lt__(self, other):
         return self.u < other.u
-    
+
 # #     def vector(self):
 #         return Vector((self.u, self.v, 0.0))
 
+
 class VEdge(object):
+
     def __init__(self, v1, v2):
         self.v1 = v1
         self.v2 = v2
-    
+
     def __str__(self):
         return str(self.v1) + " - " + str(self.v2)
 
+
 class ULine(object):
+
     def __init__(self, lst):
         self.list = sorted(lst, key=lambda v: v.u)
         self.coords = [v.u for v in self.list]
 
     def __str__(self):
         return str(self.list)
-    
+
     def iter(self):
         return self.list.iter()
 
@@ -78,11 +84,14 @@ def get_center(vertices):
     cv = sum([v.v for v in vertices]) / n
     return Vertex(cu, cv)
 
+
 def select(line, v1, v2):
     return [v.index for v in line if v.u > v1.u and v.u < v2.u]
 
+
 def select_v(line, v1, v2):
     return [v for v in line if v.u > v1.u and v.u < v2.u]
+
 
 class SvBricksNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Bricks '''
@@ -91,52 +100,52 @@ class SvBricksNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     du_ = FloatProperty(name='Unit width', description='One brick width',
-            default=2.0, min=0.0,
-            update=updateNode)
+                        default=2.0, min=0.0,
+                        update=updateNode)
     dv_ = FloatProperty(name='Unit heigth', description='One brick height',
-            default=1.0, min=0.0,
-            update=updateNode)
+                        default=1.0, min=0.0,
+                        update=updateNode)
     sizeu_ = FloatProperty(name='Width', description='Grid width',
-            default=10.0, min=0.0,
-            update=updateNode)
+                           default=10.0, min=0.0,
+                           update=updateNode)
     sizev_ = FloatProperty(name='Height', description='Grid height',
-            default=10.0, min=0.0,
-            update=updateNode)
+                           default=10.0, min=0.0,
+                           update=updateNode)
     toothing_ = FloatProperty(name='Toothing',
-            description='Bricks toothing amount',
-            default=0.0,
-            update=updateNode)
+                              description='Bricks toothing amount',
+                              default=0.0,
+                              update=updateNode)
     toothing_r_ = FloatProperty(name='Toothing Random',
-            description='Bricks toothing randomization factor',
-            default=0.0, min=0.0, max=1.0,
-            update=updateNode)
+                                description='Bricks toothing randomization factor',
+                                default=0.0, min=0.0, max=1.0,
+                                update=updateNode)
     rdu_ = FloatProperty(name='Random U',
-            description='Randomization amplitude along width',
-            default=0.0, min=0.0,
-            update=updateNode)
+                         description='Randomization amplitude along width',
+                         default=0.0, min=0.0,
+                         update=updateNode)
     rdv_ = FloatProperty(name='Random V',
-            description='Randomization amplitude along height',
-            default=0.0, min=0.0,
-            update=updateNode)
+                         description='Randomization amplitude along height',
+                         default=0.0, min=0.0,
+                         update=updateNode)
     shift_ = FloatProperty(name='Shift',
-            description='Bricks shifting factor',
-            default=0.5, min=0.0, max=1.0,
-            update=updateNode)
+                           description='Bricks shifting factor',
+                           default=0.5, min=0.0, max=1.0,
+                           update=updateNode)
     rand_seed_ = IntProperty(name='Seed', description='Random seed',
-            default=0,
-            update=updateNode)
+                             default=0,
+                             update=updateNode)
 
     faces_modes = [
-            ("flat", "Flat", "Flat polygons", 0),
-            ("stitch", "Stitch", "Stitch with triangles", 1),
-            ("centers", "Centers", "Connect each edge with face center", 2)
-        ]
+        ("flat", "Flat", "Flat polygons", 0),
+        ("stitch", "Stitch", "Stitch with triangles", 1),
+        ("centers", "Centers", "Connect each edge with face center", 2)
+    ]
 
     faces_mode = EnumProperty(name="Faces",
-            description="Faces triangularization mode",
-            items=faces_modes,
-            default="flat",
-            update=updateNode)
+                              description="Faces triangularization mode",
+                              items=faces_modes,
+                              default="flat",
+                              update=updateNode)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "faces_mode", expand=True)
@@ -181,7 +190,7 @@ class SvBricksNode(bpy.types.Node, SverchCustomTreeNode):
         result_centers = []
 
         parameters = match_long_repeat([dus, dvs, sizeus, sizevs, toothings, toothingrs, rdus, rdvs, shifts, seeds])
-        for du,dv,sizeu,sizev,toothing,toothing_r, rdu, rdv, shift, seed in zip(*parameters):
+        for du, dv, sizeu, sizev, toothing, toothing_r, rdu, rdv, shift, seed in zip(*parameters):
 
             random.seed(seed)
 
@@ -192,20 +201,20 @@ class SvBricksNode(bpy.types.Node, SverchCustomTreeNode):
                 v += dv
 
             ulines = [set() for v in vs]
-            vedges = [[] for i in range(len(vs)-1)]
-            for i,v in enumerate(vs[:-1]):
-                if i%2 == 0:
+            vedges = [[] for i in range(len(vs) - 1)]
+            for i, v in enumerate(vs[:-1]):
+                if i % 2 == 0:
                     u = 0.0
                 else:
                     u = shift * du
                 j = 0
                 while u <= sizeu:
-                    t1 = toothing*random.uniform(1.0-toothing_r, 1.0)
-                    t2 = toothing*random.uniform(1.0-toothing_r, 1.0)
-                    vt1 = Vertex(u, v+t1)
-                    vt2 = Vertex(u, vs[i+1]-t2)
+                    t1 = toothing * random.uniform(1.0 - toothing_r, 1.0)
+                    t2 = toothing * random.uniform(1.0 - toothing_r, 1.0)
+                    vt1 = Vertex(u, v + t1)
+                    vt2 = Vertex(u, vs[i + 1] - t2)
                     ulines[i].add(vt1)
-                    ulines[i+1].add(vt2)
+                    ulines[i + 1].add(vt2)
                     edge = VEdge(vt1, vt2)
                     vedges[i].append(edge)
                     u += du
@@ -224,7 +233,7 @@ class SvBricksNode(bpy.types.Node, SverchCustomTreeNode):
 
             edges = []
             for line in ulines:
-                for v1,v2 in zip(line, line[1:]):
+                for v1, v2 in zip(line, line[1:]):
                     edges.append((v1.index, v2.index))
 
             for lst in vedges:
@@ -235,8 +244,8 @@ class SvBricksNode(bpy.types.Node, SverchCustomTreeNode):
             centers = []
             for i, lst in enumerate(vedges):
                 line1 = ulines[i]
-                line2 = ulines[i+1]
-                for e1,e2 in zip(lst, lst[1:]):
+                line2 = ulines[i + 1]
+                for e1, e2 in zip(lst, lst[1:]):
                     face_vertices = [e1.v2, e1.v1]
                     face_vertices.extend(line1.select_v(e1.v1, e2.v1))
                     face_vertices.extend([e2.v1, e2.v2])
@@ -261,14 +270,14 @@ class SvBricksNode(bpy.types.Node, SverchCustomTreeNode):
                             face = [prev, vt1, vt2]
                             faces.append(face)
                             if not first:
-                                if i < len(vs1)-1:
+                                if i < len(vs1) - 1:
                                     prev = vs1[i]
                                     i += 1
                                 else:
                                     prev = vs2[j]
                                     j += 1
                             else:
-                                if j < len(vs2)-1:
+                                if j < len(vs2) - 1:
                                     prev = vs2[j]
                                     j += 1
                                 else:
@@ -310,5 +319,3 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(SvBricksNode)
-
-

@@ -12,6 +12,7 @@ from . nodes.sound import bake as sound_bake
 from . base_types import socket as socket_base
 from . ui.node_menu import registerMenu, unregisterMenu
 
+
 def registerFiles():
     id_keys.register()
     node_base.register()
@@ -26,6 +27,7 @@ def registerFiles():
 
     registerMenu()
     keymap.register()
+
 
 def unregisterFiles():
     id_keys.unregister()

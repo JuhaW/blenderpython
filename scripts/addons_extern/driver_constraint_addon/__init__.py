@@ -27,7 +27,7 @@ bl_info = {
     "location": "Operator Search -> Driver Constraint",
     "warning": "This addon is still in development.",
     "wiki_url": "https://github.com/ndee85/Driver-Constraint-Addon",
-    "category": "Rigging" }
+    "category": "Rigging"}
 
 
 import bpy
@@ -42,39 +42,46 @@ importlib.reload(developer_utils)
 modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in locals())
 
 
-
 # register
 ##################################
 
 import traceback
 
-def add_to_specials(self,context):
+
+def add_to_specials(self, context):
     if len(bpy.context.selected_objects) > 0:
         self.layout.operator_context = "INVOKE_DEFAULT"
         self.layout.separator()
-        op = self.layout.operator("object.create_driver_constraint",text="Driver Constraint",icon="DRIVER")
+        op = self.layout.operator("object.create_driver_constraint", text="Driver Constraint", icon="DRIVER")
 
-def add_pose_tools(self,context):
+
+def add_pose_tools(self, context):
     if len(bpy.context.selected_objects) > 0:
         self.layout.operator_context = "INVOKE_DEFAULT"
         self.layout.separator()
         self.layout.label("Shapekey Tools:")
-        op = self.layout.operator("object.create_driver_constraint",text="Driver Constraint",icon="DRIVER")
+        op = self.layout.operator("object.create_driver_constraint", text="Driver Constraint", icon="DRIVER")
+
 
 def register():
-    try: bpy.utils.register_module(__name__)
-    except: traceback.print_exc()
-    
+    try:
+        bpy.utils.register_module(__name__)
+    except:
+        traceback.print_exc()
+
     bpy.types.VIEW3D_MT_pose_specials.append(add_to_specials)
-    bpy.types.VIEW3D_PT_tools_posemode.append(add_pose_tools) 
-    
+    bpy.types.VIEW3D_PT_tools_posemode.append(add_pose_tools)
+
     print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
 
+
 def unregister():
-    try: bpy.utils.unregister_module(__name__)
-    except: traceback.print_exc()
-    
+    try:
+        bpy.utils.unregister_module(__name__)
+    except:
+        traceback.print_exc()
+
     bpy.types.VIEW3D_MT_pose_specials.remove(add_to_specials)
-    bpy.types.VIEW3D_PT_tools_posemode.remove(add_pose_tools) 
-    
+    bpy.types.VIEW3D_PT_tools_posemode.remove(add_pose_tools)
+
     print("Unregistered {}".format(bl_info["name"]))

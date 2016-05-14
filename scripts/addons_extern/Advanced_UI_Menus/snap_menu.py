@@ -1,6 +1,8 @@
 from .Utils.core import *
 
 # adds a shading mode menu
+
+
 class SnapMenuOperator(bpy.types.Operator):
     bl_label = "Snap Menu Operator"
     bl_idname = "view3d.snap_menu_operator"
@@ -14,29 +16,29 @@ class SnapMenuOperator(bpy.types.Operator):
 
     def modal(self, context, event):
         current_time = time.time()
-        
+
         # if key has been held for more than 0.3 seconds call the menu
         if event.value == 'RELEASE' and current_time > self.start_time + 0.3:
             bpy.ops.wm.call_menu(name=SnapModeMenu.bl_idname)
-            
+
             return {'FINISHED'}
-        
+
         # else toggle snap mode on/off
         elif event.value == 'RELEASE' and current_time < self.start_time + 0.3:
             if context.tool_settings.use_snap:
                 context.tool_settings.use_snap = False
-                
+
             else:
                 context.tool_settings.use_snap = True
-                
+
             return {'FINISHED'}
-        
+
         return {'RUNNING_MODAL'}
 
     def execute(self, context):
         self.start_time = time.time()
         context.window_manager.modal_handler_add(self)
-        
+
         return {'RUNNING_MODAL'}
 
 
@@ -62,9 +64,9 @@ class SnapModeMenu(bpy.types.Menu):
 
         if bpy.context.tool_settings.snap_element != "INCREMENT":
             menu.add_item().separator()
-            
+
             menu.add_item().menu(SnapTargetMenu.bl_idname)
-            
+
             menu.add_item().separator()
 
         if bpy.context.tool_settings.snap_element not in ["INCREMENT", "VOLUME"]:
@@ -75,8 +77,6 @@ class SnapModeMenu(bpy.types.Menu):
 
         if bpy.context.tool_settings.snap_element == "VOLUME":
             menu.add_item().prop(bpy.context.tool_settings, "use_snap_peel_object", toggle=True)
-
-
 
 
 class SnapTargetMenu(bpy.types.Menu):
@@ -101,6 +101,7 @@ class SnapTargetMenu(bpy.types.Menu):
 ### ------------ New hotkeys and registration ------------ ###
 
 addon_keymaps = []
+
 
 def register():
     # create the global menu hotkey

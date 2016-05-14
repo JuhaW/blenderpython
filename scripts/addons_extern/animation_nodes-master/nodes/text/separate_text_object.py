@@ -13,48 +13,49 @@ indexPropertyName = "text separation node index"
 outputTypeItems = [
     ("TEXT", "Text", "", "FONT_DATA", 0),
     ("CURVE", "Curve", "", "CURVE_DATA", 1),
-    ("MESH", "Mesh", "", "MESH_DATA", 2) ]
+    ("MESH", "Mesh", "", "MESH_DATA", 2)]
 
 originTypeItems = [
     ("DEFAULT", "Default", "", "NONE", 0),
     ("ORIGIN_GEOMETRY", "Origin to Geometry", "", "NONE", 1),
     ("ORIGIN_CURSOR", "Origin to Cursor", "", "NONE", 2),
-    ("ORIGIN_CENTER_OF_MASS", "Origin to Center of Mass", "", "NONE", 3) ]
+    ("ORIGIN_CENTER_OF_MASS", "Origin to Center of Mass", "", "NONE", 3)]
+
 
 class SeparateTextObjectNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SeparateTextObjectNode"
     bl_label = "Separate Text Object"
     bl_width_default = 200
 
-    sourceObjectName = StringProperty(name = "Source Object")
-    currentID = IntProperty(default = 0)
-    objectCount = IntProperty(default = 0)
-    parentLetters = BoolProperty(name = "Parent to Main Container", default = True)
-    materialName = StringProperty(name = "Material", default = "")
-    outputType = EnumProperty(name = "Output Type", items = outputTypeItems, default = "MESH")
-    originType = EnumProperty(name = "Origin Type", items = originTypeItems, default = "DEFAULT")
+    sourceObjectName = StringProperty(name="Source Object")
+    currentID = IntProperty(default=0)
+    objectCount = IntProperty(default=0)
+    parentLetters = BoolProperty(name="Parent to Main Container", default=True)
+    materialName = StringProperty(name="Material", default="")
+    outputType = EnumProperty(name="Output Type", items=outputTypeItems, default="MESH")
+    originType = EnumProperty(name="Origin Type", items=originTypeItems, default="DEFAULT")
 
     def create(self):
         self.outputs.new("an_ObjectListSocket", "Text Objects", "textObjects")
 
     def draw(self, layout):
-        row = layout.row(align = True)
-        row.prop(self, "sourceObjectName", text = "Source")
+        row = layout.row(align=True)
+        row.prop(self, "sourceObjectName", text="Source")
 
-        self.invokeFunction(row, "assignActiveObject", icon = "EYEDROPPER")
+        self.invokeFunction(row, "assignActiveObject", icon="EYEDROPPER")
 
         source = self.getSourceObject()
         if source is not None:
-            row.prop(source, "hide", text = "")
+            row.prop(source, "hide", text="")
 
         layout.prop_search(self, "materialName", bpy.data, "materials", text="Material", icon="MATERIAL_DATA")
-        layout.prop(self, "originType", text = "Origin")
-        layout.prop(self, "outputType", expand = True)
+        layout.prop(self, "originType", text="Origin")
+        layout.prop(self, "outputType", expand=True)
 
         self.invokeFunction(layout, "updateSeparation",
-            text = "Update",
-            description = "Recreate the individual characters from the source object",
-            icon = "FILE_REFRESH")
+                            text="Update",
+                            description="Recreate the individual characters from the source object",
+                            icon="FILE_REFRESH")
 
     def drawAdvanced(self, layout):
         layout.prop(self, "parentLetters")
@@ -76,8 +77,10 @@ class SeparateTextObjectNode(bpy.types.Node, AnimationNode):
         self.createNewNodeID()
 
         source = self.getSourceObject()
-        if source is None: return
-        if source.data is None: return
+        if source is None:
+            return
+        if source.data is None:
+            return
         source.hide = False
 
         objects = splitTextObject(source)
@@ -98,7 +101,7 @@ class SeparateTextObjectNode(bpy.types.Node, AnimationNode):
             object[indexPropertyName] = i
             object.id_keys.set("String", "Initial Text", originalCharacter)
             object.id_keys.set("Transforms", "Initial Transforms",
-                (object.location, object.rotation_euler, object.scale))
+                               (object.location, object.rotation_euler, object.scale))
         bpy.ops.an.update_id_keys_list()
         self.objectCount = len(objects)
 
@@ -122,15 +125,17 @@ class SeparateTextObjectNode(bpy.types.Node, AnimationNode):
         self.currentID = round(random.random() * 100000)
 
     def isObjectPartOfThisNode(self, object):
-        return getattr(object, '["'+idPropertyName+'"]', -1) == self.currentID
+        return getattr(object, '["' + idPropertyName + '"]', -1) == self.currentID
 
     def getSourceObject(self):
         source = bpy.data.objects.get(self.sourceObjectName)
-        if getattr(source, "type", "") == "FONT": return source
+        if getattr(source, "type", "") == "FONT":
+            return source
         return None
 
     def duplicate(self, sourceNode):
         self.createNewNodeID()
+
 
 def splitTextObject(source):
     text = cleanText(source.data.body)
@@ -152,10 +157,12 @@ def splitTextObject(source):
 
     return objects
 
+
 def cleanText(text):
     for part in [" ", "\n", "\t", "\r"]:
         text = text.replace(part, "")
     return text
+
 
 def newCharacterObject(name, sourceData, character):
     newTextData = sourceData.copy()
@@ -164,9 +171,11 @@ def newCharacterObject(name, sourceData, character):
     bpy.context.scene.objects.link(characterObject)
     return characterObject
 
+
 def setCharacterPosition(characterObject, source, sourceSplinePosition, offsetPosition):
     characterOffset = sourceSplinePosition - offsetPosition
     characterObject.matrix_world = source.matrix_world * Matrix.Translation(characterOffset)
+
 
 def getSplinePositions(textObject):
     onlySelect(textObject)
@@ -175,13 +184,15 @@ def getSplinePositions(textObject):
     removeCurve(curve)
     return positions
 
+
 def onlySelect(object):
-    bpy.ops.object.select_all(action = "DESELECT")
+    bpy.ops.object.select_all(action="DESELECT")
     bpy.context.scene.objects.active = object
     object.select = True
 
+
 def onlySelectList(objects):
-    bpy.ops.object.select_all(action = "DESELECT")
+    bpy.ops.object.select_all(action="DESELECT")
     if len(objects) == 0:
         bpy.context.scene.objects.active = None
     else:
@@ -189,9 +200,11 @@ def onlySelectList(objects):
     for object in objects:
         object.select = True
 
+
 def newCurveFromActiveObject():
-    bpy.ops.object.convert(target = "CURVE", keep_original = True)
+    bpy.ops.object.convert(target="CURVE", keep_original=True)
     return bpy.context.scene.objects.active
+
 
 def removeCurve(curve):
     curveData = curve.data
@@ -199,16 +212,20 @@ def removeCurve(curve):
     bpy.data.objects.remove(curve)
     bpy.data.curves.remove(curveData)
 
-@executeInAreaType("VIEW_3D")
-def convertSelectedObjects(type = "MESH"):
-    bpy.ops.object.convert(target = type)
 
 @executeInAreaType("VIEW_3D")
-def setOriginType(type = "ORIGIN_GEOMETRY"):
-    bpy.ops.object.origin_set(type = type)
+def convertSelectedObjects(type="MESH"):
+    bpy.ops.object.convert(target=type)
+
+
+@executeInAreaType("VIEW_3D")
+def setOriginType(type="ORIGIN_GEOMETRY"):
+    bpy.ops.object.origin_set(type=type)
+
 
 def removeObject(object):
-    if object.mode != "OBJECT": bpy.ops.object.mode_set(mode = "OBJECT")
+    if object.mode != "OBJECT":
+        bpy.ops.object.mode_set(mode="OBJECT")
     bpy.context.scene.objects.unlink(object)
     objectType = object.type
     data = object.data
@@ -218,10 +235,12 @@ def removeObject(object):
     elif objectType == "MESH":
         bpy.data.meshes.remove(data)
 
+
 def parentObjectsToMainControler(objects):
     mainControler = getMainObjectContainer(bpy.context.scene)
     for object in objects:
         object.parent = mainControler
+
 
 def setMaterialOnObjects(objects, material):
     for object in objects:

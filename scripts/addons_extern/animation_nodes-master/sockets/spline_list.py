@@ -5,6 +5,7 @@ from .. base_types.socket import AnimationNodeSocket
 from .. utils.id_reference import tryToFindObjectReference
 from .. data_structures.splines.from_blender import createSplinesFromBlenderObject
 
+
 class SplineListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_SplineListSocket"
     bl_label = "Spline List Socket"
@@ -14,22 +15,22 @@ class SplineListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     storable = True
     comparable = False
 
-    objectName = StringProperty(default = "",
-        description = "Use the splines from this object",
-        update = propertyChanged)
+    objectName = StringProperty(default="",
+                                description="Use the splines from this object",
+                                update=propertyChanged)
 
-    useWorldSpace = BoolProperty(default = True,
-        description = "Convert points to world space",
-        update = propertyChanged)
+    useWorldSpace = BoolProperty(default=True,
+                                 description="Convert points to world space",
+                                 update=propertyChanged)
 
-    showObjectInput = BoolProperty(default = True)
+    showObjectInput = BoolProperty(default=True)
 
     def drawProperty(self, layout, text):
-        row = layout.row(align = True)
-        row.prop_search(self, "objectName",  bpy.context.scene, "objects", icon="NONE", text = text)
-        self.invokeFunction(row, "assignActiveObject", icon = "EYEDROPPER")
+        row = layout.row(align=True)
+        row.prop_search(self, "objectName", bpy.context.scene, "objects", icon="NONE", text=text)
+        self.invokeFunction(row, "assignActiveObject", icon="EYEDROPPER")
         if self.objectName != "":
-            row.prop(self, "useWorldSpace", text = "", icon = "WORLD")
+            row.prop(self, "useWorldSpace", text="", icon="WORLD")
 
     def getValue(self):
         object = self.getObject()
@@ -40,11 +41,13 @@ class SplineListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
         return splines
 
     def getObject(self):
-        if self.objectName == "": return None
+        if self.objectName == "":
+            return None
 
         object = tryToFindObjectReference(self.objectName)
         name = getattr(object, "name", "")
-        if name != self.objectName: self.objectName = name
+        if name != self.objectName:
+            self.objectName = name
         return object
 
     def setProperty(self, data):

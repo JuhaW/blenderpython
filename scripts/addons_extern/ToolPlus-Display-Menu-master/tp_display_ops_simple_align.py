@@ -19,7 +19,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-#bl_info = {
+# bl_info = {
 #    "author": "Gabriel Beaudin (gabhead)",
 #    "version": (0,1),
 #    "blender": (2, 71, 0),
@@ -31,62 +31,78 @@
 import bpy
 
 # Align all
+
+
 def main(context):
     for i in bpy.context.selected_objects:
         i.location = bpy.context.active_object.location
         i.rotation_euler = bpy.context.active_object.rotation_euler
 
 # Align Location
+
+
 def LocAll(context):
     for i in bpy.context.selected_objects:
         i.location = bpy.context.active_object.location
+
 
 def LocX(context):
     for i in bpy.context.selected_objects:
         i.location.x = bpy.context.active_object.location.x
 
+
 def LocY(context):
     for i in bpy.context.selected_objects:
         i.location.y = bpy.context.active_object.location.y
+
 
 def LocZ(context):
     for i in bpy.context.selected_objects:
         i.location.z = bpy.context.active_object.location.z
 
 # Align Rotation
+
+
 def RotAll(context):
     for i in bpy.context.selected_objects:
         i.rotation_euler = bpy.context.active_object.rotation_euler
+
 
 def RotX(context):
     for i in bpy.context.selected_objects:
         i.rotation_euler.x = bpy.context.active_object.rotation_euler.x
 
+
 def RotY(context):
     for i in bpy.context.selected_objects:
         i.rotation_euler.y = bpy.context.active_object.rotation_euler.y
+
 
 def RotZ(context):
     for i in bpy.context.selected_objects:
         i.rotation_euler.z = bpy.context.active_object.rotation_euler.z
 
 # Align Scale
+
+
 def ScaleAll(context):
     for i in bpy.context.selected_objects:
         i.scale = bpy.context.active_object.scale
+
 
 def ScaleX(context):
     for i in bpy.context.selected_objects:
         i.scale.x = bpy.context.active_object.scale.x
 
+
 def ScaleY(context):
     for i in bpy.context.selected_objects:
         i.scale.y = bpy.context.active_object.scale.y
 
+
 def ScaleZ(context):
     for i in bpy.context.selected_objects:
         i.scale.z = bpy.context.active_object.scale.z
-        
 
 
 class TP_Display_Align_All(bpy.types.Operator):
@@ -271,11 +287,12 @@ class TP_Display_Align_Scale_Z(bpy.types.Operator):
         return {'FINISHED'}
 
 
-## registring
+# registring
 def register():
     bpy.utils.register_module(__name__)
 
     pass
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)
@@ -284,4 +301,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

@@ -24,12 +24,11 @@ import bpy
 from bpy import *
 
 
-
 ############  Distribute  ########################################################################################################
 ############  Distribute  ########################################################################################################
 
 
-#bl_info = {
+# bl_info = {
 #    "name": "Distribute Objects",
 #    "author": "Oscurart, CodemanX",
 #    "version": (3,1),
@@ -40,18 +39,19 @@ from bpy import *
 
 # POLLS
 class OscPollObject():
-    #bl_category="META"
+    # bl_category="META"
     #bl_region_type = 'TOOLS'
     bl_region_type = 'UI'
-    bl_space_type = 'VIEW_3D' 
+    bl_space_type = 'VIEW_3D'
 
     @classmethod
     def poll(cls, context):
         return context.scene.osc_object_tools
-    
 
-## ------------------------------------ SELECTION --------------------------------------
-bpy.selection_osc=[]
+
+# ------------------------------------ SELECTION --------------------------------------
+bpy.selection_osc = []
+
 
 def select_osc():
     if bpy.context.mode == "OBJECT":
@@ -59,10 +59,10 @@ def select_osc():
         sel = len(bpy.context.selected_objects)
 
         if sel == 0:
-            bpy.selection_osc=[]
+            bpy.selection_osc = []
         else:
             if sel == 1:
-                bpy.selection_osc=[]
+                bpy.selection_osc = []
                 bpy.selection_osc.append(obj)
             elif sel > len(bpy.selection_osc):
                 for sobj in bpy.context.selected_objects:
@@ -74,8 +74,9 @@ def select_osc():
                     if (it in bpy.context.selected_objects) == False:
                         bpy.selection_osc.remove(it)
 
+
 class OscSelection(bpy.types.Header):
-    
+
     bl_label = "Selection Osc"
     bl_space_type = "VIEW_3D"
 
@@ -87,47 +88,52 @@ class OscSelection(bpy.types.Header):
         layout = self.layout
         row = layout.row()
         row.label("Sels: "+str(len(bpy.selection_osc)))
-        """  
+        """
 
-##=============== DISTRIBUTE ======================    
+# =============== DISTRIBUTE ======================
 
 
-def ObjectDistributeOscurart (self, X, Y, Z):
+def ObjectDistributeOscurart(self, X, Y, Z):
     if len(bpy.selection_osc[:]) > 1:
         # VARIABLES
-        dif = bpy.selection_osc[-1].location-bpy.selection_osc[0].location
-        chunkglobal = dif/(len(bpy.selection_osc[:])-1)
+        dif = bpy.selection_osc[-1].location - bpy.selection_osc[0].location
+        chunkglobal = dif / (len(bpy.selection_osc[:]) - 1)
         chunkx = 0
         chunky = 0
         chunkz = 0
         deltafst = bpy.selection_osc[0].location
-        
-        #ORDENA
-        for OBJECT in bpy.selection_osc[:]:          
-            if X:  OBJECT.location.x=deltafst[0]+chunkx
-            if Y:  OBJECT.location[1]=deltafst[1]+chunky
-            if Z:  OBJECT.location.z=deltafst[2]+chunkz
-            chunkx+=chunkglobal[0]
-            chunky+=chunkglobal[1]
-            chunkz+=chunkglobal[2]
-    else:  
-        self.report({'ERROR'}, "Selection is only 1!")      
-    
+
+        # ORDENA
+        for OBJECT in bpy.selection_osc[:]:
+            if X:
+                OBJECT.location.x = deltafst[0] + chunkx
+            if Y:
+                OBJECT.location[1] = deltafst[1] + chunky
+            if Z:
+                OBJECT.location.z = deltafst[2] + chunkz
+            chunkx += chunkglobal[0]
+            chunky += chunkglobal[1]
+            chunkz += chunkglobal[2]
+    else:
+        self.report({'ERROR'}, "Selection is only 1!")
+
+
 class DialogDistributeOsc(bpy.types.Operator):
     """Space Objects between there Origins"""
     bl_idname = "object.distribute_osc"
-    bl_label = "Distribute Objects"       
+    bl_label = "Distribute Objects"
     Boolx = bpy.props.BoolProperty(name="X")
     Booly = bpy.props.BoolProperty(name="Y")
     Boolz = bpy.props.BoolProperty(name="Z")
-    
+
     def execute(self, context):
-        ObjectDistributeOscurart(self, self.Boolx,self.Booly,self.Boolz)
+        ObjectDistributeOscurart(self, self.Boolx, self.Booly, self.Boolz)
         return {'FINISHED'}
+
     def invoke(self, context, event):
         self.Boolx = True
         self.Booly = True
-        self.Boolz = True        
+        self.Boolz = True
         return context.window_manager.invoke_props_dialog(self)
 
 
@@ -140,7 +146,4 @@ def unregister():
 
 
 if __name__ == "__main__":
-    register() 	
-
-
-
+    register()

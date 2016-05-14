@@ -2,6 +2,7 @@ import bpy
 from mathutils.kdtree import KDTree
 from ... base_types.node import AnimationNode
 
+
 class FindCloseVerticesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_FindCloseVerticesNode"
     bl_label = "Find Close Vertices"
@@ -28,7 +29,8 @@ class FindCloseVerticesNode(bpy.types.Node, AnimationNode):
             added = 0
             for (vector, foundIndex, distance) in kdTree.find_range(vertices[searchIndex], maxDistance):
                 if searchIndex != foundIndex and distance > minDistance:
-                    if added >= connections: break
+                    if added >= connections:
+                        break
                     if foundIndex > searchIndex:
                         edge = (searchIndex, foundIndex)
                     else:

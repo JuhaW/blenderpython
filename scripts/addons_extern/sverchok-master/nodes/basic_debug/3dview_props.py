@@ -83,6 +83,7 @@ class Sv3DviewPropsNode(bpy.types.Node, SverchCustomTreeNode):
     def update(self):
         pass
 
+
 def register():
     bpy.utils.register_class(Sv3DviewPropsNode)
 

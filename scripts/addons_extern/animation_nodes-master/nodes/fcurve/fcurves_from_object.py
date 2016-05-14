@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class FCurvesFromObjectNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_FCurvesFromObjectNode"
     bl_label = "FCurves from Object"
@@ -10,5 +11,7 @@ class FCurvesFromObjectNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_FCurveListSocket", "FCurves", "fCurves")
 
     def execute(self, object):
-        try: return list(object.animation_data.action.fcurves)
-        except: return []
+        try:
+            return list(object.animation_data.action.fcurves)
+        except:
+            return []

@@ -36,6 +36,7 @@ class PerfectShapePanel(bpy.types.Panel):
 
 
 class PerfectShapeUI(PerfectShape):
+
     def draw(self, context):
         layout = self.layout
 

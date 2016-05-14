@@ -59,31 +59,31 @@ class YAVNEPanel(bpy.types.Panel):
         mesh = context.active_object.data
         view_3d_theme = context.user_preferences.themes['Default'].view_3d
 
-        row = layout.row(align = True)
+        row = layout.row(align=True)
         row.alignment = 'CENTER'
 
-        row.prop(mesh, 'show_normal_loop', text = '', icon = 'LOOPSEL')
-        row.prop(view_3d_theme, 'split_normal', text = '')
-        row.prop(context.tool_settings, 'normal_size', text = 'Size')
+        row.prop(mesh, 'show_normal_loop', text='', icon='LOOPSEL')
+        row.prop(view_3d_theme, 'split_normal', text='')
+        row.prop(context.tool_settings, 'normal_size', text='Size')
         if not mesh.use_auto_smooth:
             row.active = False
 
     def draw_vertex_normal_weight_ui(self, context, layout):
         addon_props = self.addon_props
 
-        col = layout.column(align = True)
+        col = layout.column(align=True)
 
         col.label('Vertex Normal Weight:')
 
-        row = col.row(align = True)
+        row = col.row(align=True)
 
-        row.prop(addon_props, 'vertex_normal_weight', text = '')
+        row.prop(addon_props, 'vertex_normal_weight', text='')
 
-        op = row.operator('mesh.yavne_manage_vertex_normal_weight', text = '', icon = 'VERTEXSEL')
+        op = row.operator('mesh.yavne_manage_vertex_normal_weight', text='', icon='VERTEXSEL')
         op.action = 'GET'
         op.type = addon_props.vertex_normal_weight
 
-        op = row.operator('mesh.yavne_manage_vertex_normal_weight', text = '', icon = 'ZOOMIN')
+        op = row.operator('mesh.yavne_manage_vertex_normal_weight', text='', icon='ZOOMIN')
         op.action = 'SET'
         op.type = addon_props.vertex_normal_weight
         op.update = True
@@ -91,20 +91,20 @@ class YAVNEPanel(bpy.types.Panel):
     def draw_face_normal_influence_ui(self, context, layout):
         addon_props = self.addon_props
 
-        col = layout.column(align = True)
+        col = layout.column(align=True)
 
         row = col.row()
         row.label('Face Normal Influence:')
 
-        row = col.row(align = True)
+        row = col.row(align=True)
 
-        row.prop(addon_props, 'face_normal_influence', text = '')
+        row.prop(addon_props, 'face_normal_influence', text='')
 
-        op = row.operator('mesh.yavne_manage_face_normal_influence', text = '', icon = 'FACESEL')
+        op = row.operator('mesh.yavne_manage_face_normal_influence', text='', icon='FACESEL')
         op.action = 'GET'
         op.influence = addon_props.face_normal_influence
 
-        op = row.operator('mesh.yavne_manage_face_normal_influence', text = '', icon = 'ZOOMIN')
+        op = row.operator('mesh.yavne_manage_face_normal_influence', text='', icon='ZOOMIN')
         op.action = 'SET'
         op.influence = addon_props.face_normal_influence
         op.update = True
@@ -112,18 +112,18 @@ class YAVNEPanel(bpy.types.Panel):
     def draw_edit_vertex_normals_ui(self, context, layout):
         addon_props = self.addon_props
 
-        col = layout.column(align = True)
-        row = col.row(align = True)
+        col = layout.column(align=True)
+        row = col.row(align=True)
 
-        row.operator('mesh.yavne_get_normal_vector', text = 'Get')
-        row.operator('mesh.yavne_set_normal_vector', text = 'Set')
-        col.prop(addon_props, 'normal_buffer', text = '')
+        row.operator('mesh.yavne_get_normal_vector', text='Get')
+        row.operator('mesh.yavne_set_normal_vector', text='Set')
+        col.prop(addon_props, 'normal_buffer', text='')
 
     def draw_transfer_shading_ui(self, context, layout):
         addon_props = self.addon_props
         obj_curr = context.active_object
 
-        col = layout.column(align = True)
+        col = layout.column(align=True)
 
         # Generate a collection of potential shading sources.
         available_sources = addon_props.available_sources
@@ -135,17 +135,17 @@ class YAVNEPanel(bpy.types.Panel):
 
         # Confirm that the current shading source is still available.
         if (addon_props.source and
-            addon_props.source not in addon_props.available_sources
-        ):
+                    addon_props.source not in addon_props.available_sources
+                ):
             addon_props.source = ''
 
-        row = col.row(align = True)
+        row = col.row(align=True)
 
         row.prop_search(
-            addon_props, 'source', addon_props, 'available_sources', text = '',
-            icon = 'OBJECT_DATA'
+            addon_props, 'source', addon_props, 'available_sources', text='',
+            icon='OBJECT_DATA'
         )
-        row.operator('view_3d.yavne_pick_shading_source', text = '', icon = 'EYEDROPPER')
+        row.operator('view_3d.yavne_pick_shading_source', text='', icon='EYEDROPPER')
         col.operator('mesh.yavne_transfer_shading')
 
     def draw_update_vertex_normals_ui(self, context, layout):

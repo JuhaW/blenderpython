@@ -18,7 +18,6 @@
 # by meta-androcto, parts based on work by Saidenka #
 
 
-
 import bpy
 import platform
 import inspect
@@ -59,14 +58,14 @@ bl_info = {
     "location": "View3D > Properties Panels",
     "description": "Properties Panels Extended",
     "warning": "",
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"\
-        "/Py/Scripts",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"
+    "/Py/Scripts",
     "tracker_url": "",
     "category": "Addon Factory"}
 
 
 sub_modules = [
-#    AF_measure_tools,
+    #    AF_measure_tools,
     border_lines,
     icon_tools,
     index_visualizer,
@@ -77,7 +76,7 @@ sub_modules = [
     VIEW3D_PT_view3d_cursor,
     VIEW3D_PT_view3d_name,
     VIEW3D_PT_view3d_shading,
-    ]
+]
 
 
 sub_modules.sort(
@@ -145,9 +144,9 @@ class UIToolsPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     align_box_draw = bpy.props.BoolProperty(
-            name='Box Draw',
-            description='If applied patch: patch/ui_layout_box.patch',
-            default=False)
+        name='Box Draw',
+        description='If applied patch: patch/ui_layout_box.patch',
+        default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -250,7 +249,6 @@ for mod in sub_modules:
                     unregister_submodule(mod)
         return update
 
-
     prop = bpy.props.BoolProperty(
         name=info['name'],
         description=info.get('description', ''),
@@ -262,7 +260,7 @@ for mod in sub_modules:
 
 classes = [
     UIToolsPreferences,
-    ]
+]
 
 
 def register():
@@ -285,5 +283,3 @@ def unregister():
 
     for cls in classes[::-1]:
         bpy.utils.unregister_class(cls)
-
-

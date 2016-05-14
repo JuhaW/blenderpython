@@ -23,6 +23,7 @@ from mathutils import Vector
 from ..MeshBrush import MeshBrush
 from ...function_modules.modifiers import apply_shrinkwrap
 
+
 class StrokeMove(bpy.types.Operator):
     bl_idname = "mesh.sct_stroke_move"
     bl_label = "Stroke Move"
@@ -52,7 +53,7 @@ class StrokeMove(bpy.types.Operator):
         # Update the octree.
         model_matrix = active_object.matrix_world
         world_space_submap = {
-            index : model_matrix * vertices[index].co.copy()
+            index: model_matrix * vertices[index].co.copy()
             for index in indices_affected_by_stroke
         }
         octree = props.octree
@@ -63,7 +64,7 @@ class StrokeMove(bpy.types.Operator):
         # its post-stroke and pre-stroke positions.
         pre_stroke_object_space_map = self.pre_stroke_object_space_map
         stroke_displacement_map = {
-            index : vertices[index].co - pre_stroke_object_space_map[index]
+            index: vertices[index].co - pre_stroke_object_space_map[index]
             for index in indices_affected_by_stroke
         }
 
@@ -95,7 +96,7 @@ class StrokeMove(bpy.types.Operator):
 
         # Record the pre-stroke coordinates of the affected vertex indices.
         self.pre_stroke_object_space_map = {
-            index : vertices[index].co.copy()
+            index: vertices[index].co.copy()
             for index in indices_affected_by_stroke
         }
 
@@ -134,7 +135,7 @@ class StrokeMove(bpy.types.Operator):
                 context.scene.objects.link(temp_target)
 
                 # Set the temporary target of the surface constraint.
-                self.target =  temp_target.name
+                self.target = temp_target.name
 
         # Disable the brush graphic, if necessary.
         if props.brush_is_visible:
@@ -206,7 +207,7 @@ class StrokeMove(bpy.types.Operator):
             # Calculate an object space displacement vector between the brush's
             # original position and its displaced position.
             object_space_displacement = (
-                inverted_model_matrix *  displaced_brush_center -
+                inverted_model_matrix * displaced_brush_center -
                 inverted_model_matrix * brush.center
             )
 
@@ -224,17 +225,17 @@ class StrokeMove(bpy.types.Operator):
         if self.target:
             surface_constraint_props = self.surface_constraint_props
             apply_shrinkwrap(
-                offset = self.offset, target = self.target,
-                wrap_method = surface_constraint_props.wrap_method_map[
+                offset=self.offset, target=self.target,
+                wrap_method=surface_constraint_props.wrap_method_map[
                     surface_constraint_props.direction
                 ],
-                affected_indices = list(indices_affected_by_stroke)
+                affected_indices=list(indices_affected_by_stroke)
             )
 
         # Update the octree's coordinate map.
         model_matrix = active_object.matrix_world
         world_space_submap = {
-            index : model_matrix * vertices[index].co
+            index: model_matrix * vertices[index].co
             for index in indices_affected_by_stroke
         }
         self.props.octree.coordinate_map.update(world_space_submap)

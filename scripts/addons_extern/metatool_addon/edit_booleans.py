@@ -15,6 +15,7 @@ import bpy
 
 ###------ Create Boolean Operators -------###
 
+
 class boolean_A(bpy.types.Operator):
     """Boolean the currently selected objects"""
     bl_idname = "mesh.boolean"
@@ -120,7 +121,7 @@ class booleanToolbar_C(bpy.types.Panel):
 def register():
     bpy.utils.register_class(boolean_A)
     bpy.utils.register_class(booleanMenu_B)
-    #bpy.utils.register_class(booleanToolbar_C)
+    # bpy.utils.register_class(booleanToolbar_C)
 
     wm = bpy.context.window_manager
 
@@ -128,7 +129,7 @@ def register():
 def unregister():
     bpy.utils.unregister_class(boolean_A)
     bpy.utils.unregister_class(booleanMenu_B)
-    #bpy.utils.unregister_class(booleanToolbar_C)
+    # bpy.utils.unregister_class(booleanToolbar_C)
 
 
 if __name__ == "__main__":

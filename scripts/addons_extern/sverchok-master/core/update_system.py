@@ -34,6 +34,7 @@ graphs = []
 no_data_color = (1, 0.3, 0)
 exception_color = (0.8, 0.0, 0)
 
+
 def update_error_colors(self, context):
     global no_data_color
     global exception_color
@@ -57,14 +58,14 @@ def make_dep_dict(node_tree, down=False):
     # create wifi out dependencies, process if needed
 
     wifi_out_nodes = [(name, node.var_name)
-                  for name, node in ng.nodes.items()
-                  if node.bl_idname == 'WifiOutNode' and node.outputs]
+                      for name, node in ng.nodes.items()
+                      if node.bl_idname == 'WifiOutNode' and node.outputs]
     if wifi_out_nodes:
         wifi_dict = {node.var_name: name
                      for name, node in ng.nodes.items()
                      if node.bl_idname == 'WifiInNode'}
 
-    for i,link in enumerate(list(ng.links)):
+    for i, link in enumerate(list(ng.links)):
         #  this proctects against a rare occurance where
         #  a link is considered valid without a to_socket
         #  or a from_socket. proctects against a blender crash
@@ -189,6 +190,7 @@ def separate_nodes(ng, links=None):
     """
     return [ns for ns in node_set_list if len(ns) > 1]
 
+
 def make_tree_from_nodes(node_names, tree, down=True):
     """
     Create a partial update list from a sub-tree, node_names is a list of nodes that
@@ -270,6 +272,7 @@ def do_update_heat_map(node_list, nodes):
         # linear scale.
         nodes[name].color = cold.lerp(hot, t / t_max)
 
+
 def update_error_nodes(ng, name, err=Exception):
     if "error nodes" in ng:
         error_nodes = ast.literal_eval(ng["error nodes"])
@@ -285,7 +288,8 @@ def update_error_nodes(ng, name, err=Exception):
         node.color = no_data_color
     else:
         node.color = exception_color
-    node.use_custom_color=True
+    node.use_custom_color = True
+
 
 def reset_error_nodes(ng):
     if "error nodes" in ng:
@@ -321,10 +325,10 @@ def do_update_general(node_list, nodes, procesed_nodes=set()):
             if data_structure.DEBUG_MODE:
                 print("Processed  {} in: {:.4f}".format(node_name, delta))
             timings.append(delta)
-            graph.append({"name" : node_name,
-                           "bl_idname": node.bl_idname,
-                           "start": start,
-                           "duration": delta})
+            graph.append({"name": node_name,
+                          "bl_idname": node.bl_idname,
+                          "start": start,
+                          "duration": delta})
 
         except Exception as err:
             ng = nodes.id_data
@@ -343,6 +347,7 @@ def do_update(node_list, nodes):
         do_update_heat_map(node_list, nodes)
     else:
         do_update_general(node_list, nodes)
+
 
 def build_update_list(ng=None):
     """
@@ -420,10 +425,12 @@ def process_from_node(node):
     else:
         process_tree(ng)
 
+
 def sverchok_trees():
     for ng in bpy.data.node_groups:
         if ng.bl_idname == "SverchCustomTreeType":
             yield ng
+
 
 def process_tree(ng=None):
     global update_cache
@@ -454,6 +461,7 @@ def reload_sverchok():
     from sverchok.core import handlers
     handlers.sv_post_load([])
 
+
 def get_update_lists(ng):
     """
     Make update list available in blender console.
@@ -464,6 +472,7 @@ def get_update_lists(ng):
     if not ng.name in update_cache:
         build_update_list(ng)
     return (update_cache.get(ng.name), partial_update_cache.get(ng.name))
+
 
 def register():
     addon_name = sverchok.__name__

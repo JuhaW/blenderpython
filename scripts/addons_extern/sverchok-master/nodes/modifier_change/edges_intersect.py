@@ -34,7 +34,7 @@ def order_points(edge, point_list):
     ''' order these edges from distance to v1, then
     sandwich the sorted list with v1, v2 '''
     v1, v2 = edge
-    dist = lambda co: (v1-co).length
+    dist = lambda co: (v1 - co).length
     point_list = sorted(point_list, key=dist)
     return [v1] + point_list + [v2]
 
@@ -72,7 +72,7 @@ def can_skip(closest_points, vert_vectors):
 
     # if this distance is larger than than VTX_PRECISION, we can skip it.
     cpa, cpb = closest_points
-    return (cpa-cpb).length > cm.CAD_prefs.VTX_PRECISION
+    return (cpa - cpb).length > cm.CAD_prefs.VTX_PRECISION
 
 
 def get_intersection_dictionary(bm, edge_indices):
@@ -121,17 +121,17 @@ def update_mesh(bm, d):
 
     for old_edge, point_list in d.items():
         num_points = len(point_list)
-        num_edges_to_add = num_points-1
+        num_edges_to_add = num_points - 1
 
         for i in range(num_edges_to_add):
             ov.new(point_list[i])
-            ov.new(point_list[i+1])
+            ov.new(point_list[i + 1])
 
             if hasattr(bm.verts, "ensure_lookup_table"):
                 bm.verts.ensure_lookup_table()
                 bm.edges.ensure_lookup_table()  # not sure this even exists..
 
-            vseq = ov[vert_count], ov[vert_count+1]
+            vseq = ov[vert_count], ov[vert_count + 1]
             oe.new(vseq)
             bm.normal_update()
             vert_count = len(ov)

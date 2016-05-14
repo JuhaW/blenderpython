@@ -31,7 +31,7 @@ bl_info = {
     'warning': '',
     'wiki_url': '',
     'tracker_url': '',
-    'category': 'Object' }
+    'category': 'Object'}
 
 #
 import bpy
@@ -42,19 +42,20 @@ from math import *
 
 class oa_p_group0(bpy.types.PropertyGroup):
 
-    t = EnumProperty( items =( ('opt0', 'location', ''),
-                               ('opt1', 'rotation', ''),
-                               ('opt2', 'scale', '') ),
-                      name = 'test',
-                      default = 'opt0' )
+    t = EnumProperty(items=(('opt0', 'location', ''),
+                            ('opt1', 'rotation', ''),
+                            ('opt2', 'scale', '')),
+                     name='test',
+                     default='opt0')
 
 
 def list_clear_(l):
     l[:] = []
     return l
 
+
 def rad_(d):
-        return d * pi / 180
+    return d * pi / 180
 
 
 class oa_buf():
@@ -76,10 +77,10 @@ class oa_msg_popup(bpy.types.Operator, oa_buf):
             self.t = 'ERROR'
         else:
             self.t = 'NONE'
-                
+
         layout = self.layout
         row = layout.split(0.25)
-        row.label(self.msg_type, icon = self.t)
+        row.label(self.msg_type, icon=self.t)
         row.label(self.msg)
 
     def execute(self, context):
@@ -89,6 +90,8 @@ class oa_msg_popup(bpy.types.Operator, oa_buf):
         return context.window_manager.invoke_popup(self)
 
 #
+
+
 class oa_h_popup(bpy.types.Operator):
 
     bl_idname = 'oa.hp_id'
@@ -96,11 +99,11 @@ class oa_h_popup(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text = 'Select original object and click Select Object button.')
-        layout.label(text = 'Select objects that you want to align.')
-        layout.label(text = 'Use x, y, z, or custom to align them.')
-        layout.label(text = 'If using custom select axis with checkbox first.')
-    
+        layout.label(text='Select original object and click Select Object button.')
+        layout.label(text='Select objects that you want to align.')
+        layout.label(text='Use x, y, z, or custom to align them.')
+        layout.label(text='If using custom select axis with checkbox first.')
+
     def execute(self, context):
         return {'FINISHED'}
 
@@ -108,6 +111,8 @@ class oa_h_popup(bpy.types.Operator):
         return context.window_manager.invoke_popup(self)
 
 #
+
+
 class oa_op0(bpy.types.Operator):
 
     bl_idname = 'oa.op0_id'
@@ -122,6 +127,8 @@ class oa_op0(bpy.types.Operator):
         return {'FINISHED'}
 
 #
+
+
 class oa_op1(bpy.types.Operator):
 
     bl_idname = 'oa.op1_id'
@@ -146,6 +153,8 @@ class oa_op1(bpy.types.Operator):
             return {'FINISHED'}
 
 #
+
+
 class oa_op2(bpy.types.Operator):
 
     bl_idname = 'oa.op2_id'
@@ -170,6 +179,8 @@ class oa_op2(bpy.types.Operator):
             return {'FINISHED'}
 
 #
+
+
 class oa_op3(bpy.types.Operator):
 
     bl_idname = 'oa.op3_id'
@@ -194,79 +205,84 @@ class oa_op3(bpy.types.Operator):
             return {'FINISHED'}
 
 #
+
+
 class oa_op4(bpy.types.Operator):
 
     bl_idname = 'oa.op4_id'
     bl_label = 'Custom:'
     bl_options = {'REGISTER', 'UNDO'}
 
-    x_ = y_ = z_ = FloatProperty( default = 0.0, min = -100.0, max = 100.0, step = 1, precision = 3 )
-    rx_ = ry_ = rz_ = FloatProperty( default = 0.0, min = -360.0, max = 360.0, step = 1, precision = 3 )
+    x_ = y_ = z_ = FloatProperty(default=0.0, min=-100.0, max=100.0, step=1, precision=3)
+    rx_ = ry_ = rz_ = FloatProperty(default=0.0, min=-360.0, max=360.0, step=1, precision=3)
     b_x = b_y = b_z = BoolProperty()
 
     def execute(self, context):
         c_prop = context.scene.my_custom_props.t
         for ob_sel in bpy.context.selected_objects:
-                
-                if c_prop == 'opt0':
-                    if self.b_x == True:
-                        ob_sel.location = Vector((self.x_, ob_sel.location.y, ob_sel.location.z))
-                    if self.b_y == True:
-                        ob_sel.location = Vector((ob_sel.location.x, self.y_, ob_sel.location.z))
-                    if self.b_z == True:
-                        ob_sel.location = Vector((ob_sel.location.x, ob_sel.location.y, self.z_))
-                elif c_prop == 'opt1':
-                    if self.b_x == True:
-                        ob_sel.rotation_euler = Vector((rad_(self.rx_), ob_sel.rotation_euler.y, ob_sel.rotation_euler.z))
-                    if self.b_y == True:
-                        ob_sel.rotation_euler = Vector((ob_sel.rotation_euler.x, rad_(self.ry_), ob_sel.rotation_euler.z))
-                    if self.b_z == True:
-                        ob_sel.rotation_euler = Vector((ob_sel.rotation_euler.x, ob_sel.rotation_euler.y, rad_(self.rz_)))
-                elif c_prop == 'opt2':
-                    if self.b_x == True:
-                        ob_sel.scale = Vector((self.x_, ob_sel.scale.y, ob_sel.scale.z))
-                    if self.b_y == True:
-                        ob_sel.scale = Vector((ob_sel.scale.x, self.y_, ob_sel.scale.z))
-                    if self.b_z == True:
-                        ob_sel.scale = Vector((ob_sel.scale.x, ob_sel.scale.y, self.z_))
+
+            if c_prop == 'opt0':
+                if self.b_x == True:
+                    ob_sel.location = Vector((self.x_, ob_sel.location.y, ob_sel.location.z))
+                if self.b_y == True:
+                    ob_sel.location = Vector((ob_sel.location.x, self.y_, ob_sel.location.z))
+                if self.b_z == True:
+                    ob_sel.location = Vector((ob_sel.location.x, ob_sel.location.y, self.z_))
+            elif c_prop == 'opt1':
+                if self.b_x == True:
+                    ob_sel.rotation_euler = Vector((rad_(self.rx_), ob_sel.rotation_euler.y, ob_sel.rotation_euler.z))
+                if self.b_y == True:
+                    ob_sel.rotation_euler = Vector((ob_sel.rotation_euler.x, rad_(self.ry_), ob_sel.rotation_euler.z))
+                if self.b_z == True:
+                    ob_sel.rotation_euler = Vector((ob_sel.rotation_euler.x, ob_sel.rotation_euler.y, rad_(self.rz_)))
+            elif c_prop == 'opt2':
+                if self.b_x == True:
+                    ob_sel.scale = Vector((self.x_, ob_sel.scale.y, ob_sel.scale.z))
+                if self.b_y == True:
+                    ob_sel.scale = Vector((ob_sel.scale.x, self.y_, ob_sel.scale.z))
+                if self.b_z == True:
+                    ob_sel.scale = Vector((ob_sel.scale.x, ob_sel.scale.y, self.z_))
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self, width = 200)
+        return context.window_manager.invoke_props_dialog(self, width=200)
 
     def draw(self, context):
         c_prop = context.scene.my_custom_props.t
         layout = self.layout
 
         row = layout.split(0.25)
-        row.prop(self, 'b_x', text = 'x')
+        row.prop(self, 'b_x', text='x')
         if c_prop == 'opt1':
             row.prop(self, 'rx_')
         else:
             row.prop(self, 'x_')
 
         row = layout.split(0.25)
-        row.prop(self, 'b_y', text = 'y')
+        row.prop(self, 'b_y', text='y')
         if c_prop == 'opt1':
             row.prop(self, 'ry_')
         else:
             row.prop(self, 'y_')
 
         row = layout.split(0.25)
-        row.prop(self, 'b_z', text = 'z')
+        row.prop(self, 'b_z', text='z')
         if c_prop == 'opt1':
             row.prop(self, 'rz_')
         else:
             row.prop(self, 'z_')
 
 
-class_list = [ oa_op0, oa_op1, oa_op2, oa_op3, oa_op4, oa_h_popup, oa_msg_popup, oa_p_group0 ]
+class_list = [oa_op0, oa_op1, oa_op2, oa_op3, oa_op4, oa_h_popup, oa_msg_popup, oa_p_group0]
 
-## registring
+# registring
+
+
 def register():
     bpy.utils.register_module(__name__)
 
     pass
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

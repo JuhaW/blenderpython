@@ -23,21 +23,21 @@ from bpy.props import BoolProperty, IntProperty, FloatProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (match_long_repeat, sv_zip,
-                            updateNode, SvSetSocketAnyType)
+                                     updateNode, SvSetSocketAnyType)
 
 
 def cylinder_vertices(Subd, Vertices, Height, RadiusBot, RadiusTop, Separate):
-    theta = 360/Vertices
-    heightSubd = Height/(Subd+1)
+    theta = 360 / Vertices
+    heightSubd = Height / (Subd + 1)
     X = []
     Y = []
     Z = []
-    for i in range(Subd+2):
-        radius = RadiusBot - ((RadiusBot-RadiusTop)/(Subd+1))*i
+    for i in range(Subd + 2):
+        radius = RadiusBot - ((RadiusBot - RadiusTop) / (Subd + 1)) * i
         for j in range(Vertices):
-            X.append(radius*cos(radians(theta*j)))
-            Y.append(radius*sin(radians(theta*j)))
-            Z.append(heightSubd*i)
+            X.append(radius * cos(radians(theta * j)))
+            Y.append(radius * sin(radians(theta * j)))
+            Z.append(heightSubd * i)
 
     points = list(sv_zip(X, Y, Z))
     if Separate:
@@ -47,7 +47,7 @@ def cylinder_vertices(Subd, Vertices, Height, RadiusBot, RadiusTop, Separate):
         for y, P in enumerate(points):
             x += 1
             out_.append(P)
-            if x//Vertices:
+            if x // Vertices:
                 out.append(out_)
                 out_ = []
                 x = 0
@@ -58,29 +58,29 @@ def cylinder_vertices(Subd, Vertices, Height, RadiusBot, RadiusTop, Separate):
 
 def cylinder_edges(Subd, Vertices):
     listEdg = []
-    for i in range(Subd+2):
-        for j in range(Vertices-1):
-            listEdg.append([j+Vertices*i, j+1+Vertices*i])
-        listEdg.append([Vertices-1+Vertices*i, 0+Vertices*i])
-    for i in range(Subd+1):
+    for i in range(Subd + 2):
+        for j in range(Vertices - 1):
+            listEdg.append([j + Vertices * i, j + 1 + Vertices * i])
+        listEdg.append([Vertices - 1 + Vertices * i, 0 + Vertices * i])
+    for i in range(Subd + 1):
         for j in range(Vertices):
-            listEdg.append([j+Vertices*i, j+Vertices+Vertices*i])
+            listEdg.append([j + Vertices * i, j + Vertices + Vertices * i])
 
     return listEdg
 
 
 def cylinder_faces(Subd, Vertices, Cap):
     listPlg = []
-    for i in range(Subd+1):
-        for j in range(Vertices-1):
-            listPlg.append([j+Vertices*i, j+1+Vertices*i, j+1+Vertices*i+Vertices, j+Vertices*i+Vertices])
-        listPlg.append([Vertices-1+Vertices*i, 0+Vertices*i, 0+Vertices*i+Vertices, Vertices-1+Vertices*i+Vertices])
+    for i in range(Subd + 1):
+        for j in range(Vertices - 1):
+            listPlg.append([j + Vertices * i, j + 1 + Vertices * i, j + 1 + Vertices * i + Vertices, j + Vertices * i + Vertices])
+        listPlg.append([Vertices - 1 + Vertices * i, 0 + Vertices * i, 0 + Vertices * i + Vertices, Vertices - 1 + Vertices * i + Vertices])
     if Cap:
         capBot = []
         capTop = []
         for i in range(Vertices):
             capBot.append(i)
-            capTop.append(Vertices*(Subd+1)+i)
+            capTop.append(Vertices * (Subd + 1) + i)
         capBot.reverse()
         listPlg.append(capBot)
         listPlg.append(capTop)

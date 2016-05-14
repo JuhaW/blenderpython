@@ -13,6 +13,7 @@ def getMainObjectContainer(scene):
         scene.objects.link(objectContainer)
     return objectContainer
 
+
 def newMainObjectContainer():
     objectContainer = bpy.data.objects.new(mainObjectContainerName, None)
     objectContainer.hide = True
@@ -26,6 +27,7 @@ def getHelperMaterial():
     if helperMaterial is None:
         helperMaterial = newHelperMaterial()
     return helperMaterial
+
 
 def newHelperMaterial():
     material = bpy.data.materials.new(helperMaterialName)

@@ -10,8 +10,9 @@ from ... base_types.node import AnimationNode
 from . subprogram_base import SubprogramBaseNode
 from ... utils.nodes import newNodeAtCursor, invokeTranslation
 from ... sockets.info import (toBaseIdName, toListDataType, toIdName,
-                                    isBase, toListIdName, toBaseDataType)
+                              isBase, toListIdName, toBaseDataType)
 from . subprogram_sockets import SubprogramData, subprogramInterfaceChanged, NoDefaultValue
+
 
 class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
     bl_idname = "an_LoopInputNode"
@@ -29,14 +30,14 @@ class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
     def draw(self, layout):
         layout.separator()
         left, right = splitAlignment(layout)
-        self.invokeSocketTypeChooser(left, "createGeneratorOutputNode", socketGroup = "LIST", text = "", icon = "ZOOMIN", emboss = False)
+        self.invokeSocketTypeChooser(left, "createGeneratorOutputNode", socketGroup="LIST", text="", icon="ZOOMIN", emboss=False)
         right.label("New Generator Output")
-        layout.prop(self, "subprogramName", text = "", icon = "GROUP_VERTEX")
+        layout.prop(self, "subprogramName", text="", icon="GROUP_VERTEX")
 
     def drawAdvanced(self, layout):
         col = layout.column()
         col.label("Description:")
-        col.prop(self, "subprogramDescription", text = "")
+        col.prop(self, "subprogramDescription", text="")
 
         layout.separator()
 
@@ -44,8 +45,8 @@ class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
         col.label("Iterator Sockets:")
         box = col.box()
         for socket in self.getIteratorSockets():
-            box.prop(socket.loop, "useAsOutput", text = "Use {} as Output".format(repr(socket.text)))
-        self.invokeSocketTypeChooser(box, "newIterator", socketGroup = "LIST", text = "New Iterator", icon = "PLUS")
+            box.prop(socket.loop, "useAsOutput", text="Use {} as Output".format(repr(socket.text)))
+        self.invokeSocketTypeChooser(box, "newIterator", socketGroup="LIST", text="New Iterator", icon="PLUS")
 
         layout.separator()
 
@@ -53,18 +54,18 @@ class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
         col.label("Parameter Sockets:")
         box = col.box()
         for socket in self.getParameterSockets():
-            subcol = box.column(align = False)
+            subcol = box.column(align=False)
             row = subcol.row()
             row.label(repr(socket.text))
-            self.invokeFunction(row, "createReassignParameterNode", text = "Reassign", data = socket.identifier)
+            self.invokeFunction(row, "createReassignParameterNode", text="Reassign", data=socket.identifier)
             row = subcol.row()
-            row.prop(socket.loop, "useAsInput", text = "Input")
-            row.prop(socket.loop, "useAsOutput", text = "Output")
+            row.prop(socket.loop, "useAsInput", text="Input")
+            row.prop(socket.loop, "useAsOutput", text="Output")
             subrow = row.row()
             subrow.active = socket.isCopyable
-            subrow.prop(socket.loop, "copyAlways", text = "Copy")
-            socket.drawSocket(subcol, text = "Default", drawType = "PROPERTY_ONLY")
-        self.invokeSocketTypeChooser(box, "newParameter", text = "New Parameter", icon = "PLUS")
+            subrow.prop(socket.loop, "copyAlways", text="Copy")
+            socket.drawSocket(subcol, text="Default", drawType="PROPERTY_ONLY")
+        self.invokeSocketTypeChooser(box, "newParameter", text="New Parameter", icon="PLUS")
 
         layout.separator()
 
@@ -73,20 +74,23 @@ class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
         box = col.box()
         for node in self.getSortedGeneratorNodes():
             box.label("{} - {}".format(repr(node.outputName), node.listDataType))
-        self.invokeSocketTypeChooser(box, "createGeneratorOutputNode", socketGroup = "LIST", text = "New Generator", icon = "PLUS")
+        self.invokeSocketTypeChooser(box, "createGeneratorOutputNode", socketGroup="LIST", text="New Generator", icon="PLUS")
 
-        self.invokeFunction(layout, "createBreakNode", text = "New Break Condition", icon = "PLUS")
+        self.invokeFunction(layout, "createBreakNode", text="New Break Condition", icon="PLUS")
 
     def edit(self):
         for target in self.newIteratorSocket.dataTargets:
-            if target.dataType == "Node Control": continue
-            if not isBase(target.dataType): continue
+            if target.dataType == "Node Control":
+                continue
+            if not isBase(target.dataType):
+                continue
             listDataType = toListDataType(target.dataType)
             socket = self.newIterator(listDataType, target.getDisplayedName())
             socket.linkWith(target)
 
         for target in self.newParameterSocket.dataTargets:
-            if target.dataType == "Node Control": continue
+            if target.dataType == "Node Control":
+                continue
             socket = self.newParameter(target.dataType, target.getDisplayedName(), target.getProperty())
             socket.linkWith(target)
 
@@ -98,24 +102,26 @@ class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
         function, socketGroup = ("newParameter", "ALL") if isParameterSocket else ("newIterator", "LIST")
 
         left, right = splitAlignment(layout)
-        self.invokeSocketTypeChooser(left, function, socketGroup = socketGroup, icon = "ZOOMIN", emboss = False)
+        self.invokeSocketTypeChooser(left, function, socketGroup=socketGroup, icon="ZOOMIN", emboss=False)
         right.label(socket.name)
 
-
-    def newIterator(self, listDataType, name = None):
-        if name is None: name = toBaseDataType(listDataType)
+    def newIterator(self, listDataType, name=None):
+        if name is None:
+            name = toBaseDataType(listDataType)
         socket = self.outputs.new(toBaseIdName(listDataType), name, "iterator_" + getRandomString(5))
         socket.moveTo(self.newIteratorSocket.index)
-        self.setupSocket(socket, name, moveGroup = 1)
+        self.setupSocket(socket, name, moveGroup=1)
         return socket
 
-    def newParameter(self, dataType, name = None, defaultValue = None):
-        if name is None: name = dataType
+    def newParameter(self, dataType, name=None, defaultValue=None):
+        if name is None:
+            name = dataType
         socket = self.outputs.new(toIdName(dataType), name, "parameter_" + getRandomString(5))
-        if defaultValue: socket.setProperty(defaultValue)
+        if defaultValue:
+            socket.setProperty(defaultValue)
         socket.moveTo(self.newParameterSocket.index)
         socket.loop.copyAlways = False
-        self.setupSocket(socket, name, moveGroup = 2)
+        self.setupSocket(socket, name, moveGroup=2)
         return socket
 
     def setupSocket(self, socket, name, moveGroup):
@@ -129,7 +135,6 @@ class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
         socket.display.removeOperator = True
         socket.loop.useAsInput = True
 
-
     def socketChanged(self):
         subprogramInterfaceChanged()
 
@@ -140,13 +145,15 @@ class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
     def duplicate(self, sourceNode):
         self.randomizeNetworkColor()
         match = re.search("(.*) ([0-9]+)$", self.subprogramName)
-        if match: self.subprogramName = match.group(1) + " " + str(int(match.group(2)) + 1)
-        else: self.subprogramName += " 2"
-
+        if match:
+            self.subprogramName = match.group(1) + " " + str(int(match.group(2)) + 1)
+        else:
+            self.subprogramName += " 2"
 
     def getSocketData(self):
         data = SubprogramData()
-        if len(self.outputs) == 0: return data
+        if len(self.outputs) == 0:
+            return data
 
         self.insertIteratorData(data)
         self.insertGeneratorData(data)
@@ -178,7 +185,6 @@ class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
         for node in self.getSortedGeneratorNodes():
             data.newOutput(toIdName(node.listDataType), node.identifier, node.outputName)
 
-
     def createGeneratorOutputNode(self, dataType):
         node = newNodeAtCursor("an_LoopGeneratorOutputNode")
         node.loopInputIdentifier = self.identifier
@@ -199,13 +205,11 @@ class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
         node.loopInputIdentifier = self.identifier
         invokeTranslation()
 
-
     def getTemplateCode(self):
         for socket in self.getIteratorSockets():
             yield "self.newIterator({}, name = {})".format(repr(toListDataType(socket.bl_idname)), repr(socket.text))
         for socket in self.getParameterSockets():
             yield "self.newParameter({}, name = {})".format(repr(socket.dataType), repr(socket.text))
-
 
     @property
     def newIteratorSocket(self):
@@ -238,11 +242,12 @@ class LoopInputNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
 
     def getSortedGeneratorNodes(self):
         nodes = self.network.generatorOutputNodes
-        nodes.sort(key = attrgetter("sortIndex"))
+        nodes.sort(key=attrgetter("sortIndex"))
         try:
             for i, node in enumerate(nodes):
                 node.sortIndex = i
-        except: pass # The function has been called while drawing the interface
+        except:
+            pass  # The function has been called while drawing the interface
         return nodes
 
     def getReassignParameterNodes(self):

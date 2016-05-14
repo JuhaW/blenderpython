@@ -9,28 +9,29 @@ from ... base_types.node import AnimationNode
 meshDataTypeItems = [
     ("MESH_DATA", "Mesh Data", "Mesh Data object that contains only vertex locations, edge indices and polygon indices", "", 0),
     ("BMESH", "BMesh", "BMesh object", "", 1),
-    ("VERTICES", "Vertices", "A list of vertex locations; The length of this list has to be equal to the amount of vertices the mesh already has", "", 2) ]
+    ("VERTICES", "Vertices", "A list of vertex locations; The length of this list has to be equal to the amount of vertices the mesh already has", "", 2)]
+
 
 class MeshObjectOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_MeshObjectOutputNode"
     bl_label = "Mesh Object Output"
     bl_width_default = 175
-    searchTags = [("Set Mesh Data on Object (old)", {"meshDataType" : repr("MESH_DATA")}),
-                  ("Set BMesh on Object (old)", {"meshDataType" : repr("BMESH")}),
-                  ("Set Vertices on Object (old)", {"meshDataType" : repr("VERTICES")}) ]
+    searchTags = [("Set Mesh Data on Object (old)", {"meshDataType": repr("MESH_DATA")}),
+                  ("Set BMesh on Object (old)", {"meshDataType": repr("BMESH")}),
+                  ("Set Vertices on Object (old)", {"meshDataType": repr("VERTICES")})]
 
     def meshDataTypeChanged(self, context):
         self.recreateInputs()
 
-    meshDataType = EnumProperty(name = "Mesh Data Type", default = "MESH_DATA",
-        items = meshDataTypeItems, update = meshDataTypeChanged)
+    meshDataType = EnumProperty(name="Mesh Data Type", default="MESH_DATA",
+                                items=meshDataTypeItems, update=meshDataTypeChanged)
 
-    checkIndices = BoolProperty(name = "Check Indices", default = True,
-        description = "Check that the highest edge or polygon index is below the " +
-         "vertex amount (unchecking can crash Blender when the mesh data is invalid)")
+    checkIndices = BoolProperty(name="Check Indices", default=True,
+                                description="Check that the highest edge or polygon index is below the " +
+                                "vertex amount (unchecking can crash Blender when the mesh data is invalid)")
 
-    checkTupleLengths = BoolProperty(name = "Check Tuple Lengths", default = True,
-        description = "Check that edges have two indices and polygons three or more")
+    checkTupleLengths = BoolProperty(name="Check Tuple Lengths", default=True,
+                                     description="Check that edges have two indices and polygons three or more")
 
     errorMessage = StringProperty()
 
@@ -61,15 +62,18 @@ class MeshObjectOutputNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if not self.meshInputSocket.hide:
-            layout.prop(self, "meshDataType", text = "Type")
+            layout.prop(self, "meshDataType", text="Type")
         if self.errorMessage != "":
-            writeText(layout, self.errorMessage, width = 25, icon = "ERROR")
+            writeText(layout, self.errorMessage, width=25, icon="ERROR")
 
     @property
     def meshInputSocket(self):
-        if self.meshDataType == "MESH_DATA": return self.inputs["Mesh Data"]
-        if self.meshDataType == "BMESH": return self.inputs["BMesh"]
-        if self.meshDataType == "VERTICES": return self.inputs["Vertices"]
+        if self.meshDataType == "MESH_DATA":
+            return self.inputs["Mesh Data"]
+        if self.meshDataType == "BMESH":
+            return self.inputs["BMesh"]
+        if self.meshDataType == "VERTICES":
+            return self.inputs["Vertices"]
 
     def drawAdvanced(self, layout):
         layout.prop(self, "checkIndices")
@@ -83,16 +87,21 @@ class MeshObjectOutputNode(bpy.types.Node, AnimationNode):
         s = self.inputs
 
         if self.meshDataType == "MESH_DATA":
-            if s["Mesh Data"].isUsed:    yield "    self.setMeshData(mesh, meshData)"
+            if s["Mesh Data"].isUsed:
+                yield "    self.setMeshData(mesh, meshData)"
         elif self.meshDataType == "BMESH":
-            if s["BMesh"].isUsed:        yield "    self.setBMesh(mesh, bm)"
+            if s["BMesh"].isUsed:
+                yield "    self.setBMesh(mesh, bm)"
         elif self.meshDataType == "VERTICES":
-            if s["Vertices"].isUsed:     yield "    self.setVertices(mesh, vertices)"
+            if s["Vertices"].isUsed:
+                yield "    self.setVertices(mesh, vertices)"
 
-        if s["Material Indices"].isUsed: yield "    self.setMaterialIndices(mesh, materialIndices)"
+        if s["Material Indices"].isUsed:
+            yield "    self.setMaterialIndices(mesh, materialIndices)"
 
     def isValidObject(self, object):
-        if object is None: return False
+        if object is None:
+            return False
         if object.type != "MESH" or object.mode != "OBJECT":
             self.errorMessage = "Object is not in object mode or is no mesh object"
             return False
@@ -103,8 +112,8 @@ class MeshObjectOutputNode(bpy.types.Node, AnimationNode):
         bmesh.new().to_mesh(mesh)
 
         isValidData = meshData.isValid(
-            checkTupleLengths = self.checkTupleLengths,
-            checkIndices = self.checkIndices)
+            checkTupleLengths=self.checkTupleLengths,
+            checkIndices=self.checkIndices)
 
         if isValidData:
             mesh.from_pydata(meshData.vertices, meshData.edges, meshData.polygons)
@@ -124,8 +133,10 @@ class MeshObjectOutputNode(bpy.types.Node, AnimationNode):
         mesh.update()
 
     def setMaterialIndices(self, mesh, materialIndices):
-        if len(materialIndices) == 0: return
-        if len(mesh.polygons) == 0: return
+        if len(materialIndices) == 0:
+            return
+        if len(mesh.polygons) == 0:
+            return
         if any(index < 0 for index in materialIndices):
             self.errorMessage = "Material indices have to be greater or equal to zero"
             return

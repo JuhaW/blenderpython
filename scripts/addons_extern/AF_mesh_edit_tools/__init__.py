@@ -31,7 +31,6 @@ bl_info = {
     "category": "Addon Factory"}
 
 
-
 if "bpy" in locals():
     import importlib
     importlib.reload(face_inset_fillet)
@@ -63,9 +62,10 @@ else:
     from . import random_vertices
     from . import mesh_fastloop
 
-import bpy 
+import bpy
 from bpy.props import BoolProperty
 ### ------ MENUS ====== ###
+
 
 class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
     # Define the "Extras" menu
@@ -76,79 +76,78 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         mode = context.tool_settings.mesh_select_mode
-        if mode[0]: 	
-            split = layout.split()		
+        if mode[0]:
+            split = layout.split()
             col = split.column()
             col.label(text="Vert")
             col.operator("mesh.vertex_chamfer",
-                text="Vertex Chamfer")
+                         text="Vertex Chamfer")
             col.operator("mesh.random_vertices",
-                text="Random Vertices")
+                         text="Random Vertices")
 
-            row = split.row(align=True)		
+            row = split.row(align=True)
             col = split.column()
             col.label(text="Utilities")
             col.operator("object_ot.fastloop",
-                text="Fast loop")
-            col.operator('mesh.flip_normals', text = 'Normals Flip')
-            col.operator('mesh.remove_doubles', text = 'Remove Doubles')
-            col.operator('mesh.subdivide', text = 'Subdivide')
-            col.operator('mesh.dissolve_limited', text = 'Dissolve Limited')
+                         text="Fast loop")
+            col.operator('mesh.flip_normals', text='Normals Flip')
+            col.operator('mesh.remove_doubles', text='Remove Doubles')
+            col.operator('mesh.subdivide', text='Subdivide')
+            col.operator('mesh.dissolve_limited', text='Dissolve Limited')
 
-        elif mode[1]: 	
-            split = layout.split()		
+        elif mode[1]:
+            split = layout.split()
             col = split.column()
             col.label(text="Edge")
             col.operator("fillet.op0_id",
-                text="Edge Fillet Plus")
+                         text="Edge Fillet Plus")
             col.operator("mesh.offset_edges",
-                text="Offset Edges")
+                         text="Offset Edges")
             col.operator("mesh.edge_roundifier",
-                text="Edge Roundify")
+                         text="Edge Roundify")
             col.operator("object.mesh_edge_length_set",
-                text="Set Edge Length")
+                         text="Set Edge Length")
             col.operator("bpt.mesh_to_wall",
-                text="Edge(s) to Wall")
-				
-            row = split.row(align=True)		
+                         text="Edge(s) to Wall")
+
+            row = split.row(align=True)
             col = split.column()
             col.label(text="Utilities")
             col.operator("object_ot.fastloop",
-                text="Fast loop")
-            col.operator('mesh.flip_normals', text = 'Normals Flip')
-            col.operator('mesh.remove_doubles', text = 'Remove Doubles')
-            col.operator('mesh.remove_doubles', text = 'Remove Doubles')
-            col.operator('mesh.subdivide', text = 'Subdivide')
-            col.operator('mesh.dissolve_limited', text = 'Dissolve Limited')
+                         text="Fast loop")
+            col.operator('mesh.flip_normals', text='Normals Flip')
+            col.operator('mesh.remove_doubles', text='Remove Doubles')
+            col.operator('mesh.remove_doubles', text='Remove Doubles')
+            col.operator('mesh.subdivide', text='Subdivide')
+            col.operator('mesh.dissolve_limited', text='Dissolve Limited')
 
-        elif mode[2]: 			
-            split = layout.split()		
+        elif mode[2]:
+            split = layout.split()
             col = split.column()
             col.label(text="Face")
             col.operator("object.mextrude",
-                text="Multi Extrude")
+                         text="Multi Extrude")
             col.operator("faceinfillet.op0_id",
-                text="Face Inset Fillet")
+                         text="Face Inset Fillet")
             col.operator("mesh.add_faces_to_object",
-                text="PKHG Faces")
+                         text="PKHG Faces")
             col.operator("mesh.ext_cut_faces",
-                text="Cut Faces")
+                         text="Cut Faces")
             col.operator("sp_sol.op0_id",
-                text="Split Solidify")
+                         text="Split Solidify")
 
-            row = split.row(align=True)		
+            row = split.row(align=True)
             col = split.column()
             col.label(text="Utilities")
             col.operator("object_ot.fastloop",
-                text="Fast loop")
-            col.operator('mesh.flip_normals', text = 'Normals Flip')
-            col.operator('mesh.remove_doubles', text = 'Remove Doubles')
-            col.operator('mesh.subdivide', text = 'Subdivide')
-            col.operator('mesh.dissolve_limited', text = 'Dissolve Limited')
+                         text="Fast loop")
+            col.operator('mesh.flip_normals', text='Normals Flip')
+            col.operator('mesh.remove_doubles', text='Remove Doubles')
+            col.operator('mesh.subdivide', text='Subdivide')
+            col.operator('mesh.dissolve_limited', text='Dissolve Limited')
 
 
 class EditToolsSettings(bpy.types.PropertyGroup):
-
 
     vert_settings = BoolProperty(
         name="Vert",
@@ -194,11 +193,11 @@ class EditToolsPanel(bpy.types.Panel):
             row = layout.row()
             row.label(text="Vert Tools:", icon="VERTEXSEL")
             row = layout.split(0.70)
-            row.operator('mesh.vertex_chamfer', text = 'Chamfer')
-            row.operator('help.vertexchamfer', text = '?')
+            row.operator('mesh.vertex_chamfer', text='Chamfer')
+            row.operator('help.vertexchamfer', text='?')
             row = layout.split(0.70)
-            row.operator('mesh.random_vertices', text = 'Random Vertices')
-            row.operator('help.random_vert', text = '?')
+            row.operator('mesh.random_vertices', text='Random Vertices')
+            row.operator('help.random_vert', text='?')
             row = layout.row()
 
         # Edge options
@@ -215,20 +214,20 @@ class EditToolsPanel(bpy.types.Panel):
             row = layout.row()
             row.label(text="Edge Tools:", icon="EDGESEL")
             row = layout.split(0.70)
-            row.operator('fillet.op0_id', text = 'Fillet plus')
-            row.operator('help.edge_fillet', text = '?')
+            row.operator('fillet.op0_id', text='Fillet plus')
+            row.operator('help.edge_fillet', text='?')
             row = layout.split(0.70)
-            row.operator('mesh.offset_edges', text = 'Offset Edges')
-            row.operator('help.offset_edges', text = '?')
+            row.operator('mesh.offset_edges', text='Offset Edges')
+            row.operator('help.offset_edges', text='?')
             row = layout.split(0.70)
-            row.operator('mesh.edge_roundifier', text = 'Roundify')
-            row.operator('help.roundify', text = '?')
+            row.operator('mesh.edge_roundifier', text='Roundify')
+            row.operator('help.roundify', text='?')
             row = layout.split(0.70)
-            row.operator('object.mesh_edge_length_set', text = 'Set Edge Length')
-            row.operator('help.roundify', text = '?')
+            row.operator('object.mesh_edge_length_set', text='Set Edge Length')
+            row.operator('help.roundify', text='?')
             row = layout.split(0.70)
-            row.operator('bpt.mesh_to_wall', text = 'Mesh to wall')
-            row.operator('help.wall', text = '?')
+            row.operator('bpt.mesh_to_wall', text='Mesh to wall')
+            row.operator('help.wall', text='?')
             row = layout.row()
 
         # Face options
@@ -245,20 +244,20 @@ class EditToolsPanel(bpy.types.Panel):
             row = layout.row()
             row.label(text="Face Tools:", icon="FACESEL")
             row = layout.split(0.70)
-            row.operator('object.mextrude', text = 'Multi Extrude')
-            row.operator('help.mextrude', text = '?')
+            row.operator('object.mextrude', text='Multi Extrude')
+            row.operator('help.mextrude', text='?')
             row = layout.split(0.70)
-            row.operator('faceinfillet.op0_id', text = 'Inset Fillet')
-            row.operator('help.face_inset', text = '?')
+            row.operator('faceinfillet.op0_id', text='Inset Fillet')
+            row.operator('help.face_inset', text='?')
             row = layout.split(0.70)
-            row.operator('mesh.add_faces_to_object', text = 'Face Extrude')
-            row.operator('help.pkhg', text = '?')
+            row.operator('mesh.add_faces_to_object', text='Face Extrude')
+            row.operator('help.pkhg', text='?')
             row = layout.split(0.70)
-            row.operator('mesh.ext_cut_faces', text = 'Cut Faces')
-            row.operator('help.cut_faces', text = '?')
+            row.operator('mesh.ext_cut_faces', text='Cut Faces')
+            row.operator('help.cut_faces', text='?')
             row = layout.split(0.70)
-            row.operator('sp_sol.op0_id', text = 'Split Solidify')
-            row.operator('help.solidify', text = '?')
+            row.operator('sp_sol.op0_id', text='Split Solidify')
+            row.operator('help.solidify', text='?')
             row = layout.row()
 
         # Utils options
@@ -276,29 +275,34 @@ class EditToolsPanel(bpy.types.Panel):
             row.label(text="Utilities:")
             row = layout.row()
             row = layout.split(0.70)
-            row.operator('object_ot.fastloop', text = 'Fast Loop')
-            row.operator('help.random_vert', text = '?')
+            row.operator('object_ot.fastloop', text='Fast Loop')
+            row.operator('help.random_vert', text='?')
             row = layout.row()
-            row.operator('mesh.flip_normals', text = 'Normals Flip')
+            row.operator('mesh.flip_normals', text='Normals Flip')
             row = layout.row()
-            row.operator('mesh.remove_doubles', text = 'Remove Doubles')
+            row.operator('mesh.remove_doubles', text='Remove Doubles')
             row = layout.row()
-            row.operator('mesh.subdivide', text = 'Subdivide')
+            row.operator('mesh.subdivide', text='Subdivide')
             row = layout.row()
-            row.operator('mesh.dissolve_limited', text = 'Dissolve Limited')
+            row.operator('mesh.dissolve_limited', text='Dissolve Limited')
 # Addons Preferences
+
+
 class AddonPreferences(bpy.types.AddonPreferences):
-	bl_idname = __name__
-	
-	def draw(self, context):
-		layout = self.layout
-		layout.label(text="----Mesh Edit Tools----")
-		layout.label(text="Collection of extra Mesh Edit Functions")
-		layout.label(text="Edit Mode toolshelf or W key specials")
+    bl_idname = __name__
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="----Mesh Edit Tools----")
+        layout.label(text="Collection of extra Mesh Edit Functions")
+        layout.label(text="Edit Mode toolshelf or W key specials")
 
 # Define "Extras" menu
+
+
 def menu_func(self, context):
     self.layout.menu('VIEW3D_MT_edit_mesh_extras', icon='PLUGIN')
+
 
 def register():
 

@@ -41,11 +41,11 @@ def inset_special(vertices, faces, inset_rates, axis, distances, make_inner):
         dummy_vec = Vector()
         for v in verts:
             dummy_vec = dummy_vec + v
-        return dummy_vec * 1/n
+        return dummy_vec * 1 / n
 
     def do_tri(face, lv_idx, make_inner):
         a, b, c = face
-        d, e, f = lv_idx-2, lv_idx-1, lv_idx
+        d, e, f = lv_idx - 2, lv_idx - 1, lv_idx
         out_faces = []
         out_faces.append([a, b, e, d])
         out_faces.append([b, c, f, e])
@@ -56,7 +56,7 @@ def inset_special(vertices, faces, inset_rates, axis, distances, make_inner):
 
     def do_quad(face, lv_idx, make_inner):
         a, b, c, d = face
-        e, f, g, h = lv_idx-3, lv_idx-2, lv_idx-1, lv_idx
+        e, f, g, h = lv_idx - 3, lv_idx - 2, lv_idx - 1, lv_idx
         out_faces = []
         out_faces.append([a, b, f, e])
         out_faces.append([b, c, g, f])
@@ -105,7 +105,7 @@ def inset_special(vertices, faces, inset_rates, axis, distances, make_inner):
             if axis:
                 local_normal = (avg_vec + local_normal + Vector(axis)).normalized()
 
-            new_verts_prime = [v.lerp(v+local_normal, distance) for v in new_verts_prime]
+            new_verts_prime = [v.lerp(v + local_normal, distance) for v in new_verts_prime]
 
         vertices.extend(new_verts_prime)
 
@@ -191,9 +191,9 @@ class SvInsetSpecial(bpy.types.Node, SverchCustomTreeNode):
         inset_rates = self.get_value_for('inset', [[self.inset]])
         distance_vals = self.get_value_for('distance', [[self.distance]])
 
-        #if self.inputs['axis'].links:
+        # if self.inputs['axis'].links:
         #    axees = self.get_value_for('axis', [[self.axis]])
-        #else:
+        # else:
         #    axees = None
 
         # print(inset_rates)
@@ -202,7 +202,7 @@ class SvInsetSpecial(bpy.types.Node, SverchCustomTreeNode):
         fullList(distance_vals, len(polys[0]))
         #fullList(axees, len(polys[0]))
 
-        #verts, faces, axis=None, distance=0, make_inner=False
+        # verts, faces, axis=None, distance=0, make_inner=False
         verts_out = []
         polys_out = []
 

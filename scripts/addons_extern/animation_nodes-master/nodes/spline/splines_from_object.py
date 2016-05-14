@@ -4,14 +4,15 @@ from ... events import propertyChanged
 from ... base_types.node import AnimationNode
 from ... data_structures.splines.from_blender import createSplinesFromBlenderObject
 
+
 class SplinesFromObjectNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SplinesFromObjectNode"
     bl_label = "Splines from Object"
 
     useWorldTransform = BoolProperty(
-        name = "Use World Transform",
-        description = "Use the position in global space",
-        default = True, update = propertyChanged)
+        name="Use World Transform",
+        description="Use the position in global space",
+        default=True, update=propertyChanged)
 
     def create(self):
         self.inputs.new("an_ObjectSocket", "Object", "objects").defaultDrawType = "PROPERTY_ONLY"

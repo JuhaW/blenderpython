@@ -23,7 +23,7 @@ import re
 import bpy
 import blf
 import bgl
-from  sverchok import node_tree
+from sverchok import node_tree
 
 from bpy.types import SpaceNodeEditor
 
@@ -44,7 +44,7 @@ def parse_socket(socket):
 
     # okay, here we should be more clever and extract part of the list
     # to avoid the amount of time it take to format it.
-    
+
     content_str = pprint.pformat(data, width=str_width)
     content_array = content_str.split('\n')
 
@@ -73,7 +73,7 @@ def parse_socket(socket):
     return out
 
 
-## end of util functions
+# end of util functions
 
 
 def tag_redraw_all_nodeviews():
@@ -84,7 +84,7 @@ def tag_redraw_all_nodeviews():
                 for region in area.regions:
                     if region.type == 'WINDOW':
                         region.tag_redraw()
-   
+
 
 def callback_enable(*args):
     n_id = args[0]
@@ -118,7 +118,7 @@ def callback_disable_all():
 def draw_callback_px(n_id, data):
 
     space = bpy.context.space_data
-  
+
     ng_view = space.edit_tree
     # ng_view can be None
     if not ng_view:
@@ -146,7 +146,7 @@ def draw_callback_px(n_id, data):
         blf.position(0, x, ypos, 0)
         blf.draw(0, line)
         ypos -= (text_height * 1.3)
-        
-        
+
+
 def unregister():
     callback_disable_all()

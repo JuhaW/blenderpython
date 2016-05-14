@@ -115,7 +115,7 @@ class MUV_TexLockRotation(bpy.types.Operator):
                 region,
                 space.region_3d,
                 world_mat * v_ave
-                )
+            )
             ix = self.ini_mouse_x - orig_2d.x
             iy = self.ini_mouse_y - orig_2d.y
             cx = mx - orig_2d.x
@@ -123,7 +123,7 @@ class MUV_TexLockRotation(bpy.types.Operator):
             iang = atan2(iy, ix)
             cang = atan2(cy, cx)
             dang = cang - iang
-            
+
             mt = Matrix.Translation(-uv_ave)
             mr = Matrix.Rotation(dang, 4, 'Z')
             mti = mt.inverted()
@@ -133,7 +133,7 @@ class MUV_TexLockRotation(bpy.types.Operator):
                 uv = mat * uv
                 l[uv_layer].uv = Vector((uv.x, uv.y))
 
-            bpy.ops.transform.rotate(axis=f.normal, value=dang) 
+            bpy.ops.transform.rotate(axis=f.normal, value=dang)
 
         if event.type == 'RIGHTMOUSE':
             if event.value == 'PRESS':
@@ -150,7 +150,6 @@ class MUV_TexLockRotation(bpy.types.Operator):
             self.first_time = True
             return {'RUNNING_MODAL'}
         return {'CANCELLED'}
-
 
 
 # Texture lock
@@ -217,7 +216,7 @@ class MUV_TexLockScale(bpy.types.Operator):
                 region,
                 space.region_3d,
                 world_mat * v_ave
-                )
+            )
             ix = self.ini_mouse_x - orig_2d.x
             iy = self.ini_mouse_y - orig_2d.y
             cx = mx - orig_2d.x
@@ -255,4 +254,3 @@ class MUV_TexLockScale(bpy.types.Operator):
             self.first_time = True
             return {'RUNNING_MODAL'}
         return {'CANCELLED'}
-

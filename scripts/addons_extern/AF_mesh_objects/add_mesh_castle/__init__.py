@@ -27,12 +27,11 @@ bl_info = {
     "blender": (2, 75, 0),
     "location": "View3D > Add > Mesh > Castle",
     "warning": "WIP - Frequent changes for known issues and enhancements.",
-    "support": "TESTING", # OFFICIAL, COMMUNITY, TESTING.
+    "support": "TESTING",  # OFFICIAL, COMMUNITY, TESTING.
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Add_Mesh/Castle",
     "tracker_url": "https://developer.blender.org/T45596",
     "category": "Add Mesh"
-    }
-
+}
 
 
 from . import Castle
@@ -40,14 +39,18 @@ from . import Castle
 import bpy
 
 # Menu
+
+
 def menu_func_castle(self, context):
     self.layout.operator(Castle.add_castle.bl_idname,
                          text="Castle",
                          icon="PLUGIN")
 
+
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.INFO_MT_mesh_add.append(menu_func_castle)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

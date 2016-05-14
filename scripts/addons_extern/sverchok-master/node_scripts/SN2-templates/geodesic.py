@@ -51,7 +51,7 @@ class HedronScript(SvScriptSimpleGenerator):
                     (0.0 + x1, -1.63299316185 + y1, -0.577350269185 + z1),
                     (1.41421356237 + x1, 0.816496580927 + y1, -0.57735026919 + z1),
                     (-1.41421356237 + x1, 0.816496580927 + y1, -0.57735026919 + z1)
-                    ])*(1.0 + scale)).tolist()
+                ]) * (1.0 + scale)).tolist()
 
         elif type_geodesic == Geo.tetra_edge.value:
             return (
@@ -60,7 +60,7 @@ class HedronScript(SvScriptSimpleGenerator):
                     (x0, 1.41421356237 + y0, 1.0 + z0),
                     (1.41421356237 + x1, 0.0 + y1, -1.0 + z1),
                     (-1.41421356237 + x1, 0.0 + y1, -1.0 + z1)
-                    ])*(1.0 + scale)).tolist()
+                ]) * (1.0 + scale)).tolist()
 
         elif type_geodesic == Geo.tetra_face.value:
             return (
@@ -69,7 +69,7 @@ class HedronScript(SvScriptSimpleGenerator):
                     (1.41421356237 + x0, -0.816496580927 + y0, 0.57735026919 + z0),
                     (x0, 1.63299316185 + y0, 0.577350269185 + z0),
                     (x1, y1, -1.73205080757 + z1)
-                    ])*(1.0 + scale)).tolist()
+                ]) * (1.0 + scale)).tolist()
 
         elif type_geodesic == Geo.octra_top.value:
             return (
@@ -80,18 +80,18 @@ class HedronScript(SvScriptSimpleGenerator):
                     (x1, -1.0 + y1, z1),
                     (1.0 + x1, y1, z1),
                     (x2, y2, -1.0 + z2)
-                    ])*(1.0 + scale)).tolist()
+                ]) * (1.0 + scale)).tolist()
 
         elif type_geodesic == Geo.octra_edge.value:
             return (
                 npMatrix([
                     (0.0 + x0, -0.707106781187 + y0, 0.707106781187 + z0),
                     (0.0 + x0, 0.707106781187 + y0, 0.707106781187 + z0),
-                    (1.0 + x1, y1,  z1),
-                    (-1.0 + x1, y1,  z1),
+                    (1.0 + x1, y1, z1),
+                    (-1.0 + x1, y1, z1),
                     (0.0 + x2, -0.707106781187 + y2, -0.707106781187 + z2),
                     (0.0 + x2, 0.707106781187 + y2, -0.707106781187 + z2)
-                    ])*(1.0 + scale)).tolist()
+                ]) * (1.0 + scale)).tolist()
 
         elif type_geodesic == Geo.octra_face.value:
             return (
@@ -102,7 +102,7 @@ class HedronScript(SvScriptSimpleGenerator):
                     (-0.408248458663 + x1, -0.707106781187 + y1, -0.577350150255 + z1),
                     (0.816496412728 + x1, 0.0 + y1, -0.577350507059 + z1),
                     (-0.408248458663 + x1, 0.707106781187 + y1, -0.577350150255 + z1)
-                    ])*(1.0 + scale)).tolist()
+                ]) * (1.0 + scale)).tolist()
 
         elif type_geodesic == Geo.icosa_top.value:
             return (
@@ -119,7 +119,7 @@ class HedronScript(SvScriptSimpleGenerator):
                     (-0.5 + x2, 0.162459832634 + y2, -0.262865565628 + z2),
                     (-0.309016994375 + x2, -0.425325419658 + y2, -0.262865531009 + z2),
                     (0.0 + x3, 0.0 + y3, -0.587785252292 + z3)
-                    ])*(1.0 + scale)).tolist()
+                ]) * (1.0 + scale)).tolist()
 
         elif type_geodesic == Geo.icosa_edge.value:
             return (
@@ -136,7 +136,7 @@ class HedronScript(SvScriptSimpleGenerator):
                     (0.5 + x3, 0 + y3, -0.309016994375 + z3),
                     (0 + x4, 0.309016994375 + y4, -0.5 + z4),
                     (0 + x4, -0.309016994375 + y4, -0.5 + z4)
-                    ])*(1.0 + scale)).tolist()
+                ]) * (1.0 + scale)).tolist()
 
         elif type_geodesic == Geo.icosa_face.value:
             return (
@@ -152,8 +152,8 @@ class HedronScript(SvScriptSimpleGenerator):
                     (-0.288675134594 + x2, 0.5 + y2, -0.11026408971 + z2),
                     (-0.35682208977 + x3, 0.0 + y3, -0.467086179484 + z3),
                     (0.17841104489 + x3, -0.309016994375 + y3, -0.46708617948 + z3),
-                    (0.17841104489 + x3, 0.309016994375 + y3,  -0.46708617948 + z3)
-                    ])*(1.0 + scale)).tolist()
+                    (0.17841104489 + x3, 0.309016994375 + y3, -0.46708617948 + z3)
+                ]) * (1.0 + scale)).tolist()
 
     @staticmethod
     def make_edges(type_geodesic, layer, top_x, top_y, top_z, scale):

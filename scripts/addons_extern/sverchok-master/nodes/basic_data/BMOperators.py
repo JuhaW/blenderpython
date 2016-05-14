@@ -67,12 +67,12 @@ class SvBMOpsNode(bpy.types.Node, SverchCustomTreeNode):
         if not self.outputs['bmesh_list'].is_linked:
             return
         bml, val, e = self.inputs
-        obj, v = safc(bml.sv_get(), val.sv_get([[1]*12]))
+        obj, v = safc(bml.sv_get(), val.sv_get([[1] * 12]))
         outp = []
-        op = "bmesh.ops."+self.oper
+        op = "bmesh.ops." + self.oper
         if e.is_linked:
             element = e.sv_get()
-            for bm, v, e in zip(obj,v, element):
+            for bm, v, e in zip(obj, v, element):
                 exec(op)
                 outp.append(bm.copy())
                 bm.free()
@@ -83,7 +83,7 @@ class SvBMOpsNode(bpy.types.Node, SverchCustomTreeNode):
                 cur = "edges"
             elif "faces=e" in op:
                 cur = "faces"
-            for bm, v in zip(obj,v):
+            for bm, v in zip(obj, v):
                 e = getattr(bm, cur)
                 exec(op)
                 outp.append(bm.copy())

@@ -117,6 +117,7 @@ class PerfectPatternRemove(bpy.types.Operator):
 
 
 class PerfectShape(bpy.types.Operator, PerfectShapeUI):
+
     @classmethod
     def poll(cls, context):
         return context.mode == "EDIT_MESH" and context.space_data.type == "VIEW_3D" and context.object is not None
@@ -392,7 +393,6 @@ class PerfectShape(bpy.types.Operator, PerfectShapeUI):
                             loop_faces.append(new_face)
                         bmesh.ops.recalc_face_normals(object_bm, faces=loop_faces)
 
-
                     if self.outset > 0.0:
                         outset_region_faces = bmesh.ops.inset_region(object_bm, faces=loop_faces,
                                                                      thickness=self.outset, use_even_offset=True,
@@ -487,7 +487,7 @@ class PerfectShape(bpy.types.Operator, PerfectShapeUI):
                             for i in range(self.cuts):
                                 new_split_edges = []
                                 for idx, vert in enumerate(verts_list):
-                                    if idx < self.cuts_len+i or idx >= loop_verts_len-i:
+                                    if idx < self.cuts_len + i or idx >= loop_verts_len - i:
                                         continue
                                     for edge in vert.link_edges:
                                         if edge in split_edges:
@@ -509,7 +509,7 @@ class PerfectShape(bpy.types.Operator, PerfectShapeUI):
                                     break
                                 split_edges = []
                                 for idx, vert in enumerate(verts_list):
-                                    if idx < self.cuts_len+i or idx >= loop_verts_len-i:
+                                    if idx < self.cuts_len + i or idx >= loop_verts_len - i:
                                         for edge in vert.link_edges:
                                             if edge not in skip_edges and edge not in cut_skip:
                                                 if prev_edge is not None and idx not in range(self.cuts_len):
@@ -520,7 +520,7 @@ class PerfectShape(bpy.types.Operator, PerfectShapeUI):
                                                 if edge not in dissolve_edges and edge not in split_edges:
                                                     split_edges.append(edge)
                                                     cut_skip.append(edge)
-                                                    #edge.select_set(True)
+                                                    # edge.select_set(True)
                                                 prev_edge = edge
 
                                 if first_join and len(cut_edges) == 1:

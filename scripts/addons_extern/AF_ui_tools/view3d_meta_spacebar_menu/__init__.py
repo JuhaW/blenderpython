@@ -30,14 +30,14 @@ bl_info = {
 }
 
 
-import sys, os
+import sys
+import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'view3d_meta_spacebar_menu'))
-    
-    
+
+
 if "bpy" in locals():
     import imp
 
-    
     imp.reload(view3d_spacebar_main_menu)
     imp.reload(view3d_spacebar_file_menu)
 
@@ -48,24 +48,23 @@ if "bpy" in locals():
     imp.reload(view3d_spacebar_object_mesh_menu)
 
     imp.reload(view3d_spacebar_align_menu)
-    imp.reload(view3d_spacebar_modifier_menu)      
-    
+    imp.reload(view3d_spacebar_modifier_menu)
+
     imp.reload(view3d_spacebar_curve_surface_menu)
     imp.reload(view3d_spacebar_delete_clear_menu)
-    
+
     imp.reload(view3d_spacebar_edge_visual_menu)
     imp.reload(view3d_spacebar_edges_edit_menu)
-    
+
     imp.reload(view3d_spacebar_face_edit_menu)
     imp.reload(view3d_spacebar_face_visual_menu)
-    
+
     imp.reload(view3d_spacebar_vertices_edit_menu)
     imp.reload(view3d_spacebar_selection_menu)
 
-    imp.reload(view3d_spacebar_special_menu)         
+    imp.reload(view3d_spacebar_special_menu)
 
     print("Reloaded multifiles")
-	
 
 
 else:
@@ -76,7 +75,6 @@ else:
     from . import view3d_spacebar_vertices_edit_menu, view3d_spacebar_selection_menu
 
     print("Imported multifiles")
-    
 
 
 import view3d_spacebar_main_menu
@@ -89,105 +87,85 @@ import view3d_spacebar_3dview_menu
 import view3d_spacebar_object_mesh_menu
 
 import view3d_spacebar_align_menu
-import view3d_spacebar_modifier_menu      
-    
+import view3d_spacebar_modifier_menu
+
 import view3d_spacebar_curve_surface_menu
 import view3d_spacebar_delete_clear_menu
-    
+
 import view3d_spacebar_edge_visual_menu
 import view3d_spacebar_edges_edit_menu
-    
+
 import view3d_spacebar_face_edit_menu
 import view3d_spacebar_face_visual_menu
-    
+
 import view3d_spacebar_vertices_edit_menu
 import view3d_spacebar_selection_menu
-          
+
 import view3d_spacebar_special_menu
 
 import bpy
 
 
-
 def register():
-   
-   view3d_spacebar_main_menu.register()
-   view3d_spacebar_file_menu.register()
 
-   view3d_spacebar_view_camera_menu.register()
-   view3d_spacebar_window_menu.register()
+    view3d_spacebar_main_menu.register()
+    view3d_spacebar_file_menu.register()
 
-   view3d_spacebar_3dview_menu.register()
-   view3d_spacebar_object_mesh_menu.register()
- 
-   view3d_spacebar_align_menu.register()
-   view3d_spacebar_modifier_menu.register()      
-    
-   view3d_spacebar_curve_surface_menu.register()
-   view3d_spacebar_delete_clear_menu.register()
-    
-   view3d_spacebar_edge_visual_menu.register()
-   view3d_spacebar_edges_edit_menu.register()
-    
-   view3d_spacebar_face_edit_menu.register()
-   view3d_spacebar_face_visual_menu.register()
-    
-   view3d_spacebar_vertices_edit_menu.register()
-   view3d_spacebar_selection_menu.register()
-          
-   view3d_spacebar_special_menu.register()
+    view3d_spacebar_view_camera_menu.register()
+    view3d_spacebar_window_menu.register()
 
-   
-   bpy.utils.register_module(__name__)
-   
-   
-   
- 
+    view3d_spacebar_3dview_menu.register()
+    view3d_spacebar_object_mesh_menu.register()
+
+    view3d_spacebar_align_menu.register()
+    view3d_spacebar_modifier_menu.register()
+
+    view3d_spacebar_curve_surface_menu.register()
+    view3d_spacebar_delete_clear_menu.register()
+
+    view3d_spacebar_edge_visual_menu.register()
+    view3d_spacebar_edges_edit_menu.register()
+
+    view3d_spacebar_face_edit_menu.register()
+    view3d_spacebar_face_visual_menu.register()
+
+    view3d_spacebar_vertices_edit_menu.register()
+    view3d_spacebar_selection_menu.register()
+
+    view3d_spacebar_special_menu.register()
+
+    bpy.utils.register_module(__name__)
+
+
 def unregister():
-    
-   view3d_spacebar_main_menu.unregister()
-   view3d_spacebar_file_menu.unregister()
 
-   view3d_spacebar_view_camera_menu.unregister()
-   view3d_spacebar_window_menu.unregister()
+    view3d_spacebar_main_menu.unregister()
+    view3d_spacebar_file_menu.unregister()
 
-   view3d_spacebar_3dview_menu.unregister()
-   view3d_spacebar_object_mesh_menu.unregister()
- 
-   view3d_spacebar_align_menu.unregister()
-   view3d_spacebar_modifier_menu.unregister()      
-    
-   view3d_spacebar_curve_surface_menu.unregister()
-   view3d_spacebar_delete_clear_menu.unregister()
-    
-   view3d_spacebar_edge_visual_menu.unregister()
-   view3d_spacebar_edges_edit_menu.unregister()
-    
-   view3d_spacebar_face_edit_menu.unregister()
-   view3d_spacebar_face_visual_menu.unregister()
-    
-   view3d_spacebar_vertices_edit_menu.unregister()
-   view3d_spacebar_selection_menu.unregister()
+    view3d_spacebar_view_camera_menu.unregister()
+    view3d_spacebar_window_menu.unregister()
 
-   view3d_spacebar_special_menu.unregister()
+    view3d_spacebar_3dview_menu.unregister()
+    view3d_spacebar_object_mesh_menu.unregister()
 
-    
-   bpy.utils.unregister_module(__name__)
-    
+    view3d_spacebar_align_menu.unregister()
+    view3d_spacebar_modifier_menu.unregister()
+
+    view3d_spacebar_curve_surface_menu.unregister()
+    view3d_spacebar_delete_clear_menu.unregister()
+
+    view3d_spacebar_edge_visual_menu.unregister()
+    view3d_spacebar_edges_edit_menu.unregister()
+
+    view3d_spacebar_face_edit_menu.unregister()
+    view3d_spacebar_face_visual_menu.unregister()
+
+    view3d_spacebar_vertices_edit_menu.unregister()
+    view3d_spacebar_selection_menu.unregister()
+
+    view3d_spacebar_special_menu.unregister()
+
+    bpy.utils.unregister_module(__name__)
+
 if __name__ == "__main__":
     register()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -98,7 +98,7 @@ class PathParser(object):
         self._get_lines()
 
     def relative(self, a, b):
-        return [a[0]+b[0], a[1]+b[1]]
+        return [a[0] + b[0], a[1] + b[1]]
 
     def _get_lines(self):
         ''' arrives here only if the file exists '''
@@ -184,7 +184,7 @@ class PathParser(object):
             a = Vector(final_verts[0])
             b = Vector(final_verts[last_edge_idx])
 
-            if (a-b).length < 0.0005:
+            if (a - b).length < 0.0005:
                 final_edges[-1][1] = 0
                 final_verts.pop()
             else:
@@ -195,7 +195,7 @@ class PathParser(object):
             at this point there is probably distance between end
             point and start..so this bridges the gap
             '''
-            edges = [self.state_idx-1, 0]
+            edges = [self.state_idx - 1, 0]
             final_edges.extend([edges])
 
     def perform_MoveTo(self):
@@ -301,8 +301,8 @@ class PathParser(object):
 
         arc = Arc(start, radius, xaxis_rot, flag1, flag2, end)
 
-        theta = 1/num_verts
-        for i in range(num_verts+1):
+        theta = 1 / num_verts
+        for i in range(num_verts + 1):
             point = arc.point(theta * i)
             points.append(point)
 
@@ -377,7 +377,7 @@ class PathParser(object):
 
     def is_component_wrapped(self, component):
         '''then we have a wrapped component, like (a+b)'''
-        return (len(component) > 2) and (component[0]+component[-1] == '()')
+        return (len(component) > 2) and (component[0] + component[-1] == '()')
 
     def is_component_simple_negation(self, comp):
         return (len(comp) == 2) and (comp[0] == '-') and (comp[1] in self.segments)
@@ -425,11 +425,11 @@ class PathParser(object):
     def make_edges(self, intermediate_idx, line_data, offset):
         start = intermediate_idx
         end = intermediate_idx + len(line_data) + offset
-        temp_edges = [[i, i+1] for i in range(start, end)]
+        temp_edges = [[i, i + 1] for i in range(start, end)]
 
         # move current needle to last position
         if self.close_section:
-            closing_edge = [self.state_idx-1, intermediate_idx]
+            closing_edge = [self.state_idx - 1, intermediate_idx]
             temp_edges.append(closing_edge)
             self.posxy = tuple(line_data[0])
         else:
@@ -599,7 +599,7 @@ class SvProfileNode(bpy.types.Node, SverchCustomTreeNode):
                 'X': lambda coords: (0, coords[0], coords[1]),
                 'Y': lambda coords: (coords[0], 0, coords[1]),
                 'Z': lambda coords: (coords[0], coords[1], 0)
-                }.get(self.current_axis)
+            }.get(self.current_axis)
 
             vertices = list(map(axis_fill, vertices))
             full_result_verts.append(vertices)

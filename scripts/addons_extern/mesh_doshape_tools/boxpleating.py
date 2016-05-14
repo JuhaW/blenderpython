@@ -18,17 +18,17 @@ Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 END GPL LICENCE BLOCK
 '''
 
-bl_info = {  
- "name": "Boxpleating",  
- "author": "Diego Quevedo ( http://doshape.com/ )",  
- "version": (1, 0),  
- "blender": (2, 7 , 3),  
- "location": "View3D > EditMode > ToolShelf",  
- "description": "allow bisect in specific degree",  
- "warning": "",  
- "wiki_url": "",  
- "tracker_url": "",  
- "category": "Mesh"} 
+bl_info = {
+    "name": "Boxpleating",
+    "author": "Diego Quevedo ( http://doshape.com/ )",
+    "version": (1, 0),
+    "blender": (2, 7, 3),
+    "location": "View3D > EditMode > ToolShelf",
+    "description": "allow bisect in specific degree",
+    "warning": "",
+    "wiki_url": "",
+    "tracker_url": "",
+    "category": "Mesh"}
 
 
 import bpy
@@ -37,63 +37,56 @@ import mathutils
 import math
 import sys
 
- 
 
-    
 class BoxpleatingOperator(bpy.types.Operator):
     "rota y junta las caras seleccionadas"
     bl_idname = 'mesh.boxpleating'
     bl_label = 'Boxpleating'
-    bl_description  = "rota y junta las caras seleccionadas"
+    bl_description = "rota y junta las caras seleccionadas"
     bl_options = {'REGISTER', 'UNDO'}
-    
-    angle = bpy.props.FloatProperty(  
-        name="angle",  
-        default=0.0,  
+
+    angle = bpy.props.FloatProperty(
+        name="angle",
+        default=0.0,
         description="Angulo Rotacion",
-        min=-sys.float_info.max, 
+        min=-sys.float_info.max,
         max=sys.float_info.max,
         precision=2,
         subtype="ANGLE",
-        unit = "ROTATION"
+        unit="ROTATION"
     )
-        
+
     chboxaxisx = bpy.props.BoolProperty(
         name="Axis X",
-        default= True
+        default=True
     )
-    chboxaxisy  = bpy.props.BoolProperty(
+    chboxaxisy = bpy.props.BoolProperty(
         name="Axis Y",
-        default= False
+        default=False
     )
-    
-    chboxaxisz  = bpy.props.BoolProperty(
-        name="Axis z",
-        default= False
-    )
-    
 
-    
-    def main(self, context, chboxaxisx, chboxaxisy,chboxaxisz, angle):
-          
+    chboxaxisz = bpy.props.BoolProperty(
+        name="Axis z",
+        default=False
+    )
+
+    def main(self, context, chboxaxisx, chboxaxisy, chboxaxisz, angle):
+
         angulo = angle
-                
+
         RX_b = False
         RY_b = False
         RZ_b = False
 
-        
         try:
-            
+
             if chboxaxisx:
                 RX = 1
                 RX_b = True
-                
-                
+
             else:
                 RX = 0
 
-                
             if chboxaxisy:
                 RY = 1
                 RY_b = True
@@ -108,75 +101,66 @@ class BoxpleatingOperator(bpy.types.Operator):
             else:
                 RZ = 0
 
-                
-                            
             obj = bpy.context.object
             me = obj.data
             bm = bmesh.from_edit_mesh(me)
 
             faces = [c for c in bm.faces if (c.select and not c.hide)]
 
-
-            caras=[]
+            caras = []
 
             for cara in faces:
                 caras.append(cara)
                 cara.select = False
-                
+
             bpy.ops.mesh.select_all(action='DESELECT')
 
             for cara in caras:
                 cara.select = True
-                bm.faces.active= cara 
-                bpy.ops.transform.rotate(value=angulo, axis=(RX,RY,RZ), constraint_axis=(RX_b, RY_b, RZ_b), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
-                cara.select=False   
-                
+                bm.faces.active = cara
+                bpy.ops.transform.rotate(value=angulo, axis=(RX, RY, RZ), constraint_axis=(RX_b, RY_b, RZ_b), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+                cara.select = False
+
             for cara in caras:
                 cara.select = True
-                if len(cara.verts) ==3:        
-                    bm.faces.active= cara #especifico a esta cara como la cara activa
-             
-            bmesh.update_edit_mesh(me, True)                
-    
+                if len(cara.verts) == 3:
+                    bm.faces.active = cara  # especifico a esta cara como la cara activa
+
+            bmesh.update_edit_mesh(me, True)
+
         except:
-            print("parametros no validos")     
-        
-        
-        
-        
-                        
+            print("parametros no validos")
+
     @classmethod
     def poll(self, context):
         obj = context.active_object
         return all([obj is not None, obj.type == 'MESH', obj.mode == 'EDIT'])
 
     def execute(self, context):
-        
-        self.main(context, self.chboxaxisx, self.chboxaxisy,self.chboxaxisz, self.angle)
+
+        self.main(context, self.chboxaxisx, self.chboxaxisy, self.chboxaxisz, self.angle)
         return {'FINISHED'}
-    
-    
+
+
 class BoxpleatingOperatorPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_label = "BoxPleating"
-    
+
     @classmethod
     def poll(cls, context):
         return (context.mode == 'EDIT_MESH')
-    
+
     def draw(self, context):
-        
-        layout = self.layout 
+
+        layout = self.layout
         row = layout.row(align=True)
-        row.operator(BoxpleatingOperator.bl_idname) 
+        row.operator(BoxpleatingOperator.bl_idname)
 
-
-
-    
 
 def register():
     bpy.utils.register_module(__name__)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

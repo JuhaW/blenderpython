@@ -19,10 +19,12 @@ Page Up/Down
 """
 import bpy
 import threading
-from time import ctime,sleep
+from time import ctime, sleep
 
-enum_page = [( 'PAGE_UP', 'up', 'previous' ),
-            ( 'PAGE_DOWN', 'down', 'next' )]
+enum_page = [('PAGE_UP', 'up', 'previous'),
+             ('PAGE_DOWN', 'down', 'next')]
+
+
 class IMAGE_OT_page_loop(bpy.types.Operator):
     """
     上/下 一张 图片
@@ -36,39 +38,39 @@ class IMAGE_OT_page_loop(bpy.types.Operator):
     def poll(cls, context):
         space = context.space_data
         return context.area.type == 'IMAGE_EDITOR'
-        
+
     def execute(self, context):
         C = context
         D = bpy.data
-        
+
         if len(D.images) < 1:
             self.report({'INFO'}, 'image need!')
             return {'CANCELLED'}
-        
+
         dImages = D.images.values()
         current_image_index = dImages.index(context.space_data.image)
-        
-        print("current_image_index",current_image_index)
-        
+
+        print("current_image_index", current_image_index)
+
         if self.input_page == 'PAGE_UP':
-            current_image_index = current_image_index -1
+            current_image_index = current_image_index - 1
         else:
-            current_image_index = current_image_index +1
-        
-        print("current_image_index -+ ",current_image_index)
-        
+            current_image_index = current_image_index + 1
+
+        print("current_image_index -+ ", current_image_index)
+
         if current_image_index < 0:
-            current_image_index = len(dImages)-1
+            current_image_index = len(dImages) - 1
         elif current_image_index == len(dImages):
             current_image_index = 0
-        
-        print("current_image_index final ",current_image_index)
-        
+
+        print("current_image_index final ", current_image_index)
+
         context.space_data.image = dImages[current_image_index]
-        
+
         return {'FINISHED'}
 
-    
+
 def registerImageLoopHotkey(balabala):
     sleep(5)
     kc = bpy.context.window_manager.keyconfigs.default.keymaps['Image']
@@ -78,18 +80,20 @@ def registerImageLoopHotkey(balabala):
         kmi = kc.keymap_items.new('image.page_loop', "PAGE_DOWN", 'PRESS')
         kmi.properties.input_page = "PAGE_DOWN"
     # print(ctime)
-        
+
+
 def unregisterImageLoopHotkey():
     kc = bpy.context.window_manager.keyconfigs.default.keymaps['Image']
     if kc:
         if "PAGE_UP" in kc.keymap_items.keys():
-            kc.keymap_items.remove( kc.keymap_items["PAGE_UP"])
+            kc.keymap_items.remove(kc.keymap_items["PAGE_UP"])
         if "PAGE_DOWN" in kc.keymap_items.keys():
-            kc.keymap_items.remove( kc.keymap_items["PAGE_DOWN"])
-    
-def register():   
-    bpy.utils.register_class(IMAGE_OT_page_loop) 
-    
+            kc.keymap_items.remove(kc.keymap_items["PAGE_DOWN"])
+
+
+def register():
+    bpy.utils.register_class(IMAGE_OT_page_loop)
+
     # print(ctime)
     t1 = threading.Thread(target=registerImageLoopHotkey, args=("",))   # 无法启动注册，只好线程延迟
     # setDaemon(True)将线程声明为守护线程，必须在start() 方法调用之前设置，如果不设置为守护线程程序会被无限挂起。
@@ -97,16 +101,13 @@ def register():
     t1.setDaemon(True)
     t1.start()
     # t1.join()
-    
-    #registerImageLoopHotkey()
+
+    # registerImageLoopHotkey()
 
 
 def unregister():
     unregisterImageLoopHotkey()
     bpy.utils.unregister_class(IMAGE_OT_page_loop)
-    
-
-
 
 
 if __name__ == "__main__":

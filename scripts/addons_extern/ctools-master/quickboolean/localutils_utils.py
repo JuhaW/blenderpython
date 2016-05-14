@@ -176,7 +176,6 @@ def find_brackets(text, brackets=(('(', ')'), ('[', ']'), ('{', '}')),
         if not match:
             i += 1
 
-
     if old_style:
         retval = []
         for i, (t, j, u) in sorted(match_tokens.items()):
@@ -188,5 +187,5 @@ def find_brackets(text, brackets=(('(', ')'), ('[', ']'), ('{', '}')),
         retval = tuple(retval)
     else:
         retval = tuple(((i, t, j, u) if i != j else (None, t, j, u)
-                       for i, (t, j, u) in sorted(match_tokens.items())))
+                        for i, (t, j, u) in sorted(match_tokens.items())))
     return retval

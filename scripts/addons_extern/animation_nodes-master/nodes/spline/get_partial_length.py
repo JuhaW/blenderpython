@@ -2,6 +2,7 @@ import bpy
 from ... base_types.node import AnimationNode
 from . spline_evaluation_base import SplineEvaluationBase
 
+
 class GetSplineLengthNode(bpy.types.Node, AnimationNode, SplineEvaluationBase):
     bl_idname = "an_GetSplineLengthNode"
     bl_label = "Get Spline Length"
@@ -16,7 +17,7 @@ class GetSplineLengthNode(bpy.types.Node, AnimationNode, SplineEvaluationBase):
         self.outputs.new("an_FloatSocket", "Length", "length")
 
     def draw(self, layout):
-        layout.prop(self, "parameterType", text = "")
+        layout.prop(self, "parameterType", text="")
 
     def drawAdvanced(self, layout):
         col = layout.column()

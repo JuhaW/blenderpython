@@ -3,6 +3,7 @@ from bpy.props import *
 from ... tree_info import keepNodeLinks
 from ... base_types.node import AnimationNode
 
+
 class FloatClampNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_FloatClampNode"
     bl_label = "Clamp"
@@ -30,12 +31,15 @@ class FloatClampNode(bpy.types.Node, AnimationNode):
     def edit(self):
         output = self.outputs[0]
         if output.dataType == "Float":
-            if output.shouldBeIntegerSocket(): self.setOutputType("an_IntegerSocket")
+            if output.shouldBeIntegerSocket():
+                self.setOutputType("an_IntegerSocket")
         else:
-            if output.shouldBeFloatSocket(): self.setOutputType("an_FloatSocket")
+            if output.shouldBeFloatSocket():
+                self.setOutputType("an_FloatSocket")
 
     def setOutputType(self, idName):
-        if self.outputs[0].bl_idname == idName: return
+        if self.outputs[0].bl_idname == idName:
+            return
         self._setOutputType(idName)
 
     @keepNodeLinks

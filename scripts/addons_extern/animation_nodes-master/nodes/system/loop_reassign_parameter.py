@@ -3,6 +3,7 @@ from bpy.props import *
 from ... base_types.node import AnimationNode
 from ... tree_info import getNodeByIdentifier, keepNodeState
 
+
 class ReassignLoopParameterNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ReassignLoopParameterNode"
     bl_label = "Reassign Loop Parameter"
@@ -15,8 +16,8 @@ class ReassignLoopParameterNode(bpy.types.Node, AnimationNode):
             self.parameterIdName = self.linkedParameterSocket.bl_idname
             self.generateSockets()
 
-    loopInputIdentifier = StringProperty(update = identifierChanged)
-    parameterIdentifier = StringProperty(update = identifierChanged)
+    loopInputIdentifier = StringProperty(update=identifierChanged)
+    parameterIdentifier = StringProperty(update=identifierChanged)
     parameterIdName = StringProperty()
 
     def create(self):
@@ -25,16 +26,19 @@ class ReassignLoopParameterNode(bpy.types.Node, AnimationNode):
     def draw(self, layout):
         socket = self.linkedParameterSocket
         if socket:
-            layout.label("{} > {}".format(repr(socket.node.subprogramName), socket.text), icon = "GROUP_VERTEX")
+            layout.label("{} > {}".format(repr(socket.node.subprogramName), socket.text), icon="GROUP_VERTEX")
         else:
-            layout.label("Target does not exist", icon = "ERROR")
+            layout.label("Target does not exist", icon="ERROR")
 
     def edit(self):
         network = self.network
-        if network.type != "Invalid": return
-        if network.loopInAmount != 1: return
+        if network.type != "Invalid":
+            return
+        if network.loopInAmount != 1:
+            return
         loopInput = network.loopInputNode
-        if self.loopInputIdentifier == loopInput.identifier: return
+        if self.loopInputIdentifier == loopInput.identifier:
+            return
         self.loopInputIdentifier = loopInput.identifier
 
     @keepNodeState
@@ -49,14 +53,19 @@ class ReassignLoopParameterNode(bpy.types.Node, AnimationNode):
         try:
             inputNode = self.loopInputNode
             return inputNode.outputsByIdentifier[self.parameterIdentifier]
-        except: pass
+        except:
+            pass
 
     @property
     def loopInputNode(self):
-        try: return getNodeByIdentifier(self.loopInputIdentifier)
-        except: return None
+        try:
+            return getNodeByIdentifier(self.loopInputIdentifier)
+        except:
+            return None
 
     @property
     def conditionSocket(self):
-        try: return self.inputs["Condition"]
-        except: return None
+        try:
+            return self.inputs["Condition"]
+        except:
+            return None

@@ -21,10 +21,10 @@ from bpy.props import BoolProperty
 from mathutils import Matrix
 
 from sverchok.node_tree import (SverchCustomTreeNode, MatrixSocket,
-                       StringsSocket, VerticesSocket)
+                                StringsSocket, VerticesSocket)
 from sverchok.data_structure import (dataCorrect, updateNode,
-                            Matrix_generate, Vector_generate,
-                            SvGetSocketAnyType)
+                                     Matrix_generate, Vector_generate,
+                                     SvGetSocketAnyType)
 
 
 sverchok_bakery_cache = {}
@@ -128,7 +128,7 @@ class BakeryNode(bpy.types.Node, SverchCustomTreeNode):
         except:
             cache = []
         names = ['Sv_' + self.name + str(i) for i, t in enumerate(mats)]
-        #print('bakery'+str(names)+str(cache))
+        # print('bakery'+str(names)+str(cache))
 
         # delete previous objects удаляет предыдущие объекты, если есть, если надо.
         bpy.ops.object.select_all(action='DESELECT')
@@ -149,12 +149,12 @@ class BakeryNode(bpy.types.Node, SverchCustomTreeNode):
                 k = lenver
             else:
                 v = vertices[k]
-            if (len(v)-1) < fhtagn[k]:
+            if (len(v) - 1) < fhtagn[k]:
                 continue
-            elif fhtagn[k] < (len(v)-1):
-                nonneed = (len(v)-1) - fhtagn[k]
+            elif fhtagn[k] < (len(v) - 1):
+                nonneed = (len(v) - 1) - fhtagn[k]
                 for q in range(nonneed):
-                    v.pop((fhtagn[k]+1))
+                    v.pop((fhtagn[k] + 1))
             #########
             # end of solution to reduce vertices
 

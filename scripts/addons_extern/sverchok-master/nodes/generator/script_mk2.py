@@ -16,7 +16,7 @@
 #
 # END GPL LICENSE BLOCK #####
 
-# author Linus Yng, partly based on script node 
+# author Linus Yng, partly based on script node
 
 import os
 import traceback
@@ -37,7 +37,7 @@ READY_COLOR = (0, 0.8, 0.95)
 from sverchok.utils.sv_panels_tools import sv_get_local_path
 from sverchok.utils import script_importhelper
 from sverchok.node_tree import SverchCustomTreeNode
-from sverchok.data_structure import updateNode , node_id
+from sverchok.data_structure import updateNode, node_id
 
 sv_path = os.path.dirname(sv_get_local_path()[0])
 
@@ -108,8 +108,9 @@ socket_types = {
 # for number lists
 defaults = [0 for i in range(32)]
 
+
 class SvScriptNodeMK2(bpy.types.Node, SverchCustomTreeNode):
-    
+
     bl_idname = 'SvScriptNodeMK2'
     bl_label = 'Script Node 2'
     bl_icon = 'OUTLINER_OB_EMPTY'
@@ -117,9 +118,8 @@ class SvScriptNodeMK2(bpy.types.Node, SverchCustomTreeNode):
     def avail_templates(self, context):
         templates_path = os.path.join(sv_path, "node_scripts", "SN2-templates")
         items = [(t, t, "") for t in next(os.walk(templates_path))[2]]
-        items.sort(key=lambda x:x[0].upper())
+        items.sort(key=lambda x: x[0].upper())
         return items
-    
 
     files_popup = EnumProperty(
         items=avail_templates,
@@ -129,17 +129,17 @@ class SvScriptNodeMK2(bpy.types.Node, SverchCustomTreeNode):
     #  dict used for storing SvScript objects, access with self.script
     #  property
     script_objects = {}
-    
+
     n_id = StringProperty()
-    
+
     # Also used to keep track if a script is loaded.
-    script_str = StringProperty(description = "The acutal script as text")
-    script_name = StringProperty(name = "Text file", 
-                                 description = "Blender Text object containing script")
-    
+    script_str = StringProperty(description="The acutal script as text")
+    script_name = StringProperty(name="Text file",
+                                 description="Blender Text object containing script")
+
     # properties that the script can expose either in draw or as socket
     # management needs to be reviewed.
-    
+
     int_list = IntVectorProperty(
         name='int_list', description="Integer list",
         default=defaults, size=32, update=updateNode)
@@ -147,26 +147,26 @@ class SvScriptNodeMK2(bpy.types.Node, SverchCustomTreeNode):
     float_list = FloatVectorProperty(
         name='float_list', description="Float list",
         default=defaults, size=32, update=updateNode)
-    
+
     bool_list = BoolVectorProperty(
         name='bool_list', description="Boolean list",
         default=defaults, size=32, update=updateNode)
-    
+
     def enum_callback(self, context):
         script = self.script
         if hasattr(script, "enum_func"):
             return script.enum_func(context)
         else:
             return None
-        
-    generic_enum = EnumProperty(    
+
+    generic_enum = EnumProperty(
         items=enum_callback,
         name='Scripted Enum',
         description='See script for description')
-    
+
     #  better logic should be taken from old script node
     #  should support reordering and removal
-    
+
     def create_sockets(self):
         script = self.script
         if script:
@@ -174,7 +174,7 @@ class SvScriptNodeMK2(bpy.types.Node, SverchCustomTreeNode):
                 socket_types
                 stype = socket_types[args[0]]
                 name = args[1]
-                if len(args) == 2:  
+                if len(args) == 2:
                     self.inputs.new(stype, name)
                 # has default
                 elif len(args) == 3:
@@ -192,19 +192,19 @@ class SvScriptNodeMK2(bpy.types.Node, SverchCustomTreeNode):
                         self.float_list[offset] = default_value
                         socket.prop_type = "float_list"
                     socket.prop_index = offset
-                    
-            for args in script.outputs:            
+
+            for args in script.outputs:
                 if len(args) > 1 and args[1] not in self.outputs:
                     stype = socket_types[args[0]]
                     self.outputs.new(stype, args[1])
-    
+
     def clear(self):
         self.script_str = ""
         del self.script
         self.inputs.clear()
         self.outputs.clear()
         self.use_custom_color = False
-    
+
     def load(self):
         if not self.script_name in bpy.data.texts:
             self.script_name = ""
@@ -218,64 +218,62 @@ class SvScriptNodeMK2(bpy.types.Node, SverchCustomTreeNode):
             self.use_custom_color = True
             self.color = READY_COLOR
             self.create_sockets()
-    
+
     def update(self):
         if not self.script_str:
             return
-            
+
         script = self.script
-        
+
         if not script:
             self.load()
             script = self.script
             if not script:
                 return
-                    
+
         if hasattr(script, 'update'):
             script.update()
- 
-    
+
     def process(self):
         script = self.script
-        
+
         if not script:
             self.load()
             script = self.script
             if not script:
                 return
-        
+
         if hasattr(script, "process"):
             script.process()
-    
-                        
+
     def copy(self, node):
         self.n_id = ""
         node_id(self)
-                
+
     def sv_init(self, context):
         node_id(self)
         self.color = FAIL_COLOR
-    
+
     # property functions for accessing self.script
     def _set_script(self, value):
         n_id = node_id(self)
         value.node = self
         self.script_objects[n_id] = value
-        
-    def _del_script(self):       
+
+    def _del_script(self):
         n_id = node_id(self)
         if n_id in self.script_objects:
             del self.script_objects[n_id]
-    
+
     def _get_script(self):
         n_id = node_id(self)
         script = self.script_objects.get(n_id)
         if script:
-            script.node = self # paranoid update often safety setting
+            script.node = self  # paranoid update often safety setting
         return script
-        
+
     script = property(_get_script, _set_script, _del_script, "The script object for this node")
-    
+
     def draw_buttons(self, context, layout):
         col = layout.column(align=True)
         row = col.row()
@@ -293,7 +291,7 @@ class SvScriptNodeMK2(bpy.types.Node, SverchCustomTreeNode):
             row.operator("node.sverchok_text_callback", text='Clear').fn_name = 'clear'
             if hasattr(script, "draw_buttons"):
                 script.draw_buttons(context, layout)
-    
+
     def draw_label(self):
         '''
         Uses script.name as label if possible, otherwise the class name.
@@ -307,12 +305,13 @@ class SvScriptNodeMK2(bpy.types.Node, SverchCustomTreeNode):
                 return script.__class__.__name__
         else:
             return self.bl_label
-            
+
 
 def register():
-    bpy.utils.register_class(SvScriptNodeMK2)    
+    bpy.utils.register_class(SvScriptNodeMK2)
     bpy.utils.register_class(SvLoadScript)
     bpy.utils.register_class(SvDefaultScript2Template)
+
 
 def unregister():
     bpy.utils.unregister_class(SvScriptNodeMK2)

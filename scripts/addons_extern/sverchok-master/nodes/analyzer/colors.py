@@ -36,7 +36,7 @@ class SvVertexColorNode(bpy.types.Node, SverchCustomTreeNode):
     mode = EnumProperty(items=modes, default='vertices', update=updateNode)
     object_ref = StringProperty(default='', update=updateNode)
 
-    def draw_buttons(self, context,   layout):
+    def draw_buttons(self, context, layout):
         layout.prop_search(self, 'object_ref', bpy.data, 'objects')
         ob = bpy.data.objects[self.object_ref]
         if ob.type == 'MESH':
@@ -45,7 +45,7 @@ class SvVertexColorNode(bpy.types.Node, SverchCustomTreeNode):
 
     def draw_buttons_ext(self, context, layout):
         row = layout.row(align=True)
-        row.prop(self,    "clear",   text="clear unindexed")
+        row.prop(self, "clear", text="clear unindexed")
         row.prop(self, "clear_c", text="")
 
     def sv_init(self, context):
@@ -61,10 +61,10 @@ class SvVertexColorNode(bpy.types.Node, SverchCustomTreeNode):
         if self.vertex_color not in objm.vertex_colors:
             return
         ovgs = objm.vertex_colors.get(self.vertex_color)
-        Ind, Col = self.inputs     
+        Ind, Col = self.inputs
         if Col.is_linked:
             sm, colors = self.mode, Col.sv_get()[0]
-            idxs = Ind.sv_get()[0] if Ind.is_linked else [i.index for i in getattr(objm,sm)]
+            idxs = Ind.sv_get()[0] if Ind.is_linked else [i.index for i in getattr(objm, sm)]
             idxs, colors = second_as_first_cycle(idxs, colors)
             bm = bmesh.new()
             bm.from_mesh(objm)
@@ -84,22 +84,21 @@ class SvVertexColorNode(bpy.types.Node, SverchCustomTreeNode):
             bm.free()
         if self.outputs["OutColor"].is_linked:
             out = []
-            sm= self.mode
+            sm = self.mode
             bm = bmesh.new()
             bm.from_mesh(objm)
             if sm == 'vertices':
-                #output one color per vertex
+                # output one color per vertex
                 for v in bm.verts[:]:
                     c = ovgs.data[v.link_loops[0].index].color
                     out.append(list(c))
-                    
-                
+
             elif sm == 'polygons':
-                #output one color per face
+                # output one color per face
                 for f in bm.faces[:]:
                     c = ovgs.data[f.loops[0].index].color
-                    out.append(list(c))                    
-            
+                    out.append(list(c))
+
             self.outputs["OutColor"].sv_set([out])
             bm.free()
 

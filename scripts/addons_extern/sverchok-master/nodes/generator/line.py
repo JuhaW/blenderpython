@@ -33,22 +33,23 @@ def make_line(integer, step):
         step = [step]
     fullList(step, integer[0])
 
-    for i in range(integer[0]-1):
+    for i in range(integer[0] - 1):
         v = Vector(vertices[i]) + Vector((step[i], 0.0, 0.0))
         vertices.append(v[:])
 
     edges = []
-    for i in range(integer[0]-1):
-        edges.append((i, i+1))
+    for i in range(integer[0] - 1):
+        edges.append((i, i + 1))
 
     return vertices, edges
+
 
 class LineNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Line '''
     bl_idname = 'LineNode'
     bl_label = 'Line'
     bl_icon = 'OUTLINER_OB_EMPTY'
-    
+
     int_ = IntProperty(name='N Verts', description='Nº Vertices',
                        default=2, min=2,
                        options={'ANIMATABLE'}, update=updateNode)
@@ -62,7 +63,7 @@ class LineNode(bpy.types.Node, SverchCustomTreeNode):
 
         self.outputs.new('VerticesSocket', "Vertices", "Vertices")
         self.outputs.new('StringsSocket', "Edges", "Edges")
-    
+
     def draw_buttons(self, context, layout):
         pass
 
@@ -78,7 +79,7 @@ class LineNode(bpy.types.Node, SverchCustomTreeNode):
 
         params = match_long_repeat([integer, step])
         out = [a for a in (zip(*[make_line(i, s) for i, s in zip(*params)]))]
-            
+
         # outputs
         if outputs['Vertices'].is_linked:
             outputs['Vertices'].sv_set(out[0])

@@ -8,7 +8,8 @@ from ... sockets.info import toIdName, isList, toBaseIdName, toListDataType
 
 selectionTypeItems = [
     ("SINGLE", "Single", "Select only one random element from the list"),
-    ("MULTIPLE", "Multiple", "Select multiple random elements from the list") ]
+    ("MULTIPLE", "Multiple", "Select multiple random elements from the list")]
+
 
 class GetRandomListElementsNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_GetRandomListElementsNode"
@@ -21,21 +22,21 @@ class GetRandomListElementsNode(bpy.types.Node, AnimationNode):
     def selectionTypeChanged(self, context):
         self.generateSockets()
 
-    assignedType = StringProperty(update = assignedTypeChanged)
+    assignedType = StringProperty(update=assignedTypeChanged)
     listIdName = StringProperty()
 
-    selectionType = EnumProperty(name = "Select Type", default = "MULTIPLE",
-        items = selectionTypeItems, update = selectionTypeChanged)
+    selectionType = EnumProperty(name="Select Type", default="MULTIPLE",
+                                 items=selectionTypeItems, update=selectionTypeChanged)
 
-    nodeSeed = IntProperty(update = propertyChanged)
+    nodeSeed = IntProperty(update=propertyChanged)
 
     def create(self):
         self.assignedType = "Float List"
         self.randomizeNodeSeed()
 
     def draw(self, layout):
-        layout.prop(self, "selectionType", text = "")
-        layout.prop(self, "nodeSeed", text = "Node Seed")
+        layout.prop(self, "selectionType", text="")
+        layout.prop(self, "nodeSeed", text="Node Seed")
 
     def getExecutionCode(self):
         yield "random.seed(self.nodeSeed * 1245 + seed)"
@@ -55,20 +56,25 @@ class GetRandomListElementsNode(bpy.types.Node, AnimationNode):
 
     def getWantedDataType(self):
         listInput = self.inputs[1].dataOrigin
-        if listInput is not None: return listInput.dataType
+        if listInput is not None:
+            return listInput.dataType
 
         if self.selectionType == "SINGLE":
             elementOutputs = self.outputs[0].dataTargets
-            if len(elementOutputs) == 1: return toListDataType(elementOutputs[0].dataType)
+            if len(elementOutputs) == 1:
+                return toListDataType(elementOutputs[0].dataType)
         elif self.selectionType == "MULTIPLE":
             listOutputs = self.outputs[0].dataTargets
-            if len(listOutputs) == 1: return listOutputs[0].dataType
+            if len(listOutputs) == 1:
+                return listOutputs[0].dataType
 
         return self.inputs[0].dataType
 
     def assignType(self, listDataType):
-        if not isList(listDataType): return
-        if listDataType == self.assignedType: return
+        if not isList(listDataType):
+            return
+        if listDataType == self.assignedType:
+            return
         self.assignedType = listDataType
 
     @keepNodeState

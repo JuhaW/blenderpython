@@ -22,7 +22,6 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {
     "name": "node arrange",
     "author": "Juhaw, zeffii",
@@ -38,7 +37,6 @@ bl_info = {
 
 import sys
 import bpy
-
 
 
 class values():
@@ -325,7 +323,6 @@ def nodes_arrange(nodelist, level):
 
 
 def nodetree_get(mat):
-
 
     return mat.node_tree.nodes
 

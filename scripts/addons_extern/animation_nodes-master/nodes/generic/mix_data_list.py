@@ -7,12 +7,13 @@ from ... base_types.node import AnimationNode
 from ... sockets.info import toIdName, toListIdName, toListDataType
 
 nodeTypes = {
-    "Matrix" : "Mix Matrix List",
-    "Vector" : "Mix Vector List",
-    "Float" : "Mix Float List",
-    "Color" : "Mix Color List",
-    "Euler" : "Mix Euler List",
-    "Quaternion" : "Mix Quaternion List" }
+    "Matrix": "Mix Matrix List",
+    "Vector": "Mix Vector List",
+    "Float": "Mix Float List",
+    "Color": "Mix Color List",
+    "Euler": "Mix Euler List",
+    "Quaternion": "Mix Quaternion List"}
+
 
 class MixDataListNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_MixDataListNode"
@@ -20,14 +21,14 @@ class MixDataListNode(bpy.types.Node, AnimationNode):
     dynamicLabelType = "ALWAYS"
 
     onlySearchTags = True
-    searchTags = [(tag, {"dataType" : repr(type)}) for type, tag in nodeTypes.items()]
+    searchTags = [(tag, {"dataType": repr(type)}) for type, tag in nodeTypes.items()]
 
     def dataTypeChanged(self, context):
         self.recreateSockets()
 
-    dataType = StringProperty(update = dataTypeChanged)
-    repeat = BoolProperty(name = "Repeat", default = False,
-        description = "Repeat the factor for values above and below 0-1", update = executionCodeChanged)
+    dataType = StringProperty(update=dataTypeChanged)
+    repeat = BoolProperty(name="Repeat", default=False,
+                          description="Repeat the factor for values above and below 0-1", update=executionCodeChanged)
 
     def create(self):
         self.dataType = "Float"

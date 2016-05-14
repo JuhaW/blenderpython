@@ -3,6 +3,7 @@ import sys
 from .. import problems
 from .. utils.layout import writeText
 
+
 class ProblemsPanel(bpy.types.Panel):
     bl_idname = "an_problems_panel"
     bl_label = "Problems"
@@ -13,20 +14,21 @@ class ProblemsPanel(bpy.types.Panel):
     @classmethod
     def poll(cls, context):
         tree = cls.getTree()
-        if tree is None: return False
+        if tree is None:
+            return False
         return tree.bl_idname == "an_AnimationNodeTree" and len(problems.getProblems()) > 0
 
     def draw_header(self, context):
-        self.layout.label("", icon = "ERROR")
+        self.layout.label("", icon="ERROR")
 
     def draw(self, context):
         layout = self.layout
-        col = layout.column(align = True)
-        subcol = col.column(align = True)
+        col = layout.column(align=True)
+        subcol = col.column(align=True)
         subcol.scale_y = 1.5
-        subcol.operator("an.tag_retry_execution", text = "Retry", icon = "FILE_REFRESH")
+        subcol.operator("an.tag_retry_execution", text="Retry", icon="FILE_REFRESH")
         if sys.platform == "win32":
-            col.operator("wm.console_toggle", text = "Toogle Console", icon = "CONSOLE")
+            col.operator("wm.console_toggle", text="Toogle Console", icon="CONSOLE")
 
         layout.separator()
 
@@ -36,7 +38,7 @@ class ProblemsPanel(bpy.types.Panel):
 
         layout.separator()
 
-        col = layout.column(align = True)
+        col = layout.column(align=True)
         tree = self.getTree()
         lastExec = tree.lastExecutionInfo
         col.label("Last successful execution using:")
@@ -45,9 +47,9 @@ class ProblemsPanel(bpy.types.Panel):
 
         if lastExec.isDefault:
             writeText(col,
-                ("These versions are only guesses. This file has not been executed "
-                 "in a version that supports storing of version information yet."),
-                autoWidth = True)
+                      ("These versions are only guesses. This file has not been executed "
+                       "in a version that supports storing of version information yet."),
+                      autoWidth=True)
 
     @classmethod
     def getTree(cls):

@@ -27,8 +27,10 @@ from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, match_long_repeat, fullList, Matrix_generate
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata, pydata_from_bmesh
 
+
 def is_matrix(lst):
     return len(lst) == 4 and len(lst[0]) == 4
+
 
 class SvExtrudeEdgesNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Extrude edges '''
@@ -49,7 +51,7 @@ class SvExtrudeEdgesNode(bpy.types.Node, SverchCustomTreeNode):
         self.outputs.new('VerticesSocket', 'NewVertices')
         self.outputs.new('StringsSocket', 'NewEdges')
         self.outputs.new('StringsSocket', 'NewFaces')
-  
+
     def process(self):
         # inputs
         if not (self.inputs['Vertices'].is_linked):
@@ -72,9 +74,8 @@ class SvExtrudeEdgesNode(bpy.types.Node, SverchCustomTreeNode):
         result_ext_edges = []
         result_ext_faces = []
 
+        meshes = match_long_repeat([vertices_s, edges_s, matrices_s])  # , extrude_edges_s])
 
-        meshes = match_long_repeat([vertices_s, edges_s, matrices_s]) #, extrude_edges_s])
-        
         for vertices, edges, matrices in zip(*meshes):
             if len(edges[0]) == 2:
                 faces = []
@@ -83,15 +84,15 @@ class SvExtrudeEdgesNode(bpy.types.Node, SverchCustomTreeNode):
                 edges = []
             if not matrices:
                 matrices = [Matrix()]
-            
+
             bm = bmesh_from_pydata(vertices, edges, faces)
             # better to do it in separate node, not integrate by default.
-            #if extrude_edges:
+            # if extrude_edges:
             #    b_edges = []
             #    for edge in extrude_edges:
             #        b_edge = [e for e in bm.edges if set([v.index for v in e.verts]) == set(edge)]
             #        b_edges.append(b_edge[0])
-            #else:
+            # else:
             b_edges = bm.edges
 
             new_geom = bmesh.ops.extrude_edge_only(bm, edges=b_edges, use_select_history=False)['geom']
@@ -142,5 +143,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-
-

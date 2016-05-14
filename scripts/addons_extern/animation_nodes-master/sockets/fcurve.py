@@ -3,6 +3,7 @@ from mathutils import Vector
 from .. data_structures.mesh import Polygon
 from .. base_types.socket import AnimationNodeSocket
 
+
 class FCurveSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_FCurveSocket"
     bl_label = "FCurve Socket"

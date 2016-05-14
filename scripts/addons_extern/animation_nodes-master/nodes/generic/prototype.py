@@ -2,6 +2,7 @@ import bpy
 from ... base_types.node import AnimationNode
 from ... sockets.info import toIdName
 
+
 class PrototypeNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_PrototypeNode"
     bl_label = "Prototype Node"
@@ -9,14 +10,14 @@ class PrototypeNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if len(self.sockets) == 0:
-            col = layout.column(align = True)
+            col = layout.column(align=True)
             col.label("Create sockets in the")
             col.label("advanced settings")
 
     def drawAdvanced(self, layout):
-        row = layout.row(align = True)
-        self.invokeSocketTypeChooser(row, "newInput", text = "New Input")
-        self.invokeSocketTypeChooser(row, "newOutput", text = "New Output")
+        row = layout.row(align=True)
+        self.invokeSocketTypeChooser(row, "newInput", text="New Input")
+        self.invokeSocketTypeChooser(row, "newOutput", text="New Output")
 
     def newInput(self, dataType):
         socket = self.inputs.new(toIdName(dataType), dataType)

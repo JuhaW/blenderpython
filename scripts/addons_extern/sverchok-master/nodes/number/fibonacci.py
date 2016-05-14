@@ -22,19 +22,20 @@ from bpy.props import IntProperty, FloatProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, match_long_repeat
 
+
 def fibonacci(x1, x2, count, maxValue):
-    result = [x1,x2]
-    for i in range(count-2):
+    result = [x1, x2]
+    for i in range(count - 2):
         r = x1 + x2
         result.append(r)
         x1 = x2
         x2 = r
-    
+
     if maxValue:
         actualMax = max(map(abs, result))
         if actualMax == 0.0:
             return result
-        result = [x*maxValue/actualMax for x in result]
+        result = [x * maxValue / actualMax for x in result]
 
     return result
 
@@ -87,7 +88,7 @@ class SvGenFibonacci(bpy.types.Node, SverchCustomTreeNode):
         if not self.outputs['Sequence'].is_linked:
             return
 
-        parameters = match_long_repeat([x1,x2, count, maxValue])
+        parameters = match_long_repeat([x1, x2, count, maxValue])
         result = [list(fibonacci(*args)) for args in zip(*parameters)]
         self.outputs['Sequence'].sv_set(result)
 

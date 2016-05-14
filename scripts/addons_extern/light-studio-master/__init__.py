@@ -27,43 +27,47 @@ bl_info = {
     "location": "View3D -> Tools -> Light Studio",
     "warning": "This addon is still in development.",
     "wiki_url": "",
-    "category": "Lighting" }
-    
-    
-import bpy      
+    "category": "Lighting"}
+
+
+import bpy
 
 # load and reload submodules
-##################################    
-    
+##################################
+
 from . import developer_utils
 modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in locals())
 
 
-
 # register
-################################## 
+##################################
 
 import traceback
 
 from . light_operators import Blender_Light_Studio_Properties
 from . import deleteOperator
 from . import selectOperator
+
+
 def register():
-    try: bpy.utils.register_module(__name__)
-    except: traceback.print_exc()
-    bpy.types.Scene.BLStudio = bpy.props.PointerProperty(name="Blender Light Studio Properties", type = Blender_Light_Studio_Properties)
-    bpy.types.Object.protected = bpy.props.BoolProperty(name = 'protected', default = False)
-    deleteOperator.replace_shortkey( 'object.delete', deleteOperator.DeleteOperator.bl_idname )
-    selectOperator.replace_shortkey( 'view3d.select', selectOperator.SelectionOperator.bl_idname )
-    
+    try:
+        bpy.utils.register_module(__name__)
+    except:
+        traceback.print_exc()
+    bpy.types.Scene.BLStudio = bpy.props.PointerProperty(name="Blender Light Studio Properties", type=Blender_Light_Studio_Properties)
+    bpy.types.Object.protected = bpy.props.BoolProperty(name='protected', default=False)
+    deleteOperator.replace_shortkey('object.delete', deleteOperator.DeleteOperator.bl_idname)
+    selectOperator.replace_shortkey('view3d.select', selectOperator.SelectionOperator.bl_idname)
+
     print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
-    
+
 
 def unregister():
     deleteOperator.replace_shortkey(deleteOperator.DeleteOperator.bl_idname, 'object.delete')
     selectOperator.replace_shortkey(selectOperator.SelectionOperator.bl_idname, 'view3d.select')
-    try: bpy.utils.unregister_module(__name__)
-    except: traceback.print_exc()
-    
+    try:
+        bpy.utils.unregister_module(__name__)
+    except:
+        traceback.print_exc()
+
     print("Unregistered {}".format(bl_info["name"]))
-    

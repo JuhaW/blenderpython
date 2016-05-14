@@ -20,10 +20,10 @@ def sv_main(verts=[], num_verts=20, new_divisions=20):
         ['s', 'num_verts', num_verts],
         ['s', 'new_divisions', new_divisions]]
 
-    out_sockets = [ 
-        ['v', 'Vecs', []], 
+    out_sockets = [
+        ['v', 'Vecs', []],
         ['s', 'Edges', []],
-        ['v', 'Vecs ctrl', []], 
+        ['v', 'Vecs ctrl', []],
         ['s', 'Edges ctrl', []],
         ['v', 'Vecs norm', []],
         ['s', 'Edges norm', []]
@@ -34,13 +34,12 @@ def sv_main(verts=[], num_verts=20, new_divisions=20):
 
     # defend against div by zero
     new_divisions = max(new_divisions, 1)
-    
-    # while developing, it can be useful to uncomment this 
+
+    # while developing, it can be useful to uncomment this
     if 'get_length' in globals():
         import imp
         imp.reload(spline_utils)
         from spline_utils import get_length, get_verts_n_edges
-
 
     f = list(map(Vector, verts[0]))
     knot1, ctrl_1, ctrl_2, knot2 = f
@@ -49,20 +48,19 @@ def sv_main(verts=[], num_verts=20, new_divisions=20):
 
     tlen, lengths = get_length(farc_verts)
     # print(tlen)
-    segment_width = tlen/new_divisions
+    segment_width = tlen / new_divisions
     print('new div length = ', segment_width)
     k = get_verts_n_edges(farc_verts, lengths, segment_width)
 
     arc_verts = [v[:] for v in arc_verts]
-    arc_edges = [(n, n+1) for n in range(len(arc_verts)-1)]
-    
+    arc_edges = [(n, n + 1) for n in range(len(arc_verts) - 1)]
+
     norm_verts = [v[:] for v in k]
-    norm_edges = [(n, n+1) for n in range(len(k)-1)]
-    
+    norm_edges = [(n, n + 1) for n in range(len(k) - 1)]
 
     controls = verts[0]
-    control_edges = [[(0,1),(2,3)]]
-    
+    control_edges = [[(0, 1), (2, 3)]]
+
     out_sockets[0][2] = [arc_verts]
     out_sockets[1][2] = [arc_edges]
 
@@ -72,7 +70,4 @@ def sv_main(verts=[], num_verts=20, new_divisions=20):
     out_sockets[4][2] = [norm_verts]
     out_sockets[5][2] = [norm_edges]
 
-
     return in_sockets, out_sockets
-
-

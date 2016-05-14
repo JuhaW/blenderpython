@@ -223,7 +223,7 @@ def _intersect_edit(context, verts, edges, faces, invert):
 
     cut_verts = [bm.verts.new(obimat * co) for co in verts]
     cut_edges = [bm.edges.new((cut_verts[v1], cut_verts[v2]))
-                for v1, v2, in edges]
+                 for v1, v2, in edges]
     cut_faces = [bm.faces.new([cut_verts[v] for v in f]) for f in faces]
     cutting_elems = cut_verts + cut_edges + cut_faces
     cutting_elems = set(cutting_elems)
@@ -512,6 +512,7 @@ class GrabCursor:
     modal operator 実行中に他の modal operator を呼ぶと、それが終了した際に
     Continuous Grab が無効化される為。
     """
+
     def __init__(self):
         self._grab_cursor_wrapping = [None, None]
         """:type: list[int]"""
@@ -1177,7 +1178,6 @@ class QuickBooleanPanel(bpy.types.Panel):
     @classmethod
     def draw_property(cls, src, src_properties, attr, layout, text=None,
                       skip_hidden=True, row=False, **kwargs):
-
         """オペレータ実行時のプロパティ表示を再現する。
         :type attr: str
         :type layout: bpy.types.UILayout

@@ -18,7 +18,6 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 import bpy
 
 
@@ -32,28 +31,28 @@ class WKST_CopyDupli(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
 
-        if context.mode == 'OBJECT': 
-                 
+        if context.mode == 'OBJECT':
+
             layout.operator("object.duplicate_move", "Duplicate", icon="MOD_ARRAY")
-            layout.operator("object.duplicate_move_linked", "Duplicate Linked")     
+            layout.operator("object.duplicate_move_linked", "Duplicate Linked")
 
             layout.separator()
 
             layout.operator("mft.radialclone", text="Radial Clone", icon="FILE_REFRESH")
-            layout.operator("object.simplearewo",text="Replicator", icon="NEXT_KEYFRAME") 
-            layout.operator("object.cursor_array", text="Copy 2 Cursor", icon="NEXT_KEYFRAME") 
-            
-            layout.separator()        
-            
-            layout.operator("object.copy_selected_modifiers", text="Copy Modifier", icon="PASTEFLIPDOWN")
-            layout.operator("switch.mod_display","Copy Modifier Display", icon="PASTEFLIPDOWN")  
+            layout.operator("object.simplearewo", text="Replicator", icon="NEXT_KEYFRAME")
+            layout.operator("object.cursor_array", text="Copy 2 Cursor", icon="NEXT_KEYFRAME")
 
-        elif context.mode == 'EDIT_MESH': 
-        
+            layout.separator()
+
+            layout.operator("object.copy_selected_modifiers", text="Copy Modifier", icon="PASTEFLIPDOWN")
+            layout.operator("switch.mod_display", "Copy Modifier Display", icon="PASTEFLIPDOWN")
+
+        elif context.mode == 'EDIT_MESH':
+
             layout.operator("mesh.duplicate_move", "Duplicate", icon="MOD_ARRAY")
 
-            layout.operator("object.cursor_array", text="Copy 2 Cursor", icon="FORCE_FORCE") 
-  
+            layout.operator("object.cursor_array", text="Copy 2 Cursor", icon="FORCE_FORCE")
+
 
 class WKST_CopyLink(bpy.types.Menu):
     """Instance Tools"""
@@ -63,9 +62,8 @@ class WKST_CopyLink(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
 
-        layout.operator("object.make_links_data","Set Instance", icon="LINKED").type='OBDATA'
-        layout.operator("object.makesingle","Clear Instance", icon="UNLINKED")
-
+        layout.operator("object.make_links_data", "Set Instance", icon="LINKED").type = 'OBDATA'
+        layout.operator("object.makesingle", "Clear Instance", icon="UNLINKED")
 
 
 class WKST_CopyLink_Data(bpy.types.Menu):
@@ -76,8 +74,8 @@ class WKST_CopyLink_Data(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
 
-        layout.operator("object.select_linked", text="Select Linked", icon="RESTRICT_SELECT_OFF")   
-        layout.operator_menu_enum("object.make_links_data", "type"," Make Links Data",  icon="CONSTRAINT")            
+        layout.operator("object.select_linked", text="Select Linked", icon="RESTRICT_SELECT_OFF")
+        layout.operator_menu_enum("object.make_links_data", "type", " Make Links Data", icon="CONSTRAINT")
 
 
 #######  Operator  ##################
@@ -93,13 +91,11 @@ class MakeSingle(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
 class Copy2Cursor(bpy.types.Operator):
     """Copy selected object to cursor direction"""
     bl_idname = "object.cursor_array"
     bl_label = "Copy 2 Cursor"
     bl_options = {'REGISTER', 'UNDO'}
-
 
     total = bpy.props.IntProperty(name="Steps", default=2, min=1, max=100)
 
@@ -118,7 +114,6 @@ class Copy2Cursor(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
 ###### Register #######################
 
 def register():
@@ -127,6 +122,7 @@ def register():
     bpy.utils.register_class(WKST_CopyDupli)
     bpy.utils.register_class(WKST_CopyLink)
     bpy.utils.register_class(WKST_CopyLink_Data)
+
 
 def unregister():
     bpy.utils.unregister_class(MakeSingle)

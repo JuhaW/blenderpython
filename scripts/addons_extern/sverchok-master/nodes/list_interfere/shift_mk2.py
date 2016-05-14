@@ -21,7 +21,7 @@ from bpy.props import BoolProperty, IntProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, StringsSocket
 from sverchok.data_structure import (updateNode, changable_sockets,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 import numpy as np
 
 
@@ -60,15 +60,15 @@ class ShiftNodeMK2(bpy.types.Node, SverchCustomTreeNode):
     def process(self):
         if not self.outputs["data"].is_linked:
             return
-            
+
         data = self.inputs['data'].sv_get()
         number = self.inputs["shift"].sv_get()[0][0]
         # numpy case:
         dat = np.array(data)
         # levelsOfList replacement:
-        depth = dat.ndim #len(np.shape(dat))-1
+        depth = dat.ndim  # len(np.shape(dat))-1
         # roll with enclose (we need case of declose and vectorization)
-        output = np.roll(dat,number,axis=min(self.level,depth)).tolist()
+        output = np.roll(dat, number, axis=min(self.level, depth)).tolist()
 
         self.outputs['data'].sv_set(output)
 

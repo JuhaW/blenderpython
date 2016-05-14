@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class ObjectListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_ObjectListSocket"
     bl_label = "Object List Socket"

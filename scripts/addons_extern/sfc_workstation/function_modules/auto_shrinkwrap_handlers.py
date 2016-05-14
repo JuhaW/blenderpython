@@ -22,17 +22,20 @@ import bpy
 
 addon = bpy.context.user_preferences.addons[__package__.split(".")[0]]
 
+
 def load_pre(scene):
     # Disable automatic shrinkwrapping before saving.
     props = addon.preferences.surface_constraint
     if props.auto_shrinkwrap_is_enabled:
         props.auto_shrinkwrap_is_enabled = False
 
+
 def save_post(scene):
     # If automatic shrinkwrapping was enabled prior to saving, reactivate it.
     props = addon.preferences.surface_constraint
     if props.auto_shrinkwrap_is_enabled_pre_save:
         props.auto_shrinkwrap_is_enabled = True
+
 
 def save_pre(scene):
     # Disable automatic shrinkwrapping before saving.
@@ -41,6 +44,7 @@ def save_pre(scene):
         props.auto_shrinkwrap_is_enabled
     if props.auto_shrinkwrap_is_enabled_pre_save:
         props.auto_shrinkwrap_is_enabled = False
+
 
 def scene_update_pre(scene):
     props = addon.preferences.surface_constraint
@@ -74,14 +78,14 @@ def scene_update_pre(scene):
     ):
         # Attempt to find the referenced mesh object.
         object_uid_map = {
-            str(object_.as_pointer()) : object_ for object_ in bpy.data.objects
+            str(object_.as_pointer()): object_ for object_ in bpy.data.objects
         }
         if props.mesh_object_uid in object_uid_map:
             referenced_object = object_uid_map[props.mesh_object_uid]
 
             # Attempt to remove the referenced modifier.
             modifier_uid_map = {
-                str(modifier.as_pointer()) : modifier
+                str(modifier.as_pointer()): modifier
                 for modifier in referenced_object.modifiers
             }
             if props.modifier_uid in modifier_uid_map:
@@ -118,7 +122,7 @@ def scene_update_pre(scene):
         # unique identifiers and the active object's modifiers.
         if props.modifier_uid:
             modifier_uid_map = {
-                str(modifier.as_pointer()) : modifier
+                str(modifier.as_pointer()): modifier
                 for modifier in active_object.modifiers
             }
 
@@ -131,7 +135,7 @@ def scene_update_pre(scene):
         ):
             # Add a shrinkwrap modifier to the active mesh object.
             modifier = active_object.modifiers.new(
-                name = "Surface Constraint Preview", type = 'SHRINKWRAP'
+                name="Surface Constraint Preview", type='SHRINKWRAP'
             )
             modifier.offset = offset
             modifier.show_expanded = False
@@ -145,7 +149,7 @@ def scene_update_pre(scene):
 
             # Move the modifier to the top of the stack.
             while active_object.modifiers[0] != modifier:
-                bpy.ops.object.modifier_move_up(modifier = modifier.name)
+                bpy.ops.object.modifier_move_up(modifier=modifier.name)
 
             # Record a unique identifier for the modifier.
             props.modifier_uid = str(modifier.as_pointer())
@@ -176,7 +180,7 @@ def scene_update_pre(scene):
 
             # Move the modifier to the top of the stack.
             while active_object.modifiers[0] != modifier:
-                bpy.ops.object.modifier_move_up(modifier = modifier.name)
+                bpy.ops.object.modifier_move_up(modifier=modifier.name)
 
         # Determine if the modifier needs to be applied.
 
@@ -193,9 +197,9 @@ def scene_update_pre(scene):
             str(active_operator.as_pointer()) != props.operator_uid
         ):
             # Apply the modifier.
-            bpy.ops.object.mode_set(mode = 'OBJECT')
-            bpy.ops.object.modifier_apply(modifier = modifier.name)
-            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.modifier_apply(modifier=modifier.name)
+            bpy.ops.object.mode_set(mode='EDIT')
 
             # Record a unique identifier for the most recently finished
             # operator.

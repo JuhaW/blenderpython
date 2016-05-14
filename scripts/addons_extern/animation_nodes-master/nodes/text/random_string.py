@@ -4,11 +4,12 @@ from bpy.props import *
 from ... events import propertyChanged
 from ... base_types.node import AnimationNode
 
+
 class RandomStringNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_RandomStringNode"
     bl_label = "Random Text"
 
-    nodeSeed = IntProperty(name = "Node Seed", update = propertyChanged)
+    nodeSeed = IntProperty(name="Node Seed", update=propertyChanged)
 
     def create(self):
         self.inputs.new("an_IntegerSocket", "Seed", "seed")

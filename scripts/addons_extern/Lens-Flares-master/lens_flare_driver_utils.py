@@ -21,46 +21,59 @@ Created by Jacques Lucke
 import bpy
 from lens_flare_utils import *
 
-def newDriver(object, dataPath, index = -1, type = "SCRIPTED"):
-	fcurve = object.driver_add(dataPath, index)
-	driver = fcurve.driver
-	driver.type = type
-	return driver
-def createCopyValueDriver(fromObject, fromPath, toObject, toPath):
-	driver = newDriver(toObject, toPath)
-	linkFloatPropertyToDriver(driver, "var", fromObject, fromPath)
-	driver.expression = "var"
-def setWorldTransformAsProperty(object, propertyName, transformChannel):
-	setCustomProperty(object, propertyName)
-	driver = newDriver(object, getDataPath(propertyName), type = "SUM")
-	linkTransformChannelToDriver(driver, "var", object, transformChannel)
-def setTransformDifferenceAsProperty(target, relative, propertyName, transformChannel, normalized = False):
-	setCustomProperty(target, propertyName)
-	driver = newDriver(target, getDataPath(propertyName))
-	linkTransformChannelToDriver(driver, "a", relative, transformChannel)
-	linkTransformChannelToDriver(driver, "b", target, transformChannel)
-	if normalized:
-		linkDistanceToDriver(driver, "dis", target, relative)
-		driver.expression = "(a-b)/(dis+0.0000001)"
-	else: driver.expression = "a-b"
 
-def linkFloatPropertyToDriver(driver, name, id, dataPath, idType = "OBJECT"):
-	driverVariable = driver.variables.new()
-	driverVariable.name = name
-	driverVariable.type = "SINGLE_PROP"
-	driverVariable.targets[0].id_type = idType
-	driverVariable.targets[0].id = id
-	driverVariable.targets[0].data_path = dataPath
-def linkTransformChannelToDriver(driver, name, id, transformType, space = "WORLD_SPACE"):
-	driverVariable = driver.variables.new()
-	driverVariable.name = name
-	driverVariable.type = "TRANSFORMS"
-	driverVariable.targets[0].id = id
-	driverVariable.targets[0].transform_type = transformType
-	driverVariable.targets[0].transform_space = space
+def newDriver(object, dataPath, index=-1, type="SCRIPTED"):
+    fcurve = object.driver_add(dataPath, index)
+    driver = fcurve.driver
+    driver.type = type
+    return driver
+
+
+def createCopyValueDriver(fromObject, fromPath, toObject, toPath):
+    driver = newDriver(toObject, toPath)
+    linkFloatPropertyToDriver(driver, "var", fromObject, fromPath)
+    driver.expression = "var"
+
+
+def setWorldTransformAsProperty(object, propertyName, transformChannel):
+    setCustomProperty(object, propertyName)
+    driver = newDriver(object, getDataPath(propertyName), type="SUM")
+    linkTransformChannelToDriver(driver, "var", object, transformChannel)
+
+
+def setTransformDifferenceAsProperty(target, relative, propertyName, transformChannel, normalized=False):
+    setCustomProperty(target, propertyName)
+    driver = newDriver(target, getDataPath(propertyName))
+    linkTransformChannelToDriver(driver, "a", relative, transformChannel)
+    linkTransformChannelToDriver(driver, "b", target, transformChannel)
+    if normalized:
+        linkDistanceToDriver(driver, "dis", target, relative)
+        driver.expression = "(a-b)/(dis+0.0000001)"
+    else:
+        driver.expression = "a-b"
+
+
+def linkFloatPropertyToDriver(driver, name, id, dataPath, idType="OBJECT"):
+    driverVariable = driver.variables.new()
+    driverVariable.name = name
+    driverVariable.type = "SINGLE_PROP"
+    driverVariable.targets[0].id_type = idType
+    driverVariable.targets[0].id = id
+    driverVariable.targets[0].data_path = dataPath
+
+
+def linkTransformChannelToDriver(driver, name, id, transformType, space="WORLD_SPACE"):
+    driverVariable = driver.variables.new()
+    driverVariable.name = name
+    driverVariable.type = "TRANSFORMS"
+    driverVariable.targets[0].id = id
+    driverVariable.targets[0].transform_type = transformType
+    driverVariable.targets[0].transform_space = space
+
+
 def linkDistanceToDriver(driver, name, object1, object2):
-	driverVariable = driver.variables.new()
-	driverVariable.name = name
-	driverVariable.type = "LOC_DIFF"
-	driverVariable.targets[0].id = object1
-	driverVariable.targets[1].id = object2
+    driverVariable = driver.variables.new()
+    driverVariable.name = name
+    driverVariable.type = "LOC_DIFF"
+    driverVariable.targets[0].id = object1
+    driverVariable.targets[1].id = object2

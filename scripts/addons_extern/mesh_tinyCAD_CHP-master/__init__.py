@@ -13,7 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""  
+"""
 
 
 bl_info = {
@@ -38,6 +38,7 @@ from mathutils.geometry import intersect_point_line as PtLineIntersect
 
 OWN_PRECISION = 1.0e-5
 
+
 def point_on_edge(p, edge):
     '''
     # modified from cad_module
@@ -46,7 +47,7 @@ def point_on_edge(p, edge):
     < returns:  True / False if a point happens to lie on an edge
     '''
     pt, _percent = PtLineIntersect(p, edge.verts[0].co, edge.verts[1].co)
-    on_line = (pt-p).length < OWN_PRECISION
+    on_line = (pt - p).length < OWN_PRECISION
     return on_line and (0.0 <= _percent <= 1.0)
 
 
@@ -61,7 +62,7 @@ def operate(context, bm, selected):
     if (not isect) or ((isect[0] - isect[1]).length >= 1.0e-5):
         print('these edges do not intersect')
         return
-    else:    
+    else:
         print('definite intersection found')
 
     p0 = isect[0]
@@ -73,10 +74,10 @@ def operate(context, bm, selected):
     elif (p1 or p2):
         print('point lies on 1 edge')
         return
-    
+
     # reaches this point if the intersection doesnt lie on either edge
     def get_vertex(edge):
-        IDX_BOOL = bool((edge.verts[0].co-p0).length > (edge.verts[1].co-p0).length)
+        IDX_BOOL = bool((edge.verts[0].co - p0).length > (edge.verts[1].co - p0).length)
         return edge.verts[IDX_BOOL]
 
     bm.select_mode = {'VERT'}
@@ -88,11 +89,8 @@ def operate(context, bm, selected):
     edge_2.select = False
     v1.select = True
 
-    
     return True
 
-        
-    
 
 class TCChamferPlus(bpy.types.Operator):
     bl_idname = "tinycad.chamfer_plus"
@@ -109,16 +107,16 @@ class TCChamferPlus(bpy.types.Operator):
         obj = bpy.context.edit_object
         me = obj.data
         bm = bmesh.from_edit_mesh(me)
-        
+
         selected = [e for e in bm.edges if e.select and (not e.hide)]
 
         if len(selected) == 2:
             if operate(context, bm, selected):
                 bmesh.update_edit_mesh(me, True)
-                
+
                 # bpy.ops.mesh.bevel('INVOKE_DEFAULT', vertex_only=True)
                 bpy.ops.mesh.bevel('INVOKE_REGION_WIN', vertex_only=True)
-                
+
                 return {"FINISHED"}
 
         bmesh.update_edit_mesh(me, True)
@@ -136,6 +134,7 @@ def register():
         bpy.types.VIEW3D_MT_edit_mesh_tinycad.append(menu_func)
     except:
         print('mesh_tinyCAD menu not found, cannot add')
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

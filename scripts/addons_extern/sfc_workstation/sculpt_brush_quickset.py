@@ -57,12 +57,13 @@ import bpy
 import bgl
 import blf
 
+
 def draw_callback_px(self, context):
     # circle graphic, text, and slider
     unify_settings = bpy.context.tool_settings.unified_paint_settings
     strength = unify_settings.strength if self.uni_str else self.brush.strength
     size = unify_settings.size if self.uni_size else self.brush.size
-    
+
     if self.graphic:
         bgl.glEnable(bgl.GL_BLEND)
         bgl.glColor4f(self.brushcolor.r, self.brushcolor.g, self.brushcolor.b, strength * 0.25)
@@ -72,7 +73,7 @@ def draw_callback_px(self, context):
         bgl.glEnd()
         bgl.glDisable(bgl.GL_BLEND)
         bgl.glColor4f(0.0, 0.0, 0.0, 1.0)
-    
+
     if self.text != 'NONE' and self.doingstr:
         if self.text == 'MEDIUM':
             fontsize = 11
@@ -80,44 +81,44 @@ def draw_callback_px(self, context):
             fontsize = 22
         else:
             fontsize = 8
-        
+
         font_id = 0
         blf.size(font_id, fontsize, 72)
         blf.shadow(font_id, 0, 0.0, 0.0, 0.0, 1.0)
         blf.enable(font_id, blf.SHADOW)
-        
+
         if strength < 0.001:
             text = "0.001"
         else:
             text = str(strength)[0:5]
         textsize = blf.dimensions(font_id, text)
-        
+
         xpos = self.start[0] + self.offset[0]
         ypos = self.start[1] + self.offset[1]
-        
+
         bgl.glEnable(bgl.GL_BLEND)
         bgl.glColor4f(self.backcolor.r, self.backcolor.g, self.backcolor.b, 0.5)
-        
+
         bgl.glBegin(bgl.GL_POLYGON)
         for x, y in self.rectpoints:
             bgl.glVertex2i(int(textsize[0] * x) + xpos, int(textsize[1] * y) + ypos)
         bgl.glEnd()
-        
+
         bgl.glDisable(bgl.GL_BLEND)
         bgl.glColor4f(0.0, 0.0, 0.0, 1.0)
-        
+
         blf.position(font_id, xpos, ypos, 0)
         blf.draw(font_id, text)
-        
+
         blf.disable(font_id, blf.SHADOW)
-    
+
     if self.slider != 'NONE' and self.doingstr:
         bgl.glEnable(bgl.GL_BLEND)
         bgl.glColor4f(self.backcolor.r, self.backcolor.g, self.backcolor.b, 0.5)
-        
+
         xpos = self.start[0] + self.offset[0] - self.sliderwidth + (32 if self.text == 'MEDIUM' else 64 if self.text == 'LARGE' else 23)
-        ypos = self.start[1] + self.offset[1] - self.sliderheight# + (1 if self.slider != 'SMALL' else 0)
-        
+        ypos = self.start[1] + self.offset[1] - self.sliderheight  # + (1 if self.slider != 'SMALL' else 0)
+
         if strength < 1.0:
             sliderscale = strength
         elif strength > 5.0:
@@ -126,21 +127,22 @@ def draw_callback_px(self, context):
             sliderscale = strength / 5
         else:
             sliderscale = strength / 2
-        
+
         bgl.glBegin(bgl.GL_POLYGON)
         for x, y in self.rectpoints:
             bgl.glVertex2i(int(self.sliderwidth * x) + xpos, int(self.sliderheight * y) + ypos - 1)
         bgl.glEnd()
-        
+
         bgl.glColor4f(self.frontcolor.r, self.frontcolor.g, self.frontcolor.b, 0.8)
-        
+
         bgl.glBegin(bgl.GL_POLYGON)
         for x, y in self.rectpoints:
             bgl.glVertex2i(int(self.sliderwidth * x * sliderscale) + xpos, int(self.sliderheight * y * 0.75) + ypos)
         bgl.glEnd()
-        
+
         bgl.glDisable(bgl.GL_BLEND)
         bgl.glColor4f(0.0, 0.0, 0.0, 1.0)
+
 
 def applyChanges(self):
     unify_settings = bpy.context.tool_settings.unified_paint_settings
@@ -148,17 +150,17 @@ def applyChanges(self):
     if self.doingstr:
         if self.uni_str:
             modrate = self.strmod * 0.0025
-            newval  = unify_settings.strength + modrate
+            newval = unify_settings.strength + modrate
             if 10.0 > newval > 0.0:
                 unify_settings.strength = newval
                 self.strmod_total += modrate
         else:
             modrate = self.strmod * 0.0025
-            newval  = self.brush.strength + modrate
+            newval = self.brush.strength + modrate
             if 10.0 > newval > 0.0:
                 self.brush.strength = newval
                 self.strmod_total += modrate
-    
+
     if self.doingrad:
         if self.uni_size:
             newval = unify_settings.size + self.radmod
@@ -171,15 +173,16 @@ def applyChanges(self):
                 self.brush.size = newval
                 self.radmod_total += self.radmod
 
+
 def revertChanges(self):
     unify_settings = bpy.context.tool_settings.unified_paint_settings
-    
+
     if self.doingstr:
         if self.uni_str:
             unify_settings.strength -= self.strmod_total
         else:
             self.brush.strength -= self.strmod_total
-    
+
     if self.doingrad:
         if self.uni_size:
             unify_settings.size -= self.radmod_total
@@ -187,80 +190,77 @@ def revertChanges(self):
             self.brush.size -= self.radmod_total
 
 
-
 class BrushValuesQuickSet(bpy.types.Operator):
     """Brush QuickSet / Rightmouse: UP-Down = Size; Left-Right = Strenght"""
     bl_idname = "brush.modal_quickset"
     bl_label = "Brush QuickSet"
-    
+
     axisaffect = bpy.props.EnumProperty(
-        name        = "Axis Order",
-        description = "Which axis affects which brush property",
-        items       = [('YSTR', 'X: Radius, Y: Strength', ''),
-                       ('YRAD', 'Y: Radius, X: Strength', '')],
-        default     = 'YRAD')
-    
+        name="Axis Order",
+        description="Which axis affects which brush property",
+        items=[('YSTR', 'X: Radius, Y: Strength', ''),
+               ('YRAD', 'Y: Radius, X: Strength', '')],
+        default='YRAD')
+
     keyaction = bpy.props.EnumProperty(
-        name        = "Key Action",
-        description = "Hotkey second press or initial release behaviour",
-        items       = [('IGNORE', 'Key Ignored', ''),
-                       ('CANCEL', 'Key Cancels', ''),
-                       ('FINISH', 'Key Applies', '')],
-        default     = 'FINISH')
-    
+        name="Key Action",
+        description="Hotkey second press or initial release behaviour",
+        items=[('IGNORE', 'Key Ignored', ''),
+               ('CANCEL', 'Key Cancels', ''),
+               ('FINISH', 'Key Applies', '')],
+        default='FINISH')
+
     text = bpy.props.EnumProperty(
-        name        = "Numeric",
-        description = "Text display; only shows when strength adjusted",
-        items       = [('NONE', 'None', ''),
-                       ('LARGE', 'Large', ''),
-                       ('MEDIUM', 'Medium', ''),
-                       ('SMALL', 'Small', '')],
-        default     = 'MEDIUM')
-    
+        name="Numeric",
+        description="Text display; only shows when strength adjusted",
+        items=[('NONE', 'None', ''),
+               ('LARGE', 'Large', ''),
+               ('MEDIUM', 'Medium', ''),
+               ('SMALL', 'Small', '')],
+        default='MEDIUM')
+
     slider = bpy.props.EnumProperty(
-        name        = "Slider",
-        description = "Slider display for strength visualization",
-        items       = [('NONE', 'None', ''),
-                       ('LARGE', 'Large', ''),
-                       ('MEDIUM', 'Medium', ''),
-                       ('SMALL', 'Small', '')],
-        default     = 'MEDIUM')
-    
+        name="Slider",
+        description="Slider display for strength visualization",
+        items=[('NONE', 'None', ''),
+               ('LARGE', 'Large', ''),
+               ('MEDIUM', 'Medium', ''),
+               ('SMALL', 'Small', '')],
+        default='MEDIUM')
+
     deadzone = bpy.props.IntProperty(
-        name        = "Pixel Deadzone",
-        description = "Screen distance after which movement has effect",
-        default     = 16,
-        min         = 0)
-    
+        name="Pixel Deadzone",
+        description="Screen distance after which movement has effect",
+        default=16,
+        min=0)
+
     sens = bpy.props.FloatProperty(
-        name        = "Sensitivity",
-        description = "Multiplier to affect brush settings by",
-        default     = 1.0,
-        min         = 0.1,
-        max         = 2.0)
-    
+        name="Sensitivity",
+        description="Multiplier to affect brush settings by",
+        default=1.0,
+        min=0.1,
+        max=2.0)
+
     graphic = bpy.props.BoolProperty(
-        name        = "Graphic",
-        description = "Transparent circle to visually represent strength",
-        default     = True)
-    
+        name="Graphic",
+        description="Transparent circle to visually represent strength",
+        default=True)
+
     lock = bpy.props.BoolProperty(
-        name        = "Lock Axis",
-        description = "When adjusting one value, lock the other",
-        default     = True)
-    
-    
+        name="Lock Axis",
+        description="When adjusting one value, lock the other",
+        default=True)
+
     @classmethod
     def poll(cls, context):
         return (context.area.type == 'VIEW_3D'
                 and context.mode in {'SCULPT', 'PAINT_WEIGHT', 'PAINT_VERTEX', 'PAINT_TEXTURE'})
-    
-    
+
     def modal(self, context, event):
         sens = (self.sens * 0.5) if event.shift else (self.sens)
         self.cur = (event.mouse_region_x, event.mouse_region_y)
         diff = (self.cur[0] - self.prev[0], self.cur[1] - self.prev[1])
-        
+
         if self.axisaffect == 'YRAD':
             # Y corresponds to radius
             if not self.doingrad:
@@ -305,7 +305,7 @@ class BrushValuesQuickSet(bpy.types.Operator):
                     self.strmod = diff[1] * sens
             else:
                 self.strmod = diff[1] * sens
-        
+
         context.area.tag_redraw()
         if event.type in {'LEFTMOUSE'} or self.action == 1:
             # apply changes, finished
@@ -340,8 +340,7 @@ class BrushValuesQuickSet(bpy.types.Operator):
             self.prev = self.cur
             return {'RUNNING_MODAL'}
         return {'CANCELLED'}
-    
-    
+
     def invoke(self, context, event):
         if bpy.context.mode == 'SCULPT':
             self.brush = context.tool_settings.sculpt.brush
@@ -354,7 +353,7 @@ class BrushValuesQuickSet(bpy.types.Operator):
         else:
             self.report({'WARNING'}, "Mode invalid - only paint or sculpt")
             return {'CANCELLED'}
-        
+
         self.hotkey = event.type
         if self.hotkey == 'NONE':
             self.keyaction = 'IGNORE'
@@ -362,7 +361,7 @@ class BrushValuesQuickSet(bpy.types.Operator):
         unify_settings = context.tool_settings.unified_paint_settings
         self.uni_size = unify_settings.use_unified_size
         self.uni_str = unify_settings.use_unified_strength
-        
+
         self.doingrad = False
         self.doingstr = False
         self.start = (event.mouse_region_x, event.mouse_region_y)
@@ -371,42 +370,42 @@ class BrushValuesQuickSet(bpy.types.Operator):
         self.strmod_total = 0.0
         self.radmod = 0.0
         self.strmod = 0.0
-        
+
         # self._handle = context.space_data.draw_handler_add(draw_callback_px, (self, context), 'WINDOW', 'POST_PIXEL')
 
         if self.graphic:
             if not hasattr(self, '_handle'):
                 self._handle = context.space_data.draw_handler_add(draw_callback_px, (self, context), 'WINDOW', 'POST_PIXEL')
-                
+
             self.brushcolor = self.brush.cursor_color_add
-            if self.brush.sculpt_capabilities.has_secondary_color and self.brush.direction in {'SUBTRACT','DEEPEN','MAGNIFY','PEAKS','CONTRAST','DEFLATE'}:
+            if self.brush.sculpt_capabilities.has_secondary_color and self.brush.direction in {'SUBTRACT', 'DEEPEN', 'MAGNIFY', 'PEAKS', 'CONTRAST', 'DEFLATE'}:
                 self.brushcolor = self.brush.cursor_color_subtract
-            
+
             self.circlepoints = (
-                (0.000000, 1.000000), (-0.195090, 0.980785), (-0.382683, 0.923880), (-0.555570, 0.831470), 
-                (-0.707107, 0.707107), (-0.831470, 0.555570), (-0.923880, 0.382683), (-0.980785, 0.195090), 
-                (-1.000000, 0.000000), (-0.980785, -0.195090), (-0.923880, -0.382683), (-0.831470, -0.555570), 
-                (-0.707107, -0.707107), (-0.555570, -0.831470), (-0.382683, -0.923880), (-0.195090, -0.980785), 
-                (0.000000, -1.000000), (0.195091, -0.980785), (0.382684, -0.923879), (0.555571, -0.831469), 
-                (0.707107, -0.707106), (0.831470, -0.555570), (0.923880, -0.382683), (0.980785, -0.195089), 
-                (1.000000, 0.000001), (0.980785, 0.195091), (0.923879, 0.382684), (0.831469, 0.555571), 
+                (0.000000, 1.000000), (-0.195090, 0.980785), (-0.382683, 0.923880), (-0.555570, 0.831470),
+                (-0.707107, 0.707107), (-0.831470, 0.555570), (-0.923880, 0.382683), (-0.980785, 0.195090),
+                (-1.000000, 0.000000), (-0.980785, -0.195090), (-0.923880, -0.382683), (-0.831470, -0.555570),
+                (-0.707107, -0.707107), (-0.555570, -0.831470), (-0.382683, -0.923880), (-0.195090, -0.980785),
+                (0.000000, -1.000000), (0.195091, -0.980785), (0.382684, -0.923879), (0.555571, -0.831469),
+                (0.707107, -0.707106), (0.831470, -0.555570), (0.923880, -0.382683), (0.980785, -0.195089),
+                (1.000000, 0.000001), (0.980785, 0.195091), (0.923879, 0.382684), (0.831469, 0.555571),
                 (0.707106, 0.707108), (0.555569, 0.831470), (0.382682, 0.923880), (0.195089, 0.980786))
-        
+
         if self.text != 'NONE':
             if not hasattr(self, '_handle'):
                 self._handle = context.space_data.draw_handler_add(draw_callback_px, (self, context), 'WINDOW', 'POST_PIXEL')
-                
+
             self.offset = (30, -37)
-            
+
             self.backcolor = Color((1.0, 1.0, 1.0)) - context.user_preferences.themes['Default'].view_3d.space.text_hi
-            
+
             self.rectpoints = (
                 (0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
-        
+
         if self.slider != 'NONE':
             if not hasattr(self, '_handle'):
                 self._handle = context.space_data.draw_handler_add(draw_callback_px, (self, context), 'WINDOW', 'POST_PIXEL')
-                
+
             if self.slider == 'LARGE':
                 self.sliderheight = 16
                 self.sliderwidth = 180
@@ -416,19 +415,19 @@ class BrushValuesQuickSet(bpy.types.Operator):
             else:
                 self.sliderheight = 3
                 self.sliderwidth = 60
-            
+
             if not hasattr(self, 'offset'):
                 self.offset = (30, -37)
-            
+
             if not hasattr(self, 'backcolor'):
                 self.backcolor = Color((1.0, 1.0, 1.0)) - context.user_preferences.themes['Default'].view_3d.space.text_hi
-            
+
             self.frontcolor = context.user_preferences.themes['Default'].view_3d.space.text_hi
-            
+
             if not hasattr(self, 'rectpoints'):
                 self.rectpoints = (
                     (0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
-        
+
         # enter modal operation
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
@@ -436,7 +435,7 @@ class BrushValuesQuickSet(bpy.types.Operator):
 
 def register():
     bpy.utils.register_class(BrushValuesQuickSet)
-    
+
     cfg = bpy.context.window_manager.keyconfigs.addon
     if not cfg.keymaps.__contains__('Sculpt'):
         cfg.keymaps.new('Sculpt', space_type='EMPTY', region_type='WINDOW')
@@ -446,7 +445,7 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(BrushValuesQuickSet)
-    
+
     cfg = bpy.context.window_manager.keyconfigs.addon
     if cfg.keymaps.__contains__('Sculpt'):
         for kmi in cfg.keymaps['Sculpt'].keymap_items:

@@ -5,16 +5,15 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 #
-
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 
 bl_info = {
@@ -31,7 +30,7 @@ bl_info = {
 
 import bpy
 from bpy.props import FloatVectorProperty, IntProperty,\
-                        FloatProperty, BoolProperty
+    FloatProperty, BoolProperty
 #from add_utils import AddObjectHelper, add_object_data
 from bpy_extras.object_utils import AddObjectHelper, object_data_add
 #from bpy_extras.object_utils import AddObjectHelper
@@ -41,6 +40,7 @@ from math import *
 
 class Heli(object):
     "définition d'une helice"
+
     def __init__(self, params):
 
         self.pal = params[0]  # nb_blades     nb de pales
@@ -72,16 +72,16 @@ class Heli(object):
         xmax = 0.0
         rgood = 10.0
         dx = 0.2
-        while  fabs(rmax - rgood) > 1e-10:
+        while fabs(rmax - rgood) > 1e-10:
             dx = dx * 0.1
             rgood = rmax
             rmax = 0.0
             x = xmax
             while x < self.lar:
                 r = ((self.kar * x) / (1.0 + self.kar * x))\
-                        * (self.kav * (self.lar - x) /\
-                        (1.0 + self.kav * (self.lar - x)))
-                if  r >= rmax:
+                    * (self.kav * (self.lar - x) /
+                       (1.0 + self.kav * (self.lar - x)))
+                if r >= rmax:
                     rmax = r
                     xmax = x - dx
                 else:
@@ -135,7 +135,7 @@ def addpoint(hel, vert_list, na, j, alfa1, alfa2, epe, ray, max, min, i):
     y = ray * sin(alfa) + vn.y * epais
     z = ray * (alfa - hel.dec) * tan(hel.inc + atan(hel.stp / ray))\
         + vn.z * epais
-    vert_list.extend((Vector((x,y,z)),))
+    vert_list.extend((Vector((x, y, z)),))
     nbpoints = len(vert_list) - 1
     if i == 0:
         if vert_list[nbpoints][2] > max:
@@ -173,7 +173,7 @@ def makePropeller(params):
     na = hel.nbr
     ndt = int(hel.nbr / 5)
 
-    if  ndt < 5:
+    if ndt < 5:
         ndt = 5
 
     zpmax = -1e40
@@ -197,8 +197,8 @@ def makePropeller(params):
             alfa2 = r[2]
             j = na
             while j > 0:
-                r = addpoint(hel, vert_list, na, j, alfa1, alfa2,\
-                    - epe, ray, zpmax, zpmin, i)
+                r = addpoint(hel, vert_list, na, j, alfa1, alfa2,
+                             - epe, ray, zpmax, zpmin, i)
                 vert_list = r[0]
                 zpmin = r[1]
                 zpmax = r[2]
@@ -206,8 +206,8 @@ def makePropeller(params):
 
             j = 0
             while j <= na:
-                r = addpoint(hel, vert_list, na, j, alfa1, alfa2,\
-                    epe, ray, zpmax, zpmin, i)
+                r = addpoint(hel, vert_list, na, j, alfa1, alfa2,
+                             epe, ray, zpmax, zpmin, i)
                 vert_list = r[0]
                 zpmin = r[1]
                 zpmax = r[2]
@@ -224,10 +224,10 @@ def makePropeller(params):
         j = 0
         while j < hel.nbr:
 
-            p1 = i +     (j + 1) * (2 * na + 1)
+            p1 = i + (j + 1) * (2 * na + 1)
             p2 = i + 1 + (j + 1) * (2 * na + 1)
-            p3 = i + 1 +  j      * (2 * na + 1)
-            p4 = i +      j      * (2 * na + 1)
+            p3 = i + 1 + j * (2 * na + 1)
+            p4 = i + j * (2 * na + 1)
             face_list.extend(((p1, p2, p3, p4),))
 
             j = j + 1
@@ -238,19 +238,19 @@ def makePropeller(params):
         j = 0
         while j < hel.nbr:
 
-            p1 = i +     (j + 1) * (2 * na + 1)
+            p1 = i + (j + 1) * (2 * na + 1)
             p2 = i + 1 + (j + 1) * (2 * na + 1)
-            p3 = i + 1 +       j * (2 * na + 1)
-            p4 = i +           j * (2 * na + 1)
+            p3 = i + 1 + j * (2 * na + 1)
+            p4 = i + j * (2 * na + 1)
             face_list.extend(((p1, p2, p3, p4),))
 
             j = j + 1
         i = i + 1
 
-   #debut ectremite de palle
+   # debut ectremite de palle
    # triangle bord attaque
     hnbr = (hel.nbr) * (2 * na + 1)
-   #on ajoute les point du bout a la liste des points
+   # on ajoute les point du bout a la liste des points
     nbext = len(vert_list)
     i = 0
     while i < 2 * na:
@@ -283,12 +283,12 @@ def makePropeller(params):
         face_list.extend(((p1, p2, p3, p4),))
 
         i = i + 1
-  #fin extremite de pale
+  # fin extremite de pale
   # findefinition des faces
   # fin maillage d'une pale
 
-  #maillage conge
-  #definition vertices
+  # maillage conge
+  # definition vertices
 
     nbdf = int(na / 5)
     if nbdf < 5:
@@ -331,8 +331,8 @@ def makePropeller(params):
             beta = j * (pi / 2) / ndt
 
             vtem3 = vnorm.copy() * (hel.rac * sin(beta)) + vtang.copy()\
-               * hel.rac * cos(beta)
-            
+                * hel.rac * cos(beta)
+
             vert_list.extend(((center + vtem3),))
             nbpoints = len(vert_list) - 1
 
@@ -341,8 +341,8 @@ def makePropeller(params):
                 yy = vert_list[nbpoints][1]
                 zz = vert_list[nbpoints][2]
                 correction = sqrt(xx * xx + yy * yy)\
-                    / radius(zz, 0.5 * (zpmin + zpmax), \
-                    (hel.rap - hel.rac), zpmin - zpmax, hel.gfm)
+                    / radius(zz, 0.5 * (zpmin + zpmax),
+                             (hel.rap - hel.rac), zpmin - zpmax, hel.gfm)
                 correction = 1 / correction
 
             k = correction + j * (1 - correction) / (ndt - 1)
@@ -357,13 +357,13 @@ def makePropeller(params):
 
         i = i + 1  # B1
 
-  #fin definition vertices
-  #definition des faces
+  # fin definition vertices
+  # definition des faces
     j = 0
     while j < 2 * na:
-        p4 =        j + 1
-        p3 =        j
-        p2 = orig + j +     (ndt - 1) * (j + 1)
+        p4 = j + 1
+        p3 = j
+        p2 = orig + j + (ndt - 1) * (j + 1)
         p1 = orig + j + 1 + (ndt - 1) * (j + 2)
         face_list.extend(((p1, p2, p3, p4),))
         j = j + 1
@@ -371,7 +371,7 @@ def makePropeller(params):
     j = 2 * na
     while j < nbdf + 2 * na:
 
-        p1 = orig + j +     (ndt - 1) * (j + 1)
+        p1 = orig + j + (ndt - 1) * (j + 1)
         p2 = 0
         p3 = 0
         p4 = orig + j + 1 + (ndt - 1) * (j + 2)
@@ -384,19 +384,19 @@ def makePropeller(params):
         while j < 2 * na + nbdf:
 
             p1 = orig + i + 1 + (j + 1) * (ndt)
-            p2 = orig + i +     (j + 1) * (ndt)
-            p3 = orig + i +           j * (ndt)
-            p4 = orig + i + 1 +       j * (ndt)
+            p2 = orig + i + (j + 1) * (ndt)
+            p3 = orig + i + j * (ndt)
+            p4 = orig + i + 1 + j * (ndt)
 
             face_list.extend(((p1, p2, p3, p4),))
             j = j + 1
 
         i = i + 1
 
-  #fin definition des faces congé
-  #fin maillage conge
+  # fin definition des faces congé
+  # fin maillage conge
 
-  #copie des pales
+  # copie des pales
     npnts = len(vert_list)
     ntri = len(face_list)
 
@@ -424,7 +424,7 @@ def makePropeller(params):
 
         pale = pale + 1
 
-#fin copie des pales
+# fin copie des pales
 
 # moyeu
 # vertices moyeu
@@ -438,8 +438,8 @@ def makePropeller(params):
     i = 0
     while i <= nbc:
         zz = zmin + (zmax - zmin) * i / nbc
-        ray = radius(zz, 0.5 * (zpmin + zpmax), (hel.rap - hel.rac),\
-            zpmin - zpmax, hel.gfm)
+        ray = radius(zz, 0.5 * (zpmin + zpmax), (hel.rap - hel.rac),
+                     zpmin - zpmax, hel.gfm)
 
         j = 0
         while j < nbg:
@@ -447,7 +447,7 @@ def makePropeller(params):
             x = ray * sin(alfa)
             y = ray * cos(alfa)
             z = zz
-            vert_list.extend((Vector((x,y,z)),))
+            vert_list.extend((Vector((x, y, z)),))
             j = j + 1
 
         i = i + 1
@@ -460,20 +460,20 @@ def makePropeller(params):
 
         j = 0
         while j < nbg:
-            p1 = npnts +  i      * nbg + (boucle(nbg, j))
+            p1 = npnts + i * nbg + (boucle(nbg, j))
             p2 = npnts + (i + 1) * nbg + (boucle(nbg, j))
             p3 = npnts + (i + 1) * nbg + (boucle(nbg, j + 1))
-            p4 = npnts +  i      * nbg + (boucle(nbg, j + 1))
+            p4 = npnts + i * nbg + (boucle(nbg, j + 1))
             face_list.extend(((p1, p2, p3, p4),))
             j = j + 1
 
         i = i + 1
 
-  #fin faces moyeu
-  #fin moyeu
+  # fin faces moyeu
+  # fin moyeu
 
-  #alesage
-  #vertex alesage
+  # alesage
+  # vertex alesage
     ray = hel.ral
     npnts = len(vert_list)
     rgex1a = npnts
@@ -488,32 +488,32 @@ def makePropeller(params):
             x = ray * sin(alfa)
             y = ray * cos(alfa)
             z = zz
-            vert_list.extend((Vector((x,y,z)),))
+            vert_list.extend((Vector((x, y, z)),))
             j = j + 1
 
         i = i + 1
 
     rgex2a = len(vert_list) - nbg
-  #fin vertex alesage
+  # fin vertex alesage
 
-  #faces alesage
+  # faces alesage
     i = 0
     while i < nbc:
         j = 0
         while j < nbg:
 
-            p1 = npnts +  i      * (nbg) + (boucle(nbg, j + 1))
+            p1 = npnts + i * (nbg) + (boucle(nbg, j + 1))
             p2 = npnts + (i + 1) * (nbg) + (boucle(nbg, j + 1))
-            p3 = npnts + (i + 1) * (nbg) + (boucle(nbg, j    ))
-            p4 = npnts +  i      * (nbg) + (boucle(nbg, j    ))
+            p3 = npnts + (i + 1) * (nbg) + (boucle(nbg, j))
+            p4 = npnts + i * (nbg) + (boucle(nbg, j))
             face_list.extend(((p1, p2, p3, p4),))
             j = j + 1
 
         i = i + 1
 
-  #fin faces alesage
+  # fin faces alesage
 
-  #fin alesage
+  # fin alesage
 
   # extremite 1
     rgex1a_r = len(vert_list)
@@ -531,8 +531,8 @@ def makePropeller(params):
     j = 0
     while j < nbg:
 
-        p1 = rgex1a_r + boucle(nbg,     j)
-        p2 = rgex1m_r + boucle(nbg,     j)
+        p1 = rgex1a_r + boucle(nbg, j)
+        p2 = rgex1m_r + boucle(nbg, j)
         p3 = rgex1m_r + boucle(nbg, 1 + j)
         p4 = rgex1a_r + boucle(nbg, 1 + j)
         face_list.extend(((p1, p2, p3, p4),))
@@ -556,25 +556,24 @@ def makePropeller(params):
     j = 0
     while j < nbg:
 
-        p4 = rgex2a_r + boucle(nbg,     j)
-        p3 = rgex2m_r + boucle(nbg,     j)
+        p4 = rgex2a_r + boucle(nbg, j)
+        p3 = rgex2m_r + boucle(nbg, j)
         p2 = rgex2m_r + boucle(nbg, 1 + j)
         p1 = rgex2a_r + boucle(nbg, 1 + j)
         face_list.extend(((p1, p2, p3, p4),))
         j = j + 1
 
   # fin extremite 2
-    return  vert_list, face_list
-
+    return vert_list, face_list
 
 
 def add_propeller_object(self, context):
 
-    params = [self.nb_blades, self.thi_mesh, self.coef_ba, self.coef_bf, \
-        self.devers, self.step, self.hub_contour, self.blade_width, \
-        self.incidence, self.angulae_lag, self.blade_radius, self.cut_rad,\
-        self.bl_root_rad, self.boring_rad, self.blade_thick, \
-        self.round_root, self.extra_hub]
+    params = [self.nb_blades, self.thi_mesh, self.coef_ba, self.coef_bf,
+              self.devers, self.step, self.hub_contour, self.blade_width,
+              self.incidence, self.angulae_lag, self.blade_radius, self.cut_rad,
+              self.bl_root_rad, self.boring_rad, self.blade_thick,
+              self.round_root, self.extra_hub]
     verts, faces = makePropeller(params)
     mesh_data = bpy.data.meshes.new(name="Propeller")
     mesh_data.from_pydata(verts, [], faces)
@@ -592,73 +591,73 @@ class OBJECT_OT_add_propeller(bpy.types.Operator, AddObjectHelper):
     scale = 1.0
 
     nb_blades = IntProperty(name="Number of blades", default=4,
-                       min=1, max=100,
-                       description="Number of blades")
+                            min=1, max=100,
+                            description="Number of blades")
 
     thi_mesh = IntProperty(name="Refinement of the mesh", default=30,
-                       min=2, max=200,
-                       description="Give greater finer")
+                           min=2, max=200,
+                           description="Give greater finer")
 
     coef_ba = FloatProperty(name="Aspect ratio 1", default=6.0,
-                       min=1.0, max=10000.0,
-                       description="Aspect ratio")
+                            min=1.0, max=10000.0,
+                            description="Aspect ratio")
 
     coef_bf = FloatProperty(name="Aspect ratio 2", default=200.0,
-                       min=1.0, max=10000.0,
-                       description="Aspect ratio")
+                            min=1.0, max=10000.0,
+                            description="Aspect ratio")
 
     devers = FloatProperty(name="Devers", default=0.5,
-                       min=-10.0, max=10.0,
-                       description="Devers of the blade")
+                           min=-10.0, max=10.0,
+                           description="Devers of the blade")
 
     step = FloatProperty(name="Pitch", default=0.3,
-                       min=-10.0, max=10.0,
-                       description="Propeller pitch")
+                         min=-10.0, max=10.0,
+                         description="Propeller pitch")
 
     hub_contour = FloatProperty(name="Contour", default=1.8,
-                       min=1.0, max=1000.0,
-                       description="Shapely of hub")
+                                min=1.0, max=1000.0,
+                                description="Shapely of hub")
 
     blade_width = FloatProperty(name="Width", default=90.0,
-                       min=1.0, max=1000.0,
-                       description="Width of the blade in degrees")
+                                min=1.0, max=1000.0,
+                                description="Width of the blade in degrees")
 
     incidence = FloatProperty(name="Incidence", default=15.0,
-                       min=-20.0, max=20.0,
-                       description="Angle of incidence in degrees")
+                              min=-20.0, max=20.0,
+                              description="Angle of incidence in degrees")
 
     angulae_lag = FloatProperty(name="Lag", default=30.0,
-                       min=-1000.0, max=1000.0,
-                       description="Lag compensator in degrees")
+                                min=-1000.0, max=1000.0,
+                                description="Lag compensator in degrees")
 
     blade_radius = FloatProperty(name="Blade radius", default=1.0 * scale,
-                       min=0.0, max=1000.0,
-                       description="Length of a full blade")
+                                 min=0.0, max=1000.0,
+                                 description="Length of a full blade")
 
     cut_rad = FloatProperty(name="End Cut", default=0.002 * scale,
-                       min=0.0, max=1000.0,
-                       description="Very small for a full blade")
+                            min=0.0, max=1000.0,
+                            description="Very small for a full blade")
 
     bl_root_rad = FloatProperty(name="Hub radius", default=0.3 * scale,
-                       min=0.0, max=1000.0,
-                       description="Determine the hub radius")
+                                min=0.0, max=1000.0,
+                                description="Determine the hub radius")
 
     boring_rad = FloatProperty(name="Boring radius", default=0.17 * scale,
-                       min=0.0, max=1000.0,
-                       description="Half the diameter of the boring")
+                               min=0.0, max=1000.0,
+                               description="Half the diameter of the boring")
 
     blade_thick = FloatProperty(name="Blade thickness",
-                       default=0.05 * scale,
-                       min=0.0, max=1000.0,
-                       description="Determine the blade thickness")
+                                default=0.05 * scale,
+                                min=0.0, max=1000.0,
+                                description="Determine the blade thickness")
 
     round_root = FloatProperty(name="Rounding", default=0.04 * scale,
-                       min=0.0, max=1000.0,
-                       description="Radius of the rounding of the blade root")
+                               min=0.0, max=1000.0,
+                               description="Radius of the rounding of the blade root")
 
     extra_hub = FloatProperty(name="Overtaking", default=0.05 * scale,
-                        min=0.0, max=1000.0,
-                        description="Increase the length of the hub")
+                              min=0.0, max=1000.0,
+                              description="Increase the length of the hub")
 
     def execute(self, context):
         add_propeller_object(self, context)
@@ -667,7 +666,7 @@ class OBJECT_OT_add_propeller(bpy.types.Operator, AddObjectHelper):
 
 def menu_func(self, context):
     self.layout.operator(OBJECT_OT_add_propeller.bl_idname,
-                        text="Propeller", icon="PLUGIN")
+                         text="Propeller", icon="PLUGIN")
 
 
 def register():

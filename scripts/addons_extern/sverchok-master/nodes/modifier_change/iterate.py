@@ -42,7 +42,7 @@ def iterate_matrices(matrices, vertices, edges, faces, count, offset, r=0):
 
     x = 0
     for matrix in matrices:
-        new_vertices, new_edges, new_faces = iterate(matrices, matrix, vertices, edges, faces, count, offset+x, r)
+        new_vertices, new_edges, new_faces = iterate(matrices, matrix, vertices, edges, faces, count, offset + x, r)
         x += len(new_vertices)
         result_vertices.extend(new_vertices)
         result_edges.extend(new_edges)
@@ -58,16 +58,16 @@ def iterate(matrices, matrix, vertices, edges, faces, count, offset, r=0):
     if count == 0:
         return result_vertices, result_edges, result_faces
 
-    new_vertices = [matrix*v for v in vertices]
-    new_edges = [(v1+offset+r, v2+offset+r) for v1, v2 in edges]
-    new_faces = [[v+offset+r for v in face] for face in faces]
+    new_vertices = [matrix * v for v in vertices]
+    new_edges = [(v1 + offset + r, v2 + offset + r) for v1, v2 in edges]
+    new_faces = [[v + offset + r for v in face] for face in faces]
 
     result_vertices.extend(new_vertices)
     result_edges.extend(new_edges)
     result_faces.extend(new_faces)
 
     n = len(new_vertices)
-    rest_vertices, rest_edges, rest_faces = iterate_matrices(matrices, new_vertices, edges, faces, count-1, offset, r+n)
+    rest_vertices, rest_edges, rest_faces = iterate_matrices(matrices, new_vertices, edges, faces, count - 1, offset, r + n)
 
     result_vertices.extend(rest_vertices)
     result_edges.extend(rest_edges)
@@ -77,11 +77,11 @@ def iterate(matrices, matrix, vertices, edges, faces, count, offset, r=0):
 
 
 def shift_edges(edges, offset):
-    return [(v1+offset, v2+offset) for (v1, v2) in edges]
+    return [(v1 + offset, v2 + offset) for (v1, v2) in edges]
 
 
 def shift_faces(faces, offset):
-    return [[v+offset for v in face] for face in faces]
+    return [[v + offset for v in face] for face in faces]
 
 
 def calc_matrix_powers(matrices, count):
@@ -93,7 +93,7 @@ def calc_matrix_powers(matrices, count):
     result = []
     result.extend(matrices)
     for m in matrices:
-        result.extend([m*n for n in calc_matrix_powers(matrices, count-1)])
+        result.extend([m * n for n in calc_matrix_powers(matrices, count - 1)])
 
     return result
 

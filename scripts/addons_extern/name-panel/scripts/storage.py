@@ -18,316 +18,318 @@
 # ##### END GPL LICENSE BLOCK #####
 
 # batch
+
+
 class batch:
-  '''
-    Contains Classes;
-      menu
-      curves
-
-    Contains Lists;
-      objects
-      groups
-      actions
-      greasePencils
-      pencilLayers
-      constraints
-      modifiers
-      cameras
-      meshes
-      lamps
-      lattices
-      metaballs
-      speakers
-      armatures
-      boneGroups
-      bones
-      boneConstraints
-      vertexGroups
-      shapekeys
-      uvs
-      vertexColors
-      materials
-      textures
-      particleSystems
-      particleSettings
-      scenes
-      renderLayers
-      worlds
-      libraries
-      images
-      masks
-      sequences
-      movie clips
-      sounds
-      screens
-      keying sets
-      palettes
-      brushes
-      linestyles
-      nodes
-      node labels
-      node groups
-      texts
-  '''
-
-  # classes
-
-  # menu
-  class menu:
     '''
+      Contains Classes;
+        menu
+        curves
+
       Contains Lists;
         objects
-        modifiers
+        groups
+        actions
+        greasePencils
+        pencilLayers
         constraints
+        modifiers
+        cameras
+        meshes
+        lamps
+        lattices
+        metaballs
+        speakers
+        armatures
+        boneGroups
+        bones
+        boneConstraints
+        vertexGroups
+        shapekeys
+        uvs
+        vertexColors
+        materials
+        textures
+        particleSystems
+        particleSettings
+        scenes
+        renderLayers
+        worlds
+        libraries
+        images
+        masks
+        sequences
+        movie clips
+        sounds
+        screens
+        keying sets
+        palettes
+        brushes
+        linestyles
+        nodes
+        node labels
+        node groups
+        texts
     '''
-    # object
-    objects = [
-      ('ALL', 'All Objects', '', 'OBJECT_DATA', 0),
-      ('MESH', 'Mesh', '', 'OUTLINER_OB_MESH', 1),
-      ('CURVE', 'Curve', '', 'OUTLINER_OB_CURVE', 2),
-      ('SURFACE', 'Surface', '', 'OUTLINER_OB_SURFACE', 3),
-      ('META', 'Meta', '', 'OUTLINER_OB_META', 4),
-      ('FONT', 'Text', '', 'OUTLINER_OB_FONT', 5),
-      ('ARMATURE', 'Armature', '', 'OUTLINER_OB_ARMATURE', 6),
-      ('LATTICE', 'Lattice', '', 'OUTLINER_OB_LATTICE', 7),
-      ('EMPTY', 'Empty', '', 'OUTLINER_OB_EMPTY', 8),
-      ('SPEAKER', 'Speaker', '', 'OUTLINER_OB_SPEAKER', 9),
-      ('CAMERA', 'Camera', '', 'OUTLINER_OB_CAMERA', 10),
-      ('LAMP', 'Lamp', '', 'OUTLINER_OB_LAMP', 11)
-    ]
 
-    # constraint
-    constraints = [
-      ('ALL', 'All Constraints', '', 'CONSTRAINT', 0),
+    # classes
 
-      # motion tracking
-      ('CAMERA_SOLVER', 'Camera Solver', '', 'CONSTRAINT_DATA', 1),
-      ('FOLLOW_TRACK', 'Follow Track', '', 'CONSTRAINT_DATA', 2),
-      ('OBJECT_SOLVER', 'Object Solver', '', 'CONSTRAINT_DATA', 3),
+    # menu
+    class menu:
+        '''
+          Contains Lists;
+            objects
+            modifiers
+            constraints
+        '''
+        # object
+        objects = [
+            ('ALL', 'All Objects', '', 'OBJECT_DATA', 0),
+            ('MESH', 'Mesh', '', 'OUTLINER_OB_MESH', 1),
+            ('CURVE', 'Curve', '', 'OUTLINER_OB_CURVE', 2),
+            ('SURFACE', 'Surface', '', 'OUTLINER_OB_SURFACE', 3),
+            ('META', 'Meta', '', 'OUTLINER_OB_META', 4),
+            ('FONT', 'Text', '', 'OUTLINER_OB_FONT', 5),
+            ('ARMATURE', 'Armature', '', 'OUTLINER_OB_ARMATURE', 6),
+            ('LATTICE', 'Lattice', '', 'OUTLINER_OB_LATTICE', 7),
+            ('EMPTY', 'Empty', '', 'OUTLINER_OB_EMPTY', 8),
+            ('SPEAKER', 'Speaker', '', 'OUTLINER_OB_SPEAKER', 9),
+            ('CAMERA', 'Camera', '', 'OUTLINER_OB_CAMERA', 10),
+            ('LAMP', 'Lamp', '', 'OUTLINER_OB_LAMP', 11)
+        ]
 
-      # transform
-      ('COPY_LOCATION', 'Copy Location', '', 'CONSTRAINT_DATA', 4),
-      ('COPY_ROTATION', 'Copy Rotation', '', 'CONSTRAINT_DATA', 5),
-      ('COPY_SCALE', 'Copy Scale', '', 'CONSTRAINT_DATA', 6),
-      ('COPY_TRANSFORMS', 'Copy Transforms', '', 'CONSTRAINT_DATA', 7),
-      ('LIMIT_DISTANCE', 'Limit Distance', '', 'CONSTRAINT_DATA', 8),
-      ('LIMIT_LOCATION', 'Limit Location', '', 'CONSTRAINT_DATA', 9),
-      ('LIMIT_ROTATION', 'Limit Rotation', '', 'CONSTRAINT_DATA', 10),
-      ('LIMIT_SCALE', 'Limit Scale', '', 'CONSTRAINT_DATA', 11),
-      ('MAINTAIN_VOLUME', 'Maintain Volume', '', 'CONSTRAINT_DATA', 12),
-      ('TRANSFORM', 'Transformation', '', 'CONSTRAINT_DATA', 13),
+        # constraint
+        constraints = [
+            ('ALL', 'All Constraints', '', 'CONSTRAINT', 0),
 
-      # tracking
-      ('CLAMP_TO', 'Clamp To', '', 'CONSTRAINT_DATA', 14),
-      ('DAMPED_TRACK', 'Damped Track', '', 'CONSTRAINT_DATA', 15),
-      ('IK', 'Inverse Kinematics', '', 'CONSTRAINT_DATA', 16),
-      ('LOCKED_TRACK', 'Locked Track', '', 'CONSTRAINT_DATA', 17),
-      ('SPLINE_IK', 'Spline IK', '', 'CONSTRAINT_DATA', 18),
-      ('STRETCH_TO', 'Stretch To', '', 'CONSTRAINT_DATA', 19),
-      ('TRACK_TO', 'Track To', '', 'CONSTRAINT_DATA', 20),
+            # motion tracking
+            ('CAMERA_SOLVER', 'Camera Solver', '', 'CONSTRAINT_DATA', 1),
+            ('FOLLOW_TRACK', 'Follow Track', '', 'CONSTRAINT_DATA', 2),
+            ('OBJECT_SOLVER', 'Object Solver', '', 'CONSTRAINT_DATA', 3),
 
-      # relationship
-      ('ACTION', 'Action', '', 'CONSTRAINT_DATA', 21),
-      ('CHILD_OF', 'Child Of', '', 'CONSTRAINT_DATA', 22),
-      ('FLOOR', 'Floor', '', 'CONSTRAINT_DATA', 23),
-      ('FOLLOW_PATH', 'Follow Path', '', 'CONSTRAINT_DATA', 24),
-      ('PIVOT', 'Pivot', '', 'CONSTRAINT_DATA', 25),
-      ('RIGID_BODY_JOINT', 'Rigid Body Joint', '', 'CONSTRAINT_DATA', 26),
-      ('SHRINKWRAP', 'Shrinkwrap', '', 'CONSTRAINT_DATA', 27)
-    ]
+            # transform
+            ('COPY_LOCATION', 'Copy Location', '', 'CONSTRAINT_DATA', 4),
+            ('COPY_ROTATION', 'Copy Rotation', '', 'CONSTRAINT_DATA', 5),
+            ('COPY_SCALE', 'Copy Scale', '', 'CONSTRAINT_DATA', 6),
+            ('COPY_TRANSFORMS', 'Copy Transforms', '', 'CONSTRAINT_DATA', 7),
+            ('LIMIT_DISTANCE', 'Limit Distance', '', 'CONSTRAINT_DATA', 8),
+            ('LIMIT_LOCATION', 'Limit Location', '', 'CONSTRAINT_DATA', 9),
+            ('LIMIT_ROTATION', 'Limit Rotation', '', 'CONSTRAINT_DATA', 10),
+            ('LIMIT_SCALE', 'Limit Scale', '', 'CONSTRAINT_DATA', 11),
+            ('MAINTAIN_VOLUME', 'Maintain Volume', '', 'CONSTRAINT_DATA', 12),
+            ('TRANSFORM', 'Transformation', '', 'CONSTRAINT_DATA', 13),
 
-    # modifier
-    modifiers = [
-      ('ALL', 'All Modifiers', '', 'MODIFIER', 0),
+            # tracking
+            ('CLAMP_TO', 'Clamp To', '', 'CONSTRAINT_DATA', 14),
+            ('DAMPED_TRACK', 'Damped Track', '', 'CONSTRAINT_DATA', 15),
+            ('IK', 'Inverse Kinematics', '', 'CONSTRAINT_DATA', 16),
+            ('LOCKED_TRACK', 'Locked Track', '', 'CONSTRAINT_DATA', 17),
+            ('SPLINE_IK', 'Spline IK', '', 'CONSTRAINT_DATA', 18),
+            ('STRETCH_TO', 'Stretch To', '', 'CONSTRAINT_DATA', 19),
+            ('TRACK_TO', 'Track To', '', 'CONSTRAINT_DATA', 20),
 
-      # modify
-      ('DATA_TRANSFER', 'Data Transfer', '', 'MOD_DATA_TRANSFER', 1),
-      ('MESH_CACHE', 'Mesh Cache', '', 'MOD_MESHDEFORM', 2),
-      ('NORMAL_EDIT', 'Normal Edit', '', 'MOD_NORMALEDIT', 3),
-      ('UV_PROJECT', 'UV Project', '', 'MOD_UVPROJECT', 4),
-      ('UV_WARP', 'UV Warp', '', 'MOD_UVPROJECT', 5),
-      ('VERTEX_WEIGHT_EDIT', 'Vertex Weight Edit', '', 'MOD_VERTEX_WEIGHT', 6),
-      ('VERTEX_WEIGHT_MIX', 'Vertex Weight Mix', '', 'MOD_VERTEX_WEIGHT', 7),
-      ('VERTEX_WEIGHT_PROXIMITY', 'Vertex Weight Proximity', '', 'MOD_VERTEX_WEIGHT', 8),
+            # relationship
+            ('ACTION', 'Action', '', 'CONSTRAINT_DATA', 21),
+            ('CHILD_OF', 'Child Of', '', 'CONSTRAINT_DATA', 22),
+            ('FLOOR', 'Floor', '', 'CONSTRAINT_DATA', 23),
+            ('FOLLOW_PATH', 'Follow Path', '', 'CONSTRAINT_DATA', 24),
+            ('PIVOT', 'Pivot', '', 'CONSTRAINT_DATA', 25),
+            ('RIGID_BODY_JOINT', 'Rigid Body Joint', '', 'CONSTRAINT_DATA', 26),
+            ('SHRINKWRAP', 'Shrinkwrap', '', 'CONSTRAINT_DATA', 27)
+        ]
 
-      # generate
-      ('ARRAY', 'Array', '', 'MOD_ARRAY', 9),
-      ('BEVEL', 'Bevel', '', 'MOD_BEVEL', 10),
-      ('BOOLEAN', 'Boolean', '', 'MOD_BOOLEAN', 11),
-      ('BUILD', 'Build', '', 'MOD_BUILD', 12),
-      ('DECIMATE', 'Decimate', '', 'MOD_DECIM', 13),
-      ('EDGE_SPLIT', 'Edge Split', '', 'MOD_EDGESPLIT', 14),
-      ('MASK', 'Mask', '', 'MOD_MASK', 15),
-      ('MIRROR', 'Mirror', '', 'MOD_MIRROR', 16),
-      ('MULTIRES', 'Multiresolution', '', 'MOD_MULTIRES', 17),
-      ('REMESH', 'Remesh', '', 'MOD_REMESH', 18),
-      ('SCREW', 'Screw', '', 'MOD_SCREW', 19),
-      ('SKIN', 'Skin', '', 'MOD_SKIN', 20),
-      ('SOLIDIFY', 'Solidify', '', 'MOD_SOLIDIFY', 21),
-      ('SUBSURF', 'Subdivision Surface', '', 'MOD_SUBSURF', 22),
-      ('TRIANGULATE', 'Triangulate', '', 'MOD_TRIANGULATE', 23),
-      ('WIREFRAME', 'Wireframe', '', 'MOD_WIREFRAME', 24),
+        # modifier
+        modifiers = [
+            ('ALL', 'All Modifiers', '', 'MODIFIER', 0),
 
-      # deform
-      ('ARMATURE', 'Armature', '', 'MOD_ARMATURE', 25),
-      ('CAST', 'Cast', '', 'MOD_CAST', 26),
-      ('CORRECTIVE_SMOOTH', 'Corrective Smooth', '', 'MOD_SMOOTH', 27),
-      ('CURVE', 'Curve', '', 'MOD_CURVE', 28),
-      ('DISPLACE', 'Displace', '', 'MOD_DISPLACE', 29),
-      ('HOOK', 'Hook', '', 'HOOK', 30),
-      ('LAPLACIANSMOOTH', 'Laplacian Smooth', '', 'MOD_SMOOTH', 31),
-      ('LAPLACIANDEFORM', 'Laplacian Deform', '', 'MOD_MESHDEFORM', 32),
-      ('LATTICE', 'Lattice', '', 'MOD_LATTICE', 33),
-      ('MESH_DEFORM', 'Mesh Deform', '', 'MOD_MESHDEFORM', 34),
-      ('SHRINKWRAP', 'Shrinkwrap', '', 'MOD_SHRINKWRAP', 35),
-      ('SIMPLE_DEFORM', 'Simple Deform', '', 'MOD_SIMPLEDEFORM', 36),
-      ('SMOOTH', 'Smooth', '', 'MOD_SMOOTH', 37),
-      ('WARP', 'Warp', '', 'MOD_WARP', 38),
-      ('WAVE', 'Wave', '', 'MOD_WAVE', 39),
+            # modify
+            ('DATA_TRANSFER', 'Data Transfer', '', 'MOD_DATA_TRANSFER', 1),
+            ('MESH_CACHE', 'Mesh Cache', '', 'MOD_MESHDEFORM', 2),
+            ('NORMAL_EDIT', 'Normal Edit', '', 'MOD_NORMALEDIT', 3),
+            ('UV_PROJECT', 'UV Project', '', 'MOD_UVPROJECT', 4),
+            ('UV_WARP', 'UV Warp', '', 'MOD_UVPROJECT', 5),
+            ('VERTEX_WEIGHT_EDIT', 'Vertex Weight Edit', '', 'MOD_VERTEX_WEIGHT', 6),
+            ('VERTEX_WEIGHT_MIX', 'Vertex Weight Mix', '', 'MOD_VERTEX_WEIGHT', 7),
+            ('VERTEX_WEIGHT_PROXIMITY', 'Vertex Weight Proximity', '', 'MOD_VERTEX_WEIGHT', 8),
 
-      # simulate
-      ('CLOTH', 'Cloth', '', 'MOD_CLOTH', 40),
-      ('COLLISION', 'Collision', '', 'MOD_PHYSICS', 41),
-      ('DYNAMIC_PAINT', 'Dynamic Paint', '', 'MOD_DYNAMICPAINT', 42),
-      ('EXPLODE', 'Explode', '', 'MOD_EXPLODE', 43),
-      ('FLUID_SIMULATION', 'Fluid Simulation', '', 'MOD_FLUIDSIM', 44),
-      ('OCEAN', 'Ocean', '', 'MOD_OCEAN', 45),
-      ('PARTICLE_INSTANCE', 'Particle Instance', '', 'MOD_PARTICLES', 46),
-      ('PARTICLE_SYSTEM', 'Particle System', '', 'MOD_PARTICLES', 47),
-      ('SMOKE', 'Smoke', '', 'MOD_SMOKE', 48),
-      ('SOFT_BODY', 'Soft Body', '', 'MOD_SOFT', 49)
-    ]
+            # generate
+            ('ARRAY', 'Array', '', 'MOD_ARRAY', 9),
+            ('BEVEL', 'Bevel', '', 'MOD_BEVEL', 10),
+            ('BOOLEAN', 'Boolean', '', 'MOD_BOOLEAN', 11),
+            ('BUILD', 'Build', '', 'MOD_BUILD', 12),
+            ('DECIMATE', 'Decimate', '', 'MOD_DECIM', 13),
+            ('EDGE_SPLIT', 'Edge Split', '', 'MOD_EDGESPLIT', 14),
+            ('MASK', 'Mask', '', 'MOD_MASK', 15),
+            ('MIRROR', 'Mirror', '', 'MOD_MIRROR', 16),
+            ('MULTIRES', 'Multiresolution', '', 'MOD_MULTIRES', 17),
+            ('REMESH', 'Remesh', '', 'MOD_REMESH', 18),
+            ('SCREW', 'Screw', '', 'MOD_SCREW', 19),
+            ('SKIN', 'Skin', '', 'MOD_SKIN', 20),
+            ('SOLIDIFY', 'Solidify', '', 'MOD_SOLIDIFY', 21),
+            ('SUBSURF', 'Subdivision Surface', '', 'MOD_SUBSURF', 22),
+            ('TRIANGULATE', 'Triangulate', '', 'MOD_TRIANGULATE', 23),
+            ('WIREFRAME', 'Wireframe', '', 'MOD_WIREFRAME', 24),
 
-  # lists
-  # list = [
-  #  [datablock.name, [count, datablock]
-  # ]
+            # deform
+            ('ARMATURE', 'Armature', '', 'MOD_ARMATURE', 25),
+            ('CAST', 'Cast', '', 'MOD_CAST', 26),
+            ('CORRECTIVE_SMOOTH', 'Corrective Smooth', '', 'MOD_SMOOTH', 27),
+            ('CURVE', 'Curve', '', 'MOD_CURVE', 28),
+            ('DISPLACE', 'Displace', '', 'MOD_DISPLACE', 29),
+            ('HOOK', 'Hook', '', 'HOOK', 30),
+            ('LAPLACIANSMOOTH', 'Laplacian Smooth', '', 'MOD_SMOOTH', 31),
+            ('LAPLACIANDEFORM', 'Laplacian Deform', '', 'MOD_MESHDEFORM', 32),
+            ('LATTICE', 'Lattice', '', 'MOD_LATTICE', 33),
+            ('MESH_DEFORM', 'Mesh Deform', '', 'MOD_MESHDEFORM', 34),
+            ('SHRINKWRAP', 'Shrinkwrap', '', 'MOD_SHRINKWRAP', 35),
+            ('SIMPLE_DEFORM', 'Simple Deform', '', 'MOD_SIMPLEDEFORM', 36),
+            ('SMOOTH', 'Smooth', '', 'MOD_SMOOTH', 37),
+            ('WARP', 'Warp', '', 'MOD_WARP', 38),
+            ('WAVE', 'Wave', '', 'MOD_WAVE', 39),
 
-  # objects
-  objects = []
+            # simulate
+            ('CLOTH', 'Cloth', '', 'MOD_CLOTH', 40),
+            ('COLLISION', 'Collision', '', 'MOD_PHYSICS', 41),
+            ('DYNAMIC_PAINT', 'Dynamic Paint', '', 'MOD_DYNAMICPAINT', 42),
+            ('EXPLODE', 'Explode', '', 'MOD_EXPLODE', 43),
+            ('FLUID_SIMULATION', 'Fluid Simulation', '', 'MOD_FLUIDSIM', 44),
+            ('OCEAN', 'Ocean', '', 'MOD_OCEAN', 45),
+            ('PARTICLE_INSTANCE', 'Particle Instance', '', 'MOD_PARTICLES', 46),
+            ('PARTICLE_SYSTEM', 'Particle System', '', 'MOD_PARTICLES', 47),
+            ('SMOKE', 'Smoke', '', 'MOD_SMOKE', 48),
+            ('SOFT_BODY', 'Soft Body', '', 'MOD_SOFT', 49)
+        ]
 
-  # groups
-  groups = []
+    # lists
+    # list = [
+    #  [datablock.name, [count, datablock]
+    # ]
 
-  # actions
-  actions = []
+    # objects
+    objects = []
 
-  # grease pencils
-  greasePencils = []
+    # groups
+    groups = []
 
-  # pencil layers
-  pencilLayers = []
+    # actions
+    actions = []
 
-  # constraints
-  constraints = []
+    # grease pencils
+    greasePencils = []
 
-  # modifiers
-  modifiers = []
+    # pencil layers
+    pencilLayers = []
 
-  # cameras
-  cameras = []
+    # constraints
+    constraints = []
 
-  # meshes
-  meshes = []
+    # modifiers
+    modifiers = []
 
-  # curves
-  curves = []
+    # cameras
+    cameras = []
 
-  # lamps
-  lamps = []
+    # meshes
+    meshes = []
 
-  # lattices
-  lattices = []
+    # curves
+    curves = []
 
-  # metaballs
-  metaballs = []
+    # lamps
+    lamps = []
 
-  # speakers
-  speakers = []
+    # lattices
+    lattices = []
 
-  # armatures
-  armatures = []
+    # metaballs
+    metaballs = []
 
-  # bone groups
-  boneGroups = []
+    # speakers
+    speakers = []
 
-  # bones
-  bones = []
+    # armatures
+    armatures = []
 
-  # vertex groups
-  vertexGroups = []
+    # bone groups
+    boneGroups = []
 
-  # shapekeys
-  shapekeys = []
+    # bones
+    bones = []
 
-  # uvs
-  uvs = []
+    # vertex groups
+    vertexGroups = []
 
-  # vertex colors
-  vertexColors = []
+    # shapekeys
+    shapekeys = []
 
-  # materials
-  materials = []
+    # uvs
+    uvs = []
 
-  # textures
-  textures = []
+    # vertex colors
+    vertexColors = []
 
-  # particle systems
-  particleSystems = []
+    # materials
+    materials = []
 
-  # particle settings
-  particleSettings = []
+    # textures
+    textures = []
 
-  # scenes
-  scenes = []
+    # particle systems
+    particleSystems = []
 
-  # render layers
-  renderLayers = []
+    # particle settings
+    particleSettings = []
 
-  # worlds
-  worlds = []
+    # scenes
+    scenes = []
 
-  # libraries
-  libraries = []
+    # render layers
+    renderLayers = []
 
-  # images
-  images = []
+    # worlds
+    worlds = []
 
-  # masks
-  masks = []
+    # libraries
+    libraries = []
 
-  # sequences
-  sequences = []
+    # images
+    images = []
 
-  # movie clips
-  movieClips = []
+    # masks
+    masks = []
 
-  # sounds
-  sounds = []
+    # sequences
+    sequences = []
 
-  # screens
-  screens = []
+    # movie clips
+    movieClips = []
 
-  # keying sets
-  keyingSets = []
+    # sounds
+    sounds = []
 
-  # palettes
-  palettes = []
+    # screens
+    screens = []
 
-  # brushes
-  brushes = []
+    # keying sets
+    keyingSets = []
 
-  # linestyles
-  linestyles = []
+    # palettes
+    palettes = []
 
-  # nodes
-  nodes = []
+    # brushes
+    brushes = []
 
-  # node labels
-  nodeLabels = []
+    # linestyles
+    linestyles = []
 
-  # node groups
-  nodeGroups = []
+    # nodes
+    nodes = []
 
-  # texts
-  texts = []
+    # node labels
+    nodeLabels = []
+
+    # node groups
+    nodeGroups = []
+
+    # texts
+    texts = []

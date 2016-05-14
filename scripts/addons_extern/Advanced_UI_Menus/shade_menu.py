@@ -1,6 +1,8 @@
 from .Utils.core import *
 
 # adds a shading mode menu
+
+
 class ShadeModeOperator(bpy.types.Operator):
     bl_label = "Shading Operator"
     bl_idname = "view3d.shading_menu_operator"
@@ -11,37 +13,37 @@ class ShadeModeOperator(bpy.types.Operator):
         # populate the list of last modes
         if context.space_data.viewport_shade not in self.last_mode:
             self.last_mode.append(context.space_data.viewport_shade)
-        
+
         # keep the list to 2 items
         if len(self.last_mode) > 2:
             del self.last_mode[1]
 
     def modal(self, context, event):
         current_time = time.time()
-        
+
         # if key has been held for more than 0.3 seconds call the menu
         if event.value == 'RELEASE' and current_time > self.start_time + 0.3:
             bpy.ops.wm.call_menu(name=ShadeModeMenu.bl_idname)
-            
+
             return {'FINISHED'}
-        
+
         # else toggle between wireframe and your last used mode
         elif event.value == 'RELEASE' and current_time < self.start_time + 0.3:
             if context.space_data.viewport_shade != self.last_mode[0]:
                 context.space_data.viewport_shade = self.last_mode[0]
-                
+
             else:
                 context.space_data.viewport_shade = self.last_mode[1]
-                
+
             return {'FINISHED'}
-        
+
         return {'RUNNING_MODAL'}
 
     def execute(self, context):
         self.init(context)
         self.start_time = time.time()
         context.window_manager.modal_handler_add(self)
-        
+
         return {'RUNNING_MODAL'}
 
 
@@ -54,27 +56,27 @@ class ShadeModeMenu(bpy.types.Menu):
 
         if renderer == 'BLENDER_RENDER':
             modes = [["Solid", 'SOLID', "SOLID"],
-                              ["Wireframe", 'WIREFRAME', "WIRE"],
-                              ["Textured", 'TEXTURED', "TEXTURE_SHADED"],
-                              ["Material", 'MATERIAL', "MATERIAL_DATA"],
-                              ["Rendered", 'RENDERED', "SMOOTH"],
-                              ["Bounding Box", 'BOUNDBOX', "BBOX"]]
-            
+                     ["Wireframe", 'WIREFRAME', "WIRE"],
+                     ["Textured", 'TEXTURED', "TEXTURE_SHADED"],
+                     ["Material", 'MATERIAL', "MATERIAL_DATA"],
+                     ["Rendered", 'RENDERED', "SMOOTH"],
+                     ["Bounding Box", 'BOUNDBOX', "BBOX"]]
+
         elif renderer == 'CYCLES':
             modes = [["Solid", 'SOLID', "SOLID"],
-                             ["Wireframe", 'WIREFRAME', "WIRE"],
-                             ["Textured", 'TEXTURED', "TEXTURE_SHADED"],
-                             ["Material", 'MATERIAL', "MATERIAL_DATA"],
-                             ["Rendered", 'RENDERED', "SMOOTH"],
-                             ["Bounding Box", 'BOUNDBOX', "BBOX"]]
-            
+                     ["Wireframe", 'WIREFRAME', "WIRE"],
+                     ["Textured", 'TEXTURED', "TEXTURE_SHADED"],
+                     ["Material", 'MATERIAL', "MATERIAL_DATA"],
+                     ["Rendered", 'RENDERED', "SMOOTH"],
+                     ["Bounding Box", 'BOUNDBOX', "BBOX"]]
+
         else:
             modes = [["Solid", 'SOLID', "SOLID"],
-                             ["Wireframe", 'WIREFRAME', "WIRE"],
-                             ["Textured", 'TEXTURED', "TEXTURE_SHADED"],
-                             ["Material", 'MATERIAL', "MATERIAL_DATA"],
-                             ["Bounding Box", 'BOUNDBOX', "BBOX"]]
-            
+                     ["Wireframe", 'WIREFRAME', "WIRE"],
+                     ["Textured", 'TEXTURED', "TEXTURE_SHADED"],
+                     ["Material", 'MATERIAL', "MATERIAL_DATA"],
+                     ["Bounding Box", 'BOUNDBOX', "BBOX"]]
+
         return modes
 
     def draw(self, context):
@@ -90,7 +92,7 @@ class ShadeModeMenu(bpy.types.Menu):
         if bpy.context.object.type in ['MESH', 'CURVE', 'SURFACE']:
             menu.add_item().separator()
             menu.add_item().menu(MeshShadeMenu.bl_idname)
-            
+
         # add a display options menu if the mode is not edit
         if get_mode() != 'EDIT':
             menu.add_item().menu(DisplayOptionsMenu.bl_idname)
@@ -102,11 +104,11 @@ class MeshShadeMenu(bpy.types.Menu):
 
     def draw(self, context):
         menu = Menu(self)
-        
+
         if bpy.context.mode == 'EDIT_MESH':
             menu.add_item().operator("mesh.faces_shade_flat", "Shade Flat", icon="MESH_ICOSPHERE")
             menu.add_item().operator("mesh.faces_shade_smooth", "Shade Smooth", icon="MESH_UVSPHERE")
-            
+
         else:
             menu.add_item().operator("object.shade_flat", "Shade Flat", icon="MESH_ICOSPHERE")
             menu.add_item().operator("object.shade_smooth", "Shade Smooth", icon="MESH_UVSPHERE")
@@ -124,10 +126,11 @@ class DisplayOptionsMenu(bpy.types.Menu):
         menu.add_item().prop(context.object, 'show_wire', toggle=True)
         menu.add_item().prop(context.object, 'show_x_ray', toggle=True)
         menu.add_item().prop(context.object, 'show_all_edges', toggle=True)
-        
+
 ### ------------ New hotkeys and registration ------------ ###
 
 addon_keymaps = []
+
 
 def register():
     # create the global menu hotkey
@@ -136,6 +139,7 @@ def register():
     km = wm.keyconfigs.active.keymaps['3D View']
     kmi = km.keymap_items.new('view3d.shading_menu_operator', 'Z', 'PRESS')
     addon_keymaps.append((km, kmi))
+
 
 def unregister():
     # remove keymaps when add-on is deactivated

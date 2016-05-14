@@ -24,8 +24,10 @@ from bpy.props import EnumProperty, IntProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, SvSetSocketAnyType, SvGetSocketAnyType
 
+
 def acc(l):
     return list(accumulate(l))
+
 
 class ListFuncNode(bpy.types.Node, SverchCustomTreeNode):
     ''' List function '''
@@ -34,12 +36,12 @@ class ListFuncNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     mode_items = [
-        ("MIN",         "Minimum",        "", 1),
-        ("MAX",         "Maximum",        "", 2),
-        ("AVR",         "Average",        "", 3),
-        ("SUM",         "Sum",            "", 4),
+        ("MIN", "Minimum", "", 1),
+        ("MAX", "Maximum", "", 2),
+        ("AVR", "Average", "", 3),
+        ("SUM", "Sum", "", 4),
         #("ACC",         "Accumulate",     "", 5),
-        ]
+    ]
     func_ = EnumProperty(name="Function", description="Function choice",
                          default="AVR", items=mode_items,
                          update=updateNode)
@@ -64,12 +66,12 @@ class ListFuncNode(bpy.types.Node, SverchCustomTreeNode):
             "AVR": self.avr,
             "SUM": sum,
             #"ACC": acc
-            }
+        }
         if 'Function' in self.outputs and self.outputs['Function'].is_linked:
             if 'Data' in self.inputs and self.inputs['Data'].is_linked:
                 data = SvGetSocketAnyType(self, self.inputs['Data'])
                 func = func_dict[self.func_]
-                
+
                 if not self.level:
                     out = [func(data)]
                 else:
@@ -81,7 +83,7 @@ class ListFuncNode(bpy.types.Node, SverchCustomTreeNode):
         out = []
         if level:
             for obj in data:
-                out.append(self.count(obj, level-1, func))
+                out.append(self.count(obj, level - 1, func))
         elif type(data) in [list, tuple] and len(data) > 0:
             if len(data) == 1:
                 data.extend(data)
@@ -95,7 +97,7 @@ class ListFuncNode(bpy.types.Node, SverchCustomTreeNode):
         flag = True
         for d in data:
             if type(d) not in [float, int]:
-                idx_avr = len(data)//2
+                idx_avr = len(data) // 2
                 result = data[idx_avr]
                 flag = False
                 break
@@ -105,6 +107,7 @@ class ListFuncNode(bpy.types.Node, SverchCustomTreeNode):
         if flag:
             result = sum_d / len(data)
         return result
+
 
 def register():
     bpy.utils.register_class(ListFuncNode)

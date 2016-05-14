@@ -8,7 +8,8 @@ from ... base_types.node import AnimationNode
 
 sourceTypeItems = [
     ("MESH_DATA", "Mesh Data", "", "", 0),
-    ("BMESH", "BMesh", "", "", 1) ]
+    ("BMESH", "BMesh", "", "", 1)]
+
 
 class ConstructBVHTreeNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ConstructBVHTreeNode"
@@ -18,15 +19,15 @@ class ConstructBVHTreeNode(bpy.types.Node, AnimationNode):
     def sourceTypeChanged(self, context):
         self.recreateInputs()
 
-    sourceType = EnumProperty(name = "Source Type", default = "MESH_DATA",
-        items = sourceTypeItems, update = sourceTypeChanged)
+    sourceType = EnumProperty(name="Source Type", default="MESH_DATA",
+                              items=sourceTypeItems, update=sourceTypeChanged)
 
     def create(self):
         self.recreateInputs()
         self.outputs.new("an_BVHTreeSocket", "BVHTree", "bvhTree")
 
     def draw(self, layout):
-        layout.prop(self, "sourceType", text = "Source")
+        layout.prop(self, "sourceType", text="Source")
 
     @keepNodeState
     def recreateInputs(self):
@@ -56,8 +57,8 @@ class ConstructBVHTreeNode(bpy.types.Node, AnimationNode):
         minPolygonIndex = min(itertools.chain([0], *polygonsIndices))
 
         if 0 <= minPolygonIndex and maxPolygonIndex < len(vectorList):
-            return BVHTree.FromPolygons(vectorList, polygonsIndices, epsilon = epsilon)
-        return BVHTree.FromPolygons([], [], epsilon = epsilon)
+            return BVHTree.FromPolygons(vectorList, polygonsIndices, epsilon=epsilon)
+        return BVHTree.FromPolygons([], [], epsilon=epsilon)
 
     def fromBMesh(self, bm, epsilon):
-        return BVHTree.FromBMesh(bm, epsilon = epsilon)
+        return BVHTree.FromBMesh(bm, epsilon=epsilon)

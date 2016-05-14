@@ -2,6 +2,7 @@ import bpy
 from bpy.props import *
 from ... base_types.node import AnimationNode
 
+
 class CreatePolygonIndicesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_CreatePolygonIndicesNode"
     bl_label = "Create Polygon Indices"
@@ -14,7 +15,7 @@ class CreatePolygonIndicesNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon = "ERROR")
+            layout.label(self.errorMessage, icon="ERROR")
 
     def execute(self, indices):
         if len(indices) >= 3:

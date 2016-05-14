@@ -22,12 +22,14 @@ from bpy.props import FloatProperty, EnumProperty
 from sverchok.node_tree import SverchCustomTreeNode, StringsSocket
 from sverchok.data_structure import updateNode, match_long_repeat
 
+
 def cylindrical(rho, phi, z, mode):
     if mode == "degrees":
         phi = radians(phi)
-    x = rho*cos(phi)
-    y = rho*sin(phi)
+    x = rho * cos(phi)
+    y = rho * sin(phi)
     return x, y, z
+
 
 def spherical(rho, phi, theta, mode):
     if mode == "degrees":
@@ -38,29 +40,29 @@ def spherical(rho, phi, theta, mode):
     z = rho * cos(theta)
     return x, y, z
 
+
 class VectorPolarInNode(bpy.types.Node, SverchCustomTreeNode):
     '''Generate vectors by spherical or cylindrical coordinates'''
     bl_idname = 'VectorPolarInNode'
     bl_label = 'Vectors polar in'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
-
     rho_ = FloatProperty(name='rho', description='Rho coordinate',
-            default=0.0, precision=3,
-            update=updateNode)
+                         default=0.0, precision=3,
+                         update=updateNode)
     phi_ = FloatProperty(name='phi', description='Phi coordinate',
-            default=0.0, precision=3,
-            update=updateNode)
+                         default=0.0, precision=3,
+                         update=updateNode)
     theta_ = FloatProperty(name='theta', description='Theta coordinate',
-            default=0.0, precision=3,
-            update=updateNode)
+                           default=0.0, precision=3,
+                           update=updateNode)
     z_ = FloatProperty(name='Z', description='Z coordinate',
-            default=0.0, precision=3,
-            update=updateNode)
+                       default=0.0, precision=3,
+                       update=updateNode)
 
     coord_modes = [
         ("z_", "Cylinder", "Use cylindrical coordinates", 1),
-        ("theta_",  "Sphere", "Use spherical coordinates", 2),
+        ("theta_", "Sphere", "Use spherical coordinates", 2),
     ]
 
     def coordinate_changed(self, context):
@@ -72,9 +74,9 @@ class VectorPolarInNode(bpy.types.Node, SverchCustomTreeNode):
     func_dict = {'z_': cylindrical, 'theta_': spherical}
 
     angle_modes = [
-            ("radians", "Radian", "Use angles in radians", 1),
-            ("degrees", "Degree", "Use angles in degrees", 2)
-        ]
+        ("radians", "Radian", "Use angles in radians", 1),
+        ("degrees", "Degree", "Use angles in degrees", 2)
+    ]
 
     angles_mode = EnumProperty(items=angle_modes, default="radians", update=updateNode)
 
@@ -88,7 +90,7 @@ class VectorPolarInNode(bpy.types.Node, SverchCustomTreeNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "coordinates", expand=True)
         layout.prop(self, "angles_mode", expand=True)
-    
+
     def process(self):
         if not self.outputs['Vectors'].is_linked:
             return
@@ -108,12 +110,11 @@ class VectorPolarInNode(bpy.types.Node, SverchCustomTreeNode):
             result.append(vs)
 
         self.outputs['Vectors'].sv_set(result)
-    
-    
+
+
 def register():
     bpy.utils.register_class(VectorPolarInNode)
 
 
 def unregister():
     bpy.utils.unregister_class(VectorPolarInNode)
-

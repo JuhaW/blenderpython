@@ -13,4 +13,3 @@ def logo():
     with_color = "\033[1;31m{0}\033[0m" if can_paint else "{0}"
     for line in lines:
         print(with_color.format(line))
-

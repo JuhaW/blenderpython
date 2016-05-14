@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class MakeSplineCyclicNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_MakeSplineCyclicNode"
     bl_label = "Make Spline Cyclic"

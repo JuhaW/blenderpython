@@ -6,17 +6,18 @@ from .... algorithms.mesh_generation.indices_utils import gridQuadPolygonIndices
 from .... algorithms.mesh_generation.basic_shapes import gridVertices
 from .... events import executionCodeChanged
 
+
 class GridMeshNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_GridMeshNode"
     bl_label = "Grid Mesh"
     bl_width_default = 160
 
-    centerGrid = BoolProperty(name = "Center", default = True, update = executionCodeChanged)
+    centerGrid = BoolProperty(name="Center", default=True, update=executionCodeChanged)
 
     def create(self):
         divisionsSockets = [
             self.inputs.new("an_IntegerSocket", "X Divisions", "xDivisions"),
-            self.inputs.new("an_IntegerSocket", "Y Divisions", "yDivisions") ]
+            self.inputs.new("an_IntegerSocket", "Y Divisions", "yDivisions")]
         for socket in divisionsSockets:
             socket.value = 5
             socket.minValue = 2

@@ -6,6 +6,7 @@ import mathutils
 
 from mmd_tools import bpyutils
 
+
 class FnBone(object):
     AT_DUMMY_CONSTRAINT_NAME = 'mmd_tools_at_dummy'
     AT_ROTATION_CONSTRAINT_NAME = 'mmd_tools_at_rotation'
@@ -98,12 +99,12 @@ class FnBone(object):
             return shadow_bone
         with bpyutils.edit_object(arm) as data:
             src_bone = data.edit_bones[bone_name]
-            shadow_bone = data.edit_bones.new(name='%s.shadow'%(bone_name))
+            shadow_bone = data.edit_bones.new(name='%s.shadow' % (bone_name))
             shadow_bone.head = mathutils.Vector([0, 0, 0])
             shadow_bone.tail = src_bone.tail - src_bone.head
             shadow_bone.layers = (
                 False, False, False, False, False, False, False, False,
-                True , False, False, False, False, False, False, False,
+                True, False, False, False, False, False, False, False,
                 False, False, False, False, False, False, False, False,
                 False, False, False, False, False, False, False, False)
             shadow_bone_name = shadow_bone.name

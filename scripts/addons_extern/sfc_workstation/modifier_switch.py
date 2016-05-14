@@ -1,17 +1,17 @@
 # ##### BEGIN MIT LICENSE BLOCK #####
 #
 # Copyright (c) 2012 Mikhail Rachinskiy
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,69 +23,64 @@
 # ##### END MIT LICENSE BLOCK #####
 
 bl_info = {
-	"name": "Switch",
-	"author": "Mikhail Rachinskiy (jewelcourses.com)",
-	"version": (0,5,0),
-	"blender": (2,7,4),
-	"location": "Properties → Modifiers",
-	"description": "Convinient placement and management of certain modifier propierties.",
-	"warning": "",
-	"wiki_url": "http://jewelcourses.com",
-	"tracker_url": "http://jewelcourses.com",
-	"category": "Object"}
+    "name": "Switch",
+    "author": "Mikhail Rachinskiy (jewelcourses.com)",
+    "version": (0, 5, 0),
+    "blender": (2, 7, 4),
+    "location": "Properties → Modifiers",
+    "description": "Convinient placement and management of certain modifier propierties.",
+    "warning": "",
+    "wiki_url": "http://jewelcourses.com",
+    "tracker_url": "http://jewelcourses.com",
+    "category": "Object"}
 
 import bpy
 from bpy.types import (Operator, Panel)
 
 
-
-
 def get_name(name):
-	for mo in bpy.context.active_object.modifiers:
-		if name == mo.name:
-			return mo.name
-	return False
-
-
+    for mo in bpy.context.active_object.modifiers:
+        if name == mo.name:
+            return mo.name
+    return False
 
 
 class MOD_DISPLAY(Operator):
-	'''Copy modifier viewport display state to selected'''
-	bl_label = "Switch"
-	bl_idname = "switch.mod_display"
+    '''Copy modifier viewport display state to selected'''
+    bl_label = "Switch"
+    bl_idname = "switch.mod_display"
 
-	@classmethod
-	def poll(cls, context):
-		return context.active_object is not None
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None
 
-	def execute(self, context):
-		for ob in context.selected_objects:
-			for mo in ob.modifiers:
-				m_name = get_name(mo.name)
-				if m_name:
-					mo.show_viewport = context.active_object.modifiers[m_name].show_viewport
-		return {'FINISHED'}
+    def execute(self, context):
+        for ob in context.selected_objects:
+            for mo in ob.modifiers:
+                m_name = get_name(mo.name)
+                if m_name:
+                    mo.show_viewport = context.active_object.modifiers[m_name].show_viewport
+        return {'FINISHED'}
 
 
 class MOD_PROP(Operator):
-	'''Copy modifier properties to selected'''
-	bl_label = "Switch"
-	bl_idname = "switch.mod_prop"
+    '''Copy modifier properties to selected'''
+    bl_label = "Switch"
+    bl_idname = "switch.mod_prop"
 
-	@classmethod
-	def poll(cls, context):
-		return context.active_object is not None
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None
 
-	def execute(self, context):
-		obj = context.active_object
-		for ob in context.selected_objects:
-			for mo in ob.modifiers:
-				if mo.type == 'ARRAY':
-					if mo.name == get_name(mo.name):
-						mo.constant_offset_displace = obj.modifiers[mo.name].constant_offset_displace
-						mo.count = obj.modifiers[mo.name].count
-		return {'FINISHED'}
-
+    def execute(self, context):
+        obj = context.active_object
+        for ob in context.selected_objects:
+            for mo in ob.modifiers:
+                if mo.type == 'ARRAY':
+                    if mo.name == get_name(mo.name):
+                        mo.constant_offset_displace = obj.modifiers[mo.name].constant_offset_displace
+                        mo.count = obj.modifiers[mo.name].count
+        return {'FINISHED'}
 
 
 """
@@ -169,20 +164,21 @@ class SwitchPanel(Panel):
 """
 
 classes = [
-	#SwitchPanel,
+    # SwitchPanel,
 
-	MOD_DISPLAY,
-	MOD_PROP,
+    MOD_DISPLAY,
+    MOD_PROP,
 ]
 
 
 def register():
-	for cls in classes:
-		bpy.utils.register_class(cls)
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
 
 def unregister():
-	for cls in classes:
-		bpy.utils.unregister_class(cls)
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
 
 if __name__ == "__main__":
-	register()
+    register()

@@ -27,10 +27,11 @@ from sverchok.data_structure import multi_socket
 
 
 def name_seq():
-    for i in range(ord('a'),ord('z')): 
+    for i in range(ord('a'), ord('z')):
         yield chr(i)
     for i in range(1000):
         yield "a.".join(str(i))
+
 
 class WifiInNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Wifi Input '''
@@ -44,7 +45,7 @@ class WifiInNode(bpy.types.Node, SverchCustomTreeNode):
             return
         ng = self.id_data
         wifi_in_list = [node for node in ng.nodes
-                           if node.bl_idname == 'WifiInNode']
+                        if node.bl_idname == 'WifiInNode']
         # verify that set var name isn't used before, if it is reset to previous
         for node in wifi_in_list:
             if node.name != self.name:
@@ -53,12 +54,12 @@ class WifiInNode(bpy.types.Node, SverchCustomTreeNode):
                     return
         # name is unique, store it.
         self.base_name = self.var_name
-        if self.inputs: # if we have inputs, rename
+        if self.inputs:  # if we have inputs, rename
             for i, s in enumerate(self.inputs):
                 s.name = "{0}[{1}]".format(self.var_name, i)
-        else: #create first socket
-            self.inputs.new('StringsSocket', self.var_name+"[0]")
-        
+        else:  # create first socket
+            self.inputs.new('StringsSocket', self.var_name + "[0]")
+
     var_name = StringProperty(name='var_name', update=change_var_name)
 
     base_name = StringProperty(default='')
@@ -70,41 +71,41 @@ class WifiInNode(bpy.types.Node, SverchCustomTreeNode):
     def sv_init(self, context):
         ng = self.id_data
         var_set = {node.var_name for node in ng.nodes
-                           if node.bl_idname == 'WifiInNode'}
-        for name in name_seq(): 
+                   if node.bl_idname == 'WifiInNode'}
+        for name in name_seq():
             if not name in var_set:
                 self.var_name = name
                 return
-                
+
     def copy(self, node):
         ng = self.id_data
         var_set = {node.var_name for node in ng.nodes
-                           if node.bl_idname == 'WifiInNode'}
+                   if node.bl_idname == 'WifiInNode'}
         for name in name_seq():
             if not name in var_set:
                 self.var_name = name
                 return
 
     def gen_var_name(self):
-        #from socket
+        # from socket
         if self.inputs:
             n = self.inputs[0].name.rstrip("[0]")
             self.base_name = n
             self.var_name = n
-        else: 
+        else:
             ng = self.id_data
             var_set = {node.var_name for node in ng.nodes
-                           if node.bl_idname == 'WifiInNode'}
+                       if node.bl_idname == 'WifiInNode'}
             for name in name_seq():
                 if not name in var_set:
                     self.var_name = name
                     return
-        
+
     def update(self):
         # ugly hack to get var name sometimes with old layouts
         if not self.var_name:
             self.gen_var_name()
-                
+
         self.base_name = self.var_name
         multi_socket(self, min=1, breck=True)
 

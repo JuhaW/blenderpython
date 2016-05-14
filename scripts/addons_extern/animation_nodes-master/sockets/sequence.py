@@ -3,6 +3,7 @@ from bpy.props import *
 from .. events import propertyChanged
 from .. base_types.socket import AnimationNodeSocket
 
+
 class SequenceSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_SequenceSocket"
     bl_label = "Sequence Socket"
@@ -12,22 +13,22 @@ class SequenceSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     storable = False
     comparable = True
 
-    sequenceName = StringProperty(update = propertyChanged)
+    sequenceName = StringProperty(update=propertyChanged)
 
     def drawProperty(self, layout, text):
-        row = layout.row(align = True)
+        row = layout.row(align=True)
 
         editor = self.nodeTree.scene.sequence_editor
         if editor:
-            row.prop_search(self, "sequenceName",  editor, "sequences", icon="NLA", text = text)
-            self.invokeFunction(row, "assignActiveSequence", icon = "EYEDROPPER")
+            row.prop_search(self, "sequenceName", editor, "sequences", icon="NLA", text=text)
+            self.invokeFunction(row, "assignActiveSequence", icon="EYEDROPPER")
         else:
             row.label("No Sequence Editor")
 
-
     def getValue(self):
         editor = self.nodeTree.scene.sequence_editor
-        if editor: return editor.sequences.get(self.sequenceName)
+        if editor:
+            return editor.sequences.get(self.sequenceName)
         return None
 
     def setProperty(self, data):
@@ -38,7 +39,8 @@ class SequenceSocket(bpy.types.NodeSocket, AnimationNodeSocket):
 
     def assignActiveSequence(self):
         sequenceEditor = self.nodeTree.scene.sequence_editor
-        if not sequenceEditor: return
+        if not sequenceEditor:
+            return
 
         sequence = sequenceEditor.active_strip
         if sequence:

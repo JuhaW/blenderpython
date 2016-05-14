@@ -33,15 +33,15 @@ secondInputOperations = ("ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "POWER", "MINI
 baseInputOperations = ("LOGARITHM", )
 stepSizeInputOperations = ("SNAP", )
 
-operationLabels = {item[0] : item[2] for item in operationItems}
+operationLabels = {item[0]: item[2] for item in operationItems}
 
 searchItems = {
-    "Add Numbers" : "ADD",
-    "Subtract Numbers" : "SUBTRACT",
-    "Multiply Numbers" : "MULTIPLY",
-    "Divide Numbers" : "DIVIDE",
-    "Invert Number" : "INVERT",
-    "Reciprocal Number" : "RECIPROCAL" }
+    "Add Numbers": "ADD",
+    "Subtract Numbers": "SUBTRACT",
+    "Multiply Numbers": "MULTIPLY",
+    "Divide Numbers": "DIVIDE",
+    "Invert Number": "INVERT",
+    "Reciprocal Number": "RECIPROCAL"}
 
 
 class FloatMathNode(bpy.types.Node, AnimationNode):
@@ -53,22 +53,22 @@ class FloatMathNode(bpy.types.Node, AnimationNode):
     def getSearchTags(cls):
         tags = []
         for name, operation in searchItems.items():
-            tags.append((name, {"operation" : repr(operation)}))
+            tags.append((name, {"operation": repr(operation)}))
         return tags
 
     def operationChanged(self, context):
         self.recreateInputSockets()
         executionCodeChanged()
 
-    operation = EnumProperty(name = "Operation", default = "MULTIPLY",
-        items = operationItems, update = operationChanged)
+    operation = EnumProperty(name="Operation", default="MULTIPLY",
+                             items=operationItems, update=operationChanged)
 
     def create(self):
         self.outputs.new("an_FloatSocket", "Result", "result")
         self.recreateInputSockets()
 
     def draw(self, layout):
-        layout.prop(self, "operation", text = "")
+        layout.prop(self, "operation", text="")
 
     def drawLabel(self):
         label = operationLabels[self.operation]
@@ -81,42 +81,68 @@ class FloatMathNode(bpy.types.Node, AnimationNode):
     def edit(self):
         output = self.outputs[0]
         if output.dataType == "Float":
-            if output.shouldBeIntegerSocket(): self.setOutputType("an_IntegerSocket")
+            if output.shouldBeIntegerSocket():
+                self.setOutputType("an_IntegerSocket")
         else:
-            if output.shouldBeFloatSocket(): self.setOutputType("an_FloatSocket")
+            if output.shouldBeFloatSocket():
+                self.setOutputType("an_FloatSocket")
 
     def getExecutionCode(self):
         op = self.operation
-        if op == "ADD": yield "result = a + b"
-        if op == "SUBTRACT": yield "result = a - b"
-        if op == "MULTIPLY": yield "result = a * b"
-        if op == "DIVIDE": yield from ("if b == 0: result = 0",
-                                       "else: result = a / b")
-        if op == "SINE": yield "result = math.sin(a)"
-        if op == "COSINE": yield "result = math.cos(a)"
-        if op == "TANGENT": yield "result = math.tan(a)"
-        if op == "ARCSINE": yield "result = math.asin(min(max(a, -1), 1))"
-        if op == "ARCCOSINE": yield "result = math.acos(min(max(a, -1), 1))"
-        if op == "ARCTANGENT": yield "result = math.atan(a)"
-        if op == "POWER": yield "result = math.pow(a, b) if a >= 0 or int(b) == b else 0"
+        if op == "ADD":
+            yield "result = a + b"
+        if op == "SUBTRACT":
+            yield "result = a - b"
+        if op == "MULTIPLY":
+            yield "result = a * b"
+        if op == "DIVIDE":
+            yield from ("if b == 0: result = 0",
+                        "else: result = a / b")
+        if op == "SINE":
+            yield "result = math.sin(a)"
+        if op == "COSINE":
+            yield "result = math.cos(a)"
+        if op == "TANGENT":
+            yield "result = math.tan(a)"
+        if op == "ARCSINE":
+            yield "result = math.asin(min(max(a, -1), 1))"
+        if op == "ARCCOSINE":
+            yield "result = math.acos(min(max(a, -1), 1))"
+        if op == "ARCTANGENT":
+            yield "result = math.atan(a)"
+        if op == "POWER":
+            yield "result = math.pow(a, b) if a >= 0 or int(b) == b else 0"
         if op == "LOGARITHM":
-            if "Base" not in self.inputs: yield "base = b" # to keep older files working
+            if "Base" not in self.inputs:
+                yield "base = b"  # to keep older files working
             yield "if a <= 0: result = 0"
             yield "elif base <= 0 or base == 1: result = math.log(a)"
             yield "else: result = math.log(a, base)"
-        if op == "MINIMUM": yield "result = min(a, b)"
-        if op == "MAXIMUM": yield "result = max(a, b)"
-        if op == "LESSTHAN": yield "result = a < b"
-        if op == "GREATHERTHAN": yield "result = a > b"
-        if op == "ABSOLUTE": yield "result = abs(a)"
-        if op == "MODULO": yield from ("if b == 0: result = 0",
-                                       "else: result = a % b")
-        if op == "FLOOR": yield "result = math.floor(a)"
-        if op == "CEILING": yield "result = math.ceil(a)"
-        if op == "SQRT": yield "result = math.sqrt(a) if a >= 0 else 0"
-        if op == "INVERT": yield "result = - a"
-        if op == "RECIPROCAL": yield "result = 1 / a if a != 0 else 0"
-        if op == "SNAP": yield "result = round(a / stepSize) * stepSize if stepSize != 0 else a"
+        if op == "MINIMUM":
+            yield "result = min(a, b)"
+        if op == "MAXIMUM":
+            yield "result = max(a, b)"
+        if op == "LESSTHAN":
+            yield "result = a < b"
+        if op == "GREATHERTHAN":
+            yield "result = a > b"
+        if op == "ABSOLUTE":
+            yield "result = abs(a)"
+        if op == "MODULO":
+            yield from ("if b == 0: result = 0",
+                        "else: result = a % b")
+        if op == "FLOOR":
+            yield "result = math.floor(a)"
+        if op == "CEILING":
+            yield "result = math.ceil(a)"
+        if op == "SQRT":
+            yield "result = math.sqrt(a) if a >= 0 else 0"
+        if op == "INVERT":
+            yield "result = - a"
+        if op == "RECIPROCAL":
+            yield "result = 1 / a if a != 0 else 0"
+        if op == "SNAP":
+            yield "result = round(a / stepSize) * stepSize if stepSize != 0 else a"
 
         if self.outputs[0].dataType == "Integer":
             yield "result = int(result)"
@@ -125,7 +151,8 @@ class FloatMathNode(bpy.types.Node, AnimationNode):
         return ["math"]
 
     def setOutputType(self, idName):
-        if self.outputs[0].bl_idname == idName: return
+        if self.outputs[0].bl_idname == idName:
+            return
         self._setOutputType(idName)
 
     @keepNodeLinks

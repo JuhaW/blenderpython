@@ -10,21 +10,22 @@ operationItems = [
     ("DIVIDE", "Divide", "Divide element by element (values are in radians internally)", "", 3),
     ("SCALE", "Scale", "", "", 4),
     ("ABSOLUTE", "Absolute", "", "", 5),
-    ("SNAP", "Snap", "Snap the individual axis rotations", "", 6) ]
+    ("SNAP", "Snap", "Snap the individual axis rotations", "", 6)]
 
 operationLabels = {
-    "ADD" : "A + B",
-    "SUBTRACT" : "A - B",
-    "MULTIPLY" : "A * B",
-    "DIVIDE" : "A / B",
-    "SCALE" : "A * scale",
-    "ABSOLUTE" : "abs A",
-    "SNAP" : "snap A" }
+    "ADD": "A + B",
+    "SUBTRACT": "A - B",
+    "MULTIPLY": "A * B",
+    "DIVIDE": "A / B",
+    "SCALE": "A * scale",
+    "ABSOLUTE": "abs A",
+    "SNAP": "snap A"}
 
 operationsWithFloat = ["SCALE"]
 operationsWithSecondEuler = ["ADD", "SUBTRACT", "MULTIPLY", "DIVIDE"]
 operationsWithStepEuler = ["SNAP"]
 operationsWithDegree = ["MULTIPLY", "DIVIDE"]
+
 
 class EulerMathNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_EulerMathNode"
@@ -34,20 +35,21 @@ class EulerMathNode(bpy.types.Node, AnimationNode):
     def operationChanged(self, context):
         self.createInputs()
 
-    operation = EnumProperty(name = "Operation", items = operationItems, default = "ADD", update = operationChanged)
-    useDegree = BoolProperty(name = "Use Degrees",
-        description = "Multiply and Divide degrees. If false, operation will use radians (output is always radians)",
-        default = True, update = operationChanged)
+    operation = EnumProperty(name="Operation", items=operationItems, default="ADD", update=operationChanged)
+    useDegree = BoolProperty(name="Use Degrees",
+                             description="Multiply and Divide degrees. If false, operation will use radians (output is always radians)",
+                             default=True, update=operationChanged)
 
     def create(self):
         self.createInputs()
         self.outputs.new("an_EulerSocket", "Result", "result")
 
     def draw(self, layout):
-        layout.prop(self, "operation", text = "")
+        layout.prop(self, "operation", text="")
 
     def drawAdvanced(self, layout):
-        if self.operation in operationsWithDegree: layout.prop(self, "useDegree")
+        if self.operation in operationsWithDegree:
+            layout.prop(self, "useDegree")
 
     def drawLabel(self):
         return operationLabels[self.operation]
@@ -63,16 +65,18 @@ class EulerMathNode(bpy.types.Node, AnimationNode):
         if self.operation in operationsWithStepEuler:
             self.inputs.new("an_EulerSocket", "Step Size", "stepSize").value = (0.1, 0.1, 0.1)
 
-
     def getExecutionCode(self):
         op = self.operation
 
-        if op == "ADD": return "result = mathutils.Euler((a[0] + b[0], a[1] + b[1], a[2] + b[2]), 'XYZ')"
-        elif op == "SUBTRACT": return "result = mathutils.Euler((a[0] - b[0], a[1] - b[1], a[2] - b[2]), 'XYZ')"
+        if op == "ADD":
+            return "result = mathutils.Euler((a[0] + b[0], a[1] + b[1], a[2] + b[2]), 'XYZ')"
+        elif op == "SUBTRACT":
+            return "result = mathutils.Euler((a[0] - b[0], a[1] - b[1], a[2] - b[2]), 'XYZ')"
         elif op == "MULTIPLY":
             if self.useDegree:
                 return "result = mathutils.Euler((math.radians(math.degrees(A) * math.degrees(B)) for A, B in zip(a, b)), 'XYZ')"
-            else: return "result = mathutils.Euler((a[0] * b[0], a[1] * b[1], a[2] * b[2]), 'XYZ')"
+            else:
+                return "result = mathutils.Euler((a[0] * b[0], a[1] * b[1], a[2] * b[2]), 'XYZ')"
         elif op == "DIVIDE":
             if self.useDegree:
                 return ("result = mathutils.Euler((0, 0, 0), 'XYZ')",
@@ -84,14 +88,15 @@ class EulerMathNode(bpy.types.Node, AnimationNode):
                         "if b[0] != 0: result[0] = a[0] / b[0]",
                         "if b[1] != 0: result[1] = a[1] / b[1]",
                         "if b[2] != 0: result[2] = a[2] / b[2]")
-        elif op == "SCALE":  return "result = mathutils.Euler((a[0] * scale, a[1] * scale, a[2] * scale), 'XYZ')"
-        elif op == "ABSOLUTE": return "result = mathutils.Euler((abs(a[0]), abs(a[1]), abs(a[2])), 'XYZ')"
+        elif op == "SCALE":
+            return "result = mathutils.Euler((a[0] * scale, a[1] * scale, a[2] * scale), 'XYZ')"
+        elif op == "ABSOLUTE":
+            return "result = mathutils.Euler((abs(a[0]), abs(a[1]), abs(a[2])), 'XYZ')"
         elif op == "SNAP":
             return ("result = a.copy()",
                     "if stepSize.x != 0: result[0] = round(a[0] / stepSize[0]) * stepSize[0]",
                     "if stepSize.y != 0: result[1] = round(a[1] / stepSize[1]) * stepSize[1]",
                     "if stepSize.z != 0: result[2] = round(a[2] / stepSize[2]) * stepSize[2]")
-
 
     def getUsedModules(self):
         return ["math, mathutils"]

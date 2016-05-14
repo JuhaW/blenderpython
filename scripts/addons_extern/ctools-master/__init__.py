@@ -167,9 +167,9 @@ class CToolsPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     align_box_draw = bpy.props.BoolProperty(
-            name='Box Draw',
-            description='If applied patch: patch/ui_layout_box.patch',
-            default=False)
+        name='Box Draw',
+        description='If applied patch: patch/ui_layout_box.patch',
+        default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -258,7 +258,7 @@ class CToolsPreferences(bpy.types.AddonPreferences):
         sub = row.row()
         sub.alignment = 'LEFT'
         op = sub.operator('script.cutils_module_update',
-                     icon='FILE_REFRESH')
+                          icon='FILE_REFRESH')
         op.dry_run = UPDATE_DRY_RUN
         op.diff = UPDATE_DIFF_TEXT
         sub = row.row()
@@ -279,7 +279,6 @@ for mod in sub_modules:
                 if mod.__addon_enabled__:
                     unregister_submodule(mod)
         return update
-
 
     prop = bpy.props.BoolProperty(
         name=info['name'],
@@ -304,9 +303,9 @@ class SCRIPT_OT_cutils_module_update(bpy.types.Operator):
     log_name = 'ctools_update.log'  # name of bpy.types.Text
 
     dry_run = bpy.props.BoolProperty(
-            'Dry Run', default=False, options={'SKIP_SAVE'})
+        'Dry Run', default=False, options={'SKIP_SAVE'})
     diff = bpy.props.BoolProperty(
-            'Create Diff Text', default=True, options={'SKIP_SAVE'})
+        'Create Diff Text', default=True, options={'SKIP_SAVE'})
 
     def execute(self, context):
         if not self.dry_run:
@@ -389,7 +388,7 @@ class SCRIPT_OT_cutils_module_update(bpy.types.Operator):
                             dst = []
 
                         lines = list(difflib.unified_diff(
-                                dst, src, fromfile=name, tofile=name))
+                            dst, src, fromfile=name, tofile=name))
                         if lines:
                             for line in lines:
                                 diff_lines.append(line)
@@ -443,7 +442,7 @@ class SCRIPT_OT_cutils_module_update(bpy.types.Operator):
                                 if not os.path.exists(os.path.dirname(dst)):
                                     os.makedirs(os.path.dirname(dst))
                                 with open(dst, 'wb') as dst_f, \
-                                     open(src, 'rb') as src_f:
+                                        open(src, 'rb') as src_f:
                                     dst_f.write(src_f.read())
 
         # except:

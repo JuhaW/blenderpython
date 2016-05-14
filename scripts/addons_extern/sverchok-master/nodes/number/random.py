@@ -33,7 +33,7 @@ class RandomNode(bpy.types.Node, SverchCustomTreeNode):
 
     count_inner = IntProperty(name='Count',
                               default=1, min=1,
-                               update=updateNode)
+                              update=updateNode)
     seed = FloatProperty(name='Seed',
                          default=0,
                          update=updateNode)
@@ -47,14 +47,13 @@ class RandomNode(bpy.types.Node, SverchCustomTreeNode):
     def process(self):
         if not self.outputs[0].is_linked:
             return
-            
+
         Coun = self.inputs['Count'].sv_get()[0]
 
         Seed = self.inputs['Seed'].sv_get()[0]
 
         # outputs
 
-        
         Random = []
         if len(Seed) == 1:
             random.seed(Seed[0])
@@ -65,7 +64,7 @@ class RandomNode(bpy.types.Node, SverchCustomTreeNode):
             for s, c in zip(*param):
                 random.seed(s)
                 Random.append([random.random() for i in range(int(c))])
-        
+
         self.outputs[0].sv_set(Random)
 
 

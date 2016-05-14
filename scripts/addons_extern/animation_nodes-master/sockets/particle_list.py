@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class ParticleListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_ParticleListSocket"
     bl_label = "Particle List Socket"

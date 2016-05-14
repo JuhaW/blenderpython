@@ -2,6 +2,7 @@ import bpy
 from bpy.props import *
 from ... base_types.node import AnimationNode
 
+
 class ObjectDataPathOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ObjectDataPathOutputNode"
     bl_label = "Object Data Path Output"
@@ -17,15 +18,17 @@ class ObjectDataPathOutputNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon = "ERROR")
+            layout.label(self.errorMessage, icon="ERROR")
 
     def drawAdvanced(self, layout):
-        self.invokeFunction(layout, "clearCache", text = "Clear Cache")
+        self.invokeFunction(layout, "clearCache", text="Clear Cache")
 
     def execute(self, object, path, arrayIndex, value):
-        if object is None: return object
+        if object is None:
+            return object
         setAttributeFunction = getSetFunction(object, path)
-        if setAttributeFunction is None: return object
+        if setAttributeFunction is None:
+            return object
         try:
             setAttributeFunction(object, arrayIndex, value)
             self.errorMessage = ""
@@ -38,16 +41,20 @@ class ObjectDataPathOutputNode(bpy.types.Node, AnimationNode):
 
 cache = {}
 
+
 def getSetFunction(object, attribute):
-    if attribute in cache: return cache[attribute]
+    if attribute in cache:
+        return cache[attribute]
 
     function = createSetFunction(object, attribute)
     cache[attribute] = function
     return function
 
+
 def createSetFunction(object, dataPath):
     needsIndex = dataPathBelongsToArray(object, dataPath)
-    if needsIndex is None: return None
+    if needsIndex is None:
+        return None
     data = {}
     if needsIndex:
         exec(setAttributeWithIndex.replace("#dataPath#", dataPath), data, data)
@@ -65,6 +72,7 @@ setAttributeWithoutIndex = '''
 def setAttributeWithoutIndex(object, index, value):
     object.#dataPath# = value
 '''
+
 
 def dataPathBelongsToArray(object, dataPath):
     if "." in dataPath:

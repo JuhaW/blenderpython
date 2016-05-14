@@ -25,8 +25,8 @@ bl_info = {
     "location": "Image Related",
     "description": "Tools for managing Images",
     "warning": "",
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"\
-        "/Py/Scripts",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"
+    "/Py/Scripts",
     "tracker_url": "",
     "category": "Addon Factory"}
 
@@ -46,6 +46,7 @@ else:
 
 import bpy
 
+
 def register():
     bpy.utils.register_module(__name__)
     # Add "Extras" menu to the "Add Mesh" menu
@@ -58,11 +59,11 @@ def register():
 def unregister():
 
     # Remove "Extras" menu from the "Add Mesh" menu.
-	bpy.types.IMAGE_MT_image.remove(IMAGE_MT_image.menu)
-	bpy.types.IMAGE_MT_select.remove(IMAGE_MT_select.menu)
-	bpy.types.IMAGE_MT_uvs.remove(IMAGE_MT_uvs.menu)
-	bpy.types.IMAGE_MT_view.remove(IMAGE_MT_view.menu)
-	bpy.utils.unregister_module(__name__)
+    bpy.types.IMAGE_MT_image.remove(IMAGE_MT_image.menu)
+    bpy.types.IMAGE_MT_select.remove(IMAGE_MT_select.menu)
+    bpy.types.IMAGE_MT_uvs.remove(IMAGE_MT_uvs.menu)
+    bpy.types.IMAGE_MT_view.remove(IMAGE_MT_view.menu)
+    bpy.utils.unregister_module(__name__)
 
 
 if __name__ == "__main__":

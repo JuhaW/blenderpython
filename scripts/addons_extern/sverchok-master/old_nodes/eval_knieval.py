@@ -332,7 +332,7 @@ class EvalKnievalNode(bpy.types.Node, SverchCustomTreeNode):
     # hyper: because it's above mode.
     current_hyper = StringProperty(default="SET")
     hyper_options = [
-        ("DO",  "Do",  "", 0),
+        ("DO", "Do", "", 0),
         ("SET", "Set", "", 1),
         ("GET", "Get", "", 2)
     ]
@@ -379,7 +379,7 @@ class EvalKnievalNode(bpy.types.Node, SverchCustomTreeNode):
             'SET': 'input',
             'GET': 'output',
             'DO': 'input'
-            }.get(self.selected_hyper, None)
+        }.get(self.selected_hyper, None)
 
         if not (self.mode == self.previous_mode):
             self.set_sockets()

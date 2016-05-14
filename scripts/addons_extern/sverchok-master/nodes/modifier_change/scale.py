@@ -32,11 +32,11 @@ class SvScaleNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     factor_ = FloatProperty(name='Factor', description='scaling factor',
-                           default=1.0,
-                           options={'ANIMATABLE'}, update=updateNode)
+                            default=1.0,
+                            options={'ANIMATABLE'}, update=updateNode)
     Separate = BoolProperty(name='Separate', description='Separate UV coords',
-                           default=False,
-                           update=updateNode)
+                            default=False,
+                            update=updateNode)
 
     def sv_init(self, context):
         self.inputs.new('VerticesSocket', "Vertices", "Vertices")
@@ -44,27 +44,27 @@ class SvScaleNode(bpy.types.Node, SverchCustomTreeNode):
         self.inputs.new('StringsSocket', "Factor", "Factor").prop_name = "factor_"
         self.outputs.new('VerticesSocket', "Vertices", "Vertices")
 
-    def draw_buttons(self,context,layout):
-        layout.prop(self,'Separate')
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'Separate')
 
     def scaling(self, vertex, center, factor):
         pt = Vector(vertex)
         c = Vector(center)
-        return (c + factor*(pt-c))[:]
+        return (c + factor * (pt - c))[:]
 
     def vert_scl(self, vertex, center, factor):
         scaled = []
-        params = match_long_repeat([center,factor])
-        for c,f in zip(*params):
-            scaled_ =[]
+        params = match_long_repeat([center, factor])
+        for c, f in zip(*params):
+            scaled_ = []
             for v in vertex:
-                scaled_.append(self.scaling(v, c,f))
+                scaled_.append(self.scaling(v, c, f))
             if self.Separate:
                 scaled.append(scaled_)
             else:
                 scaled.extend(scaled_)
         return scaled
-  
+
     def process(self):
         # inputs
         if 'Vertices' in self.inputs and self.inputs['Vertices'].is_linked:

@@ -372,10 +372,10 @@ RegionView3D._fields_ = fields(
     c_float, 'dist',  # distance from 'ofs' along -viewinv[2] vector, where result is negative as is 'ofs'
     c_float, 'camdx', 'camdy',  # camera view offsets, 1.0 = viewplane moves entire width/height
     c_float, 'pixsize',  # runtime only
-    c_float, 'ofs[3]',  # view center & orbit pivot, negative of worldspace location, also matches -viewinv[3][0:3] in ortho mode. 
+    c_float, 'ofs[3]',  # view center & orbit pivot, negative of worldspace location, also matches -viewinv[3][0:3] in ortho mode.
     c_float, 'camzoom',  # viewport zoom on the camera frame, see BKE_screen_view3d_zoom_to_fac
     c_char, 'is_persp',   # check if persp/ortho view, since 'persp' cant be used for this since
-                            # it can have cameras assigned as well. (only set in view3d_winmatrix_set)
+    # it can have cameras assigned as well. (only set in view3d_winmatrix_set)
     c_char, 'persp',
     c_char, 'view',
     c_char, 'viewlock',
@@ -408,7 +408,7 @@ class GPUFXSettings(Structure):
         c_void_p, 'ssao',  # GPUSSAOSettings
         c_char, 'fx_flag',  # eGPUFXFlags
         c_char, 'pad[7]',
-        )
+    )
 
 
 class View3D(Structure):
@@ -456,7 +456,7 @@ View3D._fields_ = fields(
 
     c_float, 'lens', 'grid',
     c_float, 'near', 'far',
-    c_float, 'ofs[3]',  #  DNA_DEPRECATED  # XXX deprecated
+    c_float, 'ofs[3]',  # DNA_DEPRECATED  # XXX deprecated
     c_float, 'cursor[3]',
 
     c_short, 'matcap_icon',  # icon id
@@ -492,9 +492,9 @@ View3D._fields_ = fields(
 
     # # XXX deprecated?
     # struct bGPdata *gpd  DNA_DEPRECATED        # Grease-Pencil Data (annotation layers)
-    # 
+    #
     # short usewcol, dummy3[3]
-    # 
+    #
     #  # multiview - stereo 3d
     # short stereo3d_flag
     # char stereo3d_camera
@@ -502,7 +502,7 @@ View3D._fields_ = fields(
     # float stereo3d_convergence_factor
     # float stereo3d_volume_alpha
     # float stereo3d_convergence_alpha
-    # 
+    #
     # # local grid
     # char localgrid, cursor_snap_grid, dummy[2]
     # float lg_loc[3], dummy2[2] // orign(x,y,z)
@@ -871,14 +871,16 @@ class MCol(Structure):
 # new face structure, replaces MFace, which is now only used for storing tessellations.
 class MPoly(Structure):
     _fields_ = fields(
-        # offset into loop array and number of loops in the face 
+        # offset into loop array and number of loops in the face
         c_int, 'loopstart',
-        c_int, 'totloop',  # keep signed since we need to subtract when getting the previous loop 
+        c_int, 'totloop',  # keep signed since we need to subtract when getting the previous loop
         c_short, 'mat_nr',
         c_char, 'flag', 'pad',
     )
 
 # the e here is because we want to move away from relying on edge hashes.
+
+
 class MLoop(Structure):
     _fields_ = fields(
         c_uint, 'v',  # vertex index
@@ -907,7 +909,7 @@ class Mesh(Structure):
         c_void, '*mselect',  # struct MSelect
 
         # BMESH ONLY
-        #new face structures
+        # new face structures
         c_void, '*mpoly',  # struct MPoly
         c_void, '*mtpoly',  # struct MTexPoly
         c_void, '*mloop',  # struct MLoop
@@ -916,7 +918,7 @@ class Mesh(Structure):
         # END BMESH ONLY
 
         # mface stores the tessellation (triangulation) of the mesh,
-        # real faces are now stored in nface. 
+        # real faces are now stored in nface.
         c_void, '*mface',  # struct MFace  # array of mesh object mode faces for tessellation
         c_void, '*mtface',  # struct MTFace  # store tessellation face UV's and texture here
         c_void, '*tface',  # struct TFace  # DNA_DEPRECATED   # deprecated, use mtface
@@ -960,9 +962,9 @@ class CustomDataLayer(Structure):
         c_int, 'offset',     # in editmode, offset of layer in block
         c_int, 'flag',       # general purpose flag
         c_int, 'active',     # number of the active layer of this type
-        c_int, 'active_rnd', # number of the layer to render
-        c_int, 'active_clone', # number of the layer to render
-        c_int, 'active_mask', # number of the layer to render
+        c_int, 'active_rnd',  # number of the layer to render
+        c_int, 'active_clone',  # number of the layer to render
+        c_int, 'active_mask',  # number of the layer to render
         c_int, 'uid',        # shape keyblock unique id reference
         c_char, 'name[64]',  # layer name, MAX_CUSTOMDATA_LAYER_NAME
         c_void, '*data',     # layer data
@@ -1027,9 +1029,9 @@ DerivedMesh._fields_ = fields(
     c_void, '*recalcTessellation',  # void (*recalcTessellation)(DerivedMesh * dm)
 
     # * Loop tessellation cache
-    CFUNCTYPE(c_int, POINTER(DerivedMesh)),  '*recalcLoopTri',  # void (*recalcLoopTri)(DerivedMesh * dm)
+    CFUNCTYPE(c_int, POINTER(DerivedMesh)), '*recalcLoopTri',  # void (*recalcLoopTri)(DerivedMesh * dm)
     # * accessor functions
-    CFUNCTYPE(POINTER(MLoopTri), POINTER(DerivedMesh)), '*getLoopTriArray',  #const struct MLoopTri *(*getLoopTriArray)(DerivedMesh * dm)
+    CFUNCTYPE(POINTER(MLoopTri), POINTER(DerivedMesh)), '*getLoopTriArray',  # const struct MLoopTri *(*getLoopTriArray)(DerivedMesh * dm)
     CFUNCTYPE(c_int, POINTER(DerivedMesh)), '*getNumLoopTri',  # int (*getNumLoopTri)(DerivedMesh *dm)
 
     # Misc. Queries
@@ -1398,6 +1400,7 @@ class PyObject_HEAD(ctypes.Structure):
         ('ob_type', ctypes.c_void_p),
     ]
 
+
 class PyObject_VAR_HEAD(ctypes.Structure):
     _fields_ = [
         # py_object, '_ob_next', '_ob_prev';  # When Py_TRACE_REFS is defined
@@ -1485,7 +1488,7 @@ PropertyRNA._fields_ = fields(
     # python handle to hold all callbacks
     # * (in a pointer array at the moment, may later be a tuple)
     c_void, '*py_data',
-    )
+)
 
 
 class FloatPropertyRNA(Structure):

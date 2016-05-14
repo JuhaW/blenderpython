@@ -16,10 +16,10 @@
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 # ***** END GPL LICENCE BLOCK *****
- 
+
 # ----------------------------------------------------------
 # File: main_panel.py
-# Main panel 
+# Main panel
 # Author: Antonio Vazquez (antonioya)
 #
 # ----------------------------------------------------------
@@ -32,6 +32,8 @@ from html_maker import write_html
 # ------------------------------------------------------
 # Buttons: UI Class
 # ------------------------------------------------------
+
+
 class MainPanel(bpy.types.Panel):
     bl_idname = "object_panel_ui"
     bl_label = "Html Export"
@@ -54,6 +56,8 @@ class MainPanel(bpy.types.Panel):
 # ------------------------------------------------------
 # Button: Action class ON
 # ------------------------------------------------------
+
+
 class RunActionOn(bpy.types.Operator):
     bl_idname = "object.storyboard_on"
     bl_label = "Include"
@@ -266,5 +270,3 @@ class ExportHtmlDoc(bpy.types.Operator, ExportHelper):
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
-
-

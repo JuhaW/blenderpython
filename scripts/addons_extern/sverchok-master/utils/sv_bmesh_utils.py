@@ -58,6 +58,7 @@ def pydata_from_bmesh(bm):
     p = [[i.index for i in p.verts] for p in bm.faces[:]]
     return v, e, p
 
+
 def with_bmesh(method):
     '''Decorator for methods which can work with BMesh.
     Usage:
@@ -89,7 +90,7 @@ def with_bmesh(method):
             return None
         elif isinstance(method_result, bmesh.types.BMesh):
             result = pydata_from_bmesh(method_result)
-        elif isinstance(method_result, (list,tuple)) and len(method_result) >= 1 and isinstance(method_result[0], bmesh.types.BMesh):
+        elif isinstance(method_result, (list, tuple)) and len(method_result) >= 1 and isinstance(method_result[0], bmesh.types.BMesh):
             result_bmesh = pydata_from_bmesh(method_result[0])
             result_other = method_result[1:]
             result = list(result_bmesh) + list(result_other)
@@ -104,4 +105,3 @@ def with_bmesh(method):
     real_process.__name__ = method.__name__
     real_process.__doc__ = method.__doc__
     return real_process
-

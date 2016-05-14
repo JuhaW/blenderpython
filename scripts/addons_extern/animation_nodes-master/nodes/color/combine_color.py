@@ -1,4 +1,5 @@
-import bpy, colorsys
+import bpy
+import colorsys
 from bpy.props import *
 from ... tree_info import keepNodeState
 from ... base_types.node import AnimationNode
@@ -14,6 +15,7 @@ sourceTypeItems = [
     ("HSL", "HSL", "Hue, Saturation, Lightness"),
     ("YIQ", "YIQ", "Luma, Chrominance")]
 
+
 class CombineColorNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_CombineColorNode"
     bl_label = "Combine Color"
@@ -22,8 +24,8 @@ class CombineColorNode(bpy.types.Node, AnimationNode):
     def sourceTypeChanged(self, context):
         self.recreateInputs()
 
-    sourceType = EnumProperty(name = "Source Type", default = "RGB",
-        items = sourceTypeItems, update = sourceTypeChanged)
+    sourceType = EnumProperty(name="Source Type", default="RGB",
+                              items=sourceTypeItems, update=sourceTypeChanged)
 
     def create(self):
         self.recreateInputs()
@@ -53,19 +55,23 @@ class CombineColorNode(bpy.types.Node, AnimationNode):
         self.inputs.new("an_FloatSocket", "Alpha", "alpha").value = 1
 
     def draw(self, layout):
-        layout.prop(self, "sourceType", expand = True)
+        layout.prop(self, "sourceType", expand=True)
 
     def drawAdvanced(self, layout):
-        layout.label("Uses linear color space", icon = "INFO")
+        layout.label("Uses linear color space", icon="INFO")
 
     def drawLabel(self):
         return "Color from {}a".format(self.sourceType)
 
     def getExecutionCode(self):
-        if self.sourceType == "RGB":    yield "color = [red, green, blue, alpha]"
-        elif self.sourceType == "HSV":  yield "color = [*colorsys.hsv_to_rgb(hue, saturation, value), alpha]"
-        elif self.sourceType == "HSL":  yield "color = [*colorsys.hls_to_rgb(hue, lightness, saturation), alpha]"
-        elif self.sourceType == "YIQ":  yield "color = [*colorsys.yiq_to_rgb(y, i, q), alpha]"
+        if self.sourceType == "RGB":
+            yield "color = [red, green, blue, alpha]"
+        elif self.sourceType == "HSV":
+            yield "color = [*colorsys.hsv_to_rgb(hue, saturation, value), alpha]"
+        elif self.sourceType == "HSL":
+            yield "color = [*colorsys.hls_to_rgb(hue, lightness, saturation), alpha]"
+        elif self.sourceType == "YIQ":
+            yield "color = [*colorsys.yiq_to_rgb(y, i, q), alpha]"
 
     def getUsedModules(self):
         return ["colorsys"]

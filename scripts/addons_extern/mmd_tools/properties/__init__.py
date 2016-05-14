@@ -25,8 +25,8 @@ __properties = {
                 ('NON_COLLISION_CONSTRAINT', 'Non Collision Constraint', '', 52),
                 ('SPRING_CONSTRAINT', 'Spring Constraint', '', 53),
                 ('SPRING_GOAL', 'Spring Goal', '', 54),
-                ]
-            ),
+            ]
+        ),
         'mmd_root': bpy.props.PointerProperty(type=root.MMDRoot),
         'mmd_camera': bpy.props.PointerProperty(type=camera.MMDCamera),
         'mmd_rigid': bpy.props.PointerProperty(type=rigid_body.MMDRigidBody),
@@ -36,24 +36,25 @@ __properties = {
         'is_mmd_glsl_light': bpy.props.BoolProperty(name='is_mmd_glsl_light', default=False),
         'pmx_import_scale': bpy.props.FloatProperty(name='pmx_import_scale'),
 
-        },
+    },
     bpy.types.Material: {
         'mmd_material': bpy.props.PointerProperty(type=material.MMDMaterial),
-        },
+    },
     bpy.types.PoseBone: {
         'mmd_bone': bpy.props.PointerProperty(type=bone.MMDBone),
         'is_mmd_shadow_bone': bpy.props.BoolProperty(name='is_mmd_shadow_bone', default=False),
         'mmd_shadow_bone_type': bpy.props.StringProperty(name='mmd_shadow_bone_type'),
-        }
     }
+}
+
 
 def register():
     for typ, t in __properties.items():
         for attr, prop in t.items():
             setattr(typ, attr, prop)
 
+
 def unregister():
     for typ, t in __properties.items():
         for attr in t.keys():
             delattr(typ, attr)
-

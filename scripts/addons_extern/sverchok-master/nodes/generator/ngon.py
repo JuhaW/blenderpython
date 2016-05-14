@@ -25,11 +25,13 @@ from bpy.props import BoolProperty, IntProperty, FloatProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (fullList, match_long_repeat, updateNode)
 
+
 def rotate(l, y=1):
-   if len(l) == 0:
-      return l
-   y = y % len(l)
-   return list(l[y:]) + list(l[:y])
+    if len(l) == 0:
+        return l
+    y = y % len(l)
+    return list(l[y:]) + list(l[:y])
+
 
 class SvNGonNode(bpy.types.Node, SverchCustomTreeNode):
     ''' NGon '''
@@ -41,21 +43,20 @@ class SvNGonNode(bpy.types.Node, SverchCustomTreeNode):
                          default=1.0,
                          update=updateNode)
     sides_ = IntProperty(name='N Sides', description='Number of polygon sides',
-                        default=5, min=3,
-                        update=updateNode)
+                         default=5, min=3,
+                         update=updateNode)
     rand_seed_ = FloatProperty(name='Seed', description='Random seed',
-                        default=0.0,
-                        update=updateNode)
+                               default=0.0,
+                               update=updateNode)
     rand_r_ = FloatProperty(name='RandomR', description='Radius randomization amplitude',
-                        default=0.0, min=0.0,
-                        update=updateNode)
+                            default=0.0, min=0.0,
+                            update=updateNode)
     rand_phi_ = FloatProperty(name='RandomPhi', description='Angle randomization amplitude (radians)',
-                        default=0.0, min=0.0, max=pi,
-                        update=updateNode)
+                              default=0.0, min=0.0, max=pi,
+                              update=updateNode)
     shift_ = IntProperty(name='Shift', description='Edges bind shift (star factor)',
-                        default=0, min=0,
-                        update=updateNode)
-                        
+                         default=0, min=0,
+                         update=updateNode)
 
     def sv_init(self, context):
         self.inputs.new('StringsSocket', "Radius").prop_name = 'rad_'
@@ -77,7 +78,7 @@ class SvNGonNode(bpy.types.Node, SverchCustomTreeNode):
             random.seed(rand_seed)
 
         vertices = []
-        dphi = (2*pi)/nsides
+        dphi = (2 * pi) / nsides
         for i in range(nsides):
             phi = dphi * i
             # randomize radius if necessary
@@ -88,15 +89,15 @@ class SvNGonNode(bpy.types.Node, SverchCustomTreeNode):
             # randomize angle if necessary
             if rand_phi:
                 phi = random.uniform(phi - rand_phi, phi + rand_phi)
-            x = rr*cos(phi)
-            y = rr*sin(phi)
+            x = rr * cos(phi)
+            y = rr * sin(phi)
             v = (x, y, 0)
             vertices.append(v)
         return vertices
 
     def make_edges(self, nsides, shift):
         vs = range(nsides)
-        edges = list( zip( vs, rotate(vs, shift+1) ) )
+        edges = list(zip(vs, rotate(vs, shift + 1)))
         return edges
 
     def make_faces(self, nsides, shift):
@@ -117,7 +118,7 @@ class SvNGonNode(bpy.types.Node, SverchCustomTreeNode):
 
         seed = self.inputs['RandomSeed'].sv_get()[0]
 
-        rand_r   = self.inputs['RandomR'].sv_get()[0]
+        rand_r = self.inputs['RandomR'].sv_get()[0]
         rand_phi = self.inputs['RandomPhi'].sv_get()[0]
 
         shift = self.inputs['Shift'].sv_get()[0]
@@ -144,4 +145,3 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(SvNGonNode)
-

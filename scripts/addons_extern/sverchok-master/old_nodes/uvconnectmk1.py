@@ -21,7 +21,7 @@ from bpy.props import IntProperty, BoolProperty, EnumProperty
 
 from sverchok.node_tree import SverchCustomTreeNode, VerticesSocket
 from sverchok.data_structure import (updateNode, fullList, multi_socket, levelsOflist,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class LineConnectNode(bpy.types.Node, SverchCustomTreeNode):
@@ -80,18 +80,18 @@ class LineConnectNode(bpy.types.Node, SverchCustomTreeNode):
         # to check for levelsOflist() and correct in recursion
         # lol = levelsOflist(vers)
         # print(lol)
-        #if lol == 4: # was clev - manually defined, but it is wrong way
+        # if lol == 4: # was clev - manually defined, but it is wrong way
         for ob in vers:
             for o in ob:
                 vers_.append(o)
                 lens.append(len(o))
-        #elif lol == 5:
+        # elif lol == 5:
         #    for ob in vers:
         #        for o in ob:
         #            for v in o:
         #                vers_.append(v)
         #                lens.append(len(v))
-        #else:
+        # else:
         #    print('wrong level in UV connect')
         lenvers = len(vers_)
         #print(lenvers, lens)
@@ -112,7 +112,7 @@ class LineConnectNode(bpy.types.Node, SverchCustomTreeNode):
                 objecto = []
                 indexes__ = []
                 if slice:
-                    indexes__ = [[j*ml+i for j in range(lenvers)] for i in range(ml)]
+                    indexes__ = [[j * ml + i for j in range(lenvers)] for i in range(ml)]
                     objecto = [a for a in zip(*indexes__)]
                 else:
                     for i, ob in enumerate(length_ob):
@@ -124,13 +124,13 @@ class LineConnectNode(bpy.types.Node, SverchCustomTreeNode):
                             cicle_firstrow = indexes_
                         if i > 0:
                             indexes = indexes_ + indexes__[::-1]
-                            quaded = [(indexes[k], indexes[k+1], indexes[-(k+2)], indexes[-(k+1)])
-                                      for k in range((len(indexes)-1)//2)]
+                            quaded = [(indexes[k], indexes[k + 1], indexes[-(k + 2)], indexes[-(k + 1)])
+                                      for k in range((len(indexes) - 1) // 2)]
                             objecto.extend(quaded)
-                            if i == len(length_ob)-1 and cicl:
+                            if i == len(length_ob) - 1 and cicl:
                                 indexes = cicle_firstrow + indexes_[::-1]
-                                quaded = [(indexes[k], indexes[k+1], indexes[-(k+2)], indexes[-(k+1)])
-                                          for k in range((len(indexes)-1)//2)]
+                                quaded = [(indexes[k], indexes[k + 1], indexes[-(k + 2)], indexes[-(k + 1)])
+                                          for k in range((len(indexes) - 1) // 2)]
                                 objecto.extend(quaded)
                         indexes__ = indexes_
                 vers_ = [newobject]
@@ -139,9 +139,9 @@ class LineConnectNode(bpy.types.Node, SverchCustomTreeNode):
                 for k, ob in enumerate(vers_):
                     objecto = []
                     for i, ve in enumerate(ob[:-1]):
-                        objecto.append([i, i+1])
+                        objecto.append([i, i + 1])
                     if cicl:
-                        objecto.append([0, len(ob)-1])
+                        objecto.append([0, len(ob) - 1])
                     edges.append(objecto)
 
         # not direction:
@@ -154,7 +154,7 @@ class LineConnectNode(bpy.types.Node, SverchCustomTreeNode):
                 if slice:
                     joinvers = joinvers(vers_)
                     for i, ve in enumerate(vers_[0][:]):
-                        inds = [j*ml+i for j in range(lenvers)]
+                        inds = [j * ml + i for j in range(lenvers)]
                         objecto.append(inds)
                 else:
                     # flip matrix transpose:
@@ -165,20 +165,20 @@ class LineConnectNode(bpy.types.Node, SverchCustomTreeNode):
                     joinvers = joinvers(vers_)
                     for i, ob in enumerate(vers_[:-1]):
                         for k, ve in enumerate(ob[:-1]):
-                            objecto.append([i*lenvers+k, (i+1)*lenvers+k, (i+1)*lenvers+k+1, i*lenvers+k+1])
+                            objecto.append([i * lenvers + k, (i + 1) * lenvers + k, (i + 1) * lenvers + k + 1, i * lenvers + k + 1])
                             if i == 0 and cicl:
-                                objecto.append([k+1, (ml-1)*lenvers+k+1, (ml-1)*lenvers+k, k])
+                                objecto.append([k + 1, (ml - 1) * lenvers + k + 1, (ml - 1) * lenvers + k, k])
             elif not polygons:
                 joinvers = joinvers(vers_)
                 for i, ve in enumerate(vers_[0][:]):
-                    inds = [j*ml+i for j in range(lenvers)]
+                    inds = [j * ml + i for j in range(lenvers)]
                     for i, item in enumerate(inds):
                         if i == 0 and cicl:
                             objecto.append([inds[0], inds[-1]])
                         elif i == 0:
                             continue
                         else:
-                            objecto.append([item, inds[i-1]])
+                            objecto.append([item, inds[i - 1]])
             edges.append(objecto)
             vers_ = [joinvers]
         return vers_, edges
@@ -206,15 +206,14 @@ class LineConnectNode(bpy.types.Node, SverchCustomTreeNode):
                         result = self.connect([s], self.dir_check, self.cicl_check, lol, self.polygons, self.slice_check)
                         one.extend(result[0])
                         two.extend(result[1])
-                result = (one,two)
-            
+                result = (one, two)
 
             if self.outputs['vertices'].is_linked:
                 SvSetSocketAnyType(self, 'vertices', result[0])
             if self.outputs['data'].is_linked:
                 SvSetSocketAnyType(self, 'data', result[1])
-                
-                
+
+
 def register():
     bpy.utils.register_class(LineConnectNode)
 
@@ -224,4 +223,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-

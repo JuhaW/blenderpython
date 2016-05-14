@@ -1,5 +1,5 @@
 
-def dodo(verts,edges,verts_o,k):
+def dodo(verts, edges, verts_o, k):
     for i in edges:
         if k in i:
             # this is awesome !!
@@ -8,7 +8,8 @@ def dodo(verts,edges,verts_o,k):
             return k, i
     return False, False
 
-def sv_main(v=[],e=[]):
+
+def sv_main(v=[], e=[]):
 
     in_sockets = [
         ['v', 'v', v],
@@ -16,19 +17,19 @@ def sv_main(v=[],e=[]):
     vout = []
     eout = []
     if v:
-        for edges,verts in zip(e,v):
+        for edges, verts in zip(e, v):
             ed = 1
             edges_o = []
             verts_o = []
             k = 0
             while True:
-                k, ed = dodo(verts,edges,verts_o,k)
+                k, ed = dodo(verts, edges, verts_o, k)
                 if ed:
                     edges.remove(ed)
                 if not ed:
                     break
-            edges_o = [[k,k+1] for k in range(len(verts_o)-1)]
-            edges_o.append([0,len(verts_o)-1])
+            edges_o = [[k, k + 1] for k in range(len(verts_o) - 1)]
+            edges_o.append([0, len(verts_o) - 1])
             eout.append(edges_o)
             vout.append(verts_o)
 

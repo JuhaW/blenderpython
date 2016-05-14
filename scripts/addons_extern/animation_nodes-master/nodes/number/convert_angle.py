@@ -7,11 +7,12 @@ conversionTypeItems = [
     ("DEGREE_TO_RADIAN", "Degree to Radian", ""),
     ("RADIAN_TO_DEGREE", "Radian to Degree", "")]
 
+
 class ConvertAngleNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ConvertAngleNode"
     bl_label = "Convert Angle"
 
-    searchTags = [(name, {"conversionType" : repr(type)}) for type, name, _ in conversionTypeItems]
+    searchTags = [(name, {"conversionType": repr(type)}) for type, name, _ in conversionTypeItems]
 
     def settingChanged(self, context):
         inSocket = self.inputs["Angle"]
@@ -24,7 +25,7 @@ class ConvertAngleNode(bpy.types.Node, AnimationNode):
             outSocket.text = "Degree"
         executionCodeChanged()
 
-    conversionType = EnumProperty(name = "Conversion Type", items = conversionTypeItems, update = settingChanged)
+    conversionType = EnumProperty(name="Conversion Type", items=conversionTypeItems, update=settingChanged)
 
     def create(self):
         socket1 = self.inputs.new("an_FloatSocket", "Angle", "inAngle")
@@ -34,11 +35,13 @@ class ConvertAngleNode(bpy.types.Node, AnimationNode):
         self.conversionType = "DEGREE_TO_RADIAN"
 
     def draw(self, layout):
-        layout.prop(self, "conversionType", text = "")
+        layout.prop(self, "conversionType", text="")
 
     def getExecutionCode(self):
-        if self.conversionType == "DEGREE_TO_RADIAN": return "outAngle = inAngle / 180 * math.pi"
-        if self.conversionType == "RADIAN_TO_DEGREE": return "outAngle = inAngle * 180 / math.pi"
+        if self.conversionType == "DEGREE_TO_RADIAN":
+            return "outAngle = inAngle / 180 * math.pi"
+        if self.conversionType == "RADIAN_TO_DEGREE":
+            return "outAngle = inAngle * 180 / math.pi"
 
     def getUsedModules(self):
         return ["math"]

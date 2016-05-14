@@ -39,7 +39,8 @@ class MechappoPanel(bpy.types.Panel):
 """
 #---- main ------
 
-def subdiv(obj,number,fromall):
+
+def subdiv(obj, number, fromall):
     if number == 0:
         return
     mode = bpy.context.mode
@@ -53,7 +54,8 @@ def subdiv(obj,number,fromall):
     if mode != 'EDIT_MESH':
         bpy.ops.object.editmode_toggle()
 
-def makemat(obj,matname,ct):
+
+def makemat(obj, matname, ct):
     mat = bpy.data.materials.new(matname)
     obj.data.materials.append(mat)
     #obj.data.materials[0] = mat
@@ -61,42 +63,47 @@ def makemat(obj,matname,ct):
     bpy.ops.object.material_slot_assign()
     bpy.context.object.active_material.diffuse_color = (random.random(), random.random(), random.random())
 
-def randselect(obj,ratio,fromall):
-    bpy.ops.object.mode_set(mode = 'EDIT')
+
+def randselect(obj, ratio, fromall):
+    bpy.ops.object.mode_set(mode='EDIT')
     if fromall == True:
         bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.mesh.select_mode(type='FACE')
-    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.mode_set(mode='OBJECT')
     ct = 0
     for i in obj.data.polygons:
         randval = random.random()
         if randval > ratio:
-             i.select = False
+            i.select = False
         ct += 1
-    bpy.ops.object.mode_set(mode = 'EDIT')
-    
+    bpy.ops.object.mode_set(mode='EDIT')
+
+
 def hide():
-    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.hide(unselected=True)
 
 
 def unhide():
-    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.mesh.reveal()
     bpy.ops.mesh.select_all(action='INVERT')
 
+
 def extrude(size):
-    bpy.ops.mesh.extrude_faces_move(MESH_OT_extrude_faces_indiv={"mirror":False}, TRANSFORM_OT_shrink_fatten={"value":size, "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "release_confirm":False})
+    bpy.ops.mesh.extrude_faces_move(MESH_OT_extrude_faces_indiv={"mirror": False}, TRANSFORM_OT_shrink_fatten={"value": size, "mirror": False, "proportional": 'DISABLED', "proportional_edit_falloff": 'SMOOTH', "proportional_size": 1, "snap": False, "snap_target": 'CLOSEST', "snap_point": (0, 0, 0), "snap_align": False, "snap_normal": (0, 0, 0), "release_confirm": False})
+
 
 def selectcheck(obj):
-     
+
     if obj == None:
         print('not selected object')
         return False
-    if  obj.type != 'MESH':
+    if obj.type != 'MESH':
         print('not mesh type')
         return False
+
 
 def get_polygon_number(obj):
     mesh = obj.data
@@ -104,8 +111,9 @@ def get_polygon_number(obj):
     for face in mesh.polygons:
         num += 1
     return num
-    
-def valuecheck(obj,cuts,depth,ratio,sidepoly):
+
+
+def valuecheck(obj, cuts, depth, ratio, sidepoly):
     if ratio == 0:
         ratio = 0.001
     polygons = get_polygon_number(obj)
@@ -116,20 +124,20 @@ def valuecheck(obj,cuts,depth,ratio,sidepoly):
     for i in range(depth):
         polygons = polygons * cuts
     #polygons *= sidepoly
-    if polygons > 300000/ratio:
-        print('polygons=',polygons,value,'limit=',300000/ratio)
+    if polygons > 300000 / ratio:
+        print('polygons=', polygons, value, 'limit=', 300000 / ratio)
         return False
     print('OK')
-    print('polygons=',polygons,value,300000/ratio)
+    print('polygons=', polygons, value, 300000 / ratio)
     return True
-    
+
 
 class ErrorDialog(bpy.types.Operator):
     bl_idname = "error.dialog"
     bl_label = "Warning:"
     bl_options = {'REGISTER'}
-        
-    my_message = StringProperty(name="message",default='Prease Input Smaller Values to Cuts or Depth.')    
+
+    my_message = StringProperty(name="message", default='Prease Input Smaller Values to Cuts or Depth.')
 
     def execute(self, context):
         message = self.my_message
@@ -143,7 +151,7 @@ class ErrorDialog(bpy.types.Operator):
     def draw(self, context):
         global wmessage
         self.layout.label(wmessage)
- 
+
 
 cuts = 0
 depth = 1
@@ -159,16 +167,15 @@ class MechappoCreate(bpy.types.Operator):
     bl_label = "Mechappo Create"
     bl_options = {'REGISTER'}
 
-    my_fromall = BoolProperty(name="from Selected All",default=False)
-    my_cuts = bpy.props.IntProperty(name="Subdivide:",min=0,max=100,default = cuts)
-    my_depth = bpy.props.IntProperty(name="Depth:",min=1,max=10,default = depth)
-    my_thickness = bpy.props.FloatProperty(name="Thickness:",default = thickness)
-    my_ratio = bpy.props.FloatProperty(name="Selected ratio:",min=0,max=1,default = ratio)
-    my_addmat = BoolProperty(name="Add Material",default = addmat)
-
+    my_fromall = BoolProperty(name="from Selected All", default=False)
+    my_cuts = bpy.props.IntProperty(name="Subdivide:", min=0, max=100, default=cuts)
+    my_depth = bpy.props.IntProperty(name="Depth:", min=1, max=10, default=depth)
+    my_thickness = bpy.props.FloatProperty(name="Thickness:", default=thickness)
+    my_ratio = bpy.props.FloatProperty(name="Selected ratio:", min=0, max=1, default=ratio)
+    my_addmat = BoolProperty(name="Add Material", default=addmat)
 
     def execute(self, context):
-        
+
         fromall = self.my_fromall
         cuts = self.my_cuts
         depth = self.my_depth
@@ -176,17 +183,17 @@ class MechappoCreate(bpy.types.Operator):
         ratio = self.my_ratio
         addmat = self.my_addmat
         global wmessage
-        
+
         obj = bpy.context.active_object
         if selectcheck(obj) == False:
             wmessage = "Prease Select Mesh Object."
             bpy.ops.error.dialog('INVOKE_DEFAULT')
             return{'FINISHED'}
-        if valuecheck(obj,cuts,depth,ratio,4) == False:
+        if valuecheck(obj, cuts, depth, ratio, 4) == False:
             wmessage = "Prease Input Smaller Values to Cuts or Depth."
             bpy.ops.error.dialog('INVOKE_DEFAULT')
             return{'FINISHED'}
-      
+
         ct = 0
         ii = 0
         for i in obj.data.materials:
@@ -194,8 +201,8 @@ class MechappoCreate(bpy.types.Operator):
         print(ii)
         hide()
         for i in range(depth):
-            subdiv(obj,cuts,fromall)
-            randselect(obj,ratio,fromall)
+            subdiv(obj, cuts, fromall)
+            randselect(obj, ratio, fromall)
             if ct == 0:
                 thickness *= -1
             else:
@@ -203,10 +210,10 @@ class MechappoCreate(bpy.types.Operator):
                     thickness *= -1
             extrude(thickness)
             if addmat == True:
-                makemat(obj,'mat',ct+ii)
+                makemat(obj, 'mat', ct + ii)
             ct += 1
         unhide()
-        
+
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.mesh.remove_doubles(threshold=0.0001, use_unselected=False)
 
@@ -216,50 +223,50 @@ class MechappoCreate(bpy.types.Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
+
 class MechappoSelect(bpy.types.Operator):
 
     bl_idname = "mechappo.select"
     bl_label = "Mechappo Select"
     bl_options = {'REGISTER'}
 
-    my_fromall = BoolProperty(name="from Selected All",default=False)
-    my_cuts = bpy.props.IntProperty(name="Subdivide:",min=0,max=100,default = cuts)
-    my_depth = bpy.props.IntProperty(name="Depth:",min=1,max=10,default = depth)
-    my_ratio = bpy.props.FloatProperty(name="Selected ratio:",min=0,max=1,default = ratio)
-    my_addmat = BoolProperty(name="Add Material",default = False)
-
+    my_fromall = BoolProperty(name="from Selected All", default=False)
+    my_cuts = bpy.props.IntProperty(name="Subdivide:", min=0, max=100, default=cuts)
+    my_depth = bpy.props.IntProperty(name="Depth:", min=1, max=10, default=depth)
+    my_ratio = bpy.props.FloatProperty(name="Selected ratio:", min=0, max=1, default=ratio)
+    my_addmat = BoolProperty(name="Add Material", default=False)
 
     def execute(self, context):
-        
+
         fromall = self.my_fromall
         cuts = self.my_cuts
         depth = self.my_depth
         ratio = self.my_ratio
         addmat = self.my_addmat
         global wmessage
-        
+
         obj = bpy.context.active_object
         if selectcheck(obj) == False:
             wmessage = "Prease Select Mesh Object."
             bpy.ops.error.dialog('INVOKE_DEFAULT')
             return{'FINISHED'}
         if cuts != 0:
-            if valuecheck(obj,cuts,depth,ratio,0) == False:
+            if valuecheck(obj, cuts, depth, ratio, 0) == False:
                 wmessage = "Prease Input Smaller Values to Cuts or Depth."
                 bpy.ops.error.dialog('INVOKE_DEFAULT')
                 return{'FINISHED'}
-            
+
         ct = 0
         ii = 0
         for i in obj.data.materials:
             ii += 1
         for i in range(depth):
-            subdiv(obj,cuts,fromall)
-            randselect(obj,ratio,fromall)
+            subdiv(obj, cuts, fromall)
+            randselect(obj, ratio, fromall)
             if addmat == True:
-                makemat(obj,'mat',ct+ii)
+                makemat(obj, 'mat', ct + ii)
             ct += 1
-        
+
         return{'FINISHED'}
 
     def invoke(self, context, event):
@@ -268,14 +275,16 @@ class MechappoSelect(bpy.types.Operator):
 
 #	Registration
 
+
 def register():
-    #bpy.utils.register_class(MechappoPanel)
+    # bpy.utils.register_class(MechappoPanel)
     bpy.utils.register_class(MechappoCreate)
     bpy.utils.register_class(MechappoSelect)
     bpy.utils.register_class(ErrorDialog)
 
+
 def unregister():
-    #bpy.utils.unregister_class(MechappoPanel)
+    # bpy.utils.unregister_class(MechappoPanel)
     bpy.utils.unregister_class(MechappoCreate)
     bpy.utils.unregister_class(MechappoSelect)
     bpy.utils.unregister_class(ErrorDialog)

@@ -279,6 +279,7 @@ class DrawNearestPreferences(
 # Space Property
 ###############################################################################
 class VIEW3D_PG_DrawNearest(bpy.types.PropertyGroup):
+
     def update(self, context):
         arg = 'ENABLE' if self.enable else 'DISABLE'
         bpy.ops.view3d.draw_nearest_element('INVOKE_DEFAULT', type=arg)
@@ -296,6 +297,7 @@ space_prop = SpaceProperty(
 # GLSettings
 ###############################################################################
 class Buffer:
+
     def __new__(self, type, dimensions=0, template=None):
         """
         :param type: GL_BYTE('bool','byte'), GL_SHORT('short'),
@@ -368,6 +370,7 @@ def glSwitch(attr, value):
 
 
 class GCM(contextlib._GeneratorContextManager):
+
     @classmethod
     def contextmanager(cls, func):
         sig = inspect.signature(cls.__init__)
@@ -397,6 +400,7 @@ class GCM(contextlib._GeneratorContextManager):
 
 
 class GLSettings:
+
     def __init__(self, context, view_matrix=None, perspective_matrix=None):
         rv3d = context.region_data
         if view_matrix is None:
@@ -1125,7 +1129,7 @@ def find_nearest(context, context_dict, bm, mco_region):
             # faces
             for efa in active.link_faces:
                 set_select(efa)
-            #edges
+            # edges
             for efa in active.link_faces:
                 for eed in efa.edges:
                     set_select(eed)
@@ -1179,15 +1183,15 @@ def find_loop_selection(context, context_dict, bm, mco_region, ring, toggle):
         else:
             ts.mesh_select_mode = [False, True, False]
         r = bpy.ops.mesh.edgering_select(
-                context_dict, 'INVOKE_DEFAULT', False,
-                extend=False, deselect=False, toggle=False, ring=True)
+            context_dict, 'INVOKE_DEFAULT', False,
+            extend=False, deselect=False, toggle=False, ring=True)
     else:
         if toggle:
             bpy.ops.mesh.select_all(context_dict, False, action='DESELECT')
         ts.mesh_select_mode = [False, True, False]
         r = bpy.ops.mesh.loop_select(
-                context_dict, 'INVOKE_DEFAULT', False,
-                extend=False, deselect=False, toggle=False, ring=False)
+            context_dict, 'INVOKE_DEFAULT', False,
+            extend=False, deselect=False, toggle=False, ring=False)
     if r == {'CANCELLED'}:
         active_edge = None
         elems = []
@@ -1355,6 +1359,7 @@ def get_dm_attr(mesh, dm, attr):
         # 1007616個の要素: 4.0s
         queue = collections.deque()
         P = POINTER(c_float)
+
         def callback(userData, index, cent, no):
             # この方法だと12.0s
             # queue = cast(c_void_p(userData), py_object).value
@@ -1368,7 +1373,7 @@ def get_dm_attr(mesh, dm, attr):
                                    DMForeachFlag.DM_FOREACH_NOP)
 
         face_center_origindex_np_array = np.array(
-                [i for i, v in queue], dtype=np.int)
+            [i for i, v in queue], dtype=np.int)
         sort_order = np.argsort(face_center_origindex_np_array)
         face_center_origindex_np_array = \
             face_center_origindex_np_array[sort_order]
@@ -1466,9 +1471,9 @@ def get_dm_elems(mesh, bm, elems, require_face_centers):
         face_origindex_array = get_dm_attr(mesh, dm, 'face_origindex_array')
         if require_face_centers:
             face_center_np_array = get_dm_attr(
-                    mesh, dm, 'face_center_np_array')
+                mesh, dm, 'face_center_np_array')
             face_center_origindex_np_array = get_dm_attr(
-                    mesh, dm, 'face_center_origindex_np_array')
+                mesh, dm, 'face_center_origindex_np_array')
 
     # 要素の二番目は派生元のelemのindex。無けれはNone
     dm_vert_elems = {}
@@ -1628,11 +1633,11 @@ def setlinestyle(nr):
 
 def face_stipple_pattern(size):
     stipple_quattone_base = np.array(
-            [[1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 0]])
+        [[1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 0]])
 
     def conv(arr):
-        arr = [int(''.join([str(k) for k in arr[i][j*8:j*8+8]]), 2)
-           for i in range(32) for j in range(4)]
+        arr = [int(''.join([str(k) for k in arr[i][j * 8:j * 8 + 8]]), 2)
+               for i in range(32) for j in range(4)]
         return bgl.Buffer(bgl.GL_BYTE, 128, arr)
 
     if size >= 8:
@@ -1646,13 +1651,13 @@ def face_stipple_pattern(size):
         if not buf:
             buf = face_stipple_pattern.x4 = \
                 conv(np.tile(np.repeat(np.repeat(
-                        stipple_quattone_base, 4, axis=0), 4, axis=1), (2, 2)))
+                    stipple_quattone_base, 4, axis=0), 4, axis=1), (2, 2)))
     elif size >= 2:
         buf = face_stipple_pattern.x2
         if not buf:
             buf = face_stipple_pattern.x2 = \
                 conv(np.tile(np.repeat(np.repeat(
-                        stipple_quattone_base, 2, axis=0), 2, axis=1), (4, 4)))
+                    stipple_quattone_base, 2, axis=0), 2, axis=1), (4, 4)))
     else:
         # glutil.cのものと重ならないようにずらしたもの
         buf = face_stipple_pattern.x1
@@ -1904,7 +1909,7 @@ def draw_callback(cls, context):
                         tris = [(0, 1, 2), (0, 2, 3)]
                 else:
                     tris = mathutils.geometry.tessellate_polygon(
-                           [[vert_coords_local[i] for i in v_indices]])
+                        [[vert_coords_local[i] for i in v_indices]])
                 for tri in tris:
                     for i in tri:
                         j = v_indices[i]
@@ -2334,17 +2339,17 @@ class VIEW3D_OT_draw_nearest_element(bpy.types.Operator):
         if mode == 'select':
             if use_internal:
                 elem = find_nearest_ctypes(
-                        context, context_dict, bm, mco_region)
+                    context, context_dict, bm, mco_region)
             else:
                 elem = find_nearest(context, context_dict, bm, mco_region)
             elems = [elem] if elem else []
         elif prefs.use_loop_select:
             if use_internal:
                 edge, elems = find_loop_selection_ctypes(
-                        context, context_dict, bm, mco_region, ring, toggle)
+                    context, context_dict, bm, mco_region, ring, toggle)
             else:
                 edge, elems = find_loop_selection(
-                        context, context_dict, bm, mco_region, ring, toggle)
+                    context, context_dict, bm, mco_region, ring, toggle)
         else:
             elems = []
 
@@ -2390,10 +2395,10 @@ class VIEW3D_OT_draw_nearest_element(bpy.types.Operator):
             require_face_centers = prefs.face_emphasis == 'CENTER'
             if prefs.use_derived_mesh:
                 verts, edges, faces, centers = get_dm_elems(
-                        mesh, bm, elems, require_face_centers)
+                    mesh, bm, elems, require_face_centers)
             else:
                 verts, edges, faces, centers = get_bmdm_elems(
-                        mesh, bm, elems, require_face_centers, False)
+                    mesh, bm, elems, require_face_centers, False)
             elems_key = []
             for ele in elems:
                 if isinstance(ele, bmesh.types.BMVert):
@@ -2437,7 +2442,7 @@ class VIEW3D_OT_draw_nearest_element(bpy.types.Operator):
         data['dm_num_elems'] = [get_dm_attr(mesh, dm, 'num_verts'),
                                 get_dm_attr(mesh, dm, 'num_edges'),
                                 get_dm_attr(mesh, dm, 'num_faces'),
-                                get_dm_attr(mesh, dm, 'num_loops'),]
+                                get_dm_attr(mesh, dm, 'num_loops'), ]
         data['target_prev'] = data['target']
         data['area_prev'] = area.as_pointer()
 
@@ -2481,7 +2486,7 @@ class VIEW3D_OT_draw_nearest_element(bpy.types.Operator):
             if not self.handle:
                 self.__class__.handle = bpy.types.SpaceView3D.draw_handler_add(
                     draw_callback, (self.__class__, context,), 'WINDOW',
-                        'POST_VIEW')
+                    'POST_VIEW')
             context.window_manager.modal_handler_add(self)
 
             return {'RUNNING_MODAL'}

@@ -2,6 +2,7 @@ import bpy
 import sys
 from ... base_types.node import AnimationNode
 
+
 class RayCastBVHTreeNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_RayCastBVHTreeNode"
     bl_label = "Ray Cast BVHTree"

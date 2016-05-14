@@ -21,7 +21,6 @@ import bpy
 from . import functions
 
 
-
 # UI
 class SEQUENCER_EXTRA_MT_input(bpy.types.Menu):
     bl_label = "Input"
@@ -29,93 +28,94 @@ class SEQUENCER_EXTRA_MT_input(bpy.types.Menu):
     def draw(self, context):
         self.layout.operator_context = 'INVOKE_REGION_WIN'
         self.layout.operator('sequencerextra.striprename',
-        text='File Name to Strip Name', icon='PLUGIN')
+                             text='File Name to Strip Name', icon='PLUGIN')
         self.layout.operator('sequencerextra.editexternally',
-        text='Open with External Editor', icon='PLUGIN')
+                             text='Open with External Editor', icon='PLUGIN')
         self.layout.operator('sequencerextra.edit',
-        text='Open with Editor', icon='PLUGIN')
+                             text='Open with Editor', icon='PLUGIN')
         self.layout.operator('sequencerextra.createmovieclip',
-        text='Create Movieclip strip', icon='PLUGIN')
+                             text='Create Movieclip strip', icon='PLUGIN')
+
 
 def sequencer_header_func(self, context):
     self.layout.menu("SEQUENCER_EXTRA_MT_input")
 
+
 def sequencer_add_menu_func(self, context):
-    self.layout.operator('sequencerextra.placefromfilebrowser', 
-    text='place from file browser', icon='PLUGIN').insert = False
-    self.layout.operator('sequencerextra.placefromfilebrowser', 
-    text='insert from file browser', icon='PLUGIN').insert = True
-    self.layout.operator('sequencerextra.recursiveload', 
-    text='recursive load from browser', icon='PLUGIN')
+    self.layout.operator('sequencerextra.placefromfilebrowser',
+                         text='place from file browser', icon='PLUGIN').insert = False
+    self.layout.operator('sequencerextra.placefromfilebrowser',
+                         text='insert from file browser', icon='PLUGIN').insert = True
+    self.layout.operator('sequencerextra.recursiveload',
+                         text='recursive load from browser', icon='PLUGIN')
     self.layout.separator()
 
 
 def sequencer_select_menu_func(self, context):
     self.layout.operator_menu_enum('sequencerextra.select_all_by_type',
-    'type', text='All by Type', icon='PLUGIN')
+                                   'type', text='All by Type', icon='PLUGIN')
     self.layout.separator()
     self.layout.operator('sequencerextra.selectcurrentframe',
-    text='Before Current Frame', icon='PLUGIN').mode = 'BEFORE'
+                         text='Before Current Frame', icon='PLUGIN').mode = 'BEFORE'
     self.layout.operator('sequencerextra.selectcurrentframe',
-    text='After Current Frame', icon='PLUGIN').mode = 'AFTER'
+                         text='After Current Frame', icon='PLUGIN').mode = 'AFTER'
     self.layout.operator('sequencerextra.selectcurrentframe',
-    text='On Current Frame', icon='PLUGIN').mode = 'ON'
+                         text='On Current Frame', icon='PLUGIN').mode = 'ON'
     self.layout.separator()
     self.layout.operator('sequencerextra.selectsamechannel',
-    text='Same Channel', icon='PLUGIN')
+                         text='Same Channel', icon='PLUGIN')
 
 
 def sequencer_strip_menu_func(self, context):
     self.layout.operator('sequencerextra.extendtofill',
-    text='Extend to Fill', icon='PLUGIN')
+                         text='Extend to Fill', icon='PLUGIN')
     self.layout.operator_menu_enum('sequencerextra.fadeinout',
-    'mode', text='Fade', icon='PLUGIN')
+                                   'mode', text='Fade', icon='PLUGIN')
     self.layout.operator_menu_enum('sequencerextra.copyproperties',
-    'prop', icon='PLUGIN')
-    
+                                   'prop', icon='PLUGIN')
+
     self.layout.operator('sequencerextra.insert',
-    text='Insert (Single Channel)', icon='PLUGIN').singlechannel = True
+                         text='Insert (Single Channel)', icon='PLUGIN').singlechannel = True
     self.layout.operator('sequencerextra.insert',
-    text='Insert', icon='PLUGIN').singlechannel = False
+                         text='Insert', icon='PLUGIN').singlechannel = False
     self.layout.operator('sequencerextra.ripplecut',
-    text='Ripple Cut', icon='PLUGIN')
+                         text='Ripple Cut', icon='PLUGIN')
     self.layout.operator('sequencerextra.rippledelete',
-    text='Ripple Delete', icon='PLUGIN')
+                         text='Ripple Delete', icon='PLUGIN')
     self.layout.separator()
 
 
 def time_frame_menu_func(self, context):
     self.layout.operator('timeextra.trimtimelinetoselection',
-    text='Trim to Selection', icon='PLUGIN')
+                         text='Trim to Selection', icon='PLUGIN')
     self.layout.operator('timeextra.trimtimeline',
-    text='Trim to Timeline Content', icon='PLUGIN')
+                         text='Trim to Timeline Content', icon='PLUGIN')
     self.layout.separator()
     self.layout.operator('screenextra.frame_skip',
-    text='Skip Forward One Second', icon='PLUGIN').back = False
+                         text='Skip Forward One Second', icon='PLUGIN').back = False
     self.layout.operator('screenextra.frame_skip',
-    text='Skip Back One Second', icon='PLUGIN').back = True
+                         text='Skip Back One Second', icon='PLUGIN').back = True
     self.layout.separator()
 
 
 def time_header_func(self, context):
     self.layout.operator('sequencerextra.jogshuttle',
-    text='Jog/Shuttle', icon='NDOF_TURN')
+                         text='Jog/Shuttle', icon='NDOF_TURN')
 
 
 def clip_header_func(self, context):
     self.layout.operator('sequencerextra.jogshuttle',
-    text='Jog/Shuttle', icon='NDOF_TURN')
+                         text='Jog/Shuttle', icon='NDOF_TURN')
 
 
 def clip_clip_menu_func(self, context):
     self.layout.operator('clipextra.openactivestrip',
-    text='Open Active Strip', icon='PLUGIN')
+                         text='Open Active Strip', icon='PLUGIN')
     self.layout.operator('clipextra.openfromfilebrowser',
-    text='Open from File Browser', icon='PLUGIN')
+                         text='Open from File Browser', icon='PLUGIN')
     self.layout.separator()
-    
-   
-    
+
+
 ###############################
 
 
@@ -145,7 +145,6 @@ def draw_color_balance(layout, color_balance):
 
 ############################
 
-        
 
 class JumptoCut(bpy.types.Panel):
     bl_space_type = "SEQUENCE_EDITOR"
@@ -153,7 +152,7 @@ class JumptoCut(bpy.types.Panel):
     bl_label = "Jump to Cut 6"
 
     COMPAT_ENGINES = {'BLENDER_RENDER'}
-    
+
     _frame_rate_args_prev = None
     _preset_class = None
 
@@ -218,35 +217,34 @@ class JumptoCut(bpy.types.Panel):
     def draw(self, context):
         scn = context.scene
         strip = functions.act_strip(context)
-            
+
         preferences = context.user_preferences
         prefs = preferences.addons[__package__].preferences
-        
+
         layout = self.layout
         layout = layout.box()
         # jump to cut main controls
-        
-        row=layout.row(align=True)
-        
-        row.label(icon='TIME', text="Secs")  
+
+        row = layout.row(align=True)
+
+        row.label(icon='TIME', text="Secs")
         row.operator('screenextra.frame_skip',
-        text="", icon='TRIA_LEFT').back = True
+                     text="", icon='TRIA_LEFT').back = True
         row.operator('screenextra.frame_skip',
-        text="", icon='TRIA_RIGHT').back = False
-        
+                     text="", icon='TRIA_RIGHT').back = False
+
         row.separator()
-        
-        row.label(icon='IPO_BOUNCE', text="Cuts")  
-        row.operator("sequencer.strip_jump", icon="PLAY_REVERSE", text="").next=False
-        row.operator("sequencer.strip_jump", icon='PLAY', text="").next=True
-        
+
+        row.label(icon='IPO_BOUNCE', text="Cuts")
+        row.operator("sequencer.strip_jump", icon="PLAY_REVERSE", text="").next = False
+        row.operator("sequencer.strip_jump", icon='PLAY', text="").next = True
+
         row.separator()
-        
+
         row.label(icon='MARKER_HLT', text="Marker")
-        row.operator("screen.marker_jump", icon="TRIA_LEFT", text="").next=False
-        row.operator("screen.marker_jump", icon='TRIA_RIGHT', text="").next=True
-        
-        
+        row.operator("screen.marker_jump", icon="TRIA_LEFT", text="").next = False
+        row.operator("screen.marker_jump", icon='TRIA_RIGHT', text="").next = True
+
         rd = scn.render
         screen = context.screen
         row = layout.row(align=True)
@@ -269,77 +267,75 @@ class JumptoCut(bpy.types.Panel):
             sub.operator("screen.animation_play", text="", icon='PAUSE')
         row.operator("screen.keyframe_jump", text="", icon='NEXT_KEYFRAME').next = True
         row.operator("screen.frame_jump", text="", icon='FF').end = True
-        
+
         row.separator()
         row.prop(scn, "sync_mode", text="")
         row.separator()
         self.draw_framerate(row, rd)
-        
-        row=layout.row(align=True)
+
+        row = layout.row(align=True)
         row.operator("sequencer.refresh_all")
         row.operator('sequencer.rendersize', text='set render size', icon='PLUGIN')
 
-        row=layout.row(align=True)
+        row = layout.row(align=True)
         row.operator("sequencerextra.setstartend", icon="PREVIEW_RANGE", text="IN/OUT")
         row.operator('timeextra.trimtimelinetoselection', text='Selection', icon='PREVIEW_RANGE')
         row.operator('timeextra.trimtimeline', text='All', icon='PREVIEW_RANGE')
 
-        layout = self.layout        
+        layout = self.layout
         # layout = layout.box()
         # panel setup ------------------------------------------------------
-        row=layout.row(align=True)
+        row = layout.row(align=True)
         row = row.split(percentage=0.25)
         row.prop(prefs, "kr_show_tools", text="Tools", icon='SEQ_SEQUENCER')
         if prefs.kr_show_tools:
             row = row.split(percentage=0.25)
             row.prop(prefs, "kr_mini_ui", text="mini")
         else:
-            row = row.split(percentage=0.25) 
-            row.label(text = "")
-            
+            row = row.split(percentage=0.25)
+            row.label(text="")
+
         if "vseqf" in dir(bpy.ops):
-            row = row.split(percentage=0.25) 
+            row = row.split(percentage=0.25)
             row.prop(scn, 'quickcontinuousenable', text="", icon='POSE_DATA')
         else:
-            row = row.split(percentage=0.25) 
-            row.label(text = "")
-        row = row.split(percentage=0.25) 
-        row.label(text = "")
-        row = row.split(percentage=0.33)   
+            row = row.split(percentage=0.25)
+            row.label(text="")
+        row = row.split(percentage=0.25)
+        row.label(text="")
+        row = row.split(percentage=0.33)
         row.prop(prefs, "kr_show_info", text="", icon='VIEWZOOM')
-        row = row.split(percentage=0.5) 
+        row = row.split(percentage=0.5)
         row.prop(prefs, "kr_extra_info", text="", icon='BORDERMOVE')
-        row = row.split(percentage=1) 
+        row = row.split(percentage=1)
         row.prop(prefs, "kr_show_modifiers", text="", icon='RESTRICT_VIEW_OFF')
-        
-        
+
         ##########
         if "vseqf" in dir(bpy.ops):
             row = layout.row()
             row.active = (scn.quickcontinuousenable)
-            row.prop(scn, 'quickcontinuouschildren', text = "Children")
-            row.prop(scn, 'quickcontinuousfollow', text = "follow")
-            row.prop(scn, 'quickcontinuoussnap', text = "Snap")
-            row.prop(scn, 'quickcontinuoussnapdistance', text = "distance")
+            row.prop(scn, 'quickcontinuouschildren', text="Children")
+            row.prop(scn, 'quickcontinuousfollow', text="follow")
+            row.prop(scn, 'quickcontinuoussnap', text="Snap")
+            row.prop(scn, 'quickcontinuoussnapdistance', text="distance")
 
         #########
-        
-        
+
         if prefs.kr_show_tools:
             layout = self.layout
             layout = layout.box()
             # snap, handler selector and meta tools
-            
+
             if prefs.kr_mini_ui:
-                row=layout.row(align=True)
-                row.operator('sequencerextra.extrasnap', text='', icon='SNAP_ON').align=0
-                row.operator('sequencerextra.extrasnap', text='', icon='SNAP_SURFACE').align=1
-                row.operator('sequencerextra.extrasnap', text='', icon='SNAP_ON').align=2
+                row = layout.row(align=True)
+                row.operator('sequencerextra.extrasnap', text='', icon='SNAP_ON').align = 0
+                row.operator('sequencerextra.extrasnap', text='', icon='SNAP_SURFACE').align = 1
+                row.operator('sequencerextra.extrasnap', text='', icon='SNAP_ON').align = 2
 
                 row.separator()
-                row.operator('sequencerextra.extrahandles', text='', icon='TRIA_LEFT').side=0
-                row.operator('sequencerextra.extrahandles', text='', icon='PMARKER').side=1
-                row.operator('sequencerextra.extrahandles', text='', icon='TRIA_RIGHT').side=2
+                row.operator('sequencerextra.extrahandles', text='', icon='TRIA_LEFT').side = 0
+                row.operator('sequencerextra.extrahandles', text='', icon='PMARKER').side = 1
+                row.operator('sequencerextra.extrahandles', text='', icon='TRIA_RIGHT').side = 2
 
                 row.separator()
                 row.operator("sequencerextra.metacopy", icon="COPYDOWN", text="")
@@ -348,65 +344,64 @@ class JumptoCut(bpy.types.Panel):
                 row.operator('sequencerextra.meta_separate_trim', text='', icon='ALIGN')
                 row.separator()
                 row.prop(prefs, "use_io_tools", text="I/O tools")
-                
+
                 # IN /OUT TOOLS
-                
-                
+
                 if prefs.use_io_tools:
-                    row=layout.row(align=True)
+                    row = layout.row(align=True)
                     if scn.kr_auto_markers == True:
                         row.prop(scn, "kr_auto_markers", text="")
-                    
+
                         row.separator()
                         row.operator("sequencerextra.sourcein", icon="MARKER_HLT", text="")
                         row.prop(scn, "kr_in_marker")
                         row.operator("sequencerextra.sourceout", icon='MARKER_HLT', text="")
                         row.prop(scn, "kr_out_marker")
                     else:
-                        row.prop(scn, "kr_auto_markers", text="AUTO i/o") 
+                        row.prop(scn, "kr_auto_markers", text="AUTO i/o")
                         row.operator("sequencerextra.sourcein", icon="MARKER_HLT", text="IN")
                         row.operator("sequencerextra.sourceout", icon='MARKER_HLT', text="OUT")
                     row.separator()
                     row.operator("sequencerextra.setinout", icon="ARROW_LEFTRIGHT", text="")
-                    row.operator("sequencerextra.triminout", icon="FULLSCREEN_EXIT", text="",emboss=True)
-                    
+                    row.operator("sequencerextra.triminout", icon="FULLSCREEN_EXIT", text="", emboss=True)
+
                 # miniUI extra actions
-                row=layout.row(align=True)
+                row = layout.row(align=True)
                 row.operator('sequencerextra.jogshuttle',
-                    text='', icon='NDOF_TURN')
+                             text='', icon='NDOF_TURN')
                 row.operator('sequencerextra.navigateup',
-                    text='', icon='FILE_PARENT')
+                             text='', icon='FILE_PARENT')
                 row.operator('sequencerextra.extendtofill',
-                text='', icon='STYLUS_PRESSURE')
+                             text='', icon='STYLUS_PRESSURE')
                 row.operator('sequencerextra.placefromfilebrowser',
-                    text='', icon='TRIA_DOWN').insert = False            
+                             text='', icon='TRIA_DOWN').insert = False
                 row.operator('sequencerextra.placefromfilebrowser',
-                    text='', icon='TRIA_RIGHT').insert = True
+                             text='', icon='TRIA_RIGHT').insert = True
                 row.operator('sequencer.slip',
-                    text='', icon='MOD_SHRINKWRAP')
+                             text='', icon='MOD_SHRINKWRAP')
                 row.operator_menu_enum('sequencerextra.fadeinout',
-                'mode', text='fade', icon='MOD_ARRAY')
+                                       'mode', text='fade', icon='MOD_ARRAY')
                 row.operator_menu_enum('sequencerextra.copyproperties',
-                'prop', text='copy',icon='SCRIPT')
-            
+                                       'prop', text='copy', icon='SCRIPT')
+
             else:  # NOT prefs.kr_mini_ui:
-                    
-                row=layout.row(align=True)
-                row.label("Snap:")    
-                #row=layout.row(align=True)
-                row.operator('sequencerextra.extrasnap', text='left', icon='SNAP_ON').align=0
-                row.operator('sequencerextra.extrasnap', text='center', icon='SNAP_SURFACE').align=1
-                row.operator('sequencerextra.extrasnap', text='right', icon='SNAP_ON').align=2
 
-                row=layout.row(align=True)
+                row = layout.row(align=True)
+                row.label("Snap:")
+                # row=layout.row(align=True)
+                row.operator('sequencerextra.extrasnap', text='left', icon='SNAP_ON').align = 0
+                row.operator('sequencerextra.extrasnap', text='center', icon='SNAP_SURFACE').align = 1
+                row.operator('sequencerextra.extrasnap', text='right', icon='SNAP_ON').align = 2
+
+                row = layout.row(align=True)
                 row.label("Handlers:")
-                #row=layout.row(align=True)
-                row.operator('sequencerextra.extrahandles', text='left', icon='TRIA_LEFT').side=0
-                row.operator('sequencerextra.extrahandles', text='both', icon='PMARKER').side=1
-                row.operator('sequencerextra.extrahandles', text='right', icon='TRIA_RIGHT').side=2
+                # row=layout.row(align=True)
+                row.operator('sequencerextra.extrahandles', text='left', icon='TRIA_LEFT').side = 0
+                row.operator('sequencerextra.extrahandles', text='both', icon='PMARKER').side = 1
+                row.operator('sequencerextra.extrahandles', text='right', icon='TRIA_RIGHT').side = 2
 
-                row=layout.row()
-                row=layout.row(align=True)
+                row = layout.row()
+                row = layout.row(align=True)
                 split = row.split(percentage=0.99)
                 colR2 = split.column()
                 row1 = colR2.row(align=True)
@@ -415,22 +410,20 @@ class JumptoCut(bpy.types.Panel):
                 split = row.split(percentage=0.99)
                 colR3 = split.column()
                 colR3.operator('sequencerextra.meta_separate_trim', text='unMeta & Trim', icon='ALIGN')
-        
-        
-        
+
                 # IN /OUT TOOLS
-                row=layout.box()
-                split=row.split(percentage=0.7)
+                row = layout.box()
+                split = row.split(percentage=0.7)
                 colR1 = split.column()
-                row1=colR1.row(align=True)
+                row1 = colR1.row(align=True)
                 row1.operator("sequencerextra.sourcein", icon="MARKER_HLT", text="set IN")
                 row1.operator("sequencerextra.sourceout", icon='MARKER_HLT', text="set OUT")
                 colR3 = split.column()
                 colR3.operator("sequencerextra.setinout", icon="ARROW_LEFTRIGHT", text="selected")
-                
-                split=row.split(percentage=0.7)
+
+                split = row.split(percentage=0.7)
                 colR1 = split.column()
-                row1=colR1.row(align=True)
+                row1 = colR1.row(align=True)
                 if scn.kr_auto_markers == False:
                     row1.prop(scn, "kr_auto_markers", text="auto markers")
                 else:
@@ -439,48 +432,47 @@ class JumptoCut(bpy.types.Panel):
                     row1.prop(scn, "kr_out_marker")
                     row1.active = scn.kr_auto_markers
                 colR3 = split.column()
-                colR3.operator("sequencerextra.triminout", icon="FULLSCREEN_EXIT", text="trim",emboss=True)
+                colR3.operator("sequencerextra.triminout", icon="FULLSCREEN_EXIT", text="trim", emboss=True)
 
-        
                 # UI extra actions
-                row=layout.row(align=True)
+                row = layout.row(align=True)
                 row.operator('sequencerextra.jogshuttle',
-                    text='Jog/Shuttle', icon='NDOF_TURN')            
+                             text='Jog/Shuttle', icon='NDOF_TURN')
                 row.operator('sequencerextra.navigateup',
-                    text='Navigate Up', icon='FILE_PARENT')
+                             text='Navigate Up', icon='FILE_PARENT')
                 row.operator('sequencerextra.extendtofill',
-                text='Extend to Fill', icon='STYLUS_PRESSURE')
-                row=layout.row(align=True)
+                             text='Extend to Fill', icon='STYLUS_PRESSURE')
+                row = layout.row(align=True)
                 row.operator('sequencerextra.placefromfilebrowser',
-                    text='File Place', icon='TRIA_DOWN').insert = False
+                             text='File Place', icon='TRIA_DOWN').insert = False
                 row.operator('sequencerextra.placefromfilebrowser',
-                    text='File Insert', icon='TRIA_RIGHT').insert = True
+                             text='File Insert', icon='TRIA_RIGHT').insert = True
                 row.operator('sequencer.slip',
-                    text='Slip', icon='MOD_SHRINKWRAP')
-                row=layout.row(align=True)
+                             text='Slip', icon='MOD_SHRINKWRAP')
+                row = layout.row(align=True)
                 row.operator_menu_enum('sequencerextra.fadeinout',
-                'mode', text='Fade', icon='MOD_ARRAY')
+                                       'mode', text='Fade', icon='MOD_ARRAY')
                 row.operator_menu_enum('sequencerextra.copyproperties',
-                'prop', icon='SCRIPT')
-                
+                                       'prop', icon='SCRIPT')
+
         # INFO box
-        
+
         if strip != None:
             if prefs.kr_show_info:
                 layout = self.layout
                 layout = layout.box()
                 row = layout.split(percentage=0.075)
-                row.prop(prefs, "kr_show_info", text="",icon='VIEWZOOM', emboss=True)
+                row.prop(prefs, "kr_show_info", text="", icon='VIEWZOOM', emboss=True)
                 row = row.split(percentage=0.3)
                 row.prop(strip, "type", text="")
                 row = row.split(percentage=1)
                 row.prop(strip, "name", text="")
-                
+
                 # MUTE INFORMATION
                 layout.active = (not strip.mute)
 
                 # basic info
-                    
+
                 row = layout.row()
                 row.prop(strip, "channel")
                 row.prop(strip, "frame_start")
@@ -491,7 +483,7 @@ class JumptoCut(bpy.types.Panel):
 
                 if strip.type in {'MOVIE', 'SOUND'}:
                     row.prop(strip, "filepath", text="")
-                
+
                 if strip.type == 'IMAGE':
                     row.prop(strip, "directory", text="")
                     # Current element for the filename
@@ -500,15 +492,15 @@ class JumptoCut(bpy.types.Panel):
                         row = layout.row()
                         row.prop(elem, "filename", text="File")  # strip.elements[0] could be a fallback
                         row.operator("sequencer.change_path", text="change files")
-                
+
                 if strip.type == 'COLOR':
-                    row.prop(strip, "color", text = "")
+                    row.prop(strip, "color", text="")
 
                 # VSE QUICK PARENT INFO
                 if "vseqf" in dir(bpy.ops):
                     if len(scn.parenting) > 0:
                         row = layout.row()
-                        row = row.split(percentage=0.8) 
+                        row = row.split(percentage=0.8)
                         childrennames = functions.find_children(strip.name)
                         parentname = functions.find_parent(strip.name)
                         if parentname != None:
@@ -516,14 +508,14 @@ class JumptoCut(bpy.types.Panel):
                                 row.label("Parent: {} Children: {}".format(parentname, ", ".join(childrennames)))
                             else:
                                 row.label("Parent: {}".format(parentname))
-                            
+
                         elif len(childrennames) > 0:
-                            row.label("Children: {}".format(", ".join(childrennames))) 
+                            row.label("Children: {}".format(", ".join(childrennames)))
                         #row = layout.row()
                 # trim info
-                
+
                 if strip.type not in {"SPEED", "WIPE", "CROSS", "ADJUSTMENT"}:
-                    row = row.split(percentage=1) 
+                    row = row.split(percentage=1)
                     row.prop(prefs, "kr_show_trim", text="Trim")
                     if prefs.kr_show_trim:
                         if not isinstance(strip, bpy.types.EffectSequence):
@@ -535,9 +527,9 @@ class JumptoCut(bpy.types.Panel):
                         row.label(text="soft:")
                         row.prop(strip, "frame_offset_start", text="Start")
                         row.prop(strip, "frame_offset_end", text="End")
-                
+
                 row = layout.row()
-                    
+
                 # special strips info
                 if strip.type == 'SPEED':
                     row.prop(strip, "multiply_speed")
@@ -548,7 +540,7 @@ class JumptoCut(bpy.types.Panel):
                 if strip.type == 'GAUSSIAN_BLUR':
                     row.prop(strip, "size_x")
                     row.prop(strip, "size_y")
-                
+
                 if strip.type == 'WIPE':
                     row = layout.row()
                     row.prop(strip, "transition_type", expand=True)
@@ -611,16 +603,15 @@ class JumptoCut(bpy.types.Panel):
                     for i in range(1, strip.channel):
                         row.operator("sequencer.cut_multicam", text="%d" % i).camera = i
 
-                
                 try:
                     if strip.input_count > 0:
                         col = layout.column()
                         col.prop(strip, "input_1")
                         if strip.input_count > 1:
-                            col.prop(strip, "input_2")   
+                            col.prop(strip, "input_2")
                 except AttributeError:
                     pass
-                                    
+
             # extra info box:
             if prefs.kr_extra_info:
                 layout = self.layout
@@ -628,53 +619,52 @@ class JumptoCut(bpy.types.Panel):
                 if strip.type not in {'SOUND'}:
                     row = box.row(align=True)
                     sub = row.row(align=True)
-                    # MUTE THIS BOX 
+                    # MUTE THIS BOX
                     box.active = (not strip.mute)
-                    sub.prop(prefs, "kr_extra_info", text = "", icon='BORDERMOVE', emboss = True)
+                    sub.prop(prefs, "kr_extra_info", text="", icon='BORDERMOVE', emboss=True)
                     sub.separator()
                     sub.prop(strip, "blend_alpha", text="Opacity", slider=True)
                     row.prop(strip, "mute", toggle=True, icon_only=True)
                     row.prop(strip, "lock", toggle=True, icon_only=True)
 
                     row = box.row(align=True)
-                    
+
                     col = row.column()
                     col.prop(strip, "strobe")
                     col.prop(strip, "use_flip_x", text="flip X")
                     col.prop(strip, "use_flip_y", text="flip Y")
                     col.prop(strip, "use_reverse_frames", text="Backwards")
                     col.prop(strip, "use_deinterlace")
-                    
+
                     col = row.column()
-                    col.prop(strip, "blend_type", icon='COLOR', text = "")
+                    col.prop(strip, "blend_type", icon='COLOR', text="")
 
                     col.prop(strip, "color_saturation", text="Saturation")
                     col.prop(strip, "color_multiply", text="Multiply")
                     col.prop(strip, "use_float", text="Convert Float")
                     col.prop(strip, "alpha_mode")
-                    
+
                     row = box.row(align=True)
-                    row.prop(strip, "use_translation", text="Image Offset", icon = "AXIS_TOP")
-                    row.prop(strip, "use_crop", text="Image Crop", icon = "BORDER_RECT")
+                    row.prop(strip, "use_translation", text="Image Offset", icon="AXIS_TOP")
+                    row.prop(strip, "use_crop", text="Image Crop", icon="BORDER_RECT")
                     if strip.use_translation:
-                            row = box.row(align=True)
-                            row.prop(strip.transform, "offset_x", text="X")
-                            row.prop(strip.transform, "offset_y", text="Y")
+                        row = box.row(align=True)
+                        row.prop(strip.transform, "offset_x", text="X")
+                        row.prop(strip.transform, "offset_y", text="Y")
                     if strip.use_crop:
                         row = box.row(align=True)
                         row.prop(strip.crop, "max_y")
                         row.prop(strip.crop, "min_x")
                         row.prop(strip.crop, "min_y")
                         row.prop(strip.crop, "max_x")
-                                        
-                    
-                #sound type
+
+                # sound type
                 else:
                     row = box.row(align=True)
                     row.prop(strip, "volume")
                     row.prop(strip, "mute", toggle=True, icon_only=True)
                     row.prop(strip, "lock", toggle=True, icon_only=True)
-                    
+
                     sound = strip.sound
                     if sound is not None:
                         row = box.row()
@@ -686,14 +676,13 @@ class JumptoCut(bpy.types.Panel):
                         row.prop(sound, "use_memory_cache")
 
                     row.prop(strip, "show_waveform")
-                    
+
                     row = box.row()
                     row.prop(strip, "pitch")
                     row.prop(strip, "pan")
 
-        
-            ## modifiers
-            
+            # modifiers
+
             if strip.type != 'SOUND' and prefs.kr_show_modifiers:
                 sequencer = context.scene.sequence_editor
                 layout = self.layout
@@ -701,7 +690,7 @@ class JumptoCut(bpy.types.Panel):
                 # MUTE THIS BOX
                 layout.active = (not strip.mute)
                 row = layout.split(percentage=0.075)
-                row.prop(prefs, "kr_show_modifiers", text = "", icon='RESTRICT_VIEW_OFF', emboss = True)
+                row.prop(prefs, "kr_show_modifiers", text="", icon='RESTRICT_VIEW_OFF', emboss=True)
                 row = row.split(percentage=0.40)
                 row.prop(strip, "use_linear_modifiers", text="Linear")
                 row = row.split(percentage=1)
@@ -747,25 +736,10 @@ class JumptoCut(bpy.types.Panel):
                             col = box.column()
                             col.prop(mod, "bright")
                             col.prop(mod, "contrast")
-                            
+
                 if "copy_modifiers" in dir(bpy.ops.sequencer):
                     row = layout.row(align=True)
                     row.operator("sequencer.copy_modifiers", text="Copy Modifiers", icon='COPYDOWN')
                     row.operator("sequencer.paste_modifiers", text="Paste Modifiers", icon='PASTEDOWN')
 
-                
-        
         ############################################################
-        
-        
-
-        
-
-
-
-
-
-
-
-
-

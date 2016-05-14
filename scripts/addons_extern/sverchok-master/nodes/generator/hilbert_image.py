@@ -99,9 +99,9 @@ class HilbertImageNode(bpy.types.Node, SverchCustomTreeNode):
             if 'Edges' in self.outputs and len(self.outputs['Edges'].links) > 0:
 
                 listEdg = []
-                r = len(verts)-1
+                r = len(verts) - 1
                 for i in range(r):
-                    listEdg.append((i, i+1))
+                    listEdg.append((i, i + 1))
 
                 edg = list(listEdg)
                 self.outputs['Edges'].sv_set([edg])
@@ -111,27 +111,27 @@ class HilbertImageNode(bpy.types.Node, SverchCustomTreeNode):
             #self.outputs['Edges'].StringsProperty = str([[]])
 
     def hilbert(self, x0, y0, xi, xj, yi, yj, n, img, pixels, Sensitivity):
-        w = img.size[0]-1
-        h = img.size[1]-1
-        px = x0+(xi+yi)/2
-        py = y0+(xj+yj)/2
-        xy = int(int(px*w)+int(py*h)*(w+1))*4
-        p = (pixels[xy]*self.R+pixels[xy+1]*self.G+pixels[xy+2]*self.B)#*pixels[xy+3]
+        w = img.size[0] - 1
+        h = img.size[1] - 1
+        px = x0 + (xi + yi) / 2
+        py = y0 + (xj + yj) / 2
+        xy = int(int(px * w) + int(py * h) * (w + 1)) * 4
+        p = (pixels[xy] * self.R + pixels[xy + 1] * self.G + pixels[xy + 2] * self.B)  # *pixels[xy+3]
         if p > 0:
-            n = n-p**(1/Sensitivity)
+            n = n - p**(1 / Sensitivity)
         out = []
         if n <= 0:
-            X = x0 + (xi + yi)/2
-            Y = y0 + (xj + yj)/2
+            X = x0 + (xi + yi) / 2
+            Y = y0 + (xj + yj) / 2
             out.append(X)
             out.append(Y)
             out.append(0)
             return [out]
         else:
-            out.extend(self.hilbert(x0,               y0,               yi/2, yj/2, xi/2, xj/2, n - 1, img, pixels, Sensitivity))
-            out.extend(self.hilbert(x0 + xi/2,        y0 + xj/2,        xi/2, xj/2, yi/2, yj/2, n - 1, img, pixels, Sensitivity))
-            out.extend(self.hilbert(x0 + xi/2 + yi/2, y0 + xj/2 + yj/2, xi/2, xj/2, yi/2, yj/2, n - 1, img, pixels, Sensitivity))
-            out.extend(self.hilbert(x0 + xi/2 + yi,   y0 + xj/2 + yj,  -yi/2,-yj/2,-xi/2,-xj/2, n - 1, img, pixels, Sensitivity))
+            out.extend(self.hilbert(x0, y0, yi / 2, yj / 2, xi / 2, xj / 2, n - 1, img, pixels, Sensitivity))
+            out.extend(self.hilbert(x0 + xi / 2, y0 + xj / 2, xi / 2, xj / 2, yi / 2, yj / 2, n - 1, img, pixels, Sensitivity))
+            out.extend(self.hilbert(x0 + xi / 2 + yi / 2, y0 + xj / 2 + yj / 2, xi / 2, xj / 2, yi / 2, yj / 2, n - 1, img, pixels, Sensitivity))
+            out.extend(self.hilbert(x0 + xi / 2 + yi, y0 + xj / 2 + yj, -yi / 2, -yj / 2, -xi / 2, -xj / 2, n - 1, img, pixels, Sensitivity))
             return out
 
 

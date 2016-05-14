@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class GetObjectsFromGroupNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_GetObjectsFromGroupNode"
     bl_label = "Objects from Group"

@@ -48,10 +48,10 @@ TEXT_NAME = 'valid_shortcuts.txt'
 
 
 class ListValidKeysPreferences(
-    utils.AddonKeyMapUtility,
-    utils.AddonPreferences,
-    bpy.types.PropertyGroup if '.' in __name__ else
-    bpy.types.AddonPreferences):
+        utils.AddonKeyMapUtility,
+        utils.AddonPreferences,
+        bpy.types.PropertyGroup if '.' in __name__ else
+        bpy.types.AddonPreferences):
     bl_idname = __name__
 
     output = bpy.props.EnumProperty(
@@ -227,7 +227,7 @@ class WM_OT_list_valid_keys(bpy.types.Operator):
         area_region_types = set(r.type for r in context.area.regions)
         area_region_types = self.sorted_region_types(area_region_types)
         visible_region_types = set(r.type for r in context.area.regions
-                           if r.id != 0)
+                                   if r.id != 0)
         flow = column.column_flow(2)
         for region_type in area_region_types:
             col = flow.column()

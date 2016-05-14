@@ -4,6 +4,7 @@ from mathutils import Vector
 from ... events import propertyChanged
 from ... base_types.node import AnimationNode
 
+
 class ProjectOnSplineNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ProjectOnSplineNode"
     bl_label = "Project on Spline"
@@ -13,9 +14,9 @@ class ProjectOnSplineNode(bpy.types.Node, AnimationNode):
         propertyChanged()
 
     extended = BoolProperty(
-        name = "Extended Spline",
-        description = "Project point on extended spline. If this is turned on the parameter is not computable.",
-        update = settingChanged)
+        name="Extended Spline",
+        description="Project point on extended spline. If this is turned on the parameter is not computable.",
+        update=settingChanged)
 
     def create(self):
         self.inputs.new("an_SplineSocket", "Spline", "spline").defaultDrawType = "PROPERTY_ONLY"
@@ -25,7 +26,7 @@ class ProjectOnSplineNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_FloatSocket", "Parameter", "parameter")
 
     def draw(self, layout):
-        layout.prop(self, "extended", text = "Extended")
+        layout.prop(self, "extended", text="Extended")
 
     def execute(self, spline, location):
         spline.update()

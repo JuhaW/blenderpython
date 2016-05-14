@@ -22,16 +22,18 @@ objectTypeItems = [
     ("Point Lamp", "Point Lamp", "", "LAMP_POINT", 3),
     ("Curve 2D", "Curve 2D", "", "FORCE_CURVE", 4),
     ("Curve 3D", "Curve 3D", "", "CURVE_DATA", 5),
-    ("Empty", "Empty", "", "EMPTY_DATA", 6) ]
+    ("Empty", "Empty", "", "EMPTY_DATA", 6)]
 
 emptyDrawTypes = []
 for item in bpy.types.Object.bl_rna.properties["empty_draw_type"].enum_items:
-    emptyDrawTypes.append({"value" : item.identifier, "name" : item.name})
+    emptyDrawTypes.append({"value": item.identifier, "name": item.name})
 emptyDrawTypeItems = enumItemsFromDicts(emptyDrawTypes)
 
+
 class an_ObjectNamePropertyGroup(bpy.types.PropertyGroup):
-    objectName = StringProperty(name = "Object Name", default = "", update = propertyChanged)
-    objectIndex = IntProperty(name = "Object Index", default = 0, update = propertyChanged)
+    objectName = StringProperty(name="Object Name", default="", update=propertyChanged)
+    objectIndex = IntProperty(name="Object Index", default=0, update=propertyChanged)
+
 
 class ObjectInstancerNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ObjectInstancerNode"
@@ -47,31 +49,31 @@ class ObjectInstancerNode(bpy.types.Node, AnimationNode):
         self.resetInstances = True
         propertyChanged()
 
-    linkedObjects = CollectionProperty(type = an_ObjectNamePropertyGroup)
-    resetInstances = BoolProperty(default = False, update = propertyChanged)
+    linkedObjects = CollectionProperty(type=an_ObjectNamePropertyGroup)
+    resetInstances = BoolProperty(default=False, update=propertyChanged)
 
-    copyFromSource = BoolProperty(name = "Copy from Source",
-        default = True, update = copyFromSourceChanged)
+    copyFromSource = BoolProperty(name="Copy from Source",
+                                  default=True, update=copyFromSourceChanged)
 
-    deepCopy = BoolProperty(name = "Deep Copy", default = False, update = resetInstancesEvent,
-        description = "Make the instances independent of the source object (e.g. copy mesh)")
+    deepCopy = BoolProperty(name="Deep Copy", default=False, update=resetInstancesEvent,
+                            description="Make the instances independent of the source object (e.g. copy mesh)")
 
-    objectType = EnumProperty(name = "Object Type", default = "Mesh",
-        items = objectTypeItems, update = resetInstancesEvent)
+    objectType = EnumProperty(name="Object Type", default="Mesh",
+                              items=objectTypeItems, update=resetInstancesEvent)
 
-    copyObjectProperties = BoolProperty(name = "Copy Full Object", default = False,
-        description = "Enable this to copy modifiers/constrains/... from the source object.",
-        update = resetInstancesEvent)
+    copyObjectProperties = BoolProperty(name="Copy Full Object", default=False,
+                                        description="Enable this to copy modifiers/constrains/... from the source object.",
+                                        update=resetInstancesEvent)
 
-    removeAnimationData = BoolProperty(name = "Remove Animation Data", default = True,
-        description = "Remove the active action on the instance; This is useful when you want to animate the object yourself",
-        update = resetInstancesEvent)
+    removeAnimationData = BoolProperty(name="Remove Animation Data", default=True,
+                                       description="Remove the active action on the instance; This is useful when you want to animate the object yourself",
+                                       update=resetInstancesEvent)
 
-    parentInstances = BoolProperty(name = "Parent to Main Container",
-        default = True, update = resetInstancesEvent)
+    parentInstances = BoolProperty(name="Parent to Main Container",
+                                   default=True, update=resetInstancesEvent)
 
-    emptyDrawType = EnumProperty(name = "Empty Draw Type", default = "PLAIN_AXES",
-        items = emptyDrawTypeItems, update = resetInstancesEvent)
+    emptyDrawType = EnumProperty(name="Empty Draw Type", default="PLAIN_AXES",
+                                 items=emptyDrawTypeItems, update=resetInstancesEvent)
 
     def create(self):
         self.updateInputSockets()
@@ -88,33 +90,34 @@ class ObjectInstancerNode(bpy.types.Node, AnimationNode):
     def draw(self, layout):
         layout.prop(self, "copyFromSource")
         if self.copyFromSource:
-            layout.prop(self, "copyObjectProperties", text = "Copy Full Object")
+            layout.prop(self, "copyObjectProperties", text="Copy Full Object")
             layout.prop(self, "deepCopy")
         else:
-            layout.prop(self, "objectType", text = "")
+            layout.prop(self, "objectType", text="")
             if self.objectType == "Empty":
-                layout.prop(self, "emptyDrawType", text = "")
+                layout.prop(self, "emptyDrawType", text="")
 
     def drawAdvanced(self, layout):
         layout.prop(self, "parentInstances")
         layout.prop(self, "removeAnimationData")
 
         self.invokeFunction(layout, "resetObjectDataOnAllInstances",
-            text = "Reset Source Data",
-            description = "Reset the source data on all instances")
+                            text="Reset Source Data",
+                            description="Reset the source data on all instances")
         self.invokeFunction(layout, "unlinkInstancesFromNode",
-            confirm = True,
-            text = "Unlink Instances from Node",
-            description = "This will make sure that the objects won't be removed if you remove the Replicate Node.")
+                            confirm=True,
+                            text="Unlink Instances from Node",
+                            description="This will make sure that the objects won't be removed if you remove the Replicate Node.")
 
         layout.separator()
-        self.invokeFunction(layout, "hideRelationshipLines", text = "Hide Relationship Lines", icon = "RESTRICT_VIEW_OFF")
-
+        self.invokeFunction(layout, "hideRelationshipLines", text="Hide Relationship Lines", icon="RESTRICT_VIEW_OFF")
 
     def getExecutionCode(self):
         # support for older nodes which didn't have a scene list input
-        if "Scenes" in self.inputs: yield "_scenes = set(scenes)"
-        else: yield "_scenes = {scene}"
+        if "Scenes" in self.inputs:
+            yield "_scenes = set(scenes)"
+        else:
+            yield "_scenes = {scene}"
 
         if self.copyFromSource:
             yield "objects = self.getInstances_WithSource(instancesAmount, sourceObject, _scenes)"
@@ -159,7 +162,6 @@ class ObjectInstancerNode(bpy.types.Node, AnimationNode):
 
         return self.getOutputObjects(instancesAmount, sourceObject, scenes)
 
-
     def getOutputObjects(self, instancesAmount, sourceObject, scenes):
         objects = []
 
@@ -168,8 +170,10 @@ class ObjectInstancerNode(bpy.types.Node, AnimationNode):
         indicesToRemove = []
         for i, item in enumerate(self.linkedObjectsList):
             object = self.getObjectFromItem(item)
-            if object is None: indicesToRemove.append(i)
-            else: objects.append(object)
+            if object is None:
+                indicesToRemove.append(i)
+            else:
+                objects.append(object)
 
         self.removeObjectFromItemIndices(indicesToRemove)
 
@@ -213,7 +217,7 @@ class ObjectInstancerNode(bpy.types.Node, AnimationNode):
         self.linkedObjects.clear()
 
     def removeLastObject(self):
-        self.removeObjectFromItemIndex(len(self.linkedObjects)-1)
+        self.removeObjectFromItemIndex(len(self.linkedObjects) - 1)
 
     def removeObjectFromItemIndices(self, indices):
         for offset, index in enumerate(indices):
@@ -237,7 +241,8 @@ class ObjectInstancerNode(bpy.types.Node, AnimationNode):
             self.removeObjectData(data, type)
 
     def removeObjectData(self, data, type):
-        if data is None: return # the object was an empty
+        if data is None:
+            return  # the object was an empty
         if data.users == 0:
             if type == "MESH":
                 bpy.data.meshes.remove(data)
@@ -258,14 +263,16 @@ class ObjectInstancerNode(bpy.types.Node, AnimationNode):
 
     def removeShapeKeys(self, object):
         # don't remove the shape key if it is used somewhere else
-        if object.type not in ("MESH", "CURVE", "LATTICE"): return
-        if object.data.shape_keys is None: return
-        if object.data.shape_keys.user.users > 1: return
+        if object.type not in ("MESH", "CURVE", "LATTICE"):
+            return
+        if object.data.shape_keys is None:
+            return
+        if object.data.shape_keys.user.users > 1:
+            return
 
         object.active_shape_key_index = 0
         while object.active_shape_key is not None:
             object.shape_key_remove(object.active_shape_key)
-
 
     def createNewObjects(self, amount, sourceObject, scenes):
         objects = []
@@ -279,7 +286,8 @@ class ObjectInstancerNode(bpy.types.Node, AnimationNode):
     def appendNewObject(self, name, sourceObject, scenes):
         object = self.newInstance(name, sourceObject, scenes)
         for scene in scenes:
-            if scene is not None: scene.objects.link(object)
+            if scene is not None:
+                scene.objects.link(object)
         linkedItem = self.linkedObjects.add()
         linkedItem.objectName = object.name
         linkedItem.objectIndex = bpy.data.objects.find(object.name)
@@ -319,20 +327,20 @@ class ObjectInstancerNode(bpy.types.Node, AnimationNode):
             if self.objectType == "Mesh":
                 return bpy.data.meshes.new(getPossibleMeshName("instance mesh"))
             elif self.objectType == "Text":
-                return bpy.data.curves.new(getPossibleCurveName("instance text"), type = "FONT")
+                return bpy.data.curves.new(getPossibleCurveName("instance text"), type="FONT")
             elif self.objectType == "Camera":
                 return bpy.data.cameras.new(getPossibleCameraName("instance camera"))
             elif self.objectType == "Point Lamp":
-                return bpy.data.lamps.new(getPossibleLampName("instance lamp"), type = "POINT")
+                return bpy.data.lamps.new(getPossibleLampName("instance lamp"), type="POINT")
             elif self.objectType.startswith("Curve"):
-                curve = bpy.data.curves.new(getPossibleCurveName("instance curve"), type = "CURVE")
+                curve = bpy.data.curves.new(getPossibleCurveName("instance curve"), type="CURVE")
                 curve.dimensions = self.objectType[-2:]
                 return curve
         return None
 
     def unlinkInstance(self, object):
         if bpy.context.mode != "OBJECT" and bpy.context.active_object == object:
-            bpy.ops.object.mode_set(mode = "OBJECT")
+            bpy.ops.object.mode_set(mode="OBJECT")
         for scene in bpy.data.scenes:
             if object.name in scene.objects:
                 scene.objects.unlink(object)

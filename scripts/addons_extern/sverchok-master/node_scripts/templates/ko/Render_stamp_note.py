@@ -6,7 +6,7 @@ def sv_main(st=[], size=12):
     in_sockets = [
         ['s', 'Formula2:"txt"+str(x)', st],
         ['s', 'Size of Note(int8-64)', size]
-        ]
+    ]
 
     if st:
 

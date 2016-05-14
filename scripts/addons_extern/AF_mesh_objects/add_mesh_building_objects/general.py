@@ -6,7 +6,7 @@
 #       - id2 = Housed-open staircase
 #       - id3 = Box staircase
 #       - id4 = Circular staircase
-# 
+#
 # Paul "BrikBot" Marshall
 # Created: September 19, 2011
 # Last Modified: January 29, 2011
@@ -41,15 +41,17 @@ from bpy_extras import object_utils
 from math import atan
 from mathutils import Vector
 
-class General:
-    def __init__(self,rise,run,N):
-        self.stop=float(N)*Vector([run,0,rise])
-        self.slope=rise/run
-        self.angle=atan(self.slope)
-        #identical quads for all objects except stringer
-        self.faces=[[0,1,3,2],[0,1,5,4],[0,2,6,4],[4,5,7,6],[2,3,7,6],[1,3,7,5]]
 
-    def Make_mesh(self, verts, faces, name):        
+class General:
+
+    def __init__(self, rise, run, N):
+        self.stop = float(N) * Vector([run, 0, rise])
+        self.slope = rise / run
+        self.angle = atan(self.slope)
+        # identical quads for all objects except stringer
+        self.faces = [[0, 1, 3, 2], [0, 1, 5, 4], [0, 2, 6, 4], [4, 5, 7, 6], [2, 3, 7, 6], [1, 3, 7, 5]]
+
+    def Make_mesh(self, verts, faces, name):
         # Create new mesh
         mesh = bpy.data.meshes.new(name)
 

@@ -2,6 +2,7 @@ import bpy
 from ... base_types.node import AnimationNode
 from . spline_evaluation_base import SplineEvaluationBase
 
+
 class GetSplineSamplesNode(bpy.types.Node, AnimationNode, SplineEvaluationBase):
     bl_idname = "an_GetSplineSamplesNode"
     bl_label = "Get Spline Samples"
@@ -19,7 +20,7 @@ class GetSplineSamplesNode(bpy.types.Node, AnimationNode, SplineEvaluationBase):
         self.outputs.new("an_VectorListSocket", "Tangents", "tangents")
 
     def draw(self, layout):
-        layout.prop(self, "parameterType", text = "")
+        layout.prop(self, "parameterType", text="")
 
     def drawAdvanced(self, layout):
         col = layout.column()
@@ -28,7 +29,8 @@ class GetSplineSamplesNode(bpy.types.Node, AnimationNode, SplineEvaluationBase):
 
     def getExecutionCode(self):
         isLinked = self.getLinkedOutputsDict()
-        if not (isLinked["positions"] or isLinked["tangents"]): return []
+        if not (isLinked["positions"] or isLinked["tangents"]):
+            return []
 
         lines = []
         add = lines.append
@@ -36,11 +38,15 @@ class GetSplineSamplesNode(bpy.types.Node, AnimationNode, SplineEvaluationBase):
         add("if spline.isEvaluable:")
 
         if self.parameterType == "UNIFORM":
-            if isLinked["positions"]: add("    positions = spline.getUniformSamples(amount, start, end, self.resolution)")
-            if isLinked["tangents"]: add("    tangents = spline.getUniformTangentSamples(amount, start, end, self.resolution)")
+            if isLinked["positions"]:
+                add("    positions = spline.getUniformSamples(amount, start, end, self.resolution)")
+            if isLinked["tangents"]:
+                add("    tangents = spline.getUniformTangentSamples(amount, start, end, self.resolution)")
         elif self.parameterType == "RESOLUTION":
-            if isLinked["positions"]: add("    positions = spline.getSamples(amount, start, end)")
-            if isLinked["tangents"]: add("    tangents = spline.getTangentSamples(amount, start, end)")
+            if isLinked["positions"]:
+                add("    positions = spline.getSamples(amount, start, end)")
+            if isLinked["tangents"]:
+                add("    tangents = spline.getTangentSamples(amount, start, end)")
 
         add("else: positions, tangents = [], []")
 

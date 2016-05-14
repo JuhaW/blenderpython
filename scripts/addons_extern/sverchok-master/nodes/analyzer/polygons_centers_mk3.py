@@ -21,7 +21,8 @@ from mathutils import Vector, Matrix, geometry
 from bpy.props import BoolProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (SvSetSocketAnyType, SvGetSocketAnyType,
-                        Vector_generate, Vector_degenerate, updateNode)
+                                     Vector_generate, Vector_degenerate, updateNode)
+
 
 class CentersPolsNodeMK3(bpy.types.Node, SverchCustomTreeNode):
     ''' Centers of polygons of mesh (not including matrixes, so apply scale-rot-loc ctrl+A) '''
@@ -29,11 +30,10 @@ class CentersPolsNodeMK3(bpy.types.Node, SverchCustomTreeNode):
     bl_label = 'Centers polygons'
     bl_icon = 'OUTLINER_OB_EMPTY'
 
-    Separate = BoolProperty(name="Separate", 
-                            description="separate by objects", 
+    Separate = BoolProperty(name="Separate",
+                            description="separate by objects",
                             default=True,
                             update=updateNode)
-
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "Separate", text="Separate")
@@ -50,12 +50,12 @@ class CentersPolsNodeMK3(bpy.types.Node, SverchCustomTreeNode):
         if self.outputs['Centers'].is_linked or self.outputs['Normals'].is_linked or \
                 self.outputs['Origins'].is_linked or self.outputs['Norm_abs'].is_linked:
             if 'Polygons' in self.inputs and 'Vertices' in self.inputs \
-                and self.inputs['Polygons'].is_linked and self.inputs['Vertices'].is_linked:
+                    and self.inputs['Polygons'].is_linked and self.inputs['Vertices'].is_linked:
 
                 pols_ = SvGetSocketAnyType(self, self.inputs['Polygons'])
                 vers_tupls = SvGetSocketAnyType(self, self.inputs['Vertices'])
                 vers_vects = Vector_generate(vers_tupls)
-                
+
                 # make mesh temp утилитарно - удалить в конце
                 mat_collect = []
                 normals_out = []
@@ -74,22 +74,22 @@ class CentersPolsNodeMK3(bpy.types.Node, SverchCustomTreeNode):
                         p0_xdirs.append(v0)
                         # normals
                         norm = geometry.normal(v0, v1, v2)
-                        normals.append(norm)                       
+                        normals.append(norm)
                         # centrs
-                        x,y,z = zip(*[verst[poi] for poi in p])
-                        x,y,z = sum(x)/len(x), sum(y)/len(y), sum(z)/len(z)
-                        current_center = Vector((x,y,z))
+                        x, y, z = zip(*[verst[poi] for poi in p])
+                        x, y, z = sum(x) / len(x), sum(y) / len(y), sum(z) / len(z)
+                        current_center = Vector((x, y, z))
                         centrs.append(current_center)
                         # normal absolute !!!
                         # это совершенно нормально!!! ;-)
-                        norm_abs.append(current_center+norm)
-                        
+                        norm_abs.append(current_center + norm)
+
                         if self.Separate:
-                            norm_abs_out.append(norm_abs)    
+                            norm_abs_out.append(norm_abs)
                             origins.append(centrs)
                             normals_out.append(normals)
                         else:
-                            norm_abs_out.extend(norm_abs)    
+                            norm_abs_out.extend(norm_abs)
                             origins.extend(centrs)
                             normals_out.extend(normals)
                     mat_collect_ = []
@@ -123,9 +123,6 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(CentersPolsNodeMK3)
-    
+
 if __name__ == '__main__':
     register()
-
-
-

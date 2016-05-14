@@ -25,7 +25,7 @@ from mathutils import Vector
 
 from sverchok.node_tree import SverchCustomTreeNode, VerticesSocket, StringsSocket
 from sverchok.data_structure import (updateNode, fullList,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 def generate_bezier(verts=[], num_verts=20):
@@ -35,7 +35,7 @@ def generate_bezier(verts=[], num_verts=20):
     arc_verts = bezlerp(knot1, ctrl_1, ctrl_2, knot2, max(3, num_verts))
 
     arc_verts = [v[:] for v in arc_verts]
-    arc_edges = [(n, n+1) for n in range(len(arc_verts)-1)]
+    arc_edges = [(n, n + 1) for n in range(len(arc_verts) - 1)]
     return arc_verts, arc_edges
 
 

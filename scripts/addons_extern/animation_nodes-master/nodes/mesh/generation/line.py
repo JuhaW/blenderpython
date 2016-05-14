@@ -1,6 +1,7 @@
 import bpy
 from .... base_types.node import AnimationNode
 
+
 class LineMeshNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_LineMeshNode"
     bl_label = "Line Mesh"

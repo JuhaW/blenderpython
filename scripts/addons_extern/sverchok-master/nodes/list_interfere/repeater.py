@@ -21,7 +21,7 @@ from bpy.props import BoolProperty, IntProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, changable_sockets,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class ListRepeaterNode(bpy.types.Node, SverchCustomTreeNode):
@@ -59,7 +59,7 @@ class ListRepeaterNode(bpy.types.Node, SverchCustomTreeNode):
             inputsocketname = 'Data'
             outputsocketname = ['Data', ]
             changable_sockets(self, inputsocketname, outputsocketname)
-    
+
     def process(self):
         if self.inputs['Data'].is_linked:
             data = SvGetSocketAnyType(self, self.inputs['Data'])
@@ -86,11 +86,11 @@ class ListRepeaterNode(bpy.types.Node, SverchCustomTreeNode):
         if level:
             out = []
             for idx, obj in enumerate(data):
-                out.append(self.count(obj, level-1, number, idx))
+                out.append(self.count(obj, level - 1, number, idx))
 
         else:
             out = []
-            indx = min(cou, len(number)-1)
+            indx = min(cou, len(number) - 1)
             for i in range(int(number[indx])):
                 out.append(data)
         return out

@@ -1,5 +1,6 @@
 from ... import tree_info
 
+
 def _updateSubprogramInvokerNodes():
     tree_info.updateIfNecessary()
     for node in tree_info.getNodesByType("an_InvokeSubprogramNode"):
@@ -9,13 +10,17 @@ def _updateSubprogramInvokerNodes():
 
 subprogramChanged = False
 
+
 def forceSubprogramUpdate():
     _updateSubprogramInvokerNodes()
 
+
 def updateIfNecessary():
     global subprogramChanged
-    if subprogramChanged: _updateSubprogramInvokerNodes()
+    if subprogramChanged:
+        _updateSubprogramInvokerNodes()
     subprogramChanged = False
+
 
 def subprogramInterfaceChanged():
     from ... events import treeChanged
@@ -25,6 +30,7 @@ def subprogramInterfaceChanged():
 
 
 class SubprogramData:
+
     def __init__(self):
         self.inputs = []
         self.outputs = []
@@ -33,7 +39,7 @@ class SubprogramData:
         data = SocketData(idName, identifier, text, defaultValue)
         self.inputs.append(data)
 
-    def newOutput(self, idName, identifier, text, defaultValue = None):
+    def newOutput(self, idName, identifier, text, defaultValue=None):
         data = SocketData(idName, identifier, text, defaultValue)
         self.outputs.append(data)
 
@@ -60,7 +66,8 @@ class SubprogramData:
     def applySockets(self, node, oldSockets, nodeSockets, socketData):
         for i, data in enumerate(socketData):
             couldUseOldSocket = self.changeExistingSocket(oldSockets, data, i)
-            if couldUseOldSocket: continue
+            if couldUseOldSocket:
+                continue
             newSocket = self.newSocketFromData(nodeSockets, data)
             newSocket.moveTo(i)
 
@@ -90,7 +97,9 @@ class SubprogramData:
         for socket in nodeSockets[len(socketData):]:
             socket.remove()
 
+
 class SocketData:
+
     def __init__(self, idName, identifier, text, defaultValue):
         self.idName = idName
         self.identifier = identifier

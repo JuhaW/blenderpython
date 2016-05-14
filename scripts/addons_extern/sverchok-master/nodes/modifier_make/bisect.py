@@ -23,8 +23,8 @@ from mathutils import Vector
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode,
-                            Matrix_generate, Vector_generate,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     Matrix_generate, Vector_generate,
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 # based on CrossSectionNode
 # but using python bmesh code for driving

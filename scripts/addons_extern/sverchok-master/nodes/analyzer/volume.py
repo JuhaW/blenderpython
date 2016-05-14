@@ -21,8 +21,8 @@ import bmesh
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata
 from sverchok.data_structure import (dataCorrect, updateNode,
-                            SvSetSocketAnyType, SvGetSocketAnyType,
-                            Vector_generate)
+                                     SvSetSocketAnyType, SvGetSocketAnyType,
+                                     Vector_generate)
 
 
 class SvVolumeNode(bpy.types.Node, SverchCustomTreeNode):
@@ -48,13 +48,13 @@ class SvVolumeNode(bpy.types.Node, SverchCustomTreeNode):
             for verts_obj, faces_obj in zip(vertices, faces):
                 # this is for one object
                 bme = bmesh_from_pydata(verts_obj, [], faces_obj)
-                geom_in = bme.verts[:]+bme.edges[:]+bme.faces[:]
+                geom_in = bme.verts[:] + bme.edges[:] + bme.faces[:]
                 bmesh.ops.recalc_face_normals(bme, faces=bme.faces[:])
                 # calculation itself
                 out.append(bme.calc_volume())
                 bme.clear()
                 bme.free()
-                
+
             if self.outputs['Volume'].is_linked:
                 SvSetSocketAnyType(self, 'Volume', out)
 
@@ -82,6 +82,7 @@ class SvVolumeNode(bpy.types.Node, SverchCustomTreeNode):
             VOLUME += det/6
         '''
 
+
 def register():
     bpy.utils.register_class(SvVolumeNode)
 
@@ -91,4 +92,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-

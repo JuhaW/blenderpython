@@ -21,8 +21,8 @@ from bpy.props import BoolProperty, IntProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, changable_sockets,
-                            SvSetSocketAnyType, SvGetSocketAnyType,
-                            levelsOflist)
+                                     SvSetSocketAnyType, SvGetSocketAnyType,
+                                     levelsOflist)
 
 
 class ListFLNode(bpy.types.Node, SverchCustomTreeNode):
@@ -43,7 +43,7 @@ class ListFLNode(bpy.types.Node, SverchCustomTreeNode):
         layout.prop(self, "level", text="level")
 
     def sv_init(self, context):
-        
+
         self.inputs.new('StringsSocket', "Data", "Data")
         self.outputs.new('StringsSocket', "Middl", "Middl")
         self.outputs.new('StringsSocket', "First", "First")
@@ -53,19 +53,19 @@ class ListFLNode(bpy.types.Node, SverchCustomTreeNode):
         if self.inputs['Data'].links:
             # адаптивный сокет
             inputsocketname = 'Data'
-            outputsocketname = ["Middl",'First', 'Last']
+            outputsocketname = ["Middl", 'First', 'Last']
             changable_sockets(self, inputsocketname, outputsocketname)
-    
+
     def process(self):
         if 'First' in self.outputs and self.outputs['First'].is_linked or \
                 'Last' in self.outputs and self.outputs['Last'].is_linked or \
                 'Middl' in self.outputs and self.outputs['Middl'].is_linked:
             data = SvGetSocketAnyType(self, self.inputs['Data'])
-            
+
             # blocking too height values of levels, reduce
-            levels = levelsOflist(data)-2
+            levels = levelsOflist(data) - 2
             if levels >= self.level:
-                levels = self.level-1
+                levels = self.level - 1
             elif levels < 1:
                 levels = 1
             # assign out
@@ -83,7 +83,7 @@ class ListFLNode(bpy.types.Node, SverchCustomTreeNode):
         out = []
         if level:
             for obj in data:
-                out.append(self.count(obj, level-1, mode))
+                out.append(self.count(obj, level - 1, mode))
         elif type(data) in [tuple, list]:
             if mode == 0:
                 out.append(data[0])
@@ -102,4 +102,3 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(ListFLNode)
-

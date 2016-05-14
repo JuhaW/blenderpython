@@ -7,6 +7,7 @@ pointTypeItems = [
     ("POINT", "Point", "Add a normal point to the spline"),
     ("BEZIER_POINT", "Bezier Point", "Add a point with handles")]
 
+
 class AppendPointToSplineNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_AppendPointToSplineNode"
     bl_label = "Append Point to Spline"
@@ -16,7 +17,7 @@ class AppendPointToSplineNode(bpy.types.Node, AnimationNode):
         self.inputs["Right Handle"].hide = self.pointType != "BEZIER_POINT"
         propertyChanged(self, context)
 
-    pointType = EnumProperty(name = "Point Type", default = "POINT", items = pointTypeItems, update = settingChanged)
+    pointType = EnumProperty(name="Point Type", default="POINT", items=pointTypeItems, update=settingChanged)
 
     def create(self):
         self.inputs.new("an_SplineSocket", "Spline", "spline").dataIsModified = True
@@ -27,7 +28,7 @@ class AppendPointToSplineNode(bpy.types.Node, AnimationNode):
         self.settingChanged(bpy.context)
 
     def draw(self, layout):
-        layout.prop(self, "pointType", text = "")
+        layout.prop(self, "pointType", text="")
 
     def execute(self, spline, point, leftHandle, rightHandle):
         if self.pointType == "BEZIER_POINT" and spline.type == "BEZIER":

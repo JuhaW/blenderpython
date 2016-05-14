@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class TransformSplineNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_TransformSplineNode"
     bl_label = "Transform Spline"

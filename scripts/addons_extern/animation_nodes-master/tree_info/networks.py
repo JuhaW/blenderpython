@@ -2,7 +2,9 @@ from itertools import chain
 from collections import defaultdict
 from . network import NodeNetwork
 
+
 class NodeNetworks:
+
     def __init__(self):
         self._reset()
 
@@ -16,7 +18,8 @@ class NodeNetworks:
 
         networksByIdentifier = defaultdict(list)
         for nodes in self.iterNodeGroups():
-            if not self.groupContainsAnimationNodes(nodes): continue
+            if not self.groupContainsAnimationNodes(nodes):
+                continue
 
             network = NodeNetwork(nodes, self.forestData)
             networksByIdentifier[network.identifier].append(network)

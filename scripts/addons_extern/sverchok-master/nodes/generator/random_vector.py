@@ -22,7 +22,7 @@ from mathutils.noise import seed_set, random_unit_vector
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, match_long_repeat,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class RandomVectorNode(bpy.types.Node, SverchCustomTreeNode):
@@ -76,7 +76,6 @@ class RandomVectorNode(bpy.types.Node, SverchCustomTreeNode):
                 Random.append([random_unit_vector().to_tuple() for i in range(int(max(1, c)))])
 
             SvSetSocketAnyType(self, 'Random', Random)
-
 
 
 def register():

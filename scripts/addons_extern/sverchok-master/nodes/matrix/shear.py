@@ -22,7 +22,7 @@ from mathutils import Matrix
 
 from sverchok.node_tree import SverchCustomTreeNode, StringsSocket
 from sverchok.data_structure import (updateNode, fullList, Matrix_listing,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class MatrixShearNode(bpy.types.Node, SverchCustomTreeNode):
@@ -34,9 +34,9 @@ class MatrixShearNode(bpy.types.Node, SverchCustomTreeNode):
     # select Shear plane
 
     mode_items = [
-        ("XY",       "XY-plane",        ""),
-        ("XZ",       "XZ-plane",        ""),
-        ("YZ",       "YZ-plane",        ""),
+        ("XY", "XY-plane", ""),
+        ("XZ", "XZ-plane", ""),
+        ("YZ", "YZ-plane", ""),
     ]
     factor1_ = FloatProperty(name='Factor 1', description='Factor1',
                              default=0.0,
@@ -61,12 +61,12 @@ class MatrixShearNode(bpy.types.Node, SverchCustomTreeNode):
         if not self.outputs['Matrix'].is_linked:
             return
         # inputs
-        
+
         factor1 = self.inputs['Factor1'].sv_get()
         factor2 = self.inputs['Factor2'].sv_get()
-        
+
         # outputs
-        
+
         max_l = max(len(factor1), len(factor2))
         fullList(factor1, max_l)
         fullList(factor2, max_l)

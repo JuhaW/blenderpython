@@ -7,39 +7,41 @@ import struct
 from .. import common
 from .. import pmx
 
+
 class Writer(common.BinaryWriter):
     """pmx writer
     """
+
     def __init__(self, ios,
-            text_encoding, extended_uv,
-            vertex_index_size, texture_index_size, material_index_size,
-            bone_index_size, morph_index_size, rigidbody_index_size):
+                 text_encoding, extended_uv,
+                 vertex_index_size, texture_index_size, material_index_size,
+                 bone_index_size, morph_index_size, rigidbody_index_size):
         super(Writer, self).__init__(ios)
-        if text_encoding==0:
+        if text_encoding == 0:
             def write_text(unicode):
                 if not unicode:
                     self.write_int(0, 4)
                 else:
-                    utf16=unicode.encode('utf-16-le') 
+                    utf16 = unicode.encode('utf-16-le')
                     self.write_int(len(utf16), 4)
                     self.write_bytes(utf16)
-            self.write_text=write_text
-        elif text_encoding==1:
+            self.write_text = write_text
+        elif text_encoding == 1:
             def write_text(unicode):
-               utf8=unicode.encode('utf8') 
-               self.write_int(len(utf8), 4)
-               self.write_bytes(utf8)
-            self.write_text=write_text
+                utf8 = unicode.encode('utf8')
+                self.write_int(len(utf8), 4)
+                self.write_bytes(utf8)
+            self.write_text = write_text
         else:
             raise WriteError(
-                    "invalid text_encoding: {0}".format(text_encoding))
+                "invalid text_encoding: {0}".format(text_encoding))
 
-        self.write_vertex_index=lambda index: self.write_int(index, vertex_index_size)
-        self.write_texture_index=lambda index: self.write_int(index, texture_index_size)
-        self.write_material_index=lambda index: self.write_int(index, material_index_size)
-        self.write_bone_index=lambda index: self.write_int(index, bone_index_size)
-        self.write_morph_index=lambda index: self.write_int(index, morph_index_size)
-        self.write_rigidbody_index=lambda index: self.write_int(index, rigidbody_index_size)
+        self.write_vertex_index = lambda index: self.write_int(index, vertex_index_size)
+        self.write_texture_index = lambda index: self.write_int(index, texture_index_size)
+        self.write_material_index = lambda index: self.write_int(index, material_index_size)
+        self.write_bone_index = lambda index: self.write_int(index, bone_index_size)
+        self.write_morph_index = lambda index: self.write_int(index, morph_index_size)
+        self.write_rigidbody_index = lambda index: self.write_int(index, rigidbody_index_size)
 
     def write_vertices(self, vertices):
         self.write_int(len(vertices), 4)
@@ -71,7 +73,7 @@ class Writer(common.BinaryWriter):
             self.write_float(deform.weight3)
         else:
             raise common.WriteException(
-                    "unknown deform type: {0}".format(deform.type))
+                "unknown deform type: {0}".format(deform.type))
 
     def write_indices(self, indices):
         self.write_int(len(indices), 4)
@@ -100,13 +102,13 @@ class Writer(common.BinaryWriter):
             self.write_texture_index(m.sphere_texture_index)
             self.write_int(m.sphere_mode, 1)
             self.write_int(m.toon_sharing_flag, 1)
-            if m.toon_sharing_flag==0:
+            if m.toon_sharing_flag == 0:
                 self.write_texture_index(m.toon_texture_index)
-            elif m.toon_sharing_flag==1:
+            elif m.toon_sharing_flag == 1:
                 self.write_int(m.toon_texture_index, 1)
             else:
                 raise common.WriteException(
-                        "unknown toon_sharing_flag {0}".format(m.toon_sharing_flag))
+                    "unknown toon_sharing_flag {0}".format(m.toon_sharing_flag))
             self.write_text(m.comment)
             self.write_int(m.vertex_count, 4)
 
@@ -125,8 +127,8 @@ class Writer(common.BinaryWriter):
                 self.write_bone_index(bone.tail_index)
             else:
                 raise common.WriteException(
-                        "unknown bone conenction flag: {0}".format(
-                            bone.getConnectionFlag()))
+                    "unknown bone conenction flag: {0}".format(
+                        bone.getConnectionFlag()))
 
             if bone.getExternalRotationFlag() or bone.getExternalTranslationFlag():
                 self.write_bone_index(bone.effect_index)
@@ -156,16 +158,16 @@ class Writer(common.BinaryWriter):
     def write_ik_link(self, link):
         self.write_bone_index(link.bone_index)
         self.write_int(link.limit_angle, 1)
-        if link.limit_angle==0:
+        if link.limit_angle == 0:
             pass
-        elif link.limit_angle==1:
+        elif link.limit_angle == 1:
             self.write_vector3(link.limit_min)
             self.write_vector3(link.limit_max)
         else:
             raise common.WriteException(
-                    "invalid ik link limit_angle: {0}".format(
-                        link.limit_angle))
- 
+                "invalid ik link limit_angle: {0}".format(
+                    link.limit_angle))
+
     def write_morph(self, morphs):
         self.write_int(len(morphs), 4)
         for m in morphs:
@@ -173,46 +175,46 @@ class Writer(common.BinaryWriter):
             self.write_text(m.english_name)
             self.write_int(m.panel, 1)
             self.write_int(m.morph_type, 1)
-            if m.morph_type==0:
+            if m.morph_type == 0:
                 # todo
                 raise common.WriteException(
-                        "not implemented GroupMorph")
-            elif m.morph_type==1:
+                    "not implemented GroupMorph")
+            elif m.morph_type == 1:
                 self.write_int(len(m.offsets), 4)
                 for o in m.offsets:
                     self.write_vertex_index(o.vertex_index)
                     self.write_vector3(o.position_offset)
-            elif m.morph_type==2:
+            elif m.morph_type == 2:
                 # todo
                 raise common.WriteException(
-                        "not implemented BoneMorph")
-            elif m.morph_type==3:
+                    "not implemented BoneMorph")
+            elif m.morph_type == 3:
                 # todo
                 raise common.WriteException(
-                        "not implemented UvMorph")
-            elif m.morph_type==4:
+                    "not implemented UvMorph")
+            elif m.morph_type == 4:
                 # todo
                 raise common.WriteException(
-                        "not implemented extended UvMorph1")
-            elif m.morph_type==5:
+                    "not implemented extended UvMorph1")
+            elif m.morph_type == 5:
                 # todo
                 raise common.WriteException(
-                        "not implemented extended UvMorph2")
-            elif m.morph_type==6:
+                    "not implemented extended UvMorph2")
+            elif m.morph_type == 6:
                 # todo
                 raise common.WriteException(
-                        "not implemented extended UvMorph3")
-            elif m.morph_type==7:
+                    "not implemented extended UvMorph3")
+            elif m.morph_type == 7:
                 # todo
                 raise common.WriteException(
-                        "not implemented extended UvMorph4")
-            elif m.morph_type==8:
+                    "not implemented extended UvMorph4")
+            elif m.morph_type == 8:
                 # todo
                 raise common.WriteException(
-                        "not implemented extended MaterialMorph")
+                    "not implemented extended MaterialMorph")
             else:
                 raise common.WriteException(
-                        "unknown morph type: {0}".format(m.morph_type))
+                    "unknown morph type: {0}".format(m.morph_type))
 
     def write_display_slots(self, display_slots):
         self.write_int(len(display_slots), 4)
@@ -223,13 +225,13 @@ class Writer(common.BinaryWriter):
             self.write_int(len(s.references), 4)
             for r in s.references:
                 self.write_int(r[0], 1)
-                if r[0]==0:
+                if r[0] == 0:
                     self.write_bone_index(r[1])
-                elif r[0]==1:
+                elif r[0] == 1:
                     self.write_morph_index(r[1])
                 else:
                     raise common.WriteException(
-                            "unknown display_type: {0}".format(r[0]))
+                        "unknown display_type: {0}".format(r[0]))
 
     def write_rigidbodies(self, rigidbodies):
         self.write_int(len(rigidbodies), 4)
@@ -286,7 +288,7 @@ def write(ios, model, text_encoding=0):
     """
     assert(isinstance(ios, io.IOBase))
     assert(isinstance(model, pmx.Model))
-    writer=common.BinaryWriter(ios)
+    writer = common.BinaryWriter(ios)
     # header
     writer.write_bytes(b"PMX ")
     writer.write_float(model.version)
@@ -297,40 +299,41 @@ def write(ios, model, text_encoding=0):
     writer.write_int(text_encoding, 1)
     # extend uv
     writer.write_int(0, 1)
+
     def get_array_size(size):
-        if size<128:
+        if size < 128:
             return 1
-        elif size<32768:
+        elif size < 32768:
             return 2
-        elif size<2147483647:
+        elif size < 2147483647:
             return 4
         else:
             raise common.WriteError(
-                    "invalid array_size: {0}".format(size))
+                "invalid array_size: {0}".format(size))
     # vertex_index_size
-    vertex_index_size=get_array_size(len(model.vertices))
+    vertex_index_size = get_array_size(len(model.vertices))
     writer.write_int(vertex_index_size, 1)
     # texture_index_size
-    texture_index_size=get_array_size(len(model.textures))
+    texture_index_size = get_array_size(len(model.textures))
     writer.write_int(texture_index_size, 1)
     # material_index_size
-    material_index_size=get_array_size(len(model.materials))
+    material_index_size = get_array_size(len(model.materials))
     writer.write_int(material_index_size, 1)
     # bone_index_size
-    bone_index_size=get_array_size(len(model.bones))
+    bone_index_size = get_array_size(len(model.bones))
     writer.write_int(bone_index_size, 1)
     # morph_index_size
-    morph_index_size=get_array_size(len(model.morphs))
+    morph_index_size = get_array_size(len(model.morphs))
     writer.write_int(morph_index_size, 1)
     # rigidbody_index_size
-    rigidbody_index_size=get_array_size(len(model.rigidbodies))
+    rigidbody_index_size = get_array_size(len(model.rigidbodies))
     writer.write_int(rigidbody_index_size, 1)
 
-    writer=Writer(writer.ios, 
-            text_encoding, 0,
-            vertex_index_size, texture_index_size, material_index_size,
-            bone_index_size, morph_index_size, rigidbody_index_size)
- 
+    writer = Writer(writer.ios,
+                    text_encoding, 0,
+                    vertex_index_size, texture_index_size, material_index_size,
+                    bone_index_size, morph_index_size, rigidbody_index_size)
+
     # model info
     writer.write_text(model.name)
     writer.write_text(model.english_name)
@@ -349,7 +352,7 @@ def write(ios, model, text_encoding=0):
     writer.write_joints(model.joints)
     return True
 
+
 def write_to_file(pmx_model, path):
     with io.open(path, "wb") as f:
         return write(f, pmx_model)
-

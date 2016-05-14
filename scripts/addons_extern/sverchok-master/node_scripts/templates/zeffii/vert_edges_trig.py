@@ -2,8 +2,8 @@ def sv_main(num_verts=20, radius=5, num_rings=3, rotation=0.3):
 
     # in boilerplate, could be less verbose
     in_sockets = [
-        ['s', 'num_verts',  num_verts],
-        ['s', 'radius',  radius],
+        ['s', 'num_verts', num_verts],
+        ['s', 'radius', radius],
         ['s', 'num_rings', num_rings],
         ['s', 'rotation', rotation]
     ]

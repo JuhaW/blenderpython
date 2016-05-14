@@ -9,6 +9,7 @@ import io
 import operator
 import functools
 
+
 class AddTeapot(bpy.types.Operator):
     """Add a teapot mesh"""
     bl_idname = "mesh.primitive_teapot_add"
@@ -16,14 +17,14 @@ class AddTeapot(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     resolution = IntProperty(
-            name="Resolution",
-            description="Resolution of the Teapot",
-            default=5, min=2, max=15,
-            )
+        name="Resolution",
+        description="Resolution of the Teapot",
+        default=5, min=2, max=15,
+    )
     objecttype = IntProperty(
-            name="Object Type",
-            description="Type of Bezier Object",
-            default=1, min=1, max=2)
+        name="Object Type",
+        description="Type of Bezier Object",
+        default=1, min=1, max=2)
 
     def execute(self, context):
         verts, faces = make_teapot(self.objecttype,
@@ -31,6 +32,7 @@ class AddTeapot(bpy.types.Operator):
         # Actually create the mesh object from this geometry data.
         obj = create_mesh_object(context, verts, [], faces, "Teapot")
         return {'FINISHED'}
+
 
 def create_mesh_face_hack(faces):
     # FIXME, faces with duplicate vertices shouldn't be created in the first place.
@@ -42,6 +44,7 @@ def create_mesh_face_hack(faces):
                 f_copy.append(i)
         faces_copy.append(f_copy)
     faces[:] = faces_copy
+
 
 def create_mesh_object(context, verts, edges, faces, name):
 
@@ -109,7 +112,7 @@ def make_bezier(ctrlpnts, resolution):
     def makevert(t):
         x, y, z = b1(t) * p1 + b2(t) * p2 + b3(t) * p3 + b4(t) * p4
         return (x, y, z)
-    curveverts = [makevert(i/resolution) for i in range(resolution+1)]
+    curveverts = [makevert(i / resolution) for i in range(resolution + 1)]
     return curveverts
 
 

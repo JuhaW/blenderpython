@@ -34,6 +34,7 @@ class Node():
         data: Information to store in this node
         neighbors (set<Node>): Adjacent nodes to this one
     '''
+
     def __init__(self, data):
         self.data = data
         self.neighbors = set()
@@ -44,6 +45,7 @@ class Node():
     Parameters:
         *args: Argument list of Node objects
     '''
+
     def connect(self, *args):
         for node in args:
             self.neighbors.add(node)
@@ -55,6 +57,7 @@ class Node():
     Returns:
         set<Node>: Reachable nodes
     '''
+
     def getReachable(self):
         reachable = set()
         traversal_stack = [self]
@@ -149,12 +152,12 @@ def pick_object(region, rv3d, x, y, near, far, objects):
         if (not obj.type == 'MESH' or
             obj.mode == 'EDIT' or
             not obj.data.polygons
-        ):
+            ):
             continue
 
         # Cast ray in object space.
         inverse_model_matrix = obj.matrix_world.inverted()
-        location, normal, index =  obj.ray_cast(
+        location, normal, index = obj.ray_cast(
             inverse_model_matrix * ray_start,
             inverse_model_matrix * ray_end
         )[0:3]

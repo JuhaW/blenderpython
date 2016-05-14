@@ -1,4 +1,5 @@
-import sys, traceback
+import sys
+import traceback
 from .. import problems
 from . compile_scripts import compileScript
 from .. problems import ExecutionUnitNotSetup, ExceptionDuringExecution
@@ -7,7 +8,9 @@ from . code_generator import (getInitialVariables,
                               getNodeExecutionLines,
                               linkOutputSocketsToTargets)
 
+
 class MainExecutionUnit:
+
     def __init__(self, network):
         self.network = network
         self.setupScript = ""
@@ -19,7 +22,6 @@ class MainExecutionUnit:
         self.generateScripts()
         self.compileScripts()
         self.execute = self.raiseNotSetupException
-
 
     def setup(self):
         self.executionData = {}
@@ -37,19 +39,18 @@ class MainExecutionUnit:
         try:
             exec(self.executeCodeObject, self.executionData, self.executionData)
         except:
-            print("\n"*5)
+            print("\n" * 5)
             traceback.print_exc()
             ExceptionDuringExecution().report()
-
 
     def getCodes(self):
         return [self.setupScript, self.executeScript]
 
-
-
     def generateScripts(self):
-        try: nodes = self.network.getSortedAnimationNodes()
-        except: return
+        try:
+            nodes = self.network.getSortedAnimationNodes()
+        except:
+            return
 
         variables = getInitialVariables(nodes)
         self.setupScript = getSetupCode(nodes, variables)
@@ -63,9 +64,8 @@ class MainExecutionUnit:
         return "\n".join(lines)
 
     def compileScripts(self):
-        self.setupCodeObject = compileScript(self.setupScript, name = "setup: {}".format(repr(self.network.treeName)))
-        self.executeCodeObject = compileScript(self.executeScript, name = "execution: {}".format(repr(self.network.treeName)))
-
+        self.setupCodeObject = compileScript(self.setupScript, name="setup: {}".format(repr(self.network.treeName)))
+        self.executeCodeObject = compileScript(self.executeScript, name="execution: {}".format(repr(self.network.treeName)))
 
     def raiseNotSetupException(self, *args, **kwargs):
         raise ExecutionUnitNotSetup()

@@ -20,6 +20,7 @@
 
 import bpy
 
+
 def draw_shrinkwrap_ui(layout):
     addon = bpy.context.user_preferences.addons[__package__.split(".")[0]]
     props = addon.preferences.shrinkwrap
@@ -29,25 +30,25 @@ def draw_shrinkwrap_ui(layout):
         row = box.row()
 
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'TRIA_RIGHT', emboss = True
+            "wm.context_toggle", text="", icon='TRIA_RIGHT', emboss=True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
         row.label("Shrinkwrap")
         row.operator(
-            "mesh.sct_shrinkwrap", text = "", icon = 'MOD_SHRINKWRAP'
+            "mesh.sct_shrinkwrap", text="", icon='MOD_SHRINKWRAP'
         )
     else:
-        col = layout.column(align = True)
+        col = layout.column(align=True)
         box = col.box()
         row = box.row()
 
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'TRIA_DOWN', emboss = True
+            "wm.context_toggle", text="", icon='TRIA_DOWN', emboss=True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
         row.label("Shrinkwrap")
         row.operator(
-            "mesh.sct_shrinkwrap", text = "", icon = 'MOD_SHRINKWRAP'
+            "mesh.sct_shrinkwrap", text="", icon='MOD_SHRINKWRAP'
         )
 
         box = col.box()

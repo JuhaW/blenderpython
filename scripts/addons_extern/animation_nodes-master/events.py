@@ -4,7 +4,9 @@ from . import file_tests
 from . import event_handler
 from . utils.handlers import eventHandler
 
+
 class EventState:
+
     def __init__(self):
         self.reset()
         self.isRendering = False
@@ -19,12 +21,18 @@ class EventState:
 
     def getActives(self):
         events = set()
-        if self.treeChanged: events.add("Tree")
-        if self.fileChanged: events.add("File")
-        if self.addonChanged: events.add("Addon")
-        if self.sceneChanged: events.add("Scene")
-        if self.frameChanged: events.add("Frame")
-        if self.propertyChanged: events.add("Property")
+        if self.treeChanged:
+            events.add("Tree")
+        if self.fileChanged:
+            events.add("File")
+        if self.addonChanged:
+            events.add("Addon")
+        if self.sceneChanged:
+            events.add("Scene")
+        if self.frameChanged:
+            events.add("Frame")
+        if self.propertyChanged:
+            events.add("Property")
         return events
 
 event = EventState()
@@ -35,10 +43,12 @@ def sceneUpdated(scene):
     event.sceneChanged = True
     evaluateRaisedEvents()
 
+
 @eventHandler("RENDER_PRE")
 def renderFramePre():
     event.frameChanged = True
     evaluateRaisedEvents()
+
 
 def evaluateRaisedEvents():
     event_handler.update(event.getActives())
@@ -49,8 +59,10 @@ def evaluateRaisedEvents():
 def frameChanged(scene):
     event.frameChanged = True
 
-def propertyChanged(self = None, context = None):
+
+def propertyChanged(self=None, context=None):
     event.propertyChanged = True
+
 
 @eventHandler("FILE_LOAD_POST")
 def fileLoaded():
@@ -58,18 +70,22 @@ def fileLoaded():
     event.fileChanged = True
     treeChanged()
 
+
 @eventHandler("ADDON_LOAD_POST")
 def addonChanged():
     event.addonChanged = True
     treeChanged()
 
-def executionCodeChanged(self = None, context = None):
+
+def executionCodeChanged(self=None, context=None):
     treeChanged()
 
-def networkChanged(self = None, context = None):
+
+def networkChanged(self=None, context=None):
     treeChanged()
 
-def treeChanged(self = None, context = None):
+
+def treeChanged(self=None, context=None):
     event.treeChanged = True
     tree_info.treeChanged()
 
@@ -78,10 +94,12 @@ def treeChanged(self = None, context = None):
 def renderInitialized():
     event.isRendering = True
 
+
 @eventHandler("RENDER_CANCEL")
 @eventHandler("RENDER_COMPLETE")
 def renderEnd():
     event.isRendering = False
+
 
 def isRendering():
     return event.isRendering

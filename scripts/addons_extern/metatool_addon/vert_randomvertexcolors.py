@@ -24,7 +24,7 @@
 from random import random
 import bpy
 
-#bl_info = {
+# bl_info = {
 #    "name": "Random vertex colors",
 #    "author": "michel anders (varkenvarken)",
 #    "version": (0, 0, 1),
@@ -83,4 +83,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

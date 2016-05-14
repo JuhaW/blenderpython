@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class ColorListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_ColorListSocket"
     bl_label = "Color List Socket"

@@ -74,7 +74,7 @@ def generate_icons():
 
     verts = []
     for i in range(verts_count):
-        theta = 2.0 * math.pi * i / verts_count;
+        theta = 2.0 * math.pi * i / verts_count
         verts.append((math.cos(theta) * 0.9, math.sin(theta) * 0.9))
     generate_icon("circle", verts)
 
@@ -97,13 +97,13 @@ def generate_icons():
     seg_len_a = size_a / seg_a
     seg_len_b = size_b / seg_b
     for i in range(seg_a):
-        verts.append((seg_len_a*i-(size_a/2), size_b/2*-1))
+        verts.append((seg_len_a * i - (size_a / 2), size_b / 2 * -1))
     for i in range(seg_b):
-        verts.append((size_a/2, seg_len_b*i-(size_b/2)))
+        verts.append((size_a / 2, seg_len_b * i - (size_b / 2)))
     for i in range(seg_a, 0, -1):
-        verts.append((seg_len_a*i-(size_a/2), size_b/2))
+        verts.append((seg_len_a * i - (size_a / 2), size_b / 2))
     for i in range(seg_b, 0, -1):
-        verts.append((size_a/2*-1, seg_len_b*i-(size_b/2)))
+        verts.append((size_a / 2 * -1, seg_len_b * i - (size_b / 2)))
 
     generate_icon("rectangle", verts)
 
@@ -135,7 +135,7 @@ def generate_icons():
             if v.length > length:
                 length = v.length
         scale = 0.9 / length
-        generate_icon("object", [v*scale for v in verts], [f.indices for f in object_faces])
+        generate_icon("object", [v * scale for v in verts], [f.indices for f in object_faces])
 
 
 def generate_patterns_icons():
@@ -143,7 +143,7 @@ def generate_patterns_icons():
     patterns = bpy.context.scene.perfect_shape.patterns
     for idx, pattern in enumerate(patterns):
         if str(idx) not in pcoll:
-            verts= []
+            verts = []
             length = 0
             for vert in pattern.verts:
                 v = Vector(vert.co[:2])
@@ -151,7 +151,7 @@ def generate_patterns_icons():
                 if v.length > length:
                     length = v.length
             scale = 0.9 / length
-            generate_icon(str(idx), [v*scale for v in verts], [f.indices for f in pattern.faces], "patterns")
+            generate_icon(str(idx), [v * scale for v in verts], [f.indices for f in pattern.faces], "patterns")
 
 
 def generate_icon(name, verts=None, faces=None, coll="shape_types"):
@@ -230,7 +230,7 @@ def generate_icon(name, verts=None, faces=None, coll="shape_types"):
         buffer = buffer[:]
         for idx in range(0, 200 * 200 * 4, 4):
             if buffer[idx] == clear_color[0] and \
-                            buffer[idx + 1] == clear_color[1] and buffer[idx + 2] == clear_color[2]:
+                    buffer[idx + 1] == clear_color[1] and buffer[idx + 2] == clear_color[2]:
                 buffer[idx + 3] = 0.0
 
         thumb.image_pixels_float = buffer

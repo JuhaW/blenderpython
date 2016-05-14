@@ -30,7 +30,8 @@ bl_info = {
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/3D_interaction/Advanced_UI_Menus",
     "category": "User Interface"}
 
-import sys, os
+import sys
+import os
 
 from .Utils.core import *
 from .Utils import keymodes
@@ -55,59 +56,62 @@ from . import symmetry_menu
 from . import texture_menu
 from . import view_menu
 
-addon_files = [ 
-              brush_menu,
-              curve_menu,
-              custom_menu,
-              delete_menu,
-              dyntopo_menu,
-              extrude_menu,
-              layers_window,
-              manipulator_menu,
-              mode_menu,
-              pivot_menu,
-              proportional_menu,
-              selection_menu,
-              shade_menu,
-              snap_menu,
-              stroke_menu,
-              symmetry_menu,
-              texture_menu,
-              view_menu
-              ]
+addon_files = [
+    brush_menu,
+    curve_menu,
+    custom_menu,
+    delete_menu,
+    dyntopo_menu,
+    extrude_menu,
+    layers_window,
+    manipulator_menu,
+    mode_menu,
+    pivot_menu,
+    proportional_menu,
+    selection_menu,
+    shade_menu,
+    snap_menu,
+    stroke_menu,
+    symmetry_menu,
+    texture_menu,
+    view_menu
+]
+
 
 @bpy.app.handlers.persistent
 def scene_update_post_reg(scene):
     # remove handler
     bpy.app.handlers.scene_update_post.remove(scene_update_post_reg)
-    
+
     # disable conflicting hotkeys
     keymodes.opposingkeys(False)
-    
+
     # register all blender classes
     bpy.utils.register_module(__name__)
-    
+
     # register all files
     for addon_file in addon_files:
         addon_file.register()
 
+
 def register():
     # add a handler so blender registers keymaps and stuff after everything has loaded
     bpy.app.handlers.scene_update_post.append(scene_update_post_reg)
- 
+
+
 def unregister():
     # unregister all files
     for addon_file in addon_files:
         addon_file.unregister()
-        
+
     # unregister all blender classes
     bpy.utils.unregister_module(__name__)
-        
+
     # re-enable all the keymaps you disabled
     keymodes.opposingkeys(True)
-    
+
     # delete all the properties you have created
     del_props()
-    
+
 if __name__ == "__main__":
     register()

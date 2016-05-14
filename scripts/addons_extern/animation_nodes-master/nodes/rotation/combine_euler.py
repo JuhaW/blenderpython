@@ -3,12 +3,13 @@ from bpy.props import *
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
 
+
 class CombineEulerNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_CombineEulerNode"
     bl_label = "Combine Euler"
 
-    useDegree = BoolProperty(name = "Use Degree", default = False,
-        update = executionCodeChanged)
+    useDegree = BoolProperty(name="Use Degree", default=False,
+                             update=executionCodeChanged)
 
     def create(self):
         self.inputs.new("an_FloatSocket", "X", "x")

@@ -8,7 +8,9 @@ from . code_generator import (getInitialVariables,
                               linkOutputSocketsToTargets,
                               getLoadSocketValueLine)
 
+
 class LoopExecutionUnit:
+
     def __init__(self, network):
         self.network = network
         self.setupScript = ""
@@ -18,7 +20,6 @@ class LoopExecutionUnit:
         self.generateScript()
         self.compileScript()
         self.execute = self.raiseNotSetupException
-
 
     def setup(self):
         self.executionData = {}
@@ -32,19 +33,18 @@ class LoopExecutionUnit:
         self.executionData.clear()
         self.execute = self.raiseNotSetupException
 
-
     def getCodes(self):
         return [self.setupScript]
 
-
-
     def generateScript(self):
-        try: nodes = self.network.getSortedAnimationNodes()
-        except: return
+        try:
+            nodes = self.network.getSortedAnimationNodes()
+        except:
+            return
 
         variables = getInitialVariables(nodes)
         self.setupScript = getSetupCode(nodes, variables)
-        self.setupScript += "\n"*3
+        self.setupScript += "\n" * 3
         self.setupScript += self.getFunctionGenerationScript(nodes, variables)
 
     def getFunctionGenerationScript(self, nodes, variables):
@@ -55,14 +55,13 @@ class LoopExecutionUnit:
         else:
             return self.get_IterationsAmount(inputNode, nodes, variables)
 
-
     def get_IterationsAmount(self, inputNode, nodes, variables):
         header = self.get_IterationsAmount_Header(inputNode, variables)
-        globalizeStatement = " "*4 + getGlobalizeStatement(nodes, variables)
+        globalizeStatement = " " * 4 + getGlobalizeStatement(nodes, variables)
         generators = indent(self.get_InitializeGenerators(inputNode, variables))
         parameters = indent(self.get_InitializeParameters(inputNode, variables))
         prepareLoop = indent(self.get_IterationsAmount_PrepareLoop(inputNode, variables))
-        loopBody = indent(self.get_LoopBody(inputNode, nodes, variables), amount = 2)
+        loopBody = indent(self.get_LoopBody(inputNode, nodes, variables), amount=2)
         returnStatement = indent([self.get_ReturnStatement(inputNode, variables)])
         return joinLines([header] + [globalizeStatement] + generators + parameters + prepareLoop + loopBody + returnStatement)
 
@@ -84,14 +83,13 @@ class LoopExecutionUnit:
         lines.append("for current_loop_index in range(loop_iterations):")
         return lines
 
-
     def get_IteratorLength(self, inputNode, nodes, variables):
         header = self.get_IteratorLength_Header(inputNode, variables)
-        globalizeStatement = " "*4 + getGlobalizeStatement(nodes, variables)
+        globalizeStatement = " " * 4 + getGlobalizeStatement(nodes, variables)
         generators = indent(self.get_InitializeGenerators(inputNode, variables))
         parameters = indent(self.get_InitializeParameters(inputNode, variables))
         prepareLoop = indent(self.get_IteratorLength_PrepareLoop(inputNode, variables))
-        loopBody = indent(self.get_LoopBody(inputNode, nodes, variables), amount = 2)
+        loopBody = indent(self.get_LoopBody(inputNode, nodes, variables), amount=2)
         returnStatement = indent([self.get_ReturnStatement(inputNode, variables)])
         return joinLines([header] + [globalizeStatement] + generators + parameters + prepareLoop + loopBody + returnStatement)
 
@@ -132,7 +130,6 @@ class LoopExecutionUnit:
         lines.append(loopLine)
         return lines
 
-
     def get_InitializeGenerators(self, inputNode, variables):
         lines = []
         for i, node in enumerate(inputNode.getSortedGeneratorNodes()):
@@ -148,12 +145,12 @@ class LoopExecutionUnit:
                 lines.append(getLoadSocketValueLine(socket, variables))
         return lines
 
-
     def get_LoopBody(self, inputNode, nodes, variables):
         lines = []
         lines.extend(linkOutputSocketsToTargets(inputNode, variables))
         for node in nodes:
-            if node.bl_idname in ("an_LoopInputNode", "an_LoopGeneratorOutputNode", "an_ReassignLoopParameterNode"): continue
+            if node.bl_idname in ("an_LoopInputNode", "an_LoopGeneratorOutputNode", "an_ReassignLoopParameterNode"):
+                continue
             lines.extend(getNodeExecutionLines(node, variables))
             lines.extend(linkOutputSocketsToTargets(node, variables))
         lines.extend(self.get_LoopBreak(inputNode, variables))
@@ -175,8 +172,10 @@ class LoopExecutionUnit:
             operation = "append" if node.addType == "APPEND" else "extend"
             lines.append("if {}:".format(variables[node.conditionSocket]))
             socket = node.addSocket
-            if socket.isUnlinked and socket.isCopyable: expression = getCopyExpression(socket, variables)
-            else: expression = variables[socket]
+            if socket.isUnlinked and socket.isCopyable:
+                expression = getCopyExpression(socket, variables)
+            else:
+                expression = variables[socket]
             lines.append("    {}.{}({})".format(variables[node], operation, expression))
         return lines
 
@@ -184,16 +183,18 @@ class LoopExecutionUnit:
         lines = []
         for node in inputNode.getReassignParameterNodes():
             socket = node.inputs[0]
-            if socket.isUnlinked and socket.isCopyable: expression = getCopyExpression(socket, variables)
-            else: expression = variables[socket]
+            if socket.isUnlinked and socket.isCopyable:
+                expression = getCopyExpression(socket, variables)
+            else:
+                expression = variables[socket]
 
-            if node.conditionSocket is None: conditionPrefix = ""
-            else: conditionPrefix = "if {}: ".format(variables[node.conditionSocket])
+            if node.conditionSocket is None:
+                conditionPrefix = ""
+            else:
+                conditionPrefix = "if {}: ".format(variables[node.conditionSocket])
 
             lines.append("{}{} = {}".format(conditionPrefix, variables[node.linkedParameterSocket], expression))
         return lines
-
-
 
     def get_ReturnStatement(self, inputNode, variables):
         names = []
@@ -202,17 +203,16 @@ class LoopExecutionUnit:
         names.extend([variables[socket] for socket in inputNode.getParameterSockets() if socket.loop.useAsOutput])
         return "return {}".format(", ".join(names))
 
-
-
     def compileScript(self):
-        self.setupCodeObject = compileScript(self.setupScript, name = "group: {}".format(repr(self.network.name)))
-
+        self.setupCodeObject = compileScript(self.setupScript, name="group: {}".format(repr(self.network.name)))
 
     def raiseNotSetupException(self):
         raise ExecutionUnitNotSetup()
 
+
 def joinLines(lines):
     return "\n".join(lines)
 
-def indent(lines, amount = 1):
+
+def indent(lines, amount=1):
     return [" " * (4 * amount) + line for line in lines]

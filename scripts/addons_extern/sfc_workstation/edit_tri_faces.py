@@ -17,7 +17,6 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {
     "name": "Triangle Faces",
     "author": "MKB",
@@ -31,7 +30,6 @@ bl_info = {
     "category": "Mesh"}
 
 
-
 import bpy
 
 
@@ -40,7 +38,7 @@ class TriangleFaces(bpy.types.Operator):
     bl_idname = "mesh.tri_faces"
     bl_label = "Triangle Faces"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
         bpy.ops.mesh.edge_face_add()
         bpy.ops.mesh.inset(use_boundary=False, thickness=1)
@@ -48,7 +46,7 @@ class TriangleFaces(bpy.types.Operator):
         return {'FINISHED'}
 
 
-def operator_draw(self,context):
+def operator_draw(self, context):
     layout = self.layout
     col = layout.column(align=True)
     col.operator("mesh.tri_faces", text="Triangle Faces")
@@ -58,6 +56,7 @@ def register():
     bpy.utils.register_class(TriangleFaces)
     bpy.types.VIEW3D_MT_edit_mesh_extrude.append(operator_draw)
 
+
 def unregister():
     bpy.utils.unregister_class(TriangleFaces)
     bpy.types.VIEW3D_MT_edit_mesh_extrude.remove(operator_draw)
@@ -65,4 +64,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-    

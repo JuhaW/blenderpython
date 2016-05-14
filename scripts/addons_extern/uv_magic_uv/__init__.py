@@ -72,6 +72,8 @@ else:
 import bpy
 
 # registration
+
+
 def view3d_uvmap_menu_fn(self, context):
     self.layout.separator()
     self.layout.menu(muv_menu.MUV_CPUVMenu.bl_idname, icon="PLUGIN")
@@ -104,4 +106,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

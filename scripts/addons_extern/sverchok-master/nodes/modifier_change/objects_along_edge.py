@@ -26,12 +26,14 @@ from bpy.props import IntProperty, EnumProperty, BoolProperty, FloatProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, match_long_repeat, Matrix_generate, Vector_generate, Vector_degenerate
 
+
 def householder(u):
     ''' Householder reflection matrix '''
-    x,y,z = u[0], u[1], u[2]
-    m = Matrix([[x*x, x*y, x*z, 0], [x*y, y*y, y*z, 0], [x*z, y*z, z*z, 0], [0,0,0,0]])
-    h = Matrix() - 2*m
+    x, y, z = u[0], u[1], u[2]
+    m = Matrix([[x * x, x * y, x * z, 0], [x * y, y * y, y * z, 0], [x * z, y * z, z * z, 0], [0, 0, 0, 0]])
+    h = Matrix() - 2 * m
     return h
+
 
 def autorotate(e1, xx):
     ''' A matrix of transformation which will transform xx vector into e1. 
@@ -44,25 +46,28 @@ def autorotate(e1, xx):
         return 1
 
     alpha = xx.length * get_sign()
-    u = xx - alpha*e1
+    u = xx - alpha * e1
     v = u.normalized()
     q = householder(v)
     return q
+
 
 def diameter(vertices, axis):
     xs = [vertex[axis] for vertex in vertices]
     M = max(xs)
     m = min(xs)
-    return (M-m)
+    return (M - m)
 
 all_axes = [
-        Vector((1.0, 0.0, 0.0)),
-        Vector((0.0, 1.0, 0.0)),
-        Vector((0.0, 0.0, 1.0))
-    ]
+    Vector((1.0, 0.0, 0.0)),
+    Vector((0.0, 1.0, 0.0)),
+    Vector((0.0, 0.0, 1.0))
+]
+
 
 def Matrix_degenerate(ms):
-    return [[ j[:] for j in M ] for M in ms]
+    return [[j[:] for j in M] for M in ms]
+
 
 class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Duplicate meshes along edge '''
@@ -71,11 +76,11 @@ class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     count_modes = [
-            ("count", "Count", "Specify number of donor objects per edge", 1),
-            ("up", "Up", "Calculate count of objects automatically, scaling them only up", 2),
-            ("down", "Down", "Calculate count of objects automatically, scaling them only down", 3),
-            ("off", "Off", "Calculate count of objects automatically, do not scale them", 4),
-        ]
+        ("count", "Count", "Specify number of donor objects per edge", 1),
+        ("up", "Up", "Calculate count of objects automatically, scaling them only up", 2),
+        ("down", "Down", "Calculate count of objects automatically, scaling them only down", 3),
+        ("off", "Off", "Calculate count of objects automatically, do not scale them", 4),
+    ]
 
     def count_const(self, edge_length, vertices, count):
         return count
@@ -84,13 +89,13 @@ class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
         donor_size = diameter(vertices, self.orient_axis)
         if donor_size == 0.0:
             return 1
-        return floor( edge_length / donor_size )
+        return floor(edge_length / donor_size)
 
     def count_down(self, edge_length, vertices, count):
         donor_size = diameter(vertices, self.orient_axis)
         if donor_size == 0.0:
             return 1
-        return ceil( edge_length / donor_size )
+        return ceil(edge_length / donor_size)
 
     count_funcs = {"count": count_const,
                    "up": count_up,
@@ -102,24 +107,24 @@ class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
         self.inputs["Padding"].hide = self.count_mode == "off"
         updateNode(self, context)
 
-    count_mode = EnumProperty(name = "Scaling mode",
-        description = "Mode of determining number of objects in array and their scale",
-        default = "count",
-        items = count_modes, update=count_mode_change)
+    count_mode = EnumProperty(name="Scaling mode",
+                              description="Mode of determining number of objects in array and their scale",
+                              default="count",
+                              items=count_modes, update=count_mode_change)
 
     axes = [
-            ("X", "X", "X axis", 1),
-            ("Y", "Y", "Y axis", 2),
-            ("Z", "Z", "Z axis", 3)
-        ]
+        ("X", "X", "X axis", 1),
+        ("Y", "Y", "Y axis", 2),
+        ("Z", "Z", "Z axis", 3)
+    ]
 
     def orient_axis_change(self, context):
         updateNode(self, context)
 
-    orient_axis_ = EnumProperty(name = "Orientation axis",
-        description = "Which axis of donor objects to align with recipient edge",
-        default = "X",
-        items = axes, update=orient_axis_change)
+    orient_axis_ = EnumProperty(name="Orientation axis",
+                                description="Which axis of donor objects to align with recipient edge",
+                                default="X",
+                                items=axes, update=orient_axis_change)
 
     def get_axis_idx(self):
         return 'XYZ'.index(self.orient_axis_)
@@ -127,28 +132,28 @@ class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
     orient_axis = property(get_axis_idx)
 
     count_ = IntProperty(name='Count',
-        description='Number of copies',
-        default=3, min=1,
-        update=updateNode)
+                         description='Number of copies',
+                         default=3, min=1,
+                         update=updateNode)
 
     padding_ = FloatProperty(name='Padding',
-        description='Fraction of destination edge length to keep empty from each side',
-        default=0.0, min=0.0, max=0.49,
-        update=updateNode)
+                             description='Fraction of destination edge length to keep empty from each side',
+                             default=0.0, min=0.0, max=0.49,
+                             update=updateNode)
 
     scale_all = BoolProperty(name="Scale all axes",
-        description="Scale donor objects along all axes or only along orientation axis",
-        default=False,
-        update=updateNode)
+                             description="Scale donor objects along all axes or only along orientation axis",
+                             default=False,
+                             update=updateNode)
 
     apply_matrices = BoolProperty(name="Apply matrices",
-        description="Apply generated matrices to generated objects internally",
-        default=True,
-        update=updateNode)
+                                  description="Apply generated matrices to generated objects internally",
+                                  default=True,
+                                  update=updateNode)
 
     def get_count(self, v1, v2, vertices, count, padding):
         func = self.count_funcs[self.count_mode]
-        edge_length = (1.0 - 2*padding) * (v1-v2).length
+        edge_length = (1.0 - 2 * padding) * (v1 - v2).length
         return func(self, edge_length, vertices, count)
 
     def get_scale_off(self):
@@ -157,32 +162,32 @@ class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
     scale_off = property(get_scale_off)
 
     input_modes = [
-            ("edge", "Edges", "Define recipient edges from set of vertices and set of edges", 1),
-            ("fixed", "Fixed", "Use two specified vertices to define recipient edge", 2),
-        ]
+        ("edge", "Edges", "Define recipient edges from set of vertices and set of edges", 1),
+        ("fixed", "Fixed", "Use two specified vertices to define recipient edge", 2),
+    ]
 
     def input_mode_change(self, context):
-        self.inputs["Vertex1"].hide = self.input_mode != "fixed" 
-        self.inputs["Vertex2"].hide = self.input_mode != "fixed" 
+        self.inputs["Vertex1"].hide = self.input_mode != "fixed"
+        self.inputs["Vertex2"].hide = self.input_mode != "fixed"
         self.inputs["VerticesR"].hide = self.input_mode != "edge"
         self.inputs["EdgesR"].hide = self.input_mode != "edge"
 
-    input_mode = EnumProperty(name = "Input mode",
-        description = "Mode of specifying recipient edges",
-        default = "edge",
-        items = input_modes, update=input_mode_change)
+    input_mode = EnumProperty(name="Input mode",
+                              description="Mode of specifying recipient edges",
+                              default="edge",
+                              items=input_modes, update=input_mode_change)
 
     def get_recipient_vertices(self, vs1, vs2, vertices, edges):
         if self.input_mode == "fixed":
             return vs1, vs2
         elif self.input_mode == "edge":
-            rs1 = [vertices[i] for (i,j) in edges]
-            rs2 = [vertices[j] for (i,j) in edges]
+            rs1 = [vertices[i] for (i, j) in edges]
+            rs2 = [vertices[j] for (i, j) in edges]
             return rs1, rs2
 
     def duplicate_vertices(self, v1, v2, vertices, edges, faces, count, p):
         direction = v2 - v1
-        edge_length = (1.0 - 2*p) * direction.length
+        edge_length = (1.0 - 2 * p) * direction.length
         one_item_length = edge_length / count
         actual_length = diameter(vertices, self.orient_axis)
         if actual_length != 0.0:
@@ -192,8 +197,8 @@ class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
         x = all_axes[self.orient_axis]
         # for actual_length = 1.0 and edge_length = 3.0, let origins be [0.5, 1.5, 2.5]
         u = direction.normalized()
-        alphas = np.linspace(0.0, 1.0, count+1)
-        origins = [v1 + (1-2*p)*direction*alpha + p*direction + 0.5*one_item_length*u for alpha in alphas][:-1]
+        alphas = np.linspace(0.0, 1.0, count + 1)
+        origins = [v1 + (1 - 2 * p) * direction * alpha + p * direction + 0.5 * one_item_length * u for alpha in alphas][:-1]
         assert len(origins) == count
 
         if self.scale_off:
@@ -207,11 +212,11 @@ class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
         #rot = direction.rotation_difference(x).to_matrix().to_4x4()
 
         # Since Householder transformation is reflection, we need to reflect things back
-        flip = Matrix([[-1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
+        flip = Matrix([[-1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
         if scale is None:
-            matrices = [Matrix.Translation(o)*rot*flip for o in origins]
+            matrices = [Matrix.Translation(o) * rot * flip for o in origins]
         else:
-            matrices = [Matrix.Translation(o)*rot*scale*flip for o in origins]
+            matrices = [Matrix.Translation(o) * rot * scale * flip for o in origins]
 
         if self.apply_matrices:
             result_vertices = [[m * vertex for vertex in vertices] for m in matrices]
@@ -236,7 +241,7 @@ class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
         self.outputs.new('MatrixSocket', 'Matrices')
 
         self.input_mode_change(context)
-  
+
     def draw_buttons(self, context, layout):
         layout.prop(self, "count_mode", expand=True)
         layout.prop(self, "orient_axis_", expand=True)
@@ -287,12 +292,12 @@ class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
 
             for vertices, edges, faces, vertex1, vertex2, inp_count, padding in zip(*meshes):
                 count = self.get_count(vertex1, vertex2, vertices, inp_count, padding)
-                count = max(count,1)
+                count = max(count, 1)
                 new_matrices, new_vertices = self.duplicate_vertices(vertex1, vertex2, vertices, edges, faces, count, padding)
-                result_edges.extend( [edges] * count )
-                result_faces.extend( [faces] * count )
-                result_vertices.extend( new_vertices )
-                result_matrices.extend( new_matrices )
+                result_edges.extend([edges] * count)
+                result_faces.extend([faces] * count)
+                result_vertices.extend(new_vertices)
+                result_matrices.extend(new_matrices)
 
             result_vertices = Vector_degenerate(result_vertices)
             result_matrices = Matrix_degenerate(result_matrices)
@@ -304,6 +309,7 @@ class SvDuplicateAlongEdgeNode(bpy.types.Node, SverchCustomTreeNode):
             if self.outputs['Matrices'].is_linked:
                 self.outputs['Matrices'].sv_set(result_matrices)
 
+
 def register():
     bpy.utils.register_class(SvDuplicateAlongEdgeNode)
 
@@ -313,4 +319,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-

@@ -20,7 +20,8 @@ bl_info = {
 
 import bpy
 from .utils import AddonPreferences, SpaceProperty
-   
+
+
 class WT_HideAllWire(bpy.types.Operator):
     """Hide object's wire and edges"""
     bl_idname = "object.wt_hide_all_wire"
@@ -32,10 +33,11 @@ class WT_HideAllWire(bpy.types.Operator):
 
     def execute(self, context):
         for obj in bpy.data.objects:
-            if (not context.scene.WT_only_selection)  or  (obj.select and context.scene.WT_only_selection and not context.scene.WT_invert)  or  ((context.scene.WT_invert and context.scene.WT_only_selection) and not obj.select):
-                if hasattr(obj,"show_wire"):
-                    obj.show_wire,obj.show_all_edges = False,False
+            if (not context.scene.WT_only_selection) or (obj.select and context.scene.WT_only_selection and not context.scene.WT_invert) or ((context.scene.WT_invert and context.scene.WT_only_selection) and not obj.select):
+                if hasattr(obj, "show_wire"):
+                    obj.show_wire, obj.show_all_edges = False, False
         return {'FINISHED'}
+
 
 class WT_DrawOnlyBounds(bpy.types.Operator):
     """Display only object boundaries"""
@@ -48,13 +50,14 @@ class WT_DrawOnlyBounds(bpy.types.Operator):
 
     def execute(self, context):
         for obj in bpy.data.objects:
-            if (not context.scene.WT_only_selection)  or  (obj.select and context.scene.WT_only_selection and not context.scene.WT_invert)  or  ((context.scene.WT_invert and context.scene.WT_only_selection) and not obj.select):
-                if hasattr(obj,"draw_type"):
+            if (not context.scene.WT_only_selection) or (obj.select and context.scene.WT_only_selection and not context.scene.WT_invert) or ((context.scene.WT_invert and context.scene.WT_only_selection) and not obj.select):
+                if hasattr(obj, "draw_type"):
                     obj.draw_type = 'BOUNDS'
                     obj.show_wire = False
                     obj.show_all_edges = False
         return {'FINISHED'}
-    
+
+
 class WT_DrawTextured(bpy.types.Operator):
     """Display object in textured mode"""
     bl_idname = "object.wt_draw_textured"
@@ -66,10 +69,11 @@ class WT_DrawTextured(bpy.types.Operator):
 
     def execute(self, context):
         for obj in bpy.data.objects:
-            if (not context.scene.WT_only_selection)  or  (obj.select and context.scene.WT_only_selection and not context.scene.WT_invert)  or  ((context.scene.WT_invert and context.scene.WT_only_selection) and not obj.select):
-                if hasattr(obj,"draw_type"):
-                    obj.draw_type = 'TEXTURED'                   
+            if (not context.scene.WT_only_selection) or (obj.select and context.scene.WT_only_selection and not context.scene.WT_invert) or ((context.scene.WT_invert and context.scene.WT_only_selection) and not obj.select):
+                if hasattr(obj, "draw_type"):
+                    obj.draw_type = 'TEXTURED'
         return {'FINISHED'}
+
 
 class WT_DrawWireEdges(bpy.types.Operator):
     """Display the object's wire (all edges)"""
@@ -82,12 +86,13 @@ class WT_DrawWireEdges(bpy.types.Operator):
 
     def execute(self, context):
         for obj in bpy.data.objects:
-            if (not context.scene.WT_only_selection)  or  (obj.select and context.scene.WT_only_selection and not context.scene.WT_invert)  or  ((context.scene.WT_invert and context.scene.WT_only_selection) and not obj.select):
-                if hasattr(obj,"show_wire"):
-                    obj.show_wire,obj.show_all_edges = True,True
-                    obj.draw_type = 'TEXTURED' # to prevent from a "bug" displaying bounds and wire
+            if (not context.scene.WT_only_selection) or (obj.select and context.scene.WT_only_selection and not context.scene.WT_invert) or ((context.scene.WT_invert and context.scene.WT_only_selection) and not obj.select):
+                if hasattr(obj, "show_wire"):
+                    obj.show_wire, obj.show_all_edges = True, True
+                    obj.draw_type = 'TEXTURED'  # to prevent from a "bug" displaying bounds and wire
         return {'FINISHED'}
-    
+
+
 class WT_DrawOnlyWire(bpy.types.Operator):
     """Display the object's wire"""
     bl_idname = "object.wt_draw_only_wire"
@@ -99,18 +104,19 @@ class WT_DrawOnlyWire(bpy.types.Operator):
 
     def execute(self, context):
         for obj in bpy.data.objects:
-            if (not context.scene.WT_only_selection)  or  (obj.select and context.scene.WT_only_selection and not context.scene.WT_invert)  or  ((context.scene.WT_invert and context.scene.WT_only_selection) and not obj.select):
-                if hasattr(obj,"show_wire"):
-                    obj.show_wire,obj.show_all_edges = True,False
-                    obj.draw_type = 'TEXTURED' # to prevent from a "bug" displaying bounds and wire
+            if (not context.scene.WT_only_selection) or (obj.select and context.scene.WT_only_selection and not context.scene.WT_invert) or ((context.scene.WT_invert and context.scene.WT_only_selection) and not obj.select):
+                if hasattr(obj, "show_wire"):
+                    obj.show_wire, obj.show_all_edges = True, False
+                    obj.draw_type = 'TEXTURED'  # to prevent from a "bug" displaying bounds and wire
         return {'FINISHED'}
+
 
 class WT_SelectionHandlerToggle(bpy.types.Operator):
     """ Display the wire of the selection, auto update when selecting another object"""
     bl_idname = "object.wt_selection_handler_toggle"
     bl_label = "Wire Selection (auto)"
-    bl_options= {'INTERNAL'}
-    
+    bl_options = {'INTERNAL'}
+
     def execute(self, context):
         if context.scene.WT_handler_enable:
             try:
@@ -118,37 +124,36 @@ class WT_SelectionHandlerToggle(bpy.types.Operator):
             except:
                 print('WireTools: auto mode exit seams to have failed. If True, reload the file')
             context.scene.WT_handler_enable = False
-            if hasattr(context.object,"show_wire"):
-                        context.object.show_wire , context.object.show_all_edges = False,False
+            if hasattr(context.object, "show_wire"):
+                context.object.show_wire, context.object.show_all_edges = False, False
         else:
             bpy.app.handlers.scene_update_post.append(wire_on_selection_handler)
             context.scene.WT_handler_enable = True
-            if hasattr(context.object,"show_wire"):
-                            context.object.show_wire , context.object.show_all_edges = True,True
+            if hasattr(context.object, "show_wire"):
+                context.object.show_wire, context.object.show_all_edges = True, True
         return {'FINISHED'}
 
-def shading_wire_tools_layout(self,context):
+
+def shading_wire_tools_layout(self, context):
     layout = self.layout
-    
-    
+
     if not context.scene.WT_display_tools:
-        layout.prop(context.scene,"WT_display_tools", emboss=False, icon="TRIA_RIGHT", text="Wire Tools")
+        layout.prop(context.scene, "WT_display_tools", emboss=False, icon="TRIA_RIGHT", text="Wire Tools")
     else:
-        layout.prop(context.scene,"WT_display_tools", emboss=False, icon="TRIA_DOWN", text="Wire Tools")
-        
+        layout.prop(context.scene, "WT_display_tools", emboss=False, icon="TRIA_DOWN", text="Wire Tools")
+
         if context.scene.WT_handler_enable:
             layout.operator('object.wt_selection_handler_toggle', icon='X')
         else:
             layout.operator('object.wt_selection_handler_toggle', icon='MOD_WIREFRAME')
-        
+
         split = layout.split(percentage=.75, align=True)
         split.enabled = not context.scene.WT_handler_enable
-        split.prop(context.scene,"WT_only_selection", toggle=True, icon="BORDER_RECT")
+        split.prop(context.scene, "WT_only_selection", toggle=True, icon="BORDER_RECT")
         row = split.row(align=True)
         row.enabled = context.scene.WT_only_selection
-        row.prop(context.scene,"WT_invert",toggle=True)
-        
-        
+        row.prop(context.scene, "WT_invert", toggle=True)
+
         col = layout.column(align=True)
         col.operator("object.wt_draw_wire_and_edges", icon="WIRE", text="Wire + Edges")
         col.operator("object.wt_draw_only_wire", icon="SOLID", text="Wire")
@@ -157,24 +162,26 @@ def shading_wire_tools_layout(self,context):
         col.operator("object.wt_draw_only_box", icon="BBOX", text="Only Bounds")
         col.operator("object.wt_draw_textured", icon="MATCUBE", text="Textured")
 
-#handler
+# handler
+
+
 def wire_on_selection_handler(scene):
     obj = bpy.context.object
-    
+
     if not scene.WT_handler_previous_object:
-        if hasattr(obj,"show_wire"):
-            obj.show_wire , obj.show_all_edges = True,True
+        if hasattr(obj, "show_wire"):
+            obj.show_wire, obj.show_all_edges = True, True
             scene.WT_handler_previous_object = obj.name
     else:
         if scene.WT_handler_previous_object != obj.name:
             previous_obj = bpy.data.objects[scene.WT_handler_previous_object]
-            if hasattr(previous_obj,"show_wire"):
-                        previous_obj.show_wire , previous_obj.show_all_edges = False,False
-                        
+            if hasattr(previous_obj, "show_wire"):
+                previous_obj.show_wire, previous_obj.show_all_edges = False, False
+
             scene.WT_handler_previous_object = obj.name
-            
-            if hasattr(obj,"show_wire"):
-                            obj.show_wire , obj.show_all_edges = True,True
+
+            if hasattr(obj, "show_wire"):
+                obj.show_wire, obj.show_all_edges = True, True
 
 
 classes = [
@@ -184,7 +191,8 @@ classes = [
     WT_DrawWireEdges,
     WT_DrawOnlyWire,
     WT_SelectionHandlerToggle,
-    ]
+]
+
 
 def register():
     for cls in classes:

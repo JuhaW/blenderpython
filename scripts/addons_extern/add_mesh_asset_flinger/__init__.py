@@ -20,12 +20,12 @@
 # ##### END GPL LICENSE BLOCK #####
 
 bl_info = {
-        "name": "Asset Flinger",
-        "version": (0, 1),
-        "blender": (2, 70, 0),
-        "location": "View3D > Add > Mesh > Asset Flinger",
-        "description": "Simple Mesh Importer",
-        "category": "Add Mesh"}
+    "name": "Asset Flinger",
+    "version": (0, 1),
+    "blender": (2, 70, 0),
+    "location": "View3D > Add > Mesh > Asset Flinger",
+    "description": "Simple Mesh Importer",
+    "category": "Add Mesh"}
 
 import bpy
 import bgl
@@ -38,23 +38,24 @@ from bpy.props import (BoolProperty, EnumProperty,
                        FloatProperty, FloatVectorProperty,
                        IntProperty, StringProperty)
 
+
 class AssetFlingerPreferences(AddonPreferences):
     bl_idname = __name__
     custom_library_path = StringProperty(
-            name="Your Library",
-            subtype='FILE_PATH',
-            )
+        name="Your Library",
+        subtype='FILE_PATH',
+    )
 
     def draw(self, context):
-            layout = self.layout
+        layout = self.layout
 
-            split = layout.split(percentage=1)
+        split = layout.split(percentage=1)
 
-            col = split.column()
-            sub = col.column(align=True)
-            sub.prop(self, "custom_library_path")
+        col = split.column()
+        sub = col.column(align=True)
+        sub.prop(self, "custom_library_path")
 
-            sub.separator()
+        sub.separator()
 
 
 iconWidth = 128
@@ -75,6 +76,7 @@ if not os.path.exists(libraryPath):
     raise NameError('Did not find assets path from ' + libraryPath)
 libraryIconsPath = os.path.join(libraryPath, "icons")
 libraryDefaultModelsPath = os.path.join(libraryPath, "assets")
+
 
 def drawMenuItem(item, x, y, width, height):
     global iconWidth
@@ -98,26 +100,26 @@ def drawMenuItem(item, x, y, width, height):
     texture = item['icon']
     texture.gl_load()
     bgl.glColor4f(0.0, 0.0, 1.0, 0.5)
-    #bgl.glLineWidth(1.5)
+    # bgl.glLineWidth(1.5)
 
     #------ TEXTURE ---------#
     bgl.glEnable(bgl.GL_BLEND)
     bgl.glBindTexture(bgl.GL_TEXTURE_2D, texture.bindcode[0])
     bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MIN_FILTER, bgl.GL_NEAREST)
-    bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MAG_FILTER, bgl.GL_NEAREST) #GL_LINEAR seems to be used in Blender for background images
+    bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MAG_FILTER, bgl.GL_NEAREST)  # GL_LINEAR seems to be used in Blender for background images
     bgl.glEnable(bgl.GL_TEXTURE_2D)
     bgl.glBlendFunc(bgl.GL_SRC_ALPHA, bgl.GL_ONE_MINUS_SRC_ALPHA)
 
-    bgl.glColor4f(1,1,1,1)
+    bgl.glColor4f(1, 1, 1, 1)
     bgl.glBegin(bgl.GL_QUADS)
-    bgl.glTexCoord2d(0,0)
+    bgl.glTexCoord2d(0, 0)
     bgl.glVertex2d(x + iconMarginX, y)
-    bgl.glTexCoord2d(0,1)
+    bgl.glTexCoord2d(0, 1)
     bgl.glVertex2d(x + iconMarginX, y + iconHeight)
-    bgl.glTexCoord2d(1,1)
+    bgl.glTexCoord2d(1, 1)
     bgl.glVertex2d(x + iconMarginX + iconWidth, y + iconHeight)
-    bgl.glTexCoord2d(1,0)
-    bgl.glVertex2d(x + iconMarginX + iconWidth , y)
+    bgl.glTexCoord2d(1, 0)
+    bgl.glVertex2d(x + iconMarginX + iconWidth, y)
     bgl.glEnd()
 
     texture.gl_free()
@@ -128,6 +130,7 @@ def drawMenuItem(item, x, y, width, height):
     blf.size(font_id, textHeight, textWidth)
     blf.draw(font_id, item['text'])
 
+
 def drawCallbackMenu(self, context):
 
     global targetItemWidth
@@ -137,10 +140,9 @@ def drawCallbackMenu(self, context):
     marginY = 5
     paddingX = 5
 
-
     bgl.glEnable(bgl.GL_BLEND)
     bgl.glColor4f(0.0, 0.0, 0.0, 0.6)
-    bgl.glRectf(0,0,context.area.regions[4].width,context.area.regions[4].height)
+    bgl.glRectf(0, 0, context.area.regions[4].width, context.area.regions[4].height)
 
     contentWidth = context.area.regions[4].width - marginX * 2
     contentHeight = context.area.regions[4].height - marginY * 2
@@ -158,7 +160,7 @@ def drawCallbackMenu(self, context):
     x = contentX
     y = contentY
 
-    if len(self.current_dir_content ) == 0:
+    if len(self.current_dir_content) == 0:
         font_id = 0
         text = "Folder doesn't contain any assets!"
         bgl.glColor4f(1.0, 1.0, 1.0, 1.0)
@@ -187,8 +189,8 @@ def drawCallbackMenu(self, context):
     bgl.glDisable(bgl.GL_TEXTURE_2D)
     #bgl.glColor4f(0.0, 0.0, 0.0, 1.0)
 
-def getClicked(self, context):
 
+def getClicked(self, context):
 
     global targetItemWidth
     global targetItemHeight
@@ -225,6 +227,7 @@ def getClicked(self, context):
             y = y - itemHeight - marginY
             row += 1
     return None
+
 
 class AssetFlingerMenu(bpy.types.Operator):
 
@@ -286,7 +289,7 @@ class AssetFlingerMenu(bpy.types.Operator):
 
         up_folder = {}
         iconFile = os.path.join(libraryIconsPath, "folder.png")
-        up_folder['icon'] = bpy.data.images.load(filepath = iconFile)
+        up_folder['icon'] = bpy.data.images.load(filepath=iconFile)
         self.imageList.append(up_folder['icon'].filepath_raw)
         up_folder['text'] = '..'
         up_folder['isFolder'] = True
@@ -294,15 +297,13 @@ class AssetFlingerMenu(bpy.types.Operator):
         #up_folder['index'] = self.tree_index
         parentItem['subItems'].append(up_folder)
 
-
-
         file_list = [f for f in os.listdir(path) if not f.startswith('.')]
         file_list.sort()
         for name in file_list:
             if os.path.isdir(os.path.join(path, name)):
                 menuItem = {}
                 iconFile = os.path.join(libraryIconsPath, "folder.png")
-                menuItem['icon'] = bpy.data.images.load(filepath = iconFile)
+                menuItem['icon'] = bpy.data.images.load(filepath=iconFile)
                 self.imageList.append(menuItem['icon'].filepath_raw)
                 menuItem['text'] = name
                 menuItem['isFolder'] = True
@@ -313,18 +314,16 @@ class AssetFlingerMenu(bpy.types.Operator):
 
                 self.buildAssetTree(menuItem, os.path.join(path, name))
 
-
-
         obj_list = [item for item in file_list if item[-3:] == 'obj']
 
         for name in obj_list:
             objItem = {}
 
-            iconFile = os.path.join(path, name.replace('obj','png'))
+            iconFile = os.path.join(path, name.replace('obj', 'png'))
             if not os.path.exists(iconFile):
                 iconFile = os.path.join(libraryIconsPath, "nothumbnail.png")
 
-            objItem['icon'] = bpy.data.images.load(filepath = iconFile)
+            objItem['icon'] = bpy.data.images.load(filepath=iconFile)
             self.imageList.append(objItem['icon'].filepath_raw)
             text = os.path.splitext(name)[0]
             objItem['text'] = text
@@ -332,7 +331,7 @@ class AssetFlingerMenu(bpy.types.Operator):
             objItem['filename'] = os.path.join(path, name)
             parentItem['subItems'].append(objItem)
 
-        #pprint.pprint(parentItem)
+        # pprint.pprint(parentItem)
 
     def browse_assets(self, path):
 
@@ -340,12 +339,11 @@ class AssetFlingerMenu(bpy.types.Operator):
             # Create 'up' directory to go to previus dir (if we are not in the)
             menuItem = {}
             iconFile = os.path.join(libraryIconsPath, "folder.png")
-            menuItem['icon'] = bpy.data.images.load(filepath = iconFile)
+            menuItem['icon'] = bpy.data.images.load(filepath=iconFile)
             self.imageList.append(menuItem['icon'].filepath_raw)
             menuItem['text'] = '..'
             menuItem['isFolder'] = True
             self.current_dir_content.append(menuItem)
-
 
         user_preferences = bpy.context.user_preferences
         addon_prefs = user_preferences.addons[__name__].preferences
@@ -364,7 +362,7 @@ class AssetFlingerMenu(bpy.types.Operator):
             if addon_prefs.custom_library_path:
                 menuItem = {}
                 iconFile = os.path.join(libraryIconsPath, "folder.png")
-                menuItem['icon'] = bpy.data.images.load(filepath = iconFile)
+                menuItem['icon'] = bpy.data.images.load(filepath=iconFile)
                 self.imageList.append(menuItem['icon'].filepath_raw)
                 menuItem['text'] = addon_prefs.custom_library_path
                 menuItem['isFolder'] = True
@@ -374,7 +372,7 @@ class AssetFlingerMenu(bpy.types.Operator):
             if os.path.isdir(os.path.join(path, name)):
                 menuItem = {}
                 iconFile = os.path.join(libraryIconsPath, "folder.png")
-                menuItem['icon'] = bpy.data.images.load(filepath = iconFile)
+                menuItem['icon'] = bpy.data.images.load(filepath=iconFile)
                 self.imageList.append(menuItem['icon'].filepath_raw)
                 menuItem['text'] = name
                 menuItem['isFolder'] = True
@@ -386,11 +384,11 @@ class AssetFlingerMenu(bpy.types.Operator):
         for name in obj_list:
             objItem = {}
 
-            iconFile = os.path.join(path, name.replace('obj','png'))
+            iconFile = os.path.join(path, name.replace('obj', 'png'))
             if not os.path.exists(iconFile):
                 iconFile = os.path.join(libraryIconsPath, "nothumbnail.png")
 
-            objItem['icon'] = bpy.data.images.load(filepath = iconFile)
+            objItem['icon'] = bpy.data.images.load(filepath=iconFile)
             self.imageList.append(objItem['icon'].filepath_raw)
             text = os.path.splitext(name)[0]
             objItem['text'] = text
@@ -398,14 +396,12 @@ class AssetFlingerMenu(bpy.types.Operator):
             objItem['filename'] = os.path.join(path, name)
             self.current_dir_content.append(objItem)
 
-
     def __del__(self):
         # print("End")
         self.clearImages()
 
     def invoke(self, context, event):
         if context.area.type == 'VIEW_3D':
-
 
             self.mouseX = event.mouse_region_x
             self.mouseY = event.mouse_region_y
@@ -433,10 +429,12 @@ class AssetFlingerMenu(bpy.types.Operator):
 # store keymaps here to access after registration
 addon_keymaps = []
 
+
 def menu_draw(self, context):
     layout = self.layout
     layout.separator()
     layout.operator(AssetFlingerMenu.bl_idname, icon='MOD_SCREW')
+
 
 def register():
     bpy.utils.register_class(AssetFlingerMenu)
@@ -453,8 +451,6 @@ def register():
         kmi.properties.use_selection = True
         kmi.properties.use_mesh_modifiers = False
 
-
-
         '''
     wm = bpy.context.window_manager
     km = wm.keyconfigs.addon.keymaps.new(name='Asset Flinger', space_type='EMPTY')
@@ -466,6 +462,7 @@ def register():
     '''
 
     addon_keymaps.append((km, kmi))
+
 
 def unregister():
     bpy.utils.unregister_class(AssetFlingerMenu)

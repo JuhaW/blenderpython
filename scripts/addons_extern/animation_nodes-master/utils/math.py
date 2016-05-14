@@ -1,5 +1,6 @@
 from mathutils import Matrix, Euler
 
+
 def composeMatrix(location, rotation, scale):
     # Scale
     scaleMatrix = Matrix.Identity(3)
@@ -17,14 +18,17 @@ def composeMatrix(location, rotation, scale):
 
     return matrix
 
+
 def extractRotation(matrix):
     return rotationMatrix(matrix.to_euler())
+
 
 def rotationMatrix(rotation):
     matrix = Matrix.Rotation(rotation[2], 4, 'Z')
     matrix *= Matrix.Rotation(rotation[1], 4, 'Y')
     matrix *= Matrix.Rotation(rotation[0], 4, 'X')
     return matrix
+
 
 def mixEulers(a, b, factor):
     x = a.x * (1 - factor) + b.x * factor

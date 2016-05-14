@@ -4,9 +4,8 @@ import bpy
 import bmesh
 from bpy.props import StringProperty, FloatProperty, BoolProperty, FloatVectorProperty
 
-        # add the mesh as an object into the scene with this utility module
+# add the mesh as an object into the scene with this utility module
 from bpy_extras import object_utils
-
 
 
 def object_origin(width, height, depth):
@@ -26,6 +25,7 @@ def object_origin(width, height, depth):
 
     return verts, faces
 
+
 class AddVert(bpy.types.Operator):
     '''Add a Single Vertice to Edit Mode'''
     bl_idname = "mesh.primitive_vert_add"
@@ -35,12 +35,13 @@ class AddVert(bpy.types.Operator):
     def execute(self, context):
         mesh = bpy.data.meshes.new("Vert")
         mesh.vertices.add(1)
-        
+
         from bpy_extras import object_utils
         object_utils.object_data_add(context, mesh, operator=None)
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
 
         return {'FINISHED'}
+
 
 class AddEmptyVert(bpy.types.Operator):
     '''Add an Object Origin to Edit Mode'''
@@ -51,17 +52,18 @@ class AddEmptyVert(bpy.types.Operator):
     def execute(self, context):
         mesh = bpy.data.meshes.new("Vert")
         mesh.vertices.add(1)
-        
+
         from bpy_extras import object_utils
         object_utils.object_data_add(context, mesh, operator=None)
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.delete(type='VERT')
 
         return {'FINISHED'}
 
+
 def Add_Symmetrical_Empty():
 
-    bpy.ops.mesh.primitive_plane_add(enter_editmode = True)
+    bpy.ops.mesh.primitive_plane_add(enter_editmode=True)
 
     sempty = bpy.context.object
     sempty.name = "SymmEmpty"
@@ -70,16 +72,17 @@ def Add_Symmetrical_Empty():
     if (sempty.modifiers and sempty.modifiers['Mirror']):
         pass
     else:
-        bpy.ops.object.modifier_add(type ='MIRROR')
+        bpy.ops.object.modifier_add(type='MIRROR')
 
     # Delete all!
     bpy.ops.mesh.select_all(action='TOGGLE')
     bpy.ops.mesh.select_all(action='TOGGLE')
-    bpy.ops.mesh.delete(type ='VERT')
+    bpy.ops.mesh.delete(type='VERT')
+
 
 def Add_Symmetrical_Vert():
 
-    bpy.ops.mesh.primitive_plane_add(enter_editmode = True)
+    bpy.ops.mesh.primitive_plane_add(enter_editmode=True)
 
     sempty = bpy.context.object
     sempty.name = "SymmVert"
@@ -88,12 +91,13 @@ def Add_Symmetrical_Vert():
     if (sempty.modifiers and sempty.modifiers['Mirror']):
         pass
     else:
-        bpy.ops.object.modifier_add(type ='MIRROR')
+        bpy.ops.object.modifier_add(type='MIRROR')
 
     # Delete all!
     bpy.ops.mesh.select_all(action='TOGGLE')
     bpy.ops.mesh.select_all(action='TOGGLE')
     bpy.ops.mesh.merge(type='CENTER')
+
 
 class AddSymmetricalEmpty(bpy.types.Operator):
 
@@ -106,7 +110,7 @@ class AddSymmetricalEmpty(bpy.types.Operator):
         layout = self.layout
         mirror = bpy.context.object.modifiers['Mirror']
 
-        layout.prop(mirror,'use_clip', text="Use Clipping")
+        layout.prop(mirror, 'use_clip', text="Use Clipping")
 
         layout.label("Mirror Axis")
         row = layout.row(align=True)
@@ -117,6 +121,7 @@ class AddSymmetricalEmpty(bpy.types.Operator):
     def execute(self, context):
         Add_Symmetrical_Empty()
         return {'FINISHED'}
+
 
 class AddSymmetricalVert(bpy.types.Operator):
 
@@ -129,7 +134,7 @@ class AddSymmetricalVert(bpy.types.Operator):
         layout = self.layout
         mirror = bpy.context.object.modifiers['Mirror']
 
-        layout.prop(mirror,'use_clip', text="Use Clipping")
+        layout.prop(mirror, 'use_clip', text="Use Clipping")
 
         layout.label("Mirror Axis")
         row = layout.row(align=True)

@@ -40,9 +40,11 @@ def unit_normal(a, b, c):
     magnitude = (x**2 + y**2 + z**2)**.5
     if magnitude == 0:
         magnitude = 1
-    return (x/magnitude, y/magnitude, z/magnitude)
+    return (x / magnitude, y / magnitude, z / magnitude)
 
 # area of polygon poly
+
+
 def area_pol(poly):
     if len(poly) < 3:  # not a plane - no area
         return 0
@@ -50,10 +52,10 @@ def area_pol(poly):
     total = Vector((0, 0, 0))
     for i in range(len(poly)):
         vi1 = Vector(poly[i])
-        if i is len(poly)-1:
+        if i is len(poly) - 1:
             vi2 = Vector(poly[0])
         else:
-            vi2 = Vector(poly[i+1])
+            vi2 = Vector(poly[i + 1])
 
         prod = vi1.cross(vi2)[:]
         total[0] += prod[0]
@@ -61,7 +63,8 @@ def area_pol(poly):
         total[2] += prod[2]
 
     result = total.dot(unit_normal(poly[0], poly[1], poly[2]))
-    return abs(result/2)
+    return abs(result / 2)
+
 
 def areas(Vertices, Polygons, per_face):
     areas = []
@@ -79,6 +82,7 @@ def areas(Vertices, Polygons, per_face):
             areas.append(math.fsum(res))
 
     return areas
+
 
 class AreaNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Area '''
@@ -112,7 +116,6 @@ class AreaNode(bpy.types.Node, SverchCustomTreeNode):
         # outputs
         if outputs['Area'].is_linked:
             outputs['Area'].sv_set([areas(Vertices, Polygons, self.per_face)])
-
 
 
 def register():

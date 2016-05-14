@@ -28,6 +28,7 @@ import argparse
 import os
 import time
 
+
 def forElementsIn(xmlNode):
     for child in xmlNode.childNodes:
         if type(child) == xml.dom.minidom.Text:
@@ -35,6 +36,7 @@ def forElementsIn(xmlNode):
                 raise Exception("Unexpected content \"%s\" within element %s" % (child.wholeText, xmlNode.nodeName))
         else:
             yield child
+
 
 def createSingleStructureElement(xmlNode, structureDescription):
     createdObject = structureDescription.createInstance()
@@ -45,23 +47,25 @@ def createSingleStructureElement(xmlNode, structureDescription):
             raise Exception("XML file is incompatible: too many fields")
         field = structureDescription.fields[fieldIndex]
         if field.name != fieldName:
-            raise Exception("XML file is incompatible: Expected field %s but found field %s" % (field.name, fieldName) )
-        
-        fieldContent = createFieldContent(child,field)
+            raise Exception("XML file is incompatible: Expected field %s but found field %s" % (field.name, fieldName))
+
+        fieldContent = createFieldContent(child, field)
         setattr(createdObject, field.name, fieldContent)
         fieldIndex += 1
-    
+
     missingFields = len(structureDescription.fields) - fieldIndex
     if missingFields > 0:
         raise Exception("XML file is incompatible: %d fields are missing in %s" % (missingFields, structureDescription.structureName))
-        
+
     return createdObject
-                
-intTypeStrings = set(["int32","int16","int8","uint32", "uint16", "uint8"])     
+
+intTypeStrings = set(["int32", "int16", "int8", "uint32", "uint16", "uint8"])
+
+
 def createFieldContent(xmlNode, field):
     if isinstance(field, m3.ReferenceField):
         if field.historyOfReferencedStructures == None:
-            return [] # TODO check if that's correct
+            return []  # TODO check if that's correct
         else:
             referencedStructureName = field.historyOfReferencedStructures.name
             if referencedStructureName == "CHAR":
@@ -77,7 +81,7 @@ def createFieldContent(xmlNode, field):
                     return createElementList(xmlNode, field.name, None)
 
     elif isinstance(field, m3.UnknownBytesField):
-        return hexToBytes(stringContentOf(xmlNode),xmlNode)
+        return hexToBytes(stringContentOf(xmlNode), xmlNode)
     elif isinstance(field, m3.PrimitiveField):
         if field.typeString == "float":
             return float(stringContentOf(xmlNode))
@@ -87,20 +91,23 @@ def createFieldContent(xmlNode, field):
             raise Exception("Unsupported primtive: %s" % field.typeString)
     elif isinstance(field, m3.EmbeddedStructureField):
         return createSingleStructureElement(xmlNode, field.structureDescription)
-    else: # TagField
+    else:  # TagField
         raise Exception("Unsupported field type %s" % type(field))
 
+
 def removeWhitespace(s):
-    return s.translate({ord(" "):None,ord("\t"):None,ord("\r"):None,ord("\n"):None})
+    return s.translate({ord(" "): None, ord("\t"): None, ord("\r"): None, ord("\n"): None})
+
 
 def hexToBytes(hexString, xmlNode):
     hexString = removeWhitespace(hexString)
     if hexString == "":
         return bytearray(0)
     if not hexString.startswith("0x"):
-        raise Exception('hex string "%s" of node %s does not start with 0x' % (hexString,xmlNode.nodeName) )
+        raise Exception('hex string "%s" of node %s does not start with 0x' % (hexString, xmlNode.nodeName))
     hexString = hexString[2:]
-    return bytes([int(hexString[x:x+2], 16) for x in range(0, len(hexString),2)])
+    return bytes([int(hexString[x:x + 2], 16) for x in range(0, len(hexString), 2)])
+
 
 def stringContentOf(xmlNode):
     content = ""
@@ -108,18 +115,19 @@ def stringContentOf(xmlNode):
         if child.nodeType == Node.TEXT_NODE:
             content += child.data
         else:
-            raise Exception("Element %s contained childs of xml node type %s." % (xmlNode.nodeName,type(xmlNode)))
+            raise Exception("Element %s contained childs of xml node type %s." % (xmlNode.nodeName, type(xmlNode)))
     return content
 
+
 def createListElement(xmlNode, structureDescription):
-    if structureDescription.structureName in ["I32_","I16_", "I8__", "U32_", "U16_", "U8__", "FLAG"]:
+    if structureDescription.structureName in ["I32_", "I16_", "I8__", "U32_", "U16_", "U8__", "FLAG"]:
         return int(stringContentOf(xmlNode), 0)
     elif structureDescription.structureName in ["REAL"]:
         return float(stringContentOf(xmlNode))
     else:
         return createSingleStructureElement(xmlNode, structureDescription)
-      
-      
+
+
 def childElementsOf(parentName, xmlNode):
     expectedChildNames = parentName + "-element"
     for child in xmlNode.childNodes:
@@ -131,29 +139,29 @@ def childElementsOf(parentName, xmlNode):
                 raise Exception("Unexpected child \"%s\" within element %s", (child.nodeName, xmlNode.nodeName))
             yield child
 
+
 def createElementList(xmlNode, parentName, historyOfReferencedStructure):
     xmlElements = list(childElementsOf(parentName, xmlNode))
-    if historyOfReferencedStructure.name in ["CHAR", "I32_","I16_", "I8__", "U32_", "U16_", "U8__", "REAL", "FLAG"]:
+    if historyOfReferencedStructure.name in ["CHAR", "I32_", "I16_", "I8__", "U32_", "U16_", "U8__", "REAL", "FLAG"]:
         structVersion = 0
     else:
         if len(xmlElements) == 0:
             return []
-        
+
         child = xmlNode.firstChild
         structVersion = int(xmlNode.getAttribute("structureVersion"))
         structName = xmlNode.getAttribute("structureName")
         if structName == "" or structVersion == "":
             raise Exception("Incompatible format: Require now a strutureName and structureVerson attribute for the list %s" % parentName)
         if structName != historyOfReferencedStructure.name:
-            raise Exception("Expected a %s to have the structure name %s instead of %s" % (parentName,  historyOfReferencedStructure.name, structName))
+            raise Exception("Expected a %s to have the structure name %s instead of %s" % (parentName, historyOfReferencedStructure.name, structName))
     structureDescription = historyOfReferencedStructure.getVersion(structVersion)
     createdList = []
     for child in xmlElements:
         o = createListElement(child, structureDescription)
         createdList.append(o)
-        
+
     return createdList
-        
 
 
 def convertFile(inputFilePath, outputDirectory):
@@ -171,7 +179,6 @@ def convertFile(inputFilePath, outputDirectory):
     model = createSingleStructureElement(modelElement, modelDescription)
     m3.saveAndInvalidateModel(model, outputFilePath)
 
- 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -187,13 +194,12 @@ if __name__ == "__main__":
         if not (filePath.endswith(".m3.xml") or os.path.isdir(filePath)):
             sys.stderr.write("%s neither a directory nor does it end with '.m3.xml'\n" % filePath)
             sys.exit(2)
-            
-            
+
     if args.watch:
         if ((len(args.path) == 0) or os.path.isdir(filePath)):
             sys.stderr.write("Watch option is only supported for a single file")
             sys.exit(2)
-        
+
         previousModelModiticationTime = os.path.getmtime(filePath)
         convertFile(filePath, outputDirectory)
         print("Converted %s to an m3 file. Will convert it again if it changes" % filePath)

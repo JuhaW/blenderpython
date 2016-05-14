@@ -4,6 +4,7 @@ import functools
 from mathutils import Quaternion
 from ... base_types.node import AnimationNode
 
+
 class QuaternionListCombineNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_QuaternionListCombineNode"
     bl_label = "Combine Quaternion Rotations"

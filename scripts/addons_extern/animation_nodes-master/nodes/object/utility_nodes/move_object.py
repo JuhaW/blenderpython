@@ -1,6 +1,7 @@
 import bpy
 from .... base_types.node import AnimationNode
 
+
 class MoveObjectNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_MoveObjectNode"
     bl_label = "Move Object"

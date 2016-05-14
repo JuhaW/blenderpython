@@ -22,7 +22,7 @@ import bpy
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (dataCorrect, repeat_last,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class SvVertMaskNode(bpy.types.Node, SverchCustomTreeNode):

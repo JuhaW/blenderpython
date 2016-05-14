@@ -25,30 +25,33 @@ from bpy.props import FloatProperty, EnumProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (SvGetSocketAnyType, SvSetSocketAnyType,
-                            updateNode, match_long_repeat)
+                                     updateNode, match_long_repeat)
 
 
 def axis_rotation(vertex, center, axis, angle):
-    mat = Matrix.Rotation(radians(angle), 4,  axis)
+    mat = Matrix.Rotation(radians(angle), 4, axis)
     c = Vector(center)
-    rotated = [ (c + mat * ( Vector(i) - c))[:] for i in vertex ]
+    rotated = [(c + mat * (Vector(i) - c))[:] for i in vertex]
     return rotated
+
 
 def euler_rotation(vertex, x, y, z, order):
     rotated = []
     mat_eul = Euler((radians(x), radians(y), radians(z)), order).to_matrix().to_4x4()
     for i in vertex:
         v = Vector(i)
-        rotated.append((mat_eul*v)[:])
+        rotated.append((mat_eul * v)[:])
     return rotated
+
 
 def quat_rotation(vertex, x, y, z, w):
     rotated = []
     quat = Quaternion((w, x, y, z)).normalized()
     for i in vertex:
         v = Vector(i)
-        rotated.append((quat*v)[:])
+        rotated.append((quat * v)[:])
     return rotated
+
 
 class SvRotationNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Axis Rotation '''
@@ -60,17 +63,17 @@ class SvRotationNode(bpy.types.Node, SverchCustomTreeNode):
                            default=0.0,
                            options={'ANIMATABLE'}, update=updateNode)
     x_ = FloatProperty(name='X', description='X angle',
-                           default=0.0,
-                           options={'ANIMATABLE'}, update=updateNode)
+                       default=0.0,
+                       options={'ANIMATABLE'}, update=updateNode)
     y_ = FloatProperty(name='Y', description='Y angle',
-                           default=0.0,
-                           options={'ANIMATABLE'}, update=updateNode)
+                       default=0.0,
+                       options={'ANIMATABLE'}, update=updateNode)
     z_ = FloatProperty(name='Z', description='Z angle',
-                           default=0.0,
-                           options={'ANIMATABLE'}, update=updateNode)
+                       default=0.0,
+                       options={'ANIMATABLE'}, update=updateNode)
     w_ = FloatProperty(name='W', description='W',
-                           default=1.0,
-                           options={'ANIMATABLE'}, update=updateNode)
+                       default=1.0,
+                       options={'ANIMATABLE'}, update=updateNode)
 
     current_mode = StringProperty(default="AXIS")
 
@@ -104,20 +107,20 @@ class SvRotationNode(bpy.types.Node, SverchCustomTreeNode):
     ]
 
     mode = EnumProperty(name="mode", description="mode",
-                          default='AXIS', items=modes,
-                          update=mode_change)
+                        default='AXIS', items=modes,
+                        update=mode_change)
 
     orders = [
-        ('XYZ', "XYZ",        "", 0),
-        ('XZY', 'XZY',        "", 1),
-        ('YXZ', 'YXZ',        "", 2),
-        ('YZX', 'YZX',        "", 3),
-        ('ZXY', 'ZXY',        "", 4),
-        ('ZYX', 'ZYX',        "", 5),
+        ('XYZ', "XYZ", "", 0),
+        ('XZY', 'XZY', "", 1),
+        ('YXZ', 'YXZ', "", 2),
+        ('YZX', 'YZX', "", 3),
+        ('ZXY', 'ZXY', "", 4),
+        ('ZYX', 'ZYX', "", 5),
     ]
     order = EnumProperty(name="Order", description="Order",
-                          default="XYZ", items=orders,
-                          update=updateNode)
+                         default="XYZ", items=orders,
+                         update=updateNode)
 
     def sv_init(self, context):
         self.inputs.new('VerticesSocket', "Vertices", "Vertices")
@@ -192,7 +195,6 @@ class SvRotationNode(bpy.types.Node, SverchCustomTreeNode):
             elif self.mode == 'QUAT':
                 points = [quat_rotation(m, x, y, z, w) for m, x, y, z, w in zip(*parameters)]
                 SvSetSocketAnyType(self, 'Vertices', points)
-
 
 
 def register():

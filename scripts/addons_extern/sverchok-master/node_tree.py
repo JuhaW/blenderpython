@@ -35,6 +35,7 @@ from sverchok.core.update_system import (build_update_list, process_from_node,
                                          update_error_nodes)
 from sverchok.ui import color_def
 
+
 def process_from_socket(self, context):
     self.node.process_node(context)
 
@@ -55,7 +56,6 @@ class MatrixSocket(NodeSocket):
     bl_idname = "MatrixSocket"
     bl_label = "Matrix Socket"
     prop_name = StringProperty(default='')
-    
 
     def sv_get(self, default=sentinel, deepcopy=True):
         if self.is_linked and not self.is_output:
@@ -89,8 +89,7 @@ class VerticesSocket(NodeSocket):
     prop = FloatVectorProperty(default=(0, 0, 0), size=3, update=process_from_socket)
     prop_name = StringProperty(default='')
     use_prop = BoolProperty(default=False)
-    
-    
+
     def sv_get(self, default=sentinel, deepcopy=True):
         if self.is_linked and not self.is_output:
             return SvGetSocket(self, deepcopy)
@@ -102,7 +101,7 @@ class VerticesSocket(NodeSocket):
             raise SvNoDataError
         else:
             return default
-            
+
     def sv_set(self, data):
         SvSetSocket(self, data)
 
@@ -132,7 +131,6 @@ class StringsSocket(NodeSocketStandard):
 
     prop_type = StringProperty(default='')
     prop_index = IntProperty()
-
 
     def sv_get(self, default=sentinel, deepcopy=True):
         if self.is_linked and not self.is_output:
@@ -181,6 +179,7 @@ class SvNodeTreeCommon(object):
     '''
     Common methods shared between Sverchok node trees
     '''
+
     def build_update_list(self):
         build_update_list(self)
 
@@ -232,12 +231,11 @@ class SverchCustomTree(NodeTree, SvNodeTreeCommon):
     def turn_off_ng(self, context):
         process_tree(self)
 
-        #should turn off tree. for now it does by updating it whole
+        # should turn off tree. for now it does by updating it whole
         # should work something like this
         # outputs = filter(lambda n: isinstance(n,SvOutput), self.nodes)
         # for node in outputs:
         #   node.disable()
-
 
     sv_animate = BoolProperty(name="Animate", default=True, description='Animate this layout')
     sv_show = BoolProperty(name="Show", default=True, description='Show this layout',
@@ -246,7 +244,6 @@ class SverchCustomTree(NodeTree, SvNodeTreeCommon):
     sv_process = BoolProperty(name="Process", default=True, description='Process layout')
     sv_user_colors = StringProperty(default="")
 
-    
     # get update list for debug info, tuple (fulllist,dictofpartiallists)
 
     def update(self):
@@ -298,10 +295,11 @@ class SverchGroupTree(NodeTree, SvNodeTreeCommon):
 
 
 class SverchCustomTreeNode:
+
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname in ['SverchCustomTreeType', 'SverchGroupTreeType']
-    
+
     def mark_error(self, err):
         """
         marks the with system error color
@@ -310,7 +308,6 @@ class SverchCustomTreeNode:
         """
         ng = self.id_data
         update_error_nodes(ng, self.name, err)
-
 
     def set_color(self):
         color = color_def.get_color(self.bl_idname)
@@ -354,7 +351,7 @@ class SverchCustomTreeNode:
             a = time.perf_counter()
             process_from_node(self)
             b = time.perf_counter()
-            print("Partial update from node", self.name, "in", round(b-a, 4))
+            print("Partial update from node", self.name, "in", round(b - a, 4))
         else:
             process_from_node(self)
 

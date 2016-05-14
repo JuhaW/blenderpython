@@ -59,27 +59,27 @@ class SvMatrixTubeNode(bpy.types.Node, SverchCustomTreeNode):
         nring = len(verts[0])
         # end face
         faces_out.append(list(range(nring)))
-        for i,m in enumerate(mats):
-            for j,v in enumerate(verts[0]):
+        for i, m in enumerate(mats):
+            for j, v in enumerate(verts[0]):
                 vout = Matrix(m) * Vector(v)
                 verts_out.append(vout.to_tuple())
-                vID = j + i*nring
+                vID = j + i * nring
                 # rings
                 if j != 0:
                     edges_out.append([vID, vID - 1])
                 else:
-                    edges_out.append([vID, vID + nring-1])
+                    edges_out.append([vID, vID + nring - 1])
                 # lines
                 if i != 0:
                     edges_out.append([vID, vID - nring])
                     # faces
                     if j != 0:
-                        faces_out.append([vID, vID - nring, vID - nring - 1, vID-1,])
+                        faces_out.append([vID, vID - nring, vID - nring - 1, vID - 1, ])
                     else:
-                        faces_out.append([vID, vID - nring,  vID-1, vID + nring-1])
+                        faces_out.append([vID, vID - nring, vID - 1, vID + nring - 1])
         # end face
         # reversing list fixes face normal direction keeps mesh manifold
-        f = list(range(vID, vID-nring, -1))
+        f = list(range(vID, vID - nring, -1))
         faces_out.append(f)
         return verts_out, edges_out, faces_out
 

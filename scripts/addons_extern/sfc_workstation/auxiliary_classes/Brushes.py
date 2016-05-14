@@ -26,7 +26,9 @@ from .MapManager import MapManager
 from .RayCaster import RayCaster
 from .VertexFilter import VertexFilter
 
+
 class Brushes():
+
     def __init__(self):
         # The brushes are evaluated in world space, so as to avoid distortion
         # caused by a nonuniform object space.
@@ -67,10 +69,10 @@ class Brushes():
                 derived_brush.center =\
                     transformation_matrix * primary_brush_center
                 derived_brush.normal = ((
-                        transformation_matrix * primary_brush_normal - (
-                            transformation_matrix * Vector((0, 0, 0))
-                        )
-                    ).normalized()
+                    transformation_matrix * primary_brush_normal - (
+                        transformation_matrix * Vector((0, 0, 0))
+                    )
+                ).normalized()
                 )
                 derived_brush.radius = primary_brush_radius
                 derived_brush.transformation_matrix = transformation_matrix
@@ -105,10 +107,10 @@ class Brushes():
                 derived_brush = Brush()
                 derived_brush.center = transformation_matrix * brush.center
                 derived_brush.normal = ((
-                        transformation_matrix * brush.normal - (
-                            transformation_matrix * Vector((0, 0, 0))
-                        )
-                    ).normalized()
+                    transformation_matrix * brush.normal - (
+                        transformation_matrix * Vector((0, 0, 0))
+                    )
+                ).normalized()
                 )
                 derived_brush.radius = brush.radius
                 derived_brush.transformation_matrix = transformation_matrix * (
@@ -117,7 +119,7 @@ class Brushes():
                 derived_brushes.append(derived_brush)
 
     def determine_influence(self, octree, falloff_curve,
-                            ignore_backfacing = False, mesh_object = None):
+                            ignore_backfacing=False, mesh_object=None):
         coordinate_map = octree.coordinate_map
         map_manager = MapManager()
         primary_brush = self.primary_brush
@@ -141,8 +143,8 @@ class Brushes():
             map_manager.clip_domain(primary_brush.indices, 'RETAIN')
             primary_brush.falloff_map =\
                 falloff_curve.get_falloff_map_from_distance_map(
-                distance_map, radius
-            )
+                    distance_map, radius
+                )
 
             # Calculate the primary brush's normal.
             primary_brush_falloff_map = primary_brush.falloff_map
@@ -232,7 +234,7 @@ class Brushes():
             # Create each brush's color map from the combined color map.
             for brush in [primary_brush] + derived_brushes:
                 brush.color_map = {
-                    index : combined_color_map[index]
+                    index: combined_color_map[index]
                     for index in brush.indices
                 }
 
@@ -247,7 +249,7 @@ class Brushes():
 
     def ray_cast_primary_brush_onto_mesh(self, region_x,
                                          region_y, mesh_object,
-                                         ignore_backfacing = False):
+                                         ignore_backfacing=False):
         context = bpy.context
         primary_brush = self.primary_brush
 
@@ -327,7 +329,7 @@ class Brushes():
     def reset(self):
         self.__init__()
 
-    def set_symmetry_from_object(self, mesh_object, object_axes = set()):
+    def set_symmetry_from_object(self, mesh_object, object_axes=set()):
         # Set the center of symmetry to the mesh object's world space center.
         self.symmetry_center = mesh_object.location
 
@@ -337,24 +339,24 @@ class Brushes():
         symmetry_axes = self.symmetry_axes
         if 'X' in object_axes:
             symmetry_axes.append((
-                    model_matrix * Vector((1, 0, 0)) -(
-                        model_matrix * Vector((-1, 0, 0))
-                    )
-                ).normalized()
+                model_matrix * Vector((1, 0, 0)) - (
+                    model_matrix * Vector((-1, 0, 0))
+                )
+            ).normalized()
             )
         if 'Y' in object_axes:
             symmetry_axes.append((
-                    model_matrix * Vector((0, 1, 0)) -(
-                        model_matrix * Vector((0, -1, 0))
-                    )
-                ).normalized()
+                model_matrix * Vector((0, 1, 0)) - (
+                    model_matrix * Vector((0, -1, 0))
+                )
+            ).normalized()
             )
         if 'Z' in object_axes:
             symmetry_axes.append((
-                    model_matrix * Vector((0, 0, 1)) -(
-                        model_matrix * Vector((0, 0, -1))
-                    )
-                ).normalized()
+                model_matrix * Vector((0, 0, 1)) - (
+                    model_matrix * Vector((0, 0, -1))
+                )
+            ).normalized()
             )
 
     def update_derived(self):
@@ -368,9 +370,9 @@ class Brushes():
             transformation_matrix = brush.transformation_matrix
             brush.center = transformation_matrix * primary_brush_center
             brush.normal = ((
-                    transformation_matrix * primary_brush_normal - (
-                        transformation_matrix * Vector((0, 0, 0))
-                    )
-                ).normalized()
+                transformation_matrix * primary_brush_normal - (
+                    transformation_matrix * Vector((0, 0, 0))
+                )
+            ).normalized()
             )
             brush.radius = primary_brush_radius

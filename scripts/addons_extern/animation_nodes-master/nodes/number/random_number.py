@@ -5,6 +5,7 @@ from ... events import propertyChanged, executionCodeChanged
 from ... base_types.node import AnimationNode
 from ... algorithms.random import getUniformRandom
 
+
 class RandomNumberNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_RandomNumberNode"
     bl_label = "Random Number"
@@ -14,23 +15,23 @@ class RandomNumberNode(bpy.types.Node, AnimationNode):
         self.inputs["Max"].hide = not self.useMaxValue
         executionCodeChanged()
 
-    nodeSeed = IntProperty(update = propertyChanged)
+    nodeSeed = IntProperty(update=propertyChanged)
 
-    useNodeSeed = BoolProperty(name = "Use Node Seed",
-        description = "Turning this off gives a speedup",
-        default = True, update = executionCodeChanged)
+    useNodeSeed = BoolProperty(name="Use Node Seed",
+                               description="Turning this off gives a speedup",
+                               default=True, update=executionCodeChanged)
 
-    checkSeed = BoolProperty(name = "Check Seed",
-        description = "Can be turned of when using small seeds ( < 20.000.000 )",
-        default = True, update = executionCodeChanged)
+    checkSeed = BoolProperty(name="Check Seed",
+                             description="Can be turned of when using small seeds ( < 20.000.000 )",
+                             default=True, update=executionCodeChanged)
 
-    useMinValue = BoolProperty(name = "Use Min Value",
-        description = "When turned off 0 will be used as min value",
-        default = True, update = socketUsageChanged)
+    useMinValue = BoolProperty(name="Use Min Value",
+                               description="When turned off 0 will be used as min value",
+                               default=True, update=socketUsageChanged)
 
-    useMaxValue = BoolProperty(name = "Use Max Value",
-        description = "When turned off 1 will be used as max value",
-        default = True, update = socketUsageChanged)
+    useMaxValue = BoolProperty(name="Use Max Value",
+                               description="When turned off 1 will be used as max value",
+                               default=True, update=socketUsageChanged)
 
     def create(self):
         self.inputs.new("an_IntegerSocket", "Seed", "seed")
@@ -41,27 +42,34 @@ class RandomNumberNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if self.useNodeSeed:
-            layout.prop(self, "nodeSeed", text = "Node Seed")
+            layout.prop(self, "nodeSeed", text="Node Seed")
 
     def drawAdvanced(self, layout):
         layout.prop(self, "useNodeSeed")
         layout.prop(self, "checkSeed")
 
-        col = layout.column(align = True)
+        col = layout.column(align=True)
         col.prop(self, "useMaxValue")
         subcol = col.column()
         subcol.active = self.useMaxValue
         subcol.prop(self, "useMinValue")
 
     def getExecutionCode(self):
-        if self.useNodeSeed and self.checkSeed: seedCode = "(seed + self.nodeSeed * 1034) % len(random_number_cache)"
-        elif self.useNodeSeed and not self.checkSeed: seedCode = "seed + self.nodeSeed * 1034"
-        elif not self.useNodeSeed and self.checkSeed: seedCode = "seed % len(random_number_cache)"
-        elif not self.useNodeSeed and not self.checkSeed: seedCode = "seed"
+        if self.useNodeSeed and self.checkSeed:
+            seedCode = "(seed + self.nodeSeed * 1034) % len(random_number_cache)"
+        elif self.useNodeSeed and not self.checkSeed:
+            seedCode = "seed + self.nodeSeed * 1034"
+        elif not self.useNodeSeed and self.checkSeed:
+            seedCode = "seed % len(random_number_cache)"
+        elif not self.useNodeSeed and not self.checkSeed:
+            seedCode = "seed"
 
-        if self.useMinValue and self.useMaxValue: changeCode = " * (maxValue - minValue) + minValue"
-        elif not self.useMinValue and self.useMaxValue: changeCode = " * maxValue"
-        else: changeCode = ""
+        if self.useMinValue and self.useMaxValue:
+            changeCode = " * (maxValue - minValue) + minValue"
+        elif not self.useMinValue and self.useMaxValue:
+            changeCode = " * maxValue"
+        else:
+            changeCode = ""
 
         return "number = random_number_cache[{}]{}".format(seedCode, changeCode)
 

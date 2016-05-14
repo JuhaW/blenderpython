@@ -294,12 +294,14 @@ class AddSimpleTube(bpy.types.Operator):
 
         er = not self.equal_radii
         # ROW 1
-        row = col.row(); split = row.split(percentage=0.5)
+        row = col.row()
+        split = row.split(percentage=0.5)
         prop_n_reset(split, "handle_ext_1", "handle 1", 2.0)  # left
         prop_n_reset(split, "point1_scale", "radius_1", 1.0, er)  # right
 
         # ROW 2
-        row = col.row(); split = row.split()
+        row = col.row()
+        split = row.split()
         prop_n_reset(split, "handle_ext_2", "handle 2", 2.0)  # left
         prop_n_reset(split, "point2_scale", "radius_2", 1.0, er)  # right
 
@@ -399,7 +401,6 @@ class AddSimpleTube(bpy.types.Operator):
             return {'FINISHED'}
 
 
-
 def menu_func(self, context):
     self.layout.operator("mesh.add_curvebased_tube", text="Add Tubing")
     self.layout.separator()
@@ -412,7 +413,6 @@ def register():
 
 
 def unregister():
-
 
     bpy.utils.unregister_module(__name__)
 

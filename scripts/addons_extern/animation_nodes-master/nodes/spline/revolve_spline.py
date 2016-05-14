@@ -6,13 +6,14 @@ from ... algorithms.mesh_generation.from_splines import revolveProfileAroundAxis
 
 projectionTypeItems = [
     ("PARAMETER", "Same Parameter", ""),
-    ("PROJECT", "Project", "") ]
+    ("PROJECT", "Project", "")]
+
 
 class RevolveSplineNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_RevolveSplineNode"
     bl_label = "Revolve Spline"
 
-    projectionType = EnumProperty(name = "Projection Type", default = "PROJECT", items = projectionTypeItems, update = propertyChanged)
+    projectionType = EnumProperty(name="Projection Type", default="PROJECT", items=projectionTypeItems, update=propertyChanged)
 
     def create(self):
         self.inputs.new("an_SplineSocket", "Axis", "axis")
@@ -28,14 +29,18 @@ class RevolveSplineNode(bpy.types.Node, AnimationNode):
         self.width += 20
 
     def draw(self, layout):
-        layout.prop(self, "projectionType", text = "")
+        layout.prop(self, "projectionType", text="")
 
     def execute(self, axis, profile, splineSamples, surfaceSamples):
         def canExecute():
-            if not axis.isEvaluable: return False
-            if not profile.isEvaluable: return False
-            if splineSamples < 2: return False
-            if surfaceSamples < 3: return False
+            if not axis.isEvaluable:
+                return False
+            if not profile.isEvaluable:
+                return False
+            if splineSamples < 2:
+                return False
+            if surfaceSamples < 3:
+                return False
             return True
 
         axis.update()
@@ -44,4 +49,5 @@ class RevolveSplineNode(bpy.types.Node, AnimationNode):
         if canExecute():
             vertices, polygons = revolveProfileAroundAxis(axis, profile, splineSamples, surfaceSamples, self.projectionType)
             return vertices, polygons
-        else: return [], []
+        else:
+            return [], []

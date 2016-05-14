@@ -7,12 +7,13 @@ repetitionTypeItems = [
     ("LOOP", "Loop", ""),
     ("PING_PONG", "Ping Pong", "")]
 
+
 class RepeatTimeNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_RepeatTimeNode"
     bl_label = "Repeat Time"
 
-    repetitionType = EnumProperty(name = "Repetition Type", default = "LOOP",
-        items = repetitionTypeItems, update = executionCodeChanged)
+    repetitionType = EnumProperty(name="Repetition Type", default="LOOP",
+                                  items=repetitionTypeItems, update=executionCodeChanged)
 
     def create(self):
         self.inputs.new("an_FloatSocket", "Time", "time")
@@ -22,7 +23,7 @@ class RepeatTimeNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_FloatSocket", "Time", "outTime")
 
     def draw(self, layout):
-        layout.prop(self, "repetitionType", text = "Type")
+        layout.prop(self, "repetitionType", text="Type")
 
     def getExecutionCode(self):
         if self.repetitionType == "LOOP":

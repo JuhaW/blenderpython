@@ -404,27 +404,27 @@ def prop_update_enable(self, context):
 class WM_PROP_LockCoords(bpy.types.PropertyGroup):
     """bpy.types.WindowManager.lock_coords"""
     enable = bpy.props.BoolProperty(
-            name='Enable',
-            description='Lock vertices coordinates',
-            default=False,
-            update=prop_update_enable)
+        name='Enable',
+        description='Lock vertices coordinates',
+        default=False,
+        update=prop_update_enable)
     is_selectable = bpy.props.BoolProperty(
-            name='Selectable',
-            default=DEFAULT_SELECTABLE,
-            update=prop_update)
+        name='Selectable',
+        default=DEFAULT_SELECTABLE,
+        update=prop_update)
     lock_axis = bpy.props.BoolVectorProperty(
-            name='Lock Axis',
-            description='Lock axis',
-            default=(True, True, True),
-            subtype='XYZ', size=3,
-            update=prop_update)
+        name='Lock Axis',
+        description='Lock axis',
+        default=(True, True, True),
+        subtype='XYZ', size=3,
+        update=prop_update)
     lock_coordinate_system = bpy.props.EnumProperty(
-            name='Coordinate System',
-            items=(('GLOBAL', 'Global',
-                    'Lock with global coordinate system (slower)'),
-                   ('LOCAL', 'Local', 'Lock with local coordinate system')),
-            default='LOCAL',
-            update=prop_update)
+        name='Coordinate System',
+        items=(('GLOBAL', 'Global',
+                'Lock with global coordinate system (slower)'),
+               ('LOCAL', 'Local', 'Lock with local coordinate system')),
+        default='LOCAL',
+        update=prop_update)
 
 
 ###############################################################################
@@ -438,17 +438,17 @@ class MESH_OT_lock_coords(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     mode = bpy.props.EnumProperty(
-            name='Lock',
-            items=(('LOCK_SEL', 'Lock Selected', ''),
-                   ('LOCK_DESEL', 'Lock Deselected', ''),
-                   ('UNLOCK_SEL', 'Unlock Selected', ''),
-                   ('UNLOCK_DESEL', 'Unlock Deselected', ''),
-                   ('UNLOCK_ALL', 'Unlock All', ''),
-                   ('INVERT', 'Inverse', ''),
-                   ('RELOCK', 'Relock',
-                    'Copy current coordinates to locking coordinates'),
-                   ),
-            default='LOCK_SEL')
+        name='Lock',
+        items=(('LOCK_SEL', 'Lock Selected', ''),
+               ('LOCK_DESEL', 'Lock Deselected', ''),
+               ('UNLOCK_SEL', 'Unlock Selected', ''),
+               ('UNLOCK_DESEL', 'Unlock Deselected', ''),
+               ('UNLOCK_ALL', 'Unlock All', ''),
+               ('INVERT', 'Inverse', ''),
+               ('RELOCK', 'Relock',
+                'Copy current coordinates to locking coordinates'),
+               ),
+        default='LOCK_SEL')
 
     @classmethod
     def poll(cls, context):
@@ -834,7 +834,7 @@ def register():
     setattr(PREFS_LOCATION[0],
             'lock_coords',
             bpy.props.PointerProperty(
-                    name='Lock Coordinates', type=WM_PROP_LockCoords))
+        name='Lock Coordinates', type=WM_PROP_LockCoords))
     bpy.types.VIEW3D_MT_edit_mesh_vertices.append(menu_function)
     bpy.types.VIEW3D_HT_header.append(draw_header)
 

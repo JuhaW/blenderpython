@@ -3,6 +3,7 @@ from bpy.props import *
 from .. events import propertyChanged
 from .. base_types.socket import AnimationNodeSocket
 
+
 class ObjectGroupSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_ObjectGroupSocket"
     bl_label = "Object Group Socket"
@@ -12,10 +13,10 @@ class ObjectGroupSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     storable = False
     comparable = True
 
-    groupName = StringProperty(update = propertyChanged)
+    groupName = StringProperty(update=propertyChanged)
 
     def drawProperty(self, layout, text):
-        layout.prop_search(self, "groupName", bpy.data, "groups", text = text)
+        layout.prop_search(self, "groupName", bpy.data, "groups", text=text)
 
     def getValue(self):
         return bpy.data.groups.get(self.groupName)

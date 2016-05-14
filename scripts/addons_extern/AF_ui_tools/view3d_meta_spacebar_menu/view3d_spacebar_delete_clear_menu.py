@@ -1,4 +1,4 @@
-#bl_info = {
+# bl_info = {
 #    "name": "Spacebar Delete & Clear",
 #    "author": "Multiple Authors, mkbreuer",
 #    "version": (0, 1, 0),
@@ -11,22 +11,20 @@
 #    "category": "User Menu"}
 
 
-
-import bpy, re
+import bpy
+import re
 from bpy import *
 
 
-
-
 ###########################################################################################################################################################
 ###########################################################################################################################################################
-### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator  
-### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator 
+# Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator
+# Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator ### Operator
 ###########################################################################################################################################################
 ###########################################################################################################################################################
 
-####### Delete all Material --------------------------------------------
-####### Delete all Material --------------------------------------------
+# Delete all Material --------------------------------------------
+# Delete all Material --------------------------------------------
 
 class deleteMat(bpy.types.Operator):
     """delete materials with an value slider"""
@@ -34,42 +32,41 @@ class deleteMat(bpy.types.Operator):
     bl_label = "Delete all Material"
     bl_options = {'REGISTER', 'UNDO'}
 
-
     deleteMat = bpy.props.IntProperty(name="Delete all Material", description="How many times?", default=100, min=1, soft_max=5000, step=1)
-    
-    def execute(self, context):        
-        for i in range(self.deleteMat):      
+
+    def execute(self, context):
+        for i in range(self.deleteMat):
             bpy.ops.object.material_slot_remove()
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_props_popup(self, event)  
+        return context.window_manager.invoke_props_popup(self, event)
 
-bpy.utils.register_class(deleteMat) 
+bpy.utils.register_class(deleteMat)
 
 
 #############################################################################################################################################################
 #############################################################################################################################################################
-### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ###  
-### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ###  
+### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ###
+### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ### Sub Menus ###
 #############################################################################################################################################################
 #############################################################################################################################################################
 
 
-#######  Clean Up Mesh  #######-------------------------------------------------------                  
-#######  Clean Up Mesh  #######-------------------------------------------------------        
+# Clean Up Mesh  #######-------------------------------------------------------
+# Clean Up Mesh  #######-------------------------------------------------------
 
 class CLEANUP(bpy.types.Menu):
     bl_label = "Clean Up Mesh"
     bl_idname = "cleanup"
-   
+
     def draw(self, context):
         layout = self.layout
-            
-        layout.operator("mesh.fill_holes") 
+
+        layout.operator("mesh.fill_holes")
         layout.operator("mesh.delete_loose")
 
-        layout.operator("mesh.edge_collapse")            
+        layout.operator("mesh.edge_collapse")
 
         layout.separator()
 
@@ -80,68 +77,65 @@ class CLEANUP(bpy.types.Menu):
 bpy.utils.register_class(CLEANUP)
 
 
-
-#######  Clear Parenting  #######-------------------------------------------------------                  
-#######  Clear Parenting  #######-------------------------------------------------------        
+# Clear Parenting  #######-------------------------------------------------------
+# Clear Parenting  #######-------------------------------------------------------
 
 class CLEARPARENT(bpy.types.Menu):
     bl_label = "Clear Parenting"
     bl_idname = "clearparent"
-   
+
     def draw(self, context):
         layout = self.layout
-        
+
         layout.operator_enum("object.parent_clear", "type")
-     
+
 bpy.utils.register_class(CLEARPARENT)
 
 
-
-
-#######  Clear Tracking  #######-------------------------------------------------------                  
-#######  Clear Tracking  #######-------------------------------------------------------        
+# Clear Tracking  #######-------------------------------------------------------
+# Clear Tracking  #######-------------------------------------------------------
 
 class CLEARTRACK(bpy.types.Menu):
     bl_label = "Clear Tracking"
     bl_idname = "cleartrack"
-    
+
     def draw(self, context):
         layout = self.layout
-        
+
         layout.operator_enum("object.track_clear", "type")
-  
+
 bpy.utils.register_class(CLEARTRACK)
 
 
-#######  ReUndo  #######-------------------------------------------------------                  
-#######  ReUndo  #######-------------------------------------------------------        
+# ReUndo  #######-------------------------------------------------------
+# ReUndo  #######-------------------------------------------------------
 
 class VIEW3D_HTK_ReUndo(bpy.types.Menu):
     bl_label = "Hisrory Menu [X]"
-    bl_idname = "space_reundo"   
-   
+    bl_idname = "space_reundo"
+
     def draw(self, context):
         layout = self.layout
-        
-        layout.operator("ed.undo", text="Undo", icon ="TRIA_LEFT")
-        layout.operator("ed.redo", text="Redo", icon ="TRIA_RIGHT")
-        layout.operator("ed.undo_history", icon ="TRIA_DOWN") 
-    
-bpy.utils.register_class(VIEW3D_HTK_ReUndo)
-    
 
-######  Repeat History  ######-------------------------------------------------------                                                    
-######  Repeat History  ######-------------------------------------------------------                                                    
+        layout.operator("ed.undo", text="Undo", icon="TRIA_LEFT")
+        layout.operator("ed.redo", text="Redo", icon="TRIA_RIGHT")
+        layout.operator("ed.undo_history", icon="TRIA_DOWN")
+
+bpy.utils.register_class(VIEW3D_HTK_ReUndo)
+
+
+# Repeat History  ######-------------------------------------------------------
+# Repeat History  ######-------------------------------------------------------
 
 def draw_delete_history_tools(context, layout):
     settings = context.tool_settings
     layout.operator_context = 'INVOKE_REGION_WIN'
 
     # Special Menu
-            
-    layout.operator("ed.undo", text="Undo", icon ="TRIA_LEFT")
-    layout.operator("ed.redo", text="Redo", icon ="TRIA_RIGHT")
-    layout.operator("ed.undo_history", icon ="TRIA_DOWN") 
+
+    layout.operator("ed.undo", text="Undo", icon="TRIA_LEFT")
+    layout.operator("ed.redo", text="Redo", icon="TRIA_RIGHT")
+    layout.operator("ed.undo_history", icon="TRIA_DOWN")
 
 
 #############################################################################################################################################################
@@ -150,30 +144,29 @@ def draw_delete_history_tools(context, layout):
 ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ### Main Menu ###
 #############################################################################################################################################################
 #############################################################################################################################################################
-         
 
-#######  Delete & Clear Menu  #######-------------------------------------------------------                  
-#######  Delete & Clear Menu  #######-------------------------------------------------------        
+
+# Delete & Clear Menu  #######-------------------------------------------------------
+# Delete & Clear Menu  #######-------------------------------------------------------
 
 class VIEW3D_Space_Delete(bpy.types.Menu):
     bl_label = "Delete"
-    bl_idname = "space_cleardelete"   
-   
+    bl_idname = "space_cleardelete"
+
     def draw(self, context):
         layout = self.layout
-        
-      
-####### Object mode -------------------------------------------------        
-####### Object mode -------------------------------------------------
-       
-        ob = context       
+
+
+# Object mode -------------------------------------------------
+# Object mode -------------------------------------------------
+
+        ob = context
         if ob.mode == 'OBJECT':
 
-
             layout.operator("object.delete")
-                 
-            layout.separator()                      
-            
+
+            layout.separator()
+
             layout.menu("VIEW3D_MT_object_clear", text="Clear Location", icon='EMPTY_DATA')
 
             layout.separator()
@@ -181,221 +174,211 @@ class VIEW3D_Space_Delete(bpy.types.Menu):
             layout.operator("material.remove", text="Clear Materials")
 
             layout.separator()
-                        
+
             layout.menu("clearparent", text="Clear Parenting", icon='CONSTRAINT')
             layout.menu("cleartrack", text="Clear Tracking")
             layout.operator("object.constraints_clear", text="Clear Constraint")
 
             layout.separator()
-            layout.operator("anim.keyframe_clear_v3d", text = "Clear Keyframe", icon='KEY_DEHLT')                        
+            layout.operator("anim.keyframe_clear_v3d", text="Clear Keyframe", icon='KEY_DEHLT')
             layout.operator("object.game_property_clear")
 
-            layout.separator() 
+            layout.separator()
 
-            scn = context.scene          
-            layout.operator("ba.delete_data_obs", icon ="OUTLINER_DATA_MESH")        
-            layout.prop(scn, "mod_list","")
+            scn = context.scene
+            layout.operator("ba.delete_data_obs", icon="OUTLINER_DATA_MESH")
+            layout.prop(scn, "mod_list", "")
 
-            layout.separator()  
+            layout.separator()
 
-            layout.operator("ba.delete_scene_obs")                 
+            layout.operator("ba.delete_scene_obs")
 
-            layout.separator()             
-   
-            layout.operator("object.hide_view_clear", text="Clear Hide", icon = "RESTRICT_VIEW_OFF") 
+            layout.separator()
 
-            
-          
+            layout.operator("object.hide_view_clear", text="Clear Hide", icon="RESTRICT_VIEW_OFF")
 
-####### Edit mode -------------------------------------------------        
-####### Edit mode -------------------------------------------------
+
+# Edit mode -------------------------------------------------
+# Edit mode -------------------------------------------------
 
         elif ob.mode == 'EDIT_MESH':
 
-            layout.operator("mesh.delete", "Vertices", icon="SNAP_VERTEX").type="VERT"
+            layout.operator("mesh.delete", "Vertices", icon="SNAP_VERTEX").type = "VERT"
             layout.operator("mesh.dissolve_verts")
             layout.operator("mesh.remove_doubles")
 
             layout.separator()
-            
-            layout.operator("mesh.delete", "Edges", icon="SNAP_EDGE").type="EDGE"
+
+            layout.operator("mesh.delete", "Edges", icon="SNAP_EDGE").type = "EDGE"
             layout.operator("mesh.dissolve_edges")
             layout.operator("mesh.delete_edgeloop", text="Remove Edge Loop")
-            
+
             layout.separator()
-            
-            layout.operator("mesh.delete", "Faces", icon="SNAP_FACE").type="FACE"
+
+            layout.operator("mesh.delete", "Faces", icon="SNAP_FACE").type = "FACE"
             layout.operator("mesh.dissolve_faces")
-            layout.operator("mesh.delete", "Remove only Faces").type="ONLY_FACE"            
-            
-            
+            layout.operator("mesh.delete", "Remove only Faces").type = "ONLY_FACE"
+
             layout.separator()
 
-            layout.operator("mesh.dissolve_limited", icon="MATCUBE")		
+            layout.operator("mesh.dissolve_limited", icon="MATCUBE")
             layout.operator("mesh.dissolve_degenerate")
-            layout.operator("mesh.delete", "Remove Edge & Faces").type="EDGE_FACE"
-            
-            layout.separator() 
-                        
-            layout.operator("mesh.reveal", text="Clear Hide", icon = "RESTRICT_VIEW_OFF") 
+            layout.operator("mesh.delete", "Remove Edge & Faces").type = "EDGE_FACE"
 
-####### Curve menu ------------------------------------------------        
-####### Curve menu ------------------------------------------------
+            layout.separator()
+
+            layout.operator("mesh.reveal", text="Clear Hide", icon="RESTRICT_VIEW_OFF")
+
+# Curve menu ------------------------------------------------
+# Curve menu ------------------------------------------------
 
         if ob.mode == 'EDIT_CURVE':
 
-            layout.operator("curve.delete", "Vertices", icon="PARTICLE_TIP").type="VERT"
-            layout.operator("curve.delete", "Segment", icon="IPO_EASE_IN_OUT").type="SEGMENT"
+            layout.operator("curve.delete", "Vertices", icon="PARTICLE_TIP").type = "VERT"
+            layout.operator("curve.delete", "Segment", icon="IPO_EASE_IN_OUT").type = "SEGMENT"
 
-            layout.separator() 
-                        
-            layout.operator("curve.reveal", text="Clear Hide", icon = "RESTRICT_VIEW_OFF")            
-     
+            layout.separator()
 
-####### Surface menu ----------------------------------------------
-####### Surface menu ----------------------------------------------
-       
+            layout.operator("curve.reveal", text="Clear Hide", icon="RESTRICT_VIEW_OFF")
+
+
+# Surface menu ----------------------------------------------
+# Surface menu ----------------------------------------------
+
         if ob.mode == 'EDIT_SURFACE':
 
-            layout.operator("curve.delete", "Vertices", icon="PARTICLE_TIP").type="VERT"
-            layout.operator("curve.delete", "Segments", icon="IPO_EASE_IN_OUT").type="SEGMENT"
+            layout.operator("curve.delete", "Vertices", icon="PARTICLE_TIP").type = "VERT"
+            layout.operator("curve.delete", "Segments", icon="IPO_EASE_IN_OUT").type = "SEGMENT"
 
-            layout.separator() 
-                        
-            layout.operator("curve.reveal", text="Clear Hide", icon = "RESTRICT_VIEW_OFF") 
-    
+            layout.separator()
 
-        
-####### Metaball menu ---------------------------------------------
-####### Metaball menu ---------------------------------------------
-                
+            layout.operator("curve.reveal", text="Clear Hide", icon="RESTRICT_VIEW_OFF")
+
+
+# Metaball menu ---------------------------------------------
+# Metaball menu ---------------------------------------------
+
         if ob.mode == 'EDIT_METABALL':
-           
+
             layout.operator("mball.delete_metaelems", icon="META_BALL")
 
-            layout.separator() 
-            
-            layout.operator("mball.reveal_metaelems", text="Clear Hide", icon = "RESTRICT_VIEW_OFF") 
+            layout.separator()
+
+            layout.operator("mball.reveal_metaelems", text="Clear Hide", icon="RESTRICT_VIEW_OFF")
 
 
-####### Lattice menu ----------------------------------------------
-####### Lattice menu ----------------------------------------------
-         
+# Lattice menu ----------------------------------------------
+# Lattice menu ----------------------------------------------
+
         elif ob.mode == 'EDIT_LATTICE':
-           
+
             ##########################################
             draw_delete_history_tools(context, layout)
             ##########################################
-            
 
-                        
-####### Particle menu ---------------------------------------------
-####### Particle menu ---------------------------------------------
-           
-        if  context.mode == 'PARTICLE':
+
+# Particle menu ---------------------------------------------
+# Particle menu ---------------------------------------------
+
+        if context.mode == 'PARTICLE':
 
             layout.operator("particle.delete")
 
             layout.separator()
 
             layout.operator("particle.remove_doubles")
-            
+
             layout.separator()
 
-            layout.menu("VIEW3D_MT_particle_showhide", text = "Clear Hide", icon = "RESTRICT_VIEW_OFF")                        
+            layout.menu("VIEW3D_MT_particle_showhide", text="Clear Hide", icon="RESTRICT_VIEW_OFF")
 
 
-####### Weight paint menu -----------------------------------------
-####### Weight paint menu -----------------------------------------
-                   
-        ob = context  
+# Weight paint menu -----------------------------------------
+# Weight paint menu -----------------------------------------
+
+        ob = context
         if ob.mode == 'PAINT_WEIGHT':
 
             ##########################################
             draw_delete_history_tools(context, layout)
-            ##########################################              
+            ##########################################
 
 
+# Vertex paint menu -----------------------------------------
+# Vertex paint menu -----------------------------------------
 
-####### Vertex paint menu -----------------------------------------
-####### Vertex paint menu -----------------------------------------
-                                    
         elif ob.mode == 'PAINT_VERTEX':
-            
+
             ##########################################
             draw_delete_history_tools(context, layout)
             ##########################################
 
 
+# Texture paint menu ----------------------------------------
+# Texture paint menu ----------------------------------------
 
-####### Texture paint menu ----------------------------------------
-####### Texture paint menu ----------------------------------------
-                       
         elif ob.mode == 'PAINT_TEXTURE':
-            
+
             ##########################################
             draw_delete_history_tools(context, layout)
             ##########################################
-            
 
-            
-####### Sculpt menu -----------------------------------------------
-####### Sculpt menu -----------------------------------------------
-                        
+
+# Sculpt menu -----------------------------------------------
+# Sculpt menu -----------------------------------------------
+
         elif ob.mode == 'SCULPT':
-             
-            props = layout.operator("paint.hide_show", text="Clear All Hide", icon = "RESTRICT_VIEW_OFF")
+
+            props = layout.operator("paint.hide_show", text="Clear All Hide", icon="RESTRICT_VIEW_OFF")
             props.action = 'SHOW'
             props.area = 'ALL'
-            
+
             layout.separator()
 
             ##########################################
             draw_delete_history_tools(context, layout)
             ##########################################
-            
 
-                        
-####### Armature menu ---------------------------------------------
-####### Armature menu ---------------------------------------------
-        
-     
+
+# Armature menu ---------------------------------------------
+# Armature menu ---------------------------------------------
+
         elif ob.mode == 'EDIT_ARMATURE':
-            
-            layout.operator("armature.delete", text = "Selected Bone(s)", icon = "RIGHTARROW_THIN")
+
+            layout.operator("armature.delete", text="Selected Bone(s)", icon="RIGHTARROW_THIN")
 
             layout.separator()
-            
-            layout.operator("sketch.delete", text = "Sketch Delete", icon = "RIGHTARROW_THIN")  
-            
-            layout.separator()
-                         
-            layout.operator("armature.parent_clear", icon = "RIGHTARROW_THIN").type='CLEAR'
 
-            
-####### Pose mode menu --------------------------------------------
-####### Pose mode menu --------------------------------------------
-            
+            layout.operator("sketch.delete", text="Sketch Delete", icon="RIGHTARROW_THIN")
+
+            layout.separator()
+
+            layout.operator("armature.parent_clear", icon="RIGHTARROW_THIN").type = 'CLEAR'
+
+
+# Pose mode menu --------------------------------------------
+# Pose mode menu --------------------------------------------
+
         if context.mode == 'POSE':
-            arm = context.active_object.data 
+            arm = context.active_object.data
 
-            layout.operator("anim.keyframe_clear_v3d", text = "Clear Keyframe")
-            layout.operator("pose.paths_clear", text = "Clear Motion Path")
+            layout.operator("anim.keyframe_clear_v3d", text="Clear Keyframe")
+            layout.operator("pose.paths_clear", text="Clear Motion Path")
 
             layout.separator()
 
-            layout.menu("VIEW3D_MT_pose_transform", text="Clear Location")  
+            layout.menu("VIEW3D_MT_pose_transform", text="Clear Location")
             layout.menu("clearparent", text="Clear Parenting")
-            layout.operator("pose.constraints_clear", text="Clear Constraint")            
+            layout.operator("pose.constraints_clear", text="Clear Constraint")
 
             layout.separator()
-              
-            layout.operator("pose.reveal", text = "Clear Hide", icon = "RESTRICT_VIEW_OFF") 
+
+            layout.operator("pose.reveal", text="Clear Hide", icon="RESTRICT_VIEW_OFF")
 
 ###########################################################################################################################################################
 ###########################################################################################################################################################
-### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register 
-### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register 
+# Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register
+# Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register ### Register
 ###########################################################################################################################################################
 ###########################################################################################################################################################
 
@@ -409,41 +392,17 @@ def abs(val):
 def register():
 
     bpy.utils.register_class(VIEW3D_Space_Delete)
-   
+
 
 def unregister():
-  
-    bpy.utils.unregister_class(VIEW3D_Space_Delete)  
-    
-    bpy.utils.unregister_module(__name__)       
+
+    bpy.utils.unregister_class(VIEW3D_Space_Delete)
+
+    bpy.utils.unregister_module(__name__)
 
 
 if __name__ == "__main__":
-    register() 	
+    register()
 
     # The menu can also be called from scripts
     bpy.ops.wm.call_menu(name=VIEW3D_Space_Delete.bl_idname)
-  
-  
-           
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

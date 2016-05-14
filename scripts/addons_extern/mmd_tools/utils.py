@@ -2,7 +2,9 @@
 import re
 import math
 
-## 指定したオブジェクトのみを選択状態かつアクティブにする
+# 指定したオブジェクトのみを選択状態かつアクティブにする
+
+
 def selectAObject(obj):
     import bpy
     try:
@@ -11,14 +13,17 @@ def selectAObject(obj):
         pass
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.scene.objects.active = obj
-    obj.select=True
+    obj.select = True
 
-## 現在のモードを指定したオブジェクトのEdit Modeに変更する
+# 現在のモードを指定したオブジェクトのEdit Modeに変更する
+
+
 def enterEditMode(obj):
     import bpy
     selectAObject(obj)
     if obj.mode != 'EDIT':
         bpy.ops.object.mode_set(mode='EDIT')
+
 
 def setParentToBone(obj, parent, bone_name):
     import bpy
@@ -35,7 +40,9 @@ def setParentToBone(obj, parent, bone_name):
 
 __CONVERT_NAME_TO_L_REGEXP = re.compile('^(.*)左(.*)$')
 __CONVERT_NAME_TO_R_REGEXP = re.compile('^(.*)右(.*)$')
-## 日本語で左右を命名されている名前をblender方式のL(R)に変更する
+# 日本語で左右を命名されている名前をblender方式のL(R)に変更する
+
+
 def convertNameToLR(name):
     m = __CONVERT_NAME_TO_L_REGEXP.match(name)
     if m:
@@ -45,7 +52,9 @@ def convertNameToLR(name):
         name = m.group(1) + m.group(2) + '.R'
     return name
 
-## src_vertex_groupのWeightをdest_vertex_groupにaddする
+# src_vertex_groupのWeightをdest_vertex_groupにaddする
+
+
 def mergeVertexGroup(meshObj, src_vertex_group_name, dest_vertex_group_name):
     mesh = meshObj.data
     src_vertex_group = meshObj.vertex_groups[src_vertex_group_name]
@@ -58,6 +67,7 @@ def mergeVertexGroup(meshObj, src_vertex_group_name, dest_vertex_group_name):
             dest_vertex_group.add([v.index], v.groups[gi].weight, 'ADD')
         except ValueError:
             pass
+
 
 def separateByMaterials(meshObj):
     import bpy
@@ -86,7 +96,7 @@ def separateByMaterials(meshObj):
             i.parent = prev_parent
 
 
-## Boneのカスタムプロパティにname_jが存在する場合、name_jの値を
+# Boneのカスタムプロパティにname_jが存在する場合、name_jの値を
 # それ以外の場合は通常のbone名をキーとしたpose_boneへの辞書を作成
 def makePmxBoneMap(armObj):
     boneMap = {}
@@ -97,4 +107,3 @@ def makePmxBoneMap(armObj):
             name = i.mmd_bone.name_j or i.name
         boneMap[name] = i
     return boneMap
-

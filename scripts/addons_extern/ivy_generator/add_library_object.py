@@ -1,7 +1,9 @@
-import bpy, os
+import bpy
+import os
 
 from bpy.types import Operator, Menu
 from bpy.props import StringProperty
+
 
 def library_search_path():
     try:
@@ -10,6 +12,7 @@ def library_search_path():
         file_path = ''
 
     return file_path
+
 
 def library_object_cache(context, reload=False):
     object_cache = library_object_cache._object_cache
@@ -39,10 +42,10 @@ def library_object_add(context, filepath, group_name):
     group = data_to.groups[0]
 
     bpy.ops.object.group_instance_add(group=group_name,
-        view_align=False,
-        location=(context.scene.cursor_location))
+                                      view_align=False,
+                                      location=(context.scene.cursor_location))
 
-    #bpy.ops.object.duplicates_make_real()
+    # bpy.ops.object.duplicates_make_real()
 
 
 class LibraryAppendObject(Operator):
@@ -55,7 +58,7 @@ class LibraryAppendObject(Operator):
     filepath = StringProperty(
         subtype='FILE_PATH')
     group_name = StringProperty(
-        )
+    )
 
     def execute(self, context):
         library_object_add(context, self.filepath, self.group_name)
@@ -85,15 +88,18 @@ class Object_library_add(Menu):
             props.filepath = filepath
             props.group_name = group_name
 
+
 def add_library_button(self, context):
     self.layout.menu(
         Object_library_add.__name__,
         text="Template",
         icon="PLUGIN")
 
+
 def register():
     bpy.utils.register_class(LibraryAppendObject)
     bpy.utils.register_class(Object_library_add)
+
 
 def unregister():
     bpy.utils.unregister_class(LibraryAppendObject)

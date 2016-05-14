@@ -4,14 +4,17 @@ from . handlers import eventHandler
 enableSelectionSorting = True
 sortedSelectionNames = []
 
+
 def getSortedSelectedObjects():
     objects = []
     for name in getSortedSelectedObjectNames():
         objects.append(bpy.data.objects.get(name))
     return objects
 
+
 def getSortedSelectedObjectNames():
     return sortedSelectionNames
+
 
 @eventHandler("SCENE_UPDATE_POST")
 def updateSelectionSorting(scene):
@@ -30,6 +33,7 @@ def updateSelectionSorting(scene):
         sortedSelectionNames = newSortedSelection
     else:
         sortedSelectionNames = selectedNames
+
 
 def getSelectedObjectNames():
     selectedNames = []

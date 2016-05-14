@@ -25,12 +25,12 @@ from mathutils.geometry import intersect_point_line
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (repeat_last, Matrix_generate, Vector_generate,
-                            updateNode, SvSetSocketAnyType, SvGetSocketAnyType)
+                                     updateNode, SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 # distance between two points without sqrt, for comp only
 def distK(v1, v2):
-    return sum((i[0]-i[1])**2 for i in zip(v1, v2))
+    return sum((i[0] - i[1])**2 for i in zip(v1, v2))
 
 
 class SvVertSortNode(bpy.types.Node, SverchCustomTreeNode):
@@ -60,10 +60,10 @@ class SvVertSortNode(bpy.types.Node, SverchCustomTreeNode):
 
         updateNode(self, [])
 
-    modes = [("XYZ",    "XYZ", "X Y Z Sort",    1),
-             ("DIST",   "Dist", "Distance",     2),
-             ("AXIS",   "Axis", "Axial sort",   3),
-             ("USER",   "User", "User defined", 10)]
+    modes = [("XYZ", "XYZ", "X Y Z Sort", 1),
+             ("DIST", "Dist", "Distance", 2),
+             ("AXIS", "Axis", "Axial sort", 3),
+             ("USER", "User", "User defined", 10)]
 
     mode = EnumProperty(default='XYZ', items=modes,
                         update=mode_change)
@@ -161,7 +161,7 @@ class SvVertSortNode(bpy.types.Node, SverchCustomTreeNode):
                     axis_norm = m * Vector((1, 0, 0))
                     base_point = m * Vector((0, 0, 0))
                     intersect_d = [intersect_point_line(v_c, base_point, axis) for v_c in v]
-                    rotate_d = [f(axis, (axis_norm+v_l[0]).rotation_difference(v_c)) for v_c, v_l in zip(v, intersect_d)]
+                    rotate_d = [f(axis, (axis_norm + v_l[0]).rotation_difference(v_c)) for v_c, v_l in zip(v, intersect_d)]
                     s_v = ((data[0][1], data[1], i) for i, data in enumerate(zip(intersect_d, rotate_d)))
                     s_v = sorted(s_v, key=itemgetter(0, 1))
 

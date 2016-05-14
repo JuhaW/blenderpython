@@ -3,6 +3,8 @@ from .Utils.core import *
 ### ------------ Menus ------------ ###
 
 # adds a view manipulation menu
+
+
 class ViewMenu(bpy.types.Menu):
     bl_label = "View"
     bl_idname = "view3d.view_menu"
@@ -17,7 +19,7 @@ class ViewMenu(bpy.types.Menu):
                       ["Left", "LEFT"],
                       ["Bottom", "BOTTOM"],
                       ["Camera", "CAMERA"]]
-        
+
         # add the menu items
         for mode in view_modes:
             prop = menu.add_item().operator(
@@ -35,9 +37,9 @@ class OtherViewMenu(bpy.types.Menu):
 
     def draw(self, context):
         menu = Menu(self)
-        
-        #menu.add_item().label(text="Other")
-        #menu.add_item().separator()
+
+        # menu.add_item().label(text="Other")
+        # menu.add_item().separator()
 
         menu.add_item().operator("view3d.view_selected")
         menu.add_item().operator("view3d.view_persportho")
@@ -49,13 +51,14 @@ class OtherViewMenu(bpy.types.Menu):
         menu.add_item().prop(context.space_data, "lock_cursor", toggle=True)
         menu.add_item().prop(context.space_data, "lock_camera", toggle=True)
 
-        #menu.add_item().separator()
+        # menu.add_item().separator()
 
         #menu.add_item().operator("view3d.set_layer_view_window", text="Set Layers", icon='RESTRICT_VIEW_OFF')
 
 ### ------------ New hotkeys and registration ------------ ###
 
 addon_keymaps = []
+
 
 def register():
     # create the global menu hotkey
@@ -67,7 +70,7 @@ def register():
     addon_keymaps.append((km, kmi))
 
 
-def unregister():  
+def unregister():
     # remove keymaps when add-on is deactivated
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)

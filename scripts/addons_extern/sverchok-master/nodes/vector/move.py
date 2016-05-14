@@ -20,7 +20,7 @@ import bpy
 from bpy.props import FloatProperty
 from sverchok.node_tree import SverchCustomTreeNode, StringsSocket, VerticesSocket
 from sverchok.data_structure import (updateNode, Vector_generate,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 
 class VectorMoveNode(bpy.types.Node, SverchCustomTreeNode):
@@ -86,16 +86,16 @@ class VectorMoveNode(bpy.types.Node, SverchCustomTreeNode):
             temp = []
             for k, vr in enumerate(ob):     # vectors
                 #print('move',str(len(ob)), str(len(vecs[i])), str(vr), str(vecs[i][k]))
-                v = ((vr + vecs[i][k]*mult[i][k]))[:]
+                v = ((vr + vecs[i][k] * mult[i][k]))[:]
                 temp.append(v)   # [0]*mult[0], v[1]*mult[0], v[2]*mult[0]))
             moved.append(temp)
         #print ('move', str(moved))
         return moved
 
 
-
 def register():
     bpy.utils.register_class(VectorMoveNode)
+
 
 def unregister():
     bpy.utils.unregister_class(VectorMoveNode)

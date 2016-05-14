@@ -2,6 +2,7 @@ import bpy
 from ... base_types.node import AnimationNode
 from ... data_structures.splines.poly_spline import PolySpline
 
+
 class SplinesFromEdgesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SplinesFromEdgesNode"
     bl_label = "Splines from Edges"

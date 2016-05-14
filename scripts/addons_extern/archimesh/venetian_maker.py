@@ -171,7 +171,7 @@ def shape_mesh_and_create_children(mainobject, update=False):
     if mp.crt_mat:
         set_material(myslats, plastic)
     # ------------------------
-    # Strings (Middle)       
+    # Strings (Middle)
     # ------------------------
     myp = [((0, 0, mypoints[0] + margin), (0, 0, 0), (0, 0, 0)),
            ((0, 0, mypoints[len(mypoints) - 1]), (0, 0, 0), (0, 0, 0))]
@@ -206,7 +206,7 @@ def shape_mesh_and_create_children(mainobject, update=False):
         set_material(mycurvec, mat)
         set_material(mycurver, mat)
     # ------------------------
-    # Strings (Front)       
+    # Strings (Front)
     # ------------------------
     myp = [((0, 0, margin), (0, 0, 0), (0, 0, 0)),
            ((0, 0, mypoints[len(mypoints) - 1] - 0.003 - math.sin(math.radians(angleused)) * mp.depth / 2), (0, 0, 0),
@@ -242,7 +242,7 @@ def shape_mesh_and_create_children(mainobject, update=False):
         set_material(mycurverf, mat)
 
     # ------------------------
-    # Strings (Back)       
+    # Strings (Back)
     # ------------------------
     myp = [((0, 0, margin), (0, 0, 0), (0, 0, 0)),
            ((0, 0, mypoints[len(mypoints) - 1] - 0.003 + math.sin(math.radians(angleused)) * mp.depth / 2),
@@ -278,9 +278,9 @@ def shape_mesh_and_create_children(mainobject, update=False):
         set_material(mycurvecb, mat)
         set_material(mycurverb, mat)
 
-    # ------------------ 
+    # ------------------
     # Bottom
-    # ------------------ 
+    # ------------------
     mybase = create_venetian_base("Venetian_base", mp.width + 0.002, mp.depth + 0.002, -0.006)
     mybase.parent = myslats
     mybase.location.x = 0
@@ -291,9 +291,9 @@ def shape_mesh_and_create_children(mainobject, update=False):
     # materials
     if mp.crt_mat:
         set_material(mybase, plastic)
-    # ------------------ 
+    # ------------------
     # Stick
-    # ------------------ 
+    # ------------------
     mystick = get_venetian_stick("Venetian_stick", mp.height * 0.6)
     mystick.parent = mainobject
     mystick.location.x = -mp.width / 2 + 0.03
@@ -304,9 +304,9 @@ def shape_mesh_and_create_children(mainobject, update=False):
         matstick = create_diffuse_material("Stick_material", False, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.04)
         set_material(mybase, matstick)
 
-    # ------------------ 
+    # ------------------
     # Strings up/down
-    # ------------------ 
+    # ------------------
     mystring = get_venetian_strings("Venetian_updown", mp.height * 0.75)
     mystring.parent = mainobject
     mystring.location.x = mp.width / 2 - 0.03
@@ -339,7 +339,7 @@ class ObjectProperties(bpy.types.PropertyGroup):
     ratio = bpy.props.IntProperty(name='Extend', min=0, max=100, default=100,
                                   description='% of extension (100 full extend)', update=update_object)
 
-    # Materials        
+    # Materials
     crt_mat = bpy.props.BoolProperty(name="Create default Cycles materials",
                                      description="Create default materials for Cycles render.",
                                      default=True, update=update_object)

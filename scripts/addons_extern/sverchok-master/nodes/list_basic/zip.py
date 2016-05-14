@@ -21,7 +21,7 @@ from bpy.props import BoolProperty, IntProperty, StringProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (changable_sockets, multi_socket, preobrazovatel,
-                            SvSetSocketAnyType, SvGetSocketAnyType, updateNode)
+                                     SvSetSocketAnyType, SvGetSocketAnyType, updateNode)
 
 
 class ZipNode(bpy.types.Node, SverchCustomTreeNode):
@@ -36,10 +36,10 @@ class ZipNode(bpy.types.Node, SverchCustomTreeNode):
                          default='')
     newsock = BoolProperty(name='newsock',
                            default=False)
-    unwrap = BoolProperty(name='unwrap', 
-                description='unwrap objects?',
-                default=False,
-                update=updateNode)
+    unwrap = BoolProperty(name='unwrap',
+                          description='unwrap objects?',
+                          default=False,
+                          update=updateNode)
     base_name = 'data '
     multi_socket_type = 'StringsSocket'
 
@@ -61,7 +61,6 @@ class ZipNode(bpy.types.Node, SverchCustomTreeNode):
             outputsocketname = ['data']
             changable_sockets(self, inputsocketname, outputsocketname)
 
-
     def process(self):
         if self.outputs['data'].is_linked:
             slots = []
@@ -72,7 +71,7 @@ class ZipNode(bpy.types.Node, SverchCustomTreeNode):
                 return
             output = self.myZip(slots, self.level)
             if self.unwrap:
-                output = preobrazovatel(output, [2,3])
+                output = preobrazovatel(output, [2, 3])
             SvSetSocketAnyType(self, 'data', output)
 
     def myZip(self, list_all, level, level2=0):
@@ -99,13 +98,13 @@ class ZipNode(bpy.types.Node, SverchCustomTreeNode):
         elif level > level2:
             if type(list_all) in [list, tuple]:
                 list_res = []
-                list_tr = self.myZip(list_all, level, level2+1)
+                list_tr = self.myZip(list_all, level, level2 + 1)
                 if list_tr is False:
                     list_tr = list_all
                 t = []
                 for tr in list_tr:
                     if type(list_tr) in [list, tuple]:
-                        list_tl = self.myZip(tr, level, level2+1)
+                        list_tl = self.myZip(tr, level, level2 + 1)
                         if list_tl is False:
                             list_tl = list_tr
                         t.append(list_tl)

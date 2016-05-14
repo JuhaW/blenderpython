@@ -24,8 +24,8 @@ from mathutils import Matrix
 from bpy.props import BoolProperty
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (Vector_generate,
-                            SvSetSocketAnyType, SvGetSocketAnyType,
-                            updateNode)
+                                     SvSetSocketAnyType, SvGetSocketAnyType,
+                                     updateNode)
 
 
 class SvAdaptiveEdgeNode(bpy.types.Node, SverchCustomTreeNode):
@@ -35,7 +35,7 @@ class SvAdaptiveEdgeNode(bpy.types.Node, SverchCustomTreeNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
 
     mesh_join = BoolProperty(name="Join meshes", default=True,
-                            update=updateNode)
+                             update=updateNode)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "mesh_join")

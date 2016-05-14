@@ -21,16 +21,18 @@ import bpy
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import dataCorrect, SvSetSocketAnyType, SvGetSocketAnyType
 
+
 def pols_edges(obj):
     out = []
     for faces in obj:
-        out_edges = [] #set() #[]
+        out_edges = []  # set() #[]
         for face in faces:
-            for edge in zip(face, list(face[1:])+list([face[0]])):
-                #out_edges.add(tuple(sorted(edge)))
+            for edge in zip(face, list(face[1:]) + list([face[0]])):
+                # out_edges.add(tuple(sorted(edge)))
                 out_edges.append(list(edge))
         out.append(out_edges)
     return out
+
 
 class Pols2EdgsNode(bpy.types.Node, SverchCustomTreeNode):
     ''' take polygon and to edges '''
@@ -45,13 +47,12 @@ class Pols2EdgsNode(bpy.types.Node, SverchCustomTreeNode):
     def process(self):
         if 'edgs' in self.outputs and len(self.outputs['edgs'].links) > 0:
             if 'pols' in self.inputs and len(self.inputs['pols'].links) > 0:
-                X_ = self.inputs['pols'].sv_get() #SvGetSocketAnyType(self, self.inputs['pols'])
+                X_ = self.inputs['pols'].sv_get()  # SvGetSocketAnyType(self, self.inputs['pols'])
                 X = dataCorrect(X_)
-                #print('p2e-X',str(X))
+                # print('p2e-X',str(X))
                 result = pols_edges(X)
                 #result = self.polstoedgs(X)
                 SvSetSocketAnyType(self, 'edgs', result)
-
 
     def polstoedgs(self, pols):
         # outdated
@@ -62,13 +63,13 @@ class Pols2EdgsNode(bpy.types.Node, SverchCustomTreeNode):
                 edgs = []
                 for i, ind in enumerate(pols):
                     #print('p2e',str(i%2), str(ind))
-                    this = [ind, pols[i-1]]
+                    this = [ind, pols[i - 1]]
                     this.sort()
                     if this not in edgs and this not in object:
                         edgs.append(this)
                 object.extend(edgs)
             out.append(object)
-        #print('p2e',str(out))
+        # print('p2e',str(out))
         return out
 
 
@@ -81,4 +82,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-

@@ -22,7 +22,7 @@ import bmesh
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, Vector_generate, repeat_last,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 #
 # Remove Doubles
@@ -136,6 +136,7 @@ class SvRemoveDoublesNode(bpy.types.Node, SverchCustomTreeNode):
             if 'Doubles' in self.outputs and self.outputs['Doubles'].is_linked:
                 SvSetSocketAnyType(self, 'Doubles', d_out)
 
+
 def register():
     bpy.utils.register_class(SvRemoveDoublesNode)
 
@@ -145,4 +146,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-

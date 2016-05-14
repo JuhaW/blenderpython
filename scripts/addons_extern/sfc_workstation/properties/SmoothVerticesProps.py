@@ -20,36 +20,37 @@
 
 import bpy
 
+
 class SmoothVerticesProps(bpy.types.PropertyGroup):
-    data_path =(
+    data_path = (
         "user_preferences.addons['{0}'].preferences.smooth_vertices"
     ).format(__package__.split(".")[0])
 
     # Smooth Vertices Settings
     boundary_is_locked = bpy.props.BoolProperty(
-        name = "Lock Boundary",
-        description = "Lock vertices that are on the boundary of the mesh.",
-        default = True
+        name="Lock Boundary",
+        description="Lock vertices that are on the boundary of the mesh.",
+        default=True
     )
     iterations = bpy.props.IntProperty(
-        name = "Iterations",
-        description = "Number of smoothing iterations",
-        default = 1,
-        min = 1,
-        soft_max = 25
+        name="Iterations",
+        description="Number of smoothing iterations",
+        default=1,
+        min=1,
+        soft_max=25
     )
     only_selected_are_affected = bpy.props.BoolProperty(
-        name = "Selected Only",
-        description = (
+        name="Selected Only",
+        description=(
             "Limit the smoothing operation's effect to the selected  " +
             "vertices only."
         ),
-        default = True
+        default=True
     )
 
     # UI Visibility
     settings_ui_is_visible = bpy.props.BoolProperty(
-        name = "Settings UI Visibility",
-        description = "Show/hide the Settings UI.",
-        default = False
+        name="Settings UI Visibility",
+        description="Show/hide the Settings UI.",
+        default=False
     )

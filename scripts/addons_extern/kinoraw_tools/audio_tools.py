@@ -1,20 +1,19 @@
-import bpy, os
+import bpy
+import os
 from bpy.props import IntProperty, StringProperty, BoolProperty
 import subprocess
 
 from . import functions
 
 
-proxy_qualities = [  ( "1", "25%", "" ), ( "2", "50%", "" ),
-                    ( "3", "75%", "" ), ( "4", "100%", "" )]
-                    
+proxy_qualities = [("1", "25%", ""), ("2", "50%", ""),
+                   ("3", "75%", ""), ("4", "100%", "")]
+
 #
 #  ls *.sh | parallel -j 8 sh {}
 #
 
 # functions
-
-
 
 
 def createsyncfile(filename):
@@ -23,7 +22,7 @@ def createsyncfile(filename):
         data = []
 
         try:
-            f.writelines(data) # Write a sequence of strings to a file
+            f.writelines(data)  # Write a sequence of strings to a file
         finally:
             f.close()
 
@@ -45,7 +44,7 @@ def writesyncfile(filename, data):
         f = open(bpy.path.abspath(filename), "w")
         try:
             for line in data:
-                f.writelines(line) # Write a sequence of strings to a file
+                f.writelines(line)  # Write a sequence of strings to a file
         finally:
             f.close()
 
@@ -63,8 +62,8 @@ class ExtractWavOperator(bpy.types.Operator):
 
     @staticmethod
     def has_sequencer(context):
-        return (context.space_data.view_type\
-        in {'SEQUENCER', 'SEQUENCER_PREVIEW'})
+        return (context.space_data.view_type
+                in {'SEQUENCER', 'SEQUENCER_PREVIEW'})
 
     @classmethod
     def poll(self, context):
@@ -74,8 +73,6 @@ class ExtractWavOperator(bpy.types.Operator):
             return strip.type in ('MOVIE')
         else:
             return False
-
-
 
     def execute(self, context):
 
@@ -92,13 +89,13 @@ class ExtractWavOperator(bpy.types.Operator):
                 newfilename = bpy.path.abspath(strip.filepath).rpartition(
                     "/")[2]
                 fileoutput = os.path.join(bpy.path.abspath(audio_dir),
-                             newfilename)+".wav"
+                                          newfilename) + ".wav"
 
             # check for wav existing file
             if not os.path.isfile(fileoutput):
-                #if not, extract the file
+                # if not, extract the file
                 extract_audio = "ffmpeg -i {} -acodec pcm_s16le -ac 2 {}".\
-                format(filename, fileoutput)
+                    format(filename, fileoutput)
                 print(extract_audio)
                 os.system(extract_audio)
             else:
@@ -106,35 +103,34 @@ class ExtractWavOperator(bpy.types.Operator):
 
             if strip.type == "MOVIE":
                 # import the file and trim in the same way the original
-                bpy.ops.sequencer.sound_strip_add(filepath=fileoutput,\
-                 frame_start=strip.frame_start, channel=strip.channel+1,\
-                 replace_sel=True, overlap=False, cache=False)
+                bpy.ops.sequencer.sound_strip_add(filepath=fileoutput,
+                                                  frame_start=strip.frame_start, channel=strip.channel + 1,
+                                                  replace_sel=True, overlap=False, cache=False)
 
                 # Update scene
                 context.scene.update()
 
                 newstrip = context.scene.sequence_editor.active_strip
 
-                 # deselect all other strips
+                # deselect all other strips
                 for i in context.selected_editable_sequences:
                     if i.name != newstrip.name:
-                        i.select=False
+                        i.select = False
 
                 # Update scene
                 context.scene.update()
 
-                #Match the original clip's length
-                
+                # Match the original clip's length
+
                 newstrip.frame_start = strip.frame_start - strip.animation_offset_start
 
-                #print(newstrip.name)
+                # print(newstrip.name)
                 functions.triminout(newstrip,
-                            strip.frame_start + strip.frame_offset_start,
-                            strip.frame_start + strip.frame_offset_start + \
-                            strip.frame_final_duration)
+                                    strip.frame_start + strip.frame_offset_start,
+                                    strip.frame_start + strip.frame_offset_start +
+                                    strip.frame_final_duration)
 
         return {'FINISHED'}
-
 
 
 class ExternalAudioSetSyncOperator(bpy.types.Operator):
@@ -144,8 +140,8 @@ class ExternalAudioSetSyncOperator(bpy.types.Operator):
 
     @staticmethod
     def has_sequencer(context):
-        return (context.space_data.view_type\
-        in {'SEQUENCER', 'SEQUENCER_PREVIEW'})
+        return (context.space_data.view_type
+                in {'SEQUENCER', 'SEQUENCER_PREVIEW'})
 
     @classmethod
     def poll(cls, context):
@@ -158,7 +154,6 @@ class ExternalAudioSetSyncOperator(bpy.types.Operator):
                     return True
                 else:
                     return False
-
 
     def execute(self, context):
 
@@ -203,8 +198,8 @@ class ExternalAudioReloadOperator(bpy.types.Operator):
 
     @staticmethod
     def has_sequencer(context):
-        return (context.space_data.view_type\
-        in {'SEQUENCER', 'SEQUENCER_PREVIEW'})
+        return (context.space_data.view_type
+                in {'SEQUENCER', 'SEQUENCER_PREVIEW'})
 
     @classmethod
     def poll(cls, context):
@@ -215,7 +210,6 @@ class ExternalAudioReloadOperator(bpy.types.Operator):
                 else:
                     return False
 
-
     def execute(self, context):
 
         preferences = context.user_preferences
@@ -225,7 +219,7 @@ class ExternalAudioReloadOperator(bpy.types.Operator):
 
         for strip in context.selected_editable_sequences:
 
-            sounds =  []
+            sounds = []
             for line in data:
                 if line.split()[0] == strip.filepath:
                     moviefile = bpy.path.abspath(line.split()[0])
@@ -233,36 +227,35 @@ class ExternalAudioReloadOperator(bpy.types.Operator):
                     offset = int(line.split()[2])
                     sounds.append((soundfile, offset))
 
-
             for soundfile, offset in sounds:
-                print(soundfile,offset)
+                print(soundfile, offset)
                 print(strip.filepath)
                 # find start frame for sound strip (using offset from file)
                 sound_frame_start = strip.frame_start - strip.animation_offset_start - offset
 
                 # import the file and trim in the same way the original
-                bpy.ops.sequencer.sound_strip_add(filepath=soundfile,\
-                 frame_start=sound_frame_start, channel=strip.channel+1,\
-                 replace_sel=True, overlap=False, cache=False)
+                bpy.ops.sequencer.sound_strip_add(filepath=soundfile,
+                                                  frame_start=sound_frame_start, channel=strip.channel + 1,
+                                                  replace_sel=True, overlap=False, cache=False)
 
                 # Update scene
                 context.scene.update()
 
                 newstrip = context.scene.sequence_editor.active_strip
 
-                 # deselect all other strips
+                # deselect all other strips
                 for i in context.selected_editable_sequences:
                     if i.name != newstrip.name:
-                        i.select=False
+                        i.select = False
 
                 # Update scene
                 context.scene.update()
 
                 # trim sound strip like original one
                 functions.triminout(newstrip,
-                            strip.frame_start + strip.frame_offset_start,
-                            strip.frame_start + strip.frame_offset_start + \
-                            strip.frame_final_duration)
+                                    strip.frame_start + strip.frame_offset_start,
+                                    strip.frame_start + strip.frame_offset_start +
+                                    strip.frame_final_duration)
 
         return {'FINISHED'}
 
@@ -302,9 +295,7 @@ class AudioToolPanel(bpy.types.Panel):
             layout = self.layout
             layout.prop(prefs, "audio_dir", text="path for audio files")
 
-
             layout.operator("sequencer.extract_wav_operator", text="Extract Wav")
-
 
             layout = self.layout
             layout.prop(prefs, "audio_scripts")
@@ -316,7 +307,6 @@ class AudioToolPanel(bpy.types.Panel):
             layout = self.layout
             layout.prop(prefs, "audio_use_external_links", text="external audio sync")
 
-
             if prefs.audio_use_external_links:
                 layout = self.layout
                 layout.prop(prefs, "audio_external_filename", text="sync data")
@@ -326,10 +316,10 @@ class AudioToolPanel(bpy.types.Panel):
                 row.operator("sequencer.external_audio_reload", text="reload audio")
 
         layout = self.layout
-                
+
         row = layout.row()
         row.prop(prefs, "metertype", text="")
-        row.operator("sequencer.openmeterbridge", text="Launch Audio Meter", icon = "SOUND")
+        row.operator("sequencer.openmeterbridge", text="Launch Audio Meter", icon="SOUND")
 
 
 class OpenMeterbridgeOperator(bpy.types.Operator):
@@ -346,15 +336,12 @@ class OpenMeterbridgeOperator(bpy.types.Operator):
         if cls.has_sequencer(context):
             if len(context.selected_editable_sequences) == 1:
                 return True
-                
 
     def execute(self, context):
         preferences = context.user_preferences
         prefs = preferences.addons[__package__].preferences
 
         command = "meterbridge -t {} 'PulseAudio JACK Sink:front-left' 'PulseAudio JACK Sink:front-right' &".format(prefs.metertype.lower())
-        p = subprocess.Popen(command,stdout=subprocess.PIPE, shell = True)
-        
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+
         return {'FINISHED'}
-
-

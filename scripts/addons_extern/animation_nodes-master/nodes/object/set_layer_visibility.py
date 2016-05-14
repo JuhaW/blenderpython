@@ -5,7 +5,8 @@ from ... base_types.node import AnimationNode
 
 layerChoosingTypeItems = [
     ("SINGLE", "Single", ""),
-    ("MULTIPLE", "Multiple", "") ]
+    ("MULTIPLE", "Multiple", "")]
+
 
 class ObjectLayerVisibilityOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ObjectLayerVisibilityOutputNode"
@@ -16,8 +17,8 @@ class ObjectLayerVisibilityOutputNode(bpy.types.Node, AnimationNode):
 
     errorMessage = StringProperty()
 
-    layerChoosingType = EnumProperty(name = "Layer Choosing Type", default = "MULTIPLE",
-        items = layerChoosingTypeItems, update = layerChoosingTypeChanged)
+    layerChoosingType = EnumProperty(name="Layer Choosing Type", default="MULTIPLE",
+                                     items=layerChoosingTypeItems, update=layerChoosingTypeChanged)
 
     def create(self):
         self.inputs.new("an_ObjectSocket", "Object", "object").defaultDrawType = "PROPERTY_ONLY"
@@ -25,9 +26,9 @@ class ObjectLayerVisibilityOutputNode(bpy.types.Node, AnimationNode):
         self.recreateLayerInputSockets()
 
     def draw(self, layout):
-        layout.prop(self, "layerChoosingType", text = "Type")
+        layout.prop(self, "layerChoosingType", text="Type")
         if self.errorMessage != "":
-            writeText(layout, self.errorMessage, icon = "ERROR", width = 20)
+            writeText(layout, self.errorMessage, icon="ERROR", width=20)
 
     def getExecutionCode(self):
         yield "if object:"

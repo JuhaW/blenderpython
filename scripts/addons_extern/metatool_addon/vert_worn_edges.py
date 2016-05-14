@@ -4,7 +4,7 @@
 #########  Worn Edges  ##################################################################################################
 
 
-#bl_info = {
+# bl_info = {
 #    "name": "Worn Edges",
 #    "author": "Oscurart",
 #    "version": (1, 2),
@@ -20,6 +20,7 @@
 import bpy
 from random import random
 import bmesh
+
 
 def CreateWornEdges(context, factor):
     actobj = bpy.context.object
@@ -84,5 +85,4 @@ def unregister():
 
 
 if __name__ == '__main__':
-    register() 
-
+    register()

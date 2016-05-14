@@ -24,7 +24,7 @@ bl_info = {
     "location": "View3D > Action mouse; F10; Properties panel",
     "warning": "",
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/"
-        "Scripts/3D_interaction/Enhanced_3D_Cursor",
+    "Scripts/3D_interaction/Enhanced_3D_Cursor",
     "tracker_url": "https://developer.blender.org/T28451",
     "category": "3D View"}
 #============================================================================#
@@ -160,92 +160,92 @@ Borrowed code/logic:
 @addon.Operator(idname="view3d.cursor3d_enhanced", label="Enhanced Set Cursor", description="Cursor history and bookmarks; drag/snap cursor.")
 class EnhancedSetCursor(bpy.types.Operator):
     key_char_map = {
-        'PERIOD':".", 'NUMPAD_PERIOD':".",
-        'MINUS':"-", 'NUMPAD_MINUS':"-",
-        'EQUAL':"+", 'NUMPAD_PLUS':"+",
+        'PERIOD': ".", 'NUMPAD_PERIOD': ".",
+        'MINUS': "-", 'NUMPAD_MINUS': "-",
+        'EQUAL': "+", 'NUMPAD_PLUS': "+",
         #'E':"e", # such big/small numbers aren't useful
-        'ONE':"1", 'NUMPAD_1':"1",
-        'TWO':"2", 'NUMPAD_2':"2",
-        'THREE':"3", 'NUMPAD_3':"3",
-        'FOUR':"4", 'NUMPAD_4':"4",
-        'FIVE':"5", 'NUMPAD_5':"5",
-        'SIX':"6", 'NUMPAD_6':"6",
-        'SEVEN':"7", 'NUMPAD_7':"7",
-        'EIGHT':"8", 'NUMPAD_8':"8",
-        'NINE':"9", 'NUMPAD_9':"9",
-        'ZERO':"0", 'NUMPAD_0':"0",
-        'SPACE':" ",
-        'SLASH':"/", 'NUMPAD_SLASH':"/",
-        'NUMPAD_ASTERIX':"*",
+        'ONE': "1", 'NUMPAD_1': "1",
+        'TWO': "2", 'NUMPAD_2': "2",
+        'THREE': "3", 'NUMPAD_3': "3",
+        'FOUR': "4", 'NUMPAD_4': "4",
+        'FIVE': "5", 'NUMPAD_5': "5",
+        'SIX': "6", 'NUMPAD_6': "6",
+        'SEVEN': "7", 'NUMPAD_7': "7",
+        'EIGHT': "8", 'NUMPAD_8': "8",
+        'NINE': "9", 'NUMPAD_9': "9",
+        'ZERO': "0", 'NUMPAD_0': "0",
+        'SPACE': " ",
+        'SLASH': "/", 'NUMPAD_SLASH': "/",
+        'NUMPAD_ASTERIX': "*",
     }
 
     key_coordsys_map = {
-        'LEFT_BRACKET':-1,
-        'RIGHT_BRACKET':1,
-        'J':'VIEW',
-        'K':"Surface",
-        'L':'LOCAL',
-        'B':'GLOBAL',
-        'N':'NORMAL',
-        'M':"Scaled",
+        'LEFT_BRACKET': -1,
+        'RIGHT_BRACKET': 1,
+        'J': 'VIEW',
+        'K': "Surface",
+        'L': 'LOCAL',
+        'B': 'GLOBAL',
+        'N': 'NORMAL',
+        'M': "Scaled",
     }
 
     key_pivot_map = {
-        'H':'ACTIVE',
-        'U':'CURSOR',
-        'I':'INDIVIDUAL',
-        'O':'CENTER',
-        'P':'MEDIAN',
+        'H': 'ACTIVE',
+        'U': 'CURSOR',
+        'I': 'INDIVIDUAL',
+        'O': 'CENTER',
+        'P': 'MEDIAN',
     }
 
     key_snap_map = {
-        'C':'INCREMENT',
-        'V':'VERTEX',
-        'E':'EDGE',
-        'F':'FACE',
+        'C': 'INCREMENT',
+        'V': 'VERTEX',
+        'E': 'EDGE',
+        'F': 'FACE',
     }
 
     key_tfm_mode_map = {
-        'G':'MOVE',
-        'R':'ROTATE',
-        'S':'SCALE',
+        'G': 'MOVE',
+        'R': 'ROTATE',
+        'S': 'SCALE',
     }
 
     key_map = {
-        "confirm":{'ACTIONMOUSE'}, # also 'RET' ?
-        "cancel":{'SELECTMOUSE', 'ESC'},
-        "free_mouse":{'F10'},
-        "make_normal_snapshot":{'W'},
-        "make_tangential_snapshot":{'Q'},
-        "use_absolute_coords":{'A'},
-        "snap_to_raw_mesh":{'D'},
-        "use_object_centers":{'T'},
-        "precision_up":{'PAGE_UP'},
-        "precision_down":{'PAGE_DOWN'},
-        "move_caret_prev":{'LEFT_ARROW'},
-        "move_caret_next":{'RIGHT_ARROW'},
-        "move_caret_home":{'HOME'},
-        "move_caret_end":{'END'},
-        "change_current_axis":{'TAB', 'RET', 'NUMPAD_ENTER'},
-        "prev_axis":{'UP_ARROW'},
-        "next_axis":{'DOWN_ARROW'},
-        "remove_next_character":{'DEL'},
-        "remove_last_character":{'BACK_SPACE'},
-        "copy_axes":{'C'},
-        "paste_axes":{'V'},
-        "cut_axes":{'X'},
+        "confirm": {'ACTIONMOUSE'},  # also 'RET' ?
+        "cancel": {'SELECTMOUSE', 'ESC'},
+        "free_mouse": {'F10'},
+        "make_normal_snapshot": {'W'},
+        "make_tangential_snapshot": {'Q'},
+        "use_absolute_coords": {'A'},
+        "snap_to_raw_mesh": {'D'},
+        "use_object_centers": {'T'},
+        "precision_up": {'PAGE_UP'},
+        "precision_down": {'PAGE_DOWN'},
+        "move_caret_prev": {'LEFT_ARROW'},
+        "move_caret_next": {'RIGHT_ARROW'},
+        "move_caret_home": {'HOME'},
+        "move_caret_end": {'END'},
+        "change_current_axis": {'TAB', 'RET', 'NUMPAD_ENTER'},
+        "prev_axis": {'UP_ARROW'},
+        "next_axis": {'DOWN_ARROW'},
+        "remove_next_character": {'DEL'},
+        "remove_last_character": {'BACK_SPACE'},
+        "copy_axes": {'C'},
+        "paste_axes": {'V'},
+        "cut_axes": {'X'},
     }
 
     gizmo_factor = 0.15
     click_period = 0.25
 
-    angle_grid_steps = {True:1.0, False:5.0}
-    scale_grid_steps = {True:0.01, False:0.1}
+    angle_grid_steps = {True: 1.0, False: 5.0}
+    scale_grid_steps = {True: 0.01, False: 0.1}
 
     # ====== OPERATOR METHOD OVERLOADS ====== #
     @classmethod
     def poll(cls, context):
-        area_types = {'VIEW_3D',} # also: IMAGE_EDITOR ?
+        area_types = {'VIEW_3D', }  # also: IMAGE_EDITOR ?
         return (context.area.type in area_types) and (context.region.type == "WINDOW")
 
     def modal(self, context, event):
@@ -283,7 +283,7 @@ class EnhancedSetCursor(bpy.types.Operator):
 
         # View3D Utility
         self.vu = ViewUtility(context.region, context.space_data,
-            context.region_data)
+                              context.region_data)
 
         # Snap Utility
         self.su = SnapUtility(context)
@@ -390,7 +390,7 @@ class EnhancedSetCursor(bpy.types.Operator):
             km = wm.keyconfigs.user.keymaps['3D View']
             for kmi in KeyMapItemSearch(EnhancedSetCursor.bl_idname, km):
                 if kmi.map_type == 'KEYBOARD':
-                    self.key_map["free_mouse"] = {kmi.type,}
+                    self.key_map["free_mouse"] = {kmi.type, }
                     break
 
     def try_process_input(self, context, event, initial_run=False):
@@ -585,7 +585,7 @@ class EnhancedSetCursor(bpy.types.Operator):
             snap_type=snap_type,
             snap_align=tool_settings.use_snap_align_rotation,
             axes_coords=axes_coords,
-            )
+        )
 
         self.do_raycast = ("MOUSE" in event.type)
         self.grid_substep = event.shift
@@ -752,7 +752,7 @@ class EnhancedSetCursor(bpy.types.Operator):
 
             sys_matrix3 = rot.to_matrix() * sys_matrix3
             # sys_matrix3.rotate has a bug? or I don't understand how it works?
-            #sys_matrix3.rotate(rot)
+            # sys_matrix3.rotate(rot)
 
         for i in range(3):
             sys_matrix[i][:3] = sys_matrix3[i]
@@ -892,7 +892,7 @@ class EnhancedSetCursor(bpy.types.Operator):
         else:
             text = text.replace("\r", "\n")
         text = text.replace("\n", "\t")
-        #text = text.replace(",", ".") # ???
+        # text = text.replace(",", ".") # ???
 
         axes_text = text.split("\t")
         for i in range(min(len(axes_text), 3)):
@@ -914,14 +914,14 @@ class EnhancedSetCursor(bpy.types.Operator):
                 return
             else:
                 axis_val = axis_val[0:self.caret_pos] + \
-                           axis_val[self.caret_pos + 1:len(axis_val)]
+                    axis_val[self.caret_pos + 1:len(axis_val)]
         elif event.type in self.key_map["remove_last_character"]:
             if event.ctrl:
                 # clear current
                 axis_val = ""
             else:
                 axis_val = axis_val[0:self.caret_pos - 1] + \
-                           axis_val[self.caret_pos:len(axis_val)]
+                    axis_val[self.caret_pos:len(axis_val)]
                 self.caret_pos -= 1
         elif event.type in self.key_map["move_caret_next"]:
             self.caret_pos += 1
@@ -956,7 +956,7 @@ class EnhancedSetCursor(bpy.types.Operator):
                 elif c == "0":
                     c = ")"
             axis_val = axis_val[0:self.caret_pos] + c + \
-                       axis_val[self.caret_pos:len(axis_val)]
+                axis_val[self.caret_pos:len(axis_val)]
             self.caret_pos += 1
 
         self.caret_pos = min(max(self.caret_pos, 0), len(axis_val))
@@ -1007,33 +1007,33 @@ class EnhancedSetCursor(bpy.types.Operator):
                 self.get_normal_params(tfm_opts, dest_point)
 
             # use theme colors?
-            #ThemeView3D.normal
-            #ThemeView3D.vertex_normal
+            # ThemeView3D.normal
+            # ThemeView3D.vertex_normal
 
             bgl.glDisable(bgl.GL_LINE_STIPPLE)
 
             if settings.draw_N:
                 bgl.glColor4f(0, 1, 1, 1)
-                draw_arrow(p0, _x, y, z) # Z (normal)
+                draw_arrow(p0, _x, y, z)  # Z (normal)
             if settings.draw_T1:
                 bgl.glColor4f(1, 0, 1, 1)
-                draw_arrow(p0, y, _z, x) # X (1st tangential)
+                draw_arrow(p0, y, _z, x)  # X (1st tangential)
             if settings.draw_T2:
                 bgl.glColor4f(1, 1, 0, 1)
-                draw_arrow(p0, _z, x, y) # Y (2nd tangential)
+                draw_arrow(p0, _z, x, y)  # Y (2nd tangential)
 
             bgl.glEnable(bgl.GL_BLEND)
             bgl.glDisable(bgl.GL_DEPTH_TEST)
 
             if settings.draw_N:
                 bgl.glColor4f(0, 1, 1, 0.25)
-                draw_arrow(p0, _x, y, z) # Z (normal)
+                draw_arrow(p0, _x, y, z)  # Z (normal)
             if settings.draw_T1:
                 bgl.glColor4f(1, 0, 1, 0.25)
-                draw_arrow(p0, y, _z, x) # X (1st tangential)
+                draw_arrow(p0, y, _z, x)  # X (1st tangential)
             if settings.draw_T2:
                 bgl.glColor4f(1, 1, 0, 0.25)
-                draw_arrow(p0, _z, x, y) # Y (2nd tangential)
+                draw_arrow(p0, _z, x, y)  # Y (2nd tangential)
 
         if settings.draw_guides:
             p0 = dest_point
@@ -1055,8 +1055,8 @@ class EnhancedSetCursor(bpy.types.Operator):
                 constrained = (self.axes_coords[i] is not None) or \
                     (not self.allowed_axes[i])
                 alpha = (0.25 if constrained else 1.0)
-                draw_line_hidden_depth(p0, p1, color, \
-                    alpha, alpha, False, True)
+                draw_line_hidden_depth(p0, p1, color,
+                                       alpha, alpha, False, True)
 
             # line from origin to cursor
             p0 = sys_origin
@@ -1207,10 +1207,10 @@ class EnhancedSetCursor(bpy.types.Operator):
 
         localmat = CursorDynamicSettings.local_matrix
 
-        font_id = 0 # default font
+        font_id = 0  # default font
 
         font_size = 11
-        blf.size(font_id, font_size, 72) # font, point size, dpi
+        blf.size(font_id, font_size, 72)  # font, point size, dpi
 
         tet = context.user_preferences.themes[0].text_editor
 
@@ -1325,7 +1325,7 @@ class EnhancedSetCursor(bpy.types.Operator):
                     char_offset = 0
                     if self.axes_values[i]:
                         char_offset = blf.dimensions(font_id,
-                            coord_cells[i].text[:self.caret_pos])[0]
+                                                     coord_cells[i].text[:self.caret_pos])[0]
                     caret_x = xyz_width + char_offset
 
                 xyz_width += coord_cells[i].w
@@ -1453,19 +1453,16 @@ class EnhancedSetCursor(bpy.types.Operator):
 
             snapshot.empty_draw_type = 'SINGLE_ARROW'
             #snapshot.empty_draw_type = 'ARROWS'
-            #snapshot.layers = [True] * 20 # ?
+            # snapshot.layers = [True] * 20 # ?
             scene.objects.link(snapshot)
 #============================================================================#
-
-
-
-
 
 
 #============================================================================#
 # ===== PANELS AND DIALOGS ===== #
 @addon.Panel(idname="OBJECT_PT_transform_extra_options", space_type="VIEW_3D", region_type="UI", label="Transform Extra Options", options={'DEFAULT_CLOSED'})
 class TransformExtraOptions:
+
     def draw(self, context):
         layout = self.layout
 
@@ -1478,8 +1475,10 @@ class TransformExtraOptions:
         layout.prop(tfm_opts, "use_comma_separator")
         #layout.prop(tfm_opts, "snap_element_screen_size")
 
+
 @addon.Panel(idname="OBJECT_PT_cursor_3d_tools", space_type="VIEW_3D", region_type="UI", label="3D Cursor Tools", options={'DEFAULT_CLOSED'})
 class Cursor3DTools:
+
     def draw(self, context):
         layout = self.layout
 
@@ -1500,15 +1499,15 @@ class Cursor3DTools:
         row = layout.split(0.5)
         #row = layout.row()
         row.operator("view3d.set_cursor3d_dialog",
-            "Set", 'CURSOR')
+                     "Set", 'CURSOR')
         row = row.split(1 / 3, align=True)
         #row = row.row(align=True)
         row.prop(settings, "draw_guides",
-            text="", icon='MANIPUL', toggle=True)
+                 text="", icon='MANIPUL', toggle=True)
         row.prop(settings, "draw_snap_elements",
-            text="", icon='EDITMODE_HLT', toggle=True)
+                 text="", icon='EDITMODE_HLT', toggle=True)
         row.prop(settings, "stick_to_obj",
-            text="", icon='SNAP_ON', toggle=True)
+                 text="", icon='SNAP_ON', toggle=True)
 
         row = layout.row()
         row.label(text="Draw")
@@ -1522,16 +1521,16 @@ class Cursor3DTools:
         #subrow.enabled = False
         subrow.alert = True
         subrow.prop(settings, "cursor_visible", text="", toggle=True,
-                 icon=('RESTRICT_VIEW_OFF' if settings.cursor_visible
-                       else 'RESTRICT_VIEW_ON'))
+                    icon=('RESTRICT_VIEW_OFF' if settings.cursor_visible
+                          else 'RESTRICT_VIEW_ON'))
         #'''
         row = row.split(1 / 3, align=True)
         row.prop(settings, "draw_N",
-            text="N", toggle=True, index=0)
+                 text="N", toggle=True, index=0)
         row.prop(settings, "draw_T1",
-            text="T1", toggle=True, index=1)
+                 text="T1", toggle=True, index=1)
         row.prop(settings, "draw_T2",
-            text="T2", toggle=True, index=2)
+                 text="T2", toggle=True, index=2)
 
         # === HISTORY === #
         history = settings.history
@@ -1551,11 +1550,11 @@ class Cursor3DTools:
 
         row = layout.row()
         row.prop(settings, "show_bookmarks",
-            text="", icon='RESTRICT_VIEW_OFF')
+                 text="", icon='RESTRICT_VIEW_OFF')
         row = row.row(align=True)
         row.prop(library, "system", text="")
         row.prop(library, "offset", text="",
-            icon='ARROW_LEFTRIGHT')
+                 icon='ARROW_LEFTRIGHT')
 
         # === BOOKMARKS === #
         library.bookmarks.draw(context, layout)
@@ -1568,16 +1567,17 @@ class Cursor3DTools:
         # PASTEDOWN
         # COPYDOWN
         row.operator("scene.cursor_3d_overwrite_bookmark",
-            text="", icon='REC')
+                     text="", icon='REC')
         row.operator("scene.cursor_3d_swap_bookmark",
-            text="", icon='FILE_REFRESH')
+                     text="", icon='FILE_REFRESH')
         row.operator("scene.cursor_3d_recall_bookmark",
-            text="", icon='FILE_TICK')
+                     text="", icon='FILE_TICK')
         row.operator("scene.cursor_3d_add_empty_at_bookmark",
-            text="", icon='EMPTY_DATA')
+                     text="", icon='EMPTY_DATA')
         # Not implemented (and maybe shouldn't)
-        #row.operator("scene.cursor_3d_snap_selection_to_bookmark",
+        # row.operator("scene.cursor_3d_snap_selection_to_bookmark",
         #    text="", icon='SNAP_ON')
+
 
 @addon.Operator(idname="view3d.set_cursor3d_dialog", label="Set 3D Cursor", description="Set 3D Cursor XYZ values")
 class SetCursorDialog:
@@ -1632,6 +1632,7 @@ class SetCursorDialog:
         row.prop(tfm_opts, "use_relative_coords", text="Relative")
         row.prop(v3d, "transform_orientation", text="")
 
+
 @addon.PropertyGroup
 class AlignOrientationProperties:
     axes_items = [
@@ -1663,11 +1664,12 @@ class AlignOrientationProperties:
             orients.append((name, name, ""))
 
         return orients
-    
+
     src_axis = 'Z' | prop(name="Initial axis", items=axes_items)
     #src_orient = 'GLOBAL' | prop(items=get_orients)
     dest_axis = ' ' | prop(name="Final axis", items=axes_items_)
     dest_orient = 'GLOBAL' | prop(name="Final orientation", items=get_orients)
+
 
 @addon.Operator(idname="view3d.align_orientation", label="Align Orientation", description="Rotates active object to match axis of current orientation to axis of another orientation", options={'REGISTER', 'UNDO'})
 class AlignOrientation:
@@ -1687,7 +1689,7 @@ class AlignOrientation:
         (' ', ' ', 'Same as source axis'),
     ]
 
-    axes_ids = {'X':0, 'Y':1, 'Z':2}
+    axes_ids = {'X': 0, 'Y': 1, 'Z': 2}
 
     def get_orients(self, context):
         orients = []
@@ -1723,7 +1725,7 @@ class AlignOrientation:
         tou = csu.tou
         #tou = TransformOrientationUtility(scene, v3d, rv3d)
 
-        aop = wm.align_orientation_properties # self
+        aop = wm.align_orientation_properties  # self
 
         src_matrix = tou.get_matrix()
         src_axes = matrix_decompose(src_matrix)
@@ -1766,13 +1768,15 @@ class AlignOrientation:
     def draw(self, context):
         layout = self.layout
         wm = context.window_manager
-        aop = wm.align_orientation_properties # self
+        aop = wm.align_orientation_properties  # self
         layout.prop(aop, "src_axis")
         layout.prop(aop, "dest_axis")
         layout.prop(aop, "dest_orient")
 
+
 @addon.Operator(idname="view3d.copy_orientation", label="Copy Orientation", description="Makes a copy of current orientation")
 class CopyOrientation:
+
     def execute(self, context):
         scene = context.scene
         v3d = context.space_data
@@ -1783,11 +1787,12 @@ class CopyOrientation:
         #tou = TransformOrientationUtility(scene, v3d, rv3d)
 
         orient = create_transform_orientation(scene,
-            name=tou.get()+".copy", matrix=tou.get_matrix())
+                                              name=tou.get() + ".copy", matrix=tou.get_matrix())
 
         tou.set(orient.name)
 
         return {'FINISHED'}
+
 
 def transform_orientations_panel_extension(self, context):
     row = self.layout.row()
@@ -1795,6 +1800,8 @@ def transform_orientations_panel_extension(self, context):
     row.operator("view3d.copy_orientation", text="Copy")
 
 # ===== CURSOR MONITOR ===== #
+
+
 @addon.Operator(idname="view3d.cursor3d_monitor", label="Cursor Monitor", description="Monitor changes in cursor location and write to history")
 class CursorMonitor:
     # A class-level variable (it must be accessed from poll())
@@ -1852,14 +1859,14 @@ class CursorMonitor:
         for kmi in CursorMonitor.script_reload_kmis:
             if IsKeyMapItemEvent(kmi, event):
                 return {'CANCELLED'}
-        
+
         try:
             return self._modal(context, event)
         except Exception as e:
             print("Cursor monitor exeption in modal:\n" + repr(e))
             # Remove callbacks at any cost
             self.cancel(context)
-            #raise
+            # raise
             return {'CANCELLED'}
 
     def _modal(self, context, event):
@@ -1885,7 +1892,7 @@ class CursorMonitor:
             context.area.tag_redraw()
 
         settings = find_settings()
-        
+
         propagate_settings_to_all_screens(settings)
 
         # ================== #
@@ -1971,9 +1978,9 @@ class CursorMonitor:
             history = settings.history
 
             pos = history.get_pos()
-            if (pos is not None):# and (history.current_id != 0): # ?
+            if (pos is not None):  # and (history.current_id != 0): # ?
                 if pos == new_pos:
-                    return False # self.just_initialized ?
+                    return False  # self.just_initialized ?
 
             entry = history.entries.add()
             entry.pos = new_pos
@@ -1995,7 +2002,7 @@ class CursorMonitor:
 
             return True
 
-        return False # self.just_initialized ?
+        return False  # self.just_initialized ?
 
     def execute(self, context):
         print("Cursor monitor: launched")
@@ -2025,7 +2032,7 @@ class CursorMonitor:
 
         # I suppose that cursor position would change
         # only with user interaction.
-        #self._timer = context.window_manager. \
+        # self._timer = context.window_manager. \
         #    event_timer_add(0.1, context.window)
 
         CursorMonitor.handle_add(self, context)
@@ -2045,9 +2052,9 @@ class CursorMonitor:
         CursorMonitor.handle_remove(context)
 
 
-
 # ===== DRAWING CALLBACKS ===== #
 cursor_save_location = Vector()
+
 
 def draw_callback_view(self, context):
     global cursor_save_location
@@ -2109,9 +2116,9 @@ def draw_callback_view(self, context):
         gl_enable(bgl.GL_DEPTH_TEST, depth_test_prev)
         bgl.glDepthMask(depth_mask_prev)
         bgl.glColor4f(color_prev[0],
-            color_prev[1],
-            color_prev[2],
-            color_prev[3])
+                      color_prev[1],
+                      color_prev[2],
+                      color_prev[3])
 
     cursor_save_location = Vector(context.space_data.cursor_location)
     if not settings.cursor_visible:
@@ -2126,14 +2133,14 @@ def draw_callback_view(self, context):
         dpi = context.user_preferences.system.dpi
         widget_unit = (pixelsize * dpi * 20.0 + 36.0) / 72.0
 
-        cursor_w = widget_unit*2
-        cursor_h = widget_unit*2
+        cursor_w = widget_unit * 2
+        cursor_h = widget_unit * 2
 
         viewinv = rv3d.view_matrix.inverted()
         persinv = rv3d.perspective_matrix.inverted()
 
         origin_start = viewinv.translation
-        view_direction = viewinv.col[2].xyz#.normalized()
+        view_direction = viewinv.col[2].xyz  # .normalized()
         depth_location = origin_start - view_direction
 
         coord = (-cursor_w, -cursor_h)
@@ -2144,6 +2151,7 @@ def draw_callback_view(self, context):
              depth_location)
 
         context.space_data.cursor_location = p
+
 
 def draw_callback_header_px(self, context):
     r = context.region
@@ -2160,6 +2168,7 @@ def draw_callback_header_px(self, context):
 
     bgl.glDisable(bgl.GL_BLEND)
     bgl.glColor4f(0.0, 0.0, 0.0, 1.0)
+
 
 def draw_callback_px(self, context):
     global cursor_save_location
@@ -2183,7 +2192,6 @@ def draw_callback_px(self, context):
     bgl.glLineWidth(1)
     bgl.glDisable(bgl.GL_BLEND)
     bgl.glColor4f(0.0, 0.0, 0.0, 1.0)
-
 
 
 # ===== REGISTRATION ===== #
@@ -2233,6 +2241,7 @@ def update_keymap(activate):
     for kmi in KeyMapItemSearch(cur_idname):
         kmi.active = not activate
 
+
 @addon.Operator(idname="wm.enhanced_3d_cursor_registration", label="[Enhanced 3D Cursor] registration delayer")
 class DelayRegistrationOperator:
     _timer = None
@@ -2250,7 +2259,7 @@ class DelayRegistrationOperator:
 
     def modal(self, context, event):
         if (not self.keymap_updated) and \
-            ((event.type == 'TIMER') or ("MOVE" in event.type)):
+                ((event.type == 'TIMER') or ("MOVE" in event.type)):
             # clean up (we don't need this operator to run anymore)
             for kmi in KeyMapItemSearch(self.bl_idname):
                 km.keymap_items.remove(kmi)
@@ -2262,7 +2271,7 @@ class DelayRegistrationOperator:
             # No, better don't (at least in current version),
             # since the monitor has dependencies on View3D context.
             # Attempt to launch the monitor
-            #if bpy.ops.view3d.cursor3d_monitor.poll():
+            # if bpy.ops.view3d.cursor3d_monitor.poll():
             #    bpy.ops.view3d.cursor3d_monitor()
 
             self.cancel(context)
@@ -2281,10 +2290,11 @@ class DelayRegistrationOperator:
     def cancel(self, context):
         DelayRegistrationOperator.timer_remove(context)
 
+
 @addon.Preferences.Include
 class ThisAddonPreferences:
     auto_register_keymaps = True | prop(name="Auto Register Keymaps")
-    
+
     def draw(self, context):
         layout = self.layout
         settings = find_settings()
@@ -2309,8 +2319,8 @@ def register():
 
     # View properties panel is already long. Appending something
     # to it would make it too inconvenient
-    #bpy.types.VIEW3D_PT_view3d_properties.append(draw_cursor_tools)
-    
+    # bpy.types.VIEW3D_PT_view3d_properties.append(draw_cursor_tools)
+
     # THIS IS WHAT CAUSES TOOLTIPS TO NOT SHOW!
     update_keymap(True)
 
@@ -2342,9 +2352,7 @@ def unregister():
     bpy.types.VIEW3D_PT_transform_orientations.remove(
         transform_orientations_panel_extension)
 
-    #bpy.types.VIEW3D_PT_view3d_properties.remove(draw_cursor_tools)
-
-
+    # bpy.types.VIEW3D_PT_view3d_properties.remove(draw_cursor_tools)
 
 
 '''

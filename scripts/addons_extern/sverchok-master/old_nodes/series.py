@@ -76,7 +76,7 @@ class GenSeriesNode(bpy.types.Node, SverchCustomTreeNode):
             if Step < 0:
                 Step = 1
             if Stop < Start:
-                Stop = Start+1
+                Stop = Start + 1
             series = [c for c in self.xfrange(Start, Stop, Step)]
 
             SvSetSocketAnyType(self, 'Series', [series])
@@ -85,6 +85,7 @@ class GenSeriesNode(bpy.types.Node, SverchCustomTreeNode):
         while start < stop:
             yield start
             start += step
+
 
 def register():
     bpy.utils.register_class(GenSeriesNode)

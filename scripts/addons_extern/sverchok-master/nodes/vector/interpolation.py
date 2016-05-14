@@ -24,7 +24,7 @@ from bpy.props import EnumProperty, FloatProperty
 
 from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import (updateNode, dataCorrect, repeat_last,
-                            SvSetSocketAnyType, SvGetSocketAnyType)
+                                     SvSetSocketAnyType, SvGetSocketAnyType)
 
 # spline function modifed from
 # from looptools 4.5.2 done by Bart Crouch
@@ -44,53 +44,53 @@ def cubic_spline(locs, tknots):
         for i in locs:
             a.append(i[j])
         h = []
-        for i in range(n-1):
-            if x[i+1] - x[i] == 0:
+        for i in range(n - 1):
+            if x[i + 1] - x[i] == 0:
                 h.append(1e-8)
             else:
-                h.append(x[i+1] - x[i])
+                h.append(x[i + 1] - x[i])
         q = [False]
-        for i in range(1, n-1):
-            q.append(3/h[i]*(a[i+1]-a[i]) - 3/h[i-1]*(a[i]-a[i-1]))
+        for i in range(1, n - 1):
+            q.append(3 / h[i] * (a[i + 1] - a[i]) - 3 / h[i - 1] * (a[i] - a[i - 1]))
         l = [1.0]
         u = [0.0]
         z = [0.0]
-        for i in range(1, n-1):
-            l.append(2*(x[i+1]-x[i-1]) - h[i-1]*u[i-1])
+        for i in range(1, n - 1):
+            l.append(2 * (x[i + 1] - x[i - 1]) - h[i - 1] * u[i - 1])
             if l[i] == 0:
                 l[i] = 1e-8
             u.append(h[i] / l[i])
-            z.append((q[i] - h[i-1] * z[i-1]) / l[i])
+            z.append((q[i] - h[i - 1] * z[i - 1]) / l[i])
         l.append(1.0)
         z.append(0.0)
-        b = [False for i in range(n-1)]
+        b = [False for i in range(n - 1)]
         c = [False for i in range(n)]
-        d = [False for i in range(n-1)]
-        c[n-1] = 0.0
-        for i in range(n-2, -1, -1):
-            c[i] = z[i] - u[i]*c[i+1]
-            b[i] = (a[i+1]-a[i])/h[i] - h[i]*(c[i+1]+2*c[i])/3
-            d[i] = (c[i+1]-c[i]) / (3*h[i])
-        for i in range(n-1):
+        d = [False for i in range(n - 1)]
+        c[n - 1] = 0.0
+        for i in range(n - 2, -1, -1):
+            c[i] = z[i] - u[i] * c[i + 1]
+            b[i] = (a[i + 1] - a[i]) / h[i] - h[i] * (c[i + 1] + 2 * c[i]) / 3
+            d[i] = (c[i + 1] - c[i]) / (3 * h[i])
+        for i in range(n - 1):
             result.append([a[i], b[i], c[i], d[i], x[i]])
     splines = []
-    for i in range(len(knots)-1):
-        splines.append([result[i], result[i+n-1], result[i+(n-1)*2]])
+    for i in range(len(knots) - 1):
+        splines.append([result[i], result[i + n - 1], result[i + (n - 1) * 2]])
     return(splines)
 
 
 def eval_spline(splines, tknots, t_in):
     out = []
     for t in t_in:
-        n = bisect.bisect(tknots, t, lo=0, hi=len(tknots))-1
-        if n > len(splines)-1:
-            n = len(splines)-1
+        n = bisect.bisect(tknots, t, lo=0, hi=len(tknots)) - 1
+        if n > len(splines) - 1:
+            n = len(splines) - 1
         if n < 0:
             n = 0
         pt = []
         for i in range(3):
             ax, bx, cx, dx, tx = splines[n][i]
-            x = ax + bx*(t-tx) + cx*(t-tx)**2 + dx*(t-tx)**3
+            x = ax + bx * (t - tx) + cx * (t - tx)**2 + dx * (t - tx)**3
             pt.append(x)
         out.append(pt)
     return out
@@ -118,7 +118,7 @@ class SvInterpolationNode(bpy.types.Node, SverchCustomTreeNode):
         self.outputs.new('VerticesSocket', 'Vertices')
 
     def draw_buttons(self, context, layout):
-        #pass
+        # pass
         layout.prop(self, 'mode', expand=True)
 
     def process(self):
@@ -134,9 +134,9 @@ class SvInterpolationNode(bpy.types.Node, SverchCustomTreeNode):
             verts_out = []
             for v, t_in in zip(verts, repeat_last(t_ins)):
                 pts = np.array(v).T
-                tmp = np.apply_along_axis(np.linalg.norm, 0, pts[:, :-1]-pts[:, 1:])
+                tmp = np.apply_along_axis(np.linalg.norm, 0, pts[:, :-1] - pts[:, 1:])
                 t = np.insert(tmp, 0, 0).cumsum()
-                t = t/t[-1]
+                t = t / t[-1]
                 t_corr = [min(1, max(t_c, 0)) for t_c in t_in]
                 # this should also be numpy
                 if self.mode == 'LIN':

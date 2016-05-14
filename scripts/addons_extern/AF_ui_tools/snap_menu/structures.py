@@ -335,7 +335,7 @@ RegionView3D._fields_ = fields(
     c_float * 3, 'ofs',  # view center & orbit pivot, negative of worldspace location, also matches -viewinv[3][0:3] in ortho mode.*/
     c_float, 'camzoom',  # viewport zoom on the camera frame, see BKE_screen_view3d_zoom_to_fac
     c_char, 'is_persp',   # check if persp/ortho view, since 'persp' cant be used for this since
-                            # it can have cameras assigned as well. (only set in view3d_winmatrix_set)
+    # it can have cameras assigned as well. (only set in view3d_winmatrix_set)
     c_char, 'persp',
     c_char, 'view',
     c_char, 'viewlock',
@@ -368,7 +368,7 @@ class GPUFXSettings(Structure):
         c_void_p, 'ssao',  # GPUSSAOSettings
         c_char, 'fx_flag',  # eGPUFXFlags
         c_char * 7, 'pad',
-        )
+    )
 
 
 class View3D(Structure):
@@ -416,7 +416,7 @@ View3D._fields_ = fields(
 
     c_float, 'lens', 'grid',
     c_float, 'near', 'far',
-    c_float * 3, 'ofs',  #  DNA_DEPRECATED  # XXX deprecated
+    c_float * 3, 'ofs',  # DNA_DEPRECATED  # XXX deprecated
     c_float * 3, 'cursor',
 
     c_short, 'matcap_icon',  # icon id
@@ -452,9 +452,9 @@ View3D._fields_ = fields(
 
     # # XXX deprecated?
     # struct bGPdata *gpd  DNA_DEPRECATED        # Grease-Pencil Data (annotation layers)
-    # 
+    #
     # short usewcol, dummy3[3]
-    # 
+    #
     #  # multiview - stereo 3d
     # short stereo3d_flag
     # char stereo3d_camera
@@ -462,7 +462,7 @@ View3D._fields_ = fields(
     # float stereo3d_convergence_factor
     # float stereo3d_volume_alpha
     # float stereo3d_convergence_alpha
-    # 
+    #
     # # local grid
     # char localgrid, cursor_snap_grid, dummy[2]
     # float lg_loc[3], dummy2[2] // orign(x,y,z)

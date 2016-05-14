@@ -6,8 +6,10 @@ from .. utils.blender_ui import getDpi, getDpiFactor
 
 font = 1
 
+
 class TextBox:
-    def __init__(self, text, position, width, fontSize, lineHeightFactor = 1, maxRows = 1e5):
+
+    def __init__(self, text, position, width, fontSize, lineHeightFactor=1, maxRows=1e5):
         self.text = text
         self.padding = 5
         self.width = width
@@ -39,14 +41,14 @@ class TextBox:
         paragraphs = self.text.split("\n")
         for i, paragraph in enumerate(paragraphs):
             paragraphLines = textwrap.wrap(paragraph, maxCharactersPerLine)
-            if len(paragraphLines) == 0: paragraphLines = [""]
+            if len(paragraphLines) == 0:
+                paragraphLines = [""]
             self.lines.extend(paragraphLines)
 
             if len(self.lines) > self.maxRows:
                 self.lines = self.lines[:self.maxRows - 1]
                 self.lines.extend(textwrap.wrap("Some rows don't fit", maxCharactersPerLine))
                 break
-
 
     def calculateBoundaries(self):
         lineAmount = len(self.lines)

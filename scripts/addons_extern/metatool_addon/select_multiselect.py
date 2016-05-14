@@ -1,8 +1,8 @@
-#view3d_multiselect_menu.py (c) 2011 Sean Olson (liquidApe)
-#Original Script by: Mariano Hidalgo (uselessdreamer)
-#contributed to by: Crouch, sim88, sam, meta-androcto, and Michael W
+# view3d_multiselect_menu.py (c) 2011 Sean Olson (liquidApe)
+# Original Script by: Mariano Hidalgo (uselessdreamer)
+# contributed to by: Crouch, sim88, sam, meta-androcto, and Michael W
 #
-#Tested with r37702
+# Tested with r37702
 #
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
@@ -22,7 +22,7 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-#bl_info = {
+# bl_info = {
 #    "name": "3D View: Multiselect Menu",
 #    "author": "Sean Olson (liquidApe)",
 #    "version": (1, 2),
@@ -39,6 +39,8 @@
 import bpy
 
 # multiselect menu
+
+
 class VIEW3D_MT_Multiselect_Menu(bpy.types.Menu):
     bl_label = "MultiSelect Menu"
     id_name = "mesh.multiselect_editmode"
@@ -49,39 +51,39 @@ class VIEW3D_MT_Multiselect_Menu(bpy.types.Menu):
 
         layout.separator()
         prop = layout.operator("wm.context_set_value", text="Vertex Select",
-            icon='VERTEXSEL')
+                               icon='VERTEXSEL')
         prop.value = "(True, False, False)"
         prop.data_path = "tool_settings.mesh_select_mode"
 
         prop = layout.operator("wm.context_set_value", text="Edge Select",
-            icon='EDGESEL')
+                               icon='EDGESEL')
         prop.value = "(False, True, False)"
         prop.data_path = "tool_settings.mesh_select_mode"
 
         prop = layout.operator("wm.context_set_value", text="Face Select",
-            icon='FACESEL')
+                               icon='FACESEL')
         prop.value = "(False, False, True)"
         prop.data_path = "tool_settings.mesh_select_mode"
         layout.separator()
 
         prop = layout.operator("wm.context_set_value",
-            text="Vertex & Edge Select", icon='EDITMODE_HLT')
+                               text="Vertex & Edge Select", icon='EDITMODE_HLT')
         prop.value = "(True, True, False)"
         prop.data_path = "tool_settings.mesh_select_mode"
 
         prop = layout.operator("wm.context_set_value",
-            text="Vertex & Face Select", icon='ORTHO')
+                               text="Vertex & Face Select", icon='ORTHO')
         prop.value = "(True, False, True)"
         prop.data_path = "tool_settings.mesh_select_mode"
 
         prop = layout.operator("wm.context_set_value",
-            text="Edge & Face Select", icon='SNAP_FACE')
+                               text="Edge & Face Select", icon='SNAP_FACE')
         prop.value = "(False, True, True)"
         prop.data_path = "tool_settings.mesh_select_mode"
         layout.separator()
 
         prop = layout.operator("wm.context_set_value",
-            text="Vertex & Edge & Face Select", icon='SNAP_VOLUME')
+                               text="Vertex & Edge & Face Select", icon='SNAP_VOLUME')
         prop.value = "(True, True, True)"
         prop.data_path = "tool_settings.mesh_select_mode"
         layout.separator()
@@ -89,12 +91,11 @@ class VIEW3D_MT_Multiselect_Menu(bpy.types.Menu):
 
 def register():
     bpy.utils.register_class(VIEW3D_MT_Multiselect_Menu)
-    
+
+
 def unregister():
     bpy.utils.unregister_class(VIEW3D_MT_Multiselect_Menu)
 
 
 if __name__ == "__main__":
     register()
-
-

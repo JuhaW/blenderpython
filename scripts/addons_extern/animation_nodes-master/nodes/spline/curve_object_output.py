@@ -3,6 +3,7 @@ from bpy.props import *
 from ... utils.layout import writeText
 from ... base_types.node import AnimationNode
 
+
 class CurveObjectOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_CurveObjectOutputNode"
     bl_label = "Curve Object Output"
@@ -38,7 +39,7 @@ class CurveObjectOutputNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if self.errorMessage != "":
-            writeText(layout, self.errorMessage, width = 25, icon = "ERROR")
+            writeText(layout, self.errorMessage, width=25, icon="ERROR")
 
     def drawAdvanced(self, layout):
         writeText(layout, "Possible values for 'Fill Mode' are: \n3D Curve: 'FULL', 'HALF', 'BACK' and 'FRONT' \n2D Curve: 'NONE', 'BACK', 'FRONT' and 'BOTH'")
@@ -48,17 +49,28 @@ class CurveObjectOutputNode(bpy.types.Node, AnimationNode):
         yield "    curve = object.data"
 
         s = self.inputs
-        if s["Splines"].isUsed:             yield "    animation_nodes.data_structures.splines.to_blender.setSplinesOnBlenderObject(object, splines)"
-        if s["Bevel Depth"].isUsed:         yield "    curve.bevel_depth = bevelDepth"
-        if s["Bevel Resolution"].isUsed:    yield "    curve.bevel_resolution = bevelResolution"
-        if s["Bevel Start"].isUsed:         yield "    curve.bevel_factor_start = bevelStart"
-        if s["Bevel End"].isUsed:           yield "    curve.bevel_factor_end = bevelEnd"
-        if s["Extrude"].isUsed:             yield "    curve.extrude = extrude"
-        if s["Offset"].isUsed:              yield "    curve.offset = offset"
-        if s["Preview Resolution"].isUsed:  yield "    curve.resolution_u = previewResolution"
-        if s["Taper Object"].isUsed:        yield "    curve.taper_object = taperObject"
-        if s["Bevel Object"].isUsed:        yield "    curve.bevel_object = bevelObject"
-        if s["Fill Mode"].isUsed:           yield "    self.setFillMode(curve, fillMode)"
+        if s["Splines"].isUsed:
+            yield "    animation_nodes.data_structures.splines.to_blender.setSplinesOnBlenderObject(object, splines)"
+        if s["Bevel Depth"].isUsed:
+            yield "    curve.bevel_depth = bevelDepth"
+        if s["Bevel Resolution"].isUsed:
+            yield "    curve.bevel_resolution = bevelResolution"
+        if s["Bevel Start"].isUsed:
+            yield "    curve.bevel_factor_start = bevelStart"
+        if s["Bevel End"].isUsed:
+            yield "    curve.bevel_factor_end = bevelEnd"
+        if s["Extrude"].isUsed:
+            yield "    curve.extrude = extrude"
+        if s["Offset"].isUsed:
+            yield "    curve.offset = offset"
+        if s["Preview Resolution"].isUsed:
+            yield "    curve.resolution_u = previewResolution"
+        if s["Taper Object"].isUsed:
+            yield "    curve.taper_object = taperObject"
+        if s["Bevel Object"].isUsed:
+            yield "    curve.bevel_object = bevelObject"
+        if s["Fill Mode"].isUsed:
+            yield "    self.setFillMode(curve, fillMode)"
 
     def setFillMode(self, curve, fillMode):
         isCorrectFillMode = fillMode in ("FULL", "BACK", "FRONT", "HALF") if curve.dimensions == "3D" else fillMode in ("NONE", "BACK", "FRONT", "BOTH")

@@ -33,6 +33,7 @@ from sverchok.core.update_system import process_tree, build_update_list
 from sverchok.node_tree import SverchCustomTreeNode
 import sverchok
 
+
 def sv_get_local_path():
     sv_script_paths = os.path.normpath(os.path.dirname(__file__))
     bl_addons_path = os.path.split(os.path.dirname(sv_script_paths))[0]
@@ -43,8 +44,6 @@ def sv_get_local_path():
 sv_script_paths, bl_addons_path, sv_version_local = sv_get_local_path()
 
 
-
-
 class SverchokUpdateAll(bpy.types.Operator):
     """Sverchok update all"""
     bl_idname = "node.sverchok_update_all"
@@ -52,7 +51,7 @@ class SverchokUpdateAll(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        sv_ngs = filter(lambda ng:ng.bl_idname == 'SverchCustomTreeType', bpy.data.node_groups)
+        sv_ngs = filter(lambda ng: ng.bl_idname == 'SverchCustomTreeType', bpy.data.node_groups)
         for ng in sv_ngs:
             ng.unfreeze(hard=True)
         build_update_list()
@@ -146,11 +145,11 @@ class SverchokCheckForUpgrades(bpy.types.Operator):
             # when it is master
             url = 'https://raw.githubusercontent.com/nortikin/sverchok/master/__init__.py'
             lines = urllib.request.urlopen(url).readlines()
-            for l in map(str,lines):
+            for l in map(str, lines):
                 if '"version"' in l:
-                    version = l[l.find("("):l.find(")")+1]    
+                    version = l[l.find("("):l.find(")") + 1]
                     break
-            version_url = ast.literal_eval(version) 
+            version_url = ast.literal_eval(version)
         except urllib.error.URLError:
             traceback.print_exc()
             report({'INFO'}, "Unable to contact github, or SSL not compiled.")
@@ -235,8 +234,6 @@ class SvSwitchToLayout (bpy.types.Operator):
         return {'FINISHED'}
 
 
-
-
 class SvClearNodesLayouts (bpy.types.Operator):
     """Clear node layouts sverchok and blendgraph, when no nodes editor opened"""
     bl_idname = "node.sv_delete_nodelayouts"
@@ -260,12 +257,12 @@ class SvClearNodesLayouts (bpy.types.Operator):
             if T.bl_rna.name in ['Shader Node Tree']:
                 continue
             if trees[T.name].users > 1 and T.use_fake_user:
-                print('Layout '+str(T.name)+' protected by fake user.')
+                print('Layout ' + str(T.name) + ' protected by fake user.')
             if trees[T.name].users >= 1 and self.do_clear and not T.use_fake_user:
-                print('cleaning user: '+str(T.name))
+                print('cleaning user: ' + str(T.name))
                 trees[T.name].user_clear()
             if trees[T.name].users == 0:
-                print('removing layout: '+str(T.name)+' | '+str(T.bl_rna.name))
+                print('removing layout: ' + str(T.name) + ' | ' + str(T.bl_rna.name))
                 bpy.data.node_groups.remove(T)
 
         return {'FINISHED'}
@@ -347,8 +344,7 @@ def unregister():
 
     for class_name in reversed(sv_tools_classes):
         bpy.utils.unregister_class(class_name)
-        
-    
+
 
 if __name__ == '__main__':
     register()

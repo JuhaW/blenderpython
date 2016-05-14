@@ -29,76 +29,70 @@ bl_info = {
     "category": "Mesh"}
 
 
-
-
-
 import bpy
 import bmesh
 
-class procedural_dupli_spin(bpy.types.Operator):  
-    bl_idname = "object.procedural_dupli_spin"  
+
+class procedural_dupli_spin(bpy.types.Operator):
+    bl_idname = "object.procedural_dupli_spin"
     bl_label = "Procedural Dupli Spin"
     bl_options = {'REGISTER', 'UNDO'}
-    
-    
+
     def execute(self, context):
-        
-        #enableing the auto execute
-        
+
+        # enableing the auto execute
+
         bpy.context.user_preferences.system.use_scripts_auto_execute = True
-        
-        #saving the orignal object name
+
+        # saving the orignal object name
         object_name = bpy.context.active_object.name
         object_new_name = "Spin_" + object_name
-        #separating objects If needed
+        # separating objects If needed
         obj = bpy.context.active_object
         if bpy.context.mode == 'EDIT_MESH':
             bm = bmesh.from_edit_mesh(obj.data)
-            selected_vertex = [ v.index for v in bm.verts if v.select ]
+            selected_vertex = [v.index for v in bm.verts if v.select]
         else:
-            selected_vertex = [ v.index for v in obj.data.vertices if v.select ]
+            selected_vertex = [v.index for v in obj.data.vertices if v.select]
 
         selected_vertex = len(selected_vertex)
         total_vertex = (len(obj.data.vertices))
-        #If we need separation
+        # If we need separation
         if total_vertex - selected_vertex > 0:
             bpy.ops.mesh.select_all(action='INVERT')
             bpy.ops.mesh.separate(type='SELECTED')
             bpy.ops.object.mode_set(mode='OBJECT')
             bpy.data.objects[object_name].select = False
             for obj in bpy.context.scene.objects:
-                obj.select = ( obj == bpy.context.scene.objects.active)
+                obj.select = (obj == bpy.context.scene.objects.active)
             active_object = bpy.context.active_object
             active_object.name = object_new_name
-        #If we don't need separation
-        else: 
+        # If we don't need separation
+        else:
             bpy.ops.object.mode_set(mode='OBJECT')
             active_object = bpy.context.active_object
             active_object.name = object_new_name
-            
-            
 
-
-        #Apply rotation and scale
+        # Apply rotation and scale
         bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-        #set the origin of the object to the 3d cursor
+        # set the origin of the object to the 3d cursor
         bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
-        #add the main empty(the one which is going to be rotated with the driver)
+        # add the main empty(the one which is going to be rotated with the driver)
         bpy.ops.object.empty_add(type='PLAIN_AXES')
 
-        #rename the main empty
+        # rename the main empty
         active_object = bpy.context.active_object
         active_object.name = "Object offset_main"
 
-        #add the array offset object_child
+        # add the array offset object_child
         bpy.ops.object.empty_add(type='PLAIN_AXES')
 
-        #change the name of the array offset object_child
+        # change the name of the array offset object_child
         active_object = bpy.context.active_object
         active_object.name = "Object offset_child"
 
-        #add the array offset object_parent
+        # add the array offset object_parent
         for area in bpy.context.screen.areas:
             if area.type == 'VIEW_3D':
                 for region in area.regions:
@@ -106,13 +100,13 @@ class procedural_dupli_spin(bpy.types.Operator):
                         ctx = bpy.context.copy()
                         ctx['area'] = area
                         ctx['region'] = region
-                        bpy.ops.object.empty_add(ctx,type='PLAIN_AXES',view_align = True)
+                        bpy.ops.object.empty_add(ctx, type='PLAIN_AXES', view_align=True)
 
-        #change the name of the array offset_parent
+        # change the name of the array offset_parent
         active_object = bpy.context.active_object
         active_object.name = "Object offset_parent"
 
-        #add the copy rotation constraint
+        # add the copy rotation constraint
 
         bpy.ops.object.constraint_add(type='COPY_ROTATION')
         bpy.context.object.constraints["Copy Rotation"].target = bpy.data.objects["Object offset_main"]
@@ -121,11 +115,9 @@ class procedural_dupli_spin(bpy.types.Operator):
         bpy.context.object.constraints["Copy Rotation"].use_z = True
         bpy.context.object.constraints["Copy Rotation"].owner_space = 'LOCAL'
 
+        # make the parent relation
 
-
-        #make the parent relation
-
-        child_object= bpy.data.objects["Object offset_child"]
+        child_object = bpy.data.objects["Object offset_child"]
         parent_object = bpy.data.objects["Object offset_parent"]
 
         bpy.ops.object.select_all(action='DESELECT')
@@ -137,24 +129,23 @@ class procedural_dupli_spin(bpy.types.Operator):
 
         bpy.ops.object.parent_set()
 
-
-        #select the spin object
+        # select the spin object
         bpy.context.scene.objects.active = bpy.data.objects[object_new_name]
         for obj in bpy.context.scene.objects:
-            obj.select = ( obj == bpy.context.scene.objects.active)
+            obj.select = (obj == bpy.context.scene.objects.active)
 
-        #add the array modifier
+        # add the array modifier
         bpy.ops.object.modifier_add(type='ARRAY')
         bpy.context.object.modifiers["Array"].use_relative_offset = False
         bpy.context.object.modifiers["Array"].use_object_offset = True
-        bpy.context.object.modifiers["Array"].offset_object =  bpy.data.objects["Object offset_child"]
-        
-        #add the array count custom property
+        bpy.context.object.modifiers["Array"].offset_object = bpy.data.objects["Object offset_child"]
+
+        # add the array count custom property
         active_object = bpy.context.active_object
         active_object["Array count"] = 6
-        active_object["_RNA_UI"] = {"Array count": {"min":2}}
-        
-        #add the driver to the array count
+        active_object["_RNA_UI"] = {"Array count": {"min": 2}}
+
+        # add the driver to the array count
         myDriver = bpy.context.object.driver_add('modifiers["Array"].count')
         myDriver.driver.expression = "Array_count"
         newVar = myDriver.driver.variables.new()
@@ -163,14 +154,14 @@ class procedural_dupli_spin(bpy.types.Operator):
         newVar.targets[0].id = bpy.data.objects[object_new_name]
         newVar.targets[0].data_path = '["Array count"]'
 
-        #select the main empty
+        # select the main empty
         bpy.context.scene.objects.active = bpy.data.objects["Object offset_main"]
         for obj in bpy.context.scene.objects:
-            obj.select = ( obj == bpy.context.scene.objects.active)
+            obj.select = (obj == bpy.context.scene.objects.active)
 
-        #add the driver to the main empty
+        # add the driver to the main empty
 
-        myDriver = bpy.context.object.driver_add('rotation_euler',2)
+        myDriver = bpy.context.object.driver_add('rotation_euler', 2)
         myDriver.driver.expression = "360/Array * pi/180"
         newVar = myDriver.driver.variables.new()
         newVar.name = "Array"
@@ -178,59 +169,59 @@ class procedural_dupli_spin(bpy.types.Operator):
         newVar.targets[0].id = bpy.data.objects[object_new_name]
         newVar.targets[0].data_path = 'modifiers["Array"].count'
 
-        #select the spin object
+        # select the spin object
         bpy.context.scene.objects.active = bpy.data.objects[object_new_name]
         for obj in bpy.context.scene.objects:
-            obj.select = ( obj == bpy.context.scene.objects.active)
+            obj.select = (obj == bpy.context.scene.objects.active)
 
+        # cleaning the scene
 
-        #cleaning the scene
-        
         bpy.data.objects["Object offset_main"].hide = True
         bpy.data.objects["Object offset_child"].hide = True
-        
-        return {'FINISHED'} 
 
-#Creating Panel
+        return {'FINISHED'}
+
+# Creating Panel
+
 
 class procedural_dupli_spin_Panel(bpy.types.Panel):
     """Docstring of procedural dupli spin Panel"""
     bl_idname = "procedural dupli spin panel"
     bl_label = "procedural dupli spin"
-    
+
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_context = 'mesh_edit'
     bl_category = 'Tools'
-    
-    
+
     def draw(self, context):
         layout = self.layout
-        layout.operator(procedural_dupli_spin.bl_idname, text = "Procedural Dupli Spin", icon = 'MOD_ARRAY')
+        layout.operator(procedural_dupli_spin.bl_idname, text="Procedural Dupli Spin", icon='MOD_ARRAY')
 
 # store keymaps here to access after registration
 addon_keymaps = []
 
+
 def register():
     bpy.utils.register_class(procedural_dupli_spin)
     bpy.utils.register_class(procedural_dupli_spin_Panel)
-    
+
     #addon_keymaps = []
     wm = bpy.context.window_manager
-    km = wm.keyconfigs.addon.keymaps.new(name = 'Window', space_type = 'EMPTY')
+    km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
     kmi = km.keymap_items.new(procedural_dupli_spin.bl_idname, 'R', 'PRESS', shift=True, ctrl=True)
     #kmi.properties.my_prop = 'some'
     addon_keymaps.append((km, kmi))
 
- 
+
 def unregister():
     bpy.utils.unregister_class(procedural_dupli_spin)
     bpy.utils.register_class(procedural_dupli_spin_Panel)
-    
+
     # handle the keymap
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
- 
+
 if __name__ == "__main__":
     register()

@@ -21,7 +21,6 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {"name": "Mesh Statistics",
            "description": "Display Volume, Area, CoM of current Mesh",
            "author": "Quentin Wenger (Matpi)",
@@ -35,10 +34,9 @@ bl_info = {"name": "Mesh Statistics",
            }
 
 
-
 import bpy
 from mathutils import Matrix, Vector
-from mathutils.geometry import area_tri#, tessellate_polygon
+from mathutils.geometry import area_tri  # , tessellate_polygon
 from bpy_extras.mesh_utils import ngon_tessellate, edge_face_count
 from bgl import glBegin, glPointSize, glColor3f, glVertex3f, glEnd, GL_POINTS
 
@@ -56,26 +54,26 @@ def arithmeticMean(items):
     s = items[0].copy()
     for item in items[1:]:
         s += item
-    return s/len(items)
+    return s / len(items)
+
 
 def weightedMean(couples):
     """
     Weighted mean of the couples (item, weight).
     """
     # could be made nicer, but this is fast
-    items_weighted_sum = couples[0][0]*couples[0][1]
+    items_weighted_sum = couples[0][0] * couples[0][1]
     weights_sum = couples[0][1]
     for item, weight in couples:
-        items_weighted_sum += item*weight
+        items_weighted_sum += item * weight
         weights_sum += weight
-        
-    return items_weighted_sum/weights_sum
+
+    return items_weighted_sum / weights_sum
 
 
 def calculateTriangleArea(mesh, vertices, matrix):
-    vcs = [matrix*mesh.vertices[i].co for i in vertices]
+    vcs = [matrix * mesh.vertices[i].co for i in vertices]
     return area_tri(*vcs)
-
 
 
 def calculateArea(mesh, matrix=None):
@@ -99,7 +97,7 @@ def calculateArea(mesh, matrix=None):
                     area += calculateTriangleArea(mesh, tri, matrix)
 
     return area
-                
+
 
 def calculateTriangleVolume(vertices, reference_point):
     # vertices are already in the right order, thanks to Blender
@@ -112,7 +110,8 @@ def calculateTriangleVolume(vertices, reference_point):
     ref4[3] = 1.0
     vcs.append(ref4)
 
-    return Matrix(vcs).determinant()/6.0
+    return Matrix(vcs).determinant() / 6.0
+
 
 def calculateTriangleCOM(vertices, reference_point):
     v = vertices.copy()
@@ -141,7 +140,6 @@ def calculatePolygonVolume(mesh, polygon, reference_point):
         return volume
 
 
-
 def calculatePolygonCOM(mesh, polygon, reference_point):
     if len(polygon.vertices) == 3:
         vcs = [mesh.vertices[polygon.vertices[i]].co for i in (0, 1, 2)]
@@ -154,7 +152,7 @@ def calculatePolygonCOM(mesh, polygon, reference_point):
         v2 = calculateTriangleVolume(vcs2, reference_point)
         com1 = calculateTriangleCOM(vcs1, reference_point)
         com2 = calculateTriangleCOM(vcs2, reference_point)
-        return (com1*v1 + com2*v2)/(v1 + v2)
+        return (com1 * v1 + com2 * v2) / (v1 + v2)
 
     else:
         couples = []
@@ -178,9 +176,8 @@ def calculateVolume(mesh, reference_point=Vector((0.0, 0.0, 0.0))):
     volume = 0.0
     for polygon in mesh.polygons:
         volume += calculatePolygonVolume(mesh, polygon, reference_point)
-    
-    return volume
 
+    return volume
 
 
 def calculateCOM_Volume(mesh, reference_point=Vector((0.0, 0.0, 0.0))):
@@ -189,7 +186,7 @@ def calculateCOM_Volume(mesh, reference_point=Vector((0.0, 0.0, 0.0))):
         v = calculatePolygonVolume(mesh, polygon, reference_point)
         com = calculatePolygonCOM(mesh, polygon, reference_point)
         couples.append((com, v))
-    
+
     return weightedMean(couples)
 
 
@@ -197,7 +194,7 @@ def calculateCOM_Faces(mesh):
     couples = []
     for polygon in mesh.polygons:
         couples.append((polygon.center, polygon.area))
-    
+
     return weightedMean(couples)
 
 
@@ -206,16 +203,15 @@ def calculateCOM_Edges(mesh):
     for edge in mesh.edges:
         v1, v2 = [mesh.vertices[edge.vertices[i]].co for i in range(2)]
         # not necessary to run arithmeticMean() for 2 vertices...
-        couples.append(((v1 + v2)/2.0, (v2 - v1).length))
-    
+        couples.append(((v1 + v2) / 2.0, (v2 - v1).length))
+
     return weightedMean(couples)
 
 
 def calculateCOM_Vertices(mesh):
     points = [vertex.co for vertex in mesh.vertices]
-    
-    return arithmeticMean(points)
 
+    return arithmeticMean(points)
 
 
 def isManifold(mesh, do_check=True):
@@ -256,7 +252,7 @@ def isManifold(mesh, do_check=True):
 def isNormalsOrientationClean(mesh, do_check=True):
     if not do_check:
         return True
-    
+
     for i, p in enumerate(mesh.polygons):
         e = p.edge_keys
         set_e = set(e)
@@ -272,7 +268,6 @@ def isNormalsOrientationClean(mesh, do_check=True):
                 return False
 
     return True
-
 
 
 def updateScene(scene=None, force=False):
@@ -302,7 +297,7 @@ def updateScene(scene=None, force=False):
                                 error_manifold = True
                         if stat.volume_use:
                             if not error_manifold and not error_normals:
-                                stat.volume = calculateVolume(mesh, Vector(stat.reference_point))*obj.scale[0]*obj.scale[1]*obj.scale[2]
+                                stat.volume = calculateVolume(mesh, Vector(stat.reference_point)) * obj.scale[0] * obj.scale[1] * obj.scale[2]
                         if stat.com_use:
                             if stat.com_method == 'VERTICES':
                                 stat.com = obj.matrix_world * calculateCOM_Vertices(mesh)
@@ -317,7 +312,6 @@ def updateScene(scene=None, force=False):
                         stat.error_manifold = error_manifold
                         stat.error_normals = error_normals
 
-
                     if (stat.com_draw and stat.com_use and
                         (stat.com_method != 'VOLUME' or
                          (not stat.error_manifold and not stat.error_normals))):
@@ -327,14 +321,13 @@ def updateScene(scene=None, force=False):
                         do_draw[0] = False
 
 
-
 def refreshScene(self, context):
     bpy.ops.wm.com_refresh()
+
 
 def refreshSceneIfManual(self, context):
     if not self.reference_point_auto:
         bpy.ops.wm.com_refresh()
-
 
 
 def drawCallback():
@@ -347,7 +340,6 @@ def drawCallback():
             glVertex3f(*com[0])
             glEnd()
             glPointSize(1.0)
-    
 
 
 class MeshStatisticsCollectionGroup(bpy.types.PropertyGroup):
@@ -362,8 +354,8 @@ class MeshStatisticsCollectionGroup(bpy.types.PropertyGroup):
         items=[('VERTICES', "Vertices", "Arithmetic mean of the vertices' positions"),
                ('EDGES', "Edges", "Mean of the edges centers weighted with their lengths"),
                ('FACES', "Faces", "Mean of the faces centers weighted with their areas"),
-               ('VOLUME', "Volume", "Mean of the centers of mass of the faces tetrahedrons "\
-                                    "with respect to an arbitrary reference point; "\
+               ('VOLUME', "Volume", "Mean of the centers of mass of the faces tetrahedrons "
+                                    "with respect to an arbitrary reference point; "
                                     "theoretically the most accurate method")],
         default='VOLUME',
         update=refreshScene)
@@ -374,7 +366,7 @@ class MeshStatisticsCollectionGroup(bpy.types.PropertyGroup):
         update=refreshScene)
     com_draw = bpy.props.BoolProperty(
         name="Draw",
-        description="Draw the mesh Center of Mass in the View; note: "\
+        description="Draw the mesh Center of Mass in the View; note: "
                     "it may be hidden behind faces, look in Wire Shading Mode if needed",
         default=False)
     area = bpy.props.FloatProperty(
@@ -388,8 +380,8 @@ class MeshStatisticsCollectionGroup(bpy.types.PropertyGroup):
         update=refreshScene)
     volume = bpy.props.FloatProperty(
         name="Volume",
-        description="Sum of the mesh faces tetrahedrons "\
-                    "with respect to an arbitrary reference point; "\
+        description="Sum of the mesh faces tetrahedrons "
+                    "with respect to an arbitrary reference point; "
                     "exact for manifold meshes",
         precision=5)
     volume_use = bpy.props.BoolProperty(
@@ -399,8 +391,8 @@ class MeshStatisticsCollectionGroup(bpy.types.PropertyGroup):
         update=refreshScene)
     reference_point = bpy.props.FloatVectorProperty(
         name="Reference Point",
-        description="Point to be used for volume and center of mass "\
-                    "calculation (in local space); "\
+        description="Point to be used for volume and center of mass "
+                    "calculation (in local space); "
                     "arbitrary, but can help restricting rounding errors",
         size=3,
         precision=5,
@@ -420,25 +412,24 @@ class MeshStatisticsCollectionGroup(bpy.types.PropertyGroup):
         default=False)
     check_mesh = bpy.props.BoolProperty(
         name="Check Mesh",
-        description="Whether to check if mesh is manifold and has good normals; "\
+        description="Whether to check if mesh is manifold and has good normals; "
                     "this is a heavy calculation, to be avoided if not necessary",
         default=False,
         update=refreshScene)
-
 
 
 class COMToEmptyOperator(bpy.types.Operator):
     bl_idname = "wm.com_to_empty"
     bl_label = "Place Empty"
     bl_description = "Create an Empty at the mesh Center of Mass position and set it as active object"
-    
+
     @classmethod
     def poll(cls, context):
         return (context.area.type == 'VIEW_3D' and
-            context.mode == 'OBJECT' and
-            context.object is not None and
-            context.object.type == 'MESH' and
-            context.object.data is not None)
+                context.mode == 'OBJECT' and
+                context.object is not None and
+                context.object.type == 'MESH' and
+                context.object.data is not None)
 
     def execute(self, context):
         obj = context.object
@@ -454,7 +445,6 @@ class COMToEmptyOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
 class RefreshOperator(bpy.types.Operator):
     bl_idname = "wm.com_refresh"
     bl_label = "Refresh"
@@ -463,10 +453,10 @@ class RefreshOperator(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return (context.area.type == 'VIEW_3D' and
-            context.mode == 'OBJECT' and
-            context.object is not None and
-            context.object.type == 'MESH' and
-            context.object.data is not None)
+                context.mode == 'OBJECT' and
+                context.object is not None and
+                context.object.type == 'MESH' and
+                context.object.data is not None)
 
     def execute(self, context):
         if not context.window_manager.mesh_statistics.updating_locked:
@@ -474,25 +464,22 @@ class RefreshOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
-
 def Vector3DToString(vector):
     return "x: %.5f   y: %.5f   z: %.5f" % tuple(vector)
 
-    
+
 class MeshStatisticsPanel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Mesh Statistics"
 
-    
     @classmethod
     def poll(cls, context):
         return (context.area.type == 'VIEW_3D' and
-            context.mode == 'OBJECT' and
-            context.object is not None and
-            context.object.type == 'MESH' and
-            context.object.data is not None)
+                context.mode == 'OBJECT' and
+                context.object is not None and
+                context.object.type == 'MESH' and
+                context.object.data is not None)
 
     def draw(self, context):
         layout = self.layout
@@ -508,7 +495,7 @@ class MeshStatisticsPanel(bpy.types.Panel):
         else:
             split2.operator("wm.com_refresh", text="", icon='FILE_REFRESH')
             split2.prop(stat, "updating_locked", icon_only=True, toggle=True, icon='UNLOCKED')
-            
+
         row = layout.row()
         row.prop(stat, "area_use")
         if stat.area_use:
@@ -540,7 +527,6 @@ class MeshStatisticsPanel(bpy.types.Panel):
                 split2.prop(stat, "com_draw", toggle=True)
                 split2.operator("wm.com_to_empty")
 
-
         if stat.volume_use or (stat.com_use and stat.com_method == 'VOLUME'):
             box = layout.box()
             box.label("Volume & Volume Center of Mass Options")
@@ -557,15 +543,14 @@ class MeshStatisticsPanel(bpy.types.Panel):
                 column.label(text="Error: mesh normals orientation is not consistent;", icon='CANCEL')
                 column.label(text="this could lead to wrong calculations;")
                 column.label(text="try to recalculate them")
-                               
-            else:                        
+
+            else:
                 row = box.row()
                 row.prop(stat, "reference_point_auto")
                 if not stat.reference_point_auto:
                     row = box.row()
                     row.prop(stat, "reference_point")
-            
-        
+
 
 def register():
     bpy.utils.register_module(__name__)
@@ -574,6 +559,7 @@ def register():
     bpy.app.handlers.scene_update_post.append(updateScene)
     if not handle:
         handle[:] = [bpy.types.SpaceView3D.draw_handler_add(drawCallback, (), 'WINDOW', 'POST_VIEW')]
+
 
 def unregister():
     del bpy.types.WindowManager.mesh_statistics
@@ -584,7 +570,7 @@ def unregister():
         bpy.types.SpaceView3D.draw_handler_remove(handle[0], 'WINDOW')
         handle[:] = []
     bpy.utils.unregister_module(__name__)
-    
+
 
 if __name__ == "__main__":
     register()

@@ -70,6 +70,7 @@ else:
 
 import bpy
 
+
 class INFO_MT_curve_plants_add(bpy.types.Menu):
     # Define the "Extras" menu
     bl_idname = "curve_plants_add"
@@ -79,8 +80,9 @@ class INFO_MT_curve_plants_add(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.operator("curve.tree_add",
-            text="Sapling 3")
+                        text="Sapling 3")
         self.layout.operator("curve.ivy_gen", text="Add Ivy to Mesh").updateIvy = True
+
 
 class INFO_MT_curve_knots_add(bpy.types.Menu):
     # Define the "Extras" menu
@@ -91,11 +93,12 @@ class INFO_MT_curve_knots_add(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.operator("curve.torus_knot_plus",
-            text="Torus Knot Plus")
+                        text="Torus Knot Plus")
         layout.operator("curve.celtic_links",
-            text="Celtic Links")
+                        text="Celtic Links")
         layout.operator("mesh.add_braid",
-            text="Braid Knot")
+                        text="Braid Knot")
+
 
 class INFO_MT_curve_extras_add(bpy.types.Menu):
     # Define the "Extras" menu
@@ -106,55 +109,55 @@ class INFO_MT_curve_extras_add(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.operator("mesh.curveaceous_galore",
-            text="Curves Galore!")
+                        text="Curves Galore!")
         layout.operator("curve.spirals",
-            text="Spirals")
+                        text="Spirals")
         layout.operator("curve.curlycurve",
-            text="Curly Curve")
+                        text="Curly Curve")
         layout.operator("curve.formulacurves",
-            text="Formula Curve")
+                        text="Formula Curve")
         layout.operator("curve.wires",
-            text="Curve Wires")
+                        text="Curve Wires")
         layout.separator()
         layout.label(text="Curve Utils")
         layout.operator("curve.simplify",
-            text="Simplify Curves")
+                        text="Simplify Curves")
         layout.operator("curve.dial_scale",
-            text="Dial/Scale")
-
+                        text="Dial/Scale")
 
 
 # Define "Extras" menu
 def menu(self, context):
 
-	layout = self.layout
-	col = layout.column()
-	self.layout.separator()
-	layout.label(text="AF: Curve Objects", icon="OUTLINER_OB_CURVE")
-	self.layout.menu("curve_plants_add", text="Plants", icon="CURVE_DATA")
-	self.layout.menu("curve_knots_add", text="Knots", icon='CURVE_DATA')
-	self.layout.operator("mesh.curveaceous_galore", text="Curves Galore!", icon="CURVE_DATA")
-	self.layout.operator("curve.spirals", text="Spirals", icon="CURVE_DATA")
-	self.layout.operator("curve.curlycurve", text="Curly Curve", icon="CURVE_DATA")
-	self.layout.operator("curve.formulacurves", text="Formula Curve", icon="CURVE_DATA")
-	self.layout.operator("curve.wires", text="Curve Wires", icon="CURVE_DATA")
-	self.layout.operator("curve.dial_scale", text="Dial/Scale", icon="CURVE_DATA")
-	self.layout.separator()
-	layout.label(text="Curve Utils")
-	self.layout.operator("curve.simplify", text="Curve Simplify", icon="CURVE_DATA")
+    layout = self.layout
+    col = layout.column()
+    self.layout.separator()
+    layout.label(text="AF: Curve Objects", icon="OUTLINER_OB_CURVE")
+    self.layout.menu("curve_plants_add", text="Plants", icon="CURVE_DATA")
+    self.layout.menu("curve_knots_add", text="Knots", icon='CURVE_DATA')
+    self.layout.operator("mesh.curveaceous_galore", text="Curves Galore!", icon="CURVE_DATA")
+    self.layout.operator("curve.spirals", text="Spirals", icon="CURVE_DATA")
+    self.layout.operator("curve.curlycurve", text="Curly Curve", icon="CURVE_DATA")
+    self.layout.operator("curve.formulacurves", text="Formula Curve", icon="CURVE_DATA")
+    self.layout.operator("curve.wires", text="Curve Wires", icon="CURVE_DATA")
+    self.layout.operator("curve.dial_scale", text="Dial/Scale", icon="CURVE_DATA")
+    self.layout.separator()
+    layout.label(text="Curve Utils")
+    self.layout.operator("curve.simplify", text="Curve Simplify", icon="CURVE_DATA")
 
 
 def menu_surface(self, context):
 
-	layout = self.layout
-	col = layout.column()
-	self.layout.separator()
-	layout.label(text="Surface Factory")
-	self.layout.operator("object.add_surface_wedge", text="Wedge", icon="MOD_CURVE")
-	self.layout.operator("object.add_surface_cone", text="Cone", icon="MOD_CURVE")
-	self.layout.operator("object.add_surface_star", text="Star", icon="MOD_CURVE")
-	self.layout.operator("object.add_surface_plane", text="Plane", icon="MOD_CURVE")
-	self.layout.operator("curve.smooth_x_times", text="Special Smooth", icon="MOD_CURVE")
+    layout = self.layout
+    col = layout.column()
+    self.layout.separator()
+    layout.label(text="Surface Factory")
+    self.layout.operator("object.add_surface_wedge", text="Wedge", icon="MOD_CURVE")
+    self.layout.operator("object.add_surface_cone", text="Cone", icon="MOD_CURVE")
+    self.layout.operator("object.add_surface_star", text="Star", icon="MOD_CURVE")
+    self.layout.operator("object.add_surface_plane", text="Plane", icon="MOD_CURVE")
+    self.layout.operator("curve.smooth_x_times", text="Special Smooth", icon="MOD_CURVE")
+
 
 class CurveObjectPrefs(bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -164,14 +167,14 @@ class CurveObjectPrefs(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(context.scene, "Enable_Tab_01", text="info", icon="INFO")   
+        layout.prop(context.scene, "Enable_Tab_01", text="info", icon="INFO")
         if context.scene.Enable_Tab_01:
             row = layout.row()
             layout.label(text="----Add Curve Objects----")
             layout.label(text="Merges most Curve Object Addons into One")
             layout.label(text="Includes Add Surface Shapes")
 
-        layout.prop(context.scene, "Enable_Tab_02", text="Curve Objects", icon="INFO")  
+        layout.prop(context.scene, "Enable_Tab_02", text="Curve Objects", icon="INFO")
         if context.scene.Enable_Tab_02:
             row = layout.row()
             layout.label(text="Add Plants: Sapling & Ivy Gen, Add Iterative Tree(panel)")
@@ -184,6 +187,7 @@ class CurveObjectPrefs(bpy.types.AddonPreferences):
             layout.label(text="Dial Scale: Clock Face or Scale")
             layout.label(text="Curve Simplify: Simplify Curves")
             layout.label(text="Tubes & Pipes: Create Solid Tubes & Pipes(panel)")
+
 
 def register():
     bpy.utils.register_module(__name__)

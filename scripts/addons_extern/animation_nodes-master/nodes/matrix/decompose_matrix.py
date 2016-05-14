@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class DecomposeMatrixNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_DecomposeMatrixNode"
     bl_label = "Decompose Matrix"
@@ -14,9 +15,12 @@ class DecomposeMatrixNode(bpy.types.Node, AnimationNode):
     def getExecutionCode(self):
         isLinked = self.getLinkedOutputsDict()
         lines = []
-        if isLinked["translation"]: lines.append("translation = matrix.to_translation()")
-        if isLinked["rotation"]: lines.append("rotation = matrix.to_euler()")
-        if isLinked["scale"]: lines.append("scale = matrix.to_scale()")
+        if isLinked["translation"]:
+            lines.append("translation = matrix.to_translation()")
+        if isLinked["rotation"]:
+            lines.append("rotation = matrix.to_euler()")
+        if isLinked["scale"]:
+            lines.append("scale = matrix.to_scale()")
         return lines
 
     def getUsedModules(self):

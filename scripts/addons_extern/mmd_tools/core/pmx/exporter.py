@@ -15,25 +15,30 @@ import mmd_tools.core.model as mmd_model
 
 
 class _Vertex:
+
     def __init__(self, co, groups, normal, offsets):
         self.co = copy.deepcopy(co)
-        self.groups = copy.copy(groups) # [(group_number, weight), ...]
+        self.groups = copy.copy(groups)  # [(group_number, weight), ...]
         self.normal = copy.deepcopy(normal)
         self.offsets = copy.deepcopy(offsets)
         self.index = None
         self.uv = None
 
+
 class _Face:
+
     def __init__(self, vertices, normal):
         ''' Temporary Face Class
         '''
         self.vertices = copy.copy(vertices)
         self.normal = copy.deepcopy(normal)
 
+
 class _Mesh:
+
     def __init__(self, mesh_data, material_faces, shape_key_names, vertex_group_names, materials):
         self.mesh_data = mesh_data
-        self.material_faces = material_faces # dict of {material_index => [face1, face2, ....]}
+        self.material_faces = material_faces  # dict of {material_index => [face1, face2, ....]}
         self.shape_key_names = shape_key_names
         self.vertex_group_names = vertex_group_names
         self.materials = materials
@@ -58,7 +63,7 @@ class __PmxExporter:
     @staticmethod
     def flipUV_V(uv):
         u, v = uv
-        return [u, 1.0-v]
+        return [u, 1.0 - v]
 
     def __exportMeshes(self, meshes, bone_map):
         mat_map = {}
@@ -105,7 +110,7 @@ class __PmxExporter:
                         weight.bones = [
                             bone_map[vertex_group_names[vg1[0]]],
                             bone_map[vertex_group_names[vg2[0]]]
-                            ]
+                        ]
                         weight.weights = [vg1[1]]
                         pv.weight = weight
                     else:
@@ -185,7 +190,7 @@ class __PmxExporter:
             p_mat.toon_texture = mmd_mat.shared_toon_texture
             p_mat.is_shared_toon_texture = True
         else:
-            p_mat.toon_texture =  self.__exportTexture(mmd_mat.toon_texture)
+            p_mat.toon_texture = self.__exportTexture(mmd_mat.toon_texture)
             p_mat.is_shared_toon_texture = False
 
         # self.__material_name_table.append(material.name) # We should create the material name table AFTER sorting the materials
@@ -256,10 +261,10 @@ class __PmxExporter:
                         if child.use_connect:
                             pmx_bone.displayConnection = child
                             break
-                    #if not pmx_bone.displayConnection: #I think this wasn't working properly
+                    # if not pmx_bone.displayConnection: #I think this wasn't working properly
                         #pmx_bone.displayConnection = bone.tail - bone.head
 
-                #add fixed and local axes
+                # add fixed and local axes
                 if mmd_bone.enabled_fixed_axis:
                     pmx_bone.axis = mmd_bone.fixed_axis
 
@@ -321,7 +326,6 @@ class __PmxExporter:
         else:
             return ik_link + [ik_link]
 
-
     def __exportIK(self, bone_map):
         """ Export IK constraints
          @param bone_map the dictionary to map Blender bone names to bone indices of the pmx.model instance.
@@ -382,7 +386,7 @@ class __PmxExporter:
                 'EYEBROW': pmx.Morph.CATEGORY_EYEBROW,
                 'EYE': pmx.Morph.CATEGORY_EYE,
                 'MOUTH': pmx.Morph.CATEGORY_MOUTH,
-                }
+            }
             for item in root.mmd_root.display_item_frames[u'表情'].items:
                 morph_categories[item.name] = categories.get(item.morph_category, pmx.Morph.CATEGORY_OHTER)
             for vtx_morph in root.mmd_root.vertex_morphs:
@@ -418,11 +422,11 @@ class __PmxExporter:
     def __export_material_morphs(self, root):
         mmd_root = root.mmd_root
         categories = {
-                'SYSTEM': pmx.Morph.CATEGORY_SYSTEM,
-                'EYEBROW': pmx.Morph.CATEGORY_EYEBROW,
-                'EYE': pmx.Morph.CATEGORY_EYE,
-                'MOUTH': pmx.Morph.CATEGORY_MOUTH,
-                }
+            'SYSTEM': pmx.Morph.CATEGORY_SYSTEM,
+            'EYEBROW': pmx.Morph.CATEGORY_EYEBROW,
+            'EYE': pmx.Morph.CATEGORY_EYE,
+            'MOUTH': pmx.Morph.CATEGORY_MOUTH,
+        }
         for morph in mmd_root.material_morphs:
             mat_morph = pmx.MaterialMorph(
                 name=morph.name,
@@ -473,12 +477,12 @@ class __PmxExporter:
                 d += (mathutils.Vector(vertices[face[0]].co) - center).length
                 d += (mathutils.Vector(vertices[face[1]].co) - center).length
                 d += (mathutils.Vector(vertices[face[2]].co) - center).length
-            distances.append((d/mat.vertex_count, mat, offset, face_num))
+            distances.append((d / mat.vertex_count, mat, offset, face_num))
             offset += face_num
         sorted_faces = []
         sorted_mat = []
         for mat, offset, vert_count in [(x[1], x[2], x[3]) for x in sorted(distances, key=lambda x: x[0])]:
-            sorted_faces.extend(faces[offset:offset+vert_count])
+            sorted_faces.extend(faces[offset:offset + vert_count])
             sorted_mat.append(mat)
             self.__material_name_table.append(mat.name)
         self.__model.materials = sorted_mat
@@ -487,11 +491,11 @@ class __PmxExporter:
     def __export_bone_morphs(self, root):
         mmd_root = root.mmd_root
         categories = {
-                'SYSTEM': pmx.Morph.CATEGORY_SYSTEM,
-                'EYEBROW': pmx.Morph.CATEGORY_EYEBROW,
-                'EYE': pmx.Morph.CATEGORY_EYE,
-                'MOUTH': pmx.Morph.CATEGORY_MOUTH,
-                }
+            'SYSTEM': pmx.Morph.CATEGORY_SYSTEM,
+            'EYEBROW': pmx.Morph.CATEGORY_EYEBROW,
+            'EYE': pmx.Morph.CATEGORY_EYE,
+            'MOUTH': pmx.Morph.CATEGORY_MOUTH,
+        }
         for morph in mmd_root.bone_morphs:
             bone_morph = pmx.BoneMorph(
                 name=morph.name,
@@ -504,7 +508,7 @@ class __PmxExporter:
                     morph_data.index = self.__bone_name_table.index(data.bone)
                 except ValueError:
                     morph_data.index = -1
-                #TODO: convert location and rotation to MMD Coordinate System
+                # TODO: convert location and rotation to MMD Coordinate System
                 morph_data.location_offset = data.location
                 morph_data.rotation_offset = data.rotation
                 bone_morph.offsets.append(morph_data)
@@ -531,7 +535,6 @@ class __PmxExporter:
             d.data = items
             res.append(d)
         self.__model.display = res
-
 
     def __exportRigidBodies(self, rigid_bodies, bone_map):
         rigid_map = {}
@@ -562,7 +565,7 @@ class __PmxExporter:
             mask = 0
             for i, v in enumerate(obj.mmd_rigid.collision_group_mask):
                 if not v:
-                    mask += (1<<i)
+                    mask += (1 << i)
             p_rigid.collision_group_mask = mask
 
             rb = obj.rigid_body
@@ -596,27 +599,26 @@ class __PmxExporter:
                 rbc.limit_lin_x_upper,
                 rbc.limit_lin_y_upper,
                 rbc.limit_lin_z_upper,
-                ]) * self.TO_PMX_MATRIX * self.__scale).xyz
-            p_joint.minimum_location =(mathutils.Vector([
+            ]) * self.TO_PMX_MATRIX * self.__scale).xyz
+            p_joint.minimum_location = (mathutils.Vector([
                 rbc.limit_lin_x_lower,
                 rbc.limit_lin_y_lower,
                 rbc.limit_lin_z_lower,
-                ]) * self.TO_PMX_MATRIX * self.__scale).xyz
+            ]) * self.TO_PMX_MATRIX * self.__scale).xyz
             p_joint.maximum_rotation = (mathutils.Vector([
                 rbc.limit_ang_x_lower,
                 rbc.limit_ang_y_lower,
                 rbc.limit_ang_z_lower,
-                ]) * self.TO_PMX_MATRIX * -1).xyz
+            ]) * self.TO_PMX_MATRIX * -1).xyz
             p_joint.minimum_rotation = (mathutils.Vector([
                 rbc.limit_ang_x_upper,
                 rbc.limit_ang_y_upper,
                 rbc.limit_ang_z_upper,
-                ]) * self.TO_PMX_MATRIX * -1).xyz
+            ]) * self.TO_PMX_MATRIX * -1).xyz
 
             p_joint.spring_constant = (mathutils.Vector(mmd_joint.spring_linear) * self.TO_PMX_MATRIX).xyz
             p_joint.spring_rotation_constant = (mathutils.Vector(mmd_joint.spring_angular) * self.TO_PMX_MATRIX).xyz
             self.__model.joints.append(p_joint)
-
 
     @staticmethod
     def __convertFaceUVToVertexUV(vert_index, uv, vertices_map):
@@ -650,7 +652,7 @@ class __PmxExporter:
 
         base_mesh = meshObj.to_mesh(bpy.context.scene, True, 'PREVIEW', False)
         base_mesh.transform(meshObj.matrix_world)
-        base_mesh.transform(self.TO_PMX_MATRIX*self.__scale)
+        base_mesh.transform(self.TO_PMX_MATRIX * self.__scale)
         self.__triangulate(base_mesh)
         base_mesh.update(calc_tessface=True)
 
@@ -669,7 +671,7 @@ class __PmxExporter:
             i.value = 1.0
             mesh = meshObj.to_mesh(bpy.context.scene, True, 'PREVIEW', False)
             mesh.transform(meshObj.matrix_world)
-            mesh.transform(self.TO_PMX_MATRIX*self.__scale)
+            mesh.transform(self.TO_PMX_MATRIX * self.__scale)
             mesh.update(calc_tessface=True)
             for key in base_vertices.keys():
                 base = base_vertices[key][0]
@@ -704,7 +706,6 @@ class __PmxExporter:
             vertex_group_names,
             base_mesh.materials)
 
-
     def execute(self, filepath, **args):
         root = args.get('root', None)
         self.__model = pmx.Model()
@@ -719,12 +720,11 @@ class __PmxExporter:
         meshes = args.get('meshes', [])
         self.__armature = args.get('armature', None)
         rigid_bodeis = args.get('rigid_bodies', [])
-        joints = args.get('joints', [])        
+        joints = args.get('joints', [])
         self.__copyTextures = args.get('copy_textures', False)
         self.__filepath = filepath
 
-        self.__scale = 1.0/float(args.get('scale', 0.2))
-
+        self.__scale = 1.0 / float(args.get('scale', 0.2))
 
         nameMap = self.__exportBones()
         self.__exportIK(nameMap)
@@ -748,6 +748,7 @@ class __PmxExporter:
             self.__copy_textures(tex_dir)
 
         pmx.save(filepath, self.__model)
+
 
 def export(filepath, **kwargs):
     exporter = __PmxExporter()

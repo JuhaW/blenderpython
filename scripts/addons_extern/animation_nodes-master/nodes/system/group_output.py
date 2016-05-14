@@ -7,6 +7,7 @@ from ... base_types.node import AnimationNode
 from . subprogram_sockets import subprogramInterfaceChanged
 from ... utils.nodes import newNodeAtCursor, invokeTranslation
 
+
 class GroupOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_GroupOutputNode"
     bl_label = "Group Output"
@@ -16,7 +17,7 @@ class GroupOutputNode(bpy.types.Node, AnimationNode):
         subprogramInterfaceChanged()
         treeChanged()
 
-    groupInputIdentifier = StringProperty(update = inputNodeIdentifierChanged)
+    groupInputIdentifier = StringProperty(update=inputNodeIdentifierChanged)
 
     def create(self):
         socket = self.inputs.new("an_NodeControlSocket", "New Return").margin = 0.15
@@ -25,20 +26,22 @@ class GroupOutputNode(bpy.types.Node, AnimationNode):
         if self.inInvalidNetwork:
             col = layout.column()
             col.scale_y = 1.5
-            self.invokeFunction(col, "useGroupInputInNetwork", text = "Use Input in Network",
-                description = "Scan the network of this node for group input nodes", icon = "QUESTION")
+            self.invokeFunction(col, "useGroupInputInNetwork", text="Use Input in Network",
+                                description="Scan the network of this node for group input nodes", icon="QUESTION")
 
         layout.separator()
 
         inputNode = self.network.groupInputNode
-        if inputNode: layout.label(inputNode.subprogramName, icon = "GROUP_VERTEX")
-        else: self.invokeFunction(layout, "createGroupInputNode", text = "Input Node", icon = "PLUS")
+        if inputNode:
+            layout.label(inputNode.subprogramName, icon="GROUP_VERTEX")
+        else:
+            self.invokeFunction(layout, "createGroupInputNode", text="Input Node", icon="PLUS")
         layout.separator()
 
     def drawControlSocket(self, layout, socket):
         left, right = splitAlignment(layout)
         left.label(socket.name)
-        self.invokeSocketTypeChooser(right, "newReturn", icon = "ZOOMIN", emboss = False)
+        self.invokeSocketTypeChooser(right, "newReturn", icon="ZOOMIN", emboss=False)
 
     def edit(self):
         self.changeInputIdentifierIfNecessary()
@@ -46,22 +49,28 @@ class GroupOutputNode(bpy.types.Node, AnimationNode):
         dataOrigin = self.newReturnSocket.dataOrigin
         directOrigin = self.newReturnSocket.directOrigin
 
-        if not dataOrigin: return
-        if dataOrigin.dataType == "Node Control": return
+        if not dataOrigin:
+            return
+        if dataOrigin.dataType == "Node Control":
+            return
         socket = self.newReturn(dataOrigin.dataType, dataOrigin.getDisplayedName())
         socket.linkWith(directOrigin)
         self.newReturnSocket.removeLinks()
 
     def changeInputIdentifierIfNecessary(self):
         network = self.network
-        if network.type != "Invalid": return
-        if network.groupInAmount != 1: return
+        if network.type != "Invalid":
+            return
+        if network.groupInAmount != 1:
+            return
         inputNode = network.groupInputNode
-        if self.groupInputIdentifier == inputNode.identifier: return
+        if self.groupInputIdentifier == inputNode.identifier:
+            return
         self.groupInputIdentifier = inputNode.identifier
 
-    def newReturn(self, dataType, name = None):
-        if name is None: name = dataType
+    def newReturn(self, dataType, name=None):
+        if name is None:
+            name = dataType
         socket = self.inputs.new(toIdName(dataType), name, "return")
         socket.dataIsModified = True
         socket.text = name

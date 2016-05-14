@@ -27,6 +27,7 @@ from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import updateNode, match_long_repeat
 from sverchok.utils.sv_bmesh_utils import bmesh_from_pydata, pydata_from_bmesh
 
+
 def calc_mesh_normals(vertices, edges, faces):
     bm = bmesh_from_pydata(vertices, edges, faces)
     bm.normal_update()
@@ -38,6 +39,7 @@ def calc_mesh_normals(vertices, edges, faces):
         face_normals.append(tuple(face.normal))
     bm.free()
     return vertex_normals, face_normals
+
 
 class GetNormalsNode(bpy.types.Node, SverchCustomTreeNode):
     ''' Calculate normals of faces and vertices '''
@@ -76,10 +78,10 @@ class GetNormalsNode(bpy.types.Node, SverchCustomTreeNode):
         if self.outputs['VertexNormals'].is_linked:
             self.outputs['VertexNormals'].sv_set(result_vertex_normals)
 
+
 def register():
     bpy.utils.register_class(GetNormalsNode)
 
 
 def unregister():
     bpy.utils.unregister_class(GetNormalsNode)
-

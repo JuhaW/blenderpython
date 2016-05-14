@@ -35,13 +35,13 @@ from . import genesis_tools
 # DRAW PANEL
 #============================================================================
 
+
 class KhaliblooPanel(bpy.types.Panel):
     """Creates a Panel in the properties context of the 3D viewport"""
     bl_label = "Khalibloo"
     bl_idname = "khalibloo_panel_3d"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-
 
     def draw(self, context):
         layout = self.layout
@@ -53,21 +53,19 @@ class KhaliblooPanel(bpy.types.Panel):
         general_subclass = bpy.context.scene.khalibloo_general_platform_subclass
         mod_filter_mode = bpy.context.scene.khalibloo_modifier_filter_mode
 
-
-        #Platforn type
+        # Platforn type
         layout.prop(scene, "khalibloo_platform", expand=False)
-        
+
 #---------------------------------------------------------------------------------
-        #GENERAL TOOLS
+        # GENERAL TOOLS
         if (platform == 'GENERAL'):
-            #Category type
+            # Category type
             layout.prop(scene, "khalibloo_general_platform_subclass", expand=True)
             layout.separator()
 
-
-            #OBJECT DATA TAB
+            # OBJECT DATA TAB
             if (general_subclass == 'OBJECT DATA'):
-                #layout.separator()
+                # layout.separator()
                 #layout.label(text="Apply: ")
                 #row = layout.row(align=True)
                 #row.operator("object.khalibloo_apply_location", text="Location")
@@ -77,22 +75,21 @@ class KhaliblooPanel(bpy.types.Panel):
 
                 layout.separator()
                 layout.operator("object.khalibloo_assign_obj_indices", text="Assign Pass Indices")
-                
+
                 layout.separator()
                 row = layout.row(align=True)
                 row.operator("object.khalibloo_unhide_select", text="", icon='RESTRICT_SELECT_OFF')
                 row.operator("object.khalibloo_hide_select", text="", icon='RESTRICT_SELECT_ON')
                 row.operator("object.khalibloo_unhide_render", text="", icon='RESTRICT_RENDER_OFF')
                 row.operator("object.khalibloo_hide_render", text="", icon='RESTRICT_RENDER_ON')
-                
+
                 layout.separator()
                 layout.label(text="Multi Edit: ")
                 row = layout.row(align=True)
                 row.operator("object.khalibloo_multiedit_start", text="Start")
                 row.operator("object.khalibloo_multiedit_end", text="End")
-                
 
-            #MESH DATA TAB
+            # MESH DATA TAB
             if (general_subclass == 'MESH DATA'):
                 layout.separator()
                 layout.operator("object.khalibloo_name_object_data")
@@ -103,9 +100,9 @@ class KhaliblooPanel(bpy.types.Panel):
                 layout.operator("object.khalibloo_bind_mesh")
                 layout.operator("object.khalibloo_update_bound_mesh")
                 #layout.prop(scene, "khalibloo_spread_harden_vgroups")
-                #layout.operator("object.khalibloo_harden_weights")
+                # layout.operator("object.khalibloo_harden_weights")
 
-            #MATERIALS TAB
+            # MATERIALS TAB
             elif (general_subclass == 'MATERIALS'):
                 layout.separator()
                 layout.operator("object.khalibloo_setup_imported_materials")
@@ -120,15 +117,15 @@ class KhaliblooPanel(bpy.types.Panel):
                 row.operator("object.khalibloo_textures_on", text='', icon='RESTRICT_VIEW_OFF')
                 row.operator("object.khalibloo_textures_off", text='', icon='RESTRICT_VIEW_ON')
 
-            #MODIFIERS TAB
+            # MODIFIERS TAB
             elif (general_subclass == 'MODIFIERS'):
                 layout.separator()
                 layout.prop(scene, "khalibloo_modifier_type", expand=False)
                 layout.operator("object.khalibloo_add_modifier", text='Add Modifier', icon='ZOOMIN')
-                
+
                 layout.separator()
                 layout.prop(scene, "khalibloo_modifier_filter_mode", expand=True)
-                
+
                 row = layout.row(align=True)
                 row.operator("object.khalibloo_modifiers_realtime_on", text='', icon='RESTRICT_VIEW_OFF')
                 row.operator("object.khalibloo_modifiers_realtime_off", text='', icon='RESTRICT_VIEW_ON')
@@ -139,30 +136,30 @@ class KhaliblooPanel(bpy.types.Panel):
                 row.operator("object.khalibloo_modifiers_apply", text='Apply')
                 row.operator("object.khalibloo_modifiers_remove", text='', icon='X')
 
-            #ARMATURES TAB
+            # ARMATURES TAB
             elif (general_subclass == 'ARMATURES'):
                 layout.separator()
                 layout.operator("object.khalibloo_metarig_gamerig_hookup")
                 layout.operator("object.khalibloo_rigify_neck_fix")
 
-            #CONSTRAINTS TAB
+            # CONSTRAINTS TAB
             elif (general_subclass == 'CONSTRAINTS'):
                 layout.separator()
                 row = layout.row(align=True)
                 row.operator("object.khalibloo_constraints_unmute", text='', icon='RESTRICT_VIEW_OFF')
                 row.operator("object.khalibloo_constraints_mute", text='', icon='RESTRICT_VIEW_ON')
                 row.operator("object.khalibloo_constraints_remove", text='', icon='X')
-                
+
                 layout.separator()
-                
+
                 row = layout.row(align=True)
                 row.label(text="Bone Constraints:", icon='CONSTRAINT_BONE')
                 row = layout.row(align=True)
                 row.operator("object.khalibloo_bone_constraints_unmute", text='', icon='RESTRICT_VIEW_OFF')
                 row.operator("object.khalibloo_bone_constraints_mute", text='', icon='RESTRICT_VIEW_ON')
                 row.operator("object.khalibloo_bone_constraints_remove", text='', icon='X')
-            
-            #CUSTOM_OPS
+
+            # CUSTOM_OPS
             elif (general_subclass == 'CUSTOM_OPS'):
                 datatype = scene.khalibloo_ops_datatype
                 obj_subtype = scene.khalibloo_ops_obj_subtype
@@ -172,7 +169,7 @@ class KhaliblooPanel(bpy.types.Panel):
                 scene_subtype = scene.khalibloo_ops_scene_subtype
                 mod_scope = scene.khalibloo_ops_mod_scope
                 const_scope = scene.khalibloo_ops_const_scope
-                
+
                 col = layout.column(align=True)
                 box = col.box()
                 box.label(text="Operate on:")
@@ -229,7 +226,7 @@ class KhaliblooPanel(bpy.types.Panel):
                 elif (datatype == 'SCENES'):
                     row = box.row()
                     row.prop(scene, "khalibloo_ops_scene_subtype", text="")
-                
+
                 if (datatype == 'OBJECTS'):
                     col = layout.column(align=True)
                     box = col.box()
@@ -240,7 +237,7 @@ class KhaliblooPanel(bpy.types.Panel):
                     col1.prop(scene, "khalibloo_ops_use_obj_type_filters", text="")
                     col1 = split.column()
                     col1.alignment = 'LEFT'
-                    col1.label(text="Object type filters:") # TODO: add an "ALL" toggle to filters
+                    col1.label(text="Object type filters:")  # TODO: add an "ALL" toggle to filters
                     if(use_obj_type_filters):
                         box = col.box()
                         split = box.split()
@@ -258,7 +255,7 @@ class KhaliblooPanel(bpy.types.Panel):
                         col.prop(scene, "khalibloo_ops_obj_type_filters", text="Texts", toggle=True, index=8)
                         col.prop(scene, "khalibloo_ops_obj_type_filters", text="Lattices", toggle=True, index=9)
                         col.prop(scene, "khalibloo_ops_obj_type_filters", text="Empties", toggle=True, index=10)
-                
+
                 layout.separator()
                 layout.operator("object.khalibloo_opblock_add", icon='ZOOMIN')
                 for block in scene.khalibloo_opblocks:
@@ -282,31 +279,31 @@ class KhaliblooPanel(bpy.types.Panel):
                         row.alignment = 'RIGHT'
                         row.operator("object.khalibloo_opblock" + block.strIndex + "_remove", text="", icon='X')
                         box.separator()
-                        
-                        box.prop(scene, block.prefix+"action_mode")
-                        box.prop(scene, block.prefix+"action")
-                    
+
+                        box.prop(scene, block.prefix + "action_mode")
+                        box.prop(scene, block.prefix + "action")
+
                 layout.separator()
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_opblocks_execute", text="Execute")
 
-            
+
 #-----------------------------------------------------------------------------------
-        #GENESIS TOOLS
+        # GENESIS TOOLS
         elif (platform == 'DAZ GENESIS'):
-            
-            #Genesis Object type
+
+            # Genesis Object type
             layout.prop(scene, "khalibloo_genesis_platform_subclass", expand=True)
             layout.separator()
 
-            #if it's a Genesis figure
+            # if it's a Genesis figure
             if (genesis_subclass == 'FIGURE'):
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_genesis_rigify_setup")
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_genesis_rigify_vgroups")
@@ -316,22 +313,22 @@ class KhaliblooPanel(bpy.types.Panel):
                 # Morphs
                 layout.separator()
                 layout.prop(scene, "khalibloo_genesis_morph_dir")
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_import_genesis_morphs")
-                
+
                 # Check boxes
                 layout.separator()
                 layout.prop(scene, "khalibloo_affect_textures")
-                layout.prop(scene, "khalibloo_merge_mats")                     
-                
+                layout.prop(scene, "khalibloo_merge_mats")
+
                 #row = layout.row()
                 layout.operator("object.khalibloo_genesis_material_setup")
 
-            #If it's a Genesis item
+            # If it's a Genesis item
             elif (genesis_subclass == 'ITEM'):
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_genesis_rigify_vgroups")
@@ -339,20 +336,20 @@ class KhaliblooPanel(bpy.types.Panel):
                 layout.operator("object.khalibloo_genesis_unrigify_vgroups")
 
 #-----------------------------------------------------------------------------------
-        #GENESIS 2 TOOLS
+        # GENESIS 2 TOOLS
         elif (platform == 'DAZ GENESIS 2'):
-            
-            #Genesis Object type
+
+            # Genesis Object type
             layout.prop(scene, "khalibloo_genesis2_platform_subclass", expand=True)
             layout.separator()
 
-            #if it's a Genesis 2 Male
+            # if it's a Genesis 2 Male
             if (genesis2_subclass == 'MALE'):
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_genesis2male_rigify_setup")
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_genesis_rigify_vgroups")
@@ -362,42 +359,39 @@ class KhaliblooPanel(bpy.types.Panel):
                 # Morphs
                 layout.separator()
                 layout.prop(scene, "khalibloo_genesis_morph_dir")
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_import_genesis_morphs")
-                
+
                 # Check boxes
                 layout.separator()
                 layout.prop(scene, "khalibloo_affect_textures")
-                layout.prop(scene, "khalibloo_merge_mats")                     
-                
+                layout.prop(scene, "khalibloo_merge_mats")
+
                 layout.operator("object.khalibloo_genesis_material_setup")
 
-
-            #if it's a Genesis 2 Female
+            # if it's a Genesis 2 Female
             if (genesis2_subclass == 'FEMALE'):
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_genesis2female_rigify_setup")
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_genesis_rigify_vgroups")
 
                 layout.operator("object.khalibloo_genesis_unrigify_vgroups")
 
-
-                
                 # Morphs
                 layout.separator()
                 layout.prop(scene, "khalibloo_genesis_morph_dir")
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_import_genesis_morphs")
-                
+
                 # Check boxes
                 layout.separator()
                 layout.prop(scene, "khalibloo_affect_textures")
@@ -406,7 +400,7 @@ class KhaliblooPanel(bpy.types.Panel):
                 # Materials
                 layout.operator("object.khalibloo_genesis_material_setup")
 
-            #If it's a Genesis Item
+            # If it's a Genesis Item
             elif (genesis2_subclass == 'ITEM'):
                 # Big button
                 row = layout.row()
@@ -416,21 +410,21 @@ class KhaliblooPanel(bpy.types.Panel):
                 layout.operator("object.khalibloo_genesis_unrigify_vgroups")
 
 #-----------------------------------------------------------------------------------
-        #GENESIS 3 TOOLS
+        # GENESIS 3 TOOLS
         elif (platform == 'DAZ GENESIS 3'):
-            
-            #Genesis Object type
+
+            # Genesis Object type
             layout.prop(scene, "khalibloo_genesis3_platform_subclass", expand=True)
             layout.separator()
 
-            #if it's a Genesis 3 Male
+            # if it's a Genesis 3 Male
             if (genesis3_subclass == 'MALE'):
                 layout.label("Genesis 3 Male unavailable")
-                
+
                 # row = layout.row()
                 # row.scale_y = 2.0
                 # row.operator("object.khalibloo_genesis3male_rigify_setup")
-                
+
                 # row = layout.row()
                 # row.scale_y = 2.0
                 # row.operator("object.khalibloo_genesis_rigify_vgroups")
@@ -440,42 +434,39 @@ class KhaliblooPanel(bpy.types.Panel):
                 # # Morphs
                 # layout.separator()
                 # layout.prop(scene, "khalibloo_genesis_morph_dir")
-                
+
                 # row = layout.row()
                 # row.scale_y = 2.0
                 # row.operator("object.khalibloo_import_genesis_morphs")
-                
+
                 # # Check boxes
                 # layout.separator()
                 # layout.prop(scene, "khalibloo_affect_textures")
-                # layout.prop(scene, "khalibloo_merge_mats")                     
-                
+                # layout.prop(scene, "khalibloo_merge_mats")
+
                 # layout.operator("object.khalibloo_genesis_material_setup")
 
-
-            #if it's a Genesis 3 Female
+            # if it's a Genesis 3 Female
             if (genesis3_subclass == 'FEMALE'):
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_genesis3female_rigify_setup")
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_genesis_rigify_vgroups")
 
                 layout.operator("object.khalibloo_genesis_unrigify_vgroups")
 
-
-                
                 # Morphs
                 layout.separator()
                 layout.prop(scene, "khalibloo_genesis_morph_dir")
-                
+
                 row = layout.row()
                 row.scale_y = 2.0
                 row.operator("object.khalibloo_import_genesis_morphs")
-                
+
                 # Check boxes
                 layout.separator()
                 layout.prop(scene, "khalibloo_affect_textures")
@@ -484,7 +475,7 @@ class KhaliblooPanel(bpy.types.Panel):
                 # Materials
                 layout.operator("object.khalibloo_genesis_material_setup")
 
-            #If it's a Genesis Item
+            # If it's a Genesis Item
             elif (genesis3_subclass == 'ITEM'):
                 # Big button
                 row = layout.row()
@@ -501,21 +492,21 @@ class KhaliblooPanelUV(bpy.types.Panel):
     bl_space_type = 'IMAGE_EDITOR'
     bl_region_type = 'UI'
 
-
     def draw(self, context):
         layout = self.layout
         scene = context.scene
-        
-        row = layout.row(align = True)
+
+        row = layout.row(align=True)
         row.operator("uv.khalibloo_uv_flatten_x", text="Flatten X")
         row.operator("uv.khalibloo_uv_flatten_y", text="Flatten Y")
-        
+
         #layout.prop(scene, "khalibloo_image")
         #layout.template_ID(bpy.context.space_data, "image", new="image.new")
-        
+
         #row = layout.row(align = True)
         #row.prop(scene, "khalibloo_batchbake_startframe")
         #row.prop(scene, "khalibloo_batchbake_endframe")
+
 
 def register():
     utils.initialize()

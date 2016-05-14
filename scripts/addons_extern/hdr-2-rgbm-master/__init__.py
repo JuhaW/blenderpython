@@ -9,16 +9,21 @@ bl_info = {
     "category": "Material",
 }
 
-import bpy, math, os
+import bpy
+import math
+import os
 from bpy.app.handlers import persistent
 
 # function to clamp float
+
+
 def saturate(num, floats=True):
     if num < 0:
         num = 0
     elif num > (1 if floats else 255):
         num = (1 if floats else 255)
-    return num 
+    return num
+
 
 class EncodeToRGBM(bpy.types.Operator):
     """Nice Useful Tooltip"""
@@ -48,30 +53,31 @@ class EncodeToRGBM(bpy.types.Operator):
         target_ima = bpy.data.images.get(ima_name + '_RGBM.png')
         if not target_ima:
             target_ima = bpy.data.images.new(
-                    name = ima_name + '_RGBM.png',
-                    width = ima.size[0],
-                    height = ima.size[1],
-                    alpha = True,
-                    float_buffer = False
-                    )
-        
+                name=ima_name + '_RGBM.png',
+                width=ima.size[0],
+                height=ima.size[1],
+                alpha=True,
+                float_buffer=False
+            )
+
         num_pixels = len(ima.pixels)
         result_pixel = list(ima.pixels)
-        
+
         # Encode to RGBM
-        for i in range(0,num_pixels,4):
+        for i in range(0, num_pixels, 4):
             for j in range(3):
-                result_pixel[i+j] *= 1.0 / 8.0
-            result_pixel[i+3] = saturate(max(result_pixel[i], result_pixel[i+1], result_pixel[i+2], 1e-6))
-            result_pixel[i+3] = math.ceil(result_pixel[i+3] * 255.0) / 255.0;
+                result_pixel[i + j] *= 1.0 / 8.0
+            result_pixel[i + 3] = saturate(max(result_pixel[i], result_pixel[i + 1], result_pixel[i + 2], 1e-6))
+            result_pixel[i + 3] = math.ceil(result_pixel[i + 3] * 255.0) / 255.0
             for j in range(3):
-                result_pixel[i+j] /= result_pixel[i+3]
-        
+                result_pixel[i + j] /= result_pixel[i + 3]
+
         target_ima.pixels = result_pixel
-        
+
         sima.image = target_ima
 
         return {'FINISHED'}
+
 
 def draw(self, context):
     row = self.layout.row()
@@ -79,9 +85,11 @@ def draw(self, context):
     row = self.layout.row()
     row.operator("image.encode_to_rgbm")
 
+
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.IMAGE_PT_image_properties.append(draw)
+
 
 def unregister():
     bpy.types.IMAGE_PT_image_properties.remove(draw)

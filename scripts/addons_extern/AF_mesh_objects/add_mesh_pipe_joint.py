@@ -8,6 +8,8 @@ from bpy.props import *
 # verts/edges/faces ... List of vertices/edges/faces for the
 #                       new mesh (as used in from_pydata).
 # name ... Name of the new mesh (& object).
+
+
 def create_mesh_object(context, verts, edges, faces, name):
     # Create new mesh
     mesh = bpy.data.meshes.new(name)
@@ -22,6 +24,7 @@ def create_mesh_object(context, verts, edges, faces, name):
     return object_utils.object_data_add(context, mesh, operator=None)
 
 # A very simple "bridge" tool.
+
 
 def createFaces(vertIdx1, vertIdx2, closed=False, flipped=False):
     faces = []
@@ -66,17 +69,18 @@ def createFaces(vertIdx1, vertIdx2, closed=False, flipped=False):
                 face = [vertIdx2[num], vertIdx1[0], vertIdx2[num + 1]]
             else:
                 face = [vertIdx2[num], vertIdx1[num],
-                    vertIdx1[num + 1], vertIdx2[num + 1]]
+                        vertIdx1[num + 1], vertIdx2[num + 1]]
             faces.append(face)
         else:
             if fan:
                 face = [vertIdx1[0], vertIdx2[num], vertIdx2[num + 1]]
             else:
                 face = [vertIdx1[num], vertIdx2[num],
-                    vertIdx2[num + 1], vertIdx1[num + 1]]
+                        vertIdx2[num + 1], vertIdx1[num + 1]]
             faces.append(face)
 
     return faces
+
 
 class AddElbowJoint(bpy.types.Operator):
     # Create the vertices and polygons for a simple elbow (bent pipe).
@@ -86,35 +90,35 @@ class AddElbowJoint(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
 
     radius = FloatProperty(name="Radius",
-        description="The radius of the pipe",
-        default=1.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                           description="The radius of the pipe",
+                           default=1.0,
+                           min=0.01,
+                           max=100.0,
+                           unit="LENGTH")
     div = IntProperty(name="Divisions",
-        description="Number of vertices (divisions)",
-        default=32, min=3, max=256)
+                      description="Number of vertices (divisions)",
+                      default=32, min=3, max=256)
 
     angle = FloatProperty(name="Angle",
-        description="The angle of the branching pipe (i.e. the 'arm' - " \
-                    "Measured from the center line of the main pipe",
-        default=radians(45.0),
-        min=radians(-179.9),
-        max=radians(179.9),
-        unit="ROTATION")
+                          description="The angle of the branching pipe (i.e. the 'arm' - "
+                          "Measured from the center line of the main pipe",
+                          default=radians(45.0),
+                          min=radians(-179.9),
+                          max=radians(179.9),
+                          unit="ROTATION")
 
     startLength = FloatProperty(name="Length Start",
-        description="Length of the beginning of the pipe",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                                description="Length of the beginning of the pipe",
+                                default=3.0,
+                                min=0.01,
+                                max=100.0,
+                                unit="LENGTH")
     endLength = FloatProperty(name="End Length",
-        description="Length of the end of the pipe",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                              description="Length of the end of the pipe",
+                              default=3.0,
+                              min=0.01,
+                              max=100.0,
+                              unit="LENGTH")
 
     def execute(self, context):
 
@@ -177,6 +181,7 @@ class AddElbowJoint(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class AddTeeJoint(bpy.types.Operator):
     # Create the vertices and polygons for a simple tee (T) joint.
     # The base arm of the T can be positioned in an angle if needed though.
@@ -186,45 +191,45 @@ class AddTeeJoint(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
 
     radius = FloatProperty(name="Radius",
-        description="The radius of the pipe",
-        default=1.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                           description="The radius of the pipe",
+                           default=1.0,
+                           min=0.01,
+                           max=100.0,
+                           unit="LENGTH")
     div = IntProperty(name="Divisions",
-        description="Number of vertices (divisions)",
-        default=32,
-        min=4,
-        max=256)
+                      description="Number of vertices (divisions)",
+                      default=32,
+                      min=4,
+                      max=256)
 
     angle = FloatProperty(name="Angle",
-        description="The angle of the branching pipe (i.e. the 'arm' - " \
-                    "Measured from the center line of the main pipe",
-        default=radians(90.0),
-        min=radians(0.1),
-        max=radians(179.9),
-        unit="ROTATION")
+                          description="The angle of the branching pipe (i.e. the 'arm' - "
+                          "Measured from the center line of the main pipe",
+                          default=radians(90.0),
+                          min=radians(0.1),
+                          max=radians(179.9),
+                          unit="ROTATION")
 
     startLength = FloatProperty(name="Length Start",
-        description="Length of the beginning of the" \
-                    " main pipe (the straight one)",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                                description="Length of the beginning of the"
+                                " main pipe (the straight one)",
+                                default=3.0,
+                                min=0.01,
+                                max=100.0,
+                                unit="LENGTH")
     endLength = FloatProperty(name="End Length",
-        description="Length of the end of the" \
-                    " main pipe (the straight one)",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                              description="Length of the end of the"
+                              " main pipe (the straight one)",
+                              default=3.0,
+                              min=0.01,
+                              max=100.0,
+                              unit="LENGTH")
     branchLength = FloatProperty(name="Arm Length",
-        description="Length of the arm pipe (the bent one)",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                                 description="Length of the arm pipe (the bent one)",
+                                 default=3.0,
+                                 min=0.01,
+                                 max=100.0,
+                                 unit="LENGTH")
 
     def execute(self, context):
 
@@ -246,16 +251,16 @@ class AddTeeJoint(bpy.types.Operator):
 
         # List of vert indices of each cross section
         loopMainStart = []        # Vert indices for the
-                                  # beginning of the main pipe.
+        # beginning of the main pipe.
         loopJoint1 = []        # Vert indices for joint that is used
-                               # to connect the joint & loopMainStart.
+        # to connect the joint & loopMainStart.
         loopJoint2 = []        # Vert indices for joint that is used
-                               # to connect the joint & loopArm.
+        # to connect the joint & loopArm.
         loopJoint3 = []        # Vert index for joint that is used
-                               # to connect the joint & loopMainEnd.
+        # to connect the joint & loopMainEnd.
         loopArm = []        # Vert indices for the end of the arm.
         loopMainEnd = []        # Vert indices for the
-                                # end of the main pipe.
+        # end of the main pipe.
 
         # Create start circle (main pipe)
         for vertIdx in range(div):
@@ -355,6 +360,7 @@ class AddTeeJoint(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class AddWyeJoint(bpy.types.Operator):
     """Add a Wye-Joint mesh"""
     bl_idname = "mesh.primitive_wye_joint_add"
@@ -362,51 +368,51 @@ class AddWyeJoint(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
 
     radius = FloatProperty(name="Radius",
-        description="The radius of the pipe",
-        default=1.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                           description="The radius of the pipe",
+                           default=1.0,
+                           min=0.01,
+                           max=100.0,
+                           unit="LENGTH")
     div = IntProperty(name="Divisions",
-        description="Number of vertices (divisions)",
-        default=32,
-        min=4,
-        max=256)
+                      description="Number of vertices (divisions)",
+                      default=32,
+                      min=4,
+                      max=256)
 
     angle1 = FloatProperty(name="Angle 1",
-        description="The angle of the 1. branching pipe " \
-                    "(measured from the center line of the main pipe)",
-        default=radians(45.0),
-        min=radians(-179.9),
-        max=radians(179.9),
-        unit="ROTATION")
+                           description="The angle of the 1. branching pipe "
+                           "(measured from the center line of the main pipe)",
+                           default=radians(45.0),
+                           min=radians(-179.9),
+                           max=radians(179.9),
+                           unit="ROTATION")
     angle2 = FloatProperty(name="Angle 2",
-        description="The angle of the 2. branching pipe " \
-                    "(measured from the center line of the main pipe) ",
-        default=radians(45.0),
-        min=radians(-179.9),
-        max=radians(179.9),
-        unit="ROTATION")
+                           description="The angle of the 2. branching pipe "
+                           "(measured from the center line of the main pipe) ",
+                           default=radians(45.0),
+                           min=radians(-179.9),
+                           max=radians(179.9),
+                           unit="ROTATION")
 
     startLength = FloatProperty(name="Length Start",
-        description="Length of the beginning of the" \
-                    " main pipe (the straight one)",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                                description="Length of the beginning of the"
+                                " main pipe (the straight one)",
+                                default=3.0,
+                                min=0.01,
+                                max=100.0,
+                                unit="LENGTH")
     branch1Length = FloatProperty(name="Length Arm 1",
-        description="Length of the 1. arm",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                                  description="Length of the 1. arm",
+                                  default=3.0,
+                                  min=0.01,
+                                  max=100.0,
+                                  unit="LENGTH")
     branch2Length = FloatProperty(name="Length Arm 2",
-        description="Length of the 2. arm",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                                  description="Length of the 2. arm",
+                                  default=3.0,
+                                  min=0.01,
+                                  max=100.0,
+                                  unit="LENGTH")
 
     def execute(self, context):
 
@@ -429,13 +435,13 @@ class AddWyeJoint(bpy.types.Operator):
 
         # List of vert indices of each cross section
         loopMainStart = []        # Vert indices for
-                                  # the beginning of the main pipe.
+        # the beginning of the main pipe.
         loopJoint1 = []        # Vert index for joint that is used
-                               # to connect the joint & loopMainStart.
+        # to connect the joint & loopMainStart.
         loopJoint2 = []        # Vert index for joint that
-                               # is used to connect the joint & loopArm1.
+        # is used to connect the joint & loopArm1.
         loopJoint3 = []        # Vert index for joint that is
-                               # used to connect the joint & loopArm2.
+        # used to connect the joint & loopArm2.
         loopArm1 = []        # Vert idxs for end of the 1. arm.
         loopArm2 = []        # Vert idxs for end of the 2. arm.
 
@@ -481,10 +487,10 @@ class AddWyeJoint(bpy.types.Operator):
                 curVertAngle = vertIdx * (2.0 * pi / div)
 
                 locX = (-sin(curVertAngle) * sin(angleJoint)
-                    / sin(angle2 - angleJoint))
+                        / sin(angle2 - angleJoint))
                 locY = -cos(curVertAngle)
                 locZ = (-(sin(curVertAngle) * cos(angleJoint)
-                    / sin(angle2 - angleJoint)))
+                          / sin(angle2 - angleJoint)))
 
                 loopTemp.append(len(verts))
                 verts.append([locX * radius, locY * radius, locZ * radius])
@@ -548,6 +554,7 @@ class AddWyeJoint(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class AddCrossJoint(bpy.types.Operator):
     """Add a Cross-Joint mesh"""
     # Create the vertices and polygons for a coss (+ or X) pipe joint.
@@ -556,61 +563,61 @@ class AddCrossJoint(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
 
     radius = FloatProperty(name="Radius",
-        description="The radius of the pipe",
-        default=1.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                           description="The radius of the pipe",
+                           default=1.0,
+                           min=0.01,
+                           max=100.0,
+                           unit="LENGTH")
     div = IntProperty(name="Divisions",
-        description="Number of vertices (divisions)",
-        default=32,
-        min=4,
-        max=256)
+                      description="Number of vertices (divisions)",
+                      default=32,
+                      min=4,
+                      max=256)
 
     angle1 = FloatProperty(name="Angle 1",
-        description="The angle of the 1. arm (from the main axis)",
-        default=radians(90.0),
-        min=radians(-179.9),
-        max=radians(179.9),
-        unit="ROTATION")
+                           description="The angle of the 1. arm (from the main axis)",
+                           default=radians(90.0),
+                           min=radians(-179.9),
+                           max=radians(179.9),
+                           unit="ROTATION")
     angle2 = FloatProperty(name="Angle 2",
-        description="The angle of the 2. arm (from the main axis)",
-        default=radians(90.0),
-        min=radians(-179.9),
-        max=radians(179.9),
-        unit="ROTATION")
+                           description="The angle of the 2. arm (from the main axis)",
+                           default=radians(90.0),
+                           min=radians(-179.9),
+                           max=radians(179.9),
+                           unit="ROTATION")
     angle3 = FloatProperty(name="Angle 3 (center)",
-        description="The angle of the center arm (from the main axis)",
-        default=radians(0.0),
-        min=radians(-179.9),
-        max=radians(179.9),
-        unit="ROTATION")
+                           description="The angle of the center arm (from the main axis)",
+                           default=radians(0.0),
+                           min=radians(-179.9),
+                           max=radians(179.9),
+                           unit="ROTATION")
 
     startLength = FloatProperty(name="Length Start",
-        description="Length of the beginning of the " \
-                    "main pipe (the straight one)",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                                description="Length of the beginning of the "
+                                "main pipe (the straight one)",
+                                default=3.0,
+                                min=0.01,
+                                max=100.0,
+                                unit="LENGTH")
     branch1Length = FloatProperty(name="Length Arm 1",
-        description="Length of the 1. arm",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                                  description="Length of the 1. arm",
+                                  default=3.0,
+                                  min=0.01,
+                                  max=100.0,
+                                  unit="LENGTH")
     branch2Length = FloatProperty(name="Length Arm 2",
-        description="Length of the 2. arm",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                                  description="Length of the 2. arm",
+                                  default=3.0,
+                                  min=0.01,
+                                  max=100.0,
+                                  unit="LENGTH")
     branch3Length = FloatProperty(name="Length Arm 3 (center)",
-        description="Length of the center arm",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                                  description="Length of the center arm",
+                                  default=3.0,
+                                  min=0.01,
+                                  max=100.0,
+                                  unit="LENGTH")
 
     def execute(self, context):
 
@@ -634,15 +641,15 @@ class AddCrossJoint(bpy.types.Operator):
 
         # List of vert indices of each cross section
         loopMainStart = []        # Vert indices for the
-                                  # beginning of the main pipe.
+        # beginning of the main pipe.
         loopJoint1 = []        # Vert index for joint that is used
-                               # to connect the joint & loopMainStart.
+        # to connect the joint & loopMainStart.
         loopJoint2 = []        # Vert index for joint that is used
-                               # to connect the joint & loopArm1.
+        # to connect the joint & loopArm1.
         loopJoint3 = []        # Vert index for joint that is used
-                               # to connect the joint & loopArm2.
+        # to connect the joint & loopArm2.
         loopJoint4 = []        # Vert index for joint that is used
-                               # to connect the joint & loopArm3.
+        # to connect the joint & loopArm3.
         loopArm1 = []        # Vert idxs for the end of the 1. arm.
         loopArm2 = []        # Vert idxs for the end of the 2. arm.
         loopArm3 = []        # Vert idxs for the center arm end.
@@ -709,10 +716,10 @@ class AddCrossJoint(bpy.types.Operator):
                     loopTempB.append(len(verts))
 
                 locX = (sin(curVertAngle) * sin(angleJoint)
-                    / sin(angle - angleJoint))
+                        / sin(angle - angleJoint))
                 locY = -cos(curVertAngle)
                 locZ = (Z * (sin(curVertAngle) * cos(angleJoint)
-                    / sin(angle - angleJoint)))
+                             / sin(angle - angleJoint)))
 
                 verts.append([locX * radius, locY * radius, locZ * radius])
 
@@ -802,6 +809,7 @@ class AddCrossJoint(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class AddNJoint(bpy.types.Operator):
     """Add a N-Joint mesh"""
     # Create the vertices and polygons for a regular n-joint.
@@ -810,27 +818,27 @@ class AddNJoint(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
 
     radius = FloatProperty(name="Radius",
-        description="The radius of the pipe",
-        default=1.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                           description="The radius of the pipe",
+                           default=1.0,
+                           min=0.01,
+                           max=100.0,
+                           unit="LENGTH")
     div = IntProperty(name="Divisions",
-        description="Number of vertices (divisions)",
-        default=32,
-        min=4,
-        max=256)
+                      description="Number of vertices (divisions)",
+                      default=32,
+                      min=4,
+                      max=256)
     number = IntProperty(name="Arms/Joints",
-        description="Number of joints/arms",
-        default=5,
-        min=2,
-        max=99999)
+                         description="Number of joints/arms",
+                         default=5,
+                         min=2,
+                         max=99999)
     length = FloatProperty(name="Length",
-        description="Length of each joint/arm",
-        default=3.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                           description="Length of each joint/arm",
+                           default=3.0,
+                           min=0.01,
+                           max=100.0,
+                           unit="LENGTH")
 
     def execute(self, context):
         radius = self.radius
@@ -952,7 +960,7 @@ class AddNJoint(bpy.types.Operator):
         for loopIdx in range(len(loopsEndCircles)):
             faces.extend(
                 createFaces(loopsJoints[loopIdx],
-                loopsEndCircles[loopIdx], closed=True))
+                            loopsEndCircles[loopIdx], closed=True))
 
         base = create_mesh_object(context, verts, [], faces, "N Joint")
 

@@ -4,20 +4,21 @@ from ... sockets.info import toIdName, toListIdName
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
 
+
 class FloatRangeListNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_FloatRangeListNode"
     bl_label = "Number Range"
     dynamicLabelType = "ALWAYS"
 
     onlySearchTags = True
-    searchTags = [ ("Float Range", {"dataType" : repr("Float")}),
-                   ("Integer Range", {"dataType" : repr("Integer")}) ]
+    searchTags = [("Float Range", {"dataType": repr("Float")}),
+                  ("Integer Range", {"dataType": repr("Integer")})]
 
     def dataTypeChanged(self, context):
         self.generateSockets()
         executionCodeChanged()
 
-    dataType = StringProperty(default = "Float", update = dataTypeChanged)
+    dataType = StringProperty(default="Float", update=dataTypeChanged)
 
     def create(self):
         self.generateSockets()

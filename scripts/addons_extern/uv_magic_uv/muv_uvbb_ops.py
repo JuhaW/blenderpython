@@ -41,6 +41,7 @@ def redraw_all_areas():
 
 class MUV_UVBBCmd():
     op = 'NONE'
+
     def __init__(self):
         self.op = 'NONE'
 
@@ -55,19 +56,23 @@ class MUV_UVBBTranslationCmd(MUV_UVBBCmd):
     __y = 0
     __ox = 0
     __oy = 0
+
     def __init__(self, ox, oy):
         self.op = 'TRANSLATION'
         self.__x = ox
         self.__y = oy
         self.__ox = ox
         self.__oy = oy
+
     def to_matrix(self):
         dx = self.__x - self.__ox
         dy = self.__y - self.__oy
         return mathutils.Matrix.Translation((dx, dy, 0))
+
     def set(self, x, y):
         self.__x = x
         self.__y = y
+
 
 class MUV_UVBBRotationCmd(MUV_UVBBCmd):
     __x = 0
@@ -75,6 +80,7 @@ class MUV_UVBBRotationCmd(MUV_UVBBCmd):
     __ox = 0
     __oy = 0
     __iangle = 0
+
     def __init__(self, ix, iy, ox, oy):
         self.op = 'ROTATION'
         self.__x = ix
@@ -84,6 +90,7 @@ class MUV_UVBBRotationCmd(MUV_UVBBCmd):
         dx = self.__x - self.__ox
         dy = self.__y - self.__oy
         self.__iangle = math.atan2(dy, dx)
+
     def to_matrix(self):
         dx = self.__x - self.__ox
         dy = self.__y - self.__oy
@@ -92,9 +99,11 @@ class MUV_UVBBRotationCmd(MUV_UVBBCmd):
         mr = mathutils.Matrix.Rotation(angle, 4, 'Z')
         mt = mathutils.Matrix.Translation((self.__ox, self.__oy, 0.0))
         return mt * mr * mti
+
     def set(self, x, y):
         self.__x = x
         self.__y = y
+
 
 class MUV_UVBBScalingCmd(MUV_UVBBCmd):
     __x = 0
@@ -108,6 +117,7 @@ class MUV_UVBBScalingCmd(MUV_UVBBCmd):
     __dir_x = 0
     __dir_y = 0
     __mat = None
+
     def __init__(self, ix, iy, ox, oy, dir_x, dir_y, mat):
         self.op = 'SCALING'
         self.__ix = ix
@@ -122,6 +132,7 @@ class MUV_UVBBScalingCmd(MUV_UVBBCmd):
         iov = mat * mathutils.Vector((ox, oy, 0.0))
         self.__iox = iov.x
         self.__ioy = iov.y
+
     def to_matrix(self):
         m = self.__mat
         mi = self.__mat.inverted()
@@ -140,6 +151,7 @@ class MUV_UVBBScalingCmd(MUV_UVBBCmd):
         if self.__dir_y == 1:
             ms[1][1] = (ty - toy) * self.__dir_y / (tiy - toy)
         return mi * mt0 * ms * mt0i * m
+
     def set(self, x, y):
         self.__x = x
         self.__y = y
@@ -148,9 +160,11 @@ class MUV_UVBBScalingCmd(MUV_UVBBCmd):
 class MUV_UVBBCmdExecuter():
     __cmd_list = []
     __cmd_list_redo = []
+
     def __init__(self):
         self.__cmd_list = []
         self.__cmd_list_redo = []
+
     def execute(self, begin=0, end=-1):
         mat = mathutils.Matrix()
         mat.identity()
@@ -158,19 +172,24 @@ class MUV_UVBBCmdExecuter():
             if begin <= i and (end == -1 or i <= end):
                 mat = cmd.to_matrix() * mat
         return mat
+
     def undo_size(self):
         return len(self.__cmd_list)
+
     def top(self):
         if len(self.__cmd_list) <= 0:
             return None
         return self.__cmd_list[-1]
+
     def append(self, cmd):
         self.__cmd_list.append(cmd)
         self.__cmd_list_redo = []
+
     def undo(self):
         if len(self.__cmd_list) <= 0:
             return
         self.__cmd_list_redo.append(self.__cmd_list.pop())
+
     def redo(self):
         if len(self.__cmd_list_redo) <= 0:
             return
@@ -218,7 +237,7 @@ class MUV_UVBBRenderer(bpy.types.Operator):
             [pos.x - offset, pos.y + offset],
             [pos.x + offset, pos.y + offset],
             [pos.x + offset, pos.y - offset]
-            ]
+        ]
         bgl.glEnable(bgl.GL_BLEND)
         bgl.glBegin(bgl.GL_QUADS)
         bgl.glColor4f(1.0, 1.0, 1.0, 1.0)
@@ -248,25 +267,27 @@ class MUV_UVBBState(Enum):
 
 
 class MUV_UVBBStateBase():
+
     def __init__(self):
         raise NotImplementedError
+
     def update(self, context, event, ctrl_points, mouse_view):
         raise NotImplementedError
 
 
 def get_region(context, area, region):
-   for area in context.screen.areas:
-       if area.type == 'IMAGE_EDITOR':
-           break
-   else:
-       return None
-   for region in area.regions:
-       if region.type == 'WINDOW':
-           break
-   else:
-       return None
+    for area in context.screen.areas:
+        if area.type == 'IMAGE_EDITOR':
+            break
+    else:
+        return None
+    for region in area.regions:
+        if region.type == 'WINDOW':
+            break
+    else:
+        return None
 
-   return region
+    return region
 
 
 class MUV_UVBBStateNone(MUV_UVBBStateBase):
@@ -309,6 +330,7 @@ class MUV_UVBBStateNone(MUV_UVBBStateBase):
 
 class MUV_UVBBStateTranslating(MUV_UVBBStateBase):
     __cmd_exec = None
+
     def __init__(self, cmd_exec, mouse_view, ctrl_points):
         self.__cmd_exec = cmd_exec
         ox, oy = ctrl_points[0].x, ctrl_points[0].y
@@ -378,6 +400,7 @@ class MUV_UVBBStateScaling(MUV_UVBBStateBase):
 
 class MUV_UVBBStateRotating(MUV_UVBBStateBase):
     __cmd_exec = None
+
     def __init__(self, cmd_exec, mouse_view, ctrl_points):
         self.__cmd_exec = cmd_exec
         ix, iy = ctrl_points[9].x, ctrl_points[9].y
@@ -417,14 +440,11 @@ class MUV_UVBBStateMgr():
 
         self.__state = next_state
 
-
     def update(self, context, ctrl_points, event):
         mouse_region = mathutils.Vector((event.mouse_region_x, event.mouse_region_y))
         mouse_view = mathutils.Vector((context.region.view2d.region_to_view(mouse_region.x, mouse_region.y)))
         next_state = self.__state_obj.update(context, event, ctrl_points, mouse_view)
         self.__update_state(next_state, mouse_view, ctrl_points)
-
-
 
 
 class MUV_UVBBUpdater(bpy.types.Operator):
@@ -475,17 +495,17 @@ class MUV_UVBBUpdater(bpy.types.Operator):
                 top = uv[2].y
 
         points = [
-                mathutils.Vector(((left + right) * 0.5, (top + bottom) * 0.5, 0.0)),
-                mathutils.Vector((left, top, 0.0)),
-                mathutils.Vector((left, (top + bottom) * 0.5, 0.0)),
-                mathutils.Vector((left, bottom, 0.0)),
-                mathutils.Vector(((left + right) * 0.5, top, 0.0)),
-                mathutils.Vector(((left + right) * 0.5, bottom, 0.0)),
-                mathutils.Vector((right, top, 0.0)),
-                mathutils.Vector((right, (top + bottom) * 0.5, 0.0)),
-                mathutils.Vector((right, bottom, 0.0)),
-                mathutils.Vector(((left + right) * 0.5, top + 0.03, 0.0))
-                ]
+            mathutils.Vector(((left + right) * 0.5, (top + bottom) * 0.5, 0.0)),
+            mathutils.Vector((left, top, 0.0)),
+            mathutils.Vector((left, (top + bottom) * 0.5, 0.0)),
+            mathutils.Vector((left, bottom, 0.0)),
+            mathutils.Vector(((left + right) * 0.5, top, 0.0)),
+            mathutils.Vector(((left + right) * 0.5, bottom, 0.0)),
+            mathutils.Vector((right, top, 0.0)),
+            mathutils.Vector((right, (top + bottom) * 0.5, 0.0)),
+            mathutils.Vector((right, bottom, 0.0)),
+            mathutils.Vector(((left + right) * 0.5, top + 0.03, 0.0))
+        ]
 
         return points
 
@@ -502,10 +522,8 @@ class MUV_UVBBUpdater(bpy.types.Operator):
             av = trans_mat * v
             bm.faces[uv[0]].loops[uv[1]][uv_layer].uv = mathutils.Vector((av.x, av.y))
 
-
     def __update_ctrl_point(self, context, ctrl_points_ini, trans_mat):
         return [trans_mat * cp for cp in ctrl_points_ini]
-
 
     def modal(self, context, event):
         props = context.scene.muv_props.uvbb
@@ -520,7 +538,6 @@ class MUV_UVBBUpdater(bpy.types.Operator):
         self.__state_mgr.update(context, props.ctrl_points, event)
 
         return {'PASS_THROUGH'}
-
 
     def execute(self, context):
         props = context.scene.muv_props.uvbb

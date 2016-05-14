@@ -92,23 +92,23 @@ class ManageVertexNormalWeight(YAVNEBase):
     bl_options = {'UNDO'}
 
     action = bpy.props.EnumProperty(
-        name = 'Operator Action (Get or Set)',
-        description = '',
-        default = 'GET',
-        items = [
+        name='Operator Action (Get or Set)',
+        description='',
+        default='GET',
+        items=[
             ('GET', 'Get', 'Selects vertices by given vertex normal weight', '', 0),
             ('SET', 'Set', 'Assigns given vertex normal weight to selected vertices', '', 1)
         ]
     )
 
     type = bpy.props.EnumProperty(
-        name = 'Vertex Normal Weight',
-        description = (
+        name='Vertex Normal Weight',
+        description=(
             'Determines how each vertex normal is calculated as the ' +
             'weighted average of adjacent face normals'
         ),
-        default = 'ANGLE',
-        items = [
+        default='ANGLE',
+        items=[
             ('UNIFORM', 'Uniform', 'Face normals are averaged evenly.', '', -1),
             ('ANGLE', 'Corner Angle', 'Face normals are averaged according to the corner angle of a shared vertex in each face. This is the smoothing scheme used by Blender.', '', 0),
             ('AREA', 'Face Area', 'Face normals are averaged according to the area of each face.', '', 1),
@@ -118,9 +118,9 @@ class ManageVertexNormalWeight(YAVNEBase):
     )
 
     update = bpy.props.BoolProperty(
-        name = 'Update Vertex Normals',
-        description = 'Update vertex normals at the end of a "Set" action.',
-        default = True
+        name='Update Vertex Normals',
+        description='Update vertex normals at the end of a "Set" action.',
+        default=True
     )
 
     def execute(self, context):
@@ -183,29 +183,29 @@ class ManageFaceNormalInfluence(YAVNEBase):
     bl_options = {'UNDO'}
 
     action = bpy.props.EnumProperty(
-        name = 'Operator Action (Get or Set)',
-        description = '',
-        default = 'GET',
-        items = [
+        name='Operator Action (Get or Set)',
+        description='',
+        default='GET',
+        items=[
             ('GET', 'Get', 'Selects faces by given normal vector influence', '', 0),
             ('SET', 'Set', 'Assigns given normal vector influence to selected faces', '', 1)
         ]
     )
 
     influence = bpy.props.EnumProperty(
-        name = 'Face Normal Influence',
-        description = 'Classification that determine which face normals are taken into account when calculating vertex normals',
-        default = 'STRONG',
-        items = [
+        name='Face Normal Influence',
+        description='Classification that determine which face normals are taken into account when calculating vertex normals',
+        default='STRONG',
+        items=[
             ('STRONG', 'Strong', 'Strong face normals are always taken into account when calculating vertex normals.', '', 0),
             ('WEAK', 'Weak', 'Weak face normals are only taken into account when calculating the normal of a vertex that is not influenced by a strong face normal.', '', 1)
         ]
     )
 
     update = bpy.props.BoolProperty(
-        name = 'Update Vertex Normals',
-        description = 'Update vertex normals at the end of a "Set" action.',
-        default = True
+        name='Update Vertex Normals',
+        description='Update vertex normals at the end of a "Set" action.',
+        default=True
     )
 
     def execute(self, context):
@@ -254,7 +254,7 @@ class PickShadingSource(YAVNEBase):
         # Exit Edit mode, if necessary.
         self.initially_in_edit_mode = context.mode == 'EDIT_MESH'
         if self.initially_in_edit_mode:
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
         # Populate a list of objects that are valid as shading sources.
         self.available_sources = [
@@ -263,7 +263,7 @@ class PickShadingSource(YAVNEBase):
             if (obj.type == 'MESH' and
                 obj != obj_curr and
                 obj.is_visible(scene)
-            )
+                )
         ]
 
         # Hide objects that are visible but invalid as shading sources.
@@ -272,7 +272,7 @@ class PickShadingSource(YAVNEBase):
             for obj in scene.objects
             if ((obj.type != 'MESH' and obj.is_visible(scene)) or
                 obj == obj_curr
-            )
+                )
         ]
         for obj in self.temporarily_hidden_objects:
             obj.hide = True
@@ -323,7 +323,7 @@ class PickShadingSource(YAVNEBase):
 
         # Return to Edit mode, if necessary.
         if self.initially_in_edit_mode:
-            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.object.mode_set(mode='EDIT')
 
         # Restore  active area's header to its initial state.
         context.area.header_text_set()
@@ -574,7 +574,7 @@ class TransferShading(YAVNEBase):
         source = self.addon.preferences.source
 
         # Modifiers can only be applied in Object mode.
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         # Group selected vertices.
         selected_vertices = [v.index for v in mesh.vertices if v.select]
@@ -582,7 +582,7 @@ class TransferShading(YAVNEBase):
         selected_vertices_group.add(selected_vertices, 1, 'ADD')
 
         # Add data transfer modifier.
-        data_xfer_modifier = modifiers.new(name = '', type = 'DATA_TRANSFER')
+        data_xfer_modifier = modifiers.new(name='', type='DATA_TRANSFER')
         data_xfer_modifier.object = bpy.data.objects[source]
         data_xfer_modifier.use_loop_data = True
         data_xfer_modifier.data_types_loops = {'CUSTOM_NORMAL'}
@@ -590,22 +590,22 @@ class TransferShading(YAVNEBase):
 
         # Move data transfer modifier to the top of the stack.
         while modifiers[0] != data_xfer_modifier:
-            bpy.ops.object.modifier_move_up(modifier = data_xfer_modifier.name)
+            bpy.ops.object.modifier_move_up(modifier=data_xfer_modifier.name)
 
         # Apply data transfer modifier.
-        bpy.ops.object.modifier_apply(modifier = data_xfer_modifier.name)
+        bpy.ops.object.modifier_apply(modifier=data_xfer_modifier.name)
 
         # Delete the vertex group.
         obj_curr.vertex_groups.remove(selected_vertices_group)
 
         # Return to Edit mode.
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
 
         # Lock transfered normals.
         bpy.ops.mesh.yavne_manage_vertex_normal_weight(
-            action = 'SET',
-            type = 'UNWEIGHTED',
-            update = True
+            action='SET',
+            type='UNWEIGHTED',
+            update=True
         )
 
         return {'FINISHED'}
@@ -622,7 +622,7 @@ class UpdateVertexNormals(YAVNEBase):
 
     def execute(self, context):
         # Split normal data can only be written from Object mode.
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.shade_smooth()
 
         mesh = context.active_object.data
@@ -689,7 +689,7 @@ class UpdateVertexNormals(YAVNEBase):
 
         # Write split normal data to the mesh, and return to Edit mode.
         mesh.normals_split_custom_set(split_normals)
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.mode_set(mode='EDIT')
 
         bm.free()
 

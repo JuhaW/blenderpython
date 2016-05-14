@@ -23,7 +23,6 @@ from sverchok.node_tree import SverchCustomTreeNode
 from sverchok.data_structure import levelsOflist, SvGetSocketAnyType
 
 
-
 class SverchokViewer(bpy.types.Operator):
     """Sverchok viewer"""
     bl_idname = "node.sverchok_viewer_button"
@@ -41,7 +40,7 @@ class SverchokViewer(bpy.types.Operator):
         if inputs['vertices'].links:
             if type(inputs['vertices'].links[0].from_socket) == bpy.types.VerticesSocket:
                 evaverti = inputs['vertices'].sv_get()
-                
+
                 deptl = levelsOflist(evaverti)
                 if deptl and deptl > 2:
                     a = self.readFORviewer_sockets_data(evaverti, deptl, len(evaverti))
@@ -88,7 +87,7 @@ class SverchokViewer(bpy.types.Operator):
         self.do_text(out_verts, out_edgpol, out_matrix, edpotype)
         return {'FINISHED'}
 
-    def do_text(self,vertices,edgspols,matrices,edpotype):
+    def do_text(self, vertices, edgspols, matrices, edpotype):
         texts = bpy.data.texts.items()
         exists = False
         for t in texts:
@@ -98,17 +97,17 @@ class SverchokViewer(bpy.types.Operator):
 
         if not exists:
             bpy.data.texts.new('Sverchok_viewer')
-        podpis = '\n'*2 \
-                + '**************************************************' + '\n' \
-                + '                     The End                      '
+        podpis = '\n' * 2 \
+            + '**************************************************' + '\n' \
+            + '                     The End                      '
         for_file = 'node name: ' + self.nodename \
-                    + '\n\nvertices: \n' \
-                    + vertices \
-                    + edpotype \
-                    + edgspols \
-                    + '\n\nmatrixes: \n' \
-                    + matrices \
-                    + podpis
+            + '\n\nvertices: \n' \
+            + vertices \
+            + edpotype \
+            + edgspols \
+            + '\n\nmatrixes: \n' \
+            + matrices \
+            + podpis
         bpy.data.texts['Sverchok_viewer'].clear()
         bpy.data.texts['Sverchok_viewer'].write(for_file)
 
@@ -158,6 +157,7 @@ class SverchokViewer(bpy.types.Operator):
                 output += ('\n' + str(val))
         return cache + output
 
+
 class ViewerNode_text(bpy.types.Node, SverchCustomTreeNode):
     ''' Viewer Node text '''
     bl_idname = 'ViewerNode_text'
@@ -178,9 +178,9 @@ class ViewerNode_text(bpy.types.Node, SverchCustomTreeNode):
 
     def process(self):
         pass
+
     def update(self):
         pass
-
 
 
 def register():
@@ -194,5 +194,3 @@ def unregister():
 
 if __name__ == '__main__':
     register()
-
-

@@ -11,11 +11,13 @@ import sys
 import argparse
 import math
 
+
 def normalize(x, y, z):
-    length = math.sqrt(x*x + y*y + z*z)
+    length = math.sqrt(x * x + y * y + z * z)
     if length == 0:
         return 0.0, 0.0, 0.0
     return (x / length, y / length, z / length)
+
 
 def uvIntToFloat(m3UVCoordinate):
     return (m3UVCoordinate.x / 2048.0, 1 - m3UVCoordinate.y / 2048.0)
@@ -27,34 +29,34 @@ def recalculateTangentsOfFaces(m3VerticesToUpdate, faces):
         vertex0 = m3VerticesToUpdate[face[0]]
         vertex1 = m3VerticesToUpdate[face[1]]
         vertex2 = m3VerticesToUpdate[face[2]]
-        
+
         uv0 = uvIntToFloat(vertex0.uv0)
         uv1 = uvIntToFloat(vertex1.uv0)
         uv2 = uvIntToFloat(vertex2.uv0)
-        
+
         u0 = uv0[0]
         u1 = uv1[0]
         u2 = uv2[0]
         v0 = uv0[1]
         v1 = uv1[1]
         v2 = uv2[1]
-        
+
         deltaU1 = u1 - u0
         deltaU2 = u2 - u0
         deltaV1 = v1 - v0
         deltaV2 = v2 - v0
-        
+
         e1x = vertex1.position.x - vertex0.position.x
         e1y = vertex1.position.y - vertex0.position.y
         e1z = vertex1.position.z - vertex0.position.z
-        
+
         e2x = vertex2.position.x - vertex0.position.x
         e2y = vertex2.position.y - vertex0.position.y
         e2z = vertex2.position.z - vertex0.position.z
-        
-        inverseFactor = (deltaU1*deltaV2 - deltaU2*deltaV1)
+
+        inverseFactor = (deltaU1 * deltaV2 - deltaU2 * deltaV1)
         if (inverseFactor < 0.00000001 and inverseFactor > -0.00000001):
-            continue;
+            continue
         factor = 1.0 / inverseFactor
         tx = (deltaV2 * e1x - deltaV1 * e2x)
         ty = (deltaV2 * e1y - deltaV1 * e2y)
@@ -65,18 +67,18 @@ def recalculateTangentsOfFaces(m3VerticesToUpdate, faces):
         by = (- deltaU2 * e1y + deltaU1 * e2y)
         bz = (- deltaU2 * e1z + deltaU1 * e2z)
         bx, by, bz = normalize(bx, by, bz)
-        
+
         tangentBitangentTuple = ((tx, ty, tz), (bx, by, bz))
-        
-        listV0 = faceIndexToTangentAndBitangentTupleList.get(face[0],[])
+
+        listV0 = faceIndexToTangentAndBitangentTupleList.get(face[0], [])
         listV0.append(tangentBitangentTuple)
         faceIndexToTangentAndBitangentTupleList[face[0]] = listV0
-        
-        listV1 = faceIndexToTangentAndBitangentTupleList.get(face[1],[])
+
+        listV1 = faceIndexToTangentAndBitangentTupleList.get(face[1], [])
         listV1.append(tangentBitangentTuple)
         faceIndexToTangentAndBitangentTupleList[face[1]] = listV1
-        
-        listV2 = faceIndexToTangentAndBitangentTupleList.get(face[2],[])
+
+        listV2 = faceIndexToTangentAndBitangentTupleList.get(face[2], [])
         listV2.append(tangentBitangentTuple)
         faceIndexToTangentAndBitangentTupleList[face[2]] = listV2
 
@@ -111,8 +113,8 @@ def recalculateTangentsOfFaces(m3VerticesToUpdate, faces):
         # tx ty tz
         # bx by bz
         # nx ny nz
-        det = tx*by*nz + ty*bz*nx + tz*bx*ny - nx*by*tz - ny*bz*tx - nz*bx*ty
-        if det >= 0:# comparing in that correction seems to be correct...
+        det = tx * by * nz + ty * bz * nx + tz * bx * ny - nx * by * tz - ny * bz * tx - nz * bx * ty
+        if det >= 0:  # comparing in that correction seems to be correct...
             sign = -1.0
         else:
             sign = 1.0
@@ -121,6 +123,7 @@ def recalculateTangentsOfFaces(m3VerticesToUpdate, faces):
         vertex.tangent.y = ty
         vertex.tangent.z = tz
         vertex.sign = sign
+
 
 def recalculateTangentsOfDivisions(m3VerticesToUpdate, divisions):
     faces = []
@@ -143,6 +146,7 @@ def recalculateTangentsOfDivisions(m3VerticesToUpdate, divisions):
                 vertexIndexIndex += 3
     recalculateTangentsOfFaces(m3VerticesToUpdate, faces)
 
+
 def recalculateTangentsOfModel(model):
     vertexClassName = "VertexFormat" + hex(model.vFlags)
     vertexStructureDescription = m3.structures[vertexClassName].getVersion(0)
@@ -151,6 +155,7 @@ def recalculateTangentsOfModel(model):
 
     recalculateTangentsOfDivisions(m3VerticesToUpdate, model.divisions)
 
+
 def convert(inputPath, outputPath):
     model = m3.loadModel(inputPath)
     recalculateTangentsOfModel(model)
@@ -158,8 +163,8 @@ def convert(inputPath, outputPath):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert Starcraft II m3 models to xml format.')
-    parser.add_argument('inputPath',  help="A *.m3 file")
+    parser.add_argument('inputPath', help="A *.m3 file")
     parser.add_argument('outputPath', help="A *.m3 file")
     args = parser.parse_args()
-    
+
     convert(args.inputPath, args.outputPath)

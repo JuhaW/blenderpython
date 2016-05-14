@@ -5,6 +5,7 @@ from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
 from ... sockets.info import toIdName, toListIdName, toBaseDataType, isBase, isLimitedList, toGeneralListIdName
 
+
 class SetListElementNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SetListElementNode"
     bl_label = "Set List Element"
@@ -14,17 +15,17 @@ class SetListElementNode(bpy.types.Node, AnimationNode):
         self.listIdName = toListIdName(self.assignedType)
         self.generateSockets()
 
-    assignedType = StringProperty(update = assignedTypeChanged)
+    assignedType = StringProperty(update=assignedTypeChanged)
     baseIdName = StringProperty()
     listIdName = StringProperty()
 
-    clampIndex = BoolProperty(name = "Clamp Index", default = False,
-        description = "Clamp the index between the lowest and highest possible index",
-        update = executionCodeChanged)
+    clampIndex = BoolProperty(name="Clamp Index", default=False,
+                              description="Clamp the index between the lowest and highest possible index",
+                              update=executionCodeChanged)
 
-    allowNegativeIndex = BoolProperty(name = "Allow Negative Index",
-        description = "-2 means the second last list element",
-        update = executionCodeChanged, default = False)
+    allowNegativeIndex = BoolProperty(name="Allow Negative Index",
+                                      description="-2 means the second last list element",
+                                      update=executionCodeChanged, default=False)
 
     errorMessage = StringProperty()
 
@@ -33,18 +34,19 @@ class SetListElementNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon = "ERROR")
+            layout.label(self.errorMessage, icon="ERROR")
 
     def drawAdvanced(self, layout):
         layout.prop(self, "clampIndex")
         layout.prop(self, "allowNegativeIndex")
         self.invokeSocketTypeChooser(layout, "assignListDataType",
-            socketGroup = "LIST", text = "Change Type", icon = "TRIA_RIGHT")
+                                     socketGroup="LIST", text="Change Type", icon="TRIA_RIGHT")
 
     def getExecutionCode(self):
         yield "self.errorMessage = ''"
-        if self.isTuple(): yield "_list = list(_list)"
-        
+        if self.isTuple():
+            yield "_list = list(_list)"
+
         if self.allowNegativeIndex:
             if self.clampIndex:
                 yield "if len(_list) != 0: _list[min(max(index, -len(_list)), len(_list) - 1)] = element"
@@ -64,7 +66,8 @@ class SetListElementNode(bpy.types.Node, AnimationNode):
     def isTuple(self):
         listInput = self.inputs["List"].dataOrigin
         if listInput is not None:
-            if isLimitedList(listInput.bl_idname): return True
+            if isLimitedList(listInput.bl_idname):
+                return True
         return False
 
     def getWantedDataType(self):
@@ -74,18 +77,23 @@ class SetListElementNode(bpy.types.Node, AnimationNode):
 
         if listInput is not None:
             idName = listInput.bl_idname
-            if isLimitedList(idName): idName = toGeneralListIdName(idName)
+            if isLimitedList(idName):
+                idName = toGeneralListIdName(idName)
             return toBaseDataType(idName)
-        if elementInput is not None: return elementInput.dataType
-        if len(listOutputs) == 1: return toBaseDataType(listOutputs[0].dataType)
+        if elementInput is not None:
+            return elementInput.dataType
+        if len(listOutputs) == 1:
+            return toBaseDataType(listOutputs[0].dataType)
         return self.inputs["Element"].dataType
 
     def assignListDataType(self, listDataType):
         self.assignType(toBaseDataType(listDataType))
 
     def assignType(self, baseDataType):
-        if not isBase(baseDataType): return
-        if baseDataType == self.assignedType: return
+        if not isBase(baseDataType):
+            return
+        if baseDataType == self.assignedType:
+            return
         self.assignedType = baseDataType
 
     @keepNodeState

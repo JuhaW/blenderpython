@@ -1,6 +1,7 @@
 import bpy
 from .. base_types.socket import AnimationNodeSocket
 
+
 class QuaternionListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_QuaternionListSocket"
     bl_label = "Quaternion List Socket"

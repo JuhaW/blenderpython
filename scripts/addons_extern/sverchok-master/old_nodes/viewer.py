@@ -21,11 +21,11 @@ from bpy.props import BoolProperty, StringProperty
 from mathutils import Matrix
 
 from sverchok.node_tree import (SverchCustomTreeNode, SvColors,
-                       StringsSocket, VerticesSocket, MatrixSocket)
+                                StringsSocket, VerticesSocket, MatrixSocket)
 from sverchok.data_structure import (cache_viewer_baker,
-                            dataCorrect, node_id,
-                            Vector_generate, Matrix_generate,
-                            updateNode, SvGetSocketAnyType)
+                                     dataCorrect, node_id,
+                                     Vector_generate, Matrix_generate,
+                                     updateNode, SvGetSocketAnyType)
 from sverchok.ui.viewer_draw import callback_disable, callback_enable
 
 
@@ -43,12 +43,12 @@ class SvObjBake(bpy.types.Operator):
     def execute(self, context):
         global cache_viewer_baker
         nid = node_id(bpy.data.node_groups[self.idtree].nodes[self.idname])
-        if cache_viewer_baker[nid+'m'] and not cache_viewer_baker[nid+'v']:
+        if cache_viewer_baker[nid + 'm'] and not cache_viewer_baker[nid + 'v']:
             return {'CANCELLED'}
-        vers = dataCorrect(cache_viewer_baker[nid+'v'])
-        edg_pol = dataCorrect(cache_viewer_baker[nid+'ep'])
-        if cache_viewer_baker[nid+'m']:
-            matrixes = dataCorrect(cache_viewer_baker[nid+'m'])
+        vers = dataCorrect(cache_viewer_baker[nid + 'v'])
+        edg_pol = dataCorrect(cache_viewer_baker[nid + 'ep'])
+        if cache_viewer_baker[nid + 'm']:
+            matrixes = dataCorrect(cache_viewer_baker[nid + 'm'])
         else:
             matrixes = []
             for i in range((len(vers))):
@@ -92,13 +92,13 @@ class SvObjBake(bpy.types.Operator):
             else:
                 v = vertices[k]
             #print (fhtagn, len(v)-1)
-            if (len(v)-1) < fhtagn[k]:
+            if (len(v) - 1) < fhtagn[k]:
                 continue
             # возможно такая сложность не нужна, но пусть лежит тут. Удалять лишние точки не обязательно.
-            elif fhtagn[k] < (len(v)-1):
-                nonneed = (len(v)-1) - fhtagn[k]
+            elif fhtagn[k] < (len(v) - 1):
+                nonneed = (len(v) - 1) - fhtagn[k]
                 for q in range(nonneed):
-                    v.pop((fhtagn[k]+1))
+                    v.pop((fhtagn[k] + 1))
                 #print (fhtagn[k], (len(v)-1))
 
             e = edg_pol[k] if edgs else []
@@ -137,23 +137,22 @@ class ViewerNode(bpy.types.Node, SverchCustomTreeNode):
     n_id = StringProperty(default='', options={'SKIP_SAVE'})
 
     Vertex_show = BoolProperty(name='Vertices', description='Show or not vertices',
-                    default=True,
-                    update=updateNode)
+                               default=True,
+                               update=updateNode)
     activate = BoolProperty(name='Show', description='Activate node?',
-                    default=True,
-                    update=updateNode)
+                            default=True,
+                            update=updateNode)
     transparant = BoolProperty(name='Transparant', description='transparant polygons?',
-                    default=False,
-                    update=updateNode)
+                               default=False,
+                               update=updateNode)
     shading = BoolProperty(name='Shading', description='shade the object or index representation?',
-                    default=False,
-                    update=updateNode)
+                           default=False,
+                           update=updateNode)
 
     bakebuttonshow = BoolProperty(
         name='bakebuttonshow', description='show bake button on node',
         default=True,
         update=updateNode)
-
 
     color_view = SvColors.color
 
@@ -194,9 +193,9 @@ class ViewerNode(bpy.types.Node, SverchCustomTreeNode):
         if 'matrix' not in self.inputs:
             return
 
-        cache_viewer_baker[n_id+'v'] = []
-        cache_viewer_baker[n_id+'ep'] = []
-        cache_viewer_baker[n_id+'m'] = []
+        cache_viewer_baker[n_id + 'v'] = []
+        cache_viewer_baker[n_id + 'ep'] = []
+        cache_viewer_baker[n_id + 'm'] = []
 
         if not self.id_data.sv_show:
             callback_disable(n_id)
@@ -206,34 +205,34 @@ class ViewerNode(bpy.types.Node, SverchCustomTreeNode):
             callback_disable(n_id)
 
             if self.inputs['vertices'].links and \
-                type(self.inputs['vertices'].links[0].from_socket) == VerticesSocket:
+                    type(self.inputs['vertices'].links[0].from_socket) == VerticesSocket:
 
                 propv = SvGetSocketAnyType(self, self.inputs['vertices'])
-                cache_viewer_baker[n_id+'v'] = dataCorrect(propv)
+                cache_viewer_baker[n_id + 'v'] = dataCorrect(propv)
             else:
-                cache_viewer_baker[n_id+'v'] = []
+                cache_viewer_baker[n_id + 'v'] = []
 
             if self.inputs['edg_pol'].links and \
-                type(self.inputs['edg_pol'].links[0].from_socket) == StringsSocket:
+                    type(self.inputs['edg_pol'].links[0].from_socket) == StringsSocket:
                 prope = SvGetSocketAnyType(self, self.inputs['edg_pol'])
-                cache_viewer_baker[n_id+'ep'] = dataCorrect(prope)
+                cache_viewer_baker[n_id + 'ep'] = dataCorrect(prope)
                 #print (prope)
             else:
-                cache_viewer_baker[n_id+'ep'] = []
+                cache_viewer_baker[n_id + 'ep'] = []
 
             if self.inputs['matrix'].links and \
-                type(self.inputs['matrix'].links[0].from_socket) == MatrixSocket:
+                    type(self.inputs['matrix'].links[0].from_socket) == MatrixSocket:
                 propm = SvGetSocketAnyType(self, self.inputs['matrix'])
-                cache_viewer_baker[n_id+'m'] = dataCorrect(propm)
+                cache_viewer_baker[n_id + 'm'] = dataCorrect(propm)
             else:
-                cache_viewer_baker[n_id+'m'] = []
+                cache_viewer_baker[n_id + 'm'] = []
 
         else:
             callback_disable(n_id)
 
-        if cache_viewer_baker[n_id+'v'] or cache_viewer_baker[n_id+'m']:
-            callback_enable(n_id, cache_viewer_baker[n_id+'v'], cache_viewer_baker[n_id+'ep'], \
-                cache_viewer_baker[n_id+'m'], self.Vertex_show, self.color_view.copy(), self.transparant, self.shading)
+        if cache_viewer_baker[n_id + 'v'] or cache_viewer_baker[n_id + 'm']:
+            callback_enable(n_id, cache_viewer_baker[n_id + 'v'], cache_viewer_baker[n_id + 'ep'],
+                            cache_viewer_baker[n_id + 'm'], self.Vertex_show, self.color_view.copy(), self.transparant, self.shading)
 
             self.use_custom_color = True
             self.color = (1, 0.3, 0)
@@ -251,14 +250,15 @@ class ViewerNode(bpy.types.Node, SverchCustomTreeNode):
         global cache_viewer_baker
         n_id = node_id(self)
         callback_disable(n_id)
-        cache_viewer_baker.pop(n_id+'v', None)
-        cache_viewer_baker.pop(n_id+'ep', None)
-        cache_viewer_baker.pop(n_id+'m', None)
+        cache_viewer_baker.pop(n_id + 'v', None)
+        cache_viewer_baker.pop(n_id + 'ep', None)
+        cache_viewer_baker.pop(n_id + 'm', None)
 
     def bake(self):
         if self.activate and self.inputs['edg_pol'].is_linked:
             bake = bpy.ops.node.sverchok_mesh_baker
             bake(idname=self.name, idtree=self.id_data.name)
+
 
 def register():
     bpy.utils.register_class(ViewerNode)

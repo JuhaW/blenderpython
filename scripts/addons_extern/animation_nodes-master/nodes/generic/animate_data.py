@@ -5,6 +5,7 @@ from ... sockets.info import toIdName
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
 
+
 class AnimateDataNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_AnimateDataNode"
     bl_label = "Animate Data"
@@ -12,18 +13,18 @@ class AnimateDataNode(bpy.types.Node, AnimationNode):
     dynamicLabelType = "ALWAYS"
 
     onlySearchTags = True
-    searchTags = [ ("Animate Matrix", {"dataType" : repr("Matrix")}),
-                   ("Animate Vector", {"dataType" : repr("Vector")}),
-                   ("Animate Float", {"dataType" : repr("Float")}),
-                   ("Animate Color", {"dataType" : repr("Color")}),
-                   ("Animate Euler", {"dataType" : repr("Euler")}),
-                   ("Animate Quaternion", {"dataType" : repr("Quaternion")}) ]
+    searchTags = [("Animate Matrix", {"dataType": repr("Matrix")}),
+                  ("Animate Vector", {"dataType": repr("Vector")}),
+                  ("Animate Float", {"dataType": repr("Float")}),
+                  ("Animate Color", {"dataType": repr("Color")}),
+                  ("Animate Euler", {"dataType": repr("Euler")}),
+                  ("Animate Quaternion", {"dataType": repr("Quaternion")})]
 
     def dataTypeChanged(self, context):
         self.generateSockets()
         executionCodeChanged()
 
-    dataType = StringProperty(default = "Float", update = dataTypeChanged)
+    dataType = StringProperty(default="Float", update=dataTypeChanged)
 
     def create(self):
         self.generateSockets()

@@ -2,13 +2,14 @@ from math import sin, cos, radians, pi
 from mathutils import Vector, Euler
 # creates flower
 
+
 def sv_main(n_petals=8, vp_petal=20, profile_radius=1.3, amp=1.0):
 
     in_sockets = [
-        ['s', 'Nm Petals',  n_petals],
-        ['s', 'herts per Petal',  vp_petal],
+        ['s', 'Nm Petals', n_petals],
+        ['s', 'herts per Petal', vp_petal],
         ['s', 'Profile Radius', profile_radius],
-        ['s', 'Amp',  amp],
+        ['s', 'Amp', amp],
     ]
 
     # variables

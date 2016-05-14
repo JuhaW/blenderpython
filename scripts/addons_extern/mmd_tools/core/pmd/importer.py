@@ -19,7 +19,6 @@ def import_pmd(**kwargs):
     target_path = kwargs['filepath']
     pmd_model = pmd.load(target_path)
 
-
     logging.info('')
     logging.info('****************************************')
     logging.info(' mmd_tools.import_pmd module')
@@ -47,18 +46,18 @@ def import_pmd(**kwargs):
         pmx_v.co = v.position
         pmx_v.normal = v.normal
         pmx_v.uv = v.uv
-        pmx_v.additional_uvs= []
+        pmx_v.additional_uvs = []
         pmx_v.edge_scale = 1
 
         weight = pmx.BoneWeight()
         if v.bones[0] != v.bones[1]:
             weight.type = pmx.BoneWeight.BDEF2
             weight.bones = v.bones
-            weight.weights = [float(v.weight)/100.0]
+            weight.weights = [float(v.weight) / 100.0]
         else:
             weight.type = pmx.BoneWeight.BDEF1
             weight.bones = [v.bones[0]]
-            weight.weights = [float(v.weight)/100.0]
+            weight.weights = [float(v.weight) / 100.0]
 
         pmx_v.weight = weight
 
@@ -107,15 +106,15 @@ def import_pmd(**kwargs):
             pmx_bone.visible = False
         elif bone.type == 8:
             pmx_bone.isMovable = False
-            tail_loc=mathutils.Vector(pmd_model.bones[bone.tail_bone].position)
+            tail_loc = mathutils.Vector(pmd_model.bones[bone.tail_bone].position)
             loc = mathutils.Vector(bone.position)
             vec = tail_loc - loc
             vec.normalize()
-            pmx_bone.axis=list(vec)
+            pmx_bone.axis = list(vec)
         elif bone.type == 9:
             pmx_bone.visible = False
             pmx_bone.hasAdditionalRotate = True
-            pmx_bone.additionalTransform = (bone.tail_bone, float(bone.ik_bone)/100.0)
+            pmx_bone.additionalTransform = (bone.tail_bone, float(bone.ik_bone) / 100.0)
 
         if bone.type >= 4:
             pmx_bone.transform_order = 2
@@ -170,13 +169,13 @@ def import_pmd(**kwargs):
     logging.info('------------------------------')
     for i, mat in enumerate(pmd_model.materials):
         pmx_mat = pmx.Material()
-        pmx_mat.name = '材質%d'%(i+1)
-        pmx_mat.name_e = 'Material%d'%(i+1)
+        pmx_mat.name = '材質%d' % (i + 1)
+        pmx_mat.name_e = 'Material%d' % (i + 1)
         pmx_mat.diffuse = mat.diffuse
         pmx_mat.specular = mat.specular + [mat.specular_intensity]
         pmx_mat.ambient = mat.ambient
-        pmx_mat.enabled_self_shadow = True # pmd doesn't support this
-        pmx_mat.enabled_self_shadow_map = abs(mat.diffuse[3] - 0.98) > 1e-7 # consider precision error
+        pmx_mat.enabled_self_shadow = True  # pmd doesn't support this
+        pmx_mat.enabled_self_shadow_map = abs(mat.diffuse[3] - 0.98) > 1e-7  # consider precision error
         pmx_mat.enabled_toon_edge = (mat.edge_flag != 0)
         pmx_mat.vertex_count = mat.vertex_count
         if len(mat.texture_path) > 0:

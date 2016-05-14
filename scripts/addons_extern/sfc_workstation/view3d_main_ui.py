@@ -22,12 +22,11 @@ import bpy
 from bpy import*
 ### Import different UI ###
 
-from wkst_workstation.view3d_curve_ui import (draw_wkst_curve_ui) 
+from wkst_workstation.view3d_curve_ui import (draw_wkst_curve_ui)
 from wkst_workstation.view3d_lattice_ui import (draw_wkst_lattice_ui)
 from wkst_workstation.view3d_object_ui import (draw_wkst_object_ui)
 from wkst_workstation.view3d_sculpt_ui import (draw_wkst_sculpt_ui)
 from wkst_workstation.view3d_edit_ui import (draw_wkst_edit_ui)
-
 
 
 ### Panel ###
@@ -38,72 +37,65 @@ class MKBToolsPanel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
 
-
     @classmethod
     def poll(cls, context):
-        return context.mode in {'EDIT_SURFACE', 'EDIT_CURVE', 'EDIT_MESH', 'OBJECT', 'EDIT_LATTICE','SCULPT'}
+        return context.mode in {'EDIT_SURFACE', 'EDIT_CURVE', 'EDIT_MESH', 'OBJECT', 'EDIT_LATTICE', 'SCULPT'}
 
     def draw(self, context):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
-        
 
-###-----### Objectmode Panel ###      
+
+###-----### Objectmode Panel ###
         if context.mode == 'OBJECT':
-            
+
             # 1 #
             draw_wkst_object_ui(self, context, layout)
-            
-            # 2 #        
-            #draw_surface_constraint_ui(layout)
-            
+
+            # 2 #
+            # draw_surface_constraint_ui(layout)
 
 
-       
-###-----### Editmode Panel ###      
+###-----### Editmode Panel ###
         if context.mode == 'EDIT_MESH':
-            
+
             # 1 #
             draw_wkst_edit_ui(self, context, layout)
-            
-            # 2 #                                    
-            #draw_shrinkwrap_ui(layout)
-            
+
+            # 2 #
+            # draw_shrinkwrap_ui(layout)
+
             # 3 #
-            #draw_smooth_vertices_ui(layout)
-            
+            # draw_smooth_vertices_ui(layout)
+
             # 4 #
-            #draw_mesh_brush_ui(layout)
-            
-            # 5 # 
-            #draw_surface_constraint_ui(layout)         
+            # draw_mesh_brush_ui(layout)
+
+            # 5 #
+            # draw_surface_constraint_ui(layout)
 
 
-
-###-----### Curvemode Panel ###      
+###-----### Curvemode Panel ###
         if context.mode == 'EDIT_CURVE':
-            
+
             # 1 #
             draw_wkst_curve_ui(self, context, layout)
 
 
-###-----### Latticemode Panel ###      
+###-----### Latticemode Panel ###
         if context.mode == 'EDIT_LATTICE':
-            
+
             # 1 #
             draw_wkst_lattice_ui(self, context, layout)
 
 
-###-----### Sculptmode Panel ###      
+###-----### Sculptmode Panel ###
         if context.mode == 'SCULPT':
-            
+
             # 1 #
             draw_wkst_sculpt_ui(self, context, layout)
-                        
 
-       
-        
-        
+
 def register():
     bpy.utils.register_class(MKBToolsPanel)
 
@@ -113,4 +105,4 @@ def unregister():
 
 
 if __name__ == "__main__":
-    register()                   
+    register()

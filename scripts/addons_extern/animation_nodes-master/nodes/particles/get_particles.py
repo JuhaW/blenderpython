@@ -1,6 +1,7 @@
 import bpy
 from ... base_types.node import AnimationNode
 
+
 class GetParticlesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_GetParticlesNode"
     bl_label = "Get Particles"
@@ -10,5 +11,6 @@ class GetParticlesNode(bpy.types.Node, AnimationNode):
         self.outputs.new("an_ParticleListSocket", "Particles", "particles")
 
     def execute(self, particleSystem):
-        if not particleSystem: return []
+        if not particleSystem:
+            return []
         return list(particleSystem.particles)
