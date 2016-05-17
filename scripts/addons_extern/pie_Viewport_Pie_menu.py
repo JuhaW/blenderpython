@@ -28,7 +28,7 @@ bl_info = {
 
 import bpy
 
-from bpy.types import Menu
+from bpy.types import Menu, Operator
 from bpy.props import IntProperty
 
 """
@@ -44,7 +44,7 @@ from bpy.props import IntProperty
 """
 
 
-class ViewMenu(bpy.types.Operator):
+class ViewMenu(Operator):
 
     bl_idname = "object.view_menu"
     bl_label = "View Menu"
@@ -171,7 +171,7 @@ class PieSplitViewport(Menu):
                      icon='RIGHTARROW')
 
 
-class SplitHorizontal(bpy.types.Operator):
+class SplitHorizontal(Operator):
     """Split the viewport in half horizontally."""
 
     bl_idname = "split.horizontal"
@@ -182,7 +182,7 @@ class SplitHorizontal(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SplitVertical(bpy.types.Operator):
+class SplitVertical(Operator):
     """Split the viewport in half vertically."""
 
     bl_idname = "split.vertical"
@@ -193,7 +193,7 @@ class SplitVertical(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class JoinArea(bpy.types.Operator):
+class JoinArea(Operator):
     """Invoke operator over editor and click on adjacent editor to join."""
 
     bl_idname = "area.joinarea"
