@@ -240,21 +240,21 @@ class SelModeVertEdgeFace(bpy.types.Operator):
 def update_Prefs(self, context):
     """Function to toggle keymaps and menu style."""
     wm = bpy.context.window_manager
-    kc = wm.keyconfigs.addon
+    kc = wm.keyconfigs.user
 
-    if wm.keyconfigs.addon:
+    if kc:
         for km in addon_keymaps:
             for kmi in km.keymap_items:
                 km.keymap_items.remove(kmi)
 
-            wm.keyconfigs.addon.keymaps.remove(km)
+            wm.keyconfigs.user.keymaps.remove(km)
 
-    addon_keymaps.clear()
+    # addon_keymaps.clear()
 
     if kc:
         # Multi Select Pie
         if self.use_3D_Pie_prop:
-            km = wm.keyconfigs.active.keymaps['Mesh']
+            km = wm.keyconfigs.user.keymaps['Mesh']
 
             for kmi in km.keymap_items:
                 if kmi.idname == 'wm.call_menu':
@@ -267,7 +267,7 @@ def update_Prefs(self, context):
             kmi.properties.name = "VIEW3D_MT_Multiselect_Menu_Pie"
 
         else:
-            km = wm.keyconfigs.active.keymaps['Mesh']
+            km = wm.keyconfigs.user.keymaps['Mesh']
 
             for kmi in km.keymap_items:
                 if kmi.idname == 'wm.call_menu_pie':
@@ -289,7 +289,7 @@ class MultiSelectPreferences(
     bl_idname = __name__
 
     use_3D_Pie_prop = BoolProperty(
-        name="Toggle Pie",
+        name="Use Pie",
         description="Toggle between pie-style menu and classic list-style menu",
         default=False,
         update=update_Prefs)
@@ -322,7 +322,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     wm = bpy.context.window_manager
-    km = wm.keyconfigs.active.keymaps['Mesh']
+    km = wm.keyconfigs.user.keymaps['Mesh']
 
     # remove default keybinding
     for kmi in km.keymap_items:
@@ -332,9 +332,9 @@ def register():
                 break
 
     # add multiselect keybinding
-    km = wm.keyconfigs.active.keymaps['Mesh']
-    kmi = km.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
-    kmi.properties.name = "VIEW3D_MT_Multiselect_Menu"
+    kma = wm.keyconfigs.user.keymaps['Mesh']
+    kmai = kma.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
+    kmai.properties.name = "VIEW3D_MT_Multiselect_Menu"
 
 
 def unregister():
@@ -344,13 +344,13 @@ def unregister():
     wm = bpy.context.window_manager
 
     # remove multiselect keybinding
-    km = wm.keyconfigs.active.keymaps['Mesh']
+    km = wm.keyconfigs.user.keymaps['Mesh']
     for kmi in km.keymap_items:
         if kmi.idname == 'wm.call_menu':
             if kmi.properties.name == "VIEW3D_MT_Multiselect_Menu":
                 km.keymap_items.remove(kmi)
                 break
-    km = wm.keyconfigs.active.keymaps['Mesh']
+    km = wm.keyconfigs.user.keymaps['Mesh']
     for kmi in km.keymap_items:
         if kmi.idname == 'wm.call_menu_pie':
             if kmi.properties.name == "VIEW3D_MT_Multiselect_Menu_Pie":
@@ -358,11 +358,11 @@ def unregister():
                 break
 
     # replace default keymap
-    km = wm.keyconfigs.active.keymaps['Mesh']
+    km = wm.keyconfigs.user.keymaps['Mesh']
     kmi = km.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
     kmi.properties.name = "VIEW3D_MT_edit_mesh_select_mode"
 
-#    addon_keymaps.clear()
+    # addon_keymaps.clear()
 
 if __name__ == "__main__":
     register()
