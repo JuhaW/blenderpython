@@ -22,7 +22,7 @@
 
 bl_info = {
     'name': 'Multiselect Menu',
-    'author': 'Sean Olson (liquidApe), Italic_',
+    'author': 'italic, Sean Olson (liquidApe)',
     'version': (2, 0),
     'blender': (2, 7, 6),
     'location': 'View3D > Mouse > Menu ',
@@ -30,14 +30,11 @@ bl_info = {
     'description': 'Added options for multiselect to the ctrl-tab menu',
     'category': '3D View'}
 
-from .utils import AddonPreferences, SpaceProperty, operator_call
 import bpy
-import bpy.ops
-from bpy.types import Menu
-from bpy.app.handlers import persistent
-from bpy.props import BoolProperty
 
-import inspect
+from bpy.types import Menu, PropertyGroup, Operator
+from bpy.props import BoolProperty
+from .utils import AddonPreferences
 
 
 class VIEW3D_MT_Multiselect_Menu(Menu):
@@ -142,7 +139,7 @@ class MultiPie(Menu):
                      icon='SNAP_VOLUME')
 
 
-class SelModeVert(bpy.types.Operator):
+class SelModeVert(Operator):
     """Vertex select mode."""
 
     bl_idname = "multi.vert"
@@ -155,7 +152,7 @@ class SelModeVert(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SelModeEdge(bpy.types.Operator):
+class SelModeEdge(Operator):
     """Edge select mode."""
 
     bl_idname = "multi.edge"
@@ -168,7 +165,7 @@ class SelModeEdge(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SelModeFace(bpy.types.Operator):
+class SelModeFace(Operator):
     """Face select mode."""
 
     bl_idname = "multi.face"
@@ -181,7 +178,7 @@ class SelModeFace(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SelModeVertEdge(bpy.types.Operator):
+class SelModeVertEdge(Operator):
     """Vertex and edge select mode."""
 
     bl_idname = "multi.vertedge"
@@ -194,7 +191,7 @@ class SelModeVertEdge(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SelModeVertFace(bpy.types.Operator):
+class SelModeVertFace(Operator):
     """Vertex and face select mode."""
 
     bl_idname = "multi.vertface"
@@ -207,7 +204,7 @@ class SelModeVertFace(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SelModeEdgeFace(bpy.types.Operator):
+class SelModeEdgeFace(Operator):
     """Edge and face select mode."""
 
     bl_idname = "multi.edgeface"
@@ -220,7 +217,7 @@ class SelModeEdgeFace(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class SelModeVertEdgeFace(bpy.types.Operator):
+class SelModeVertEdgeFace(Operator):
     """Vertex, edge and face select mode."""
 
     bl_idname = "multi.vertedgeface"
@@ -232,10 +229,6 @@ class SelModeVertEdgeFace(bpy.types.Operator):
                              value="(True, True, True)")
         return {'FINISHED'}
 
-
-# =============================================================================
-#  USER PREFERENCES
-# =============================================================================
 
 def update_Prefs(self, context):
     """Function to toggle keymaps and menu style."""
@@ -268,8 +261,7 @@ def update_Prefs(self, context):
 
 
 class MultiSelectPreferences(
-        AddonPreferences,
-        bpy.types.PropertyGroup,
+        AddonPreferences, PropertyGroup,
         bpy.types.AddonPreferences):
     """Addon preferences displayed in the user preferences after activation."""
 
@@ -277,7 +269,7 @@ class MultiSelectPreferences(
 
     pie_toggle = BoolProperty(
         name="Use Pie",
-        description="Toggle between pie-style menu and classic list-style menu",
+        description="Toggle between pie-style and classic list-style menus",
         default=False,
         update=update_Prefs)
 
@@ -306,12 +298,11 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    global oldkey
     wm = bpy.context.window_manager
     km = wm.keyconfigs.user.keymaps['Mesh']
 
     # remove default keybinding
-    for kmi in wm.keyconfigs.user.keymaps['Mesh'].keymap_items:
+    for kmi in km.keymap_items:
         if kmi.idname == 'wm.call_menu' and \
                 kmi.properties.name == "VIEW3D_MT_edit_mesh_select_mode":
             km.keymap_items.remove(kmi)
