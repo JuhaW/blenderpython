@@ -49,14 +49,14 @@ class ViewMenu(Operator):
     bl_idname = "object.view_menu"
     bl_label = "View Menu"
     bl_options = {'INTERNAL'}
-    variable = bpy.props.StringProperty()
+    vp = bpy.props.StringProperty()
 
     @classmethod
     def poll(cls, context):
         return True
 
     def execute(self, context):
-        bpy.context.area.type = self.variable
+        bpy.context.area.type = self.vp
         return {'FINISHED'}
 
 
@@ -70,24 +70,18 @@ class PieAreaViews(Menu):
         layout = self.layout
         pie = layout.menu_pie()
 
-        pie.operator("wm.call_menu_pie", text="Images",
-                     icon='IMAGE_COL').name = "PieAreaViewsImage"
-        pie.operator("wm.call_menu_pie", text="Anim",
-                     icon='IPO').name = "PieAreaViewsAnim"
-        pie.operator("screen.screen_full_area", text="Full Screen",
-                     icon='FULLSCREEN_ENTER')
-        pie.operator("object.view_menu", text="3D View",
-                     icon='VIEW3D').variable = "VIEW_3D"
+        pie.operator("wm.call_menu_pie", text="Images", icon='IMAGE_COL').name = "PieAreaViewsImage"
+        pie.operator("wm.call_menu_pie", text="Anim", icon='IPO').name = "PieAreaViewsAnim"
+        pie.operator("screen.screen_full_area", text="Full Screen", icon='FULLSCREEN_ENTER')
+        pie.operator("object.view_menu", text="3D View", icon='VIEW3D').vp = "VIEW_3D"
 
         # DIAGONALS
-        pie.operator("wm.call_menu_pie", text="Utils",
-                     icon='BUTS').name = "PieAreaViewsUtils"
+        pie.operator("wm.call_menu_pie", text="Utils", icon='BUTS').name = "PieAreaViewsUtils"
         pie = pie.row()
         pie.label('')
         pie = layout.menu_pie()
         pie.operator("area.joinarea", text="Join", icon='X')
-        pie.operator("wm.call_menu_pie", text="Split",
-                     icon='SPLITSCREEN').name = "pie.split_viewport"
+        pie.operator("wm.call_menu_pie", text="Split", icon='SPLITSCREEN').name = "pie.split_viewport"
 
 
 class PieAreaViewsAnim(Menu):
@@ -100,14 +94,10 @@ class PieAreaViewsAnim(Menu):
         layout = self.layout
 
         pie = layout.menu_pie()
-        pie.operator("object.view_menu", text="Dope Sheet",
-                     icon='ACTION').variable = "DOPESHEET_EDITOR"
-        pie.operator("object.view_menu", text="Graph Editor",
-                     icon='IPO').variable = "GRAPH_EDITOR"
-        pie.operator("object.view_menu", text="NLA Editor",
-                     icon='NLA').variable = "NLA_EDITOR"
-        pie.operator("object.view_menu", text="Timeline",
-                     icon='TIME').variable = "TIMELINE"
+        pie.operator("object.view_menu", text="Dope Sheet", icon='ACTION').vp = "DOPESHEET_EDITOR"
+        pie.operator("object.view_menu", text="Graph Editor", icon='IPO').vp = "GRAPH_EDITOR"
+        pie.operator("object.view_menu", text="NLA Editor", icon='NLA').vp = "NLA_EDITOR"
+        pie.operator("object.view_menu", text="Timeline", icon='TIME').vp = "TIMELINE"
 
 
 class PieAreaViewsImage(Menu):
@@ -120,14 +110,10 @@ class PieAreaViewsImage(Menu):
         layout = self.layout
 
         pie = layout.menu_pie()
-        pie.operator("object.view_menu", text="Node Editor",
-                     icon='NODETREE').variable = "NODE_EDITOR"
-        pie.operator("object.view_menu", text="UV Image Editor",
-                     icon='IMAGE_COL').variable = "IMAGE_EDITOR"
-        pie.operator("object.view_menu", text="Video Sequece Editor",
-                     icon='SEQUENCE').variable = "SEQUENCE_EDITOR"
-        pie.operator("object.view_menu", text="Movie Clip Editor",
-                     icon='CLIP').variable = "CLIP_EDITOR"
+        pie.operator("object.view_menu", text="Node Editor", icon='NODETREE').vp = "NODE_EDITOR"
+        pie.operator("object.view_menu", text="UV Image Editor", icon='IMAGE_COL').vp = "IMAGE_EDITOR"
+        pie.operator("object.view_menu", text="Video Sequece Editor", icon='SEQUENCE').vp = "SEQUENCE_EDITOR"
+        pie.operator("object.view_menu", text="Movie Clip Editor", icon='CLIP').vp = "CLIP_EDITOR"
 
 
 class PieAreaViewsUtils(Menu):
@@ -140,16 +126,11 @@ class PieAreaViewsUtils(Menu):
         layout = self.layout
 
         pie = layout.menu_pie()
-        pie.operator("object.view_menu", text="Properties",
-                     icon='BUTS').variable = "PROPERTIES"
-        pie.operator("object.view_menu", text="Text Editor",
-                     icon='TEXT').variable = "TEXT_EDITOR"
-        pie.operator("object.view_menu", text="Python Console",
-                     icon='CONSOLE').variable = "CONSOLE"
-        pie.operator("object.view_menu", text="Outliner",
-                     icon='OOPS').variable = "OUTLINER"
-        pie.operator("object.view_menu", text="File Browser",
-                     icon='FILESEL').variable = "FILE_BROWSER"
+        pie.operator("object.view_menu", text="Properties", icon='BUTS').vp = "PROPERTIES"
+        pie.operator("object.view_menu", text="Text Editor", icon='TEXT').vp = "TEXT_EDITOR"
+        pie.operator("object.view_menu", text="Python Console", icon='CONSOLE').vp = "CONSOLE"
+        pie.operator("object.view_menu", text="Outliner", icon='OOPS').vp = "OUTLINER"
+        pie.operator("object.view_menu", text="File Browser", icon='FILESEL').vp = "FILE_BROWSER"
 
 
 class PieSplitViewport(Menu):
@@ -163,12 +144,8 @@ class PieSplitViewport(Menu):
         layout = self.layout
         pie = layout.menu_pie()
 
-        pie.operator("split.vertical",
-                     text="Vertical",
-                     icon='DOWNARROW_HLT')
-        pie.operator("split.horizontal",
-                     text="Horizontal",
-                     icon='RIGHTARROW')
+        pie.operator("split.vertical", text="Vertical", icon='DOWNARROW_HLT')
+        pie.operator("split.horizontal", text="Horizontal", icon='RIGHTARROW')
 
 
 class SplitHorizontal(Operator):
@@ -219,7 +196,6 @@ class JoinArea(Operator):
         return {'RUNNING_MODAL'}
 
 
-# Classes in order of appearance in addon
 classes = (
     ViewMenu,
     PieAreaViews,
@@ -236,25 +212,17 @@ addon_keymaps = []
 
 
 def register():
-    """Register addon and classes in Blender."""
-    # View Menu
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    # Keymap Config
     wm = bpy.context.window_manager
-    if wm.keyconfigs.addon:
-        # Views
-        km = wm.keyconfigs.addon.keymaps.new(name='Screen')
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE',
-                                  'PRESS', shift=True)
-        kmi.properties.name = "PieAreaViews"
-        addon_keymaps.append(km)
+    km = wm.keyconfigs.addon.keymaps.new(name='Screen')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', shift=True)
+    kmi.properties.name = "PieAreaViews"
+    addon_keymaps.append(km)
 
 
 def unregister():
-    """Unregister addon and classes in Blender."""
-    # View Menu
     for cls in classes:
         bpy.utils.unregister_class(cls)
 
@@ -264,8 +232,8 @@ def unregister():
             for kmi in km.keymap_items:
                 km.keymap_items.remove(kmi)
                 wm.keyconfigs.addon.keymaps.remove(km)
-    # clear the list
-    del addon_keymaps[:]
+
+    addon_keymaps.clear()
 
 
 if __name__ == "__main__":
