@@ -22,7 +22,7 @@ class OrientPoll(Operator):
 
     @classmethod
     def poll(cls, context):
-        return True
+        return bpy.context.space_data == "VIEW_3D"
 
     def execute(self, context):
         bpy.context.space_data.transform_orientation = self.space
@@ -30,7 +30,7 @@ class OrientPoll(Operator):
 
 
 class OrientPie(Menu):
-    bl_label = "Orientation Pie"
+    bl_label = "Transform Orientation"
 
     def draw(self, context):
         layout = self.layout
@@ -45,35 +45,37 @@ class OrientPie(Menu):
 
 addon_keymaps = []
 
+classes = [
+    OrientPoll,
+    OrientPie
+]
+
 
 def register():
-    bpy.utils.register_class(OrientPoll)
-    bpy.utils.register_class(OrientPie)
+    for cls in classes:
+        bpy.utils.register_class(cls)
 
     wm = bpy.context.window_manager
-    if wm.keyconfigs.user:
-        km = wm.keyconfigs.user.keymaps['3D View']
-        kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', alt=True)
-        kmi.properties.name = "OrientPie"
 
-        for kmi in km.keymap_items:
-            if kmi.idname == 'transform.select_orientation':
-                km.keymap_items.remove(kmi)
+    km = wm.keyconfigs.addon.keymaps.new(name='VIEW_3D')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', alt=True)
+    kmi.properties.name = "OrientPie"
+    addon_keymaps.append(km)
 
 
 def unregister():
-    bpy.utils.unregister_class(OrientPie)
-    bpy.utils.unregister_class(OrientPoll)
+    for cls in classes[::-1]:
+        bpy.utils.unregister_class(cls)
 
     wm = bpy.context.window_manager
-    if wm.keyconfigs.user:
-        km = wm.keyconfigs.user.keymaps['3D View']
-        for kmi in km.keymap_items:
-            if kmi.idname == 'wm.call_menu_pie' and \
-                    kmi.properties.name == 'OrientPie':
+    if wm.keyconfigs.addon:
+        for km in addon_keymaps:
+            for kmi in km.keymap_items:
                 km.keymap_items.remove(kmi)
 
-        km.keymap_items.new('transform.select_orientation', 'SPACE', 'PRESS', alt=True)
+            # wm.keyconfigs.addon.keymaps.remove(km)
+
+    addon_keymaps.clear()
 
 
 if __name__ == "__main__":
