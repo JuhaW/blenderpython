@@ -3,7 +3,7 @@
 bl_info = {
     "name": "Orientation Pie",
     "author": "Italic_",
-    "version": (1, 0, 0),
+    "version": (1, 1, 0),
     "blender": (2, 77, 0),
     "description": "",
     "location": "Hotkey: ALT + Spacebar",
@@ -22,7 +22,7 @@ class OrientPoll(Operator):
 
     @classmethod
     def poll(cls, context):
-        return bpy.context.space_data == "VIEW_3D"
+        return bpy.context.space_data.type == "VIEW_3D"
 
     def execute(self, context):
         bpy.context.space_data.transform_orientation = self.space
@@ -35,11 +35,18 @@ class OrientPie(Menu):
     def draw(self, context):
         layout = self.layout
         pie = layout.menu_pie()
+        view = context.space_data
 
         pie.operator("pie.orientation", text="Global").space = 'GLOBAL'
         pie.operator("pie.orientation", text="Local").space = 'LOCAL'
-        pie.operator("pie.orientation", text="Normal").space = 'NORMAL'
         pie.operator("pie.orientation", text="Gimbal").space = 'GIMBAL'
+
+        # XXX: Persistent list of custom orientations when on a non-custom orientation
+        pie = pie.box()
+        pie.prop(view, "transform_orientation", text="")
+
+        pie = layout.menu_pie()
+        pie.operator("pie.orientation", text="Normal").space = 'NORMAL'
         pie.operator("pie.orientation", text="View").space = 'VIEW'
 
 
@@ -57,7 +64,7 @@ def register():
 
     wm = bpy.context.window_manager
 
-    km = wm.keyconfigs.addon.keymaps.new(name='VIEW_3D')
+    km = wm.keyconfigs.addon.keymaps['3D View']
     kmi = km.keymap_items.new('wm.call_menu_pie', 'SPACE', 'PRESS', alt=True)
     kmi.properties.name = "OrientPie"
     addon_keymaps.append(km)
