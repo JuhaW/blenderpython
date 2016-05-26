@@ -401,9 +401,9 @@ class DoorObjectgeneratorpanel(bpy.types.Panel):
 # Create Doorframe
 # ------------------------------------------------------------------------------
 def create_doorframe(mp, mymesh):
-    tf = mp.frame_thick/3
+    tf = mp.frame_thick / 3
     sf = mp.frame_size
-    wf = (mp.frame_width/2) - sf
+    wf = (mp.frame_width / 2) - sf
     hf = mp.frame_height - sf
     gap = 0.02
     deep = mp.frame_thick * 0.50

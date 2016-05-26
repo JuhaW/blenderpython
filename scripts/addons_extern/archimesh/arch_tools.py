@@ -32,7 +32,7 @@ import os
 
 # --------------------------------------------------------------------
 # Get length Blender units
-# --------------------------------------------------------------------            
+# --------------------------------------------------------------------
 def get_blendunits(units):
     if bpy.context.scene.unit_settings.system == "IMPERIAL":
         return units * 0.3048
@@ -202,7 +202,7 @@ def set_modifier_boolean(myobject, bolobject):
 
 # --------------------------------------------------------------------
 # Set material to object
-# --------------------------------------------------------------------            
+# --------------------------------------------------------------------
 def set_material(myobject, mymaterial):
     bpy.context.scene.objects.active = myobject
     if bpy.context.scene.objects.active.name == myobject.name:
@@ -226,7 +226,7 @@ def set_material_faces(myobject, idx):
 
 # --------------------------------------------------------------------
 # Select faces
-# --------------------------------------------------------------------            
+# --------------------------------------------------------------------
 def select_faces(myobject, selface, clear):
     myobject.select = True
     bpy.context.scene.objects.active = myobject
@@ -243,7 +243,7 @@ def select_faces(myobject, selface, clear):
 
 # --------------------------------------------------------------------
 # Select vertices
-# --------------------------------------------------------------------            
+# --------------------------------------------------------------------
 def select_vertices(myobject, selvertices, clear=True):
     myobject.select = True
     bpy.context.scene.objects.active = myobject
@@ -253,7 +253,7 @@ def select_vertices(myobject, selvertices, clear=True):
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.select_all(action='DESELECT')
 
-        # Select Vertices 
+        # Select Vertices
         bpy.ops.object.mode_set(mode='EDIT', toggle=False)
         sel_mode = bpy.context.tool_settings.mesh_select_mode
 
@@ -270,7 +270,7 @@ def select_vertices(myobject, selvertices, clear=True):
 
 # --------------------------------------------------------------------
 # Mark Seam
-# --------------------------------------------------------------------            
+# --------------------------------------------------------------------
 def mark_seam(myobject):
     # noinspection PyBroadException
     try:
@@ -286,14 +286,14 @@ def mark_seam(myobject):
 
 # --------------------------------------------------------------------
 # Unwrap mesh
-# --------------------------------------------------------------------            
+# --------------------------------------------------------------------
 def unwrap_mesh(myobject, allfaces=True):
     # noinspection PyBroadException
     try:
         myobject.select = True
         bpy.context.scene.objects.active = myobject
         if bpy.context.scene.objects.active.name == myobject.name:
-            # Unwrap 
+            # Unwrap
             bpy.ops.object.mode_set(mode='EDIT', toggle=False)
             if allfaces is True:
                 bpy.ops.mesh.select_all(action='DESELECT')
@@ -855,7 +855,7 @@ def create_fabric_material(matname, replace, r, g, b, rv=0.8, gv=0.636, bv=0.315
     node.scale[2] = 1000
 
     # ===========================================================================
-    # Image texture 
+    # Image texture
     # ===========================================================================
     # Load image file.
 
@@ -923,7 +923,7 @@ def copy_binfile(fromfile, tofile):
                 if mybytes:
                     f2.write(mybytes)
                 else:
-                    break    
+                    break
 
 
 # --------------------------------------------------------------------

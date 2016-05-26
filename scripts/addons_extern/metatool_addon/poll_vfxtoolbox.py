@@ -16,7 +16,7 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-#bl_info = {
+# bl_info = {
 #    "name": "vfx toolbox",
 #    "description": "various helper for vfx tasks.",
 #    "author": "Christian Brinkmann, David Wiesner",
@@ -55,6 +55,7 @@ from bpy.types import (Operator,
 # not required since blender 2.65
 # ------------------------------------------------------------------------------------------------
 
+
 def blender_namingLimitation(string):
     blender_version = bpy.app.version
     if blender_version[0] == 2 and blender_version[1] < 66 and len(string) > 21:
@@ -66,20 +67,22 @@ def blender_namingLimitation(string):
 # basic re functions
 # ------------------------------------------------------------------------------------------------
 
+
 def re_matchString(string, match):
-    
+
     s = string
     n = re.match(r".*" + match + ".*", s)
-    
+
     if n == None:
         return False
     else:
         return True
 
+
 def re_matchString_ignoreCase(string, match):
-    
+
     s = string
-    n = re.match(r".*" + match + ".*", s, re.IGNORECASE) 
+    n = re.match(r".*" + match + ".*", s, re.IGNORECASE)
     return n
 
 
@@ -92,21 +95,22 @@ def get_allObjectsBySearchString(search_string):
     matchArray = []
 
     for i in bpy.data.objects:
-    
+
         if re_matchString(i.name, search_string) == True:
             matchArray.append(i)
-        
+
     return matchArray
 
 # ------------------------------------------------------------------------------------------------
 # get number sequence
 # ------------------------------------------------------------------------------------------------
 
+
 def get_numberSequence(string):
 
     try:
         prae = re.findall("#+$", string)
-        return '%0'+str(len(prae[0]))+'d', len(prae[0])
+        return '%0' + str(len(prae[0])) + 'd', len(prae[0])
 
     except:
         return '%04d', 0
@@ -114,6 +118,7 @@ def get_numberSequence(string):
 # ------------------------------------------------------------------------------------------------
 # remove char
 # ------------------------------------------------------------------------------------------------
+
 
 def remove_specialCharactersFromString(string, char):
     return re.sub(char, '', string)
@@ -125,16 +130,16 @@ def remove_specialCharactersFromString(string, char):
 # new_name: Name_####
 
 def rename_objectsByNewName(object_list, new_name):
-    
-    preafix = get_numberSequence(new_name)[0]    
+
+    preafix = get_numberSequence(new_name)[0]
     mainName = remove_specialCharactersFromString(new_name, '#')
-    
+
     c = 0
     for i in object_list:
         dynPraefix = preafix % c
         i.name = mainName + dynPraefix
         c += 1
-    
+
     return c
 
 # ------------------------------------------------------------------------------------------------
@@ -143,21 +148,22 @@ def rename_objectsByNewName(object_list, new_name):
 # Arguments: size, type
 # Size: float in [0.0001, 1000], default 0.0
 
+
 def set_emptyType(selection_list, type):
     for obj in selection_list:
         if (obj.type == 'EMPTY'):
             obj.empty_draw_type = type
-            
+
 
 def set_emptySize(selection_list, size):
     for obj in selection_list:
         if (obj.type == 'EMPTY'):
             # float value 0.01 - 100
             obj.empty_draw_size = size
-            
+
 
 # ------------------------------------------------------------------------------------------------
-# get object type (EMPTY, LAMP ... ) 
+# get object type (EMPTY, LAMP ... )
 # ------------------------------------------------------------------------------------------------
 
 def get_objectType(name_string):
@@ -175,12 +181,12 @@ def get_objectTypeList(object_list):
     objectTypes = []
     for i in object_list:
         objectTypes.append(bpy.data.objects[i.name].type)
-    
+
     return list(set(objectTypes))
 
 
 # ------------------------------------------------------------------------------------------------
-# get object by name 
+# get object by name
 # ------------------------------------------------------------------------------------------------
 # if object exists you get the object, else you get zero
 # example: get_objectByName('Autoname_2938')
@@ -192,7 +198,7 @@ def get_objectByName(name_string):
     except:
         return False
 
-    
+
 # ------------------------------------------------------------------------------------------------
 # make object active
 # ------------------------------------------------------------------------------------------------
@@ -219,16 +225,18 @@ def get_highlightObjectByName(name_string):
     except:
         return False
 
+
 def get_highlightObjects(selection_list):
-    
-   for i in selection_list:
-        bpy.data.objects[i.name].select = True  
+
+    for i in selection_list:
+        bpy.data.objects[i.name].select = True
+
 
 def get_dehighlightObjects(selection_list):
-    
-   for i in selection_list:
+
+    for i in selection_list:
         bpy.data.objects[i.name].select = False
-        
+
 
 # ------------------------------------------------------------------------------------------------
 # get all objects in scene by type
@@ -236,36 +244,36 @@ def get_dehighlightObjects(selection_list):
 # searches for objects with the defined type in the whole scene
 
 def get_allObjectsInSceneByType(type_string):
-    
+
     objects = []
-    
+
     # searches for type in the selection
     for objs in bpy.data.objects:
         if (objs.type == type_string):
             objects.append(objs)
-    
+
     return objects
 
 
 # ------------------------------------------------------------------------------------------------
 # get objects in selection by type
 # ------------------------------------------------------------------------------------------------
-# searches for objects with the defined type in the selection 
-# ignores all othe objects in selection and returns the given type  
+# searches for objects with the defined type in the selection
+# ignores all othe objects in selection and returns the given type
 
 # example:
 # (get_ObjectsInSelectionByType('EMPTY'))
 # returns: [bpy.data.objects['Auto_00100'], bpy.data.objects['Auto_00357']]
 
 def get_ObjectsInSelectionByType(type_string):
-    
+
     objects = []
-    
+
     # searches for type in the selection
     for objs in bpy.context.selected_objects:
         if (objs.type == type_string):
             objects.append(objs)
-    
+
     return objects
 
 
@@ -273,7 +281,7 @@ def get_ObjectsInSelectionByType(type_string):
 # get objects in selection
 # ------------------------------------------------------------------------------------------------
 
-def get_AllObjectsInSelection():   
+def get_AllObjectsInSelection():
     return bpy.context.selected_objects
 
 
@@ -281,7 +289,7 @@ def get_AllObjectsInSelection():
 # get objects in scene
 # ------------------------------------------------------------------------------------------------
 
-def get_AllObjectsInScene():   
+def get_AllObjectsInScene():
     return bpy.data.objects
 
 
@@ -293,7 +301,8 @@ def get_hideSelectObjects(object_list):
     for i in object_list:
         i.hide_select = True
     bpy.ops.object.select_all(action='DESELECT')
-    return True 
+    return True
+
 
 def get_dehideSelectObjects(object_list):
     hidedObjs = []
@@ -311,11 +320,11 @@ def get_dehideSelectObjects(object_list):
 # returns: array of locations
 
 def get_objectLocation(objs):
-    
+
     locations = []
     for i in objs:
         locations.append(i.location)
-    
+
     return locations
 
 
@@ -325,18 +334,18 @@ def get_objectLocation(objs):
 # checks a string for numbersequence: _45896
 # and returns it without numbersequence
 
-def get_objectNameWithoutNumbers(string):   
-    
+def get_objectNameWithoutNumbers(string):
+
     try:
         s = string
-        n = re.sub(r"\d+$", "", s) # matches: numbersequence at the end
-        n = re.sub(r"\_+$", "", n) # matches: underline-character at the end
-        
+        n = re.sub(r"\d+$", "", s)  # matches: numbersequence at the end
+        n = re.sub(r"\_+$", "", n)  # matches: underline-character at the end
+
         # if string only has digits -> reset
         if len(n) == 0:
-            n=s
+            n = s
         return n
-    
+
     except:
         return False
 
@@ -349,22 +358,22 @@ def get_objectNameWithoutNumbers(string):
 # returns the new object
 
 
-def create_Vertices (name, verts):
+def create_Vertices(name, verts):
     # Create mesh and object
-    me = bpy.data.meshes.new(name+'Mesh')
+    me = bpy.data.meshes.new(name + 'Mesh')
     ob = bpy.data.objects.new(name, me)
     ob.show_name = True
     # Link object to scene
     bpy.context.scene.objects.link(ob)
     me.from_pydata(verts, [], [])
- 
+
     # Update mesh with new data
     me.update()
     return ob
 
 
 # ------------------------------------------------------------------------------------------------
-# create polyline 
+# create polyline
 # ------------------------------------------------------------------------------------------------
 # name: string for new object name
 # verts: 2 dimensional array of position coords - [(-1.0, 1.0, 0.0), (-1.0, -1.0, 0.0)]
@@ -378,17 +387,16 @@ def create_Vertices (name, verts):
 
 def create_PolyLine(name, verts, edges):
     # Create mesh and object
-    me = bpy.data.meshes.new(name+'Mesh')
+    me = bpy.data.meshes.new(name + 'Mesh')
     ob = bpy.data.objects.new(name, me)
     ob.show_name = True
     # Link object to scene
     bpy.context.scene.objects.link(ob)
     me.from_pydata(verts, edges, [])
- 
+
     # Update mesh with new data
     me.update(calc_edges=True)
     return ob
-
 
 
 # ================================================================================================
@@ -396,7 +404,7 @@ def create_PolyLine(name, verts, edges):
 # ================================================================================================
 
 def create_vertsFromObjects(newMesh_name, objects):
-    
+
     if len(objects) > 0:
         # get location array of selection
         locations = get_objectLocation(objects)
@@ -405,26 +413,26 @@ def create_vertsFromObjects(newMesh_name, objects):
         return True, len(locations)
     else:
         return False
-        
+
 
 # ------------------------------------------------------------------------------------------------
 # create edge from empties
 # ------------------------------------------------------------------------------------------------
 
 def create_edgeFrom2Objects(objects):
-    
+
     if len(objects) == 2:
-        
+
         # get a name for the edge
         part1 = objects[0].name
         part2 = objects[1].name
         edge_name = part1 + part2 + "_connection"
-        
+
         # get the location of the objects
         verts = get_objectLocation(objects)
-        
+
         # known connections
-        edges = [(0,1)]
+        edges = [(0, 1)]
         create_PolyLine(edge_name, verts, edges)
         return edge_name
     else:
@@ -436,33 +444,33 @@ def create_edgeFrom2Objects(objects):
 # ------------------------------------------------------------------------------------------------
 
 def create_PointCloud(objects):
-    
+
     if len(objects) > 0:
         pointcloud_name = get_objectNameWithoutNumbers(objects[0].name) + '_pointcloud'
         create_vertsFromObjects(pointcloud_name, objects)
         return pointcloud_name
-        
+
     else:
         return False
 
 
 # ------------------------------------------------------------------------------------------------
-# create a empty in the center of vertex selection 
+# create a empty in the center of vertex selection
 # ------------------------------------------------------------------------------------------------
-    
+
 def createEmptyFromSelectedVertsInCenter():
-    
+
     # maybe to simple?
-    # could be extended to check selection            
+    # could be extended to check selection
     mainObj = bpy.context.active_object.name
     bpy.ops.view3d.snap_cursor_to_selected()
-    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.add(type='EMPTY')
     ob = bpy.context.object
     ob.name = mainObj + '_empty'
     bpy.ops.view3d.snap_selected_to_cursor()
     bpy.ops.object.select_all(action='DESELECT')
-    bpy.context.scene.objects.active = bpy.data.objects[mainObj] 
+    bpy.context.scene.objects.active = bpy.data.objects[mainObj]
     bpy.ops.object.mode_set(mode='EDIT')
 
 
@@ -472,16 +480,16 @@ def createEmptyFromSelectedVertsInCenter():
 # ------------------------------------------------------------------------------------------------
 
 def createEmptiesFromSelectedVerts():
-    
-    # get the object 
+
+    # get the object
     activeObj = bpy.context.active_object
-    
+
     # set to object mode
     bpy.ops.object.mode_set(mode='OBJECT')
 
     # get the selected verts
     verts = [i.index for i in activeObj.data.vertices if i.select]
-    
+
     # counter
     empty_counter = 0
 
@@ -489,16 +497,16 @@ def createEmptiesFromSelectedVerts():
         # get local coordinate
         vert_coordinate = activeObj.data.vertices[i].co
         vert_coordinate = activeObj.matrix_world * vert_coordinate
-        
+
         # unselect all
         for item in bpy.context.selectable_objects:
             item.select = False
-        
-        # add the empty    
+
+        # add the empty
         bpy.ops.object.add(type='EMPTY', location=vert_coordinate)
         newEmpty = bpy.context.active_object
         newEmpty.location = vert_coordinate
-        newEmpty.empty_draw_size = newEmpty.empty_draw_size # / 4
+        newEmpty.empty_draw_size = newEmpty.empty_draw_size  # / 4
         bpy.ops.object.select_all(action='TOGGLE')
         bpy.ops.object.select_all(action='DESELECT')
         empty_counter += 1
@@ -513,6 +521,7 @@ def createEmptiesFromSelectedVerts():
 # ------------------------------------------------------------------------------------------------
 # validate the ascii file
 # ------------------------------------------------------------------------------------------------
+
 
 def asciiData_validation(filepath):
 
@@ -534,7 +543,7 @@ def asciiData_validation(filepath):
 
         if max(columnsLenght) == min(columnsLenght):
             return max(columnsLenght), data
-        
+
         else:
             return False
 
@@ -548,17 +557,17 @@ def asciiData_validation(filepath):
 # ------------------------------------------------------------------------------------------------
 
 def read_ascii_file(filepath, startline):
-    
+
     xValues = []
     yValues = []
     zValues = []
-    
+
     validation = asciiData_validation(filepath)
-    
+
     if (validation != False):
 
         columnsLenght = asciiData_validation(filepath)[0]
-        data = asciiData_validation(filepath)[1][startline-1:]
+        data = asciiData_validation(filepath)[1][startline - 1:]
 
         try:
             for line in data:
@@ -583,7 +592,7 @@ def read_ascii_file(filepath, startline):
             return False
 
         return columnsLenght, xValues, yValues, zValues
-    
+
     else:
         return False
 
@@ -593,19 +602,19 @@ def read_ascii_file(filepath, startline):
 # ------------------------------------------------------------------------------------------------
 
 def multiplyXYZ(xValues, yValues, zValues, multiplyValue):
-    
+
     finalX_Values = []
     finalY_Values = []
     finalZ_Values = []
-    
+
     for i in xValues:
-        finalX_Values.append(i*multiplyValue)
+        finalX_Values.append(i * multiplyValue)
 
     for i in yValues:
-        finalY_Values.append(i*multiplyValue)
+        finalY_Values.append(i * multiplyValue)
 
     for i in zValues:
-        finalZ_Values.append(i*multiplyValue)
+        finalZ_Values.append(i * multiplyValue)
 
     return [list(t) for t in zip(finalX_Values, finalY_Values, finalZ_Values)]
 
@@ -615,11 +624,11 @@ def multiplyXYZ(xValues, yValues, zValues, multiplyValue):
 # ------------------------------------------------------------------------------------------------
 
 def multiplyList(values, multiplyValue):
-    
+
     finalValues = []
-    
+
     for i in values:
-        finalValues.append(i*multiplyValue)
+        finalValues.append(i * multiplyValue)
 
     return finalValues
 
@@ -629,11 +638,11 @@ def multiplyList(values, multiplyValue):
 # ------------------------------------------------------------------------------------------------
 
 def addToXYZ(xValues, yValues, zValues, addValue):
-    
+
     finalX_Values = []
     finalY_Values = []
     finalZ_Values = []
-    
+
     for i in xValues:
         finalX_Values.append(i + addValue)
 
@@ -651,11 +660,11 @@ def addToXYZ(xValues, yValues, zValues, addValue):
 # ------------------------------------------------------------------------------------------------
 
 def addList(values, addValue):
-    
+
     finalValues = []
-    
+
     for i in values:
-        finalValues.append(i*multiplyValue)
+        finalValues.append(i * multiplyValue)
 
     return finalValues
 
@@ -665,24 +674,22 @@ def addList(values, addValue):
 # ------------------------------------------------------------------------------------------------
 
 def anglesToEuler(xValues, yValues, zValues):
-    
+
     finalX_Values = []
     finalY_Values = []
     finalZ_Values = []
-    factor = (pi/180)
-    
+    factor = (pi / 180)
+
     for i in xValues:
-        finalX_Values.append(i*factor)
+        finalX_Values.append(i * factor)
 
     for i in yValues:
-        finalY_Values.append(i*factor)
+        finalY_Values.append(i * factor)
 
     for i in zValues:
-        finalZ_Values.append(i*factor)
+        finalZ_Values.append(i * factor)
 
     return [list(t) for t in zip(finalX_Values, finalY_Values, finalZ_Values)]
-
-
 
 
 # ================================================================================================
@@ -716,7 +723,7 @@ class VfxToolboxSettings(PropertyGroup):
             if selection_types[0] == 'LAMP':
                 items.append(('NRG', "Energy", ""))
                 items.append(('CLR', "Color", ""))
-            
+
             # check for cameras
             if selection_types[0] == 'CAMERA':
                 items.append(('FCD', "Focus Distance", ""))
@@ -726,35 +733,35 @@ class VfxToolboxSettings(PropertyGroup):
 
     # set size of selected empties
     EmptySizeProperty_ = FloatProperty(
-        name = "Empty Size", 
-        description = "Size of empties.",
-        default = 1.00,
-        min = 0.01,
-        max = 100)
-    
+        name="Empty Size",
+        description="Size of empties.",
+        default=1.00,
+        min=0.01,
+        max=100)
+
     # select all empties
     AllOrInSelectionProperty_ = BoolProperty(
-        name = "All Empties in Scene", 
-        description = "Select all Empties in Scene.",
-        default = False)
-    
+        name="All Empties in Scene",
+        description="Select all Empties in Scene.",
+        default=False)
+
     # search value
     SearchForObjectsProperty_ = StringProperty(
-        name = "",
-        description = "Search string.",
-        default = "Name_")
-    
+        name="",
+        description="Search string.",
+        default="Name_")
+
     # rename value
     RenameObjectsProperty_ = StringProperty(
-        name = "",
-        description = "Rename string with sequence numbers.",
-        default = "Name_###")
+        name="",
+        description="Rename string with sequence numbers.",
+        default="Name_###")
 
     # path to ascii file
     AsciiImportPathProperty_ = StringProperty(
         name="",
         description="Path to Ascii File",
-        default="", 
+        default="",
         maxlen=1024,
         subtype='FILE_PATH')
 
@@ -766,13 +773,13 @@ class VfxToolboxSettings(PropertyGroup):
                ('ROT', "Rotation", ""),
                ('SCL', "Scale", "")),
         default='LOC',
-        )
+    )
 
     AsciiObjectProperties_ = EnumProperty(
         items=filter_object_type_callback,
         name="Apply Data to:",
         description="Filter addons by category",
-        )
+    )
 
 
 # ------------------------------------------------------------------------
@@ -788,6 +795,8 @@ def get_Prop(key, scn):
     return val
 
 # Helper function to get user float input
+
+
 def get_floatProp(key, scn):
     try:
         val = scn[key]
@@ -796,6 +805,8 @@ def get_floatProp(key, scn):
     return val
 
 # Helper function to print user input
+
+
 def printProp(label, key, scn):
     try:
         val = scn[key]
@@ -803,15 +814,16 @@ def printProp(label, key, scn):
         val = 'Undefined'
     print("%s %s" % (key, val))
 
-        
+
 # ------------------------------------------------------------------------
 #   create empties from selected verts button
 # ------------------------------------------------------------------------
- 
+
 class CreateEmptyFromVerts(bpy.types.Operator):
     bl_idname = "vfxtoolbox.create_empties_fromverts"
     bl_label = "Empties from Vertices"
     bl_description = "Creates empties from selected vertices."
+
     def execute(self, context):
         empties = createEmptiesFromSelectedVerts()
         self.report({'INFO'}, str(empties) + ' Empties created.')
@@ -821,19 +833,18 @@ class CreateEmptyFromVerts(bpy.types.Operator):
 # ------------------------------------------------------------------------
 #   create empty in center from selected vert button
 # ------------------------------------------------------------------------
- 
+
 class CreateEmptyFromVertsCenter(bpy.types.Operator):
     bl_idname = "vfxtoolbox.create_empty_fromverts_center"
     bl_label = "Empty in Center of Selection"
     bl_description = "Creates an empty in the center of the selected vertices."
-    
+
     def execute(self, context):
         createEmptyFromSelectedVertsInCenter()
         self.report({'INFO'}, 'Empty created.')
         return {'FINISHED'}
 
-   
-        
+
 # ------------------------------------------------------------------------
 #    vfxtoolbox
 # ------------------------------------------------------------------------
@@ -841,145 +852,143 @@ class CreateEmptyFromVertsCenter(bpy.types.Operator):
 # Sub Location
 class SubLoc_VFX():
     """VFX"""
-    bl_category="VFX"
+    bl_category = "VFX"
     bl_region_type = 'TOOLS'
     #bl_region_type = 'UI'
-    bl_space_type = 'VIEW_3D' 
+    bl_space_type = 'VIEW_3D'
 
     @classmethod
     def poll(cls, context):
-        return context.scene.osc_vfx 
-        
-## Sub Panel
+        return context.scene.osc_vfx
+
+# Sub Panel
+
+
 class META_TAB_VFX(SubLoc_VFX, bpy.types.Panel):
     #bl_idname = "meta.vfx"
     bl_label = "[VFX TOOLBOX]"
     bl_space_type = 'VIEW_3D'
-    
+
     def draw(self, context):
-       
-       layout = self.layout
-       scene = context.scene
-       vfxToolbox = scene.vfxToolbox
 
-       ###space2###      
-       if context.mode == 'EDIT_MESH':
-           row = layout.row()
-           row.label("Reconstruction:")
-           col = layout.column(align=True)
-           col.operator("vfxtoolbox.create_empties_fromverts", icon="EDIT") 
-           col.operator("vfxtoolbox.create_empty_fromverts_center", icon="EDGESEL")
-            
-            
+        layout = self.layout
+        scene = context.scene
+        vfxToolbox = scene.vfxToolbox
 
-       ###space2### 
-       if context.mode == 'OBJECT':
+        ###space2###
+        if context.mode == 'EDIT_MESH':
+            row = layout.row()
+            row.label("Reconstruction:")
+            col = layout.column(align=True)
+            col.operator("vfxtoolbox.create_empties_fromverts", icon="EDIT")
+            col.operator("vfxtoolbox.create_empty_fromverts_center", icon="EDGESEL")
 
-           row = layout.row()
-           col = layout.column(align=True)
-           col.label(text="Force:")
-                    
-           row = col.row(align=True)
-           row.alignment='CENTER'            
-           row.operator("object.effector_add",text="",icon="FORCE_FORCE").type="FORCE"
-           row.operator("object.effector_add",text="",icon="FORCE_WIND").type="WIND"
-           row.operator("object.effector_add",text="",icon="FORCE_VORTEX").type="VORTEX"        
-           row.operator("object.effector_add",text="",icon="FORCE_MAGNETIC").type="MAGNET"
-           row.operator("object.effector_add",text="",icon="FORCE_HARMONIC").type="HARMONIC"
+        ###space2###
+        if context.mode == 'OBJECT':
 
-           row = col.row(align=True)
-           row.alignment='CENTER' 
-           row.operator("object.effector_add",text="",icon="FORCE_CHARGE").type="CHARGE"
-           row.operator("object.effector_add",text="",icon="FORCE_LENNARDJONES").type="LENNARDJ"
-           row.operator("object.effector_add",text="",icon="FORCE_TEXTURE").type="TEXTURE"        
-           row.operator("object.effector_add",text="",icon="FORCE_CURVE").type="GUIDE"
-           row.operator("object.effector_add",text="",icon="FORCE_BOID").type="BOID"
+            row = layout.row()
+            col = layout.column(align=True)
+            col.label(text="Force:")
 
-           row = layout.row()
-           col = layout.row(align=True)
-           col.operator("object.make_local")
-           col.operator("object.proxy_make")
+            row = col.row(align=True)
+            row.alignment = 'CENTER'
+            row.operator("object.effector_add", text="", icon="FORCE_FORCE").type = "FORCE"
+            row.operator("object.effector_add", text="", icon="FORCE_WIND").type = "WIND"
+            row.operator("object.effector_add", text="", icon="FORCE_VORTEX").type = "VORTEX"
+            row.operator("object.effector_add", text="", icon="FORCE_MAGNETIC").type = "MAGNET"
+            row.operator("object.effector_add", text="", icon="FORCE_HARMONIC").type = "HARMONIC"
 
-           row = layout.row()
-           col = layout.column(align=True)
-           col.label(text="Selection:")
-           col = layout.row(align=True)
-           col.operator("vfxtoolbox.freeze_selected_objects","Freeze", icon="RESTRICT_SELECT_ON")
-           col.operator("vfxtoolbox.defreeze_all_objects","Unfreeze", icon="RESTRICT_SELECT_OFF")
-           
-           row = layout.row()
-           row.label("Scene Building:")
-           col = layout.column(align=True)
-           col.operator("vfxtoolbox.group_selected_objects", icon="CONSTRAINT")
-           col.operator("vfxtoolbox.group_release_children", icon="UNLINKED")
-           col.operator("vfxtoolbox.group_select_children", icon="GROUP")
+            row = col.row(align=True)
+            row.alignment = 'CENTER'
+            row.operator("object.effector_add", text="", icon="FORCE_CHARGE").type = "CHARGE"
+            row.operator("object.effector_add", text="", icon="FORCE_LENNARDJONES").type = "LENNARDJ"
+            row.operator("object.effector_add", text="", icon="FORCE_TEXTURE").type = "TEXTURE"
+            row.operator("object.effector_add", text="", icon="FORCE_CURVE").type = "GUIDE"
+            row.operator("object.effector_add", text="", icon="FORCE_BOID").type = "BOID"
 
-           row = layout.row()
-           row.label("Seek & Destroy:")
-           col = layout.column(align=True)
-           col.prop(vfxToolbox, 'SearchForObjectsProperty_')
-           col.operator("vfxtoolbox.find_objects", icon="BORDERMOVE")
-           col.prop(vfxToolbox, 'RenameObjectsProperty_')
-           col.operator("vfxtoolbox.rename_selected_objects", icon="DRIVER")
-            
-           row = layout.row()
-           #row.label("Scene Setup:")
-           col = layout.column(align=True)
-           col.operator("vfxtoolbox.select_cameras_and_empties", icon="CAMERA_DATA")
-           col.operator("vfxtoolbox.all_empties_in_scene", icon="EMPTY_DATA")
-           col.operator("vfxtoolbox.all_empties_in_selection", icon="BORDER_LASSO")
+            row = layout.row()
+            col = layout.row(align=True)
+            col.operator("object.make_local")
+            col.operator("object.proxy_make")
 
-           #layout.separator()
+            row = layout.row()
+            col = layout.column(align=True)
+            col.label(text="Selection:")
+            col = layout.row(align=True)
+            col.operator("vfxtoolbox.freeze_selected_objects", "Freeze", icon="RESTRICT_SELECT_ON")
+            col.operator("vfxtoolbox.defreeze_all_objects", "Unfreeze", icon="RESTRICT_SELECT_OFF")
 
-           row = layout.row()
-           row.label("Reconstruction:")
-           col = layout.column(align=True)
-           col.operator("vfxtoolbox.empty_connect", icon="OUTLINER_OB_EMPTY")
-           col.operator("vfxtoolbox.empty_pointcloud", icon="STICKY_UVS_DISABLE")
-            
-           row = layout.row()
-           row.label("Empty Appearance:")
-           col = layout.column(align=True)
-           col.prop(vfxToolbox, 'EmptySizeProperty_', icon='BLENDER', toggle=True)
-           col.operator("vfxtoolbox.set_empty_size", icon="SORTSIZE")
-            
-           #rowsub = col.row(align=True)
-           #rowsub.prop(vfxToolbox, 'EmptySizeProperty_', icon='BLENDER', toggle=True)
-           #rowsub.operator("vfxtoolbox.set_empty_size", icon="SORTSIZE")
+            row = layout.row()
+            row.label("Scene Building:")
+            col = layout.column(align=True)
+            col.operator("vfxtoolbox.group_selected_objects", icon="CONSTRAINT")
+            col.operator("vfxtoolbox.group_release_children", icon="UNLINKED")
+            col.operator("vfxtoolbox.group_select_children", icon="GROUP")
 
-           rowsub = col.row(align=True)
-           rowsub.operator("vfxtoolbox.empty_appearance", text="Plain", icon='EMPTY_DATA').number=1
-           rowsub.operator("vfxtoolbox.empty_appearance", text="Sphere", icon='MESH_UVSPHERE').number=2
-            
-           rowsub = col.row(align=True)
-           rowsub.operator("vfxtoolbox.empty_appearance", text="Circle", icon='MESH_CIRCLE').number=3
-           rowsub.operator("vfxtoolbox.empty_appearance", text="Cube", icon='MESH_CUBE').number=4
-           rowsub.operator("vfxtoolbox.empty_appearance", text="Image", icon='IMAGE_ALPHA').number=5
-            
-           #layout.separator()
+            row = layout.row()
+            row.label("Seek & Destroy:")
+            col = layout.column(align=True)
+            col.prop(vfxToolbox, 'SearchForObjectsProperty_')
+            col.operator("vfxtoolbox.find_objects", icon="BORDERMOVE")
+            col.prop(vfxToolbox, 'RenameObjectsProperty_')
+            col.operator("vfxtoolbox.rename_selected_objects", icon="DRIVER")
 
-           row = layout.row()
-           row.label("Animation from Ascii File:")
-           col = layout.column(align=True)
-           col.prop(vfxToolbox, "AsciiImportPathProperty_")
-           rowsub = col.row(align=True)
-           rowsub.prop(vfxToolbox, "AsciiObjectProperties_", text="")
-           rowsub.operator("vfxtoolbox.import_ascii", icon='IPO')
-           col.operator("vfxtoolbox.apply_asciigeo", icon="IPO" )
+            row = layout.row()
+            #row.label("Scene Setup:")
+            col = layout.column(align=True)
+            col.operator("vfxtoolbox.select_cameras_and_empties", icon="CAMERA_DATA")
+            col.operator("vfxtoolbox.all_empties_in_scene", icon="EMPTY_DATA")
+            col.operator("vfxtoolbox.all_empties_in_selection", icon="BORDER_LASSO")
 
-           col = layout.column(align=True)
-           row = col.row(align=True)
-           row.operator("wm.save_mainfile",text="",icon="FILE_TICK")         
-           row.operator("ed.undo_history", text="History")
-           row.operator("ed.undo", text="", icon="LOOP_BACK")
-           row.operator("ed.redo", text="", icon="LOOP_FORWARDS")
+            # layout.separator()
 
+            row = layout.row()
+            row.label("Reconstruction:")
+            col = layout.column(align=True)
+            col.operator("vfxtoolbox.empty_connect", icon="OUTLINER_OB_EMPTY")
+            col.operator("vfxtoolbox.empty_pointcloud", icon="STICKY_UVS_DISABLE")
 
+            row = layout.row()
+            row.label("Empty Appearance:")
+            col = layout.column(align=True)
+            col.prop(vfxToolbox, 'EmptySizeProperty_', icon='BLENDER', toggle=True)
+            col.operator("vfxtoolbox.set_empty_size", icon="SORTSIZE")
+
+            #rowsub = col.row(align=True)
+            #rowsub.prop(vfxToolbox, 'EmptySizeProperty_', icon='BLENDER', toggle=True)
+            #rowsub.operator("vfxtoolbox.set_empty_size", icon="SORTSIZE")
+
+            rowsub = col.row(align=True)
+            rowsub.operator("vfxtoolbox.empty_appearance", text="Plain", icon='EMPTY_DATA').number = 1
+            rowsub.operator("vfxtoolbox.empty_appearance", text="Sphere", icon='MESH_UVSPHERE').number = 2
+
+            rowsub = col.row(align=True)
+            rowsub.operator("vfxtoolbox.empty_appearance", text="Circle", icon='MESH_CIRCLE').number = 3
+            rowsub.operator("vfxtoolbox.empty_appearance", text="Cube", icon='MESH_CUBE').number = 4
+            rowsub.operator("vfxtoolbox.empty_appearance", text="Image", icon='IMAGE_ALPHA').number = 5
+
+            # layout.separator()
+
+            row = layout.row()
+            row.label("Animation from Ascii File:")
+            col = layout.column(align=True)
+            col.prop(vfxToolbox, "AsciiImportPathProperty_")
+            rowsub = col.row(align=True)
+            rowsub.prop(vfxToolbox, "AsciiObjectProperties_", text="")
+            rowsub.operator("vfxtoolbox.import_ascii", icon='IPO')
+            col.operator("vfxtoolbox.apply_asciigeo", icon="IPO")
+
+            col = layout.column(align=True)
+            row = col.row(align=True)
+            row.operator("wm.save_mainfile", text="", icon="FILE_TICK")
+            row.operator("ed.undo_history", text="History")
+            row.operator("ed.undo", text="", icon="LOOP_BACK")
+            row.operator("ed.redo", text="", icon="LOOP_FORWARDS")
 
 
 # ------------------------------------------------------------------------
 #    apply ascii to selection
-# ------------------------------------------------------------------------    
+# ------------------------------------------------------------------------
 
 class ApplyAsciiToSelectionButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.apply_asciigeo"
@@ -987,62 +996,61 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
     bl_description = "Apply ascii data to selection."
 
     startAtLine = bpy.props.IntProperty(
-        name = "Start at line:",
-        description = "Starting point to read to file.",
-        default=1 )
+        name="Start at line:",
+        description="Starting point to read to file.",
+        default=1)
 
     xColumn = bpy.props.IntProperty(
-        name = "X Column:",
-        description = "Set the X coloumn.",
-        default = 1,
-        min = 1,
-        max = 3 )
+        name="X Column:",
+        description="Set the X coloumn.",
+        default=1,
+        min=1,
+        max=3)
 
     yColumn = bpy.props.IntProperty(
-        name = "Y Column:",
-        description = "Set the Y coloumn.",
-        default = 2,
-        min = 1,
-        max = 3 )
+        name="Y Column:",
+        description="Set the Y coloumn.",
+        default=2,
+        min=1,
+        max=3)
 
     zColumn = bpy.props.IntProperty(
         name="Z Column:",
-        description = "Set the Z coloumn.",
-        default = 3,
-        min = 1,
-        max = 3 )
+        description="Set the Z coloumn.",
+        default=3,
+        min=1,
+        max=3)
 
     timelineStart = bpy.props.IntProperty(
         name="Timeline starting point:",
-        description = "Offset in timeline.",
-        default=1 )
+        description="Offset in timeline.",
+        default=1)
 
     timelineIncrement = bpy.props.IntProperty(
         name="Offset keys:",
-        description = "Insert keframe with an offset.",
-        default=1 )
-
+        description="Insert keframe with an offset.",
+        default=1)
 
     mult = bpy.props.FloatProperty(
-        name = "Multiply values by:", 
-        description = "Multiply the values.",
-        default = 1.00,
-        min = 0.01,
-        max = 1000 )
+        name="Multiply values by:",
+        description="Multiply the values.",
+        default=1.00,
+        min=0.01,
+        max=1000)
 
     add = bpy.props.FloatProperty(
-        name = "Add values by:", 
-        description = "Add X to the values.",
-        default = 0 )
-    
+        name="Add values by:",
+        description="Add X to the values.",
+        default=0)
+
     def oneDimensionalPropType(self, property_input):
         simple_array = ['NRG', 'FCD', 'FCL']
-        
+
         if property_input in simple_array:
             return True
         else:
             return False
-    
+
     def invoke(self, context, event):
         context.window_manager.invoke_props_dialog(self, width=330)
         return {'RUNNING_MODAL'}
@@ -1050,7 +1058,7 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
     def execute(self, context):
         scene = context.scene
         vfxToolbox = scene.vfxToolbox
-        
+
         # get dialog values
         mult_value = self.properties.mult
         add_value = self.properties.add
@@ -1060,7 +1068,7 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
         xColumn_value = self.properties.xColumn
         yColumn_value = self.properties.yColumn
         zColumn_value = self.properties.zColumn
-        
+
         # get property values
         prop = vfxToolbox.AsciiObjectProperties_
         pathToAscii = get_Prop('AsciiImportPathProperty_', vfxToolbox)
@@ -1068,10 +1076,10 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
         # get selection
         selection = get_AllObjectsInSelection()
         if len(selection) > 0:
-            
+
             # check if path is given
             if pathToAscii != 'Undefined':
-             
+
                 # read the file
                 filedata = read_ascii_file(pathToAscii, startAtLine_value)
                 if filedata != False:
@@ -1085,19 +1093,19 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
                         # object data
                         ob = bpy.data.objects[item.name]
                         ob_type = get_objectType(item.name)
-                        
+
                         # for Location, Rotation, Scale and Color are 3 Values needed
                         # thatswhy check for "multi dimensional prop type"
                         #   1.1   1.2    1.3
                         #   0.9   1.1    1.3
                         #   ...   ...    ...
                         if self.oneDimensionalPropType(prop) == False:
-                            
+
                             # get data
                             xyz = [list(t) for t in zip(filedata[xColumn_value], filedata[yColumn_value], filedata[zColumn_value])]
-                            if add_value != 0: # check for additon
+                            if add_value != 0:  # check for additon
                                 xyz = addToXYZ(filedata[xColumn_value], filedata[yColumn_value], filedata[zColumn_value], add_value)
-                            if mult_value != 1: # check for multiply
+                            if mult_value != 1:  # check for multiply
                                 xyz = multiplyXYZ(filedata[xColumn_value], filedata[yColumn_value], filedata[zColumn_value], mult_value)
 
                             # insert location keyframes
@@ -1107,7 +1115,7 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
                                     ob.location = i
                                     ob.keyframe_insert(data_path="location", index=-1)
                                     frame_num += offset
-                                
+
                                 self.report({'INFO'}, 'Added Location Animation.')
 
                             # insert rotation keyframes
@@ -1122,7 +1130,7 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
                                     frame_num += offset
 
                                 self.report({'INFO'}, 'Added Rotation Animation.')
-                        
+
                             # insert scale keyframes
                             elif prop == 'SCL':
                                 for i in xyz:
@@ -1135,18 +1143,17 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
 
                             # insert color keyframes
                             elif prop == 'CLR' and ob_type == 'LAMP':
-                                
+
                                 ob = bpy.data.lamps[item.name]
                                 for i in xyz:
                                     bpy.context.scene.frame_set(frame_num)
                                     ob.color = i
                                     ob.keyframe_insert(data_path="color", index=-1)
                                     frame_num += offset
-                            
+
                                 self.report({'INFO'}, 'Added Color Animation.')
 
-
-                        else: # else is one dimensional prop type
+                        else:  # else is one dimensional prop type
 
                             x = filedata[xColumn_value]
 
@@ -1157,7 +1164,7 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
                             # check for multiply
                             if mult_value != 1:
                                 x = multiplyList(x, add_value)
-                            
+
                             # insert energy keyframes
                             if prop == 'NRG' and ob_type == 'LAMP':
                                 ob = bpy.data.lamps[item.name]
@@ -1177,9 +1184,8 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
                                     ob.dof_distance = i
                                     ob.keyframe_insert(data_path="dof_distance", index=-1)
                                     frame_num += offset
-                                
-                                self.report({'INFO'}, 'Added DOF Distance Animation.')
 
+                                self.report({'INFO'}, 'Added DOF Distance Animation.')
 
                             elif prop == 'FCL' and ob_type == 'CAMERA':
                                 ob = bpy.data.cameras[item.name]
@@ -1188,7 +1194,7 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
                                     ob.lens = i
                                     ob.keyframe_insert(data_path="lens", index=-1)
                                     frame_num += offset
-                                
+
                                 self.report({'INFO'}, 'Added Focal Animation.')
 
                 else:
@@ -1197,78 +1203,75 @@ class ApplyAsciiToSelectionButton(bpy.types.Operator):
                 self.report({'INFO'}, 'No file selected.')
         else:
             self.report({'INFO'}, 'Nothing selected.')
-        
+
         return{'FINISHED'}
 
 
 # ------------------------------------------------------------------------
 #   import ascii data
 # ------------------------------------------------------------------------
- 
+
 class ImportAsciiButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.import_ascii"
     bl_label = "Build Empty"
     bl_description = "Creates an empty from the file data."
-    
+
     name = bpy.props.StringProperty(
         name="Name of empty:",
-        description = "The name of the object.",
+        description="The name of the object.",
         default="custom animation")
 
     startAtLine = bpy.props.IntProperty(
-        name = "Start at line:",
-        description = "Starting point to read to file.",
-        default=1 )
+        name="Start at line:",
+        description="Starting point to read to file.",
+        default=1)
 
     xColumn = bpy.props.IntProperty(
-        name = "X Column:",
-        description = "Set the X coloumn.",
-        default = 1,
-        min = 1,
-        max = 3 )
+        name="X Column:",
+        description="Set the X coloumn.",
+        default=1,
+        min=1,
+        max=3)
 
     yColumn = bpy.props.IntProperty(
-        name = "Y Column:",
-        description = "Set the Y coloumn.",
-        default = 2,
-        min = 1,
-        max = 3 )
+        name="Y Column:",
+        description="Set the Y coloumn.",
+        default=2,
+        min=1,
+        max=3)
 
     zColumn = bpy.props.IntProperty(
         name="Z Column:",
-        description = "Set the Z coloumn.",
-        default = 3,
-        min = 1,
-        max = 3 )
+        description="Set the Z coloumn.",
+        default=3,
+        min=1,
+        max=3)
 
     timelineStart = bpy.props.IntProperty(
         name="Timeline starting point:",
-        description = "Offset in timeline.",
-        default=1 )
+        description="Offset in timeline.",
+        default=1)
 
     timelineIncrement = bpy.props.IntProperty(
         name="Offset keys:",
-        description = "Insert keframe with an offset.",
-        default=1 )
-
+        description="Insert keframe with an offset.",
+        default=1)
 
     mult = bpy.props.FloatProperty(
-        name = "Multiply values by:", 
-        description = "Multiply the values.",
-        default = 1.00,
-        min = 0.01,
-        max = 1000 )
+        name="Multiply values by:",
+        description="Multiply the values.",
+        default=1.00,
+        min=0.01,
+        max=1000)
 
     add = bpy.props.FloatProperty(
-        name = "Add values by:", 
-        description = "Add X to the values.",
-        default = 0 )
-
+        name="Add values by:",
+        description="Add X to the values.",
+        default=0)
 
     def invoke(self, context, event):
         context.window_manager.invoke_props_dialog(self, width=330)
-        return {'RUNNING_MODAL'}  
-
+        return {'RUNNING_MODAL'}
 
     def execute(self, context):
         scene = context.scene
@@ -1287,7 +1290,7 @@ class ImportAsciiButton(bpy.types.Operator):
 
         #print (vfxToolbox.AsciiImportPathProperty_)
         if (get_Prop('AsciiImportPathProperty_', vfxToolbox) != 'Undefined'):
-         
+
             # read the file
             filedata = read_ascii_file(get_Prop('AsciiImportPathProperty_', vfxToolbox), startAtLine_value)
 
@@ -1295,22 +1298,22 @@ class ImportAsciiButton(bpy.types.Operator):
             if filedata != False:
 
                 # create empty
-                start_pos = (0,0,0)
-                bpy.ops.object.add(type='EMPTY', location=start_pos) 
+                start_pos = (0, 0, 0)
+                bpy.ops.object.add(type='EMPTY', location=start_pos)
                 ob = bpy.context.active_object
                 ob.empty_draw_size = ob.empty_draw_size * 4
                 ob.name = name_value
-                
+
                 # set start frame and offset
                 frame_num = timelineStart_value
                 offset = timelineIncrement_value
 
                 # get all values #xyz = [list(t) for t in zip(filedata[1], filedata[2], filedata[3])]
                 xyz = [list(t) for t in zip(filedata[xColumn_value], filedata[yColumn_value], filedata[zColumn_value])]
-                if mult_value != 1: # check for multiply
-                    xyz = multiplyXYZ(filedata[xColumn_value], filedata[yColumn_value], filedata[zColumn_value],  mult_value)
-                if add_value != 0: # check for additon
-                    xyz = addToXYZ(filedata[xColumn_value], filedata[yColumn_value], filedata[zColumn_value],  add_value)
+                if mult_value != 1:  # check for multiply
+                    xyz = multiplyXYZ(filedata[xColumn_value], filedata[yColumn_value], filedata[zColumn_value], mult_value)
+                if add_value != 0:  # check for additon
+                    xyz = addToXYZ(filedata[xColumn_value], filedata[yColumn_value], filedata[zColumn_value], add_value)
 
                 # insert location keyframes
                 if prop == 'LOC':
@@ -1332,7 +1335,7 @@ class ImportAsciiButton(bpy.types.Operator):
                         frame_num += offset
 
                     self.report({'INFO'}, 'Added Rotation Animation.')
-                
+
                 # insert scale keyframes
                 if prop == 'SCL':
                     for i in xyz:
@@ -1342,9 +1345,8 @@ class ImportAsciiButton(bpy.types.Operator):
                         frame_num += offset
 
                     self.report({'INFO'}, 'Added Scale Animation.')
-                
-                
-                else: # if nothing matches insert location keyframes
+
+                else:  # if nothing matches insert location keyframes
                     for i in xyz:
                         bpy.context.scene.frame_set(frame_num)
                         ob.location = i
@@ -1353,120 +1355,119 @@ class ImportAsciiButton(bpy.types.Operator):
 
                     self.report({'INFO'}, 'Added Location Animation.')
 
-                
-                self.report({'INFO'}, 'Object created.')   
+                self.report({'INFO'}, 'Object created.')
 
             else:
                 self.report({'INFO'}, 'Error creating object. Data not readable.')
         else:
             self.report({'INFO'}, 'No file selected.')
-                     
+
         return{'FINISHED'}
 
 
 # ------------------------------------------------------------------------
 #    set empty size button
 # ------------------------------------------------------------------------
- 
+
 class SetEmptySizeButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.set_empty_size"
     bl_label = "Update Size"
-    bl_description = "Sets the size of empties in selection." 
-    
+    bl_description = "Sets the size of empties in selection."
+
     def execute(self, context):
         scene = context.scene
         vfxToolbox = scene.vfxToolbox
-        
+
         """ NOT IN USE """
         # if 'all empties in scene' is enabled
         if (vfxToolbox.AllOrInSelectionProperty_) == True:
             # get all empties in scene
             selection = get_allObjectsInSceneByType('EMPTY')
-            
-            # set size           
+
+            # set size
             set_emptySize(selection, vfxToolbox.EmptySizeProperty_)
-            
-            # output result 
+
+            # output result
             if len(selection) > 1:
                 # output result
-                self.report({'INFO'}, (str(len(selection)) + ' empties set to: ' +  str(vfxToolbox.EmptySizeProperty_)))
+                self.report({'INFO'}, (str(len(selection)) + ' empties set to: ' + str(vfxToolbox.EmptySizeProperty_)))
             else:
-                self.report({'INFO'}, (str(len(selection)) + ' empty set to: ' +  str(vfxToolbox.EmptySizeProperty_)))
-        
+                self.report({'INFO'}, (str(len(selection)) + ' empty set to: ' + str(vfxToolbox.EmptySizeProperty_)))
+
         # if 'all empties in scene' is disabled
-        else:            
+        else:
             # get empties in selection
             selection = get_ObjectsInSelectionByType('EMPTY')
-            
+
             if len(selection) > 0:
                 # set size
                 set_emptySize(selection, vfxToolbox.EmptySizeProperty_)
 
                 if len(selection) > 1:
                     # output result
-                    self.report({'INFO'}, (str(len(selection)) + ' empties set to: ' +  str(vfxToolbox.EmptySizeProperty_)[:4]))
+                    self.report({'INFO'}, (str(len(selection)) + ' empties set to: ' + str(vfxToolbox.EmptySizeProperty_)[:4]))
                 else:
-                    self.report({'INFO'}, (str(len(selection)) + ' empty set to: ' +  str(vfxToolbox.EmptySizeProperty_)[:4]))
+                    self.report({'INFO'}, (str(len(selection)) + ' empty set to: ' + str(vfxToolbox.EmptySizeProperty_)[:4]))
 
-            #----------------------------------------------------------------------------------- 
+            #-----------------------------------------------------------------------------------
             else:
                 self.report({'INFO'}, 'Nothing selected.')
-                  
+
         return{'FINISHED'}
- 
+
 
 # ------------------------------------------------------------------------
 #   select multiple objects button
 # ------------------------------------------------------------------------
- 
+
 class FindAndSelectObjectsButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.find_objects"
     bl_label = "Find Object Sequence"
     bl_description = "Selects all objects in the scene by the given search string."
-    
+
     def execute(self, context):
         scene = context.scene
         vfxToolbox = scene.vfxToolbox
-        
+
         if (vfxToolbox.SearchForObjectsProperty_ != 'Undefined'):
             bpy.ops.object.select_all(action='DESELECT')
             selection = get_allObjectsBySearchString(vfxToolbox.SearchForObjectsProperty_)
             n = len(selection)
-            
+
             if n > 0:
                 get_highlightObjects(selection)
-                self.report({'INFO'}, "%d Object%s selected." % (n, "s"[n==1:]))
+                self.report({'INFO'}, "%d Object%s selected." % (n, "s"[n == 1:]))
             else:
                 self.report({'INFO'}, 'Nothing found.')
-            
+
         else:
             self.report({'INFO'}, 'Nothing found.')
-                          
+
         return{'FINISHED'}
- 
+
 
 # ------------------------------------------------------------------------
 #   rename multi selection button
 # ------------------------------------------------------------------------
- 
+
 class RenameSelectionButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.rename_selected_objects"
     bl_label = "Rename Selection"
     bl_description = "Renames selection as sequence."
-    
+
     def execute(self, context):
         scene = context.scene
         vfxToolbox = scene.vfxToolbox
 
-        if (vfxToolbox.RenameObjectsProperty_ != 'Undefined'):        
+        if (vfxToolbox.RenameObjectsProperty_ != 'Undefined'):
             selection = get_AllObjectsInSelection()
-            if len(selection) > 1 :
+            if len(selection) > 1:
                 rename_objectsByNewName(selection, vfxToolbox.RenameObjectsProperty_)
                 self.report({'INFO'}, 'Objects renamed to ' + vfxToolbox.RenameObjectsProperty_ + '.')
             else:
                 self.report({'INFO'}, 'More than 1 object have to be selected.')
 
-        else: 
+        else:
             self.report({'INFO'}, 'Nothing found.')
 
         return{'FINISHED'}
@@ -1480,22 +1481,22 @@ class GroupSelectionButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.group_selected_objects"
     bl_label = "Add Parent"
     bl_description = "Creates a parent for the selection."
-   
+
     def execute(self, context):
         selection = get_AllObjectsInSelection()
         if len(selection) > 0:
             bpy.ops.view3d.snap_cursor_to_selected()
-        
+
             bpy.ops.object.add(type='EMPTY')
-        
+
             bpy.ops.view3d.snap_selected_to_cursor()
             newEmpty = bpy.context.active_object
-        
+
             selection.append(newEmpty)
-            get_highlightObjects(selection)  
-            bpy.ops.object.parent_set(type='OBJECT')    
-        
-            get_hideSelectObjects(selection[0:len(selection)-1])
+            get_highlightObjects(selection)
+            bpy.ops.object.parent_set(type='OBJECT')
+
+            get_hideSelectObjects(selection[0:len(selection) - 1])
 
             self.report({'INFO'}, 'Parent created.')
 
@@ -1513,13 +1514,13 @@ class GroupReleaseMembersButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.group_release_children"
     bl_label = "Clear Parent"
     bl_description = "Releases all children and apply transformations."
-   
+
     def execute(self, context):
         selection = get_AllObjectsInSelection()
 
         # check selection length
         if len(selection) > 0:
-            
+
             for n in selection:
                 objectName = n.name     # get the name
                 childList = n.children  # get the childlist
@@ -1529,22 +1530,22 @@ class GroupReleaseMembersButton(bpy.types.Operator):
                     for i in childList:
                         subObjectName = i.name
                         hidden = bpy.data.objects[subObjectName].hide_select
-                        
+
                         # check for not selectable objects
                         if (hidden == True):
                             bpy.data.objects[subObjectName].hide_select = False
-                        
-                        # select the subobject                            
+
+                        # select the subobject
                         bpy.data.objects[subObjectName].select = True
 
                         # clear the parent with keeping transformations
                         bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
-                
+
                     self.report({'INFO'}, 'Children released.')
 
                 else:
                     self.report({'INFO'}, 'No children.')
-            
+
         else:
             self.report({'INFO'}, 'Nothing selected.')
 
@@ -1554,43 +1555,44 @@ class GroupReleaseMembersButton(bpy.types.Operator):
 #    select childs button
 # ------------------------------------------------------------------------
 
+
 class GroupSelectMembersButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.group_select_children"
     bl_label = "Select Childs"
     bl_description = "Selects all children of a parent and make them selectable if not."
-   
+
     def execute(self, context):
         selection = get_AllObjectsInSelection()
 
         # check selection length
         if len(selection) > 0:
-            
+
             for n in selection:
                 objectName = n.name     # get the name
                 childList = n.children  # get the childlist
 
                 # check for children
                 if len(childList) > 0:
-                    
+
                     # set parent to not active
                     bpy.data.objects[objectName].select = False
 
                     for i in childList:
                         subObjectName = i.name
                         hidden = bpy.data.objects[subObjectName].hide_select
-                        
+
                         # check for not selectable objects
                         if (hidden == True):
                             bpy.data.objects[subObjectName].hide_select = False
-                        
-                        # select the subobject                            
+
+                        # select the subobject
                         bpy.data.objects[subObjectName].select = True
-                
+
                     self.report({'INFO'}, 'Children selected.')
 
                 else:
                     self.report({'INFO'}, 'No children.')
-            
+
         else:
             self.report({'INFO'}, 'Nothing selected.')
 
@@ -1599,33 +1601,33 @@ class GroupSelectMembersButton(bpy.types.Operator):
 
 # ------------------------------------------------------------------------
 #    freeze selection button
-# ------------------------------------------------------------------------   
+# ------------------------------------------------------------------------
 
 class FreezeObjectsButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.freeze_selected_objects"
     bl_label = "Freeze Selection"
     bl_description = "Disables the viewport selection of current objects."
-   
+
     def execute(self, context):
         selection = get_AllObjectsInSelection()
         n = len(selection)
         if n > 0:
             get_hideSelectObjects(selection)
-            self.report({'INFO'}, "%d Object%s frozen." % (n, "s"[n==1:]))
+            self.report({'INFO'}, "%d Object%s frozen." % (n, "s"[n == 1:]))
         else:
             self.report({'INFO'}, 'Nothing selected.')
-        return{'FINISHED'} 
+        return{'FINISHED'}
 
 
 # ------------------------------------------------------------------------
 #    unfreeze all button
-# ------------------------------------------------------------------------ 
+# ------------------------------------------------------------------------
 
 class UnfreezeButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.defreeze_all_objects"
     bl_label = "Unfreeze All"
     bl_description = "Enables viewport selection of all objects in scene."
-   
+
     def execute(self, context):
         bpy.ops.object.select_all(action='DESELECT')
         selection = get_AllObjectsInScene()
@@ -1634,22 +1636,22 @@ class UnfreezeButton(bpy.types.Operator):
         if n > 0:
             freezed_array = get_dehideSelectObjects(selection)
             get_highlightObjects(freezed_array)
-            self.report({'INFO'}, "%d Object%s released." % (n, "s"[n==1:]))
+            self.report({'INFO'}, "%d Object%s released." % (n, "s"[n == 1:]))
         else:
             self.report({'INFO'}, 'Nothing selected.')
-        
-        return{'FINISHED'} 
+
+        return{'FINISHED'}
 
 
 # ------------------------------------------------------------------------
 #    get empties and camera button
-# ------------------------------------------------------------------------ 
+# ------------------------------------------------------------------------
 
 class SelectEmptiesAndCamerasButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.select_cameras_and_empties"
     bl_label = "Select Cameras & Empties"
     bl_description = "Selects all cameras and empties."
-   
+
     def execute(self, context):
         # get all empties function
         bpy.ops.object.select_all(action='DESELECT')
@@ -1658,17 +1660,17 @@ class SelectEmptiesAndCamerasButton(bpy.types.Operator):
         count_empties = len(selection_empties)
         count_cams = len(selction_cams)
         n = count_empties + count_cams
-        
+
         if n > 0:
-            #highlight all objects
+            # highlight all objects
             get_highlightObjects(selection_empties)
             get_highlightObjects(selction_cams)
-            self.report({'INFO'}, "%d Object%s selected." % (n, "s"[n==1:]))
+            self.report({'INFO'}, "%d Object%s selected." % (n, "s"[n == 1:]))
 
         else:
             self.report({'INFO'}, 'Nothing found.')
 
-        return{'FINISHED'} 
+        return{'FINISHED'}
 
 
 # ------------------------------------------------------------------------
@@ -1679,60 +1681,60 @@ class SelectAllEmptiesInSceneButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.all_empties_in_scene"
     bl_label = "Select Empties in Scene"
     bl_description = "Selects all empties in scene."
-   
+
     def execute(self, context):
-        
+
         # get all empties function
         bpy.ops.object.select_all(action='DESELECT')
         selection = get_allObjectsInSceneByType('EMPTY')
         n = len(selection)
 
         if n > 0:
-            #highlight all objects
+            # highlight all objects
             get_highlightObjects(selection)
-            self.report({'INFO'}, "%d Object%s selected." % (n, "s"[n==1:]))
+            self.report({'INFO'}, "%d Object%s selected." % (n, "s"[n == 1:]))
 
         else:
             self.report({'INFO'}, 'No empty in scene.')
 
-        return{'FINISHED'}    
+        return{'FINISHED'}
 
- 
+
 # ------------------------------------------------------------------------
 #    get all empties in selection button
-# ------------------------------------------------------------------------  
- 
+# ------------------------------------------------------------------------
+
 class SelectAllEmptiesInSelectionButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.all_empties_in_selection"
     bl_label = "Find Empties in Selection"
     bl_description = "Selects all empties in selection."
- 
+
     def execute(self, context):
-        
+
         # get all empties in selecton function
         selection = get_ObjectsInSelectionByType('EMPTY')
         n = len(selection)
-        
+
         if n > 0:
             # deselect all
             bpy.ops.object.select_all(action='DESELECT')
-            
-            #highlight all objects
+
+            # highlight all objects
             get_highlightObjects(selection)
 
-            #print info
-            self.report({'INFO'}, "%d Object%s selected." % (n, "s"[n==1:]))
+            # print info
+            self.report({'INFO'}, "%d Object%s selected." % (n, "s"[n == 1:]))
 
         else:
             self.report({'INFO'}, 'No empty in selection.')
-        
-        return{'FINISHED'}  
+
+        return{'FINISHED'}
 
 
 # ------------------------------------------------------------------------
-#    axes buttons 
+#    axes buttons
 # ------------------------------------------------------------------------
- 
+
 class EmptyAppearanceButtons(bpy.types.Operator):
     bl_idname = "vfxtoolbox.empty_appearance"
     bl_label = "Button"
@@ -1741,39 +1743,38 @@ class EmptyAppearanceButtons(bpy.types.Operator):
     number = bpy.props.IntProperty()
     row = bpy.props.IntProperty()
     loc = bpy.props.StringProperty()
- 
+
     def execute(self, context):
         scene = context.scene
         vfxToolbox = scene.vfxToolbox
-        
+
         if self.loc:
             words = self.loc.split()
             self.row = int(words[0])
             self.number = int(words[1])
-        
+
         # helper for setting typenumber
         def get_formatByNumber(button_number_int):
-            return ['NONE','PLAIN_AXES','SPHERE','CIRCLE','CUBE','IMAGE'][button_number_int]  
+            return ['NONE', 'PLAIN_AXES', 'SPHERE', 'CIRCLE', 'CUBE', 'IMAGE'][button_number_int]
 
-        
         """ NOT IN USE """
         if (vfxToolbox.AllOrInSelectionProperty_) == True:
-            
+
             # get all empties function
             selection = get_allObjectsInSceneByType('EMPTY')
-            
+
             # format empties
             set_emptyType(selection, get_formatByNumber(self.number))
-            
+
         else:
             selection = get_ObjectsInSelectionByType('EMPTY')
             if len(selection) > 0:
                 set_emptyType(selection, get_formatByNumber(self.number))
-                
+
             else:
-                self.report({'INFO'}, 'Nothing selected.')        
-        
-        return{'FINISHED'} 
+                self.report({'INFO'}, 'Nothing selected.')
+
+        return{'FINISHED'}
 
 
 # ------------------------------------------------------------------------
@@ -1784,17 +1785,17 @@ class ConnecttwoEmptiesButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.empty_connect"
     bl_label = "Connect 2 Empties"
     bl_description = "Connects 2 selected empties."
- 
+
     def execute(self, context):
-        
+
         selection = get_ObjectsInSelectionByType('EMPTY')
         if len(selection) == 2:
             newLine_name_string = create_edgeFrom2Objects(selection)
-            
+
             # select the new line
             # newLine_name_string = blender_namingLimitation(newLine_name_string)
             bpy.ops.object.select_pattern(pattern=newLine_name_string)
-            
+
             # deselect all
             bpy.ops.object.select_all(action='DESELECT')
 
@@ -1808,55 +1809,53 @@ class ConnecttwoEmptiesButton(bpy.types.Operator):
 
 # ------------------------------------------------------------------------
 #    poincloud button
-# ------------------------------------------------------------------------   
+# ------------------------------------------------------------------------
 
 class EmptiesToPointcloudButton(bpy.types.Operator):
     bl_idname = "vfxtoolbox.empty_pointcloud"
     bl_label = "Pointcloud from Empties"
     bl_description = "Creates a pointcloud by the positions of the selected empties."
- 
+
     def execute(self, context):
 
         selection = get_ObjectsInSelectionByType('EMPTY')
-        
+
         if len(selection) > 0:
             newpointcloud_name_string = create_PointCloud(selection)
-        
+
             # deselect all
             bpy.ops.object.select_all(action='DESELECT')
-        
+
             # select the pointclud
             #newpointcloud_name_string = blender_namingLimitation(newpointcloud_name_string)
             bpy.ops.object.select_pattern(pattern=newpointcloud_name_string)
-            
+
             # hightlight it!
             selectPointCloud = get_objectByName(newpointcloud_name_string)
             make_objectActive(selectPointCloud)
 
-            self.report({'INFO'}, 'Pointcloud created.') 
-            
+            self.report({'INFO'}, 'Pointcloud created.')
+
         else:
             self.report({'INFO'}, 'No empty in selection.')
 
         return{'FINISHED'}
-    
+
 
 # ------------------------------------------------------------------------
 # register and unregister functions
 # ------------------------------------------------------------------------
 
 def register():
-    bpy.utils.register_class(META_TAB_VFX)    
+    bpy.utils.register_class(META_TAB_VFX)
     bpy.utils.register_module(__name__)
     bpy.types.Scene.vfxToolbox = PointerProperty(type=VfxToolboxSettings)
-    
+
+
 def unregister():
-    bpy.utils.unregister_class(META_TAB_VFX)       
+    bpy.utils.unregister_class(META_TAB_VFX)
     bpy.utils.unregister_module(__name__)
     del bpy.types.Scene.vfxToolbox
-    
+
 if __name__ == "__main__":
     register()
-
-
-

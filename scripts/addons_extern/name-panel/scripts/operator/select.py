@@ -24,103 +24,105 @@ from bpy.types import Operator
 from bpy.props import BoolProperty, StringProperty
 
 # make active bone
+
+
 class vertexGroup(Operator):
-  '''
-    Selects a vertex group when called.
-  '''
-  bl_idname = 'object.select_vertex_group'
-  bl_label = 'Make Active Bone'
-  bl_description = 'Select this vertex group.'
-  bl_options = {'REGISTER', 'UNDO'}
-
-  # object
-  object  = StringProperty(
-    name = 'Object',
-    description = 'The object the vertex group is in.',
-    default = ''
-  )
-
-  # target
-  target = StringProperty(
-    name = 'Target',
-    description = 'The target vertex group that will be selected.',
-    default = ''
-  )
-
-  # extend
-  extend = BoolProperty(
-    name = 'Extend Selection',
-    description = 'Extend the selection.',
-    default = False
-  )
-
-  # poll
-  @classmethod
-  def poll(cls, context):
     '''
-      Space data type must be in 3D view.
+      Selects a vertex group when called.
     '''
-    return context.space_data.type in 'VIEW_3D'
+    bl_idname = 'object.select_vertex_group'
+    bl_label = 'Make Active Bone'
+    bl_description = 'Select this vertex group.'
+    bl_options = {'REGISTER', 'UNDO'}
 
-  # execute
-  def execute(self, context):
-    '''
-      Execute the operator.
-    '''
-    try:
-      if bpy.data.objects[self.object] != context.scene.objects.active:
+    # object
+    object = StringProperty(
+        name='Object',
+        description='The object the vertex group is in.',
+        default=''
+    )
 
-        # select
-        context.scene.objects.active.select = True
+    # target
+    target = StringProperty(
+        name='Target',
+        description='The target vertex group that will be selected.',
+        default=''
+    )
 
-        # mode set
-        bpy.ops.object.mode_set(mode='OBJECT')
+    # extend
+    extend = BoolProperty(
+        name='Extend Selection',
+        description='Extend the selection.',
+        default=False
+    )
 
-        # active object
-        context.scene.objects.active = bpy.data.objects[self.object]
-      if not context.object.mode in 'EDIT':
+    # poll
+    @classmethod
+    def poll(cls, context):
+        '''
+          Space data type must be in 3D view.
+        '''
+        return context.space_data.type in 'VIEW_3D'
 
-        # mode set
-        bpy.ops.object.mode_set(mode='EDIT')
+    # execute
+    def execute(self, context):
+        '''
+          Execute the operator.
+        '''
+        try:
+            if bpy.data.objects[self.object] != context.scene.objects.active:
 
-      # bmesh
-      mesh = bmesh.from_edit_mesh(context.active_object.data)
+                # select
+                context.scene.objects.active.select = True
 
-      # extend
-      if not self.extend:
+                # mode set
+                bpy.ops.object.mode_set(mode='OBJECT')
 
-        # clear vertex
-        for vertex in mesh.verts:
-          vertex.select = False
+                # active object
+                context.scene.objects.active = bpy.data.objects[self.object]
+            if not context.object.mode in 'EDIT':
 
-        # clear edge
-        for edge in mesh.edges:
-          edge.select = False
+                # mode set
+                bpy.ops.object.mode_set(mode='EDIT')
 
-        # clear face
-        for face in mesh.faces:
-          face.select = False
+            # bmesh
+            mesh = bmesh.from_edit_mesh(context.active_object.data)
 
-      # group index
-      groupIndex = context.active_object.vertex_groups[self.target].index
+            # extend
+            if not self.extend:
 
-      # deform layer
-      deformLayer = mesh.verts.layers.deform.active
+                # clear vertex
+                for vertex in mesh.verts:
+                    vertex.select = False
 
-      # select vertices
-      for vertex in mesh.verts:
-        deformVertex = vertex[deformLayer]
-        if groupIndex in deformVertex:
-          vertex.select = True
+                # clear edge
+                for edge in mesh.edges:
+                    edge.select = False
 
-      # flush selection
-      mesh.select_flush(True)
+                # clear face
+                for face in mesh.faces:
+                    face.select = False
 
-      # update viewport
-      context.scene.objects.active = context.scene.objects.active
+            # group index
+            groupIndex = context.active_object.vertex_groups[self.target].index
 
-    except:
+            # deform layer
+            deformLayer = mesh.verts.layers.deform.active
 
-      # warning messege
-      self.report({'WARNING'}, 'Invalid target.')
-    return {'FINISHED'}
+            # select vertices
+            for vertex in mesh.verts:
+                deformVertex = vertex[deformLayer]
+                if groupIndex in deformVertex:
+                    vertex.select = True
+
+            # flush selection
+            mesh.select_flush(True)
+
+            # update viewport
+            context.scene.objects.active = context.scene.objects.active
+
+        except:
+
+            # warning messege
+            self.report({'WARNING'}, 'Invalid target.')
+        return {'FINISHED'}

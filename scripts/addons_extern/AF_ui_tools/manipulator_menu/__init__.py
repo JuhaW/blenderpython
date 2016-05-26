@@ -1,4 +1,4 @@
-#re creating the functionality of the manipulator menu from 2.49
+# re creating the functionality of the manipulator menu from 2.49
 
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
@@ -34,10 +34,11 @@ bl_info = {
 from .utils import AddonPreferences, SpaceProperty
 import bpy
 
+
 def main(context):
     bpy.context.space_data.manipulator = False
 
-#class VIEW3D_OT_disable_manipulator(bpy.types.Operator):
+# class VIEW3D_OT_disable_manipulator(bpy.types.Operator):
 #    """"""
 #    bl_idname = "VIEW3D_OT_disable_manipulator"
 #    bl_label = "disable manipulator"
@@ -58,24 +59,24 @@ class VIEW3D_MT_ManipulatorMenu(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        props = layout.operator("view3d.enable_manipulator",text ='Translate', icon='MAN_TRANS')
+        props = layout.operator("view3d.enable_manipulator", text='Translate', icon='MAN_TRANS')
         props.translate = True
 
-        props = layout.operator("view3d.enable_manipulator",text ='Rotate', icon='MAN_ROT')
+        props = layout.operator("view3d.enable_manipulator", text='Rotate', icon='MAN_ROT')
         props.rotate = True
 
-        props = layout.operator("view3d.enable_manipulator",text ='Scale', icon='MAN_SCALE')
+        props = layout.operator("view3d.enable_manipulator", text='Scale', icon='MAN_SCALE')
         props.scale = True
         layout.separator()
 
-        props = layout.operator("view3d.enable_manipulator",text ='Combo', icon='MAN_SCALE')
+        props = layout.operator("view3d.enable_manipulator", text='Combo', icon='MAN_SCALE')
         props.scale = True
         props.rotate = True
         props.translate = True
 
         layout.separator()
 
-        props = layout.operator("view3d.enable_manipulator",text ='Hide', icon='MAN_SCALE')
+        props = layout.operator("view3d.enable_manipulator", text='Hide', icon='MAN_SCALE')
         props.scale = False
         props.rotate = False
         props.translate = False
@@ -84,7 +85,8 @@ class VIEW3D_MT_ManipulatorMenu(bpy.types.Menu):
 
 classes = [
     VIEW3D_MT_ManipulatorMenu,
-    ]
+]
+
 
 def register():
     for cls in classes:

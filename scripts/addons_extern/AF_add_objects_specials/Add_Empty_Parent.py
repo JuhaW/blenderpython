@@ -1,27 +1,29 @@
 bl_info = {
-"name": "Add a parent",
-"author": "Chebhou",
-"version": (1, 0),
-"blender": (2, 65, 0),
-"description": "Adds a parent for the selected objects",
-"category": "Object"}
+    "name": "Add a parent",
+    "author": "Chebhou",
+    "version": (1, 0),
+    "blender": (2, 65, 0),
+    "description": "Adds a parent for the selected objects",
+    "category": "Object"}
 
 
 import bpy
 import sys
 from bpy.props import BoolProperty, EnumProperty, StringProperty
 
+
 def add_parent(self, context):
     selected_obj = bpy.context.selected_objects.copy()
-    if self.position != 'None' :
-        exec("bpy.ops.view3d.snap_cursor_to_%s()"%self.position)
-    bpy.ops.object.empty_add(type = self.type)
+    if self.position != 'None':
+        exec("bpy.ops.view3d.snap_cursor_to_%s()" % self.position)
+    bpy.ops.object.empty_add(type=self.type)
     bpy.context.object.name = self.name
     inv_mat = bpy.context.object.matrix_world.inverted()
-    for obj in selected_obj :
+    for obj in selected_obj:
         obj.parent = bpy.context.object
-        if self.inverse :
+        if self.inverse:
             obj.matrix_parent_inverse = inv_mat
+
 
 class AddParent(bpy.types.Operator):
     """Create a new parent"""
@@ -29,39 +31,38 @@ class AddParent(bpy.types.Operator):
     bl_label = "Add a parent"
     bl_options = {'REGISTER', 'UNDO'}
 
-    type  = EnumProperty(
+    type = EnumProperty(
         name="empty type",
         description="choose the empty type",
         items=(('PLAIN_AXES', "Axis", "Axis"),
-                ('ARROWS', "Arrows", "Arrows"),
-                ('SINGLE_ARROW', "Single arrow", "Single arrow"),
-                ('CIRCLE', "Circle", "Circle"),
-                ('CUBE', "Cube", "Cube"),
+               ('ARROWS', "Arrows", "Arrows"),
+               ('SINGLE_ARROW', "Single arrow", "Single arrow"),
+               ('CIRCLE', "Circle", "Circle"),
+               ('CUBE', "Cube", "Cube"),
                ('SPHERE', "Sphere", "Sphere"),
                ('CONE', "Cone", "Cone")),
         default='PLAIN_AXES'
-        )
+    )
 
-    inverse = BoolProperty(                        
-                name = "parent inverse",                          
-                default = 0,                
-                description = "check to set the inverse"
-                )
+    inverse = BoolProperty(
+        name="parent inverse",
+        default=0,
+        description="check to set the inverse"
+    )
 
+    position = EnumProperty(
+        name="parent position",
+        description="where to create the parent",
+        items=(('center', "World center", "World center"),
+               ('None', "Cursor position", "Cursor position"),
+               ('selected', "Median point", "Median position"),
+               ('active', "Active object position", "Active position"),),
+        default='center'
+    )
 
-    position  = EnumProperty(
-                name="parent position",
-                description="where to create the parent",
-                items=(('center', "World center", "World center"),
-                       ('None', "Cursor position", "Cursor position"),
-                       ('selected', "Median point", "Median position"),
-                       ('active', "Active object position", "Active position"),),
-                default='center'
-                )
-
-    name      = StringProperty(
-                name ="name",
-                default ="Parent")
+    name = StringProperty(
+        name="name",
+        default="Parent")
 
     def execute(self, context):
         add_parent(self, context)
@@ -70,6 +71,7 @@ class AddParent(bpy.types.Operator):
 
 addon_keymaps = []
 
+
 def register():
     bpy.utils.register_class(AddParent)
 
@@ -77,7 +79,7 @@ def register():
     kc = wm.keyconfigs.addon
     if kc:
         km = wm.keyconfigs.addon.keymaps.new(name='Object Mode', space_type='EMPTY')
-        kmi = km.keymap_items.new(AddParent.bl_idname, 'P', 'PRESS')# you can chnge the shortcut later
+        kmi = km.keymap_items.new(AddParent.bl_idname, 'P', 'PRESS')  # you can chnge the shortcut later
         addon_keymaps.append((km, kmi))
 
 

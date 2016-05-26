@@ -7,7 +7,7 @@
 #!BPY
 import bpy
 
-#bl_info = {
+# bl_info = {
 #    "name": "Look at it",
 #    "author": "ishidourou",
 #    "version": (1, 0),
@@ -46,15 +46,18 @@ class LookatItPanel(bpy.types.Panel):
 """
 #---- main ------
 
-def objselect(objct,selection):
+
+def objselect(objct, selection):
     if (selection == 'ONLY'):
         bpy.ops.object.select_all(action='DESELECT')
     bpy.context.scene.objects.active = objct
     objct.select = True
 
+
 class LookatIt(bpy.types.Operator):
     bl_idname = "lookat.it"
     bl_label = "Look at it"
+
     def execute(self, context):
         cobj = bpy.context.object
         if bpy.context.mode != 'OBJECT':
@@ -81,7 +84,7 @@ def lookatempty(mode):
     for i in slist:
         ct += 1
     if ct == 0:
-        return            
+        return
     bpy.ops.object.empty_add(type='PLAIN_AXES', view_align=False)
     bpy.context.object.empty_draw_size = 3.00
     target = bpy.context.object
@@ -95,71 +98,86 @@ def lookatempty(mode):
         bpy.ops.object.track_set(type='LOCKTRACK')
     if mode == 'cursor':
         bpy.ops.object.track_clear(type='CLEAR_KEEP_TRANSFORM')
-        objselect(target,'ONLY')
+        objselect(target, 'ONLY')
         bpy.ops.object.delete(use_global=False)
-        objselect(cobj,'ADD')
+        objselect(cobj, 'ADD')
         for i in slist:
             i.select = True
+
 
 class LookatCursor(bpy.types.Operator):
     bl_idname = "lookat.cursor"
     bl_label = "Look at Cursor"
+
     def execute(self, context):
         lookatempty('cursor')
         return{'FINISHED'}
-    
+
+
 class TrackTo(bpy.types.Operator):
     bl_idname = "track.to"
     bl_label = "TrackTo"
+
     def execute(self, context):
         if bpy.context.mode != 'OBJECT':
             return{'FINISHED'}
         bpy.ops.object.track_set(type='TRACKTO')
         return{'FINISHED'}
 
+
 class DampedTrack(bpy.types.Operator):
     bl_idname = "damped.track"
     bl_label = "DampedTrack"
+
     def execute(self, context):
         if bpy.context.mode != 'OBJECT':
             return{'FINISHED'}
         bpy.ops.object.track_set(type='DAMPTRACK')
         return{'FINISHED'}
 
+
 class LockTrack(bpy.types.Operator):
     bl_idname = "lock.track"
     bl_label = "LockTrack"
+
     def execute(self, context):
         if bpy.context.mode != 'OBJECT':
             return{'FINISHED'}
         bpy.ops.object.track_set(type='LOCKTRACK')
         return{'FINISHED'}
 
+
 class TrackToEmpty(bpy.types.Operator):
     bl_idname = "track.toempty"
     bl_label = "TrackTo"
+
     def execute(self, context):
         lookatempty('tracktoempty')
         return{'FINISHED'}
 
+
 class DampedTrackEmpty(bpy.types.Operator):
     bl_idname = "damped.trackempty"
     bl_label = "DampedTrack"
+
     def execute(self, context):
         lookatempty('damptrackempty')
         return{'FINISHED'}
 
+
 class LockTrackEmpty(bpy.types.Operator):
     bl_idname = "lock.trackempty"
     bl_label = "LockTrack"
+
     def execute(self, context):
         lookatempty('locktrackempty')
         return{'FINISHED'}
 
 #	Registration
 
+
 def register():
-    #bpy.utils.register_class(LookatItPanel)
+    # bpy.utils.register_class(LookatItPanel)
     bpy.utils.register_class(LookatIt)
     bpy.utils.register_class(LookatCursor)
     bpy.utils.register_class(TrackTo)
@@ -169,8 +187,9 @@ def register():
     bpy.utils.register_class(DampedTrackEmpty)
     bpy.utils.register_class(LockTrackEmpty)
 
+
 def unregister():
-    #bpy.utils.unregister_class(LookatItPanel)
+    # bpy.utils.unregister_class(LookatItPanel)
     bpy.utils.unregister_class(LookatIt)
     bpy.utils.unregister_class(LookatCursor)
     bpy.utils.unregister_class(TrackTo)
@@ -182,4 +201,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

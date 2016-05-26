@@ -2,6 +2,7 @@
 
 from bpy.types import Panel
 
+
 class MMDMaterialPanel(Panel):
     bl_idname = 'MATERIAL_PT_mmd_tools_material'
     bl_label = 'MMD Material'
@@ -83,7 +84,6 @@ class MMDTexturePanel(Panel):
         mmd_material = material.mmd_material
 
         layout = self.layout
-
 
         tex_slots = material.texture_slots.values()
         col = layout.column(align=True)

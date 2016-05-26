@@ -23,9 +23,9 @@
 # File: __init__.py
 # Author: Antonio Vazquez (antonioya)
 # ----------------------------------------------------------
- 
+
 # ----------------------------------------------
-# Define Addon info 
+# Define Addon info
 # ----------------------------------------------
 bl_info = {
     "name": "Archimesh",
@@ -111,7 +111,7 @@ class AchmInfoMtMeshDecorationAdd(bpy.types.Menu):
         self.layout.operator("mesh.archimesh_roller", text="Add Roller curtains", icon="PLUGIN")
         self.layout.operator("mesh.archimesh_venetian", text="Add Venetian blind", icon="PLUGIN")
         self.layout.operator("mesh.archimesh_japan", text="Add Japanese curtains", icon="PLUGIN")
-    
+
 # ----------------------------------------------------------
 # Registration
 # ----------------------------------------------------------
@@ -176,7 +176,7 @@ def register():
     bpy.utils.register_class(achm_window_panel.AchmWinPanel)
     bpy.utils.register_class(achm_window_panel.AchmWindowEditPanel)
     bpy.types.INFO_MT_mesh_add.append(AchmMenu_func)
-    
+
     # Define properties
     bpy.types.Scene.archimesh_select_only = bpy.props.BoolProperty(name="Only selected",
                                                                    description="Apply auto holes only to"
@@ -267,7 +267,7 @@ def unregister():
     bpy.utils.unregister_class(achm_window_panel.AchmWinPanel)
     bpy.utils.unregister_class(achm_window_panel.AchmWindowEditPanel)
     bpy.types.INFO_MT_mesh_add.remove(AchmMenu_func)
-    
+
     # Remove properties
     del bpy.types.Scene.archimesh_select_only
     del bpy.types.Scene.archimesh_ceiling

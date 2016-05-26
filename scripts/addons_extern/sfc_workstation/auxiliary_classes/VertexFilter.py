@@ -22,7 +22,9 @@ import bpy
 from math import sqrt
 from mathutils import Matrix, Vector
 
+
 class VertexFilter():
+
     def __init__(self):
         self.coordinate_map = None
         self.indices = list()
@@ -37,14 +39,14 @@ class VertexFilter():
         vertices = self.mesh_object.data.vertices
         if space == 'OBJECT':
             self.indices = {
-                index : vertices[index].normal
+                index: vertices[index].normal
                 for index in self.indices
                 if vertices[index].normal.dot(direction_vector) > 0
             }
         elif space == 'WORLD':
             model_matrix = self.mesh_object.matrix_world
             self.indices = {
-                index : model_matrix * vertices[index].normal
+                index: model_matrix * vertices[index].normal
                 for index in self.indices
                 if (model_matrix * vertices[index].normal).dot(
                     direction_vector
@@ -91,7 +93,7 @@ class VertexFilter():
                 if index not in indices_to_discard
             ]
 
-    def discard_outside_of_circle(self, center, radius): 
+    def discard_outside_of_circle(self, center, radius):
         # Determine if the distance between each vertex and the circle's
         # center, in region space, is less than the circle's radius.  Only
         # retain the indices of vertices that are within the circle.
@@ -114,12 +116,12 @@ class VertexFilter():
         #       coordinates that are outside of the circle's bounding area,
         #       include those that are inside of the circle's circumscribed
         #       diamond, and include all else that satisfy the Pythagorean
-        #       theorem for a hypotenuse less than the circle's radius.  
+        #       theorem for a hypotenuse less than the circle's radius.
 
-    def discard_outside_of_sphere(self, center, radius): 
+    def discard_outside_of_sphere(self, center, radius):
         # Determine if the distance between each vertex and the sphere's
         # center, in object space, is less than the sphere's radius.  Only
-        # retain the indices of vertices that are within the sphere.  
+        # retain the indices of vertices that are within the sphere.
         coordinate_map = self.coordinate_map
         distance_map = dict()
         indices = self.indices
@@ -133,7 +135,7 @@ class VertexFilter():
         self.indices = inside
         return distance_map
 
-    def discard_outside_of_view(self, view): 
+    def discard_outside_of_view(self, view):
         # Assume that the mesh object's bounding box is fully contained in the
         # view projection, and test this assumption.
         bounding_box = mesh_object.bound_box
@@ -161,7 +163,7 @@ class VertexFilter():
         # If the bounding box is not entirely contained within the view
         # projection then some vertices may exist outside of the view
         # projection.
-        if not bounding_box_contained_in_projection: 
+        if not bounding_box_contained_in_projection:
             clip_space_map = self.coordinate_map
 
             # Retain each clip space vertex that is inside of the view
@@ -170,10 +172,10 @@ class VertexFilter():
             self.indices = [
                 index
                 for index in indices
-                if abs(clip_space_map[index].x) < clip_space_map[index].w and\
-                   abs(clip_space_map[index].y) < clip_space_map[index].w and\
-                   abs(clip_space_map[index].z) < clip_space_map[index].w
-            ] 
+                if abs(clip_space_map[index].x) < clip_space_map[index].w and
+                abs(clip_space_map[index].y) < clip_space_map[index].w and
+                abs(clip_space_map[index].z) < clip_space_map[index].w
+            ]
 
     def discard_raycast_occluded(self, view):
         object_space_map = self.coordinate_map
@@ -182,7 +184,7 @@ class VertexFilter():
 
         # A mesh object's raycast data is not accessible in Edit mode.
         if mesh_object.mode == 'EDIT':
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
         # A mesh object's raycast method is valid only if polygons are present.
         if polygons:
@@ -242,6 +244,6 @@ class VertexFilter():
                 index
                 for index in self.indices
                 if index in indices_to_retain
-        ]
+            ]
         else:
             self.indices = list()

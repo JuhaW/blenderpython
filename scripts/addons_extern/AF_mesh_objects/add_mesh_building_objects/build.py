@@ -77,17 +77,17 @@ class INFO_MT_mesh_objects_add(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.menu("INFO_MT_mesh_beambuilder_add",
-            text="Beam Builder")
+                    text="Beam Builder")
         layout.operator("mesh.add_say3d_balcony",
-            text="Balcony")
+                        text="Balcony")
         layout.operator("mesh.add_say3d_sove",
-            text="Sove")
+                        text="Sove")
         layout.operator("mesh.add_say3d_pencere2",
-            text="Window")
+                        text="Window")
         layout.operator("mesh.wall_add",
-            text="Wall Factory")
+                        text="Wall Factory")
         layout.operator("mesh.stairs",
-            text="Stair Builder")
+                        text="Stair Builder")
 
 
 # Register all operators and panels

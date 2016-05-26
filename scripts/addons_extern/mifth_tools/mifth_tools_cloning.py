@@ -132,7 +132,7 @@ class MFTCloneProperties(bpy.types.PropertyGroup):
                ('Z', 'Z', ''),
                ('-Z', '-Z', '')
                ),
-        default = 'Z'
+        default='Z'
     )
 
     # Radial Clone Settings
@@ -141,14 +141,14 @@ class MFTCloneProperties(bpy.types.PropertyGroup):
                ('Y', 'Y', ''),
                ('Z', 'Z', '')
                ),
-        default = 'Z'
+        default='Z'
     )
 
     radialClonesAxisType = EnumProperty(
         items=(('Global', 'Global', ''),
                ('Local', 'Local', '')
                ),
-        default = 'Global'
+        default='Global'
     )
 
     # GroupInstance to Cursor
@@ -366,8 +366,8 @@ def copy_settings_clones(newObj, oldObj):
 
     # Copy Modifiers
     for old_modifier in oldObj.modifiers.values():
-            new_modifier = newObj.modifiers.new(name=old_modifier.name,
-                                                type=old_modifier.type)
+        new_modifier = newObj.modifiers.new(name=old_modifier.name,
+                                            type=old_modifier.type)
 
     # copy duplis
     if oldObj.dupli_group is not None:
@@ -616,7 +616,7 @@ def mft_pick_and_clone(self, context, event, ray_max=10000.0):
                     # best_obj_nor).angle(newDupZAxis2)
                 # if fixDirRotAngle < math.radians(90.0):
                     # newDirRotAngle = - \
-                        # newDirRotAngle  # As we do it in negative axis
+                    # newDirRotAngle  # As we do it in negative axis
                 # Main rotation
                 # bpy.ops.transform.rotate(value=newDirRotAngle, axis=(
                     #(best_obj_nor.x, best_obj_nor.y, best_obj_nor.z)), proportional='DISABLED')

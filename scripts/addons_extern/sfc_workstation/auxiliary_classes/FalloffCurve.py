@@ -21,12 +21,14 @@
 from math import pi, sin, sqrt
 from random import random
 
+
 class FalloffCurve():
-    def __init__(self, steps = 250):
+
+    def __init__(self, steps=250):
         self.curve = dict()
         self.steps = steps
         self.profile = 'SMOOTH'
- 
+
     def generate_curve(self):
         domain_max = self.steps - 1
         profile = self.profile
@@ -35,35 +37,35 @@ class FalloffCurve():
         # Map the domain of steps to the respective range of intensities for
         # each nonrandom falloff curve profile.
         if profile == 'CONSTANT':
-            self.curve = {i : 1 for i in range(steps)}
+            self.curve = {i: 1 for i in range(steps)}
         elif profile == 'SMOOTH':
             C = pi / (2 * domain_max)
-            self.curve = {i : sin(C * i) for i in range(steps)}
+            self.curve = {i: sin(C * i) for i in range(steps)}
         elif profile == 'ROUND':
             C = domain_max ** 2
             self.curve = {
-                i : sqrt(C - (domain_max - i) ** 2) / domain_max
+                i: sqrt(C - (domain_max - i) ** 2) / domain_max
                 for i in range(steps)
             }
         elif profile == 'ROOT':
             C = 1 / sqrt(domain_max)
-            self.curve = {i : C * sqrt(i) for i in range(steps)} 
+            self.curve = {i: C * sqrt(i) for i in range(steps)}
         elif profile == 'SHARP':
             C = 1 / (domain_max ** 2)
-            self.curve = {i : C * i ** 2 for i in range(steps)}
+            self.curve = {i: C * i ** 2 for i in range(steps)}
         elif profile == 'LINEAR':
-            self.curve = {i : i / domain_max for i in range(steps)}
+            self.curve = {i: i / domain_max for i in range(steps)}
 
     def get_falloff_map_from_distance_map(self, distance_map, max_distance):
         # Return a falloff map by determining the intensity value for each
         # index in the domain of the distance map.
         if self.profile == 'RANDOM':
-            return {index : random() for index in distance_map}
+            return {index: random() for index in distance_map}
         else:
             C = self.steps - 1
             curve = self.curve
             return {
-                index : curve[
+                index: curve[
                     int((1 - distance_map[index] / max_distance) * C)
                 ]
                 for index in distance_map

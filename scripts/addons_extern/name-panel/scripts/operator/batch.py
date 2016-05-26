@@ -24,194 +24,196 @@ from bpy.types import Operator
 from ..function import batch
 
 # name
+
+
 class name(Operator):
-  '''
-    Batch name datablocks.
-  '''
-  bl_idname = 'wm.batch_name'
-  bl_label = 'Batch Name'
-  bl_description = 'Batch name datablocks.'
-  bl_options = {'REGISTER', 'UNDO'}
-
-  # draw
-  def draw(self, context):
     '''
-      Operator body.
+      Batch name datablocks.
     '''
+    bl_idname = 'wm.batch_name'
+    bl_label = 'Batch Name'
+    bl_description = 'Batch name datablocks.'
+    bl_options = {'REGISTER', 'UNDO'}
 
-    # layout
-    layout = self.layout
+    # draw
+    def draw(self, context):
+        '''
+          Operator body.
+        '''
 
-    # option
-    option = context.scene.BatchName
+        # layout
+        layout = self.layout
 
-    # filter
+        # option
+        option = context.scene.BatchName
 
-    # column
-    column = layout.column(align=True)
+        # filter
 
-    # label
-    column.label(text='Filter:')
+        # column
+        column = layout.column(align=True)
 
-    # row
-    row = column.row(align=True)
+        # label
+        column.label(text='Filter:')
 
-    # batch type
-    row.prop(option, 'batchType', expand=True)
+        # row
+        row = column.row(align=True)
 
-    # column
-    column = layout.column(align=True)
+        # batch type
+        row.prop(option, 'batchType', expand=True)
 
-    # row 1
-    row = column.row(align=True)
-    row.scale_x = 5 # hack: forces buttons to line up correctly
-    row.prop(option, 'objects', text='', icon='OBJECT_DATA')
-    row.prop(option, 'groups', text='', icon='GROUP')
-    row.prop(option, 'actions', text='', icon='ACTION')
-    row.prop(option, 'greasePencil', text='', icon='GREASEPENCIL')
-    row.prop(option, 'constraints', text='', icon='CONSTRAINT')
-    row.prop(option, 'modifiers', text='', icon='MODIFIER')
-    row.prop(option, 'objectData', text='', icon='MESH_DATA')
-    row.prop(option, 'boneGroups', text='', icon='GROUP_BONE')
-    row.prop(option, 'bones', text='', icon='BONE_DATA')
-    row.prop(option, 'boneConstraints', text='', icon='CONSTRAINT_BONE')
+        # column
+        column = layout.column(align=True)
 
-    # row 2
-    row = column.row(align=True)
-    row.scale_x = 5 # hack: forces buttons to line up correctly
-    row.prop(option, 'vertexGroups', text='', icon='GROUP_VERTEX')
-    row.prop(option, 'shapekeys', text='', icon='SHAPEKEY_DATA')
-    row.prop(option, 'uvs', text='', icon='GROUP_UVS')
-    row.prop(option, 'vertexColors', text='', icon='GROUP_VCOL')
-    row.prop(option, 'materials', text='', icon='MATERIAL')
-    row.prop(option, 'textures', text='', icon='TEXTURE')
-    row.prop(option, 'particleSystems', text='', icon='PARTICLES')
-    row.prop(option, 'particleSettings', text='', icon='MOD_PARTICLES')
+        # row 1
+        row = column.row(align=True)
+        row.scale_x = 5  # hack: forces buttons to line up correctly
+        row.prop(option, 'objects', text='', icon='OBJECT_DATA')
+        row.prop(option, 'groups', text='', icon='GROUP')
+        row.prop(option, 'actions', text='', icon='ACTION')
+        row.prop(option, 'greasePencil', text='', icon='GREASEPENCIL')
+        row.prop(option, 'constraints', text='', icon='CONSTRAINT')
+        row.prop(option, 'modifiers', text='', icon='MODIFIER')
+        row.prop(option, 'objectData', text='', icon='MESH_DATA')
+        row.prop(option, 'boneGroups', text='', icon='GROUP_BONE')
+        row.prop(option, 'bones', text='', icon='BONE_DATA')
+        row.prop(option, 'boneConstraints', text='', icon='CONSTRAINT_BONE')
 
-    # type filters
-    column = layout.column()
-    column.prop(option, 'objectType', text='')
-    column.prop(option, 'constraintType', text='')
-    column.prop(option, 'modifierType', text='')
+        # row 2
+        row = column.row(align=True)
+        row.scale_x = 5  # hack: forces buttons to line up correctly
+        row.prop(option, 'vertexGroups', text='', icon='GROUP_VERTEX')
+        row.prop(option, 'shapekeys', text='', icon='SHAPEKEY_DATA')
+        row.prop(option, 'uvs', text='', icon='GROUP_UVS')
+        row.prop(option, 'vertexColors', text='', icon='GROUP_VCOL')
+        row.prop(option, 'materials', text='', icon='MATERIAL')
+        row.prop(option, 'textures', text='', icon='TEXTURE')
+        row.prop(option, 'particleSystems', text='', icon='PARTICLES')
+        row.prop(option, 'particleSettings', text='', icon='MOD_PARTICLES')
 
-    # column
-    column = layout.column(align=True)
+        # type filters
+        column = layout.column()
+        column.prop(option, 'objectType', text='')
+        column.prop(option, 'constraintType', text='')
+        column.prop(option, 'modifierType', text='')
 
-    # row 1
-    row = column.row(align=True)
-    row.scale_x = 5 # hack: forces buttons to line up correctly
-    row.prop(option, 'scenes', text='', icon='SCENE_DATA')
-    row.prop(option, 'renderLayers', text='', icon='RENDERLAYERS')
-    row.prop(option, 'worlds', text='', icon='WORLD')
-    row.prop(option, 'libraries', text='', icon='LIBRARY_DATA_DIRECT')
-    row.prop(option, 'images', text='', icon='IMAGE_DATA')
-    row.prop(option, 'masks', text='', icon='MOD_MASK')
-    row.prop(option, 'sequences', text='', icon='SEQUENCE')
-    row.prop(option, 'movieClips', text='', icon='CLIP')
-    row.prop(option, 'sounds', text='', icon='SOUND')
+        # column
+        column = layout.column(align=True)
 
-    # row 2
-    row = column.row(align=True)
-    row.scale_x = 5 # hack: forces buttons to line up correctly
-    row.prop(option, 'screens', text='', icon='SPLITSCREEN')
-    row.prop(option, 'keyingSets', text='', icon='KEYINGSET')
-    row.prop(option, 'palettes', text='', icon='COLOR')
-    row.prop(option, 'brushes', text='', icon='BRUSH_DATA')
-    row.prop(option, 'linestyles', text='', icon='LINE_DATA')
-    row.prop(option, 'nodes', text='', icon='NODE_SEL')
-    row.prop(option, 'nodeLabels', text='', icon='NODE')
-    row.prop(option, 'nodeGroups', text='', icon='NODETREE')
-    row.prop(option, 'texts', text='', icon='TEXT')
+        # row 1
+        row = column.row(align=True)
+        row.scale_x = 5  # hack: forces buttons to line up correctly
+        row.prop(option, 'scenes', text='', icon='SCENE_DATA')
+        row.prop(option, 'renderLayers', text='', icon='RENDERLAYERS')
+        row.prop(option, 'worlds', text='', icon='WORLD')
+        row.prop(option, 'libraries', text='', icon='LIBRARY_DATA_DIRECT')
+        row.prop(option, 'images', text='', icon='IMAGE_DATA')
+        row.prop(option, 'masks', text='', icon='MOD_MASK')
+        row.prop(option, 'sequences', text='', icon='SEQUENCE')
+        row.prop(option, 'movieClips', text='', icon='CLIP')
+        row.prop(option, 'sounds', text='', icon='SOUND')
 
-    # input fields
+        # row 2
+        row = column.row(align=True)
+        row.scale_x = 5  # hack: forces buttons to line up correctly
+        row.prop(option, 'screens', text='', icon='SPLITSCREEN')
+        row.prop(option, 'keyingSets', text='', icon='KEYINGSET')
+        row.prop(option, 'palettes', text='', icon='COLOR')
+        row.prop(option, 'brushes', text='', icon='BRUSH_DATA')
+        row.prop(option, 'linestyles', text='', icon='LINE_DATA')
+        row.prop(option, 'nodes', text='', icon='NODE_SEL')
+        row.prop(option, 'nodeLabels', text='', icon='NODE')
+        row.prop(option, 'nodeGroups', text='', icon='NODETREE')
+        row.prop(option, 'texts', text='', icon='TEXT')
 
-    # row
-    row = column.row()
-    row.separator()
-    row = column.row()
-    row.separator()
-    row = column.row()
-    row.separator()
-    row = column.row()
-    row.separator()
-    row = column.row()
-    row.separator()
-    row = column.row()
-    row.separator()
+        # input fields
 
-    # custom name
-    column.prop(option, 'customName')
-    column.separator()
+        # row
+        row = column.row()
+        row.separator()
+        row = column.row()
+        row.separator()
+        row = column.row()
+        row.separator()
+        row = column.row()
+        row.separator()
+        row = column.row()
+        row.separator()
+        row = column.row()
+        row.separator()
 
-    # find
-    row = column.row(align=True)
-    row.prop(option, 'find', icon='VIEWZOOM')
+        # custom name
+        column.prop(option, 'customName')
+        column.separator()
 
-    # cheatsheet
-    row.operator('wm.regular_expression_cheatsheet', text='', icon='FILE_TEXT')
+        # find
+        row = column.row(align=True)
+        row.prop(option, 'find', icon='VIEWZOOM')
 
-    # regex
-    row.prop(option, 'regex', text='', icon='SCRIPT')
-    column.separator()
+        # cheatsheet
+        row.operator('wm.regular_expression_cheatsheet', text='', icon='FILE_TEXT')
 
-    # replace
-    column.prop(option, 'replace', icon='FILE_REFRESH')
-    column.separator()
+        # regex
+        row.prop(option, 'regex', text='', icon='SCRIPT')
+        column.separator()
 
-    # prefix
-    column.prop(option, 'prefix', icon='LOOP_BACK')
-    column.separator()
+        # replace
+        column.prop(option, 'replace', icon='FILE_REFRESH')
+        column.separator()
 
-    # suffix
-    column.prop(option, 'suffix', icon='LOOP_FORWARDS')
-    column.separator()
-    row = column.row()
+        # prefix
+        column.prop(option, 'prefix', icon='LOOP_BACK')
+        column.separator()
 
-    # trim start
-    row.label(text='Trim Start:')
-    row.prop(option, 'trimStart', text='')
-    column.separator()
-    row = column.row()
+        # suffix
+        column.prop(option, 'suffix', icon='LOOP_FORWARDS')
+        column.separator()
+        row = column.row()
 
-    # trim end
-    row.label(text='Trim End:')
-    row.prop(option, 'trimEnd', text='')
+        # trim start
+        row.label(text='Trim Start:')
+        row.prop(option, 'trimStart', text='')
+        column.separator()
+        row = column.row()
 
-    # row
-    row = column.row()
+        # trim end
+        row.label(text='Trim End:')
+        row.prop(option, 'trimEnd', text='')
 
-    # separator
-    row.separator()
+        # row
+        row = column.row()
 
-    # sort duplicates
+        # separator
+        row.separator()
 
-    # row
-    row = column.row(align=True)
-    row.prop(option, 'sort', text='Sort Duplicates', toggle=True)
-    row.prop(option, 'padding', text='Padding')
-    row.prop(option, 'start', text='Start at')
+        # sort duplicates
 
-    # sub
-    sub = row.row(align=True)
-    sub.scale_x = 0.1
-    sub.prop(option, 'separator', text='')
-    row.prop(option, 'sortOnly', text='', icon='LOCKED')
+        # row
+        row = column.row(align=True)
+        row.prop(option, 'sort', text='Sort Duplicates', toggle=True)
+        row.prop(option, 'padding', text='Padding')
+        row.prop(option, 'start', text='Start at')
 
-  # execute
-  def execute(self, context):
-    '''
-      Execute the operator.
-    '''
+        # sub
+        sub = row.row(align=True)
+        sub.scale_x = 0.1
+        sub.prop(option, 'separator', text='')
+        row.prop(option, 'sortOnly', text='', icon='LOCKED')
 
-    # main
-    batch.main(context)
+    # execute
+    def execute(self, context):
+        '''
+          Execute the operator.
+        '''
 
-    return {'FINISHED'}
+        # main
+        batch.main(context)
 
-  # invoke
-  def invoke(self, context, event):
-    '''
-      Invoke the operator panel/menu, control its width.
-    '''
-    context.window_manager.invoke_props_dialog(self, width=300)
-    return {'RUNNING_MODAL'}
+        return {'FINISHED'}
+
+    # invoke
+    def invoke(self, context, event):
+        '''
+          Invoke the operator panel/menu, control its width.
+        '''
+        context.window_manager.invoke_props_dialog(self, width=300)
+        return {'RUNNING_MODAL'}

@@ -196,15 +196,15 @@ class LAMP(bpy.types.Operator):
     opacity = bpy.props.FloatProperty(name='Translucency', min=0.00, max=1, default=0.3, precision=3,
                                       description='Lampshade translucency factor (1 completely translucent)')
 
-    # Materials        
+    # Materials
     crt_mat = bpy.props.BoolProperty(name="Create default Cycles materials",
                                      description="Create default materials for Cycles render.", default=True)
     objcol = bpy.props.FloatVectorProperty(name="Color",
-                                        description="Color for material",
-                                        default=(1.0, 1.0, 1.0, 1.0),
-                                        min=0.1, max=1,
-                                        subtype='COLOR',
-                                        size=4)
+                                           description="Color for material",
+                                           default=(1.0, 1.0, 1.0, 1.0),
+                                           min=0.1, max=1,
+                                           subtype='COLOR',
+                                           size=4)
 
     # -----------------------------------------------------
     # Draw (create UI interface)
@@ -680,9 +680,9 @@ def create_cylinder_data(segments, listheight, listradio, bottom, top, pleats, p
         e = len(listheight) - 1
         listheight.insert(e, listheight[e] + 0.001)
         listradio.insert(e, listradio[e])
-    # ------------------------------------- 
+    # -------------------------------------
     # Vertices
-    # ------------------------------------- 
+    # -------------------------------------
     idx = 0
     rp = 0
     for z in listheight:
@@ -700,7 +700,7 @@ def create_cylinder_data(segments, listheight, listradio, bottom, top, pleats, p
                 rp = 0
 
         idx += 1
-    # ------------------------------------- 
+    # -------------------------------------
     # Faces
     # -------------------------------------
     for r in range(0, len(listheight) - 1):

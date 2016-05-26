@@ -7,9 +7,9 @@ Blender: 245
 Group: 'Export'
 Tooltip: 'Save as Metasequoia MQO File'
 """
-__author__= 'ousttrue'
+__author__ = 'ousttrue'
 __url__ = ["http://gunload.web.fc2.com/blender/"]
-__version__= '2.4'
+__version__ = '2.4'
 __bpydoc__ = """\
 This script is an exporter to MQO file format.
 
@@ -30,42 +30,44 @@ Run this script from "File->Export" menu.
 """
 
 bl_addon_info = {
-        'category': 'Import/Export',
-        'name': 'Export: Metasequioa Model Format (.mqo)',
-        'author': 'ousttrue',
-        'version': (2, 1),
-        'blender': (2, 5, 3),
-        'location': 'File > Export',
-        'description': 'Export to the Metasequioa Model Format (.mqo)',
-        'warning': '', # used for warning icon and text in addons panel
-        'wiki_url': 'http://sourceforge.jp/projects/meshio/wiki/FrontPage',
-        'tracker_url': 'http://sourceforge.jp/ticket/newticket.php?group_id=5081',
-        }
+    'category': 'Import/Export',
+    'name': 'Export: Metasequioa Model Format (.mqo)',
+    'author': 'ousttrue',
+    'version': (2, 1),
+    'blender': (2, 5, 3),
+    'location': 'File > Export',
+    'description': 'Export to the Metasequioa Model Format (.mqo)',
+    'warning': '',  # used for warning icon and text in addons panel
+    'wiki_url': 'http://sourceforge.jp/projects/meshio/wiki/FrontPage',
+    'tracker_url': 'http://sourceforge.jp/ticket/newticket.php?group_id=5081',
+}
 
 import os
 import sys
 
+
 class MQOMaterial(object):
-    __slots__=[
-            'name', 'shader', 'r', 'g', 'b', 'a',
-            'dif', 'amb', 'emi',
-            ]
+    __slots__ = [
+        'name', 'shader', 'r', 'g', 'b', 'a',
+        'dif', 'amb', 'emi',
+    ]
+
     def __init__(self, name, shader=3):
-        self.name=name
-        self.shader=shader
-        self.r=0.5
-        self.g=0.5
-        self.b=0.5
-        self.a=1
-        self.dif=1
-        self.amb=0
-        self.emi=0
+        self.name = name
+        self.shader = shader
+        self.r = 0.5
+        self.g = 0.5
+        self.b = 0.5
+        self.a = 1
+        self.dif = 1
+        self.amb = 0
+        self.emi = 0
 
     def __str__(self):
         return "\"%s\" shader(%d) col(%f %f %f %f) dif(%f) amb(%f) emi(%f)" % (
-                self.name, self.shader, self.r, self.g, self.b, self.a,
-                self.dif, self.amb, self.emi
-                )
+            self.name, self.shader, self.r, self.g, self.b, self.a,
+            self.dif, self.amb, self.emi
+        )
 
 
 # for 2.5
@@ -74,98 +76,104 @@ import bpy
 # wrapper
 from . import bl
 
+
 def materialToMqo(m):
-    material=MQOMaterial(m.name, 3)
-    material.r=m.diffuse_color[0]
-    material.g=m.diffuse_color[1]
-    material.b=m.diffuse_color[2]
-    material.a=m.alpha
-    material.amb=m.ambient
-    material.emi=m.emit
+    material = MQOMaterial(m.name, 3)
+    material.r = m.diffuse_color[0]
+    material.g = m.diffuse_color[1]
+    material.b = m.diffuse_color[2]
+    material.a = m.alpha
+    material.amb = m.ambient
+    material.emi = m.emit
     return material
+
 
 def apply_transform(vec, matrix):
     x, y, z = vec
     xloc, yloc, zloc = matrix[3][0], matrix[3][1], matrix[3][2]
-    return    x*matrix[0][0] + y*matrix[1][0] + z*matrix[2][0] + xloc,\
-            x*matrix[0][1] + y*matrix[1][1] + z*matrix[2][1] + yloc,\
-            x*matrix[0][2] + y*matrix[1][2] + z*matrix[2][2] + zloc
+    return    x * matrix[0][0] + y * matrix[1][0] + z * matrix[2][0] + xloc,\
+        x * matrix[0][1] + y * matrix[1][1] + z * matrix[2][1] + yloc,\
+        x * matrix[0][2] + y * matrix[1][2] + z * matrix[2][2] + zloc
+
 
 def convert_to_mqo(vec):
     return vec.x, vec.z, -vec.y
 
 
 class OutlineNode(object):
-    __slots__=['o', 'children']
+    __slots__ = ['o', 'children']
+
     def __init__(self, o):
-        self.o=o
-        self.children=[]
+        self.o = o
+        self.children = []
 
     def __str__(self):
         return "<Node %s>" % self.o
 
 
 class ObjectInfo(object):
-    __slots__=['object', 'depth', 'material_map']
+    __slots__ = ['object', 'depth', 'material_map']
+
     def __init__(self, o, depth):
-        self.object=o
-        self.depth=depth
-        self.material_map={}
+        self.object = o
+        self.depth = depth
+        self.material_map = {}
 
     def __str__(self):
         return "<ObjectInfo %d %s>" % (self.depth, self.object)
 
 
 class MqoExporter(object):
-    __slots__=["materials", "objects", 'scale', 'apply_modifier',]
+    __slots__ = ["materials", "objects", 'scale', 'apply_modifier', ]
+
     def __init__(self, scale, apply_modifier):
-        self.objects=[]
-        self.materials=[]
-        self.scale=scale
-        self.apply_modifier=apply_modifier
+        self.objects = []
+        self.materials = []
+        self.scale = scale
+        self.apply_modifier = apply_modifier
 
     def setup(self, scene):
         # 木構造を構築する
-        object_node_map={}
+        object_node_map = {}
         for o in scene.objects:
-            object_node_map[o]=OutlineNode(o)
+            object_node_map[o] = OutlineNode(o)
         for node in object_node_map.values():
             if node.o.parent:
                 object_node_map[node.o.parent].children.append(node)
 
         # ルートを得る
-        root=object_node_map[scene.objects.active]
+        root = object_node_map[scene.objects.active]
 
         # 情報を集める
-        if root.o.type.upper()=='EMPTY':
-            # depth調整 
+        if root.o.type.upper() == 'EMPTY':
+            # depth調整
             for node in root.children:
                 self.__setup(node)
         else:
             self.__setup(root)
 
     def __setup(self, node, depth=0):
-        info=ObjectInfo(node.o, depth)
+        info = ObjectInfo(node.o, depth)
         self.objects.append(info)
-        if node.o.type.upper()=='MESH':
+        if node.o.type.upper() == 'MESH':
             # set material index
             for i, m in enumerate(node.o.data.materials):
-                info.material_map[i]=self.__getOrAddMaterial(m)
+                info.material_map[i] = self.__getOrAddMaterial(m)
         # recursive
         for child in node.children:
-            self.__setup(child, depth+1)
-            
+            self.__setup(child, depth + 1)
+
     def __getOrAddMaterial(self, material):
         for i, m in enumerate(self.materials):
-            if m==material:
+            if m == material:
                 return i
-        index=len(self.materials)
+        index = len(self.materials)
         self.materials.append(material)
         return index
 
     def write(self, path):
-        bl.message("open: "+path)
-        io=bl.Writer(path, 'cp932')
+        bl.message("open: " + path)
+        io = bl.Writer(path, 'cp932')
         self.__write_header(io)
         self.__write_scene(io)
         print("Writing MaterialChunk")
@@ -188,32 +196,32 @@ class MqoExporter(object):
         io.write("}\r\n")
 
     def __write_materials(self, io, dirname):
-        # each material    
+        # each material
         io.write("Material %d {\r\n" % (len(self.materials)))
         for m in self.materials:
             io.write(str(materialToMqo(m)))
             # ToDo separated alpha texture
             for filename in bl.material.eachTexturePath(m):
-                if len(dirname)>0 and filename.startswith(dirname):
+                if len(dirname) > 0 and filename.startswith(dirname):
                     # 相対パスに変換する
-                    filename=filename[len(dirname)+1:]
+                    filename = filename[len(dirname) + 1:]
                 io.write(" tex(\"%s\")" % filename)
                 break
-            io.write("\r\n") 
+            io.write("\r\n")
         # end of chunk
-        io.write("}\r\n") 
+        io.write("}\r\n")
 
     def __write_object(self, io, info):
         print(info)
 
-        obj=info.object
-        if obj.type.upper()=='MESH' or obj.type.upper()=='EMPTY':
+        obj = info.object
+        if obj.type.upper() == 'MESH' or obj.type.upper() == 'EMPTY':
             pass
         else:
             print(obj.type)
             return
 
-        io.write("Object \""+obj.name+"\" {\r\n")
+        io.write("Object \"" + obj.name + "\" {\r\n")
 
         # depth
         io.write("\tdepth %d\r\n" % info.depth)
@@ -221,12 +229,12 @@ class MqoExporter(object):
         # mirror
         if not self.apply_modifier:
             if bl.modifier.hasType(obj, 'MIRROR'):
-                    io.write("\tmirror 1\r\n")
-                    io.write("\tmirror_axis 1\r\n")
+                io.write("\tmirror 1\r\n")
+                io.write("\tmirror_axis 1\r\n")
 
-        if obj.type.upper()=='MESH':
+        if obj.type.upper() == 'MESH':
             # duplicate and applyMatrix
-            copyMesh, copyObj=bl.object.duplicate(obj)
+            copyMesh, copyObj = bl.object.duplicate(obj)
             # apply transform
             """
             copyObj.scale=obj.scale
@@ -243,11 +251,11 @@ class MqoExporter(object):
                 while bl.object.hasShapeKey(copyObj):
                     bpy.ops.object.shape_key_remove()
                 for m in [m for m in copyObj.modifiers]:
-                    if m.type=='SOLIDFY':
+                    if m.type == 'SOLIDFY':
                         continue
-                    elif m.type=='ARMATURE':
+                    elif m.type == 'ARMATURE':
                         bpy.ops.object.modifier_apply(modifier=m.name)
-                    elif m.type=='MIRROR':
+                    elif m.type == 'MIRROR':
                         bpy.ops.object.modifier_apply(modifier=m.name)
                     else:
                         print(m.type)
@@ -255,21 +263,21 @@ class MqoExporter(object):
             self.__write_mesh(io, copyMesh, info.material_map)
             bl.object.delete(copyObj)
 
-        io.write("}\r\n") # end of object
+        io.write("}\r\n")  # end of object
 
     def __write_mesh(self, io, mesh, material_map):
         # vertices
         io.write("\tvertex %d {\r\n" % len(mesh.vertices))
         for vert in mesh.vertices:
             x, y, z = convert_to_mqo(vert.co)
-            io.write("\t\t%f %f %f\r\n" % 
-                    (x*self.scale, y*self.scale, z*self.scale)) # rotate to y-up
+            io.write("\t\t%f %f %f\r\n" %
+                     (x * self.scale, y * self.scale, z * self.scale))  # rotate to y-up
         io.write("\t}\r\n")
 
         # faces
         io.write("\tface %d {\r\n" % len(mesh.polygons))
         for i, face in enumerate(mesh.polygons):
-            count=bl.face.getVertexCount(face)
+            count = bl.face.getVertexCount(face)
             # V
             io.write("\t\t%d V(" % count)
             for j in reversed(bl.face.getVertices(face)):
@@ -277,24 +285,23 @@ class MqoExporter(object):
             io.write(")")
             # mat
             if len(mesh.materials):
-                io.write(" M(%d)" % 
-                        material_map[bl.face.getMaterialIndex(face)])
+                io.write(" M(%d)" %
+                         material_map[bl.face.getMaterialIndex(face)])
             # UV
             if bl.mesh.hasUV(mesh) and bl.mesh.hasFaceUV(mesh, i, face):
                 io.write(" UV(")
                 for uv in reversed(bl.mesh.getFaceUV(mesh, i, face, count)):
                     # reverse vertical value
-                    io.write("%f %f " % (uv[0], 1.0-uv[1])) 
+                    io.write("%f %f " % (uv[0], 1.0 - uv[1]))
                 io.write(")")
             io.write("\r\n")
-        io.write("\t}\r\n") # end of faces
+        io.write("\t}\r\n")  # end of faces
 
 
 def _execute(filepath='', scale=10, apply_modifier=False):
     if bl.object.getActive():
-        exporter=MqoExporter(scale, apply_modifier)
+        exporter = MqoExporter(scale, apply_modifier)
         exporter.setup(bl.scene.get())
         exporter.write(filepath)
     else:
         bl.message('no active object !')
-

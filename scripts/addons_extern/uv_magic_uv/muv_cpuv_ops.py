@@ -36,7 +36,6 @@ class MUV_CPUVCopyUV(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     uv_map = bpy.props.StringProperty(options={'HIDDEN'})
-    
 
     def execute(self, context):
         props = context.scene.muv_props.cpuv
@@ -149,7 +148,7 @@ class MUV_CPUVPasteUV(bpy.types.Operator):
             uv_layer = bm.loops.layers.uv.verify()
         else:
             uv_layer = bm.loops.layers.uv[self.uv_map]
-        
+
         # get selected face
         dest_uvs = []
         dest_pin_uvs = []
@@ -169,10 +168,10 @@ class MUV_CPUVPasteUV(bpy.types.Operator):
             return {'CANCELLED'}
         if self.strategy == 'N_N' and len(props.src_uvs) != len(dest_uvs):
             self.report({'WARNING'}, "Number of selected faces is different from copied faces." +
-                    "(src:%d, dest:%d)" %
-                    (len(props.src_uvs), len(dest_uvs)))
+                        "(src:%d, dest:%d)" %
+                        (len(props.src_uvs), len(dest_uvs)))
             return {'CANCELLED'}
- 
+
         # paste
         for i, idx in enumerate(dest_face_indices):
             suv = None

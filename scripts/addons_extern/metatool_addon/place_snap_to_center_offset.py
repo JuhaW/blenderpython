@@ -3,7 +3,7 @@
 #############  Snap to Center  ###################################################################################################
 #############  Snap to Center  ###################################################################################################
 
-#bl_info = {
+# bl_info = {
 #    "name": "Snap to Center (offset)",
 #    "location": "Search tool",
 #    "description": "Snap selected objects to center with offset.",
@@ -17,18 +17,18 @@
 import bpy
 
 ###------ Create Snapping Operators -------###
-   
+
+
 class snapcenteroffset(bpy.types.Operator):
     """Snap the currently selected objects to Center with offset"""
     bl_idname = "mesh.snapcenteroffset"
     bl_label = "Selection to center (offset)"
-    bl_options = {'REGISTER', 'UNDO'}     
-    
-    
-    @classmethod        
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
     def poll(cls, context):
         return len(context.selected_objects) > 0
-    
+
     def execute(self, context):
 
         scene = bpy.context.scene
@@ -39,13 +39,13 @@ class snapcenteroffset(bpy.types.Operator):
             bpy.ops.view3d.snap_cursor_to_center()
             bpy.ops.view3d.snap_selected_to_cursor()
         else:
-            self.report({'INFO'}, "No objects selected") 
+            self.report({'INFO'}, "No objects selected")
 
-        return {"FINISHED"}     
+        return {"FINISHED"}
 
 
-## -----------------------------------SELECT LEFT---------------------
-def side (self, nombre, offset):
+# -----------------------------------SELECT LEFT---------------------
+def side(self, nombre, offset):
 
     bpy.ops.object.mode_set(mode="EDIT", toggle=0)
     OBJECT = bpy.context.active_object
@@ -65,6 +65,7 @@ def side (self, nombre, offset):
     ODATA.select_flush(False)
     bpy.ops.object.mode_set(mode="EDIT", toggle=0)
 
+
 class SelectMenor (bpy.types.Operator):
     bl_idname = "mesh.select_side_osc"
     bl_label = "Select Side"
@@ -72,41 +73,39 @@ class SelectMenor (bpy.types.Operator):
 
     side = bpy.props.BoolProperty(name="Greater than zero", default=False)
     offset = bpy.props.FloatProperty(name="Offset", default=0)
-    def execute(self,context):
+
+    def execute(self, context):
 
         side(self, self.side, self.offset)
 
         return {'FINISHED'}
 
 ###------  Functions Menu add -------###
+
+
 def menu_display(self, context):
     self.layout.operator(snapcenteroffset.bl_idname, icon="PLUGIN")
 
 ###------  Functions Menu add -------###
+
+
 def menu_display(self, context):
     self.layout.operator(snapcenteroffset.bl_idname, icon="PLUGIN")
 
-            
+
 def register():
-# Register menu
+    # Register menu
     bpy.utils.register_module(__name__)
-    #bpy.utils.register_class(snapcenteroffset)
-    bpy.types.VIEW3D_MT_snap.append(menu_display) 
+    # bpy.utils.register_class(snapcenteroffset)
+    bpy.types.VIEW3D_MT_snap.append(menu_display)
+
 
 def unregister():
-# Unregister menu
-    #bpy.utils.unregister_class(snapcenteroffset)
+    # Unregister menu
+    # bpy.utils.unregister_class(snapcenteroffset)
     bpy.types.VIEW3D_MT_snap.remove(menu_display)
     bpy.utils.unregister_module(__name__)
 
 
-    
 if __name__ == "__main__":
     register()
-
-
-
-
-
-
-

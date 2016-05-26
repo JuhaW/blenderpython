@@ -18,10 +18,12 @@
 # ***** END GPL LICENCE BLOCK *****
 
 
-import bpy, aud
+import bpy
+import aud
 from bpy.app.handlers import persistent
 
-handle = "" #XXX UGLY
+handle = ""  # XXX UGLY
+
 
 @persistent
 def play_music(scene):
@@ -35,6 +37,7 @@ def play_music(scene):
             handle = device.play(factory)
             handle.loop_count = -1
 
+
 @persistent
 def kill_music(scene):
     global handle
@@ -43,11 +46,12 @@ def kill_music(scene):
         print("Killing elevator music...")
         handle.stop()
 
+
 @persistent
 def end_music(scene):
-    
+
     kill_music(scene)
-    
+
     if scene.render_music.use_end:
         device = aud.device()
         factory = aud.Factory(scene.render_music.endfile)

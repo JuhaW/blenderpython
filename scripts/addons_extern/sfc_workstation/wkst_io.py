@@ -20,10 +20,8 @@
 # ***** END GPL LICENCE BLOCK *****
 
 
-
 import bpy
 from bpy import*
-
 
 
 ###########  Menu  #######################
@@ -32,50 +30,40 @@ class WKST_Import(bpy.types.Menu):
     """Import / Export"""
     bl_label = "Import/Export"
     bl_idname = "wkst.import_export"
-    
+
     def draw(self, context):
         layout = self.layout
 
         layout.menu("INFO_MT_file_import", text="Import", icon='EXPORT')
-        layout.menu("INFO_MT_file_export", text="Export", icon='IMPORT')   
+        layout.menu("INFO_MT_file_export", text="Export", icon='IMPORT')
         layout.menu("OBJECT_MT_selected_export", text="Export Selected", icon='IMPORT')
-                  
+
 
 class WKST_AppLINK(bpy.types.Menu):
     """Link / Append"""
     bl_label = "Link/Append"
     bl_idname = "wkst.link_append"
-    
+
     def draw(self, context):
-        layout = self.layout 
+        layout = self.layout
 
         layout.operator("wm.link", text="Link", icon='LINK_BLEND')
-        layout.operator("wm.append", text="Append", icon='APPEND_BLEND')   
+        layout.operator("wm.append", text="Append", icon='APPEND_BLEND')
 
         layout.separator()
-        
+
         layout.operator("object.proxy_make")
         layout.operator("object.make_local")
-
 
 
 ############  REGISTER  #################
 
 def register():
     bpy.utils.register_module(__name__)
- 
+
+
 def unregister():
     bpy.utils.unregister_module(__name__)
- 
+
 if __name__ == "__main__":
     register()
-
-
-
-
-
-
-
-
-
-

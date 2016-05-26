@@ -16,7 +16,7 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-#bl_info = {
+# bl_info = {
 #    "name": "Workstation Origin",
 #    "author": "mkbreuer",
 #    "version": (0, 1, 0),
@@ -33,7 +33,7 @@ import bpy
 from bpy import*
 
 
-#######  Menus Origin  #######-------------------------------------------------------                  
+# Menus Origin  #######-------------------------------------------------------
 
 class OriginRetopoMenu(bpy.types.Menu):
     """Origin Retopo Menu"""
@@ -43,18 +43,16 @@ class OriginRetopoMenu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
-        
+
         layout.label("Object Origin")
-         
-        layout.operator("mesh.emptyroom_cen", text="-> Center", icon = 'LAYER_ACTIVE')
-        layout.operator("mesh.emptyroom_sel", text="-> Selected", icon = 'LAYER_ACTIVE')            
-        layout.operator("mesh.emptyxroom_cen", text="-> Center mirrored", icon = 'MOD_MIRROR')
-        layout.operator("mesh.emptyxroom_sel", text="-> Selected mirrored", icon = 'MOD_MIRROR')
+
+        layout.operator("mesh.emptyroom_cen", text="-> Center", icon='LAYER_ACTIVE')
+        layout.operator("mesh.emptyroom_sel", text="-> Selected", icon='LAYER_ACTIVE')
+        layout.operator("mesh.emptyxroom_cen", text="-> Center mirrored", icon='MOD_MIRROR')
+        layout.operator("mesh.emptyxroom_sel", text="-> Selected mirrored", icon='MOD_MIRROR')
 
 
-bpy.utils.register_class(OriginRetopoMenu) 
-
-
+bpy.utils.register_class(OriginRetopoMenu)
 
 
 class OriginSetupMenu_obm(bpy.types.Menu):
@@ -65,30 +63,26 @@ class OriginSetupMenu_obm(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
-        
-        layout.label("Origin to...",icon = "LAYER_ACTIVE" )
-        
+
+        layout.label("Origin to...", icon="LAYER_ACTIVE")
+
         layout.operator("object.origin_set", text="to Geometry").type = 'ORIGIN_GEOMETRY'
         layout.operator("object.origin_set", text="to 3D Cursor").type = 'ORIGIN_CURSOR'
         layout.operator("object.origin_set", text="to Center of Mass").type = 'ORIGIN_CENTER_OF_MASS'
 
-        layout.separator()   
-                 
-        layout.operator("object.origin_set", text="Geometry to Origin").type = 'GEOMETRY_ORIGIN'        
+        layout.separator()
 
-        layout.separator() 
-                       
-        layout.label("Bounding Box Origin", icon = "LAYER_ACTIVE") 
-        layout.menu("object.bbox_origin_side_menu", "Side", icon ="FACESEL")  
-        layout.menu("object.bbox_origin_edge_menu", "Edge", icon ="EDGESEL")  
-        layout.menu("object.bbox_origin_corner_menu", "Corner", icon ="VERTEXSEL")                   
-                 
-                 
+        layout.operator("object.origin_set", text="Geometry to Origin").type = 'GEOMETRY_ORIGIN'
 
-     
+        layout.separator()
+
+        layout.label("Bounding Box Origin", icon="LAYER_ACTIVE")
+        layout.menu("object.bbox_origin_side_menu", "Side", icon="FACESEL")
+        layout.menu("object.bbox_origin_edge_menu", "Edge", icon="EDGESEL")
+        layout.menu("object.bbox_origin_corner_menu", "Corner", icon="VERTEXSEL")
 
 
-bpy.utils.register_class(OriginSetupMenu_obm) 
+bpy.utils.register_class(OriginSetupMenu_obm)
 
 
 class OriginSetupMenu_edm(bpy.types.Menu):
@@ -100,13 +94,13 @@ class OriginSetupMenu_edm(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        layout.label("Origin to Selected", icon = "RESTRICT_SELECT_OFF")
-            
-        layout.operator("object.originedm","to Editmode")
-        layout.operator("object.originobm","to Objectmode")
-            
+        layout.label("Origin to Selected", icon="RESTRICT_SELECT_OFF")
 
-bpy.utils.register_class(OriginSetupMenu_edm) 
+        layout.operator("object.originedm", "to Editmode")
+        layout.operator("object.originobm", "to Objectmode")
+
+
+bpy.utils.register_class(OriginSetupMenu_edm)
 
 
 class OriginSetupMenu_all_edm(bpy.types.Menu):
@@ -117,24 +111,21 @@ class OriginSetupMenu_all_edm(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
 
-        layout.label("Set Origin to Selected", icon = "LAYER_ACTIVE")
-         
-        layout.operator("object.originedm","to Editmode")
-        layout.operator("object.originobm","to Objectmode")
-            
-bpy.utils.register_class(OriginSetupMenu_all_edm) 
+        layout.label("Set Origin to Selected", icon="LAYER_ACTIVE")
+
+        layout.operator("object.originedm", "to Editmode")
+        layout.operator("object.originobm", "to Objectmode")
+
+bpy.utils.register_class(OriginSetupMenu_all_edm)
 
 
- 
- 
-        
 ######  set Origin  ##################################################################################
 
 class OriginObm(bpy.types.Operator):
-    """set origin to selected / stay in objectmode"""                 
-    bl_idname = "object.originobm"          
-    bl_label = "origin to selected / in objectmode"                 
-    bl_options = {'REGISTER', 'UNDO'}   
+    """set origin to selected / stay in objectmode"""
+    bl_idname = "object.originobm"
+    bl_label = "origin to selected / in objectmode"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
 
@@ -145,15 +136,15 @@ class OriginObm(bpy.types.Operator):
         bpy.ops.object.editmode_toggle()
 
         return {'FINISHED'}
-    
-bpy.utils.register_class(OriginObm) 
+
+bpy.utils.register_class(OriginObm)
 
 
 class OriginEdm(bpy.types.Operator):
-    """set origin to selected / stay in editmode"""                 
-    bl_idname = "object.originedm"          
-    bl_label = "origin to selected in editmode"                 
-    bl_options = {'REGISTER', 'UNDO'}   
+    """set origin to selected / stay in editmode"""
+    bl_idname = "object.originedm"
+    bl_label = "origin to selected in editmode"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         bpy.ops.view3d.snap_cursor_to_selected()
@@ -165,17 +156,16 @@ class OriginEdm(bpy.types.Operator):
 
         return {'FINISHED'}
 
-bpy.utils.register_class(OriginEdm) 
+bpy.utils.register_class(OriginEdm)
 
 
-               
-#######  Origin  #######------------------------------------------------------- 
+# Origin  #######-------------------------------------------------------
 
 class Origin_OBM(bpy.types.Operator):
-    """set origin to selected / objectmode"""                 
-    bl_idname = "object.origin_obm"          
-    bl_label = "origin to selected / in objectmode"                 
-    bl_options = {'REGISTER', 'UNDO'}   
+    """set origin to selected / objectmode"""
+    bl_idname = "object.origin_obm"
+    bl_label = "origin to selected / in objectmode"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
 
@@ -186,13 +176,13 @@ class Origin_OBM(bpy.types.Operator):
         bpy.ops.object.editmode_toggle()
 
         return {'FINISHED'}
-     
+
 
 class OriginEDM(bpy.types.Operator):
-    """set origin to selected / editmode / tip: change for local rotation"""                 
-    bl_idname = "object.origin_edm"          
-    bl_label = "origin to selected in editmode"                 
-    bl_options = {'REGISTER', 'UNDO'}   
+    """set origin to selected / editmode / tip: change for local rotation"""
+    bl_idname = "object.origin_edm"
+    bl_label = "origin to selected in editmode"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
 
@@ -203,14 +193,14 @@ class OriginEDM(bpy.types.Operator):
         bpy.ops.object.editmode_toggle()
         bpy.ops.object.editmode_toggle()
 
-        return {'FINISHED'}    
+        return {'FINISHED'}
 
 
 class OriginObm(bpy.types.Operator):
-    """set origin to selected / stay in objectmode"""                 
-    bl_idname = "object.originobm"          
-    bl_label = "origin to selected / in objectmode"                 
-    bl_options = {'REGISTER', 'UNDO'}   
+    """set origin to selected / stay in objectmode"""
+    bl_idname = "object.originobm"
+    bl_label = "origin to selected / in objectmode"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
 
@@ -224,10 +214,10 @@ class OriginObm(bpy.types.Operator):
 
 
 class OriginEdm(bpy.types.Operator):
-    """set origin to selected / stay in editmode"""                 
-    bl_idname = "object.originedm"          
-    bl_label = "origin to selected in editmode"                 
-    bl_options = {'REGISTER', 'UNDO'}   
+    """set origin to selected / stay in editmode"""
+    bl_idname = "object.originedm"
+    bl_label = "origin to selected in editmode"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         bpy.ops.view3d.snap_cursor_to_selected()
@@ -238,8 +228,6 @@ class OriginEdm(bpy.types.Operator):
         bpy.ops.object.editmode_toggle()
 
         return {'FINISHED'}
-
-
 
 
 class OriginSetupMenu_edm(bpy.types.Menu):
@@ -251,12 +239,10 @@ class OriginSetupMenu_edm(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        layout.label("to Selected...", icon = "RESTRICT_SELECT_OFF")
-            
-        layout.operator("object.originedm","in Editmode")
-        layout.operator("object.originobm","in Objectmode")
+        layout.label("to Selected...", icon="RESTRICT_SELECT_OFF")
 
-
+        layout.operator("object.originedm", "in Editmode")
+        layout.operator("object.originobm", "in Objectmode")
 
 
 # registering and menu integration
@@ -265,14 +251,11 @@ def register():
     bpy.utils.register_module(__name__)
 
 
-    
 # unregistering and removing menus
 def unregister():
 
-    bpy.utils.unregister_module(__name__) 
-
+    bpy.utils.unregister_module(__name__)
 
 
 if __name__ == "__main__":
     register()
-

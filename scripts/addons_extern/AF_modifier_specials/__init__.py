@@ -25,8 +25,8 @@ bl_info = {
     "location": "View3D > Add > Scene Elements",
     "description": "Modifiers Specials Menu",
     "warning": "",
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"\
-        "/Py/Scripts",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"
+    "/Py/Scripts",
     "tracker_url": "",
     "category": "Addon Factory"}
 
@@ -34,37 +34,40 @@ bl_info = {
 if "bpy" in locals():
     import importlib
     importlib.reload(DATA_PT_modifiers)
+    importlib.reload(mirror_tools)
 
 else:
     from . import DATA_PT_modifiers
+    from . import mirror_tools
 
 import bpy
 
 # Addons Preferences
+
+
 class AddonPreferences(bpy.types.AddonPreferences):
-	bl_idname = __name__
-	
-	def draw(self, context):
-		layout = self.layout
-		layout.label(text="----Modifier Specials----")
-		layout.label(text="Prototype/Experimental")
-		layout.label(text="Quick access to common Modifier settings")
-		layout.label(text="Includes some batch operations for subsurf")
-		layout.label(text="Includes Apply/Delete All")
-		layout.label(text="Includes View & Expand All")
+    bl_idname = __name__
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="----Modifier Specials----")
+        layout.label(text="Prototype/Experimental")
+        layout.label(text="Quick access to common Modifier settings")
+        layout.label(text="Includes some batch operations for subsurf")
+        layout.label(text="Includes Apply/Delete All")
+        layout.label(text="Includes View & Expand All")
+
 
 def register():
-	bpy.utils.register_module(__name__)
+    bpy.utils.register_module(__name__)
     # Add "Extras" menu to the "Add Mesh" menu
-	bpy.types.DATA_PT_modifiers.prepend(DATA_PT_modifiers.menu)
+    bpy.types.DATA_PT_modifiers.prepend(DATA_PT_modifiers.menu)
 
 
 def unregister():
-	bpy.types.DATA_PT_modifiers.remove(DATA_PT_modifiers.menu)
-
+    bpy.types.DATA_PT_modifiers.remove(DATA_PT_modifiers.menu)
 
     # Remove "Extras" menu from the "Add Mesh" menu.
-	bpy.utils.unregister_module(__name__)
+    bpy.utils.unregister_module(__name__)
 if __name__ == "__main__":
     register()
-

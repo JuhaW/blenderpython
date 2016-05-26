@@ -22,9 +22,10 @@ class SetGLSLShading(Operator):
             light.is_mmd_glsl_light = True
             light.hide = True
 
-        context.area.spaces[0].viewport_shade='TEXTURED'
+        context.area.spaces[0].viewport_shade = 'TEXTURED'
         bpy.context.scene.game_settings.material_mode = 'GLSL'
         return {'FINISHED'}
+
 
 class SetShadelessGLSLShading(Operator):
     bl_idname = 'mmd_tools.set_shadeless_glsl_shading'
@@ -44,11 +45,12 @@ class SetShadelessGLSLShading(Operator):
         try:
             bpy.context.scene.display_settings.display_device = 'None'
         except TypeError:
-            pass # Blender was built without OpenColorIO:
+            pass  # Blender was built without OpenColorIO:
 
-        context.area.spaces[0].viewport_shade='TEXTURED'
+        context.area.spaces[0].viewport_shade = 'TEXTURED'
         bpy.context.scene.game_settings.material_mode = 'GLSL'
         return {'FINISHED'}
+
 
 class ResetShading(Operator):
     bl_idname = 'mmd_tools.reset_shading'
@@ -67,6 +69,6 @@ class ResetShading(Operator):
             context.scene.objects.unlink(i)
 
         bpy.context.scene.display_settings.display_device = 'sRGB'
-        context.area.spaces[0].viewport_shade='SOLID'
+        context.area.spaces[0].viewport_shade = 'SOLID'
         bpy.context.scene.game_settings.material_mode = 'MULTITEXTURE'
         return {'FINISHED'}

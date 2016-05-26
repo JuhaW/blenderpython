@@ -36,7 +36,7 @@
 #    this. Personally, I think you should hit Tab and deselect the one you
 #    want to skip, but I haven't thought it through too far.
 
-#bl_info = {
+# bl_info = {
 #    "name": "MeshLint: Like Spell-checking for your Meshes",
 #    "author": "rking",
 #    "version": (1, 0),
@@ -49,7 +49,7 @@
 #    "category": "Mesh"}
 
 # For the ./mkblenderwiki script
-#mkblenderwiki_info = {
+# mkblenderwiki_info = {
 #    "license": "GPL",
 #    "py_download": "https://raw.github.com/ryanjosephking/meshlint/master/meshlint.py",
 #    "git_download": "https://github.com/ryanjosephking/meshlint.git",
@@ -66,12 +66,11 @@ try:
     from mathutils import Vector
 
     SUBPANEL_LABEL = 'MeshLint'
-    COMPLAINT_TIMEOUT = 3 # seconds
-    ELEM_TYPES = [ 'verts', 'edges', 'faces' ]
+    COMPLAINT_TIMEOUT = 3  # seconds
+    ELEM_TYPES = ['verts', 'edges', 'faces']
 
     N_A_STR = '(N/A - disabled)'
     TBD_STR = '...'
-
 
     def is_edit_mode():
         return 'EDIT_MESH' == bpy.context.mode
@@ -80,16 +79,13 @@ try:
         if not is_edit_mode():
             bpy.ops.object.editmode_toggle()
 
-
     def ensure_not_edit_mode():
         if is_edit_mode():
             bpy.ops.object.editmode_toggle()
 
-
     def has_active_mesh(context):
         obj = context.active_object
         return obj and 'MESH' == obj.type
-
 
     class MeshLintAnalyzer:
         CHECKS = []
@@ -113,7 +109,7 @@ try:
                 check_method_name = 'check_' + sym
                 check_method = getattr(type(self), check_method_name)
                 bad = check_method(self)
-                report = { 'lint': lint }
+                report = {'lint': lint}
                 for elemtype in ELEM_TYPES:
                     indices = bad.get(elemtype, [])
                     report[elemtype] = indices
@@ -129,7 +125,7 @@ try:
         def none_analysis(cls):
             analysis = []
             for lint in cls.CHECKS:
-                row = { elemtype: [] for elemtype in ELEM_TYPES }
+                row = {elemtype: [] for elemtype in ELEM_TYPES}
                 row['lint'] = lint
                 analysis.append(row)
             return analysis
@@ -140,8 +136,9 @@ try:
             'definition': 'A face with 3 edges. Often bad for modeling because it stops edge loops and does not deform well around bent areas. A mesh might look good until you animate, so beware!',
             'default': True
         })
+
         def check_tris(self):
-            bad = { 'faces': [] }
+            bad = {'faces': []}
             for f in self.b.faces:
                 if 3 == len(f.verts):
                     bad['faces'].append(f.index)
@@ -153,8 +150,9 @@ try:
             'definition': 'A face with >4 edges. Is generally bad in exactly the same ways as Tris',
             'default': True
         })
+
         def check_ngons(self):
-            bad = { 'faces': [] }
+            bad = {'faces': []}
             for f in self.b.faces:
                 if 4 < len(f.verts):
                     bad['faces'].append(f.index)
@@ -166,6 +164,7 @@ try:
             'definition': 'Simply, shapes that won\'t hold water. More precisely, nonmanifold edges are those that do not have exactly 2 faces attached to them (either more or less). Nonmanifold verts are more complicated -- you can see their definition in BM_vert_is_manifold() in bmesh_queries.c',
             'default': True
         })
+
         def check_nonmanifold(self):
             bad = {}
             for elemtype in 'verts', 'edges':
@@ -183,8 +182,9 @@ try:
             'definition': 'This confuses people. It is very specific: A face whose edges ALL have >2 faces attached. The simplest way to see this is to Ctrl+r a Default Cube and hit \'f\'',
             'default': True
         })
-        def check_interior_faces(self): # translated from editmesh_select.c
-            bad = { 'faces': [] }
+
+        def check_interior_faces(self):  # translated from editmesh_select.c
+            bad = {'faces': []}
             for f in self.b.faces:
                 if not any(3 > len(e.link_faces) for e in f.edges):
                     bad['faces'].append(f.index)
@@ -196,8 +196,9 @@ try:
             'definition': 'A vertex with 6 or more edges connected to it. Generally this is not something you want, but since some kinds of extrusions will legitimately cause such a pole (imagine extruding each face of a Cube outward, the inner corners are rightful 6+-poles). Still, if you don\'t know for sure that you want them, it is good to enable this',
             'default': False
         })
+
         def check_sixplus_poles(self):
-            bad = { 'verts': [] }
+            bad = {'verts': []}
             for v in self.b.verts:
                 if 5 < len(v.link_edges):
                     bad['verts'].append(v.index)
@@ -220,7 +221,7 @@ try:
                     self.select_face(i)
                 else:
                     print("MeshLint says: Huh?? → elemtype of %s." % elemtype)
-        
+
         def select_vert(self, index):
             self.b.verts[index].select = True
 
@@ -242,7 +243,7 @@ try:
                 'data': self.obj.data,
                 'faces': len(self.b.faces),
                 'edges': len(self.b.edges),
-                'verts': len(self.b.verts) }
+                'verts': len(self.b.verts)}
 
         for lint in CHECKS:
             sym = lint['symbol']
@@ -257,11 +258,9 @@ try:
                     default=lint['default'],
                     description=lint['definition']))
 
-
     @bpy.app.handlers.persistent
     def global_repeated_check(dummy):
         MeshLintContinuousChecker.check()
-
 
     class MeshLintContinuousChecker():
         current_message = ''
@@ -350,7 +349,6 @@ try:
                 else:
                     area.header_text_set('MeshLint: ' + message)
 
-
     class MeshLintVitalizer(bpy.types.Operator):
         """Toggles the real-time execution of the checks (Edit Mode only)"""
         bl_idname = 'meshlint.live_toggle'
@@ -371,12 +369,11 @@ try:
                 MeshLintVitalizer.is_live = True
             return {'FINISHED'}
 
-
     def activate(obj):
         bpy.context.scene.objects.active = obj
 
-
     class MeshLintObjectLooper:
+
         def examine_active_object(self):
             analyzer = MeshLintAnalyzer()
             analyzer.enable_anything_select_mode()
@@ -432,11 +429,9 @@ try:
                 elif 'EDIT_MESH' != original_mode:
                     ensure_not_edit_mode()
             return {'FINISHED'}
-        
+
         def handle_troubled_meshes(self):
             pass
-
-    
 
     class MeshLintObjectDeselector(MeshLintObjectLooper, bpy.types.Operator):
         """Mesh Check Table is under Properties > Object Data"""
@@ -490,13 +485,11 @@ try:
                 play_pause = 'PLAY'
             right.operator(
                 'meshlint.live_toggle', text=live_label, icon=play_pause)
-            
+
             layout.split().operator(
                 'meshlint.objects_deselect',
                 text='Deselect all Lint-free Objects',
                 icon='UV_ISLANDSEL')
-
-                
 
         def add_criticism(self, layout, context):
             col = layout.column()
@@ -519,7 +512,7 @@ try:
                     reward = 'ERROR'
                 col.row().label(text=label, icon=reward)
             name_crits = MeshLintControl.build_object_criticisms(
-                            bpy.context.selected_objects, total_problems)
+                bpy.context.selected_objects, total_problems)
             for crit in name_crits:
                 col.row().label(crit)
 
@@ -536,6 +529,7 @@ try:
         def build_object_criticisms(cls, objects, total_problems):
             already_complained = total_problems > 0
             criticisms = []
+
             def add_crit(crit):
                 if already_complained:
                     conjunction = 'and also'
@@ -588,13 +582,11 @@ try:
             pat = '(%s)\.?\d*$' % '|'.join(default_names)
             return not None is re.match(pat, name)
 
-
     def depluralize(**args):
         if 1 == args['count']:
             return args['string'].rstrip('s')
         else:
             return args['string']
-
 
     # Hrm. Why does it work for some Blender's but not others?
     try:
@@ -602,27 +594,28 @@ try:
         import warnings
 
         class TestControl(unittest.TestCase):
+
             def test_scale_application(self):
-                for bad in [ [0,0,0], [1,2,3], [1,1,1.1] ]:
+                for bad in [[0, 0, 0], [1, 2, 3], [1, 1, 1.1]]:
                     self.assertEqual(
                         True, MeshLintControl.has_unapplied_scale(bad),
                         "Unapplied scale: %s" % bad)
                 self.assertEqual(
-                    False, MeshLintControl.has_unapplied_scale([1,1,1]),
+                    False, MeshLintControl.has_unapplied_scale([1, 1, 1]),
                     "Applied scale (1,1,1)")
 
             def test_bad_names(self):
-                for bad in [ 'Cube', 'Cube.001', 'Sphere.123' ]:
+                for bad in ['Cube', 'Cube.001', 'Sphere.123']:
                     self.assertEqual(
                         True, MeshLintControl.is_bad_name(bad),
                         "Bad name: %s" % bad)
-                for ok in [ 'Whatever', 'NumbersOkToo.001' ]:
+                for ok in ['Whatever', 'NumbersOkToo.001']:
                     self.assertEqual(
                         False, MeshLintControl.is_bad_name(ok),
                         "OK name: %s" % ok)
 
-
         class TestUtilities(unittest.TestCase):
+
             def test_depluralize(self):
                 self.assertEqual(
                     'foo',
@@ -631,22 +624,22 @@ try:
                     'foos',
                     depluralize(count=2, string='foos'))
 
-
         class TestAnalysis(unittest.TestCase):
+
             def test_make_labels_dict(self):
                 self.assertEqual(
                     {
                         'Label One': {
-                            'edges': [1,2], 'verts': [], 'faces': [] },
+                            'edges': [1, 2], 'verts': [], 'faces': []},
                         'Label Two': {
-                            'edges': [], 'verts': [5], 'faces': [3] }
+                            'edges': [], 'verts': [5], 'faces': [3]}
                     },
                     MeshLintContinuousChecker.make_labels_dict(
                         [
-                            { 'lint': { 'label': 'Label One' },
-                                'edges': [1,2], 'verts': [], 'faces': [] },
-                            { 'lint': { 'label': 'Label Two' },
-                                'edges': [], 'verts': [5], 'faces': [3] }
+                            {'lint': {'label': 'Label One'},
+                                'edges': [1, 2], 'verts': [], 'faces': []},
+                            {'lint': {'label': 'Label Two'},
+                                'edges': [], 'verts': [5], 'faces': [3]}
                         ]),
                     'Conversion of incoming analysis into label-keyed dict')
                 self.assertEqual(
@@ -667,63 +660,63 @@ try:
                         None,
                         [
                             {
-                                'lint': { 'label': 'Tris' },
-                                'verts': [1,2,3,4],
+                                'lint': {'label': 'Tris'},
+                                'verts': [1, 2, 3, 4],
                                 'edges': [],
                                 'faces': [],
                             },
                         ]),
                     'When there was no previous analysis')
                 self.assertEqual(
-                    'Found Tris: 2 edges, ' +\
-                        'Nonmanifold Elements: 4 verts, 1 face',
+                    'Found Tris: 2 edges, ' +
+                    'Nonmanifold Elements: 4 verts, 1 face',
                     MeshLintContinuousChecker.diff_analyses(
                         [
-                            { 'lint': { 'label': 'Tris' },
-                              'verts': [], 'edges': [1,4], 'faces': [], },
-                            { 'lint': { 'label': 'CheckB' },
-                              'verts': [], 'edges': [2,3], 'faces': [], },
-                            { 'lint': { 'label': 'Nonmanifold Elements' },
-                              'verts': [], 'edges': [], 'faces': [2,3], },
+                            {'lint': {'label': 'Tris'},
+                             'verts': [], 'edges': [1, 4], 'faces': [], },
+                            {'lint': {'label': 'CheckB'},
+                             'verts': [], 'edges': [2, 3], 'faces': [], },
+                            {'lint': {'label': 'Nonmanifold Elements'},
+                             'verts': [], 'edges': [], 'faces': [2, 3], },
                         ],
                         [
-                            { 'lint': { 'label': 'Tris' },
-                              'verts': [], 'edges': [1,4,5,6], 'faces': [], },
-                            { 'lint': { 'label': 'CheckB' },
-                              'verts': [], 'edges': [2,3], 'faces': [], },
-                            { 'lint': { 'label': 'Nonmanifold Elements' },
-                              'verts': [1,2,3,4], 'edges': [],
-                                'faces': [2,3,5], },
+                            {'lint': {'label': 'Tris'},
+                             'verts': [], 'edges': [1, 4, 5, 6], 'faces': [], },
+                            {'lint': {'label': 'CheckB'},
+                             'verts': [], 'edges': [2, 3], 'faces': [], },
+                            {'lint': {'label': 'Nonmanifold Elements'},
+                             'verts': [1, 2, 3, 4], 'edges': [],
+                                'faces': [2, 3, 5], },
                         ]),
                     'Complex comparison of analyses')
                 self.assertEqual(
                     'Found Tris: 1 vert, Ngons: 2 faces, ' +
-                      'Nonmanifold Elements: 2 edges',
+                    'Nonmanifold Elements: 2 edges',
                     MeshLintContinuousChecker.diff_analyses(
                         [
-                            { 'lint': { 'label': '6+-edge Poles' },
-                              'verts': [], 'edges': [2,3], 'faces': [], },
-                            { 'lint': { 'label': 'Nonmanifold Elements' },
-                              'verts': [], 'edges': [2,3], 'faces': [], },
+                            {'lint': {'label': '6+-edge Poles'},
+                             'verts': [], 'edges': [2, 3], 'faces': [], },
+                            {'lint': {'label': 'Nonmanifold Elements'},
+                             'verts': [], 'edges': [2, 3], 'faces': [], },
                         ],
                         [
-                            { 'lint': { 'label': 'Tris' },
-                              'verts': [55], 'edges': [], 'faces': [], },
-                            { 'lint': { 'label': 'Ngons' },
-                              'verts': [], 'edges': [], 'faces': [5,6], },
-                            { 'lint': { 'label': 'Nonmanifold Elements' },
-                              'verts': [], 'edges': [2,3,4,5], 'faces': [], },
+                            {'lint': {'label': 'Tris'},
+                             'verts': [55], 'edges': [], 'faces': [], },
+                            {'lint': {'label': 'Ngons'},
+                             'verts': [], 'edges': [], 'faces': [5, 6], },
+                            {'lint': {'label': 'Nonmanifold Elements'},
+                             'verts': [], 'edges': [2, 3, 4, 5], 'faces': [], },
                         ]),
                     'User picked a different set of checks since last run.')
 
-
         class MockBlenderObject:
-            def __init__(self, name, scale=Vector([1,1,1])):
+
+            def __init__(self, name, scale=Vector([1, 1, 1])):
                 self.name = name
                 self.scale = scale
 
-
         class TestUI(unittest.TestCase):
+
             def test_complaints(self):
                 f = MeshLintControl.build_object_criticisms
                 self.assertEqual([], f([], 0), 'Nothing selected')
@@ -750,23 +743,23 @@ try:
                     ],
                     f([
                         MockBlenderObject('Sphere'),
-                        MockBlenderObject('Cube') ], 0),
+                        MockBlenderObject('Cube')], 0),
                     'Two bad names.')
 
-                scaled = MockBlenderObject('Solartech', scale=Vector([.2,2,1]))
+                scaled = MockBlenderObject('Solartech', scale=Vector([.2, 2, 1]))
                 self.assertEqual(
-                    [ '...but "Solartech" has an unapplied scale.' ],
+                    ['...but "Solartech" has an unapplied scale.'],
                     f([scaled], 0),
                     'Only problem is unapplied scale.'
                 )
 
         class QuietOnSuccessTestResult(unittest.TextTestResult):
+
             def startTest(self, test):
                 pass
 
             def addSuccess(self, test):
                 pass
-
 
         class QuietTestRunner(unittest.TextTestRunner):
             resultclass = QuietOnSuccessTestResult
@@ -793,8 +786,8 @@ try:
                         # used to bypass this only when self.warnings is None.
                         if self.warnings in ['default', 'always']:
                             warnings.filterwarnings('module',
-                                    category=DeprecationWarning,
-                                    message='Please use assert\w+ instead.')
+                                                    category=DeprecationWarning,
+                                                    message='Please use assert\w+ instead.')
                     startTime = time.time()
                     startTestRun = getattr(result, 'startTestRun', None)
                     if startTestRun is not None:
@@ -851,14 +844,11 @@ try:
             rking@panoptic.com describing your system, he'd like to track down
             this condition.""")
 
-
     def register():
         bpy.utils.register_module(__name__)
 
-
     def unregister():
         bpy.utils.unregister_module(__name__)
-
 
     if __name__ == '__main__':
         register()
@@ -871,7 +861,3 @@ except:
     print("MeshLint Oops: ", exc[1], exc[2])
 
 # vim:ts=4 sw=4 sts=4
-
-
-
-

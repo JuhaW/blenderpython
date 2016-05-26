@@ -20,29 +20,30 @@
 
 import bpy
 
+
 def draw_options_ui(layout):
     addon = bpy.context.user_preferences.addons[__package__.split(".")[0]]
     props = addon.preferences.mesh_brush
 
     col = layout.column()
-    row = col.row(align = True)
+    row = col.row(align=True)
 
     if not props.options_ui_is_visible:
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'DISCLOSURE_TRI_RIGHT',
-            emboss = False
+            "wm.context_toggle", text="", icon='DISCLOSURE_TRI_RIGHT',
+            emboss=False
         )
         op.data_path = "{0}.options_ui_is_visible".format(props.data_path)
-        row.label(text = "Options") 
+        row.label(text="Options")
     else:
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'DISCLOSURE_TRI_DOWN',
-            emboss = False
+            "wm.context_toggle", text="", icon='DISCLOSURE_TRI_DOWN',
+            emboss=False
         )
         op.data_path = "{0}.options_ui_is_visible".format(props.data_path)
-        row.label(text = "Options") 
+        row.label(text="Options")
 
-        subcol = col.column(align = True) 
+        subcol = col.column(align=True)
 
         subcol.prop(props, "backfacing_are_ignored")
         subcol.prop(props, "selection_is_isolated")

@@ -25,8 +25,8 @@ bl_info = {
     "location": "Info Header: File, Render, Window, Help",
     "description": "Custom menu items.",
     "warning": "",
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"\
-        "/Py/Scripts",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"
+    "/Py/Scripts",
     "tracker_url": "",
     "category": "Addon Factory"}
 
@@ -46,6 +46,7 @@ else:
 
 import bpy
 
+
 def register():
     bpy.utils.register_module(__name__)
     # Add "Extras" menu to the "Add Mesh" menu
@@ -57,13 +58,13 @@ def register():
 
 
 def unregister():
-	bpy.utils.unregister_module(__name__)
+    bpy.utils.unregister_module(__name__)
     # Remove "Extras" menu from the "Add Mesh" menu.
-	bpy.types.INFO_MT_file.remove(INFO_MT_file.menu)
-	bpy.types.INFO_MT_file_external_data.remove(INFO_MT_file_external_data.menu)
-	bpy.types.INFO_MT_help.remove(INFO_MT_help.menu)
-	bpy.types.INFO_MT_help.remove(INFO_MT_help.menu_func)
-	bpy.types.INFO_MT_window.remove(INFO_MT_window.menu)
+    bpy.types.INFO_MT_file.remove(INFO_MT_file.menu)
+    bpy.types.INFO_MT_file_external_data.remove(INFO_MT_file_external_data.menu)
+    bpy.types.INFO_MT_help.remove(INFO_MT_help.menu)
+    bpy.types.INFO_MT_help.remove(INFO_MT_help.menu_func)
+    bpy.types.INFO_MT_window.remove(INFO_MT_window.menu)
 
 if __name__ == "__main__":
     register()

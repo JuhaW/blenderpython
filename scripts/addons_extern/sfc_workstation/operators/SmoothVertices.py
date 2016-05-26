@@ -20,9 +20,10 @@
 
 import bpy
 from ..auxiliary_classes.VertexFilter import VertexFilter
-from ..auxiliary_classes.VertexProperties import VertexProperties 
+from ..auxiliary_classes.VertexProperties import VertexProperties
 from ..function_modules.modifiers import apply_shrinkwrap
 from ..function_modules.modifiers import apply_smooth
+
 
 class SmoothVertices(bpy.types.Operator):
     bl_idname = "mesh.sct_smooth_vertices"
@@ -42,7 +43,7 @@ class SmoothVertices(bpy.types.Operator):
             active_object and
             active_object.type == 'MESH' and
             active_object.mode == 'EDIT' and
-            context.space_data.type == 'VIEW_3D' 
+            context.space_data.type == 'VIEW_3D'
         )
 
     def __init__(self):
@@ -118,18 +119,18 @@ class SmoothVertices(bpy.types.Operator):
 
         # Apply a smoothing operation to the affected vertex indices.
         apply_smooth(
-            iterations = props.iterations, affected_indices = vertex_indices
+            iterations=props.iterations, affected_indices=vertex_indices
         )
 
         # Constrain the vertices to the surface of the specified mesh object,
         # if necessary.
         if target:
             apply_shrinkwrap(
-                offset = offset, target = target,
-                wrap_method = surface_constraint_props.wrap_method_map[
+                offset=offset, target=target,
+                wrap_method=surface_constraint_props.wrap_method_map[
                     surface_constraint_props.direction
                 ],
-                affected_indices = vertex_indices
+                affected_indices=vertex_indices
             )
 
         # If a duplicate of the active object was created and referenced as the

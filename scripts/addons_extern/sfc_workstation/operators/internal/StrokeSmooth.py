@@ -24,6 +24,7 @@ from ..MeshBrush import MeshBrush
 from ...function_modules.modifiers import apply_shrinkwrap
 from ...function_modules.modifiers import apply_smooth
 
+
 class StrokeSmoothBrush(bpy.types.Operator):
     bl_idname = "mesh.sct_stroke_smooth"
     bl_label = "Stroke Smooth Brush"
@@ -33,12 +34,12 @@ class StrokeSmoothBrush(bpy.types.Operator):
 
     def __init__(self):
         self.addon = bpy.context.user_preferences.addons[self.addon_key]
-        self.props = self.addon.preferences.mesh_brush 
+        self.props = self.addon.preferences.mesh_brush
 
     def dab(self):
         active_object = bpy.context.active_object
         preferences = self.addon.preferences
-        props = self.props 
+        props = self.props
         brushes = props.brushes
         primary_brush = brushes.primary_brush
         derived_brushes = brushes.derived_brushes
@@ -59,14 +60,14 @@ class StrokeSmoothBrush(bpy.types.Operator):
 
         # Record the pre-dab coordinates of the affected vertex indices.
         pre_dab_object_space_map = {
-            index : vertices[index].co.copy()
+            index: vertices[index].co.copy()
             for index in indices_affected_by_dab
         }
 
         # Apply a smoothing operation to the affected vertex indices.
         apply_smooth(
-            iterations = props.iterations,
-            affected_indices = list(indices_affected_by_dab)
+            iterations=props.iterations,
+            affected_indices=list(indices_affected_by_dab)
         )
 
         # Apply falloff to the result of the smoothing operation, if necessary.
@@ -104,21 +105,21 @@ class StrokeSmoothBrush(bpy.types.Operator):
         if self.target:
             surface_constraint_props = self.surface_constraint_props
             apply_shrinkwrap(
-                offset = self.offset, target = self.target,
-                wrap_method = self.wrap_method,
-                affected_indices = list(indices_affected_by_dab)
+                offset=self.offset, target=self.target,
+                wrap_method=self.wrap_method,
+                affected_indices=list(indices_affected_by_dab)
             )
 
         # Record the post-dab coordinates of the affected vertex indices.
         post_dab_object_space_map = {
-            index : vertices[index].co.copy()
+            index: vertices[index].co.copy()
             for index in indices_affected_by_dab
         }
 
         # Update the octree.
         model_matrix = active_object.matrix_world
         world_space_submap = {
-            index : model_matrix * post_dab_object_space_map[index]
+            index: model_matrix * post_dab_object_space_map[index]
             for index in indices_affected_by_dab
         }
         octree = props.octree
@@ -127,9 +128,9 @@ class StrokeSmoothBrush(bpy.types.Operator):
 
         # Update the stroke displacement map.
         stroke_displacement_submap = {
-            index : post_dab_object_space_map[index] - (
-                        pre_dab_object_space_map[index]
-                    )
+            index: post_dab_object_space_map[index] - (
+                pre_dab_object_space_map[index]
+            )
             for index in indices_affected_by_dab
         }
         stroke_displacement_map = self.stroke_displacement_map
@@ -159,9 +160,9 @@ class StrokeSmoothBrush(bpy.types.Operator):
             props.redo_stack.clear()
 
             # Push the stroke displacement map to the undo stack.
-            props.undo_stack.append(self.stroke_displacement_map) 
+            props.undo_stack.append(self.stroke_displacement_map)
 
-    def invoke(self, context, event): 
+    def invoke(self, context, event):
         # Record the object space displacement of each vertex affected by the
         # stroke.
         self.stroke_displacement_map = dict()
@@ -197,7 +198,7 @@ class StrokeSmoothBrush(bpy.types.Operator):
                 context.scene.objects.link(temp_target)
 
                 # Set the temporary target of the surface constraint.
-                self.target =  temp_target.name
+                self.target = temp_target.name
 
         # Execute the first dab, and record its position.
         self.dab()

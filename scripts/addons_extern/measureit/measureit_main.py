@@ -404,7 +404,7 @@ class MeasureitEditPanel(bpy.types.Panel):
                     for idx in range(0, mp.measureit_num):
                         ms = mp.measureit_segments[idx]
                         if (ms.gltype == 1 or ms.gltype == 12
-                           or ms.gltype == 13 or ms.gltype == 14) and ms.gltot != '99' \
+                            or ms.gltype == 13 or ms.gltype == 14) and ms.gltot != '99' \
                                 and ms.glfree is False:  # only segments
                             if ms.glpointa <= len(obverts) and ms.glpointb <= len(obverts):
                                 p1 = get_point(obverts[ms.glpointa].co, myobj)
@@ -532,11 +532,11 @@ def add_item(box, idx, segment):
                 row.prop(segment, 'glocwarning', text="Warning")
                 # ortogonal (only segments)
                 if segment.gltype == 1:
-                        if segment.glorto != "99":
-                            row = box.row(True)
-                            row.prop(segment, 'glorto_x', text="X", toggle=True)
-                            row.prop(segment, 'glorto_y', text="Y", toggle=True)
-                            row.prop(segment, 'glorto_z', text="Z", toggle=True)
+                    if segment.glorto != "99":
+                        row = box.row(True)
+                        row.prop(segment, 'glorto_x', text="X", toggle=True)
+                        row.prop(segment, 'glorto_y', text="Y", toggle=True)
+                        row.prop(segment, 'glorto_z', text="Z", toggle=True)
 
         # Arc special
         if segment.gltype == 11:

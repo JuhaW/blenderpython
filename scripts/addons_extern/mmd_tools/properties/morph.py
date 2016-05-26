@@ -26,6 +26,7 @@ def _get_bone(prop):
         return ''
     return fnBone.pose_bone.name
 
+
 def _set_bone(prop, value):
     root = prop.id_data
     fnModel = FnModel(root)
@@ -36,7 +37,8 @@ def _set_bone(prop, value):
     pose_bone = arm.pose.bones[value]
     fnBone = FnBone(pose_bone)
     prop['bone_id'] = fnBone.bone_id
-    
+
+
 class BoneMorphData(PropertyGroup):
     """
     """
@@ -44,23 +46,24 @@ class BoneMorphData(PropertyGroup):
         name='Bone',
         set=_set_bone,
         get=_get_bone,
-        )
+    )
 
     bone_id = IntProperty(
         name='Bone ID',
-        )
+    )
 
     location = FloatVectorProperty(
         name='Location',
         subtype='TRANSLATION',
         size=3,
-        )
+    )
 
     rotation = FloatVectorProperty(
         name='Rotation',
         subtype='QUATERNION',
         size=4,
-        )
+    )
+
 
 class BoneMorph(PropertyGroup):
     """Bone Morph
@@ -69,28 +72,29 @@ class BoneMorph(PropertyGroup):
         name='Name(Eng)',
         description='English Name',
         default='',
-        )
+    )
 
     category = EnumProperty(
         name='Category',
-        items = [
+        items=[
             ('SYSTEM', 'System', '', 0),
             ('EYEBROW', 'Eye Brow', '', 1),
             ('EYE', 'Eye', '', 2),
             ('MOUTH', 'Mouth', '', 3),
             ('OTHER', 'Other', '', 4),
-            ],
+        ],
         default='OTHER',
-        )
+    )
 
     data = CollectionProperty(
         name='Morph Data',
         type=BoneMorphData,
-        )
+    )
     active_bone_data = IntProperty(
         name='Active Bone Data',
         default=0,
-        )
+    )
+
 
 def _get_material(prop):
     mat_id = prop.get('material_id')
@@ -101,6 +105,7 @@ def _get_material(prop):
         return ''
     return fnMat.material.name
 
+
 def _set_material(prop, value):
     if value not in bpy.data.materials.keys():
         prop['material_id'] = -1
@@ -109,7 +114,7 @@ def _set_material(prop, value):
     fnMat = FnMaterial(mat)
     prop['material_id'] = fnMat.material_id
 
-    
+
 class MaterialMorphData(PropertyGroup):
     """
     """
@@ -118,18 +123,18 @@ class MaterialMorphData(PropertyGroup):
         items=[
             ('MULT', 'Multiply', '', 0),
             ('ADD', 'Add', '', 1)
-            ],
+        ],
         default='ADD'
-        )
+    )
     material = StringProperty(
         name='Material',
         get=_get_material,
         set=_set_material,
-        )
+    )
 
     material_id = IntProperty(
         name='Material ID',
-        )
+    )
 
     diffuse_color = FloatVectorProperty(
         name='Diffuse Color',
@@ -140,7 +145,7 @@ class MaterialMorphData(PropertyGroup):
         precision=3,
         step=0.1,
         default=[0, 0, 0, 1],
-        )
+    )
 
     specular_color = FloatVectorProperty(
         name='Specular Color',
@@ -151,7 +156,7 @@ class MaterialMorphData(PropertyGroup):
         precision=3,
         step=0.1,
         default=[0, 0, 0, 1],
-        )
+    )
 
     ambient_color = FloatVectorProperty(
         name='Ambient',
@@ -162,7 +167,7 @@ class MaterialMorphData(PropertyGroup):
         precision=3,
         step=0.1,
         default=[0, 0, 0],
-        )
+    )
 
     edge_color = FloatVectorProperty(
         name='Edge Color',
@@ -173,7 +178,7 @@ class MaterialMorphData(PropertyGroup):
         precision=3,
         step=0.1,
         default=[0, 0, 0, 1],
-        )
+    )
 
     edge_weight = FloatProperty(
         name='Edge Weight',
@@ -181,7 +186,7 @@ class MaterialMorphData(PropertyGroup):
         max=100,
         step=0.1,
         default=0,
-        )
+    )
 
     texture_factor = FloatVectorProperty(
         name='Texture factor',
@@ -192,7 +197,7 @@ class MaterialMorphData(PropertyGroup):
         precision=3,
         step=0.1,
         default=[0, 0, 0, 1],
-        )
+    )
 
     sphere_texture_factor = FloatVectorProperty(
         name='Sphere Texture factor',
@@ -203,8 +208,8 @@ class MaterialMorphData(PropertyGroup):
         precision=3,
         step=0.1,
         default=[0, 0, 0, 1],
-        )
-    
+    )
+
     toon_texture_factor = FloatVectorProperty(
         name='Toon Texture factor',
         subtype='COLOR',
@@ -214,7 +219,8 @@ class MaterialMorphData(PropertyGroup):
         precision=3,
         step=0.1,
         default=[0, 0, 0, 1],
-        )
+    )
+
 
 class MaterialMorph(PropertyGroup):
     """ Material Morph
@@ -223,44 +229,46 @@ class MaterialMorph(PropertyGroup):
         name='Name(Eng)',
         description='English Name',
         default='',
-        )
+    )
 
     category = EnumProperty(
         name='Category',
-        items = [
+        items=[
             ('SYSTEM', 'System', '', 0),
             ('EYEBROW', 'Eye Brow', '', 1),
             ('EYE', 'Eye', '', 2),
             ('MOUTH', 'Mouth', '', 3),
             ('OTHER', 'Other', '', 4),
-            ],
+        ],
         default='OTHER',
-        )
+    )
 
     data = CollectionProperty(
         name='Morph Data',
         type=MaterialMorphData,
-        )
+    )
     active_material_data = IntProperty(
         name='Active Material Data',
         default=0,
-        )
+    )
+
+
 class VertexMorph(PropertyGroup):
     """Vertex Morph
     """
     name_e = StringProperty(
         name='Name(Eng)',
         description='English Name',
-        default=''        
-        )
+        default=''
+    )
     category = EnumProperty(
         name='Category',
-        items = [
+        items=[
             ('SYSTEM', 'System', '', 0),
             ('EYEBROW', 'Eye Brow', '', 1),
             ('EYE', 'Eye', '', 2),
             ('MOUTH', 'Mouth', '', 3),
             ('OTHER', 'Other', '', 4),
-            ],
+        ],
         default='OTHER',
-        )
+    )

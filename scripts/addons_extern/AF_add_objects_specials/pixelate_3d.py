@@ -11,12 +11,14 @@ bl_info = {
     "description": "Creates a 3d pixelated version of the object.",
     "category": "Object"}
 
-import bpy, mathutils
+import bpy
+import mathutils
 from mathutils import Vector
 
 bpy.types.WindowManager.size = bpy.props.FloatProperty(name='Size', min=.05, max=5, default=.25, description='Size of the cube / grid')
-bpy.types.WindowManager.gap = bpy.props.IntProperty(name='Gap', min=0, max=90, default=10, subtype = 'PERCENTAGE', description='Separation - percent of size')
+bpy.types.WindowManager.gap = bpy.props.IntProperty(name='Gap', min=0, max=90, default=10, subtype='PERCENTAGE', description='Separation - percent of size')
 bpy.types.WindowManager.smooth = bpy.props.FloatProperty(name='Smooth', min=0, max=1, default=.0, description='Smooth factor when subdividing mesh')
+
 
 def pix(obj):
     sce = bpy.context.scene
@@ -30,7 +32,7 @@ def pix(obj):
     sce.objects.active = dup
     bpy.ops.object.mode_set()
     ver = mes.vertices
-    
+
     for i in range(250):
         fin = True
         for i in dup.data.edges:
@@ -43,7 +45,8 @@ def pix(obj):
         bpy.ops.mesh.subdivide(number_cuts=1, smoothness=wm.smooth)
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.editmode_toggle()
-        if fin: break
+        if fin:
+            break
 
     for i in ver:
         for n in range(3):
@@ -54,11 +57,12 @@ def pix(obj):
     bpy.ops.mesh.remove_doubles(threshold=0.0001)
     bpy.ops.mesh.delete(type='EDGE_FACE')
     bpy.ops.object.mode_set()
-    sca = wm.size * ( 100 - wm.gap ) * .005
-    bpy.ops.mesh.primitive_cube_add(layers = [True]+[False]*19)
-    bpy.ops.transform.resize(value=[sca]*3)
+    sca = wm.size * (100 - wm.gap) * .005
+    bpy.ops.mesh.primitive_cube_add(layers=[True] + [False] * 19)
+    bpy.ops.transform.resize(value=[sca] * 3)
     bpy.context.scene.objects.active = dup
     bpy.ops.object.parent_set(type='OBJECT')
+
 
 class Pixelate(bpy.types.Operator):
     bl_idname = 'object.pixelate'
@@ -83,9 +87,11 @@ class Pixelate(bpy.types.Operator):
         pix(objeto)
         return {'FINISHED'}
 
+
 def register():
     bpy.utils.register_class(Pixelate)
     bpy.utils.register_class(Boton)
+
 
 def unregister():
     bpy.utils.unregister_class(Pixelate)

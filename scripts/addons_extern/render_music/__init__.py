@@ -36,7 +36,8 @@ if "bpy" in locals():
 else:
     from . import render_music
 
-import bpy, os
+import bpy
+import os
 
 
 # UI
@@ -44,26 +45,26 @@ import bpy, os
 class RenderMusicProperties(bpy.types.PropertyGroup):
     scriptdir = bpy.path.abspath(os.path.dirname(__file__))
 
-    #XXX Music CC-by 3.0, Sam Brubaker, http://soundcloud.com/worldsday/elevator-music-loop
+    # XXX Music CC-by 3.0, Sam Brubaker, http://soundcloud.com/worldsday/elevator-music-loop
     playfile = bpy.props.StringProperty(
-        name = "Play Music",
-        description = "Music to play while rendering",
-        subtype = 'FILE_PATH',
-        default = scriptdir + "/play.mp3")
-    #XXX Sound CC-by 3.0, Mike Koenig, http://soundbible.com/1477-Zen-Temple-Bell.html
+        name="Play Music",
+        description="Music to play while rendering",
+        subtype='FILE_PATH',
+        default=scriptdir + "/play.mp3")
+    # XXX Sound CC-by 3.0, Mike Koenig, http://soundbible.com/1477-Zen-Temple-Bell.html
     endfile = bpy.props.StringProperty(
-        name = "End Sound",
-        description = "Sound to play when rendering completes",
-        subtype = 'FILE_PATH',
-        default = scriptdir + "/end.mp3")
+        name="End Sound",
+        description="Sound to play when rendering completes",
+        subtype='FILE_PATH',
+        default=scriptdir + "/end.mp3")
     use_play = bpy.props.BoolProperty(
-        name = "Play music while rendering",
-        description = "Enable the ability to play music while rendering",
-        default = True)
+        name="Play music while rendering",
+        description="Enable the ability to play music while rendering",
+        default=True)
     use_end = bpy.props.BoolProperty(
-        name = "Play sound upon render completion",
-        description = "Enable the ability to play a sound when a render completes",
-        default = True)
+        name="Play sound upon render completion",
+        description="Enable the ability to play a sound when a render completes",
+        default=True)
 
 
 def userpref_panel(self, context):
@@ -71,18 +72,18 @@ def userpref_panel(self, context):
 
     layout = self.layout
     layout.separator()
-    split = layout.split(percentage = 0.7)
+    split = layout.split(percentage=0.7)
     col = split.column()
-    colsplit = col.split(percentage = 0.95)
-    col1 = colsplit.split(percentage = 0.3)
+    colsplit = col.split(percentage=0.95)
+    col1 = colsplit.split(percentage=0.3)
 
     sub = col1.column()
-    sub.prop(scn.render_music, "use_play", text = "Play Music")
-    sub.prop(scn.render_music, "use_end", text = "End Music")
+    sub.prop(scn.render_music, "use_play", text="Play Music")
+    sub.prop(scn.render_music, "use_end", text="End Music")
 
     sub = col1.column()
-    sub.prop(scn.render_music, "playfile", text = "")
-    sub.prop(scn.render_music, "endfile", text = "")
+    sub.prop(scn.render_music, "playfile", text="")
+    sub.prop(scn.render_music, "endfile", text="")
 
 
 def render_panel(self, context):
@@ -95,7 +96,7 @@ def render_panel(self, context):
 
 def register():
     bpy.utils.register_class(RenderMusicProperties)
-    bpy.types.Scene.render_music = bpy.props.PointerProperty(type = RenderMusicProperties)
+    bpy.types.Scene.render_music = bpy.props.PointerProperty(type=RenderMusicProperties)
     bpy.types.RENDER_PT_render.append(render_panel)
     bpy.types.USERPREF_PT_file.append(userpref_panel)
 

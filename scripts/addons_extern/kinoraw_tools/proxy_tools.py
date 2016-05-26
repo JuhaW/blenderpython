@@ -1,13 +1,14 @@
-import bpy, os
+import bpy
+import os
 from bpy.props import IntProperty, StringProperty, BoolProperty
 import subprocess
 
 from . import functions
 
 
-proxy_qualities = [  ( "1", "25%", "" ), ( "2", "50%", "" ),
-                    ( "3", "75%", "" ), ( "4", "100%", "" ),
-                     ( "5", "none", "" )]
+proxy_qualities = [("1", "25%", ""), ("2", "50%", ""),
+                   ("3", "75%", ""), ("4", "100%", ""),
+                   ("5", "none", "")]
 
 
 # functions
@@ -22,7 +23,7 @@ def setup_proxy(context, strip, size):
     if prefs.use_bi_custom_directory:
         strip.use_proxy_custom_directory = True
         filename = strip.filepath.rpartition("/")[2].rpartition(".")[0]
-        strip.proxy.directory = bpy.path.relpath(prefs.proxy_dir+filename)
+        strip.proxy.directory = bpy.path.relpath(prefs.proxy_dir + filename)
     else:
         strip.use_proxy_custom_directory = False
 
@@ -40,7 +41,7 @@ def setup_proxy(context, strip, size):
         strip.proxy.build_100 = False
 
     else:
-        proxysuffix = proxy_qualities[size-1][1].split("%")[0]
+        proxysuffix = proxy_qualities[size - 1][1].split("%")[0]
 
         if (proxysuffix == "25"):
             strip.proxy.build_25 = True
@@ -51,14 +52,13 @@ def setup_proxy(context, strip, size):
         if (proxysuffix == "100"):
             strip.proxy.build_100 = True
 
-
     return {"FINISHED"}
 
 
 def create_proxy(context, strip, size, res):
     # calculate proxy resolution
-    div = 4/size
-    newres = (int(int(res[0])/div), int(int(res[1])/div))
+    div = 4 / size
+    newres = (int(int(res[0]) / div), int(int(res[1]) / div))
 
     preferences = context.user_preferences
     proxy_dir = preferences.addons[__package__].preferences.proxy_dir
@@ -73,12 +73,12 @@ def create_proxy(context, strip, size, res):
     # get filename
     if strip.type == "MOVIE":
         filename = bpy.path.abspath(strip.filepath)
-        proxysuffix = proxy_qualities[size-1][1].split("%")[0]
+        proxysuffix = proxy_qualities[size - 1][1].split("%")[0]
         proxy_dir = bpy.path.abspath(proxy_dir)
-        newfilename = os.path.join(proxy_dir,filename.rpartition("/")[2])
-        fileoutput = newfilename.rpartition(".")[0]+"-"+proxysuffix+".avi"
+        newfilename = os.path.join(proxy_dir, filename.rpartition("/")[2])
+        fileoutput = newfilename.rpartition(".")[0] + "-" + proxysuffix + ".avi"
 
-        #default value for ffmpeg_command = "fmpeg -i {} -vcodec mjpeg -qv 1 -s {}x{} -y {}"
+        # default value for ffmpeg_command = "fmpeg -i {} -vcodec mjpeg -qv 1 -s {}x{} -y {}"
 
         command = ffmpeg_command.format(filename, newres[0], newres[1], fileoutput)
         print(command)
@@ -111,18 +111,17 @@ def create_proxy(context, strip, size, res):
         return None
 
 
-def create_proxy_scripts(scripts_dir, commands, strip_name = None):
+def create_proxy_scripts(scripts_dir, commands, strip_name=None):
 
     functions.create_folder(bpy.path.abspath(scripts_dir))
 
     for i in commands:
-        #print(i)
+        # print(i)
         filename = "{}/proxy_script_{}.sh".format(scripts_dir, strip_name)
         text_file = open(bpy.path.abspath(filename), "w")
-        #print(filename)
+        # print(filename)
         text_file.write(i)
         text_file.close()
-
 
 
 # classes
@@ -134,8 +133,8 @@ class CreateProxyOperator(bpy.types.Operator):
     bl_label = " Create proxy"
 
     size = IntProperty(
-    name='proxysize',
-    default=1)
+        name='proxysize',
+        default=1)
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -161,8 +160,8 @@ class CreateProxyOperator(bpy.types.Operator):
             try:
                 res = sce['metadata'][0]['Composite:ImageSize'].split("x")
             except:
-                res=(sce.render.resolution_x, sce.render.resolution_y)
-                #print(res)
+                res = (sce.render.resolution_x, sce.render.resolution_y)
+                # print(res)
 
             commands = create_proxy(context, strip, self.size, res)
 
@@ -174,13 +173,12 @@ class CreateProxyOperator(bpy.types.Operator):
                 # deselect all other strips
                 for i in context.selected_editable_sequences:
                     if i.name != newstrip.name:
-                        i.select=False
+                        i.select = False
 
                 # Update scene
                 context.scene.update()
             else:
                 create_proxy_scripts(proxy_scripts_path, commands, strip.name)
-
 
         return {'FINISHED'}
 
@@ -191,8 +189,8 @@ class CreateBIProxyOperator(bpy.types.Operator):
     bl_label = " Create proxy with blender internal"
 
     size = IntProperty(
-    name='proxysize',
-    default=1)
+        name='proxysize',
+        default=1)
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -210,16 +208,17 @@ class CreateBIProxyOperator(bpy.types.Operator):
         strips = functions.get_selected_strips(context)
 
         for strip in strips:
-            #deselect all other strips 
-            for i in strips: i.select = False
-            #select current strip
+            # deselect all other strips
+            for i in strips:
+                i.select = False
+            # select current strip
             strip.select = True
             if strip.type == "MOVIE":
                 setup_proxy(context, strip, self.size)
-        #select all strips again
+        # select all strips again
         for strip in strips:
-            try: 
-                strip.select=True
+            try:
+                strip.select = True
             except ReferenceError:
                 pass
         bpy.ops.sequencer.reload()
@@ -233,11 +232,10 @@ class CreateProxyToolPanel(bpy.types.Panel):
     bl_space_type = 'SEQUENCE_EDITOR'
     bl_region_type = 'UI'
 
-
     @classmethod
     def poll(self, context):
         if context.space_data.view_type in {'SEQUENCER',
-            'SEQUENCER_PREVIEW'}:
+                                            'SEQUENCER_PREVIEW'}:
             strip = functions.act_strip(context)
             scn = context.scene
             preferences = context.user_preferences
@@ -270,7 +268,7 @@ class CreateProxyToolPanel(bpy.types.Panel):
             if prefs.use_bi_custom_directory:
                 row.prop(prefs, "proxy_dir", text="")
                 filename = strip.filepath.rpartition("/")[2].rpartition(".")[0]
-                layout.label("sample dir: //"+bpy.path.abspath(prefs.proxy_dir+filename))
+                layout.label("sample dir: //" + bpy.path.abspath(prefs.proxy_dir + filename))
 
             layout = self.layout
             col = layout.column()
@@ -285,15 +283,15 @@ class CreateProxyToolPanel(bpy.types.Panel):
 
             layout = self.layout
             layout.label("setup and create BI proxy:")
-            row = layout.row(align=True)    
+            row = layout.row(align=True)
             for i in range(4):
                 proxysuffix = proxy_qualities[i][1]
                 row.operator("sequencer.create_bi_proxy_operator",
-                    text=proxysuffix).size=i+1
+                             text=proxysuffix).size = i + 1
 
             layout = self.layout
-            layout.operator("sequencer.create_bi_proxy_operator", 
-                text="Clear proxy sizes").size=5
+            layout.operator("sequencer.create_bi_proxy_operator",
+                            text="Clear proxy sizes").size = 5
 
         else:
 
@@ -310,10 +308,10 @@ class CreateProxyToolPanel(bpy.types.Panel):
             layout.label("{} = filename, with, height, fileoutput")
             label = prefs.ffmpeg_command.format("filename", "with", "height", "fileoutput")
             layout.label(label)
-            
+
             for i in range(4):
                 proxysuffix = proxy_qualities[i][1]
-                row.operator("sequencer.create_proxy_operator",text=proxysuffix).size=i+1
+                row.operator("sequencer.create_proxy_operator", text=proxysuffix).size = i + 1
 
             layout = self.layout
             layout.prop(prefs, "proxy_scripts")
@@ -325,9 +323,5 @@ class CreateProxyToolPanel(bpy.types.Panel):
         layout = self.layout
         box = layout.box()
         box.prop(context.space_data, "proxy_render_size")
-        box.operator("sequencer.rebuild_proxy", 
-                text="Rebuild Proxies and TC")
-
-
-
-    
+        box.operator("sequencer.rebuild_proxy",
+                     text="Rebuild Proxies and TC")

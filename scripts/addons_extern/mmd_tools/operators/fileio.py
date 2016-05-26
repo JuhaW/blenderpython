@@ -17,13 +17,13 @@ import mmd_tools.core.vmd.importer as vmd_importer
 import mmd_tools.core.model as mmd_model
 
 
-
 LOG_LEVEL_ITEMS = [
     ('DEBUG', '4. DEBUG', '', 1),
     ('INFO', '3. INFO', '', 2),
     ('WARNING', '2. WARNING', '', 3),
     ('ERROR', '1. ERROR', '', 4),
-    ]
+]
+
 
 def log_handler(log_level, filepath=None):
     if filepath is None:
@@ -71,7 +71,7 @@ class ImportPmx(Operator, ImportHelper):
                     use_mipmap=self.use_mipmap,
                     sph_blend_factor=self.sph_blend_factor,
                     spa_blend_factor=self.spa_blend_factor
-                    )
+                )
             else:
                 importer = pmx_importer.PMXImporter()
                 importer.execute(
@@ -82,7 +82,7 @@ class ImportPmx(Operator, ImportHelper):
                     use_mipmap=self.use_mipmap,
                     sph_blend_factor=self.sph_blend_factor,
                     spa_blend_factor=self.spa_blend_factor
-                    )
+                )
         except Exception as e:
             logging.error(traceback.format_exc())
             self.report({'ERROR'}, str(e))
@@ -201,7 +201,7 @@ class ExportPmx(Operator, ImportHelper):
                 rigid_bodies=rig.rigidBodies(),
                 joints=rig.joints(),
                 copy_textures=self.copy_textures,
-                )
+            )
         finally:
             logger.removeHandler(handler)
 

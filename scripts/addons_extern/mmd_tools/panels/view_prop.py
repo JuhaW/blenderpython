@@ -4,9 +4,11 @@ from bpy.types import Panel
 
 import mmd_tools.core.model as mmd_model
 
+
 class _PanelBase(object):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
+
 
 class MMDModelObjectDisplayPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_root_object_display'

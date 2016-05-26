@@ -9,7 +9,7 @@ bl_info = {
     "wiki_url": "",
     "tracker_url": "",
     "category": "Add Mesh"
-    }
+}
 
 
 if "bpy" in locals():
@@ -262,7 +262,7 @@ class curved_plane(bpy.types.Operator, AddObjectHelper):
             (-1.2087979316711426, 0.631240963935852, 0.950526237487793),
             (0.07812511920928955, 0.631240725517273, 0.0),
             (-0.4999997615814209, 0.6312408447265625, 0.041929155588150024)
-            ]
+        ]
         for co in vertlist:
             v = bm.verts.new(co)
             bm.verts.index_update()
@@ -341,7 +341,7 @@ class curved_plane(bpy.types.Operator, AddObjectHelper):
             [189, 190], [190, 191], [191, 218], [216, 192], [192, 193],
             [193, 194], [194, 219], [219, 195], [195, 196], [196, 197],
             [197, 220], [217, 198], [198, 199], [199, 200], [200, 220]
-            ]
+        ]
         for verts in edgelist:
             try:
                 bm.edges.new((bm.verts[verts[0]], bm.verts[verts[1]]))
@@ -412,7 +412,7 @@ class curved_plane(bpy.types.Operator, AddObjectHelper):
             (105, 165, 212, 156), (99, 101, 106, 102), (102, 106, 183, 184),
             (101, 157, 158, 106), (106, 158, 215, 183), (99, 102, 107, 103),
             (103, 107, 200, 199), (102, 184, 185, 107), (107, 185, 220, 200)
-            ]
+        ]
         bm.verts.ensure_lookup_table()
         for verts in facelist:
             vlist = []

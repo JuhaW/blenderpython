@@ -18,8 +18,8 @@ class NorthClass:
 
         if context.area.type == 'PROPERTIES':
             self.handler = bpy.types.SpaceView3D.draw_handler_add(
-                               DrawNorth_callback,
-                               (self, context), 'WINDOW', 'POST_PIXEL')
+                DrawNorth_callback,
+                (self, context), 'WINDOW', 'POST_PIXEL')
             self.isActive = True
             self.refresh_screen()
             return True
@@ -135,6 +135,6 @@ def DrawNorth_callback(self, context):
         bgl.glDisable(bgl.GL_LINE_STIPPLE)
 
     bgl.glColor4f(color_prev[0],
-        color_prev[1],
-        color_prev[2],
-        color_prev[3])
+                  color_prev[1],
+                  color_prev[2],
+                  color_prev[3])

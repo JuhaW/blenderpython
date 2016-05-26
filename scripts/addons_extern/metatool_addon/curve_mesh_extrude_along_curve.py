@@ -19,7 +19,7 @@
 # <pep8 compliant>
 
 
-#bl_info = {
+# bl_info = {
 #    "name": "Extrude Along Curve",
 #    "author": "Andrew Hale (TrumanBlending)",
 #    "version": (0, 1),

@@ -39,10 +39,13 @@ from bpy.types import PropertyGroup
 from . import align_tools
 from . import analyse_dicom_3d_models
 from . import auto_mirror
+from . import black_hole
 from . import display_tools
 from . import navigation
-from . import toolshelf_menu
 from . import origin_tools
+from . import select_tools
+from . import toolshelf_menu
+from . import transform_extend
 
 
 bl_info = {
@@ -62,11 +65,14 @@ sub_modules = [
     align_tools,
     analyse_dicom_3d_models,
     auto_mirror,
+    black_hole,
     display_tools,
     navigation,
-    toolshelf_menu,
     origin_tools,
-    ]
+    select_tools,
+    toolshelf_menu,
+    transform_extend
+]
 
 
 sub_modules.sort(
@@ -134,9 +140,9 @@ class UIToolsPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     align_box_draw = bpy.props.BoolProperty(
-            name='Box Draw',
-            description='If applied patch: patch/ui_layout_box.patch',
-            default=False)
+        name='Box Draw',
+        description='If applied patch: patch/ui_layout_box.patch',
+        default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -239,7 +245,6 @@ for mod in sub_modules:
                     unregister_submodule(mod)
         return update
 
-
     prop = bpy.props.BoolProperty(
         name=info['name'],
         description=info.get('description', ''),
@@ -251,7 +256,7 @@ for mod in sub_modules:
 
 classes = [
     UIToolsPreferences,
-    ]
+]
 
 
 def register():

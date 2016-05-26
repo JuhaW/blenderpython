@@ -18,7 +18,7 @@
 # ***** END GPL LICENCE BLOCK *****
 
 
-#bl_info = {
+# bl_info = {
 #    "name": "Mifth Tools",
 #    "author": "Paul Geraskin",
 #    "version": (0, 1, 0),
@@ -38,9 +38,6 @@ from bpy.types import Operator, AddonPreferences
 import math
 
 
-
-
-
 class MFTRadialClone(bpy.types.Operator):
     bl_idname = "mft.radialclone"
     bl_label = "Radial Clone"
@@ -48,15 +45,15 @@ class MFTRadialClone(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     radialClonesAngle = FloatProperty(
-        default = 360.0,
-        min = -360.0,
-        max = 360.0
+        default=360.0,
+        min=-360.0,
+        max=360.0
     )
     clonez = IntProperty(
-            default = 8,
-            min = 2,
-            max = 300
-        )
+        default=8,
+        min=2,
+        max=300
+    )
 
     def execute(self, context):
 
@@ -71,8 +68,8 @@ class MFTRadialClone(bpy.types.Operator):
             for i in range(self.clonez - 1):
                 bpy.ops.object.duplicate(linked=True, mode='DUMMY')
                 #newObj = bpy.context.selected_objects[0]
-                #print(newObj)
-                #for obj in bpy.context.selected_objects:
+                # print(newObj)
+                # for obj in bpy.context.selected_objects:
                 theAxis = None
 
                 if mifthTools.radialClonesAxis == 'X':
@@ -92,10 +89,9 @@ class MFTRadialClone(bpy.types.Operator):
                         theAxis = (activeObjMatrix[0][2], activeObjMatrix[1][2], activeObjMatrix[2][2])
                     else:
                         theAxis = (0, 0, 1)
-                
-                rotateValue = (math.radians(self.radialClonesAngle)/float(self.clonez))
-                bpy.ops.transform.rotate(value=rotateValue, axis=theAxis)
 
+                rotateValue = (math.radians(self.radialClonesAngle) / float(self.clonez))
+                bpy.ops.transform.rotate(value=rotateValue, axis=theAxis)
 
             bpy.ops.object.select_all(action='DESELECT')
 
@@ -112,46 +108,43 @@ class MFTRadialClone(bpy.types.Operator):
         return context.window_manager.invoke_props_popup(self, event)
 
 
-
 def register():
 
     class MFTProperties(bpy.types.PropertyGroup):
 
         # Radial Clone Settings
-        #radialClonesNumber = IntProperty(
+        # radialClonesNumber = IntProperty(
             #default = 8,
             #min = 2,
             #max = 300
         #)
 
         radialClonesAxis = EnumProperty(
-            items = (('X', 'X', ''),
+            items=(('X', 'X', ''),
                    ('Y', 'Y', ''),
                    ('Z', 'Z', '')
                    ),
-            default = 'Z'
+            default='Z'
         )
 
         radialClonesAxisType = EnumProperty(
-            items = (('Global', 'Global', ''),
+            items=(('Global', 'Global', ''),
                    ('Local', 'Local', '')
                    ),
-            default = 'Global'
+            default='Global'
         )
-    
+
     bpy.utils.register_module(__name__)
 
     bpy.types.Scene.mifthTools = PointerProperty(name="Mifth Tools Variables", type=MFTProperties, description="Mifth Tools Properties")
 
+
 def unregister():
-    
-    del bpy.types.Scene.mifthTools   
-     
+
+    del bpy.types.Scene.mifthTools
+
     bpy.utils.unregister_module(__name__)
 
 
 if __name__ == "__main__":
     register()
-
-
-

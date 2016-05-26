@@ -19,7 +19,7 @@ bl_info = {
     "name": "Batch Transforms (Transform Utils)",
     "description": "Batch Transforms (Transform Utils)",
     "author": "dairin0d, moth3r",
-    "version": (0, 4, 8),
+    "version": (0, 4, 9),
     "blender": (2, 7, 0),
     "location": "View3D > Transform category in Tools panel",
     "warning": "Experimental / WIP",
@@ -69,6 +69,17 @@ addon = AddonManager()
 PROBLEMS:
 * the way I work with axis-angle rotation mode seems buggy
 * bug/glitch with VIEW system, noticeable when chosed as a manipulator orientation (view matrix (or other params) lag one frame behind, which leads to visible distortions of the manipulator when rotating the view)
+* moth3r says Batch Transforms is slow on files with many objects
+
+\\ Another possible option on how to handle the "hide 3D cursor" problem:
+Since the main devs refuse to add an option to not draw cursor (or even alter its appearance), the only _other_ way to "hide" it is to either move it outside of camera view for the duration of the 2D rendering, or to over-paint it with the result of 3D rendering (which will over-paint other 2D rendering too).
+The "out-of-camera-view" solution has 2 drawbacks:
+* minor: other addons may potentially use cursor position to draw something
+* major: cursor movement causes a redraw event
+In fact, two generic solutions can be proposed for each problem, which would also be useful for other kinds of situations:
+* provide a way to manipulate the order of 2D/3D drawing callbacks
+* provide a way to disable the redraw event for a section of code
+** useful for anything that requires making modifications to the scene and then reverts to the original state
 
 BUG: if editmode object is not the same as active object, selection-walker's bmesh is None
 
@@ -117,38 +128,39 @@ documentation (Ivan suggests to use his taser model for illustrations)
 (Ivan suggests to post on forum after he makes video tutorial)
 """
 
+
 @addon.Preferences.Include
 class ThisAddonPreferences:
     use_panel_left = True | prop("Show in T-panel", name="T (left panel)")
     use_panel_right = False | prop("Show in N-panel", name="N (right panel)")
     epsilon = 1e-6 | prop("Number equality threshold", name="Epsilon", min=0.0, max=1.0, step=1, precision=8)
-    
+
     gridcolors = batch_transform.GridColorsPG | prop()
     gridstep_small = 5 | prop(min=1, max=100)
     gridstep_big = 1 | prop(min=1, max=100)
-    
+
     workplane_color = Color((0.25, 0.35, 0.5)) | prop(alpha=0.25)
     workplane_lines_color = Color((1, 1, 1)) | prop(alpha=0.5)
     workplane_lines10_color = Color((1, 1, 1)) | prop(alpha=1.0)
     workplane_stipple = 2 | prop(min=1, max=256)
-    
+
     auto_align_objects = True | prop("Automatically switch between World and View alignment of new objects")
-    
+
     project_cursor_3d = False | prop("Project 3D cursor on workplane when aligning view to workplane")
-    
+
     def draw(self, context):
         layout = NestedLayout(self.layout)
-        
+
         with layout.row()(alignment='LEFT'):
             layout.prop(self, "use_panel_left")
             layout.prop(self, "use_panel_right")
-            with layout.row():#(alignment='EXPAND'):
+            with layout.row():  # (alignment='EXPAND'):
                 layout.prop(self, "epsilon", text="Tolerance ")
-        
+
         with layout.row()(alignment='LEFT'):
             layout.prop(self, "gridstep_small", text="Grid step (small)")
             layout.prop(self, "gridstep_big", text="Grid step (big)")
-        
+
         with layout.row()(alignment='LEFT'):
             layout.prop(self.gridcolors, "x", text="X")
             layout.prop(self.gridcolors, "y", text="Y")
@@ -156,20 +168,22 @@ class ThisAddonPreferences:
             layout.prop(self.gridcolors, "xy", text="XY")
             layout.prop(self.gridcolors, "xz", text="XZ")
             layout.prop(self.gridcolors, "yz", text="YZ")
-        
+
         with layout.row()(alignment='LEFT'):
             layout.prop(self, "workplane_color", text="Workplane")
             layout.prop(self, "workplane_lines_color", text="Lines")
             layout.prop(self, "workplane_lines10_color", text="Lines-10")
             layout.prop(self, "workplane_stipple", text="Stipple")
-        
+
         with layout.row()(alignment='LEFT'):
             layout.prop(self, "auto_align_objects", text="Auto switch 'Editing\Align To'")
             layout.prop(self, "project_cursor_3d", text="Project 3D cursor on workplane")
 
+
 def register():
     addon.use_zbuffer = True
     addon.register()
+
 
 def unregister():
     addon.unregister()

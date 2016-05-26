@@ -27,7 +27,7 @@ bl_info = {
     "name": "Celtic Knot",
     "description": "",
     "author": "Adam Newgas",
-    "version": (0,1,1),
+    "version": (0, 1, 1),
     "blender": (2, 74, 0),
     "location": "View3D > Add > Curve",
     "warning": "",
@@ -38,7 +38,8 @@ import bpy
 import bmesh
 from collections import defaultdict
 from mathutils import Vector
-from math import pi,sin,cos
+from math import pi, sin, cos
+
 
 class CelticKnotOperator(bpy.types.Operator):
     bl_idname = "curve.celtic_links"
@@ -54,16 +55,16 @@ class CelticKnotOperator(bpy.types.Operator):
                                          description="Distance to shift curve downward under knots",
                                          subtype="DISTANCE",
                                          unit="LENGTH")
-    handle_types = [("ALIGNED","Aligned","Points at a fixed crossing angle"),
-                    ("AUTO","Auto","Automatic control points")]
+    handle_types = [("ALIGNED", "Aligned", "Points at a fixed crossing angle"),
+                    ("AUTO", "Auto", "Automatic control points")]
     handle_type = bpy.props.EnumProperty(items=handle_types,
                                          name="Handle Type",
                                          description="Controls what type the bezier control points use",
                                          default="AUTO")
     crossing_angle = bpy.props.FloatProperty(name="Crossing Angle",
                                              description="Aligned only: the angle between curves in a knot",
-                                             default=pi/4,
-                                             min=0,max=pi/2,
+                                             default=pi / 4,
+                                             min=0, max=pi / 2,
                                              subtype="ANGLE",
                                              unit="ROTATION")
     crossing_strength = bpy.props.FloatProperty(name="Crossing Strength",
@@ -72,13 +73,12 @@ class CelticKnotOperator(bpy.types.Operator):
                                                 subtype="DISTANCE",
                                                 unit="LENGTH")
 
-
-    handle_type_map = {"AUTO":"AUTOMATIC","ALIGNED":"ALIGNED"}
+    handle_type_map = {"AUTO": "AUTOMATIC", "ALIGNED": "ALIGNED"}
 
     @classmethod
     def poll(cls, context):
         ob = context.active_object
-        #return True
+        # return True
         return ((ob is not None) and
                 (ob.mode == "OBJECT") and
                 (ob.type == "MESH") and
@@ -93,7 +93,7 @@ class CelticKnotOperator(bpy.types.Operator):
         weave_down = self.weave_down
         # Create the new object
         orig_obj = obj = context.active_object
-        curve = bpy.data.curves.new("Celtic","CURVE")
+        curve = bpy.data.curves.new("Celtic", "CURVE")
         curve.dimensions = "3D"
         curve.twist_mode = "MINIMUM"
         curve.fill_mode = "FULL"
@@ -106,22 +106,24 @@ class CelticKnotOperator(bpy.types.Operator):
         for e in obj.edges.values():
             v1 = obj.vertices[e.vertices[0]]
             v2 = obj.vertices[e.vertices[1]]
-            m = (v1.co+v2.co) / 2.0
+            m = (v1.co + v2.co) / 2.0
             midpoints.append(m)
 
         bm = bmesh.new()
         bm.from_mesh(obj)
         # Stores which loops the curve has already passed through
-        loops_entered = defaultdict(lambda:False)
-        loops_exited = defaultdict(lambda:False)
+        loops_entered = defaultdict(lambda: False)
+        loops_exited = defaultdict(lambda: False)
         # Loops on the boundary of a surface
+
         def ignorable_loop(loop):
-            return len(loop.link_loops)==0
+            return len(loop.link_loops) == 0
         # Starting at loop, build a curve one vertex at a time
         # until we start where we came from
         # Forward means that for any two edges the loop crosses
         # sharing a face, it is passing through in clockwise order
         # else anticlockwise
+
         def make_loop(loop, forward):
             current_spline = curve.splines.new("BEZIER")
             current_spline.use_cyclic_u = True
@@ -134,12 +136,14 @@ class CelticKnotOperator(bpy.types.Operator):
             handle_rights = []
             while True:
                 if forward:
-                    if loops_exited[loop]: break
+                    if loops_exited[loop]:
+                        break
                     loops_exited[loop] = True
                     # Follow the face around, ignoring boundary edges
                     while True:
                         loop = loop.link_loop_next
-                        if not ignorable_loop(loop): break
+                        if not ignorable_loop(loop):
+                            break
                     assert loops_entered[loop] == False
                     loops_entered[loop] = True
                     v = loop.vert.index
@@ -149,13 +153,15 @@ class CelticKnotOperator(bpy.types.Operator):
                     loop = loop.link_loops[0]
                     forward = loop.vert.index == v
                 else:
-                    if loops_entered[loop]: break
+                    if loops_entered[loop]:
+                        break
                     loops_entered[loop] = True
                     # Follow the face around, ignoring boundary edges
                     while True:
                         v = loop.vert.index
                         loop = loop.link_loop_prev
-                        if not ignorable_loop(loop): break
+                        if not ignorable_loop(loop):
+                            break
                     assert loops_exited[loop] == False
                     loops_exited[loop] = True
                     prev_loop = loop
@@ -176,7 +182,8 @@ class CelticKnotOperator(bpy.types.Operator):
                     tangent = loop.link_loop_next.vert.co - loop.vert.co
                     tangent.normalize()
                     binormal = normal.cross(tangent).normalized()
-                    if not forward: tangent *= -1
+                    if not forward:
+                        tangent *= -1
                     s_binormal = s * binormal
                     c_tangent = c * tangent
                     handle_left = midpoint - s_binormal - c_tangent
@@ -184,17 +191,20 @@ class CelticKnotOperator(bpy.types.Operator):
                     handle_lefts.extend(handle_left)
                     handle_rights.extend(handle_right)
             points = current_spline.bezier_points
-            points.foreach_set("co",cos)
+            points.foreach_set("co", cos)
             if handle_type != "AUTO":
-                points.foreach_set("handle_left",handle_lefts)
-                points.foreach_set("handle_right",handle_rights)
+                points.foreach_set("handle_left", handle_lefts)
+                points.foreach_set("handle_right", handle_rights)
 
         # Attempt to start a loop at each untouched loop in the entire mesh
         for face in bm.faces:
             for loop in face.loops:
-                if ignorable_loop(loop): continue
-                if not loops_exited[loop]: make_loop(loop, True)
-                if not loops_entered[loop]: make_loop(loop, False)
+                if ignorable_loop(loop):
+                    continue
+                if not loops_exited[loop]:
+                    make_loop(loop, True)
+                if not loops_entered[loop]:
+                    make_loop(loop, False)
         # Create an object from the curve
         from bpy_extras import object_utils
         object_utils.object_data_add(context, curve, operator=None)
@@ -212,10 +222,12 @@ class CelticKnotOperator(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 def menu_func(self, context):
     self.layout.operator(CelticKnotOperator.bl_idname,
                          text="Celtic Knot From Mesh",
                          icon='PLUGIN')
+
 
 def register():
     bpy.utils.register_module(__name__)

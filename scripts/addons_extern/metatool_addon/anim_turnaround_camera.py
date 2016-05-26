@@ -17,7 +17,7 @@
 #
 # ***** END GPL LICENCE BLOCK *****
 
-#bl_info = {
+# bl_info = {
 #    "name": "Turnaround camera around object",
 #    "author": "Antonio Vazquez (antonioya)",
 #    "version": (0, 1),
@@ -32,6 +32,8 @@ import math
 #------------------------------------------------------
 # Action class
 #------------------------------------------------------
+
+
 class RunAction(bpy.types.Operator):
     bl_idname = "object.rotate_around"
     bl_label = "Turnaround"
@@ -42,16 +44,16 @@ class RunAction(bpy.types.Operator):
     #------------------------------
     def execute(self, context):
         #----------------------
-        # Save old data       
+        # Save old data
         #----------------------
         scene = context.scene
         selectObject = context.active_object
         camera = bpy.data.objects[bpy.context.scene.camera.name]
-        savedCursor = bpy.context.scene.cursor_location.copy() # cursor position
+        savedCursor = bpy.context.scene.cursor_location.copy()  # cursor position
         savedFrame = scene.frame_current
         if (scene.use_cursor == False):
             bpy.ops.view3d.snap_cursor_to_selected()
-        
+
         #-------------------------
         # Create empty and parent
         #-------------------------
@@ -70,20 +72,20 @@ class RunAction(bpy.types.Operator):
         savedState = camera.matrix_world
         camera.parent = myEmpty
         camera.matrix_world = savedState
-        
+
         #-------------------------
-        # Now add revolutions 
+        # Now add revolutions
         # (make empty active object)
         #-------------------------
         bpy.ops.object.select_all(False)
         myEmpty.select = True
         bpy.context.scene.objects.active = myEmpty
-        # save current configuration     
+        # save current configuration
         savedInterpolation = context.user_preferences.edit.keyframe_new_interpolation_type
         # change interpolation mode
-        context.user_preferences.edit.keyframe_new_interpolation_type ='LINEAR'
+        context.user_preferences.edit.keyframe_new_interpolation_type = 'LINEAR'
         # create first frame
-        myEmpty.rotation_euler = (0,0,0)
+        myEmpty.rotation_euler = (0, 0, 0)
         myEmpty.empty_draw_size = 0.1
         bpy.context.scene.frame_set(scene.frame_start)
         myEmpty.keyframe_insert(data_path='rotation_euler', frame=(scene.frame_start))
@@ -91,39 +93,39 @@ class RunAction(bpy.types.Operator):
         if (scene.inverse_x):
             iX = -1
         else:
-            iX = 1    
+            iX = 1
 
         if (scene.inverse_y):
             iY = -1
         else:
-            iY = 1    
+            iY = 1
 
         if (scene.inverse_z):
             iZ = -1
         else:
-            iZ = 1    
-        
+            iZ = 1
+
         xRot = (math.pi * 2) * scene.camera_revol_x * iX
         yRot = (math.pi * 2) * scene.camera_revol_y * iY
         zRot = (math.pi * 2) * scene.camera_revol_z * iZ
 
         # create middle frame
         if (scene.back_forw == True):
-            myEmpty.rotation_euler = (xRot,yRot,zRot)
+            myEmpty.rotation_euler = (xRot, yRot, zRot)
             myEmpty.keyframe_insert(data_path='rotation_euler', frame=((scene.frame_end - scene.frame_start) / 2))
             # reverse
             xRot = xRot * -1
             yRot = yRot * -1
             zRot = 0
-        
+
         # create last frame
-        myEmpty.rotation_euler = (xRot,yRot,zRot)
+        myEmpty.rotation_euler = (xRot, yRot, zRot)
         myEmpty.keyframe_insert(data_path='rotation_euler', frame=(scene.frame_end))
-        
+
         # back previous configuration
-        context.user_preferences.edit.keyframe_new_interpolation_type = savedInterpolation    
-        bpy.context.scene.cursor_location = savedCursor      
-        
+        context.user_preferences.edit.keyframe_new_interpolation_type = savedInterpolation
+        bpy.context.scene.cursor_location = savedCursor
+
         #-------------------------
         # Back to old selection
         #-------------------------
@@ -131,7 +133,7 @@ class RunAction(bpy.types.Operator):
         selectObject.select = True
         bpy.context.scene.objects.active = selectObject
         bpy.context.scene.frame_set(savedFrame)
-        
+
         return {'FINISHED'}
 #------------------------------------------------------
 # UI Class
@@ -175,36 +177,31 @@ class PanelUI(bpy.types.Panel):
             else:
                 buf = "No valid object selected"
                 layout.label(buf, icon='MESH_DATA')
-"""                
-        
+"""
+
 #------------------------------------------------------
 # Registration
 #------------------------------------------------------
+
+
 def register():
     bpy.utils.register_class(RunAction)
-    #bpy.utils.register_class(PanelUI)
+    # bpy.utils.register_class(PanelUI)
     # Define properties
-    bpy.types.Scene.camera_revol_x = bpy.props.FloatProperty(name='X',min=0,max= 25
-                                                  ,default= 0,precision=2
-                                                  ,description='Number total of revolutions in X axis')
-    bpy.types.Scene.camera_revol_y = bpy.props.FloatProperty(name='Y',min=0,max= 25
-                                                  ,default= 0,precision=2
-                                                  ,description='Number total of revolutions in Y axis')
-    bpy.types.Scene.camera_revol_z = bpy.props.FloatProperty(name='Z',min=0,max= 25
-                                                  ,default= 1,precision=2
-                                                  ,description='Number total of revolutions in Z axis')
-    
-    bpy.types.Scene.inverse_x = bpy.props.BoolProperty(name = "-X",description="Inverse rotation",default = False)
-    bpy.types.Scene.inverse_y = bpy.props.BoolProperty(name = "-Y",description="Inverse rotation",default = False)
-    bpy.types.Scene.inverse_z = bpy.props.BoolProperty(name = "-Z",description="Inverse rotation",default = False)
-    bpy.types.Scene.use_cursor = bpy.props.BoolProperty(name = "Use cursor position",description="Use cursor position instead of object origin",default = False)
-    bpy.types.Scene.back_forw = bpy.props.BoolProperty(name = "Back and forward",description="Create back and forward animation",default = False)
+    bpy.types.Scene.camera_revol_x = bpy.props.FloatProperty(name='X', min=0, max=25, default=0, precision=2, description='Number total of revolutions in X axis')
+    bpy.types.Scene.camera_revol_y = bpy.props.FloatProperty(name='Y', min=0, max=25, default=0, precision=2, description='Number total of revolutions in Y axis')
+    bpy.types.Scene.camera_revol_z = bpy.props.FloatProperty(name='Z', min=0, max=25, default=1, precision=2, description='Number total of revolutions in Z axis')
 
-    
+    bpy.types.Scene.inverse_x = bpy.props.BoolProperty(name="-X", description="Inverse rotation", default=False)
+    bpy.types.Scene.inverse_y = bpy.props.BoolProperty(name="-Y", description="Inverse rotation", default=False)
+    bpy.types.Scene.inverse_z = bpy.props.BoolProperty(name="-Z", description="Inverse rotation", default=False)
+    bpy.types.Scene.use_cursor = bpy.props.BoolProperty(name="Use cursor position", description="Use cursor position instead of object origin", default=False)
+    bpy.types.Scene.back_forw = bpy.props.BoolProperty(name="Back and forward", description="Create back and forward animation", default=False)
+
 
 def unregister():
     bpy.utils.unregister_class(RunAction)
-    #bpy.utils.unregister_class(PanelUI)
+    # bpy.utils.unregister_class(PanelUI)
 
     del bpy.types.Scene.camera_revol_x
     del bpy.types.Scene.camera_revol_y
@@ -217,4 +214,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

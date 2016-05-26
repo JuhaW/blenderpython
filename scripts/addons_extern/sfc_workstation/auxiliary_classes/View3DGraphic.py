@@ -24,11 +24,13 @@ import bpy
 from math import pi, sqrt
 from mathutils import Matrix, Vector
 
+
 class View3DGraphic():
+
     def __init__(self):
         self.is_enabled = True
-        
-    def draw_text(self, x, y, text, size, color = (0, 0, 0, 1)):
+
+    def draw_text(self, x, y, text, size, color=(0, 0, 0, 1)):
         if not self.is_enabled:
             return
 
@@ -38,11 +40,11 @@ class View3DGraphic():
         blf.position(font_id, x, y, 0)
         blf.size(font_id, size, 72)
         blf.draw(font_id, text)
-        
+
         self.restore_opengl()
 
-    def draw_brush(self, brush, outline_color = (0, 0, 0, 1),
-                   outline_thickness = 1, interior_color = (0, 0, 0, 0.2)):
+    def draw_brush(self, brush, outline_color=(0, 0, 0, 1),
+                   outline_thickness=1, interior_color=(0, 0, 0, 0.2)):
         if not self.is_enabled:
             return
 
@@ -115,13 +117,13 @@ class View3DGraphic():
             bgl.glColor3f(*brush_color_map[index])
             bgl.glVertex3f(*coordinate_map[index])
         bgl.glEnd()
-        
+
         self.restore_opengl()
 
     def draw_region_circle(self, region_x, region_y, radius,
-                           outline_color = (0, 0, 0, 1),
-                           outline_thickness = 1,
-                           interior_color = (0, 0, 0, 0.2)):
+                           outline_color=(0, 0, 0, 1),
+                           outline_thickness=1,
+                           interior_color=(0, 0, 0, 0.2)):
         if not self.is_enabled:
             return
 
@@ -158,8 +160,8 @@ class View3DGraphic():
 
         self.restore_opengl()
 
-    def draw_octree(self, octree, nodes = {'ROOT'},
-                    space = 'WORLD', mesh_object = None):
+    def draw_octree(self, octree, nodes={'ROOT'},
+                    space='WORLD', mesh_object=None):
         if not self.is_enabled:
             return
 
@@ -167,9 +169,9 @@ class View3DGraphic():
         # systems.
         if space not in {'OBJECT', 'WORLD'}:
             raise Exception((
-                    "Invalid space argument '{0}' not found in " +
-                    "('OBJECT', 'WORLD')"
-                ).format(space)
+                "Invalid space argument '{0}' not found in " +
+                "('OBJECT', 'WORLD')"
+            ).format(space)
             )
 
         # Object space coordinates require a specified mesh object to determine

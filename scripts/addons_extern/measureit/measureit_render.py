@@ -198,8 +198,6 @@ def render_main(self, context, animation=False):
                         if scene.measureit_debug_faces is True or scene.measureit_debug_normals is True:
                             draw_faces(context, myobj, None, None)
 
-
-
                 if scene.measureit_rf is True:
                     bgl.glColor3f(1.0, 1.0, 1.0)
                     rfcolor = scene.measureit_rf_color

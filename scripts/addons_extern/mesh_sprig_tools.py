@@ -694,7 +694,7 @@ class GrabFromGeometryBase(bpy.types.Operator):
 
     def return_selected_verts(self):
         if (bpy.context.active_object and
-                type(bpy.context.active_object.data) == bpy.types.Mesh):
+                isinstance(bpy.context.active_object.data, bpy.types.Mesh)):
             selection = []
             verts_collected = 0
             # Todo, check for a better way to handle/if this is needed
@@ -796,7 +796,7 @@ class GrabPointFromActiveLocal(GrabFromGeometryBase):
     bl_label = "Grab Local Coordinates From Active Point"
     bl_description = (
         "Grabs local coordinates from selected vertex in edit mode"
-        )
+    )
     bl_options = {'REGISTER', 'UNDO'}
     vert_attribs_to_set = ('point',)
     multiply_by_world_matrix = False
@@ -903,7 +903,7 @@ class GrabAllVertsLineLocal(GrabFromGeometryBase):
     bl_label = "Grab Line from Selected Verts"
     bl_description = (
         "Grabs line coordinates from selected vertices in edit mode"
-        )
+    )
     bl_options = {'REGISTER', 'UNDO'}
     vert_attribs_to_set = ('line_start', 'line_end')
     multiply_by_world_matrix = False
@@ -1479,7 +1479,7 @@ class ScaleMatchEdgeBase(bpy.types.Operator):
         active_item = prims[addon_data.active_list_item]
 
         if (bpy.context.active_object and
-                type(bpy.context.active_object.data) == bpy.types.Mesh):
+                isinstance(bpy.context.active_object.data, bpy.types.Mesh)):
 
             if (prims[active_item.sme_edge_one].kind != 'LINE' or
                     prims[active_item.sme_edge_two].kind != 'LINE'):
@@ -1531,7 +1531,7 @@ class ScaleMatchEdgeBase(bpy.types.Operator):
                     'Divide by zero error: zero length edge encountered'
                 )
                 return {'CANCELLED'}
-            scale_factor = dest_edge.length/src_edge.length
+            scale_factor = dest_edge.length / src_edge.length
 
             if self.target == 'OBJECT':
                 bpy.context.active_object.scale = [
@@ -1543,13 +1543,13 @@ class ScaleMatchEdgeBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                            scale_check[0] != scale_check[2]):
+                        scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                        )
+                         )
                     )
                     return {'CANCELLED'}
 
@@ -1632,7 +1632,7 @@ class PointMatchBase(bpy.types.Operator):
         active_item = prims[addon_data.active_list_item]
 
         if (bpy.context.active_object and
-                type(bpy.context.active_object.data) == bpy.types.Mesh):
+                isinstance(bpy.context.active_object.data, bpy.types.Mesh)):
 
             if (prims[active_item.pm_pt_one].kind != 'POINT' or
                     prims[active_item.pm_pt_two].kind != 'POINT'):
@@ -1717,13 +1717,13 @@ class PointMatchBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                            scale_check[0] != scale_check[2]):
+                        scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                        )
+                         )
                     )
                     return {'CANCELLED'}
 
@@ -1801,7 +1801,7 @@ class VectorSlideBase(bpy.types.Operator):
         active_item = prims[addon_data.active_list_item]
 
         if (bpy.context.active_object and
-                type(bpy.context.active_object.data) == bpy.types.Mesh):
+                isinstance(bpy.context.active_object.data, bpy.types.Mesh)):
 
             if prims[active_item.vs_direction].kind != 'LINE':
                 self.report(
@@ -1857,13 +1857,13 @@ class VectorSlideBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                            scale_check[0] != scale_check[2]):
+                        scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                        )
+                         )
                     )
                     return {'CANCELLED'}
 
@@ -1965,7 +1965,7 @@ class AxisRotateBase(bpy.types.Operator):
         active_item = prims[addon_data.active_list_item]
 
         if (bpy.context.active_object and
-                type(bpy.context.active_object.data) == bpy.types.Mesh):
+                isinstance(bpy.context.active_object.data, bpy.types.Mesh)):
 
             if prims[active_item.axr_axis].kind != 'LINE':
                 self.report(
@@ -2043,13 +2043,13 @@ class AxisRotateBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                            scale_check[0] != scale_check[2]):
+                        scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                        )
+                         )
                     )
                     return {'CANCELLED'}
 
@@ -2144,7 +2144,7 @@ class MakeCollinearBase(bpy.types.Operator):
         active_item = prims[addon_data.active_list_item]
 
         if (bpy.context.active_object and
-                type(bpy.context.active_object.data) == bpy.types.Mesh):
+                isinstance(bpy.context.active_object.data, bpy.types.Mesh)):
 
             if (prims[active_item.mcl_src_line].kind != 'LINE' or
                     prims[active_item.mcl_dest_line].kind != 'LINE'):
@@ -2242,13 +2242,13 @@ class MakeCollinearBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                            scale_check[0] != scale_check[2]):
+                        scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                        )
+                         )
                     )
                     return {'CANCELLED'}
 
@@ -2257,7 +2257,7 @@ class MakeCollinearBase(bpy.types.Operator):
                 src_mesh.from_mesh(bpy.context.active_object.data)
 
                 loc_src_pivot_coords = inverse_active * mathutils.Vector(
-                        prims[active_item.mcl_src_line].line_start
+                    prims[active_item.mcl_src_line].line_start
                 )
                 inverted_loc_src_pivot_coords = loc_src_pivot_coords.copy()
                 inverted_loc_src_pivot_coords.negate()
@@ -2366,7 +2366,7 @@ class MakeCoplanarBase(bpy.types.Operator):
         active_item = prims[addon_data.active_list_item]
 
         if (bpy.context.active_object and
-                type(bpy.context.active_object.data) == bpy.types.Mesh):
+                isinstance(bpy.context.active_object.data, bpy.types.Mesh)):
 
             if (prims[active_item.mcp_src_plane].kind != 'PLANE' or
                     prims[active_item.mcp_dest_plane].kind != 'PLANE'):
@@ -2483,13 +2483,13 @@ class MakeCoplanarBase(bpy.types.Operator):
                     bpy.context.active_object.matrix_world.decompose()[2]
                 )
                 if (scale_check[0] != scale_check[1] or
-                            scale_check[0] != scale_check[2]):
+                        scale_check[0] != scale_check[2]):
                     self.report(
                         {'ERROR'},
                         ('Currently unsupported: mesh level transforms'
                          ' cannot currently be applied to objects with'
                          ' non-uniform scaling.'
-                        )
+                         )
                     )
                     return {'CANCELLED'}
 
@@ -3445,7 +3445,7 @@ class SPRIGGui(bpy.types.Panel):
 
                 # Todo, add scale match edge mods
                 if (active_item.transf_type != 'SCALEMATCHEDGE' and
-                                active_item.transf_type != 'AXISROTATE'):
+                        active_item.transf_type != 'AXISROTATE'):
                     item_info_col.label('Transformation Modifiers:')
                     item_mods_box = item_info_col.box()
                     mods_row_1 = item_mods_box.row()

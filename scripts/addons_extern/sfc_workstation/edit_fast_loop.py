@@ -20,15 +20,15 @@ bl_info = {
     "name": "Fast Loop",
     "description": "Adds loops fast!",
     "author": "Andy Davies (metalliandy)",
-    "version": (0,16),
+    "version": (0, 16),
     "blender": (2, 5, 6),
     "api": 34958,
     "location": "Tool Shelf",
-    "warning": '', # used for warning icon and text in addons panel
+    "warning": '',  # used for warning icon and text in addons panel
     "wiki_url": "",
     "tracker_url": "",
     "category": "3D View"}
-    
+
 """About this script:-
 This script enables the fast creation of multiple loops on a mesh.
 
@@ -66,41 +66,45 @@ class MakeFastLoopButton(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         layout.operator("object_ot.fastloop")
-"""        
+"""
+
 
 class OBJECT_OT_FastLoop(bpy.types.Operator):
     """FastLoop / Press Rightmouse twice to stop"""
     bl_idname = "object_ot.fastloop"
     bl_label = "FastLoop"
-    
+
     active = bpy.props.BoolProperty(name="active", default=False)
-    
+
     @classmethod
     def poll(cls, context):
         return bpy.ops.mesh.loopcut_slide.poll()
-    
+
     def modal(self, context, event):
-        if event.type == 'RIGHTMOUSE':#'ESC':
+        if event.type == 'RIGHTMOUSE':  # 'ESC':
             context.area.header_text_set()
             return {'CANCELLED'}
         elif event.type == 'LEFTMOUSE' and event.value == 'RELEASE':
             self.active = False
-        
+
         if not self.active:
             self.active = True
             bpy.ops.mesh.loopcut_slide('INVOKE_DEFAULT')
             context.area.header_text_set("Press Rightmouse twice to stop FastLoop")
-        
+
         return {'RUNNING_MODAL'}
-    
+
     def invoke(self, context, event):
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
-        
-## registring
+
+# registring
+
+
 def register():
     bpy.utils.register_module(__name__)
     pass
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

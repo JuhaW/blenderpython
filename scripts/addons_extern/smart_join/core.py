@@ -23,7 +23,9 @@ if "bpy" in locals():
 else:
     from . import joiner
 
-import bpy, bmesh
+import bpy
+import bmesh
+
 
 def get_sjmesh(name):
     mesh = bpy.data.meshes.get(name)
@@ -31,10 +33,12 @@ def get_sjmesh(name):
         return mesh
     return None
 
+
 def get_stored_sjobjects_unsafe(sj_mesh_name):
     return [o for o in bpy.data.objects if o.sjoin_mesh == sj_mesh_name]
 
-def check_fix_rename(sj_mesh, sj_obj = None, scn = None):
+
+def check_fix_rename(sj_mesh, sj_obj=None, scn=None):
 
     # sjoin check performed by update object
 
@@ -45,7 +49,6 @@ def check_fix_rename(sj_mesh, sj_obj = None, scn = None):
         for o in objs:
             o.sjoin_mesh = ''
             o.fake_user = False
-
 
         # mesh is renamed or duplicated, see if there is old mesh with this name to determine
         old_mesh = get_sjmesh(sj_mesh.sjoin_link_name)
@@ -83,7 +86,6 @@ def check_fix_rename(sj_mesh, sj_obj = None, scn = None):
         # no matter what keep sjoin_link_name same as sj_mesh.name
         sj_mesh.sjoin_link_name = sj_mesh.name
 
-
     # make sure there are no two expended objects, actually ones that look expended, this can happen if expended sj is duplicated
     if not check_is_expended(sj_obj):
         set_object_collapsed(sj_obj)
@@ -96,8 +98,10 @@ def check_is_sjoin_obj(obj):
 def check_is_expended(obj):
     return check_is_sjoin_obj(obj) and obj.data.expanded_obj == obj.name
 
+
 def check_is_there_expended_obj(mesh):
     return mesh.expanded_obj != ''
+
 
 def get_stored_sjobjects(sj_mesh):
     # check_fix_rename(sj_mesh)
@@ -106,6 +110,7 @@ def get_stored_sjobjects(sj_mesh):
 import mathutils
 
 # def collect_children_no_clear
+
 
 def get_dependent_meshes(data):
     dep = []
@@ -134,14 +139,17 @@ def update_meshes_rec_co(meshes, c):
         update_stored(mesh)
         next_dep += get_dependent_meshes(mesh)
 
-    update_meshes_rec_co(next_dep, c+1)
+    update_meshes_rec_co(next_dep, c + 1)
+
 
 def update_meshes_rec(meshes):
     update_meshes_rec_co(meshes, 0)
 
+
 def update_data_rec(data):
     mashes = get_dependent_meshes(data)
     update_meshes_rec(mashes)
+
 
 def collect_children_unsafe(obj, scn):
     if not obj:
@@ -150,9 +158,7 @@ def collect_children_unsafe(obj, scn):
     joiner.clear_mesh(obj.data)
     all_ch = get_all_children(obj)
 
-
     obj.data.sjoin_link_name = obj.data.name
-
 
     for ch in all_ch:
         # unlink_store(ch, obj.data)
@@ -176,11 +182,13 @@ def get_leaf_children(obj):
     else:
         return [x for o in obj.children for x in get_leaf_children(o)]
 
+
 def get_all_children(obj):
     if len(obj.children) == 0:
         return []
     else:
         return list(obj.children) + [x for o in obj.children for x in get_leaf_children(o)]
+
 
 def get_children_hierarchically(obj_list):
     if not obj_list:
@@ -190,11 +198,12 @@ def get_children_hierarchically(obj_list):
     for obj in obj_list:
         next_level += list(obj.children)
 
-
     return get_children_hierarchically(next_level) + obj_list
+
 
 def get_expanded_obj(sj_mesh):
     return bpy.data.objects.get(sj_mesh.expanded_obj)
+
 
 def collapse_expanded(sj_mesh):
     obj = get_expanded_obj(sj_mesh)
@@ -218,24 +227,24 @@ def collect_children(obj, scn):
         if check_is_expended(ch):
             collect_children_unsafe(ch, scn)
 
-
     update_lock = False
-
 
 
 def set_object_expended(j_obj):
     j_obj.data.expanded_obj = j_obj.name
     j_obj.draw_type = 'BOUNDS'
 
+
 def set_object_collapsed(j_obj):
     if j_obj.data.expanded_obj == j_obj.name:
         j_obj.data.expanded_obj = ''
 
-    #check to avoid rerendering
+    # check to avoid rerendering
     if j_obj.draw_type != 'TEXTURED':
         j_obj.draw_type = 'TEXTURED'
         # if somebody hide bounding box
         j_obj.hide = False
+
 
 def expand_objects(j_obj, scn):
     if j_obj is None:
@@ -246,7 +255,6 @@ def expand_objects(j_obj, scn):
 
     # if there is expended collapse it
     collapse_expanded(j_obj.data)
-
 
     # set current to expended
     set_object_expended(j_obj)
@@ -264,7 +272,6 @@ def expand_objects(j_obj, scn):
     update_lock = False
 
 
-
 def unlink_store(obj, sjoin_mesh):
     obj.use_fake_user = True
     obj.sjoin_mesh = sjoin_mesh.name
@@ -273,6 +280,7 @@ def unlink_store(obj, sjoin_mesh):
 
     for s in obj.users_scene[:]:
         s.objects.unlink(obj)
+
 
 def link_stored(obj, sjoin_object, scn):
     if obj.name not in scn.objects:
@@ -301,6 +309,8 @@ from bpy.app.handlers import persistent
 
 # looks like scene_update will be called by every operator in join_to_mesh update so I need to lock it
 update_lock = False
+
+
 @persistent
 def scene_update(scene):
     # disable edit mode for sjoin objects
@@ -345,6 +355,7 @@ def object_update(obj, scn):
         check_fix_rename(obj.data, obj, scn)
         # recursive update could be added here but it might be slow for large scenes
         # update_lock = False
+
 
 @persistent
 def before_save(dummy):

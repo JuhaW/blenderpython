@@ -35,6 +35,7 @@ import bpy
 
 ###------ Create Boolean Operators -------###
 
+
 class boolean(bpy.types.Operator):
     """Boolean the currently selected objects with Union / Intsect / Difference"""
     bl_idname = "mesh.boolean"
@@ -56,7 +57,7 @@ class boolean(bpy.types.Operator):
         activeObj = context.active_object
         selected = context.selected_objects
 
-        if selected:    
+        if selected:
             if len(selected) > 1:
                 if len(selected) == 2:
                     for ob in selected:
@@ -143,7 +144,7 @@ class booleanToolbar(bpy.types.Panel):
 def register():
     bpy.utils.register_class(boolean)
     bpy.utils.register_class(booleanMenu)
-    #bpy.utils.register_class(booleanToolbar)
+    # bpy.utils.register_class(booleanToolbar)
 
     wm = bpy.context.window_manager
 
@@ -154,16 +155,16 @@ def register():
 
 #    addon_keymaps.append(km)
 
+
 def unregister():
     bpy.utils.unregister_class(boolean)
     bpy.utils.unregister_class(booleanMenu)
-    #bpy.utils.unregister_class(booleanToolbar)
-
+    # bpy.utils.unregister_class(booleanToolbar)
 
     # remove keymaps when add-on is deactivated
     #wm = bpy.context.window_manager
-    #for km in addon_keymaps:
-        #wm.keyconfigs.addon.keymaps.remove(km)
+    # for km in addon_keymaps:
+    # wm.keyconfigs.addon.keymaps.remove(km)
     #del addon_keymaps[:]
 
 if __name__ == "__main__":

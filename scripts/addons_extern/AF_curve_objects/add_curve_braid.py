@@ -1,10 +1,10 @@
 
-import bpy  
-from bpy.props import  (FloatProperty,
-                        FloatVectorProperty,
-                        IntProperty,
-                        BoolProperty,
-                        StringProperty)
+import bpy
+from bpy.props import (FloatProperty,
+                       FloatVectorProperty,
+                       IntProperty,
+                       BoolProperty,
+                       StringProperty)
 
 from .bpybraid import awesome_braid, defaultCircle
 '''
@@ -22,6 +22,7 @@ bl_info = {
 '''
 from bpy.types import Operator
 
+
 class Braid(Operator):
     '''Add a Braid'''
     bl_idname = 'mesh.add_braid'
@@ -37,7 +38,7 @@ class Braid(Operator):
     width = FloatProperty(name='width', default=.2)
     resolution = IntProperty(name='resolution', min=1, default=2, max=100)
     pointy = BoolProperty(name='pointy', default=False)
-    
+
     def execute(self, context):
         circle = defaultCircle(self.strandsize)
         context.scene.objects.link(circle)
@@ -49,7 +50,7 @@ class Braid(Operator):
                               mz=self.width,
                               resolution=self.resolution)
         base = context.scene.objects.link(braid)
-        
+
         for ob in context.scene.objects:
             ob.select = False
         base.select = True
@@ -58,7 +59,7 @@ class Braid(Operator):
 
     def draw(self, context):
         layout = self.layout
-        
+
         box = layout.box()
         box.prop(self, 'strands')
         box.prop(self, 'sides')
@@ -68,13 +69,16 @@ class Braid(Operator):
         box.prop(self, 'width')
         box.prop(self, 'resolution')
         box.prop(self, 'pointy')
-        
+
+
 def add_object_button(self, context):
-    self.layout.operator(Braid.bl_idname, text = "Add Braid", icon = 'PLUGIN')
+    self.layout.operator(Braid.bl_idname, text="Add Braid", icon='PLUGIN')
+
 
 def register():
     bpy.utils.register_class(Braid)
     bpy.types.INFO_MT_mesh_add.append(add_object_button)
+
 
 def unregister():
     bpy.utils.unregister_class(Braid)

@@ -18,7 +18,6 @@
 # by meta-androcto, parts based on work by Saidenka #
 
 
-
 import bpy
 import platform
 import inspect
@@ -39,13 +38,17 @@ from math import *
 from bpy.props import IntProperty, BoolProperty, FloatProperty, EnumProperty, PointerProperty, StringProperty, CollectionProperty
 from bpy.types import PropertyGroup
 
+#from . import AF_measure_tools
+from . import border_lines
+from . import icon_tools
+from . import index_visualizer
+from . import mesh_check
+from . import mesh_statistics
+from . import opengl_lights
+from . import view_manage_tool
 from . import VIEW3D_PT_view3d_cursor
 from . import VIEW3D_PT_view3d_name
 from . import VIEW3D_PT_view3d_shading
-from . import border_lines
-from . import mesh_statistics
-from . import mesh_check
-
 
 bl_info = {
     "name": "AF: Properties Panels",
@@ -55,20 +58,25 @@ bl_info = {
     "location": "View3D > Properties Panels",
     "description": "Properties Panels Extended",
     "warning": "",
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"\
-        "/Py/Scripts",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"
+    "/Py/Scripts",
     "tracker_url": "",
     "category": "Addon Factory"}
 
 
 sub_modules = [
+    #    AF_measure_tools,
+    border_lines,
+    icon_tools,
+    index_visualizer,
+    mesh_check,
+    mesh_statistics,
+    opengl_lights,
+    view_manage_tool,
     VIEW3D_PT_view3d_cursor,
     VIEW3D_PT_view3d_name,
     VIEW3D_PT_view3d_shading,
-    border_lines,
-    mesh_statistics,
-    mesh_check,
-    ]
+]
 
 
 sub_modules.sort(
@@ -136,9 +144,9 @@ class UIToolsPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     align_box_draw = bpy.props.BoolProperty(
-            name='Box Draw',
-            description='If applied patch: patch/ui_layout_box.patch',
-            default=False)
+        name='Box Draw',
+        description='If applied patch: patch/ui_layout_box.patch',
+        default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -241,7 +249,6 @@ for mod in sub_modules:
                     unregister_submodule(mod)
         return update
 
-
     prop = bpy.props.BoolProperty(
         name=info['name'],
         description=info.get('description', ''),
@@ -253,7 +260,7 @@ for mod in sub_modules:
 
 classes = [
     UIToolsPreferences,
-    ]
+]
 
 
 def register():
@@ -276,5 +283,3 @@ def unregister():
 
     for cls in classes[::-1]:
         bpy.utils.unregister_class(cls)
-
-

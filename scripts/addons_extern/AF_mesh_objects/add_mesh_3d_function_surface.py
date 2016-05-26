@@ -7,9 +7,9 @@ from bpy.props import *
 
 # List of safe functions for eval()
 safe_list = ['math', 'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos', 'cosh',
-    'degrees', 'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot',
-    'ldexp', 'log', 'log10', 'modf', 'pi', 'pow', 'radians',
-    'sin', 'sinh', 'sqrt', 'tan', 'tanh']
+             'degrees', 'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot',
+             'ldexp', 'log', 'log10', 'modf', 'pi', 'pow', 'radians',
+             'sin', 'sinh', 'sqrt', 'tan', 'tanh']
 
 # Use the list to filter the local namespace
 safe_dict = dict((k, globals().get(k, None)) for k in safe_list)
@@ -89,14 +89,14 @@ def createFaces(vertIdx1, vertIdx2, closed=False, flipped=False):
                 face = [vertIdx2[num], vertIdx1[0], vertIdx2[num + 1]]
             else:
                 face = [vertIdx2[num], vertIdx1[num],
-                    vertIdx1[num + 1], vertIdx2[num + 1]]
+                        vertIdx1[num + 1], vertIdx2[num + 1]]
             faces.append(face)
         else:
             if fan:
                 face = [vertIdx1[0], vertIdx2[num], vertIdx2[num + 1]]
             else:
                 face = [vertIdx1[num], vertIdx2[num],
-                    vertIdx2[num + 1], vertIdx1[num + 1]]
+                        vertIdx2[num + 1], vertIdx1[num + 1]]
             faces.append(face)
 
     return faces
@@ -109,32 +109,32 @@ class AddZFunctionSurface(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
 
     equation = StringProperty(name="Z Equation",
-        description="Equation for z=f(x,y)",
-        default="1 - ( x**2 + y**2 )")
+                              description="Equation for z=f(x,y)",
+                              default="1 - ( x**2 + y**2 )")
 
     div_x = IntProperty(name="X Subdivisions",
-        description="Number of vertices in x direction",
-        default=16,
-        min=3,
-        max=256)
+                        description="Number of vertices in x direction",
+                        default=16,
+                        min=3,
+                        max=256)
     div_y = IntProperty(name="Y Subdivisions",
-        description="Number of vertices in y direction",
-        default=16,
-        min=3,
-        max=256)
+                        description="Number of vertices in y direction",
+                        default=16,
+                        min=3,
+                        max=256)
 
     size_x = FloatProperty(name="X Size",
-        description="Size of the x axis",
-        default=2.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                           description="Size of the x axis",
+                           default=2.0,
+                           min=0.01,
+                           max=100.0,
+                           unit="LENGTH")
     size_y = FloatProperty(name="Y Size",
-        description="Size of the y axis",
-        default=2.0,
-        min=0.01,
-        max=100.0,
-        unit="LENGTH")
+                           description="Size of the y axis",
+                           default=2.0,
+                           min=0.01,
+                           max=100.0,
+                           unit="LENGTH")
 
     def execute(self, context):
         equation = self.equation
@@ -161,7 +161,7 @@ class AddZFunctionSurface(bpy.types.Operator):
         except:
             import traceback
             self.report({'ERROR'}, "Error parsing expression: "
-                + traceback.format_exc(limit=1))
+                        + traceback.format_exc(limit=1))
             return {'CANCELLED'}
 
         for row_x in range(div_x):
@@ -181,7 +181,7 @@ class AddZFunctionSurface(bpy.types.Operator):
                 except:
                     import traceback
                     self.report({'ERROR'}, "Error evaluating expression: "
-                        + traceback.format_exc(limit=1))
+                                + traceback.format_exc(limit=1))
                     return {'CANCELLED'}
 
                 edgeloop_cur.append(len(verts))
@@ -199,9 +199,9 @@ class AddZFunctionSurface(bpy.types.Operator):
 
 
 def xyz_function_surface_faces(self, x_eq, y_eq, z_eq,
-    range_u_min, range_u_max, range_u_step, wrap_u,
-    range_v_min, range_v_max, range_v_step, wrap_v,
-    a_eq, b_eq, c_eq, f_eq, g_eq, h_eq, n, close_v):
+                               range_u_min, range_u_max, range_u_step, wrap_u,
+                               range_v_min, range_v_max, range_v_step, wrap_v,
+                               a_eq, b_eq, c_eq, f_eq, g_eq, h_eq, n, close_v):
 
     verts = []
     faces = []
@@ -262,7 +262,7 @@ def xyz_function_surface_faces(self, x_eq, y_eq, z_eq,
     except:
         import traceback
         self.report({'ERROR'}, "Error parsing expression: "
-            + traceback.format_exc(limit=1))
+                    + traceback.format_exc(limit=1))
         return [], []
 
     for vN in range(vRange):
@@ -293,7 +293,7 @@ def xyz_function_surface_faces(self, x_eq, y_eq, z_eq,
             except:
                 import traceback
                 self.report({'ERROR'}, "Error evaluating expression: "
-                    + traceback.format_exc(limit=1))
+                            + traceback.format_exc(limit=1))
                 return [], []
 
     for vN in range(range_v_step):
@@ -309,9 +309,9 @@ def xyz_function_surface_faces(self, x_eq, y_eq, z_eq,
                 uNext = 0
 
             faces.append([(vNext * uRange) + uNext,
-                (vNext * uRange) + uN,
-                (vN * uRange) + uN,
-                (vN * uRange) + uNext])
+                          (vNext * uRange) + uN,
+                          (vN * uRange) + uN,
+                          (vN * uRange) + uNext])
 
     if close_v and wrap_u and (not wrap_v):
         for uN in range(1, range_u_step - 1):
@@ -348,131 +348,131 @@ def xyz_function_surface_faces(self, x_eq, y_eq, z_eq,
 # v max = 5*pi/2
 class AddXYZFunctionSurface(bpy.types.Operator):
     """Add a surface defined defined by 3 functions:""" \
-    """ x=F1(u,v), y=F2(u,v) and z=F3(u,v)"""
+        """ x=F1(u,v), y=F2(u,v) and z=F3(u,v)"""
     bl_idname = "mesh.primitive_xyz_function_surface"
     bl_label = "Add X,Y,Z Function Surface"
     bl_options = {'REGISTER', 'UNDO', 'PRESET'}
 
     x_eq = StringProperty(name="X equation",
-        description="Equation for x=F(u,v). " \
-            "Also available: n, a, b, c, f, g, h",
-        default="cos(v)*(1+cos(u))*sin(v/8)")
+                          description="Equation for x=F(u,v). "
+                          "Also available: n, a, b, c, f, g, h",
+                          default="cos(v)*(1+cos(u))*sin(v/8)")
 
     y_eq = StringProperty(name="Y equation",
-        description="Equation for y=F(u,v). " \
-            "Also available: n, a, b, c, f, g, h",
-        default="sin(u)*sin(v/8)+cos(v/8)*1.5")
+                          description="Equation for y=F(u,v). "
+                          "Also available: n, a, b, c, f, g, h",
+                          default="sin(u)*sin(v/8)+cos(v/8)*1.5")
 
     z_eq = StringProperty(name="Z equation",
-        description="Equation for z=F(u,v). " \
-            "Also available: n, a, b, c, f, g, h",
-        default="sin(v)*(1+cos(u))*sin(v/8)")
+                          description="Equation for z=F(u,v). "
+                          "Also available: n, a, b, c, f, g, h",
+                          default="sin(v)*(1+cos(u))*sin(v/8)")
 
     range_u_min = FloatProperty(name="U min",
-        description="Minimum U value. Lower boundary of U range",
-        min=-100.00,
-        max=0.00,
-        default=0.00)
+                                description="Minimum U value. Lower boundary of U range",
+                                min=-100.00,
+                                max=0.00,
+                                default=0.00)
 
     range_u_max = FloatProperty(name="U max",
-        description="Maximum U value. Upper boundary of U range",
-        min=0.00,
-        max=100.00,
-        default=2 * pi)
+                                description="Maximum U value. Upper boundary of U range",
+                                min=0.00,
+                                max=100.00,
+                                default=2 * pi)
 
     range_u_step = IntProperty(name="U step",
-        description="U Subdivisions",
-        min=1,
-        max=1024,
-        default=32)
+                               description="U Subdivisions",
+                               min=1,
+                               max=1024,
+                               default=32)
 
     wrap_u = BoolProperty(name="U wrap",
-        description="U Wrap around",
-        default=True)
+                          description="U Wrap around",
+                          default=True)
 
     range_v_min = FloatProperty(name="V min",
-        description="Minimum V value. Lower boundary of V range",
-        min=-100.00,
-        max=0.00,
-        default=0.00)
+                                description="Minimum V value. Lower boundary of V range",
+                                min=-100.00,
+                                max=0.00,
+                                default=0.00)
 
     range_v_max = FloatProperty(name="V max",
-        description="Maximum V value. Upper boundary of V range",
-        min=0.00,
-        max=100.00,
-        default=4 * pi)
+                                description="Maximum V value. Upper boundary of V range",
+                                min=0.00,
+                                max=100.00,
+                                default=4 * pi)
 
     range_v_step = IntProperty(name="V step",
-        description="V Subdivisions",
-        min=1,
-        max=1024,
-        default=128)
+                               description="V Subdivisions",
+                               min=1,
+                               max=1024,
+                               default=128)
 
     wrap_v = BoolProperty(name="V wrap",
-        description="V Wrap around",
-        default=False)
+                          description="V Wrap around",
+                          default=False)
 
     close_v = BoolProperty(name="Close V",
-        description="Create faces for first and last " \
-            "V values (only if U is wrapped)",
-        default=False)
+                           description="Create faces for first and last "
+                           "V values (only if U is wrapped)",
+                           default=False)
 
     n_eq = IntProperty(name="Number of objects (n=0..N-1)",
-        description="The parameter n will be the index " \
-            "of the current object, 0 to N-1",
-        min=1,
-        max=100,
-        default=1)
+                       description="The parameter n will be the index "
+                       "of the current object, 0 to N-1",
+                       min=1,
+                       max=100,
+                       default=1)
 
     a_eq = StringProperty(name="A helper function",
-        description="Equation for a=F(u,v). Also available: n",
-        default="0")
+                          description="Equation for a=F(u,v). Also available: n",
+                          default="0")
 
     b_eq = StringProperty(name="B helper function",
-        description="Equation for b=F(u,v). Also available: n",
-        default="0")
+                          description="Equation for b=F(u,v). Also available: n",
+                          default="0")
 
     c_eq = StringProperty(name="C helper function",
-        description="Equation for c=F(u,v). Also available: n",
-        default="0")
+                          description="Equation for c=F(u,v). Also available: n",
+                          default="0")
 
     f_eq = StringProperty(name="F helper function",
-        description="Equation for f=F(u,v). Also available: n, a, b, c",
-        default="0")
+                          description="Equation for f=F(u,v). Also available: n, a, b, c",
+                          default="0")
 
     g_eq = StringProperty(name="G helper function",
-        description="Equation for g=F(u,v). Also available: n, a, b, c",
-        default="0")
+                          description="Equation for g=F(u,v). Also available: n, a, b, c",
+                          default="0")
 
     h_eq = StringProperty(name="H helper function",
-        description="Equation for h=F(u,v). Also available: n, a, b, c",
-        default="0")
+                          description="Equation for h=F(u,v). Also available: n, a, b, c",
+                          default="0")
 
     def execute(self, context):
 
         for n in range(0, self.n_eq):
 
             verts, faces = xyz_function_surface_faces(
-                                self,
-                                self.x_eq,
-                                self.y_eq,
-                                self.z_eq,
-                                self.range_u_min,
-                                self.range_u_max,
-                                self.range_u_step,
-                                self.wrap_u,
-                                self.range_v_min,
-                                self.range_v_max,
-                                self.range_v_step,
-                                self.wrap_v,
-                                self.a_eq,
-                                self.b_eq,
-                                self.c_eq,
-                                self.f_eq,
-                                self.g_eq,
-                                self.h_eq,
-                                n,
-                                self.close_v)
+                self,
+                self.x_eq,
+                self.y_eq,
+                self.z_eq,
+                self.range_u_min,
+                self.range_u_max,
+                self.range_u_step,
+                self.wrap_u,
+                self.range_v_min,
+                self.range_v_max,
+                self.range_v_step,
+                self.wrap_v,
+                self.a_eq,
+                self.b_eq,
+                self.c_eq,
+                self.f_eq,
+                self.g_eq,
+                self.h_eq,
+                n,
+                self.close_v)
 
             if not verts:
                 return {'CANCELLED'}

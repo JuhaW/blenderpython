@@ -302,7 +302,7 @@ def update_window(self, context):
 
         myparent.select = True
         bpy.ops.object.delete()
-        
+
     # Finally create all that again
     tmp_mesh = bpy.data.meshes.new("temp")
     do_mesh(o, tmp_mesh, True)
@@ -350,10 +350,10 @@ def do_mesh(myobject, tmp_mesh, update=False):
         # saves OpenGL data
         # sum width
         totx = myobject.dimensions.x
-        op.glpoint_a = (-totx/2, 0, 0)
+        op.glpoint_a = (-totx / 2, 0, 0)
         top_a, top_b, top_c = get_high_points(myobject, totx, op.UST)
-        op.glpoint_b = (-totx/2, 0, top_a)
-        op.glpoint_c = (totx/2, 0, top_b)
+        op.glpoint_b = (-totx / 2, 0, top_a)
+        op.glpoint_c = (totx / 2, 0, top_b)
         op.glpoint_d = (0, 0, top_c)
 
         # Lock
@@ -1347,10 +1347,10 @@ def get_high_points(selobject, width, tip):
     # Recover all vertex
     # --------------------------
     for vertex in obverts:
-        if vertex.co[0] == -width/2:
+        if vertex.co[0] == -width / 2:
             if vertex.co[2] >= top_a:
                 top_a = vertex.co[2]
-        if vertex.co[0] == width/2:
+        if vertex.co[0] == width / 2:
             if vertex.co[2] >= top_b:
                 top_b = vertex.co[2]
         # top center
@@ -1368,6 +1368,7 @@ def get_high_points(selobject, width, tip):
 # Defines a point
 # ---------------------------------------------------------
 class Cpoint:
+
     def __init__(self, x, y):
         self.x = float(x)
         self.y = float(y)

@@ -24,6 +24,7 @@ from .falloff_ui import draw_falloff_ui
 from .options_ui import draw_options_ui
 from .symmetry_ui import draw_symmetry_ui
 
+
 def draw_mesh_brush_ui(layout):
     addon = bpy.context.user_preferences.addons[__package__.split(".")[0]]
     props = addon.preferences.mesh_brush
@@ -33,30 +34,30 @@ def draw_mesh_brush_ui(layout):
         row = box.row()
 
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'TRIA_RIGHT', emboss = False
+            "wm.context_toggle", text="", icon='TRIA_RIGHT', emboss=True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
         row.label("Mesh Sculpt Brush")
-        row.operator("mesh.sct_mesh_brush", text = "", icon = 'BRUSH_DATA') 
+        row.operator("mesh.sct_mesh_brush", text="", icon='BRUSH_DATA')
     else:
-        col = layout.column(align = True)
+        col = layout.column(align=True)
         box = col.box()
         row = box.row()
 
-        op = row.operator( 
-            "wm.context_toggle", text = "", icon = 'TRIA_DOWN', emboss = False
+        op = row.operator(
+            "wm.context_toggle", text="", icon='TRIA_DOWN', emboss=True
         )
         op.data_path = "{0}.settings_ui_is_visible".format(props.data_path)
-        row.label("Mesh Sculpt Brush") 
-        row.operator("mesh.sct_mesh_brush", text = "", icon = 'BRUSH_DATA')
+        row.label("Mesh Sculpt Brush")
+        row.operator("mesh.sct_mesh_brush", text="", icon='BRUSH_DATA')
 
         box = col.box()
 
         box.prop(props, "iterations")
-        box.prop(props, "radius", slider = True)
-        box.prop(props, "spacing", slider = True)
+        box.prop(props, "radius", slider=True)
+        box.prop(props, "spacing", slider=True)
 
-        col = box.column(align = True)
+        col = box.column(align=True)
 
         draw_display_properties_ui(col)
         draw_falloff_ui(col)

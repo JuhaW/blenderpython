@@ -54,6 +54,7 @@ def get_basemesh(context, subdiv=5, radius=1.0, ratio=(1., 1., 1.)):
     bm.to_mesh(me)
     return me
 
+
 def get_texture(context, name, size=1.0, brightness=.8, contrast=.8,
                 weights=(1.0, .3, .0)):
     tex = context.blend_data.textures.new(name, 'VORONOI')
@@ -68,6 +69,7 @@ def get_texture(context, name, size=1.0, brightness=.8, contrast=.8,
     ramp.elements[0].color = (.0, .0, .0, 1.0)
     ramp.elements[0].position = .5
     return tex
+
 
 def create_rock(context, subdiv, radius, size_ratio,
                 noise_center, noise_size, noise_brightness,
@@ -95,7 +97,7 @@ def create_rock(context, subdiv, radius, size_ratio,
     disp.mid_level = displace_midlevel
     disp.strength = radius * displace_strength
     disp.texture_coords = 'OBJECT'
-    disp.texture_coords_object  = noise_origin
+    disp.texture_coords_object = noise_origin
     disp.texture = get_texture(
         context, TEXTURE_NAME + number, size=radius * noise_size,
         brightness=noise_brightness,
@@ -165,7 +167,7 @@ class LowPolyRock(bpy.types.Operator):
         description="Display advanced menu")
     voronoi_weights = bpy.props.FloatVectorProperty(
         name="Voronoi Weights", min=-1.0, max=1.0, size=3,
-        default=(1.,.3,.0), step=0.1, description="Voronoi Weights")
+        default=(1., .3, .0), step=0.1, description="Voronoi Weights")
     displace_strength = bpy.props.FloatProperty(
         name="Strength", min=.0, default=1.0, precision=3, step=0.1)
     noise_size = bpy.props.FloatProperty(
@@ -306,9 +308,11 @@ def draw_item(self, context):
     self.layout.operator_context = 'INVOKE_DEFAULT'
     self.layout.operator(LowPolyRock.bl_idname, text="LowPoly Rock", icon="PLUGIN")
 
+
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.INFO_MT_mesh_add.append(draw_item)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

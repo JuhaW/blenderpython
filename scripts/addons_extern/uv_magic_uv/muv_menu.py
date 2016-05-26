@@ -31,6 +31,7 @@ from . import muv_fliprot_ops
 from . import muv_transuv_ops
 from . import muv_texwrap_ops
 from . import muv_texlock_ops
+from . import muv_texproj_ops
 
 
 # Copy/Paste UV master menu
@@ -67,15 +68,27 @@ class MUV_TexWrapMenu(bpy.types.Menu):
         self.layout.operator(muv_texwrap_ops.MUV_TexWrapCopy.bl_idname, icon="PLUGIN")
         self.layout.operator(muv_texwrap_ops.MUV_TexWrapPaste.bl_idname, icon="PLUGIN")
 
-
 # Texture Lock master menu
+
+
 class MUV_TexLockMenu(bpy.types.Menu):
     bl_idname = "uv.muv_texlock_menu"
     bl_label = "Texture Lock"
     bl_description = "Texture Lock Menu"
 
     def draw(self, context):
-        self.layout.operator(muv_texlock_ops.MUV_TexLockStart.bl_idname, icon="PLUGIN")
-        self.layout.operator(muv_texlock_ops.MUV_TexLockStop.bl_idname, icon="PLUGIN")
-        self.layout.operator(muv_texlock_ops.MUV_TexLockIntrStart.bl_idname, icon="PLUGIN")
-        self.layout.operator(muv_texlock_ops.MUV_TexLockIntrStop.bl_idname, icon="PLUGIN")
+        self.layout.operator(muv_texlock_ops.MUV_TexLockScale.bl_idname, icon="PLUGIN")
+        self.layout.operator(muv_texlock_ops.MUV_TexLockRotation.bl_idname, icon="PLUGIN")
+
+# Texture Projection master menu
+
+
+class MUV_TexProjMenu(bpy.types.Menu):
+    bl_idname = "uv.muv_texproj_menu"
+    bl_label = "Texture Projection"
+    bl_description = "Project texture menu"
+
+    def draw(self, context):
+        self.layout.operator(muv_texproj_ops.TPStartTextureProjection.bl_idname)
+        self.layout.operator(muv_texproj_ops.TPProjectTexture.bl_idname)
+        self.layout.operator(muv_texproj_ops.TPStopTextureProjection.bl_idname)

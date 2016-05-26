@@ -152,7 +152,7 @@ def create_roof_mesh(self):
     # Thicknes
     if self.roof_thick > 0.0:
         set_modifier_solidify(myroof, self.roof_thick)
-    # Subsurf    
+    # Subsurf
     set_modifier_subsurf(myroof)
     set_smooth(myroof)
 
@@ -181,7 +181,7 @@ def create_roof_mesh(self):
     # Slope
     myroof.rotation_euler = (math.radians(self.roof_angle), 0.0, 0.0)
 
-    # Create materials        
+    # Create materials
     if self.crt_mat:
         # material
         mat = create_diffuse_material("Roof_material", False, 0.482, 0.061, 0.003, 0.581, 0.105, 0.068, 0.01)

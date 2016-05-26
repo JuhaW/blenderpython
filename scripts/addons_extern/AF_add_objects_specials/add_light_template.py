@@ -17,12 +17,11 @@ from bpy_extras.object_utils import AddObjectHelper, object_data_add
 from mathutils import Vector
 
 
-
 def add_lamps(self, context):
-    
+
     if self.bKeyLight:
-        keyLight = bpy.data.lamps.new(name = "Key_Light",type = "SPOT")
-        ob = bpy.data.objects.new("Key_Light",keyLight)
+        keyLight = bpy.data.lamps.new(name="Key_Light", type="SPOT")
+        ob = bpy.data.objects.new("Key_Light", keyLight)
         constraint = ob.constraints.new(type='COPY_LOCATION')
         constraint.use_offset = True
         constraint.owner_space = 'LOCAL'
@@ -34,10 +33,10 @@ def add_lamps(self, context):
         constraint.owner_space = 'LOCAL'
         bpy.context.scene.objects.link(ob)
         ob.rotation_euler[2] = -0.785398
-    
+
     if self.bFillLight:
-        fillLight = bpy.data.lamps.new(name = "Fill_Light",type = "SPOT")
-        ob = bpy.data.objects.new("Fill_Light",fillLight)
+        fillLight = bpy.data.lamps.new(name="Fill_Light", type="SPOT")
+        ob = bpy.data.objects.new("Fill_Light", fillLight)
         constraint = ob.constraints.new(type='COPY_LOCATION')
         constraint.use_offset = True
         constraint.owner_space = 'LOCAL'
@@ -50,10 +49,10 @@ def add_lamps(self, context):
         bpy.context.scene.objects.link(ob)
         ob.rotation_euler[2] = 0.785398
         ob.data.energy = 0.3
-    
+
     if self.bBackLight:
-        backLight = bpy.data.lamps.new(name = "Back_Light",type = "SPOT")
-        ob = bpy.data.objects.new("Back_Light",backLight)
+        backLight = bpy.data.lamps.new(name="Back_Light", type="SPOT")
+        ob = bpy.data.objects.new("Back_Light", backLight)
         constraint = ob.constraints.new(type='COPY_LOCATION')
         constraint.use_offset = True
         constraint.owner_space = 'LOCAL'
@@ -66,40 +65,40 @@ def add_lamps(self, context):
         bpy.context.scene.objects.link(ob)
         ob.rotation_euler[2] = 3.14159
         ob.data.energy = 0.2
-    
+
     if self.camera_constraint:
-        constraint = self.camera.constraints.new(type = 'TRACK_TO')
+        constraint = self.camera.constraints.new(type='TRACK_TO')
         constraint.target = self.target
         constraint.track_axis = 'TRACK_NEGATIVE_Z'
         constraint.up_axis = 'UP_Y'
-    
-    
+
+
 class OBJECT_OT_add_light_template(Operator):
     """Add light template"""
     bl_idname = "object.add_light_template"
     bl_label = "Add Light Template"
-    bl_options = {'REGISTER', 'UNDO'}   
-    
+    bl_options = {'REGISTER', 'UNDO'}
+
     camera = None
-    target = None        
-    
-    bKeyLight = BoolProperty(name = "Key Light" ,default = True)
-    bFillLight = BoolProperty(name = "Fill Light")
-    bBackLight = BoolProperty(name = "Back Light")
-    
-    camera_constraint = BoolProperty(name = "Camera Constraint")
-    
+    target = None
+
+    bKeyLight = BoolProperty(name="Key Light", default=True)
+    bFillLight = BoolProperty(name="Fill Light")
+    bBackLight = BoolProperty(name="Back Light")
+
+    camera_constraint = BoolProperty(name="Camera Constraint")
+
     def execute(self, context):
-        
+
         objects = bpy.context.selected_objects
-        
+
         if len(objects) == 2:
             for ob in objects:
-              if ob.type == 'CAMERA':
-                self.camera = ob
-              else:
-                self.target = ob
-              
+                if ob.type == 'CAMERA':
+                    self.camera = ob
+                else:
+                    self.target = ob
+
         elif len(objects) == 1:
             if objects[0].type == 'CAMERA':
                 self.camera = objects[0]
@@ -108,18 +107,17 @@ class OBJECT_OT_add_light_template(Operator):
             else:
                 self.camera = context.scene.camera
                 self.target = context.active_object
-        elif len(objects)==0:
+        elif len(objects) == 0:
             bpy.ops.object.empty_add()
             self.target = context.active_object
             self.camera = context.scene.camera
-                
-           
-            
+
         add_lamps(self, context)
         return {'FINISHED'}
-    
+
 # Registration
-    
+
+
 def add_object_button(self, context):
     self.layout.operator(
         OBJECT_OT_add_light_template.bl_idname,
@@ -128,7 +126,7 @@ def add_object_button(self, context):
 
 
 # This allows you to right click on a button and link to the manual
-#def add_object_manual_map():
+# def add_object_manual_map():
 #    url_manual_prefix = "http://wiki.blender.org/index.php/Doc:2.6/Manual/"
 #    url_manual_mapping = (
 #        ("bpy.ops.mesh.add_object", "Modeling/Objects"),
@@ -138,13 +136,13 @@ def add_object_button(self, context):
 
 def register():
     bpy.utils.register_class(OBJECT_OT_add_light_template)
-    #bpy.utils.register_manual_map(add_object_manual_map)
+    # bpy.utils.register_manual_map(add_object_manual_map)
     bpy.types.INFO_MT_add.append(add_object_button)
 
 
 def unregister():
     bpy.utils.unregister_class(OBJECT_OT_add_light_template)
-    #bpy.utils.unregister_manual_map(add_object_manual_map)
+    # bpy.utils.unregister_manual_map(add_object_manual_map)
     bpy.types.INFO_MT_mesh_add.remove(add_object_button)
 
 

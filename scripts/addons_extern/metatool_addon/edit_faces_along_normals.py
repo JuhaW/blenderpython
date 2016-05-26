@@ -3,7 +3,7 @@ import bmesh
 import mathutils
 import math
 
-#bl_info = {
+# bl_info = {
 #    "name": "Faces Along Normals",
 #    "description": "Move faces along individual normals.",
 #    "author": "Márcio Daniel da Rosa",
@@ -17,12 +17,14 @@ import math
 # selected faces. So, if a vertex is shared with more than one selected face, it will have more than
 # one calculated position. So, the final position is calculated given a list of calculated positions
 # for that vertex.
+
+
 class MoveFacesAlongNormalsOperator(bpy.types.Operator):
     '''Move the faces along individual normal vectors.'''
     bl_idname = "fan.move_faces_along_normals_operator"
     bl_label = "Move Faces Along Normals"
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     distance = bpy.props.FloatProperty(name="Distance", subtype='DISTANCE', step=1, precision=3)
 
     @classmethod
@@ -39,7 +41,7 @@ class MoveFacesAlongNormalsOperator(bpy.types.Operator):
             bm.normal_update()
             context.area.tag_redraw()
         return {'FINISHED'}
-    
+
     # Move the faces. Input: the bmesh and a flag to define if only the selected faces must be translated,
     # or all faces must be translated. Output: True if some face was translated, false if not.
     def translate_faces(self, mesh, selected_faces_only):
@@ -51,7 +53,7 @@ class MoveFacesAlongNormalsOperator(bpy.types.Operator):
                 some_face_was_affected = True
         self.translate_verts(mesh, calculated_translations_by_vertex_index)
         return some_face_was_affected
-    
+
     # Calculate the translation for each vertex in the face, along the face normal. Input: the dict where
     # the translation vector will be stored by the vertex index and the face.
     def calculate_translations_for_face_verts(self, results_dict, face):
@@ -64,7 +66,7 @@ class MoveFacesAlongNormalsOperator(bpy.types.Operator):
                 results_dict[vertex.index].append(translation)
             else:
                 results_dict[vertex.index] = [translation]
-    
+
     # Calculates the position for each vertex and updates the coordinates. Input: the bmesh and the dictionary
     # with the calculated translations for the vertices.
     def translate_verts(self, mesh, translations_by_vertex_index):
@@ -78,32 +80,38 @@ class MoveFacesAlongNormalsOperator(bpy.types.Operator):
             h = cathetus / math.cos(angle)
             sum.length = abs(h)
             vertex.co += sum
-    
+
     # input: list of coordinates, output: a coordinate, the sum of the input coordinates
     def sum_points(self, coordinates):
         final_coordinate = mathutils.Vector((0, 0, 0))
         for co in coordinates:
             final_coordinate += co
         return final_coordinate
-    
+
 # Draws the operator in the specials menu
+
+
 def specials_menu_draw(self, context):
     self.layout.operator("fan.move_faces_along_normals_operator")
 
 # Draws the operator in the faces menu
+
+
 def faces_menu_draw(self, context):
     self.layout.separator()
     self.layout.operator("fan.move_faces_along_normals_operator")
+
 
 def register():
     bpy.utils.register_class(MoveFacesAlongNormalsOperator)
     bpy.types.VIEW3D_MT_edit_mesh_specials.append(specials_menu_draw)
     bpy.types.VIEW3D_MT_edit_mesh_faces.append(faces_menu_draw)
 
+
 def unregister():
     bpy.utils.unregister_class(MoveFacesAlongNormalsOperator)
     bpy.types.VIEW3D_MT_edit_mesh_specials.remove(specials_menu_draw)
     bpy.types.VIEW3D_MT_edit_mesh_faces.remove(faces_menu_draw)
-    
+
 if __name__ == "__main__":
     register()

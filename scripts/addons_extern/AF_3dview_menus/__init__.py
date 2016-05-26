@@ -25,8 +25,8 @@ bl_info = {
     "location": "View3D > Object/Edit Mode",
     "description": "Information In Drop Down",
     "warning": "",
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"\
-        "/Py/Scripts",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"
+    "/Py/Scripts",
     "tracker_url": "",
     "category": "Addon Factory"}
 
@@ -46,6 +46,11 @@ if "bpy" in locals():
     importlib.reload(VIEW3D_MT_edit_mesh_showhide)
     importlib.reload(VIEW3D_MT_edit_mesh_vertices)
     importlib.reload(VIEW3D_MT_select_edit_mesh)
+    importlib.reload(VIEW3D_MT_armature_specials)
+    importlib.reload(VIEW3D_MT_edit_mesh_specials)
+    importlib.reload(VIEW3D_MT_select_object)
+    importlib.reload(VIEW3D_MT_pose_specials)
+    importlib.reload(VIEW3D_MT_object_batch)
 
 else:
     from . import VIEW3D_MT_object
@@ -61,32 +66,40 @@ else:
     from . import VIEW3D_MT_edit_mesh_showhide
     from . import VIEW3D_MT_edit_mesh_vertices
     from . import VIEW3D_MT_select_edit_mesh
+    from . import VIEW3D_MT_armature_specials
+    from . import VIEW3D_MT_edit_mesh_specials
+    from . import VIEW3D_MT_object_specials
+    from . import VIEW3D_MT_pose_specials
+    from . import VIEW3D_MT_object_batch
 
 import bpy
 # Addons Preferences
+
+
 class AddonPreferences(bpy.types.AddonPreferences):
-	bl_idname = __name__
+    bl_idname = __name__
 
-	view_savedata = bpy.props.StringProperty(name="View Saved Data", default="")
-	
-	def draw(self, context):
-		layout = self.layout
-		layout.label(text="Save your Views to addons preferences")
-		layout.label(text="Per Session ues only")
-		layout.label(text="Save User Settings to store permenantly")
-		layout.prop(self, 'view_savedata')
+    view_savedata = bpy.props.StringProperty(name="View Saved Data", default="")
 
-		layout.label(text="----3d View Menu's----")
-		layout.label(text="Adds additional features & concepts")
-		layout.label(text="View Menu: Pies, Switch Local, Save View Prefs, Align Menu")
-		layout.label(text="Select Menu: Additional selection methods: Object mode")
-		layout.label(text="Object Menu:")
-		layout.label(text="Pies, Shortcut Concept, Show Hide & Make Links Menu's")
-		layout.separator
-		layout.label(text="----Mesh Edit Menu's----")
-		layout.label(text="Experimental extra Functions in the edit mesh menu's")
-		layout.label(text="New features have the Plugin icon")
-		layout.label(text="Mesh, Select, Show Hide & more ")
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Save your Views to addons preferences")
+        layout.label(text="Per Session ues only")
+        layout.label(text="Save User Settings to store permenantly")
+        layout.prop(self, 'view_savedata')
+
+        layout.label(text="----3d View Menu's----")
+        layout.label(text="Adds additional features & concepts")
+        layout.label(text="View Menu: Pies, Switch Local, Save View Prefs, Align Menu")
+        layout.label(text="Select Menu: Additional selection methods: Object mode")
+        layout.label(text="Object Menu:")
+        layout.label(text="Pies, Shortcut Concept, Show Hide & Make Links Menu's")
+        layout.separator
+        layout.label(text="----Mesh Edit Menu's----")
+        layout.label(text="Experimental extra Functions in the edit mesh menu's")
+        layout.label(text="New features have the Plugin icon")
+        layout.label(text="Mesh, Select, Show Hide & more ")
+
 
 def register():
     bpy.utils.register_module(__name__)
@@ -104,24 +117,55 @@ def register():
     bpy.types.VIEW3D_MT_edit_mesh_showhide.append(VIEW3D_MT_edit_mesh_showhide.menu)
     bpy.types.VIEW3D_MT_edit_mesh_vertices.append(VIEW3D_MT_edit_mesh_vertices.menu)
     bpy.types.VIEW3D_MT_select_edit_mesh.append(VIEW3D_MT_select_edit_mesh.menu)
+    bpy.types.VIEW3D_MT_armature_specials.append(VIEW3D_MT_armature_specials.menu)
+    bpy.types.VIEW3D_MT_edit_mesh_specials.append(VIEW3D_MT_edit_mesh_specials.menu)
+    bpy.types.VIEW3D_MT_object_specials.append(VIEW3D_MT_object_specials.menu)
+    bpy.types.VIEW3D_MT_pose_specials.append(VIEW3D_MT_pose_specials.menu)
+    bpy.types.VIEW3D_MT_object_specials.append(VIEW3D_MT_object_batch.menu)
+    try:
+        bpy.types.VIEW3D_MT_Object.append(VIEW3D_MT_object.menu)
+        bpy.types.VIEW3D_MT_Select_Object.append(VIEW3D_MT_select_object.menu)
+        bpy.types.VIEW3D_MT_View_Menu.append(VIEW3D_MT_view.menu)
+        bpy.types.VIEW3D_MT_View_Align.append(VIEW3D_MT_view_align.menu)
+        bpy.types.VIEW3D_MT_View_Align_Selected.append(VIEW3D_MT_view_align_selected.menu)
+        bpy.types.VIEW3D_MT_Edit_Mesh.append(VIEW3D_MT_edit_mesh.menu)
+        bpy.types.VIEW3D_MT_Select_Edit_Mesh.append(VIEW3D_MT_select_edit_mesh.menu)
+
+    except:
+        pass
+
 
 def unregister():
 
-	bpy.types.VIEW3D_MT_object.remove(VIEW3D_MT_object.menu)
-	bpy.types.VIEW3D_MT_object_apply.remove(VIEW3D_MT_object_apply.menu)
-	bpy.types.VIEW3D_MT_select_object.remove(VIEW3D_MT_select_object.menu)
-	bpy.types.VIEW3D_MT_make_links.remove(VIEW3D_MT_make_links.menu)
-	bpy.types.VIEW3D_MT_object_showhide.remove(VIEW3D_MT_object_showhide.menu)
-	bpy.types.VIEW3D_MT_view.remove(VIEW3D_MT_view.menu)
-	bpy.types.VIEW3D_MT_view_align.remove(VIEW3D_MT_view_align.menu)
-	bpy.types.VIEW3D_MT_view_align_selected.remove(VIEW3D_MT_view_align_selected.menu)
-	bpy.types.VIEW3D_MT_edit_mesh.remove(VIEW3D_MT_edit_mesh.menu)
-	bpy.types.VIEW3D_MT_edit_mesh_delete.remove(VIEW3D_MT_edit_mesh_delete.menu)
-	bpy.types.VIEW3D_MT_edit_mesh_showhide.remove(VIEW3D_MT_edit_mesh_showhide.menu)
-	bpy.types.VIEW3D_MT_edit_mesh_vertices.remove(VIEW3D_MT_edit_mesh_vertices.menu)
-	bpy.types.VIEW3D_MT_select_edit_mesh.remove(VIEW3D_MT_select_edit_mesh.menu)
+    bpy.types.VIEW3D_MT_object.remove(VIEW3D_MT_object.menu)
+    bpy.types.VIEW3D_MT_object_apply.remove(VIEW3D_MT_object_apply.menu)
+    bpy.types.VIEW3D_MT_select_object.remove(VIEW3D_MT_select_object.menu)
+    bpy.types.VIEW3D_MT_make_links.remove(VIEW3D_MT_make_links.menu)
+    bpy.types.VIEW3D_MT_object_showhide.remove(VIEW3D_MT_object_showhide.menu)
+    bpy.types.VIEW3D_MT_view.remove(VIEW3D_MT_view.menu)
+    bpy.types.VIEW3D_MT_view_align.remove(VIEW3D_MT_view_align.menu)
+    bpy.types.VIEW3D_MT_view_align_selected.remove(VIEW3D_MT_view_align_selected.menu)
+    bpy.types.VIEW3D_MT_edit_mesh.remove(VIEW3D_MT_edit_mesh.menu)
+    bpy.types.VIEW3D_MT_edit_mesh_delete.remove(VIEW3D_MT_edit_mesh_delete.menu)
+    bpy.types.VIEW3D_MT_edit_mesh_showhide.remove(VIEW3D_MT_edit_mesh_showhide.menu)
+    bpy.types.VIEW3D_MT_edit_mesh_vertices.remove(VIEW3D_MT_edit_mesh_vertices.menu)
+    bpy.types.VIEW3D_MT_select_edit_mesh.remove(VIEW3D_MT_select_edit_mesh.menu)
+    bpy.types.VIEW3D_MT_armature_specials.remove(VIEW3D_MT_armature_specials.menu)
+    bpy.types.VIEW3D_MT_edit_mesh_specials.remove(VIEW3D_MT_edit_mesh_specials.menu)
+    bpy.types.VIEW3D_MT_object_specials.remove(VIEW3D_MT_object_specials.menu)
+    bpy.types.VIEW3D_MT_pose_specials.remove(VIEW3D_MT_pose_specials.menu)
+    bpy.types.VIEW3D_MT_object_specials.remove(VIEW3D_MT_object_batch.menu)
+    try:
+        bpy.types.VIEW3D_MT_Object.remove(VIEW3D_MT_object.menu)
+        bpy.types.VIEW3D_MT_Select_Object.remove(VIEW3D_MT_select_object.menu)
+        bpy.types.VIEW3D_MT_View_Menu.remove(VIEW3D_MT_view.menu)
+        bpy.types.VIEW3D_MT_View_Align.remove(VIEW3D_MT_view_align.menu)
+        bpy.types.VIEW3D_MT_View_Align_Selected.remove(VIEW3D_MT_view_align_selected.menu)
+        bpy.types.VIEW3D_MT_Edit_Mesh.remove(VIEW3D_MT_edit_mesh.menu)
+        bpy.types.VIEW3D_MT_Select_Edit_Mesh.remove(VIEW3D_MT_select_edit_mesh.menu)
+    except:
+        pass
+    bpy.utils.unregister_module(__name__)
 
-	bpy.utils.unregister_module(__name__)
-	
 if __name__ == "__main__":
     register()

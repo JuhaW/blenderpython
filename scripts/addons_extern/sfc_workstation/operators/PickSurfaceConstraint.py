@@ -21,6 +21,7 @@
 import bpy
 from ..auxiliary_classes.RayCaster import RayCaster
 
+
 class PickSurfaceConstraint(bpy.types.Operator):
     bl_idname = "view3d.sct_pick_surface_constraint"
     bl_label = "Pick Surface Constraint"
@@ -34,12 +35,12 @@ class PickSurfaceConstraint(bpy.types.Operator):
 
     def __init__(self):
         self.addon = bpy.context.user_preferences.addons[self.addon_key]
-        self.props = self.addon.preferences.surface_constraint 
+        self.props = self.addon.preferences.surface_constraint
 
     def finish(self):
         # Return to Edit mode, if necessary.
         if self.initially_in_edit_mode:
-            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.object.mode_set(mode='EDIT')
 
         # Reveal the temporarily hidden objects.
         for hidden_object in self.temporarily_hidden_objects:
@@ -48,11 +49,11 @@ class PickSurfaceConstraint(bpy.types.Operator):
         # Restore the active area's header to it's initial state.
         bpy.context.area.header_text_set()
 
-    def invoke(self, context, event): 
+    def invoke(self, context, event):
         # Exit Edit mode, if necessary.
         self.initially_in_edit_mode = context.mode == 'EDIT_MESH'
         if self.initially_in_edit_mode:
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
         # Add the name of each visible mesh object in the scene to the set of
         # mesh objects to use for the raycast distance test.  Temporarily hide
@@ -78,7 +79,7 @@ class PickSurfaceConstraint(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def modal(self, context, event):
-        context.area.tag_redraw() 
+        context.area.tag_redraw()
 
         if event.type == 'LEFTMOUSE' and event.value == 'PRESS':
             # Assign the name of the nearest mesh object determined to be under
@@ -102,7 +103,7 @@ class PickSurfaceConstraint(bpy.types.Operator):
         ray_origin = ray_caster.ray_origin
 
         # Determine the nearest mesh object under the mouse cursor.
-        nearest_intersection = list() 
+        nearest_intersection = list()
         for mesh_object in self.mesh_objects:
             ray_caster.mesh_object = mesh_object
             location, normal, face_index = ray_caster.ray_cast()
@@ -110,12 +111,12 @@ class PickSurfaceConstraint(bpy.types.Operator):
             # Determine the square of the distance in world space from the
             # mouse cursor to the point of intersection.
             if face_index != -1:
-                distance_squared = (location - ray_origin).length_squared 
+                distance_squared = (location - ray_origin).length_squared
 
                 # Compare this distance with that of any previously determined
                 # intersection, retaining only the lesser value.
                 if nearest_intersection:
-                   if distance_squared < nearest_intersection[1]:
+                    if distance_squared < nearest_intersection[1]:
                         nearest_intersection =\
                             [mesh_object.name, distance_squared]
                 else:

@@ -27,11 +27,11 @@ else:
 import bpy
 from bpy.props import *
 
+
 class ExpandSjoin(bpy.types.Operator):
     bl_idname = "sjoin.expand"
     bl_label = "Expand Smart Join"
     bl_options = {'REGISTER', 'UNDO'}
-
 
     @classmethod
     def poll(cls, context):
@@ -70,7 +70,6 @@ class CollapseSjoin(bpy.types.Operator):
     bl_label = "Collapse Smart Join"
     bl_options = {'REGISTER', 'UNDO'}
 
-
     @classmethod
     def poll(cls, context):
         ao = context.active_object
@@ -90,6 +89,7 @@ class CollapseSjoin(bpy.types.Operator):
         scn.objects.active = obj
         return {'FINISHED'}
 
+
 class SJoinObjects(bpy.types.Operator):
     bl_idname = "sjoin.join_add"
     bl_label = "Add To Smart Join"
@@ -104,11 +104,7 @@ class SJoinObjects(bpy.types.Operator):
         scn = context.scene
         core.update_lock = True
 
-
         active = context.active_object
-
-
-
 
         # if active is sjoin add others to it
         # TODO: make it work, currently poll is limeted so this isn't called
@@ -141,7 +137,7 @@ class SJoinObjects(bpy.types.Operator):
         active.parent = highest.parent
         '''
 
-        #parerent the selection and merge it
+        # parerent the selection and merge it
         for o in selected:
             if o.parent not in selected:
                 parent_keep_tr(o, active, scn)
@@ -150,7 +146,6 @@ class SJoinObjects(bpy.types.Operator):
         if not core.check_is_expended(active):
             core.expand_objects(active, context.scene)
             core.collect_children(active, scn)
-
 
         core.update_lock = False
         active.select = True
@@ -164,11 +159,11 @@ def parent_keep_tr(obj, parent, scn):
     scn.update()
     obj.matrix_world = w
 
+
 class SJoinObjects(bpy.types.Operator):
     bl_idname = "sjoin.join"
     bl_label = "Smart Join"
     bl_options = {'REGISTER', 'UNDO'}
-
 
     origin_at_cursor = BoolProperty(default=False, name="Origin At Cursor")
 
@@ -178,7 +173,6 @@ class SJoinObjects(bpy.types.Operator):
 
     def execute(self, context):
         core.update_lock = True
-
 
         active = context.active_object
         selected = context.selected_objects[:]
@@ -191,9 +185,9 @@ class SJoinObjects(bpy.types.Operator):
 
         # create new s_join mesh at the position of active object
         name = active.name + '_sj'
-        j_mesh = bpy.data.meshes.new(name = name)
+        j_mesh = bpy.data.meshes.new(name=name)
         j_mesh.is_sjoin = True
-        j_obj = bpy.data.objects.new(name = name, object_data= j_mesh)
+        j_obj = bpy.data.objects.new(name=name, object_data=j_mesh)
         scn.objects.link(j_obj)
         j_obj.parent = highest.parent
         if self.origin_at_cursor:
@@ -208,8 +202,7 @@ class SJoinObjects(bpy.types.Operator):
         scn.objects.active = j_obj
         core.set_object_expended(j_obj)
 
-
-        #parerent the selection and merge it
+        # parerent the selection and merge it
         for o in selected:
             if o.parent not in selected:
                 parent_keep_tr(o, j_obj, scn)
@@ -219,8 +212,8 @@ class SJoinObjects(bpy.types.Operator):
         core.collect_children(j_obj, scn)
         core.update_lock = False
 
-
         return {'FINISHED'}
+
 
 class SeparateObjects(bpy.types.Operator):
     bl_idname = "sjoin.separate"
@@ -232,7 +225,7 @@ class SeparateObjects(bpy.types.Operator):
         return bpy.ops.sjoin.expand.poll()
 
     def execute(self, context):
-        #TODO this needs to duplicate objects!!!
+        # TODO this needs to duplicate objects!!!
         active = context.active_object
         data = active.data
         # bpy.ops.sjoin.collapse()
@@ -248,6 +241,7 @@ class SeparateObjects(bpy.types.Operator):
         bpy.data.objects.remove(active)
         return {'FINISHED'}
 
+
 class UpdateRec(bpy.types.Operator):
     bl_idname = "sjoin.update_rec"
     bl_label = "Update S.Join Dependencies"
@@ -258,7 +252,7 @@ class UpdateRec(bpy.types.Operator):
         return context.active_object
 
     def execute(self, context):
-        #TODO this needs to duplicate objects!!!
+        # TODO this needs to duplicate objects!!!
         for o in context.selected_objects:
             if o.data:
                 core.update_data_rec(o.data)
@@ -277,6 +271,7 @@ class ApplySJ(bpy.types.Operator):
     def execute(self, context):
         context.active_object.data.is_sjoin = False
         return {'FINISHED'}
+
 
 class SJ_BasePanel(bpy.types.Panel):
     bl_label = "Smart Join"

@@ -20,7 +20,7 @@
 
 bl_info = {
     "name": "Import Pointcache Format (.pc2)",
-    "author": "Jasper van Nieuwenhuizen, Ivo Grigull, Matt Ebb,"\
+    "author": "Jasper van Nieuwenhuizen, Ivo Grigull, Matt Ebb,"
               " Bill L. Nieuwendorp",
     "version": (0, 5),
     "blender": (2, 5, 8),
@@ -50,14 +50,14 @@ def pc2_import(filepath, ob, scene, PREF_OFFSET=0, PREF_JUMP=1):
     headerFormat = '<12ciiffi'
     header = unpack(headerFormat, file.read(32))
 
-    #fileVersion = header[12]
+    # fileVersion = header[12]
     numPoints = header[13]
     startFrame = int(header[14])
     sampleRate = header[15]
     numSamples = header[16]
 
     print('\tnumPoints:%d startFrame:%d sampleRate:%d numSamples:%d'
-        % (numPoints, startFrame, sampleRate, numSamples))
+          % (numPoints, startFrame, sampleRate, numSamples))
 
     # If target object doesn't have Basis shape key, create it.
     try:
@@ -71,9 +71,9 @@ def pc2_import(filepath, ob, scene, PREF_OFFSET=0, PREF_JUMP=1):
     def updateMesh(ob, fr):
 
         # Insert new shape key.
-        #new_shapekey =
+        # new_shapekey =
         ob.shape_key_add('frame_%.4d' % fr)
-        #new_shapekey_name = new_shapekey.name
+        # new_shapekey_name = new_shapekey.name
 
         index = len(ob.data.shape_keys.key_blocks) - 1
         ob.active_shape_key_index = index
@@ -122,15 +122,15 @@ class Import_pc2(bpy.types.Operator, ImportHelper):
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
     filepath = StringProperty(
-            name="File Path",
-            description="File path used for importing the PC2 file",
-            maxlen=1024,
-            )
+        name="File Path",
+        description="File path used for importing the PC2 file",
+        maxlen=1024,
+    )
     frameOffset = IntProperty(
-            name="Frame offset",
-            description="Amount of frames to offset the cache animation",
-            min=minframe, max=maxframe, default=0,
-            )
+        name="Frame offset",
+        description="Amount of frames to offset the cache animation",
+        min=minframe, max=maxframe, default=0,
+    )
     filename_ext = ".pc2"
     filter_glob = StringProperty(default="*.pc2", options={'HIDDEN'})
 
@@ -144,7 +144,7 @@ class Import_pc2(bpy.types.Operator, ImportHelper):
             raise Exception("filename not set")
 
         pc2_import(self.properties.filepath, context.active_object,
-                context.scene, self.properties.frameOffset)
+                   context.scene, self.properties.frameOffset)
 
         return {'FINISHED'}
 

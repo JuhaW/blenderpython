@@ -20,20 +20,22 @@
 
 from mathutils import Vector
 
+
 class RainbowRamp():
-    def __init__(self, steps = 250):
+
+    def __init__(self, steps=250):
         self.ramp = dict()
         self.steps = steps
 
     def generate_ramp(self):
         # The rainbow color ramp is a gradation over the visible portion of the
-        # electromagnetic spectrum.  
+        # electromagnetic spectrum.
         red = Vector((1.0, 0.25, 0.25))
         orange = Vector((1.0, 0.7, 0.25))
         yellow = Vector((1.0, 1.0, 0.25))
         green = Vector((0.250, 1.0, 0.596))
-        blue = Vector((0.265, 0.25, 1.0)) 
-        violet = Vector((0.5, 0.0, 1.0)) 
+        blue = Vector((0.265, 0.25, 1.0))
+        violet = Vector((0.5, 0.0, 1.0))
 
         # Generate each subramp between neighboring colors.
         interval = self.steps // 5
@@ -41,31 +43,31 @@ class RainbowRamp():
         blue_to_green_range = range(interval, 2 * interval)
         green_to_yellow_range = range(2 * interval, 3 * interval)
         yellow_to_orange_range = range(3 * interval, 4 * interval)
-        orange_to_red_range = range(4 * interval, self.steps) 
-        C = 1 / interval 
+        orange_to_red_range = range(4 * interval, self.steps)
+        C = 1 / interval
         violet_to_blue_subramp = {
-            i : (1 - C * i) * violet + C * i * blue
+            i: (1 - C * i) * violet + C * i * blue
             for i in violet_to_blue_range
-        } 
+        }
         offset = interval
         blue_to_green_subramp = {
-            i : (1 - C * (i - offset)) * blue + C * (i - offset) * green
+            i: (1 - C * (i - offset)) * blue + C * (i - offset) * green
             for i in blue_to_green_range
-        } 
+        }
         offset = 2 * interval
         green_to_yellow_subramp = {
-            i : (1 - C * (i - offset)) * green + C * (i - offset) * yellow
+            i: (1 - C * (i - offset)) * green + C * (i - offset) * yellow
             for i in green_to_yellow_range
         }
         offset = 3 * interval
         yellow_to_orange_subramp = {
-            i : (1 - C * (i - offset)) * yellow + C * (i - offset) * orange
+            i: (1 - C * (i - offset)) * yellow + C * (i - offset) * orange
             for i in yellow_to_orange_range
         }
         C = 1 / (interval - 1)
         offset = 4 * interval
         orange_to_red_subramp = {
-            i : (1 - C * (i - offset)) * orange + C * (i - offset) * red
+            i: (1 - C * (i - offset)) * orange + C * (i - offset) * red
             for i in orange_to_red_range
         }
 
@@ -82,7 +84,7 @@ class RainbowRamp():
         ramp = self.ramp
         steps = self.steps
         return {
-            index : ramp[falloff_map[index] * (steps - 1) // 1]
+            index: ramp[falloff_map[index] * (steps - 1) // 1]
             for index in falloff_map
         }
 

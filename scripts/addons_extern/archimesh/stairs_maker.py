@@ -160,7 +160,7 @@ def create_stairs_mesh(self):
     set_normals(mystairs)
     set_modifier_mirror(mystairs, "X")
     # ------------------------
-    # Create curve handles        
+    # Create curve handles
     # ------------------------
     if self.curve:
         x = mystairs.location.x
@@ -176,7 +176,7 @@ def create_stairs_mesh(self):
         set_modifier_curve(mystairs, mycurve)
 
     # ------------------------
-    # Create materials        
+    # Create materials
     # ------------------------
     if self.crt_mat:
         # Stairs material
@@ -252,7 +252,7 @@ def create_rect_step(self, origin, myvertex, myfaces, index, step):
     # calculate width (side gap)
     width = width + self.side_gap
 
-    # Horizontal Rectangle 
+    # Horizontal Rectangle
     z = z + self.height
     myvertex.extend([(x, y - self.front_gap, z), (x, max_depth, z), (x + width, max_depth, z),
                      (x + width, y - self.front_gap, z)])
@@ -291,9 +291,9 @@ def create_round_step(self, origin, myvertex, myfaces, index, step):
 
     half = max_width / 2
     # ------------------------------------
-    # Vertical 
+    # Vertical
     # ------------------------------------
-    # calculate width 
+    # calculate width
     width = half - (half * self.radio)
     myradio = half - width
 
@@ -305,7 +305,7 @@ def create_round_step(self, origin, myvertex, myfaces, index, step):
 
         myvertex.extend([(pos_x, pos_y, z), (pos_x, pos_y, z + self.height)])
 
-    # back point    
+    # back point
     myvertex.extend([(x + width, max_depth, z), (x + width, max_depth, z + self.height)])
 
     myfaces.extend([(i, i + 1, i + 3, i + 2), (i + 2, i + 3, i + 5, i + 4), (i + 4, i + 5, i + 7, i + 6),
@@ -314,13 +314,13 @@ def create_round_step(self, origin, myvertex, myfaces, index, step):
 
     i += 16
     # ------------------------------------
-    # Horizontal 
+    # Horizontal
     # ------------------------------------
     # calculate width gap
     width = half + self.front_gap - (half * self.radio)
 
     z = z + self.height
-    # Vertical 
+    # Vertical
     myvertex.extend([(x, y - self.front_gap, z), (x, y - self.front_gap, z + self.thickness)])
     # Round
     for e in li:
@@ -329,7 +329,7 @@ def create_round_step(self, origin, myvertex, myfaces, index, step):
 
         myvertex.extend([(pos_x, pos_y, z), (pos_x, pos_y, z + self.thickness)])
 
-    # back points    
+    # back points
     myvertex.extend([(pos_x, max_depth, z), (pos_x, max_depth, z + self.thickness),
                      (x, max_depth, z), (x, max_depth, z + self.thickness)])
 
@@ -363,7 +363,7 @@ def create_bezier(objname, points, origin):
     bpy.context.scene.objects.link(myobject)
 
     polyline = curvedata.splines.new('BEZIER')
-    polyline.bezier_points.add(len(points)-1)
+    polyline.bezier_points.add(len(points) - 1)
 
     for idx, (knot, h1, h2) in enumerate(points):
         point = polyline.bezier_points[idx]

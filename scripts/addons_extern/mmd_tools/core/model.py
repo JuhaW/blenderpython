@@ -15,8 +15,10 @@ import time
 def isRigidBodyObject(obj):
     return obj.mmd_type == 'RIGID_BODY'
 
+
 def isJointObject(obj):
     return obj.mmd_type == 'JOINT'
+
 
 def isTemporaryObject(obj):
     return obj.mmd_type in ['TRACK_TARGET', 'NON_COLLISION_CONSTRAINT', 'SPRING_CONSTRAINT', 'SPRING_GOAL']
@@ -52,10 +54,13 @@ def getRigidBodySize(obj):
     else:
         raise Exception('Invalid shape type.')
 
+
 class InvalidRigidSettingException(ValueError):
     pass
 
+
 class Model:
+
     def __init__(self, root_obj):
         if root_obj.mmd_type != 'ROOT':
             raise ValueError('must be MMD ROOT type object')
@@ -79,7 +84,7 @@ class Model:
         root.lock_scale = [True, True, True]
 
         arm = bpy.data.armatures.new(name=name)
-        armObj = bpy.data.objects.new(name=name+'_arm', object_data=arm)
+        armObj = bpy.data.objects.new(name=name + '_arm', object_data=arm)
         armObj.parent = root
 
         scene.objects.link(root)
@@ -135,25 +140,25 @@ class Model:
                 size=1,
                 view_align=False,
                 enter_editmode=False
-                )
-            size = mathutils.Vector([1,1,1]) * size[0]
+            )
+            size = mathutils.Vector([1, 1, 1]) * size[0]
             rigid_type = 'SPHERE'
             bpy.ops.object.shade_smooth()
         elif shape_type == rigid_body.SHAPE_BOX:
             bpy.ops.mesh.primitive_cube_add(
                 view_align=False,
                 enter_editmode=False
-                )
+            )
             size = mathutils.Vector(size)
             rigid_type = 'BOX'
         elif shape_type == rigid_body.SHAPE_CAPSULE:
             obj = bpyutils.makeCapsule(radius=size[0], height=size[1])
-            size = mathutils.Vector([1,1,1])
+            size = mathutils.Vector([1, 1, 1])
             rigid_type = 'CAPSULE'
             with bpyutils.select_object(obj):
                 bpy.ops.object.shade_smooth()
         else:
-            raise ValueError('Unknown shape type: %s'%(str(shape_type)))
+            raise ValueError('Unknown shape type: %s' % (str(shape_type)))
 
         obj = bpy.context.active_object
         bpy.ops.rigidbody.object_add(type='ACTIVE')
@@ -243,7 +248,7 @@ class Model:
         name_e = kwargs.get('name_e')
 
         obj = bpy.data.objects.new(
-            'J.'+name,
+            'J.' + name,
             None)
         bpy.context.scene.objects.link(obj)
         obj.mmd_type = 'JOINT'
@@ -328,7 +333,7 @@ class Model:
                     True, False, False, False, False, False, False, False,
                     False, False, False, False, False, False, False, False,
                     False, False, False, False, False, False, False, False
-                    )
+                )
                 dummy_target.parent = data.edit_bones[ik_target.name]
                 ik_target_name = dummy_target.name
             dummy_ik_target = self.__arm.pose.bones[ik_target_name]
@@ -374,7 +379,7 @@ class Model:
                 bpy.context.scene.objects.link(rigids)
                 self.__rigid_grp = rigids
         return self.__rigid_grp
-        
+
     def jointGroupObject(self):
         if self.__joint_grp is None:
             for i in filter(lambda x: x.mmd_type == 'JOINT_GRP_OBJ', self.__root.children):
@@ -387,7 +392,7 @@ class Model:
                 bpy.context.scene.objects.link(joints)
                 self.__joint_grp = joints
         return self.__joint_grp
-        
+
     def temporaryGroupObject(self):
         if self.__temporary_grp is None:
             for i in filter(lambda x: x.mmd_type == 'TEMPORARY_GRP_OBJ', self.__root.children):
@@ -414,7 +419,7 @@ class Model:
         return filter(isJointObject, self.allObjects(self.jointGroupObject()))
 
     def temporaryObjects(self):
-        return filter(isTemporaryObject, self.allObjects(self.rigidGroupObject())+self.allObjects(self.temporaryGroupObject()))
+        return filter(isTemporaryObject, self.allObjects(self.rigidGroupObject()) + self.allObjects(self.temporaryGroupObject()))
 
     def renameBone(self, old_bone_name, new_bone_name):
         armature = self.armature()
@@ -523,10 +528,10 @@ class Model:
                 if i.type == 'IK':
                     i.mute = True
             const = target_bone.constraints.new('DAMPED_TRACK')
-            const.name='mmd_tools_rigid_track'
+            const.name = 'mmd_tools_rigid_track'
             const.target = empty
 
-        t=rigid_obj.hide
+        t = rigid_obj.hide
         with bpyutils.select_object(rigid_obj):
             bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
         rigid_obj.hide = t
@@ -540,11 +545,11 @@ class Model:
         total_len = len(nonCollisionJointTable)
         if total_len < 1:
             return
-            
+
         start_time = time.time()
-        logging.debug('-'*60)
+        logging.debug('-' * 60)
         logging.debug(' creating ncc, counts: %d', total_len)
-                        
+
         ncc_obj = bpy.data.objects.new('ncc', None)
         bpy.context.scene.objects.link(ncc_obj)
         ncc_obj.location = [0, 0, 0]
@@ -557,7 +562,7 @@ class Model:
             bpy.ops.rigidbody.constraint_add(type='GENERIC')
         rb = ncc_obj.rigid_body_constraint
         rb.disable_collisions = True
-        
+
         ncc_objs = []
         last_selected = [ncc_obj]
         while len(ncc_objs) < total_len:
@@ -577,9 +582,9 @@ class Model:
         for i in range(total_len):
             rb = ncc_objs[i].rigid_body_constraint
             rb.object1, rb.object2 = nonCollisionJointTable[i]
-        
+
         logging.debug(' finish in %f seconds.', time.time() - start_time)
-        logging.debug('-'*60)
+        logging.debug('-' * 60)
 
     def buildRigids(self, distance_of_ignore_collisions=1.5):
         logging.debug('--------------------------------')
@@ -606,7 +611,7 @@ class Model:
         non_collision_pairs = set()
         rigid_object_cnt = len(rigid_objects)
         for cnt, obj_a in enumerate(rigid_objects):
-            logging.info('%3d/%3d: %s', cnt+1, rigid_object_cnt, obj_a.name)
+            logging.info('%3d/%3d: %s', cnt + 1, rigid_object_cnt, obj_a.name)
             for n, ignore in enumerate(obj_a.mmd_rigid.collision_group_mask):
                 if not ignore:
                     continue
@@ -623,7 +628,7 @@ class Model:
                             nonCollisionJointTable.append((obj_a, obj_b))
                     non_collision_pairs.add(pair)
                     non_collision_pairs.add(frozenset((obj_b, obj_a)))
-        
+
         self.__createNonCollisionConstraint(nonCollisionJointTable)
         return rigid_objects
 
@@ -642,7 +647,7 @@ class Model:
         spring_target.hide = True
 
         obj = bpy.data.objects.new(
-            'S.'+target.name,
+            'S.' + target.name,
             None)
         bpy.context.scene.objects.link(obj)
         obj.location = target.location
@@ -706,11 +711,12 @@ class RigidBodyMaterial:
         0x165e83,
         0x701682,
         0x828216,
-        ]
+    ]
+
     @classmethod
     def getMaterial(cls, number):
         number = int(number)
-        material_name = 'mmd_tools_rigid_%d'%(number)
+        material_name = 'mmd_tools_rigid_%d' % (number)
         if material_name not in bpy.data.materials:
             mat = bpy.data.materials.new(material_name)
             color = cls.COLORS[number]

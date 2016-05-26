@@ -21,12 +21,11 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {"name": "Border Lines - BMesh Edition",
-           "description": "Draw thicker lines for border edges; this is a version "\
-                          "of the addon which should be faster than the original; "\
-                          "it allows thick display of active edge color, but notof fancy "\
-                          "edges (freestyle, crease, seam, sharp, etc.), which are "\
+           "description": "Draw thicker lines for border edges; this is a version "
+                          "of the addon which should be faster than the original; "
+                          "it allows thick display of active edge color, but notof fancy "
+                          "edges (freestyle, crease, seam, sharp, etc.), which are "
                           "nevertheless shown normally.",
            "author": "Quentin Wenger (Matpi)",
            "version": (1, 9),
@@ -37,7 +36,6 @@ bl_info = {"name": "Border Lines - BMesh Edition",
            "tracker_url": "",
            "category": "SCF Retopo"
            }
-
 
 
 import bpy
@@ -55,11 +53,11 @@ custom_color = [(0.0, 1.0, 0.0)]
 finer_lines = [False]
 
 
-
 def drawColorSize(coords, color):
     glColor3f(*color[:3])
     for coord in coords:
         glVertex3f(*coord)
+
 
 def drawCallback():
     obj = bpy.context.object
@@ -87,7 +85,6 @@ def drawCallback():
                 else:
                     bm = bm_old[0]
 
-
                 no_depth = not bpy.context.space_data.use_occlude_geometry
 
                 if no_depth:
@@ -96,7 +93,7 @@ def drawCallback():
                     draw_with_test = False
 
                     if finer_lines[0]:
-                        glLineWidth(point_size[0]/4.0)
+                        glLineWidth(point_size[0] / 4.0)
                         draw_with_test = True
 
                     glBegin(GL_LINES)
@@ -105,16 +102,15 @@ def drawCallback():
                         glColor3f(*custom_color[0])
                         for edge in bm.edges:
                             if edge.is_valid and edge.is_boundary:
-                                coords = [matrix_world*vert.co for vert in edge.verts]
+                                coords = [matrix_world * vert.co for vert in edge.verts]
                                 for coord in coords:
                                     glVertex3f(*coord)
-
 
                     else:
                         active = bm.select_history.active
                         for edge in bm.edges:
                             if edge.is_valid and edge.is_boundary:
-                                coords = [matrix_world*vert.co for vert in edge.verts]
+                                coords = [matrix_world * vert.co for vert in edge.verts]
 
                                 if active == edge:
                                     drawColorSize(coords, transform)
@@ -129,26 +125,23 @@ def drawCallback():
 
                     glEnable(GL_DEPTH_TEST)
 
-
                 if draw_with_test:
 
                     glBegin(GL_LINES)
-
 
                     if use_custom_color[0]:
                         glColor3f(*custom_color[0])
                         for edge in bm.edges:
                             if edge.is_valid and edge.is_boundary:
-                                coords = [matrix_world*vert.co for vert in edge.verts]
+                                coords = [matrix_world * vert.co for vert in edge.verts]
                                 for coord in coords:
                                     glVertex3f(*coord)
-
 
                     else:
                         active = bm.select_history.active
                         for edge in bm.edges:
                             if edge.is_valid and edge.is_boundary:
-                                coords = [matrix_world*vert.co for vert in edge.verts]
+                                coords = [matrix_world * vert.co for vert in edge.verts]
 
                                 if active == edge:
                                     drawColorSize(coords, transform)
@@ -159,8 +152,6 @@ def drawCallback():
 
                     glEnd()
 
-                        
-
             elif bpy.context.mode == 'OBJECT' and (obj.show_wire or bpy.context.space_data.viewport_shade == 'WIREFRAME'):
                 counts = edge_face_count(mesh)
 
@@ -170,7 +161,7 @@ def drawCallback():
                     for edge, count in zip(mesh.edges, counts):
                         # border edges
                         if count == 1:
-                            coords = [matrix_world*Vector(mesh.vertices[i].co) for i in edge.key]
+                            coords = [matrix_world * Vector(mesh.vertices[i].co) for i in edge.key]
                             glColor3f(*custom_color[0])
                             for coord in coords:
                                 glVertex3f(*coord)
@@ -180,19 +171,18 @@ def drawCallback():
                         for edge, count in zip(mesh.edges, counts):
                             # border edges
                             if count == 1:
-                                coords = [matrix_world*Vector(mesh.vertices[i].co) for i in edge.key]
+                                coords = [matrix_world * Vector(mesh.vertices[i].co) for i in edge.key]
                                 drawColorSize(coords, object_active)
                     else:
                         for edge, count in zip(mesh.edges, counts):
                             # border edges
                             if count == 1:
-                                coords = [matrix_world*Vector(mesh.vertices[i].co) for i in edge.key]
+                                coords = [matrix_world * Vector(mesh.vertices[i].co) for i in edge.key]
                                 drawColorSize(coords, wire)
-                    
-                glEnd()
-                
-            glLineWidth(1.0)
 
+                glEnd()
+
+            glLineWidth(1.0)
 
 
 def updateBGLData(self, context):
@@ -241,8 +231,6 @@ class BorderLinesCollectionGroup(bpy.types.PropertyGroup):
         update=updateBGLData)
 
 
-    
-    
 def displayBorderLinesPanel(self, context):
     layout = self.layout
 
@@ -258,19 +246,17 @@ def displayBorderLinesPanel(self, context):
         split = layout.split(percentage=0.1)
         split.separator()
         if border_lines.custom_color_use:
-            split2 = split.split()    
+            split2 = split.split()
             split2.prop(border_lines, "custom_color_use")
             split2.prop(border_lines, "custom_color", text="")
         else:
             split.prop(border_lines, "custom_color_use")
 
-
         if context.mode == 'EDIT_MESH' and not context.space_data.use_occlude_geometry:
             split = layout.split(percentage=0.1)
             split.separator()
             split.prop(border_lines, "finer_lines_behind_use")
-            
-    
+
 
 def register():
     bpy.utils.register_module(__name__)
@@ -281,7 +267,6 @@ def register():
         bpy.types.SpaceView3D.draw_handler_remove(handle[0], 'WINDOW')
     handle[:] = [bpy.types.SpaceView3D.draw_handler_add(drawCallback, (), 'WINDOW', 'POST_VIEW')]
 
-    
 
 def unregister():
     bpy.types.VIEW3D_PT_view3d_shading.remove(displayBorderLinesPanel)
@@ -290,7 +275,7 @@ def unregister():
         bpy.types.SpaceView3D.draw_handler_remove(handle[0], 'WINDOW')
         handle[:] = []
     bpy.utils.unregister_module(__name__)
-    
+
 
 if __name__ == "__main__":
     register()

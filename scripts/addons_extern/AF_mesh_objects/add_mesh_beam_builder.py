@@ -61,7 +61,7 @@ import bpy
 from bpy_extras import object_utils
 
 
-def create_mesh (self, context, name, verts, faces, debug):
+def create_mesh(self, context, name, verts, faces, debug):
     # Creates mesh and object
     # name - name of object to create
     # verts - a list of vertex tuples
@@ -86,7 +86,6 @@ def recalc_normals(debug):
     # parts of this script creates faces that are backwards or
     # have thier normals facing the wrong way, so recalculate them
     # debug - debug flag - if true prints data to console
-
 
     if bpy.context.mode != 'EDIT_MESH':
         bpy.ops.object.editmode_toggle()
@@ -118,7 +117,7 @@ def create_end_faces(verts_list, thick, debug):
     num_of_verts = len(verts_list)
     faces_temp = []
 
-    sides = 4 # sides - number of sides to mesh *added because of code re-write
+    sides = 4  # sides - number of sides to mesh *added because of code re-write
 
     if thick:
         # has thickness, so build end faces
@@ -128,19 +127,19 @@ def create_end_faces(verts_list, thick, debug):
         for index in range(num_of_verts):
             if index == (num_of_verts - 1):
                 faces_temp.append(verts_list[index])
-                faces_temp.append(verts_list[index-index])
-                faces_temp.append(verts_list[index+1])
-                faces_temp.append(verts_list[index*2+1])
+                faces_temp.append(verts_list[index - index])
+                faces_temp.append(verts_list[index + 1])
+                faces_temp.append(verts_list[index * 2 + 1])
             else:
                 faces_temp.append(verts_list[index])
-                faces_temp.append(verts_list[index+1])
-                faces_temp.append(verts_list[index+num_of_verts+1])
-                faces_temp.append(verts_list[index+num_of_verts])
+                faces_temp.append(verts_list[index + 1])
+                faces_temp.append(verts_list[index + num_of_verts + 1])
+                faces_temp.append(verts_list[index + num_of_verts])
 
             faces.append(tuple(faces_temp))
             faces_temp = []
     else:
-        #this code may not be needed, depends upon rewrite...
+        # this code may not be needed, depends upon rewrite...
         if sides > 4:
             # more than 4 sides, so replace last list item (center vert) with first list item
             # for looping and building faces
@@ -191,7 +190,7 @@ def create_side_faces(front_verts, back_verts, debug):
 
     # Build the new_faces list with tuples defining each face
     for index in range(num_of_faces):
-        facestemp = (front_verts[index], front_verts[index+1], back_verts[index+1], back_verts[index])
+        facestemp = (front_verts[index], front_verts[index + 1], back_verts[index + 1], back_verts[index])
         new_faces.append(facestemp)
 
     # print debug info to console
@@ -219,55 +218,55 @@ def calc_end_verts(size, y_off, thick, debug):
     verts = []
 
     if debug:
-        print ("\ncalc_end_verts Function Starts\n")
-        print("\nsize = ",size)
-        print("y_off = ",y_off)
+        print("\ncalc_end_verts Function Starts\n")
+        print("\nsize = ", size)
+        print("y_off = ", y_off)
 
     # Create vertices by calculation
-    x_pos = 0 + size[0]/2
-    z_pos = 0 + size[2]/2
+    x_pos = 0 + size[0] / 2
+    z_pos = 0 + size[2] / 2
     verts.append((x_pos, y_off, z_pos))
 
-    x_pos = 0 - size[0]/2
-    z_pos = 0 + size[2]/2
+    x_pos = 0 - size[0] / 2
+    z_pos = 0 + size[2] / 2
     verts.append((x_pos, y_off, z_pos))
 
-    x_pos = 0 - size[0]/2
-    z_pos = 0 - size[2]/2
+    x_pos = 0 - size[0] / 2
+    z_pos = 0 - size[2] / 2
     verts.append((x_pos, y_off, z_pos))
 
-    x_pos = 0 + size[0]/2
-    z_pos = 0 - size[2]/2
+    x_pos = 0 + size[0] / 2
+    z_pos = 0 - size[2] / 2
     verts.append((x_pos, y_off, z_pos))
 
     if thick:
         # has thickness, so calculate inside vertices
-        #### not too sure about this, but it does work the way the
-        #### solidify modifier works, so leaving as is for now
+        # not too sure about this, but it does work the way the
+        # solidify modifier works, so leaving as is for now
         x_pos = size[0] - (thick * 2)
         z_pos = size[2] - (thick * 2)
         size = (x_pos, y_off, z_pos)
 
         # Create vertices by calculation
-        x_pos = 0 + size[0]/2
-        z_pos = 0 + size[2]/2
+        x_pos = 0 + size[0] / 2
+        z_pos = 0 + size[2] / 2
         verts.append((x_pos, y_off, z_pos))
 
-        x_pos = 0 - size[0]/2
-        z_pos = 0 + size[2]/2
+        x_pos = 0 - size[0] / 2
+        z_pos = 0 + size[2] / 2
         verts.append((x_pos, y_off, z_pos))
 
-        x_pos = 0 - size[0]/2
-        z_pos = 0 - size[2]/2
+        x_pos = 0 - size[0] / 2
+        z_pos = 0 - size[2] / 2
         verts.append((x_pos, y_off, z_pos))
 
-        x_pos = 0 + size[0]/2
-        z_pos = 0 - size[2]/2
+        x_pos = 0 + size[0] / 2
+        z_pos = 0 - size[2] / 2
         verts.append((x_pos, y_off, z_pos))
 
     if debug:
-        print ("verts :", verts)
-        print ("\ncalc_end_verts Function Ends.\n\n")
+        print("verts :", verts)
+        print("\ncalc_end_verts Function Ends.\n\n")
 
     return verts
 
@@ -298,20 +297,18 @@ def adjust_c_beam_verts(verts, taper, debug):
     # get value of 5th vert
     vert_temp = verts[4]
 
-
-
     # calculate the amount of taper, updating vert_x
     # with the new value calculated.
     vert_x = calc_taper(vert_orig[0], vert_temp[0], taper)
 
-    vert_new = (vert_x,vert_temp[1],vert_z)
+    vert_new = (vert_x, vert_temp[1], vert_z)
 
     if debug:
-        print ("\nadjust_c_beam_verts function starting")
-        print ("vert_orig = ",vert_orig[0])
-        print ("vert_x = ",vert_x)
-        print("vert_temp =",vert_temp)
-        print("vert_new =",vert_new)
+        print("\nadjust_c_beam_verts function starting")
+        print("vert_orig = ", vert_orig[0])
+        print("vert_x = ", vert_x)
+        print("vert_temp =", vert_temp)
+        print("vert_new =", vert_new)
 
     # update 5th vert with new value
     verts[4] = vert_new
@@ -326,19 +323,17 @@ def adjust_c_beam_verts(verts, taper, debug):
     # get value of 5th vert
     vert_temp = verts[5]
 
-
-
     # calculate the amount of taper, updating vert_x
     # with the new value calculated.
     vert_x = calc_taper(vert_orig[0], vert_temp[0], taper)
 
-    vert_new = (vert_x,vert_temp[1],vert_z)
+    vert_new = (vert_x, vert_temp[1], vert_z)
 
     if debug:
-        print ("vert_orig = ",vert_orig[0])
-        print ("vert_x = ",vert_x)
-        print("vert_temp =",vert_temp)
-        print("vert_new =",vert_new)
+        print("vert_orig = ", vert_orig[0])
+        print("vert_x = ", vert_x)
+        print("vert_temp =", vert_temp)
+        print("vert_new =", vert_new)
 
     # update 6th vert with new value
     verts[5] = vert_new
@@ -368,7 +363,7 @@ def calc_taper(outer_vert, inner_vert, taper):
 
     # calcuate taper & adjust vertex
     vert_delta = inner_vert - outer_vert
-    adjusted_vert = outer_vert + ((vert_delta/100) * taper)
+    adjusted_vert = outer_vert + ((vert_delta / 100) * taper)
 
     #print("adjusted_vert =", adjusted_vert)
     return adjusted_vert
@@ -386,12 +381,11 @@ def create_rectangular_beam(size, thick, debug):
     # faces_final - a list of tuples of the vertices that make up each face
 
     # Create temporarylists to hold vertices locations
-    verts_front_temp=[]
-    verts_back_temp=[]
+    verts_front_temp = []
+    verts_back_temp = []
 
-    #calculate y offset from center for front vertices
-    y_off = size[1]/2
-
+    # calculate y offset from center for front vertices
+    y_off = size[1] / 2
 
     # Create front vertices by calculation
     verts_front_temp = calc_end_verts(size, y_off, thick, debug)
@@ -441,14 +435,14 @@ def create_rectangular_beam(size, thick, debug):
     if thick:
         # Object has thickness, create list of outside vertices
         numofverts = len(verts_front_list)
-        verts_front_temp = verts_front_list[0:int(numofverts/2)]
-        verts_back_temp = verts_back_list[0:int(numofverts/2)]
+        verts_front_temp = verts_front_list[0:int(numofverts / 2)]
+        verts_back_temp = verts_back_list[0:int(numofverts / 2)]
 
         faces_side_temp = create_side_faces(verts_front_temp, verts_back_temp, debug)
 
         # Create list of inside vertices
-        verts_front_temp = verts_front_list[int(numofverts/2):numofverts]
-        verts_back_temp = verts_back_list[int(numofverts/2):numofverts]
+        verts_front_temp = verts_front_list[int(numofverts / 2):numofverts]
+        verts_back_temp = verts_back_list[int(numofverts / 2):numofverts]
 
         faces_side_temp += create_side_faces(verts_front_temp, verts_back_temp, debug)
     else:
@@ -461,7 +455,7 @@ def create_rectangular_beam(size, thick, debug):
     # print debug info to console
     if debug:
         print("\ncreate_multi_side_box Function")
-        print("\nAll faces :",faces_final)
+        print("\nAll faces :", faces_final)
         print("\ncreate_multi_side_box Function Ends\n\n")
 
     return verts_final, faces_final
@@ -481,14 +475,14 @@ def create_C_beam(size, thick, taper, debug):
 
     # print debug info to console
     if debug:
-        print ("\ncreate_C_beam - function called")
+        print("\ncreate_C_beam - function called")
 
     # Get y offset of vertices from center
     y_off = size[1] / 2
 
     # Create temporarylists to hold vertices locations
-    verts_front_temp=[]
-    verts_back_temp=[]
+    verts_front_temp = []
+    verts_back_temp = []
 
     # Create front vertices by calculation
     verts_front_temp = calc_end_verts(size, y_off, thick, debug)
@@ -544,22 +538,22 @@ def create_C_beam(size, thick, taper, debug):
 
     # Create list of outside vertices for the 3 outside faces
     numofverts = (len(verts_front_list))
-    verts_front_temp = verts_front_list[0:int(numofverts/2)]
-    verts_back_temp = verts_back_list[0:int(numofverts/2)]
+    verts_front_temp = verts_front_list[0:int(numofverts / 2)]
+    verts_back_temp = verts_back_list[0:int(numofverts / 2)]
 
     faces_side_temp = create_side_faces(verts_front_temp, verts_back_temp, debug)
     # create_side_faces creates 4 outside faces, we only want 3
     # so remove the 1st face
-    faces_side_temp  = faces_side_temp[1:]
+    faces_side_temp = faces_side_temp[1:]
 
     # Create list of inside vertices for the 3 inside faces
-    verts_front_temp = verts_front_list[int(numofverts/2):numofverts]
-    verts_back_temp = verts_back_list[int(numofverts/2):numofverts]
+    verts_front_temp = verts_front_list[int(numofverts / 2):numofverts]
+    verts_back_temp = verts_back_list[int(numofverts / 2):numofverts]
 
     faces_side_temp += create_side_faces(verts_front_temp, verts_back_temp, debug)
     # create_side_faces creates 4 outside faces, we only want 3
     # so remove the 1st face
-    faces_side_temp  = faces_side_temp[0:3] + faces_side_temp[4:]
+    faces_side_temp = faces_side_temp[0:3] + faces_side_temp[4:]
 
     # fill in top two faces
     faces_side_temp.append((0, 4, 12, 8))
@@ -598,38 +592,38 @@ def create_L_beam(size, thick, taper, debug):
     z_off = size[2] / 2
 
     # Create temporarylists to hold vertices locations
-    verts_front_temp=[]
-    verts_back_temp=[]
+    verts_front_temp = []
+    verts_back_temp = []
 
     # Create front vertices by calculation
-    verts_front_temp = [(0 - x_off, 0 - y_off, z_off), \
-        (0 - (x_off - thick), 0 - y_off, z_off), \
-        (0 - (x_off - thick), 0 - y_off, 0 - (z_off - thick)), \
-        (x_off, 0 - y_off, 0 - (z_off - thick)), \
-        (x_off, 0 - y_off, 0 - z_off), \
-        (0 - x_off, 0 - y_off, 0 - z_off)]
+    verts_front_temp = [(0 - x_off, 0 - y_off, z_off),
+                        (0 - (x_off - thick), 0 - y_off, z_off),
+                        (0 - (x_off - thick), 0 - y_off, 0 - (z_off - thick)),
+                        (x_off, 0 - y_off, 0 - (z_off - thick)),
+                        (x_off, 0 - y_off, 0 - z_off),
+                        (0 - x_off, 0 - y_off, 0 - z_off)]
 
     # Adjust taper
     vert_outside = verts_front_temp[0]
     vert_inside = verts_front_temp[1]
-    verts_front_temp[1] = [(calc_taper(vert_outside[0], vert_inside[0], taper)), vert_inside[1],vert_inside[2]]
+    verts_front_temp[1] = [(calc_taper(vert_outside[0], vert_inside[0], taper)), vert_inside[1], vert_inside[2]]
 
     vert_outside = verts_front_temp[4]
     vert_inside = verts_front_temp[3]
     verts_front_temp[3] = [vert_inside[0], vert_inside[1], (calc_taper(vert_outside[2], vert_inside[2], taper))]
 
     # Create back vertices by calculation
-    verts_back_temp = [(0 - x_off, y_off, z_off), \
-        (0 - (x_off - thick), y_off, z_off), \
-        (0 - (x_off - thick), y_off, 0 - (z_off - thick)), \
-        (x_off, y_off, 0 - (z_off - thick)), \
-        (x_off, y_off, 0 - z_off), \
-        (0 - x_off, y_off, 0 - z_off)]
+    verts_back_temp = [(0 - x_off, y_off, z_off),
+                       (0 - (x_off - thick), y_off, z_off),
+                       (0 - (x_off - thick), y_off, 0 - (z_off - thick)),
+                       (x_off, y_off, 0 - (z_off - thick)),
+                       (x_off, y_off, 0 - z_off),
+                       (0 - x_off, y_off, 0 - z_off)]
 
     # Adjust taper
     vert_outside = verts_back_temp[0]
     vert_inside = verts_back_temp[1]
-    verts_back_temp[1] = [(calc_taper(vert_outside[0], vert_inside[0], taper)), vert_inside[1],vert_inside[2]]
+    verts_back_temp[1] = [(calc_taper(vert_outside[0], vert_inside[0], taper)), vert_inside[1], vert_inside[2]]
 
     vert_outside = verts_back_temp[4]
     vert_inside = verts_back_temp[3]
@@ -658,7 +652,7 @@ def create_L_beam(size, thick, taper, debug):
     for index in range(num_of_verts):
         verts_front_list.append(index)
     for index in range(num_of_verts):
-        verts_back_list.append(index  + 6)
+        verts_back_list.append(index + 6)
 
     faces_side_temp = create_side_faces(verts_front_list, verts_back_list, debug)
 
@@ -672,7 +666,6 @@ def create_L_beam(size, thick, taper, debug):
         print("\ncreate_L_beam function ending")
 
     return verts_final, faces_final
-
 
 
 def create_T_beam(size, thick, taper, debug):
@@ -698,20 +691,20 @@ def create_T_beam(size, thick, taper, debug):
     thick_off = thick / 2
 
     # Create temporarylists to hold vertices locations
-    verts_front_temp=[]
-    verts_back_temp=[]
+    verts_front_temp = []
+    verts_back_temp = []
 
     # Create front vertices by calculation
-    verts_front_temp = [(0 - x_off, 0 - y_off, z_off), \
-        (0 - thick_off, 0 - y_off, z_off), \
-        (thick_off, 0 - y_off, z_off), \
-        (x_off, 0 - y_off, z_off), \
-        (x_off, 0 - y_off, z_off - thick), \
-        (thick_off, 0 - y_off, z_off - thick), \
-        (thick_off, 0 - y_off, 0 - z_off), \
-        (0 - thick_off, 0 - y_off, 0 - z_off), \
-        (0 - thick_off, 0 - y_off, z_off - thick), \
-        (0 - x_off, 0 - y_off, z_off - thick)]
+    verts_front_temp = [(0 - x_off, 0 - y_off, z_off),
+                        (0 - thick_off, 0 - y_off, z_off),
+                        (thick_off, 0 - y_off, z_off),
+                        (x_off, 0 - y_off, z_off),
+                        (x_off, 0 - y_off, z_off - thick),
+                        (thick_off, 0 - y_off, z_off - thick),
+                        (thick_off, 0 - y_off, 0 - z_off),
+                        (0 - thick_off, 0 - y_off, 0 - z_off),
+                        (0 - thick_off, 0 - y_off, z_off - thick),
+                        (0 - x_off, 0 - y_off, z_off - thick)]
 
     # Adjust taper
     vert_outside = verts_front_temp[0]
@@ -734,16 +727,16 @@ def create_T_beam(size, thick, taper, debug):
     verts_front_temp[7] = [(calc_taper(vert_outside[0], vert_inside[0], taper)), vert_inside[1], vert_inside[2]]
 
     # Create fack vertices by calculation
-    verts_back_temp = [(0 - x_off, y_off, z_off), \
-        (0 - thick_off, y_off, z_off), \
-        (thick_off, y_off, z_off), \
-        (x_off, y_off, z_off), \
-        (x_off, y_off, z_off - thick), \
-        (thick_off, y_off, z_off - thick), \
-        (thick_off, y_off, 0 - z_off), \
-        (0 - thick_off, y_off, 0 - z_off), \
-        (0 - thick_off, y_off, z_off - thick), \
-        (0 - x_off, y_off, z_off - thick)]
+    verts_back_temp = [(0 - x_off, y_off, z_off),
+                       (0 - thick_off, y_off, z_off),
+                       (thick_off, y_off, z_off),
+                       (x_off, y_off, z_off),
+                       (x_off, y_off, z_off - thick),
+                       (thick_off, y_off, z_off - thick),
+                       (thick_off, y_off, 0 - z_off),
+                       (0 - thick_off, y_off, 0 - z_off),
+                       (0 - thick_off, y_off, z_off - thick),
+                       (0 - x_off, y_off, z_off - thick)]
 
     # Adjust taper
     vert_outside = verts_back_temp[0]
@@ -767,17 +760,16 @@ def create_T_beam(size, thick, taper, debug):
 
     verts_final = verts_front_temp + verts_back_temp
 
-
     # define end faces, only 8 so just coded
     faces_front_temp = []
     faces_back_temp = []
     faces_side_temp = []
 
-    faces_front_temp = [(0, 1, 8, 9), (1, 2, 5, 8), \
-        (2, 3, 4, 5), (5, 6, 7, 8)]
+    faces_front_temp = [(0, 1, 8, 9), (1, 2, 5, 8),
+                        (2, 3, 4, 5), (5, 6, 7, 8)]
 
-    faces_back_temp = [(10, 11, 18, 19), (11, 12, 15, 18), \
-        (12, 13, 14, 15), (15, 16, 17,  18)]
+    faces_back_temp = [(10, 11, 18, 19), (11, 12, 15, 18),
+                       (12, 13, 14, 15), (15, 16, 17, 18)]
 
     verts_front_list = []
     verts_back_list = []
@@ -787,7 +779,7 @@ def create_T_beam(size, thick, taper, debug):
     for index in range(num_of_verts):
         verts_front_list.append(index)
     for index in range(num_of_verts):
-        verts_back_list.append(index  + 10)
+        verts_back_list.append(index + 10)
 
     faces_side_temp = create_side_faces(verts_front_list, verts_back_list, debug)
 
@@ -822,26 +814,26 @@ def create_I_beam(size, thick, taper, debug):
     thick_off = thick / 2
 
     # Create temporarylists to hold vertices locations
-    verts_front_temp=[]
-    verts_back_temp=[]
+    verts_front_temp = []
+    verts_back_temp = []
 
     # Create front vertices by calculation
-    verts_front_temp = [(0 - x_off, 0 - y_off, z_off), \
-        (0 - thick_off, 0 - y_off, z_off), \
-        (thick_off, 0 - y_off, z_off), \
-        (x_off, 0 - y_off, z_off), \
-        (x_off, 0 - y_off, z_off - thick), \
-        (thick_off, 0 - y_off, z_off - thick), \
-        (thick_off, 0 - y_off, 0 - z_off + thick), \
-        (x_off, 0 - y_off, 0 - z_off + thick), \
-        (x_off, 0 - y_off, 0 - z_off), \
-        (thick_off, 0 - y_off, 0 - z_off), \
-        (0 - thick_off, 0 - y_off, 0 - z_off), \
-        (0 - x_off, 0 - y_off, 0 - z_off), \
-        (0 - x_off, 0 - y_off, 0 -z_off  + thick), \
-        (0 - thick_off, 0 - y_off, 0 - z_off + thick), \
-        (0 - thick_off, 0 - y_off, z_off - thick), \
-        (0 - x_off, 0 - y_off, z_off - thick)]
+    verts_front_temp = [(0 - x_off, 0 - y_off, z_off),
+                        (0 - thick_off, 0 - y_off, z_off),
+                        (thick_off, 0 - y_off, z_off),
+                        (x_off, 0 - y_off, z_off),
+                        (x_off, 0 - y_off, z_off - thick),
+                        (thick_off, 0 - y_off, z_off - thick),
+                        (thick_off, 0 - y_off, 0 - z_off + thick),
+                        (x_off, 0 - y_off, 0 - z_off + thick),
+                        (x_off, 0 - y_off, 0 - z_off),
+                        (thick_off, 0 - y_off, 0 - z_off),
+                        (0 - thick_off, 0 - y_off, 0 - z_off),
+                        (0 - x_off, 0 - y_off, 0 - z_off),
+                        (0 - x_off, 0 - y_off, 0 - z_off + thick),
+                        (0 - thick_off, 0 - y_off, 0 - z_off + thick),
+                        (0 - thick_off, 0 - y_off, z_off - thick),
+                        (0 - x_off, 0 - y_off, z_off - thick)]
 
     # Adjust taper
     vert_outside = verts_front_temp[0]
@@ -861,22 +853,22 @@ def create_I_beam(size, thick, taper, debug):
     verts_front_temp[12] = [vert_inside[0], vert_inside[1], (calc_taper(vert_outside[2], vert_inside[2], taper))]
 
     # Create back vertices by calculation
-    verts_back_temp = [(0 - x_off, y_off, z_off), \
-        (0 - thick_off, y_off, z_off), \
-        (thick_off, y_off, z_off), \
-        (x_off, y_off, z_off), \
-        (x_off, y_off, z_off - thick), \
-        (thick_off, y_off, z_off - thick), \
-        (thick_off, y_off, 0 - z_off + thick), \
-        (x_off, y_off, 0 - z_off + thick), \
-        (x_off, y_off, 0 - z_off), \
-        (thick_off, y_off, 0 - z_off), \
-        (0 - thick_off, y_off, 0 - z_off), \
-        (0 - x_off, y_off, 0 - z_off), \
-        (0 - x_off, y_off, 0 -z_off  + thick), \
-        (0 - thick_off, y_off, 0 - z_off + thick), \
-        (0 - thick_off, y_off, z_off - thick), \
-        (0 - x_off, y_off, z_off - thick)]
+    verts_back_temp = [(0 - x_off, y_off, z_off),
+                       (0 - thick_off, y_off, z_off),
+                       (thick_off, y_off, z_off),
+                       (x_off, y_off, z_off),
+                       (x_off, y_off, z_off - thick),
+                       (thick_off, y_off, z_off - thick),
+                       (thick_off, y_off, 0 - z_off + thick),
+                       (x_off, y_off, 0 - z_off + thick),
+                       (x_off, y_off, 0 - z_off),
+                       (thick_off, y_off, 0 - z_off),
+                       (0 - thick_off, y_off, 0 - z_off),
+                       (0 - x_off, y_off, 0 - z_off),
+                       (0 - x_off, y_off, 0 - z_off + thick),
+                       (0 - thick_off, y_off, 0 - z_off + thick),
+                       (0 - thick_off, y_off, z_off - thick),
+                       (0 - x_off, y_off, z_off - thick)]
 
     # Adjust taper
     vert_outside = verts_back_temp[0]
@@ -903,15 +895,15 @@ def create_I_beam(size, thick, taper, debug):
     faces_back_temp = []
     faces_side_temp = []
 
-    faces_front_temp = [(0, 1, 14, 15), (1, 2, 5, 14), \
-        (2, 3, 4, 5), (6, 7, 8, 9), \
-        (6, 9, 10, 13), (12, 13, 10, 11), \
-        (5, 6, 13, 14)]
+    faces_front_temp = [(0, 1, 14, 15), (1, 2, 5, 14),
+                        (2, 3, 4, 5), (6, 7, 8, 9),
+                        (6, 9, 10, 13), (12, 13, 10, 11),
+                        (5, 6, 13, 14)]
 
-    faces_back_temp = [(16, 17, 30, 31), (17, 18, 21, 30), \
-        (18, 19, 20, 21), (22, 23, 24, 25), \
-        (22, 25, 26, 29), (28, 29, 26, 27), \
-        (21, 22, 29, 30)]
+    faces_back_temp = [(16, 17, 30, 31), (17, 18, 21, 30),
+                       (18, 19, 20, 21), (22, 23, 24, 25),
+                       (22, 25, 26, 29), (28, 29, 26, 27),
+                       (21, 22, 29, 30)]
 
     verts_front_list = []
     verts_back_list = []
@@ -921,7 +913,7 @@ def create_I_beam(size, thick, taper, debug):
     for index in range(num_of_verts):
         verts_front_list.append(index)
     for index in range(num_of_verts):
-        verts_back_list.append(index  + 16)
+        verts_back_list.append(index + 16)
 
     faces_side_temp = create_side_faces(verts_front_list, verts_back_list, debug)
 
@@ -933,7 +925,6 @@ def create_I_beam(size, thick, taper, debug):
     return verts_final, faces_final
 
 
-
 # Define "Add_Rectangular_Beam" operator
 ########### Needs Work ###############
 class Add_Rectangular_Beam(bpy.types.Operator):
@@ -943,50 +934,50 @@ class Add_Rectangular_Beam(bpy.types.Operator):
     bl_description = "Create a Rectangular Beam mesh"
     bl_options = {'REGISTER', 'UNDO'}
 
-    mesh_z_size = bpy.props.FloatProperty(name = "Height(z)",
-        description = "Height (along the z-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = 1)
+    mesh_z_size = bpy.props.FloatProperty(name="Height(z)",
+                                          description="Height (along the z-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=1)
 
-    mesh_x_size = bpy.props.FloatProperty(name = "Width(x)",
-        description = "Width (along the x-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = .5)
+    mesh_x_size = bpy.props.FloatProperty(name="Width(x)",
+                                          description="Width (along the x-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=.5)
 
-    mesh_y_size = bpy.props.FloatProperty(name = "Length(y)",
-        description = "Length (along y-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = 2)
+    mesh_y_size = bpy.props.FloatProperty(name="Length(y)",
+                                          description="Length (along y-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=2)
 
-    thick_bool = bpy.props.BoolProperty(name = "Hollow",
-        description = "Create a hollow mesh with a defined thickness",
-        default = True)
+    thick_bool = bpy.props.BoolProperty(name="Hollow",
+                                        description="Create a hollow mesh with a defined thickness",
+                                        default=True)
 
-    thick = bpy.props.FloatProperty(name = "Thickness",
-        description = "Thickness of hollow mesh",
-        min = 0.01,
-        max = 1,
-        default = 0.1)
+    thick = bpy.props.FloatProperty(name="Thickness",
+                                    description="Thickness of hollow mesh",
+                                    min=0.01,
+                                    max=1,
+                                    default=0.1)
 
     # generic transform props
     # required by object_utils.py - part of blender's
     # code and is what handles alignment amongst other
     # things.
     view_align = bpy.props.BoolProperty(
-            name="Align to View",
-            default=False
-            )
+        name="Align to View",
+        default=False
+    )
     location = bpy.props.FloatVectorProperty(
-            name="Location",
-            subtype='TRANSLATION',
-            )
+        name="Location",
+        subtype='TRANSLATION',
+    )
     rotation = bpy.props.FloatVectorProperty(
-            name="Rotation",
-            subtype='EULER',
-            )
+        name="Rotation",
+        subtype='EULER',
+    )
 
     # Define tool parameter layout
     def draw(self, context):
@@ -1040,57 +1031,56 @@ class Add_C_Beam(bpy.types.Operator):
     bl_description = "Create a C or U channel mesh"
     bl_options = {'REGISTER', 'UNDO'}
 
+    mesh_z_size = bpy.props.FloatProperty(name="Height(z)",
+                                          description="Height (along the z-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=1)
 
-    mesh_z_size = bpy.props.FloatProperty(name = "Height(z)",
-        description = "Height (along the z-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = 1)
+    mesh_x_size = bpy.props.FloatProperty(name="Width(x)",
+                                          description="Width (along the x-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=.5)
 
-    mesh_x_size = bpy.props.FloatProperty(name = "Width(x)",
-        description = "Width (along the x-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = .5)
+    mesh_y_size = bpy.props.FloatProperty(name="Length(y)",
+                                          description="Length (along y-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=2)
 
-    mesh_y_size = bpy.props.FloatProperty(name = "Length(y)",
-        description = "Length (along y-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = 2)
+    thick = bpy.props.FloatProperty(name="Thickness",
+                                    description="Thickness of mesh",
+                                    min=0.01,
+                                    max=1,
+                                    default=0.1)
 
-    thick = bpy.props.FloatProperty(name = "Thickness",
-        description = "Thickness of mesh",
-        min = 0.01,
-        max = 1,
-        default = 0.1)
+    taper = bpy.props.IntProperty(name="Taper",
+                                  description="Percentage to taper outside edges, 0 = no taper, 100 = full taper",
+                                  min=0,
+                                  max=100,
+                                  default=0)
 
-    taper = bpy.props.IntProperty(name = "Taper",
-        description = "Percentage to taper outside edges, 0 = no taper, 100 = full taper",
-        min = 0,
-        max = 100,
-        default = 0)
-
-    type = bpy.props.BoolProperty(name = "U-shaped",
-        description = "Create the beam in a U orientation rather than the defualt C orientation",
-        default = True)
+    type = bpy.props.BoolProperty(name="U-shaped",
+                                  description="Create the beam in a U orientation rather than the defualt C orientation",
+                                  default=True)
 
     # generic transform props
     # required by object_utils.py - part of blender's
     # code and is what handles alignment amongst other
     # things.
     view_align = bpy.props.BoolProperty(
-            name="Align to View",
-            default=False
-            )
+        name="Align to View",
+        default=False
+    )
     location = bpy.props.FloatVectorProperty(
-            name="Location",
-            subtype='TRANSLATION',
-            )
+        name="Location",
+        subtype='TRANSLATION',
+    )
     rotation = bpy.props.FloatVectorProperty(
-            name="Rotation",
-            subtype='EULER',
-            )
+        name="Rotation",
+        subtype='EULER',
+    )
 
     # Define tool parameter layout
     def draw(self, context):
@@ -1105,7 +1095,6 @@ class Add_C_Beam(bpy.types.Operator):
         col = layout.column()
         col.prop(self, 'location')
         col.prop(self, 'rotation')
-
 
     def execute(self, context):
         # debug flag - True prints debug info to console
@@ -1130,14 +1119,13 @@ class Add_C_Beam(bpy.types.Operator):
         recalc_normals(debug)
 
         if not self.type:
-        # C-type beam is actually created as a u-type beam
-        # so rotate 90 degrees on y-axis to make a c-type
-        # and apply rotation to reset those values
-        # if self.type is true, do nothing as beam is alreay u-type.
-        # rotation value is in radians
+            # C-type beam is actually created as a u-type beam
+            # so rotate 90 degrees on y-axis to make a c-type
+            # and apply rotation to reset those values
+            # if self.type is true, do nothing as beam is alreay u-type.
+            # rotation value is in radians
             bpy.ops.transform.rotate(value=1.5708, axis=(0, 1, 0))
-            bpy.ops.object.transform_apply(location=False, rotation =True, scale=False)
-
+            bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 
         return {'FINISHED'}
 
@@ -1157,52 +1145,52 @@ class Add_L_Beam(bpy.types.Operator):
     bl_description = "Create a L shaped mesh"
     bl_options = {'REGISTER', 'UNDO'}
 
-    mesh_z_size = bpy.props.FloatProperty(name = "Height(z)",
-        description = "Height (along the z-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = 1)
+    mesh_z_size = bpy.props.FloatProperty(name="Height(z)",
+                                          description="Height (along the z-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=1)
 
-    mesh_x_size = bpy.props.FloatProperty(name = "Width(x)",
-        description = "Width (along the x-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = .5)
+    mesh_x_size = bpy.props.FloatProperty(name="Width(x)",
+                                          description="Width (along the x-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=.5)
 
-    mesh_y_size = bpy.props.FloatProperty(name = "Length(y)",
-        description = "Length (along y-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = 2)
+    mesh_y_size = bpy.props.FloatProperty(name="Length(y)",
+                                          description="Length (along y-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=2)
 
-    thick = bpy.props.FloatProperty(name = "Thickness",
-        description = "Thickness of mesh",
-        min = 0.01,
-        max = 1,
-        default = 0.1)
+    thick = bpy.props.FloatProperty(name="Thickness",
+                                    description="Thickness of mesh",
+                                    min=0.01,
+                                    max=1,
+                                    default=0.1)
 
-    taper = bpy.props.IntProperty(name = "Taper",
-        description = "Percentage to taper outside edges, 0 = no taper, 100 = full taper",
-        min = 0,
-        max = 100,
-        default = 0)
+    taper = bpy.props.IntProperty(name="Taper",
+                                  description="Percentage to taper outside edges, 0 = no taper, 100 = full taper",
+                                  min=0,
+                                  max=100,
+                                  default=0)
 
     # generic transform props
     # required by object_utils.py - part of blender's
     # code and is what handles alignment amongst other
     # things.
     view_align = bpy.props.BoolProperty(
-            name="Align to View",
-            default=False
-            )
+        name="Align to View",
+        default=False
+    )
     location = bpy.props.FloatVectorProperty(
-            name="Location",
-            subtype='TRANSLATION',
-            )
+        name="Location",
+        subtype='TRANSLATION',
+    )
     rotation = bpy.props.FloatVectorProperty(
-            name="Rotation",
-            subtype='EULER',
-            )
+        name="Rotation",
+        subtype='EULER',
+    )
 
     # Define tool parameter layout
     def draw(self, context):
@@ -1216,7 +1204,6 @@ class Add_L_Beam(bpy.types.Operator):
         col = layout.column()
         col.prop(self, 'location')
         col.prop(self, 'rotation')
-
 
     def execute(self, context):
         # debug flag - True prints debug info to console
@@ -1252,52 +1239,52 @@ class Add_T_Beam(bpy.types.Operator):
     bl_description = "Create a T shaped mesh"
     bl_options = {'REGISTER', 'UNDO'}
 
-    mesh_z_size = bpy.props.FloatProperty(name = "Height(z)",
-        description = "Height (along the z-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = 1)
+    mesh_z_size = bpy.props.FloatProperty(name="Height(z)",
+                                          description="Height (along the z-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=1)
 
-    mesh_x_size = bpy.props.FloatProperty(name = "Width(x)",
-        description = "Width (along the x-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = .5)
+    mesh_x_size = bpy.props.FloatProperty(name="Width(x)",
+                                          description="Width (along the x-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=.5)
 
-    mesh_y_size = bpy.props.FloatProperty(name = "Length(y)",
-        description = "Length (along y-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = 2)
+    mesh_y_size = bpy.props.FloatProperty(name="Length(y)",
+                                          description="Length (along y-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=2)
 
-    thick = bpy.props.FloatProperty(name = "Thickness",
-        description = "Thickness of mesh",
-        min = 0.01,
-        max = 1,
-        default = 0.1)
+    thick = bpy.props.FloatProperty(name="Thickness",
+                                    description="Thickness of mesh",
+                                    min=0.01,
+                                    max=1,
+                                    default=0.1)
 
-    taper = bpy.props.IntProperty(name = "Taper",
-        description = "Percentage to taper outside edges, 0 = no taper, 100 = full taper",
-        min = 0,
-        max = 100,
-        default = 0)
+    taper = bpy.props.IntProperty(name="Taper",
+                                  description="Percentage to taper outside edges, 0 = no taper, 100 = full taper",
+                                  min=0,
+                                  max=100,
+                                  default=0)
 
     # generic transform props
     # required by object_utils.py - part of blender's
     # code and is what handles alignment amongst other
     # things.
     view_align = bpy.props.BoolProperty(
-            name="Align to View",
-            default=False
-            )
+        name="Align to View",
+        default=False
+    )
     location = bpy.props.FloatVectorProperty(
-            name="Location",
-            subtype='TRANSLATION',
-            )
+        name="Location",
+        subtype='TRANSLATION',
+    )
     rotation = bpy.props.FloatVectorProperty(
-            name="Rotation",
-            subtype='EULER',
-            )
+        name="Rotation",
+        subtype='EULER',
+    )
 
     # Define tool parameter layout
     def draw(self, context):
@@ -1311,7 +1298,6 @@ class Add_T_Beam(bpy.types.Operator):
         col = layout.column()
         col.prop(self, 'location')
         col.prop(self, 'rotation')
-
 
     def execute(self, context):
         # debug flag - True prints debug info to console
@@ -1347,52 +1333,52 @@ class Add_I_Beam(bpy.types.Operator):
     bl_description = "Create a I shaped mesh"
     bl_options = {'REGISTER', 'UNDO'}
 
-    mesh_z_size = bpy.props.FloatProperty(name = "Height(z)",
-        description = "Height (along the z-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = 1)
+    mesh_z_size = bpy.props.FloatProperty(name="Height(z)",
+                                          description="Height (along the z-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=1)
 
-    mesh_x_size = bpy.props.FloatProperty(name = "Width(x)",
-        description = "Width (along the x-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = .5)
+    mesh_x_size = bpy.props.FloatProperty(name="Width(x)",
+                                          description="Width (along the x-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=.5)
 
-    mesh_y_size = bpy.props.FloatProperty(name = "Length(y)",
-        description = "Length (along y-axis) of mesh",
-        min = 0.01,
-        max = 100,
-        default = 2)
+    mesh_y_size = bpy.props.FloatProperty(name="Length(y)",
+                                          description="Length (along y-axis) of mesh",
+                                          min=0.01,
+                                          max=100,
+                                          default=2)
 
-    thick = bpy.props.FloatProperty(name = "Thickness",
-        description = "Thickness of mesh",
-        min = 0.01,
-        max = 1,
-        default = 0.1)
+    thick = bpy.props.FloatProperty(name="Thickness",
+                                    description="Thickness of mesh",
+                                    min=0.01,
+                                    max=1,
+                                    default=0.1)
 
-    taper = bpy.props.IntProperty(name = "Taper",
-        description = "Percentage to taper outside edges, 0 = no taper, 100 = full taper",
-        min = 0,
-        max = 100,
-        default = 0)
+    taper = bpy.props.IntProperty(name="Taper",
+                                  description="Percentage to taper outside edges, 0 = no taper, 100 = full taper",
+                                  min=0,
+                                  max=100,
+                                  default=0)
 
     # generic transform props
     # required by object_utils.py - part of blender's
     # code and is what handles alignment amongst other
     # things.
     view_align = bpy.props.BoolProperty(
-            name="Align to View",
-            default=False
-            )
+        name="Align to View",
+        default=False
+    )
     location = bpy.props.FloatVectorProperty(
-            name="Location",
-            subtype='TRANSLATION',
-            )
+        name="Location",
+        subtype='TRANSLATION',
+    )
     rotation = bpy.props.FloatVectorProperty(
-            name="Rotation",
-            subtype='EULER',
-            )
+        name="Rotation",
+        subtype='EULER',
+    )
 
     # Define tool parameter layout
     def draw(self, context):
@@ -1406,7 +1392,6 @@ class Add_I_Beam(bpy.types.Operator):
         col = layout.column()
         col.prop(self, 'location')
         col.prop(self, 'rotation')
-
 
     def execute(self, context):
         # debug flag - True prints debug info to console
@@ -1445,8 +1430,8 @@ class INFO_MT_mesh_beambuilder_add(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
-        layout.operator("mesh.primitive_rectangle_add", text = "Rectangluar Beam")
-        layout.operator("mesh.primitive_c_beam_add", text = "C or U Channel")
-        layout.operator("mesh.primitive_l_beam_add", text = "L Shaped Beam")
-        layout.operator("mesh.primitive_t_beam_add", text = "T Shaped Beam")
-        layout.operator("mesh.primitive_i_beam_add", text = "I Shaped Beam")
+        layout.operator("mesh.primitive_rectangle_add", text="Rectangluar Beam")
+        layout.operator("mesh.primitive_c_beam_add", text="C or U Channel")
+        layout.operator("mesh.primitive_l_beam_add", text="L Shaped Beam")
+        layout.operator("mesh.primitive_t_beam_add", text="T Shaped Beam")
+        layout.operator("mesh.primitive_i_beam_add", text="I Shaped Beam")

@@ -20,7 +20,9 @@
 
 from mathutils import Matrix, Vector
 
+
 class Brush():
+
     def __init__(self):
         # Transform Attributes
         self.center = Vector()

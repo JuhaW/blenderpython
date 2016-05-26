@@ -22,6 +22,7 @@ import bpy
 from bpy_extras import view3d_utils
 from mathutils import Vector
 
+
 class RayCaster():
     '''
     This class is an extension of a mesh object's ray cast method to make it
@@ -62,9 +63,9 @@ class RayCaster():
         # ray's direction needs to be inverted to point into the scene.
         if bpy.app.version < (2, 72, 0):
             if rv3d.view_perspective == 'ORTHO' or (
-                   rv3d.view_perspective == 'CAMERA' and
-                   sv3d.camera.data.type == 'ORTHO'
-               ):
+                rv3d.view_perspective == 'CAMERA' and
+                sv3d.camera.data.type == 'ORTHO'
+            ):
                 ray_direction *= -1
 
         # Determine the ray's origin in world space.
@@ -105,14 +106,14 @@ class RayCaster():
         # present.
         if not polygons:
             raise Exception((
-                    "'{0}' has no polygons available for ray intersection " + 
-                    "testing."
-                ).format(mesh_object.name)
+                "'{0}' has no polygons available for ray intersection " +
+                "testing."
+            ).format(mesh_object.name)
             )
 
         # The mesh object's ray cast data is not accessible in Edit mode.
         if mesh_object.mode == 'EDIT':
-            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.mode_set(mode='OBJECT')
 
         # Convert the ray's origin and target from world space to object space,
         # if necessary.

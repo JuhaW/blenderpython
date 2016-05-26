@@ -21,7 +21,7 @@
 
 # <pep8 compliant>
 
-#bl_info = {
+# bl_info = {
 #    "name": "Height",
 #    "author": "Michel Anders (varkenvarken)",
 #    "version": (0, 0, 2),
@@ -197,13 +197,12 @@ def menu_func_vcol(self, context):
 def register():
     bpy.utils.register_class(Height2VGroup)
     bpy.utils.register_class(Height2VCol)
-    #bpy.types.VIEW3D_MT_paint_vertex.append(menu_func_vcol)
+    # bpy.types.VIEW3D_MT_paint_vertex.append(menu_func_vcol)
     bpy.types.VIEW3D_MT_paint_weight.append(menu_func_weight)
 
 
 def unregister():
     bpy.types.IVIEW3D_MT_paint_weight.remove(menu_func_weight)
-    #bpy.types.VIEW3D_MT_paint_vertex.remove(menu_func_vcol)
+    # bpy.types.VIEW3D_MT_paint_vertex.remove(menu_func_vcol)
     bpy.utils.unregister_class(Height2VGroup)
     bpy.utils.unregister_class(Height2VCol)
-

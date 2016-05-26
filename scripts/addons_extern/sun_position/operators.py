@@ -42,7 +42,7 @@ class ControlClass:
 
     def add_handler(self, context):
         self.handler = bpy.types.SpaceView3D.draw_handler_add(self.callback,
-                              (self, context), 'WINDOW', 'POST_PIXEL')
+                                                              (self, context), 'WINDOW', 'POST_PIXEL')
 
     def remove_handler(self):
         if self.handler:
@@ -55,7 +55,7 @@ class ControlClass:
 
         if not Sun.UseDayMonth and sp.Day_of_year != Sun.Day_of_year:
             dt = (datetime.date(sp.Year, 1, 1) +
-                 datetime.timedelta(sp.Day_of_year - 1))
+                  datetime.timedelta(sp.Day_of_year - 1))
             Sun.Day = dt.day
             Sun.Month = dt.month
             Sun.Day_of_year = sp.Day_of_year
@@ -63,7 +63,7 @@ class ControlClass:
             sp.Month = dt.month
             rv = True
         elif (sp.Day != Sun.Day or
-            sp.Month != Sun.Month):
+              sp.Month != Sun.Month):
             try:
                 dt = datetime.date(sp.Year, sp.Month, sp.Day)
                 sp.Day_of_year = dt.timetuple().tm_yday
@@ -93,8 +93,8 @@ class ControlClass:
                 Sun.SunDistance = sp.SunDistance
                 return True
             if (sp.HDR_elevation != Sun.Bind.elevation or
-                sp.HDR_azimuth != Sun.Bind.azimuth or
-                sp.SunDistance != Sun.SunDistance):
+                    sp.HDR_azimuth != Sun.Bind.azimuth or
+                    sp.SunDistance != Sun.SunDistance):
                 Sun.Elevation = sp.HDR_elevation
                 Sun.Azimuth = sp.HDR_azimuth
                 Sun.Bind.elevation = sp.HDR_elevation
@@ -104,23 +104,23 @@ class ControlClass:
             return False
 
         if (rv or sp.Time != Sun.Time or
-            sp.TimeSpread != Sun.TimeSpread or
-            sp.SunDistance != Sun.SunDistance or
-            sp.Latitude != Sun.Latitude or
-            sp.Longitude != Sun.Longitude or
-            sp.UTCzone != Sun.UTCzone or
-            sp.Year != Sun.Year or
-            sp.UseSkyTexture != Sun.UseSkyTexture or
-            sp.SkyTexture != Sun.SkyTexture or
-            sp.HDR_texture != Sun.HDR_texture or
-            sp.UseSunObject != Sun.UseSunObject or
-            sp.SunObject != Sun.SunObject or
-            sp.UseObjectGroup != Sun.UseObjectGroup or
-            sp.ObjectGroup != Sun.ObjectGroup or
-            sp.DaylightSavings != Sun.DaylightSavings or
-            sp.ShowRefraction != Sun.ShowRefraction or
-            sp.ShowNorth != Sun.ShowNorth or
-            sp.NorthOffset != Sun.NorthOffset):
+                sp.TimeSpread != Sun.TimeSpread or
+                sp.SunDistance != Sun.SunDistance or
+                sp.Latitude != Sun.Latitude or
+                sp.Longitude != Sun.Longitude or
+                sp.UTCzone != Sun.UTCzone or
+                sp.Year != Sun.Year or
+                sp.UseSkyTexture != Sun.UseSkyTexture or
+                sp.SkyTexture != Sun.SkyTexture or
+                sp.HDR_texture != Sun.HDR_texture or
+                sp.UseSunObject != Sun.UseSunObject or
+                sp.SunObject != Sun.SunObject or
+                sp.UseObjectGroup != Sun.UseObjectGroup or
+                sp.ObjectGroup != Sun.ObjectGroup or
+                sp.DaylightSavings != Sun.DaylightSavings or
+                sp.ShowRefraction != Sun.ShowRefraction or
+                sp.ShowNorth != Sun.ShowNorth or
+                sp.NorthOffset != Sun.NorthOffset):
 
             Sun.Time = sp.Time
             Sun.TimeSpread = sp.TimeSpread
@@ -225,7 +225,7 @@ class SunPos_OT_Map(bpy.types.Operator):
         elif not Display.PANEL:
             Stop_all_handlers()
             return {'FINISHED'}
-        return  Map.event_controller(context, event)
+        return Map.event_controller(context, event)
 
     def invoke(self, context, event):
         context.window_manager.modal_handler_add(self)
@@ -247,7 +247,7 @@ class SunPos_OT_Hdr(bpy.types.Operator):
         elif not Display.PANEL:
             Stop_all_handlers()
             return {'FINISHED'}
-        return  Hdr.event_controller(context, event)
+        return Hdr.event_controller(context, event)
 
     def invoke(self, context, event):
         context.window_manager.modal_handler_add(self)

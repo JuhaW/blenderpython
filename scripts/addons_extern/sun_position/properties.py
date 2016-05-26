@@ -133,7 +133,7 @@ Sun = SunClass()
 class SunPosSettings(bpy.types.PropertyGroup):
 
     from bpy.props import StringProperty, EnumProperty, \
-                          IntProperty, FloatProperty
+        IntProperty, FloatProperty
 
     IsActive = bpy.props.BoolProperty(
         description="True if panel enabled.",
@@ -287,7 +287,7 @@ class SunPosSettings(bpy.types.PropertyGroup):
         items=(
             ('ECLIPTIC', "On the Ecliptic", ""),
             ('ANALEMMA', "As and Analemma", ""),
-            ),
+        ),
         default='ECLIPTIC')
 
     Location = StringProperty(
@@ -310,7 +310,7 @@ class SunPosPreferences(bpy.types.PropertyGroup):
         items=(
             ('NORMAL', "Normal", ""),
             ('HDR', "Sun + HDR texture", ""),
-            ),
+        ),
         default='NORMAL')
 
     MapLocation = EnumProperty(
@@ -319,7 +319,7 @@ class SunPosPreferences(bpy.types.PropertyGroup):
         items=(
             ('VIEWPORT', "Viewport", ""),
             ('PANEL', "Panel", ""),
-            ),
+        ),
         default='VIEWPORT')
 
     UseOneColumn = bpy.props.BoolProperty(

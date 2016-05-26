@@ -31,16 +31,18 @@ from .util import to_console
 
 from .util import OBJECT_PREFIX
 from .util import MAX_NAME_SIZE
-    
+
 ############################################################################
 # Operator code.
 ############################################################################
-# Create operator to rename this object with the required preifix.   
+# Create operator to rename this object with the required preifix.
+
+
 class OBJECT_OT_rename_to_BounceFibers(bpy.types.Operator):
     bl_label = "Rename To Bounce Fibers"
     bl_idname = "op.rename_to_bounce_fibers"
     bl_description = "Click this button to rename this object with the required prefix. This will make it a Bounce Fibers object."
-    
+
     def invoke(self, context, event):
         ob = context.object
         if ob != None:
@@ -52,7 +54,7 @@ class OBJECT_OT_rename_to_BounceFibers(bpy.types.Operator):
                 ob_source = bpy.data.objects.get(BounceFibers_name)
                 if ob_source != None:
                     # Hmm...already and object named like this.
-                    to_console ("Already an object named like [" + BounceFibers_name + "] rename manualy.")
+                    to_console("Already an object named like [" + BounceFibers_name + "] rename manualy.")
                 else:
                     ob.name = BounceFibers_name
                 ob.draw_type = 'WIRE'
@@ -61,10 +63,10 @@ class OBJECT_OT_rename_to_BounceFibers(bpy.types.Operator):
                 to_console("Only MESH type objects can host bounce fibers.")
         return {'FINISHED'}
 
+
 def register():
     bpy.utils.register_class(OBJECT_OT_rename_to_BounceFibers)
-    
+
+
 def unregister():
     bpy.utils.unregister_class(OBJECT_OT_rename_to_BounceFibers)
-
-

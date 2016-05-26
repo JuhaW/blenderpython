@@ -20,39 +20,40 @@
 
 import bpy
 
+
 def draw_display_properties_ui(layout):
     addon = bpy.context.user_preferences.addons[__package__.split(".")[0]]
     props = addon.preferences.mesh_brush
 
     col = layout.column()
-    row = col.row(align = True)
+    row = col.row(align=True)
 
     if not props.display_props_ui_is_visible:
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'DISCLOSURE_TRI_RIGHT',
-            emboss = False
+            "wm.context_toggle", text="", icon='DISCLOSURE_TRI_RIGHT',
+            emboss=False
         )
         op.data_path =\
             "{0}.display_props_ui_is_visible".format(props.data_path)
-        row.label(text = "Display Properties") 
+        row.label(text="Display Properties")
     else:
         op = row.operator(
-            "wm.context_toggle", text = "", icon = 'DISCLOSURE_TRI_DOWN',
-            emboss = False
+            "wm.context_toggle", text="", icon='DISCLOSURE_TRI_DOWN',
+            emboss=False
         )
         op.data_path =\
             "{0}.display_props_ui_is_visible".format(props.data_path)
-        row.label(text = "Display Properties") 
+        row.label(text="Display Properties")
 
-        col.prop(props, "brush_is_visible") 
+        col.prop(props, "brush_is_visible")
 
-        subcol = col.column(align = True)
+        subcol = col.column(align=True)
         if not props.brush_is_visible:
             subcol.active = False
 
-        subcol.prop(props, "interior_color", text = "Interior", slider = True) 
-        subcol.prop(props, "outline_color", text = "Outline", slider = True)
-        subcol.prop(props, "outline_thickness", text = "Thickness")
+        subcol.prop(props, "interior_color", text="Interior", slider=True)
+        subcol.prop(props, "outline_color", text="Outline", slider=True)
+        subcol.prop(props, "outline_thickness", text="Thickness")
 
         col.separator()
 

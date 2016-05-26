@@ -70,10 +70,10 @@ def register():
     #     description="Mira Curve"
     # )
 
-    #bpy.types.Object.mi_curves = CollectionProperty(
-        #name="Mira Tool Variables",
-        #type=mi_curve_test.MI_CurveObject,
-        #description="Mira Curve"
+    # bpy.types.Object.mi_curves = CollectionProperty(
+    #name="Mira Tool Variables",
+    # type=mi_curve_test.MI_CurveObject,
+    #description="Mira Curve"
     #)
 
     bpy.types.Scene.mi_settings = PointerProperty(
@@ -113,13 +113,14 @@ def register():
     )
 
     # alternative gui
-    bpy.types.WindowManager.mirawindow = bpy.props.PointerProperty(type = mi_gui.DropdownMiraToolProps)
+    bpy.types.WindowManager.mirawindow = bpy.props.PointerProperty(type=mi_gui.DropdownMiraToolProps)
+
 
 def unregister():
     import bpy
 
     #del bpy.types.Scene.miraTool
-    #del bpy.types.Object.mi_curves  # need to investigate if i need to delete it
+    # del bpy.types.Object.mi_curves  # need to investigate if i need to delete it
     del bpy.types.Scene.mi_settings
     del bpy.types.Scene.mi_cur_stretch_settings
     del bpy.types.Scene.mi_cur_surfs_settings

@@ -24,7 +24,7 @@ import bpy
 import bmesh
 from bpy.props import IntProperty
 
-#bl_info = {
+# bl_info = {
 #	"name": "Connected vertex colors",
 #	"author": "michel anders (varkenvarken)",
 #	"version": (0, 0, 1),
@@ -39,82 +39,81 @@ from bpy.props import IntProperty
 
 class ConnectedVertexColors(bpy.types.Operator):
 
-	bl_idname = "mesh.connected_vertex_colors"
-	bl_label = "ConnectedVertexColors"
-	bl_options = {'REGISTER', 'UNDO'}
+    bl_idname = "mesh.connected_vertex_colors"
+    bl_label = "ConnectedVertexColors"
+    bl_options = {'REGISTER', 'UNDO'}
 
-	seed = IntProperty(name="Seed", default=0, description="random seed. A different value gives a different but repeatable result.")
+    seed = IntProperty(name="Seed", default=0, description="random seed. A different value gives a different but repeatable result.")
 
-	@classmethod
-	def poll(self, context):
-		# Check if we have a mesh object active and are in vertex paint mode
-		p = (context.mode == 'PAINT_VERTEX' and
-			isinstance(context.scene.objects.active, bpy.types.Object) and
-			isinstance(context.scene.objects.active.data, bpy.types.Mesh))
-		return p
+    @classmethod
+    def poll(self, context):
+        # Check if we have a mesh object active and are in vertex paint mode
+        p = (context.mode == 'PAINT_VERTEX' and
+             isinstance(context.scene.objects.active, bpy.types.Object) and
+             isinstance(context.scene.objects.active.data, bpy.types.Mesh))
+        return p
 
-	@staticmethod
-	def connected_verts(v):
-		v.tag = True
-		for edge in v.link_edges:
-			ov = edge.other_vert(v)
-			if (ov is not None) and not ov.tag:
-				ov.tag = True
-				yield ov
-				for cv in ConnectedVertexColors.connected_verts(ov):
-					cv.tag = True
-					yield cv
-					
-	@staticmethod
-	def assign_vertex_colors(vertex_colors, me):
-		bm = bmesh.new()
-		bm.from_mesh(me)
-		vcolors = {}
-		for v in bm.verts:
-			v.tag = False
-		for v in bm.verts:
-			if v.index in vcolors:
-				continue
-			else:
-				vcolors[v.index] = [random(), random(), random()]
-			for cv in ConnectedVertexColors.connected_verts(v):
-				vcolors[cv.index] = vcolors[v.index]
-					
-		bm.free()
-		for poly in me.polygons:
-			for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
-				vertex_colors[loop_index].color = vcolors[me.loops[loop_index].vertex_index]
-			
-	def execute(self, context):
-		bpy.ops.object.mode_set(mode='OBJECT')
-		mesh = context.scene.objects.active.data
-		vertex_colors = mesh.vertex_colors.active.data
-		
-		seed(self.seed)
-		ConnectedVertexColors.assign_vertex_colors(vertex_colors, mesh)
-		
-		bpy.ops.object.mode_set(mode='VERTEX_PAINT')
-		bpy.ops.object.mode_set(mode='EDIT')
-		bpy.ops.object.mode_set(mode='VERTEX_PAINT')
-		context.scene.update()
-		return {'FINISHED'}
+    @staticmethod
+    def connected_verts(v):
+        v.tag = True
+        for edge in v.link_edges:
+            ov = edge.other_vert(v)
+            if (ov is not None) and not ov.tag:
+                ov.tag = True
+                yield ov
+                for cv in ConnectedVertexColors.connected_verts(ov):
+                    cv.tag = True
+                    yield cv
+
+    @staticmethod
+    def assign_vertex_colors(vertex_colors, me):
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        vcolors = {}
+        for v in bm.verts:
+            v.tag = False
+        for v in bm.verts:
+            if v.index in vcolors:
+                continue
+            else:
+                vcolors[v.index] = [random(), random(), random()]
+            for cv in ConnectedVertexColors.connected_verts(v):
+                vcolors[cv.index] = vcolors[v.index]
+
+        bm.free()
+        for poly in me.polygons:
+            for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
+                vertex_colors[loop_index].color = vcolors[me.loops[loop_index].vertex_index]
+
+    def execute(self, context):
+        bpy.ops.object.mode_set(mode='OBJECT')
+        mesh = context.scene.objects.active.data
+        vertex_colors = mesh.vertex_colors.active.data
+
+        seed(self.seed)
+        ConnectedVertexColors.assign_vertex_colors(vertex_colors, mesh)
+
+        bpy.ops.object.mode_set(mode='VERTEX_PAINT')
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.object.mode_set(mode='VERTEX_PAINT')
+        context.scene.update()
+        return {'FINISHED'}
 
 
 def menu_func(self, context):
-	self.layout.operator(ConnectedVertexColors.bl_idname, text=bl_info['description'],
-						icon='PLUGIN')
+    self.layout.operator(ConnectedVertexColors.bl_idname, text=bl_info['description'],
+                         icon='PLUGIN')
 
 
 def register():
-	bpy.utils.register_module(__name__)
-	bpy.types.VIEW3D_MT_paint_vertex.append(menu_func)
+    bpy.utils.register_module(__name__)
+    bpy.types.VIEW3D_MT_paint_vertex.append(menu_func)
 
 
 def unregister():
-	bpy.types.IVIEW3D_MT_paint_vertex.remove(menu_func)
-	bpy.utils.unregister_module(__name__)
+    bpy.types.IVIEW3D_MT_paint_vertex.remove(menu_func)
+    bpy.utils.unregister_module(__name__)
 
 
 if __name__ == "__main__":
-	register()
-
+    register()

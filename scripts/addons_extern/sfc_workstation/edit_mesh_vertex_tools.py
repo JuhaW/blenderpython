@@ -26,11 +26,13 @@
 # ---------------- mesh_geom_tool_math.py (fragments) --------------------------
 ################################################################################
 from mathutils import Vector
-#CONSTANTS--------------------------------------------------
+# CONSTANTS--------------------------------------------------
 
 EPSILON = 0.001
-DEBUG = 1 #set it to 0, for the "productive version"
-#Functions--------------------------------------------------
+DEBUG = 1  # set it to 0, for the "productive version"
+# Functions--------------------------------------------------
+
+
 def XYZvertexsort(verts):
     """ Sort a list of vertex with the most appropriate coordinate (x, y or z).
         Arguments:
@@ -38,25 +40,26 @@ def XYZvertexsort(verts):
         returns: the sorted list.
         NB: verts is modified.
     """
-    ##sort the vertices to get a list of aligned point (normally :)
-    verts.sort(key=lambda v: v.co.x)    #X coord sort
+    # sort the vertices to get a list of aligned point (normally :)
+    verts.sort(key=lambda v: v.co.x)  # X coord sort
     vertstmp = list(verts)
-    vertstmp.sort(key=lambda v: v.co.y) #Y coord sort
+    vertstmp.sort(key=lambda v: v.co.y)  # Y coord sort
 
-    #compare the x diff and the y diff
-    diff  = abs(verts[0].co.x - verts[-1].co.x)
+    # compare the x diff and the y diff
+    diff = abs(verts[0].co.x - verts[-1].co.x)
     diffy = abs(vertstmp[0].co.y - vertstmp[-1].co.y)
     if diff < diffy:
         verts, vertstmp = vertstmp, verts
         diff = diffy
 
-    vertstmp.sort(key=lambda v: v.co.z) #Z coord sort
+    vertstmp.sort(key=lambda v: v.co.z)  # Z coord sort
 
-    #compare the x|y diff and the z diff
+    # compare the x|y diff and the z diff
     if diff < abs((vertstmp[0].co.z - vertstmp[-1].co.z)):
         verts = vertstmp
 
     return verts
+
 
 def project_point_vect(point, o, vect):
     """ Projection of a point on an 'affine vector'.
@@ -69,8 +72,11 @@ def project_point_vect(point, o, vect):
     t = (point - o)
     return o + t.project(vect)
 # Classes -------------------------------------------------
+
+
 class BezierInterpolator:
     """Interpolate a vertex loop/string with a bezier curve."""
+
     def __init__(self, vertloop):
         """Constructor.
             Arguments:
@@ -78,7 +84,7 @@ class BezierInterpolator:
                               If it's a true loop (and not a simple string), the first and the last
                               vertices are the same vertex.
         """
-        nodes = [None, None] #2 first nodes
+        nodes = [None, None]  # 2 first nodes
 
         it = (v.co for v in vertloop)
         p0 = next(it)
@@ -88,15 +94,14 @@ class BezierInterpolator:
             vect = p2 - p0
             vect.normalize()
 
-            nodes.append(p1 - (abs(vect.dot(p1-p0)) / 3.0) * vect)
+            nodes.append(p1 - (abs(vect.dot(p1 - p0)) / 3.0) * vect)
             nodes.append(Vector(p1))
-            nodes.append(p1 + (abs(vect.dot(p2-p1)) / 3.0) * vect)
+            nodes.append(p1 + (abs(vect.dot(p2 - p1)) / 3.0) * vect)
 
             p0 = p1
             p1 = p2
 
-
-        if vertloop[0].index == vertloop[-1].index: #it's a true loop
+        if vertloop[0].index == vertloop[-1].index:  # it's a true loop
             p0 = vertloop[-2].co
             p1 = vertloop[0].co
             p2 = vertloop[1].co
@@ -104,28 +109,28 @@ class BezierInterpolator:
             vect = p2 - p0
             vect.normalize()
 
-            nodes[1] =   p1 + (abs(vect.dot(p2-p1)) / 3.0) * vect
-            nodes.append(p1 - (abs(vect.dot(p1-p0)) / 3.0) * vect)
+            nodes[1] = p1 + (abs(vect.dot(p2 - p1)) / 3.0) * vect
+            nodes.append(p1 - (abs(vect.dot(p1 - p0)) / 3.0) * vect)
 
-            tmpvect  = Vector(p0)
+            tmpvect = Vector(p0)
             nodes[0] = tmpvect
             nodes.append(tmpvect)
 
-        else: #it's a 'false' loop: a simple edge string
-            #1rst intermediate node
-            p0  = vertloop[0].co
-            p1  = vertloop[1].co
+        else:  # it's a 'false' loop: a simple edge string
+            # 1rst intermediate node
+            p0 = vertloop[0].co
+            p1 = vertloop[1].co
             p01 = nodes[2]
 
             nodes[0] = Vector(p0)
-            nodes[1] = p0 - 2.0*project_point_vect(p01, p1, p0-p1) + p1 + p01
+            nodes[1] = p0 - 2.0 * project_point_vect(p01, p1, p0 - p1) + p1 + p01
 
-            #last one
-            p0  = vertloop[-1].co
-            p1  = vertloop[-2].co
+            # last one
+            p0 = vertloop[-1].co
+            p1 = vertloop[-2].co
             p01 = nodes[-1]
 
-            nodes.append(p0 - 2.0*project_point_vect(p01, p1, p0-p1) + p1 + p01)
+            nodes.append(p0 - 2.0 * project_point_vect(p01, p1, p0 - p1) + p1 + p01)
             nodes.append(Vector(p0))
 
         self._nodes = nodes
@@ -137,14 +142,14 @@ class BezierInterpolator:
             @vind (int): the index of the first vertex, in the original loop
             returns Vector object (interpolation between vertloop[vind] and vertloop[vind+1])
         """
-        _1_t  = 1.0 - t
-        i     = 3 * vind
+        _1_t = 1.0 - t
+        i = 3 * vind
         nodes = self._nodes
 
         return nodes[i]                * (_1_t**3) + \
-               nodes[i+1] * 3 *  t     * (_1_t**2) + \
-               nodes[i+2] * 3 * (t**2) *  _1_t     + \
-               nodes[i+3] *     (t**3)
+            nodes[i + 1] * 3 *  t     * (_1_t**2) + \
+            nodes[i + 2] * 3 * (t**2) *  _1_t     + \
+            nodes[i + 3] * (t**3)
 ################################################################################
 # ---------------- mesh_geom_tool.py (fragments) -------------------------------
 ################################################################################
@@ -153,12 +158,15 @@ from itertools import islice
 from sys import exc_info
 from bpy.utils import register_module, unregister_module
 # general code -------------------------------------------------
+
+
 def get_selected_vertices(mesh):
     """ Returns the list of selected vertices (there is nothing like this in current API)
         Arguments:
         @mesh (Mesh): the edited mesh datablock
     """
     return list(filter(lambda v: v.select, mesh.vertices))
+
 
 def get_selected_edges(mesh):
     """ Returns the list of selected edges (there is nothing like this in current API)
@@ -168,6 +176,7 @@ def get_selected_edges(mesh):
     return list(filter(lambda e: e.select, mesh.edges))
 
 # align vertices --------------------------------------
+
 
 def align_vertices(mesh, distr):
     """Distribute vertices regularly or align them.
@@ -180,23 +189,23 @@ def align_vertices(mesh, distr):
     if len(vsel) < 3:
         raise Exception("need 3 vertices at least")
 
-
-    vsel  = XYZvertexsort(vsel)
+    vsel = XYZvertexsort(vsel)
     point = vsel[0].co
-    vect  = (vsel[-1].co - point) * (1.0/(len(vsel)-1))
+    vect = (vsel[-1].co - point) * (1.0 / (len(vsel) - 1))
 
-    if vect.length < EPSILON: return
+    if vect.length < EPSILON:
+        return
 
-    if distr == True: #align & distribute
-        for mult, vert in enumerate(islice(vsel, 1, len(vsel)-1)):
+    if distr == True:  # align & distribute
+        for mult, vert in enumerate(islice(vsel, 1, len(vsel) - 1)):
             v = vert.co
-            finalv = (mult+1) * vect + point
+            finalv = (mult + 1) * vect + point
             v.x = finalv.x
             v.y = finalv.y
             v.z = finalv.z
 
-    else: #align only
-        for vert in islice(vsel, 1, len(vsel)-1):
+    else:  # align only
+        for vert in islice(vsel, 1, len(vsel) - 1):
             v = vert.co
             finalv = project_point_vect(v, point, vect)
             v.x = finalv.x
@@ -206,13 +215,16 @@ def align_vertices(mesh, distr):
     mesh.update()
 
 # distribute vertices ------------------------------------------
+
+
 class EdgeVert(object):
     """Helper structure: a vertex of an edge."""
     __slots__ = ('edge', 'vind')
 
     def __init__(self, edge, vind):
-        self.edge = edge  #MeshEdge object
-        self.vind = vind  #index of vertex for the edge (1 or 2)
+        self.edge = edge  # MeshEdge object
+        self.vind = vind  # index of vertex for the edge (1 or 2)
+
 
 def vertex_string(edict, vert):
     """ Builds a list of edge-connected vertex indices.
@@ -222,15 +234,17 @@ def vertex_string(edict, vert):
         returns: the list of vertex indices.
     """
     vlist = [vert]
-    vind  = vert
+    vind = vert
 
     try:
         while True:
-            convert = edict[vind].pop() #connected vertex
-            edge    = convert.edge
+            convert = edict[vind].pop()  # connected vertex
+            edge = convert.edge
 
-            if convert.vind == 1: v2add = edge.vertices[1]
-            else:                 v2add = edge.vertices[0]
+            if convert.vind == 1:
+                v2add = edge.vertices[1]
+            else:
+                v2add = edge.vertices[0]
 
             vind = v2add
             vlist.append(v2add)
@@ -241,10 +255,13 @@ def vertex_string(edict, vert):
                 if elt.edge.index == edge.index:
                     del lst[i]
                     break
-    except KeyError:   pass #edict[vind] with vind not a valid key
-    except IndexError: pass #pop() on an empty list
+    except KeyError:
+        pass  # edict[vind] with vind not a valid key
+    except IndexError:
+        pass  # pop() on an empty list
 
     return vlist
+
 
 def get_loop(edges, verts):
     """ Return a 'loop' of vertices edge-connected (loop[N] and loop[N+1] are edge-connected).
@@ -255,25 +272,27 @@ def get_loop(edges, verts):
         NB: if the loop is a 'true loop' (and not a simple string), the first
         and the last vertex of the list are the same.
     """
-    e = edges.pop() #we need an edge to begin
-    
+    e = edges.pop()  # we need an edge to begin
+
     edict = dict((v.index, []) for v in verts)
     for edge in edges:
         edict[edge.vertices[0]].append(EdgeVert(edge, 1))
         edict[edge.vertices[1]].append(EdgeVert(edge, 2))
 
     looptmp = vertex_string(edict, e.vertices[0])
-    loop    = vertex_string(edict, e.vertices[1])
+    loop = vertex_string(edict, e.vertices[1])
 
     for val in edict.values():
-        if val: raise Exception("need an edge loop")
+        if val:
+            raise Exception("need an edge loop")
 
     loop.reverse()
     loop.extend(looptmp)
-    
-    vdict = dict((v.index, v) for v in verts) #dictionary of vertices, by their index
-    
-    return list(vdict[i] for i in loop) #build the list of vertex objects...
+
+    vdict = dict((v.index, v) for v in verts)  # dictionary of vertices, by their index
+
+    return list(vdict[i] for i in loop)  # build the list of vertex objects...
+
 
 def loop_size(loop):
     """ Get the geometric length of a vertex loop.
@@ -283,13 +302,14 @@ def loop_size(loop):
     """
     size = 0.0
     vects = (v.co for v in loop)
-    v1    = next(vects)
+    v1 = next(vects)
 
     for v2 in vects:
-        size += (v2-v1).length
+        size += (v2 - v1).length
         v1 = v2
 
     return size
+
 
 def distribute_vertices(mesh):
     """ Distribute vertices regularly on a curve.
@@ -300,38 +320,37 @@ def distribute_vertices(mesh):
 
     if len(vsel) < 3:
         raise Exception("need 3 vertices at least")
-    
-    loop   = get_loop(get_selected_edges(mesh), vsel)
+
+    loop = get_loop(get_selected_edges(mesh), vsel)
     interp = BezierInterpolator(loop)
 
     new_coords = []
-    average    = loop_size(loop) / (len(loop)-1)
+    average = loop_size(loop) / (len(loop) - 1)
 
     vects = (v.co for v in loop)
-    v1    = next(vects)
-    v2    = next(vects)
+    v1 = next(vects)
+    v2 = next(vects)
     index = 0
 
-    size_acc = 0.0             #size accumulator
-    vec_len  = (v2-v1).length
+    size_acc = 0.0  # size accumulator
+    vec_len = (v2 - v1).length
 
-    for coeff in (average*i for i in range(1, len(loop)-1)):
-        while coeff > (size_acc+vec_len):
+    for coeff in (average * i for i in range(1, len(loop) - 1)):
+        while coeff > (size_acc + vec_len):
             size_acc += vec_len
             v1 = v2
             v2 = next(vects)
             index += 1
-            vec_len = (v2-v1).length
+            vec_len = (v2 - v1).length
 
-        #here we have: size_acc < coeff < (size_acc+vec_len)
+        # here we have: size_acc < coeff < (size_acc+vec_len)
         # ~~> coeff 'between' v1 & v2
-        new_coords.append(interp.interpolate((coeff-size_acc)/vec_len, index))
-
+        new_coords.append(interp.interpolate((coeff - size_acc) / vec_len, index))
 
     it = iter(loop)
-    next(it) #begin with the 2nd vertex
+    next(it)  # begin with the 2nd vertex
     for coord in new_coords:
-        v   = next(it).co
+        v = next(it).co
         v.x = coord.x
         v.y = coord.y
         v.z = coord.z
@@ -340,7 +359,7 @@ def distribute_vertices(mesh):
 ################################################################################
 # ---------------- Add-On implementation ---------------------------------------
 ################################################################################
-#bl_info = {
+# bl_info = {
 #    "name": "Vertex Tools",
 #    "author": "Guillaume Englert, Witold Jaworski",
 #    "version": (1, 0, 1),
@@ -354,65 +373,71 @@ def distribute_vertices(mesh):
 #    "wiki_url": "http://airplanes3d.net/scripts-254_e.xml"
 #    }
 
-#common base for operators:
-#just to not implement the same checks twice
+# common base for operators:
+# just to not implement the same checks twice
+
+
 class VertexOperator:
     #--- methods to override:
-    def action(self,mesh):
+
+    def action(self, mesh):
         """Override this function in the children classes
             Arguments:
             @mesh (Mesh): the mesh datablock with selected vertices
             NB: this method can throw exceptions!
         """
-        pass #default implementation: empty
-    
-    def show(self, msg): 
+        pass  # default implementation: empty
+
+    def show(self, msg):
         """Override this function to use the Operator.report method
             Arguments:
             @msg (str): the message to be displayed 
         """
         print(msg)
-        
-    #--- common implementation of the Operator interface: 
+
+    #--- common implementation of the Operator interface:
     @classmethod
     def poll(cls, context):
         return (context.mode == 'EDIT_MESH')
-    
+
     def invoke(self, context, event):
         return self.execute(context)
-        
+
     def execute(self, context):
         mesh = context.object.data
         bpy.ops.object.editmode_toggle()
         result = 'FINISHED'
         try:
             self.action(mesh)
-            
+
         except Exception as e:
-            if len(e.args) > 0 :
+            if len(e.args) > 0:
                 msg = e.args[0]
             else:
                 msg = "Error: " + exc_info()[1]
-                
+
             self.show(msg)
-            
+
             result = 'CANCELLED'
         bpy.ops.object.editmode_toggle()
         return {result}
-    
+
 # operators --------------------------------------------------------------------
+
+
 class DistributeVertices(bpy.types.Operator, VertexOperator):
     ''' Distribute vertices evenly along interpolated shape of their polyline 
     '''
     bl_idname = "mesh.vertex_distribute"
     bl_label = "Vertex Distribute"
     bl_description = "Distribute selected vertices evenly along their loop"
-    
-    #def show(self, msg):
-        #self.report('ERROR', message = msg) 
-    
+
+    # def show(self, msg):
+    #self.report('ERROR', message = msg)
+
     def action(self, mesh):
         distribute_vertices(mesh)
+
 
 class AlignVertices(bpy.types.Operator, VertexOperator):
     ''' Project vertices onto the line between the first and last selected vertex 
@@ -420,12 +445,13 @@ class AlignVertices(bpy.types.Operator, VertexOperator):
     bl_idname = "mesh.vertex_align"
     bl_label = "Vertex Align"
     bl_description = "Project vertices onto the line between the first and last selected vertex"
-    
-    #def show(self, msg):
-        #self.report('ERROR', message = msg) 
-    
+
+    # def show(self, msg):
+    #self.report('ERROR', message = msg)
+
     def action(self, mesh):
-        align_vertices(mesh,False)
+        align_vertices(mesh, False)
+
 
 class InlineVertices(bpy.types.Operator, VertexOperator):
     ''' Place vertices evenly along straight line 
@@ -433,31 +459,35 @@ class InlineVertices(bpy.types.Operator, VertexOperator):
     bl_idname = "mesh.vertex_inline"
     bl_label = "Vertex Align & Distribute"
     bl_description = "Distribute vertices evenly along a straight line"
-    
-    #def show(self, msg):
-        #self.report('ERROR', message = msg) 
-    
+
+    # def show(self, msg):
+    #self.report('ERROR', message = msg)
+
     def action(self, mesh):
-        align_vertices(mesh,True)
+        align_vertices(mesh, True)
+
 
 def menu_draw(self, context):
-        self.layout.operator_context = 'INVOKE_REGION_WIN'
-        self.layout.separator()
-        self.layout.operator(DistributeVertices.bl_idname, "Distribute")
-        self.layout.operator(AlignVertices.bl_idname, "Align")
-        self.layout.operator(InlineVertices.bl_idname, "Align & Distribute")
+    self.layout.operator_context = 'INVOKE_REGION_WIN'
+    self.layout.separator()
+    self.layout.operator(DistributeVertices.bl_idname, "Distribute")
+    self.layout.operator(AlignVertices.bl_idname, "Align")
+    self.layout.operator(InlineVertices.bl_idname, "Align & Distribute")
 
 #--- ### Register
+
+
 def register():
     register_module(__name__)
     bpy.types.VIEW3D_MT_edit_mesh_vertices.append(menu_draw)
-    
+
+
 def unregister():
     bpy.types.VIEW3D_MT_edit_mesh_vertices.remove(menu_draw)
     unregister_module(__name__)
 """    
 if DEBUG > 0:
     print("mesh_vertex_tools.py: new version loaded!") #just to be sure, that we are testing what we should
-"""    
+"""
 if __name__ == '__main__':
     register()

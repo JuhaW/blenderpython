@@ -16,7 +16,7 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-#bl_info = {
+# bl_info = {
 #    "name": "Balance Vertex Groups",
 #    "author": "Koilz",
 #    "version": (1, 1),
@@ -30,6 +30,7 @@
 import bpy
 
 bpy.types.Scene.vgai2 = bpy.props.StringProperty(name="Vertex Group Index 2", description="Second active index for vertex groups", default='')
+
 
 def main(context):
 
@@ -46,7 +47,7 @@ def main(context):
     context.active_object.vertex_groups.active_index = context.active_object.vertex_groups[context.scene.vgai2].index
 
     # oppose weight
-    context.scene.tool_settings.vertex_group_weight = 1-vg_weight_previous
+    context.scene.tool_settings.vertex_group_weight = 1 - vg_weight_previous
 
     # assign weight
     bpy.ops.object.vertex_group_assign()
@@ -56,6 +57,7 @@ def main(context):
 
     # restore weight
     context.scene.tool_settings.vertex_group_weight = vg_weight_previous
+
 
 class OT_BALANCE_VG(bpy.types.Operator):
     """Balance the weight of two vertex groups"""
@@ -70,6 +72,7 @@ class OT_BALANCE_VG(bpy.types.Operator):
         main(context)
         return {'FINISHED'}
 
+
 def add_vertex_group_tools(self, context):
 
     layout = self.layout
@@ -82,9 +85,11 @@ def add_vertex_group_tools(self, context):
         row.operator("object.vertex_group_balance")
         row.prop_search(context.scene, "vgai2", context.active_object, "vertex_groups", text="")
 
+
 def register():
     bpy.utils.register_class(OT_BALANCE_VG)
     bpy.types.DATA_PT_vertex_groups.append(add_vertex_group_tools)
+
 
 def unregister():
     bpy.utils.unregister_class(OT_BALANCE_VG)
@@ -92,4 +97,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

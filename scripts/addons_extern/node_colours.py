@@ -39,24 +39,25 @@ bl_info = {
 import bpy
 from bpy.props import BoolProperty
 
+
 class NodeColourPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     set_custom_nodes = BoolProperty(name="Set custom nodes",
-                              description="Include custom nodes",
-                              default=True)
+                                    description="Include custom nodes",
+                                    default=True)
 
     set_compositing_nodes = BoolProperty(name="Set compositing nodes",
-                              description="Include compositing nodes",
-                              default=True)
+                                         description="Include compositing nodes",
+                                         default=True)
 
     set_material_nodes = BoolProperty(name="Set material nodes",
-                            description="Include material nodes",
-                            default=True)
+                                      description="Include material nodes",
+                                      default=True)
 
     set_texture_nodes = BoolProperty(name="Set texture nodes",
-                            description="Include texture nodes",
-                            default=True)
+                                     description="Include texture nodes",
+                                     default=True)
 
     def draw(self, context):
         layout = self.layout
@@ -70,6 +71,7 @@ class NodeColourPreferences(bpy.types.AddonPreferences):
         row.prop(self, "set_material_nodes")
         row = col.row()
         row.prop(self, "set_texture_nodes")
+
 
 def setNodeColourOption(setOption):
     """Enable/Disable the custom node colour for all nodes"""
@@ -97,6 +99,7 @@ def setNodeColourOption(setOption):
                 for n in tex.node_tree.nodes:
                     n.use_custom_color = setOption
 
+
 class NodeColourOn(bpy.types.Operator):
     """Turn on custom node colour for all nodes"""
     bl_idname = "node.node_colour_on"
@@ -110,6 +113,7 @@ class NodeColourOn(bpy.types.Operator):
         setNodeColourOption(True)
         return {'FINISHED'}
 
+
 class NodeColourOff(bpy.types.Operator):
     """Turn off custom node colour for all nodes"""
     bl_idname = "node.node_colour_off"
@@ -122,6 +126,7 @@ class NodeColourOff(bpy.types.Operator):
     def execute(self, context):
         setNodeColourOption(False)
         return {'FINISHED'}
+
 
 class NodeColourPanel(bpy.types.Panel):
     bl_idname = "node_colour_panel"
@@ -142,11 +147,13 @@ class NodeColourPanel(bpy.types.Panel):
         row.operator(NodeColourOn.bl_idname)
         row.operator(NodeColourOff.bl_idname)
 
+
 def register():
     bpy.utils.register_class(NodeColourPreferences)
     bpy.utils.register_class(NodeColourOn)
     bpy.utils.register_class(NodeColourOff)
     bpy.utils.register_class(NodeColourPanel)
+
 
 def unregister():
     bpy.utils.unregister_class(NodeColourPreferences)
@@ -156,4 +163,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-

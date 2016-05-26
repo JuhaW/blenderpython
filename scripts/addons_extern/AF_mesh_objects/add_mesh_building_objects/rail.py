@@ -6,7 +6,7 @@
 #       - id2 = Housed-open staircase
 #       - id3 = Box staircase
 #       - id4 = Circular staircase
-# 
+#
 # Paul "BrikBot" Marshall
 # Created: September 19, 2011
 # Last Modified: January 29, 2011
@@ -39,41 +39,43 @@
 from math import tan
 from mathutils import Vector
 
+
 class Rails:
-    def __init__(self,G,w,t,h,tT,wP,dP,wT, rEnable, lEnable):
-        self.G = G #General
-        self.w=w #rail width
-        self.t=t #rail thickness
-        self.h=h #rail height
-        self.start=Vector([0,0,self.h-self.t]) #rail start
-        self.stop=G.stop+Vector([0,0,self.h-self.t]) #rail stop
-        self.tT=tT #tread toe
-        self.wP=wP #post width
-        self.dP=dP #post depth
-        self.wT=wT #tread width
+
+    def __init__(self, G, w, t, h, tT, wP, dP, wT, rEnable, lEnable):
+        self.G = G  # General
+        self.w = w  # rail width
+        self.t = t  # rail thickness
+        self.h = h  # rail height
+        self.start = Vector([0, 0, self.h - self.t])  # rail start
+        self.stop = G.stop + Vector([0, 0, self.h - self.t])  # rail stop
+        self.tT = tT  # tread toe
+        self.wP = wP  # post width
+        self.dP = dP  # post depth
+        self.wT = wT  # tread width
         self.rEnable = rEnable
         self.lEnable = lEnable
         self.Create()
 
     def Create(self):
-        #determine offset to include railing toe
-        offset=Vector([self.tT,0,self.tT*tan(self.G.angle)])
+        # determine offset to include railing toe
+        offset = Vector([self.tT, 0, self.tT * tan(self.G.angle)])
         coords = []
-        coords.append(self.start-offset)
-        coords.append(self.stop+offset+Vector([self.dP,0,
-                                               self.dP*tan(self.G.angle)]))
-        coords.append(self.start-offset+Vector([0,self.w,0]))
-        coords.append(self.stop+offset+Vector([self.dP,self.w,
-                                               self.dP*tan(self.G.angle)]))
+        coords.append(self.start - offset)
+        coords.append(self.stop + offset + Vector([self.dP, 0,
+                                                   self.dP * tan(self.G.angle)]))
+        coords.append(self.start - offset + Vector([0, self.w, 0]))
+        coords.append(self.stop + offset + Vector([self.dP, self.w,
+                                                   self.dP * tan(self.G.angle)]))
         for j in range(4):
-            coords.append(coords[j]+Vector([0,0,self.t]))
-        #centre over posts
+            coords.append(coords[j] + Vector([0, 0, self.t]))
+        # centre over posts
         for j in coords:
-            j += Vector([0,0.5*(-self.w+self.wP),0])
+            j += Vector([0, 0.5 * (-self.w + self.wP), 0])
         if self.rEnable:
             self.G.Make_mesh(coords, self.G.faces, 'rails')
         if self.lEnable:
-            #make rail on other side
+            # make rail on other side
             for j in coords:
-                j += Vector([0,self.wT-self.wP,0])
+                j += Vector([0, self.wT - self.wP, 0])
             self.G.Make_mesh(coords, self.G.faces, 'rails')

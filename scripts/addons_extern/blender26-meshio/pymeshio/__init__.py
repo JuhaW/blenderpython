@@ -6,4 +6,3 @@ pymeshio
 
 3d mesh io library.
 """
-

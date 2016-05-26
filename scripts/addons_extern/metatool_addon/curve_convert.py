@@ -11,14 +11,15 @@ bl_info = {
 """
 import bpy
 from bpy.props import StringProperty, BoolProperty
-bpy.types.Object.names = StringProperty(name = "", default = "")
-bpy.types.Object.rscale = BoolProperty(name = "Respect Scale?", default = False)
+bpy.types.Object.names = StringProperty(name="", default="")
+bpy.types.Object.rscale = BoolProperty(name="Respect Scale?", default=False)
+
 
 class CurveConversionUpdate(bpy.types.Operator):
     """Update Mesh from Non-Destructive-Curve"""
     bl_label = "Update Mesh"
     bl_idname = "mesh.convert_update"
-    
+
     def execute(self, context):
         o = context.object
         if o.names in bpy.data.objects:
@@ -28,14 +29,18 @@ class CurveConversionUpdate(bpy.types.Operator):
                 mesh = curve.data.copy()
                 ob = bpy.data.objects.new("mesh", mesh)
                 context.scene.objects.link(ob)
-                ob.select = True; o.select = False; bpy.context.scene.objects.active = ob; bpy.ops.object.convert(target = "MESH")
+                ob.select = True
+                o.select = False
+                bpy.context.scene.objects.active = ob
+                bpy.ops.object.convert(target="MESH")
                 for i in o.data.materials:
                     ob.data.materials.append(i)
                 o.data = ob.data
                 if o.rscale == True:
                     o.scale = curve.scale
                 bpy.ops.object.delete()
-                bpy.context.scene.objects.active = o; o.select = True
+                bpy.context.scene.objects.active = o
+                o.select = True
             else:
                 self.report({"ERROR"}, "Object Not Curve")
         else:
@@ -62,12 +67,15 @@ class CurveConversionPanel(bpy.types.Panel):
             layout.label("Base Object Needs To Be Mesh Object", icon = "ERROR")
 """
 
+
 def register():
     bpy.utils.register_class(CurveConversionUpdate)
-    #bpy.utils.register_class(CurveConversionPanel)
+    # bpy.utils.register_class(CurveConversionPanel)
+
+
 def unregister():
     bpy.utils.unregister_class(CurveConversionUpdate)
-    #bpy.utils.unregister_class(CurveConversionPanel)
+    # bpy.utils.unregister_class(CurveConversionPanel)
 
 if __name__ == "__main__":
     register()

@@ -4,33 +4,36 @@
 #############  Drop to Ground  ##############################################################################################
 
 
-#bl_info = {
- #   'name': 'Drop to Ground',
-  #  'author': 'Unnikrishnan(kodemax), Florian Meyer(testscreenings)',
-   # 'version': (1,2),
-    #"blender": (2, 63, 0),
-    #'location': '3D View -> Tool Shelf -> Object Tools Panel (at the bottom)',
-    #'description': 'Drop selected objects on active object',
-    #'warning': '',
-    #'wiki_url': 'http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Object/Drop_to_ground',
-    #"tracker_url": "http://projects.blender.org/tracker/?func=detail&atid=25349",
-    #'category': ''}
+# bl_info = {
+#   'name': 'Drop to Ground',
+#  'author': 'Unnikrishnan(kodemax), Florian Meyer(testscreenings)',
+# 'version': (1,2),
+#"blender": (2, 63, 0),
+#'location': '3D View -> Tool Shelf -> Object Tools Panel (at the bottom)',
+#'description': 'Drop selected objects on active object',
+#'warning': '',
+#'wiki_url': 'http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Object/Drop_to_ground',
+#"tracker_url": "http://projects.blender.org/tracker/?func=detail&atid=25349",
+#'category': ''}
 
 #################################################################
-import bpy, bmesh
+import bpy
+import bmesh
 from mathutils import *
 from bpy.types import Operator
 from bpy.props import *
 #################################################################
 
+
 def get_align_matrix(location, normal):
-    up = Vector((0,0,1))                      
+    up = Vector((0, 0, 1))
     angle = normal.angle(up)
-    axis = up.cross(normal)                            
-    mat_rot = Matrix.Rotation(angle, 4, axis) 
+    axis = up.cross(normal)
+    mat_rot = Matrix.Rotation(angle, 4, axis)
     mat_loc = Matrix.Translation(location)
-    mat_align = mat_rot * mat_loc                      
+    mat_align = mat_rot * mat_loc
     return mat_align
+
 
 def transform_ground_to_world(sc, ground):
     tmpMesh = ground.to_mesh(sc, True, 'PREVIEW')
@@ -40,14 +43,15 @@ def transform_ground_to_world(sc, ground):
     sc.update()
     return tmp_ground
 
+
 def get_lowest_world_co_from_mesh(ob, mat_parent=None):
     bme = bmesh.new()
     bme.from_mesh(ob.data)
     mat_to_world = ob.matrix_world.copy()
     if mat_parent:
         mat_to_world = mat_parent * mat_to_world
-    lowest=None
-    #bme.verts.index_update() #probably not needed
+    lowest = None
+    # bme.verts.index_update() #probably not needed
     for v in bme.verts:
         if not lowest:
             lowest = v
@@ -57,14 +61,15 @@ def get_lowest_world_co_from_mesh(ob, mat_parent=None):
     bme.free()
     return lowest_co
 
+
 def get_lowest_world_co(context, ob, mat_parent=None):
     if ob.type == 'MESH':
         return get_lowest_world_co_from_mesh(ob)
-    
+
     elif ob.type == 'EMPTY' and ob.dupli_type == 'GROUP':
         if not ob.dupli_group:
             return None
-        
+
         else:
             lowest_co = None
             for ob_l in ob.dupli_group.objects:
@@ -74,8 +79,9 @@ def get_lowest_world_co(context, ob, mat_parent=None):
                         lowest_co = lowest_ob_l
                     if lowest_ob_l.z < lowest_co.z:
                         lowest_co = lowest_ob_l
-                        
+
             return lowest_co
+
 
 def drop_objects(self, context):
     ground = context.object
@@ -83,7 +89,7 @@ def drop_objects(self, context):
     obs.remove(ground)
     tmp_ground = transform_ground_to_world(context.scene, ground)
     down = Vector((0, 0, -10000))
-    
+
     for ob in obs:
         if self.use_origin:
             lowest_world_co = ob.location
@@ -97,14 +103,14 @@ def drop_objects(self, context):
         if hit_index == -1:
             print(ob.name, 'didn\'t hit the ground')
             continue
-        
+
         # simple drop down
-        to_ground_vec =  hit_location - lowest_world_co
+        to_ground_vec = hit_location - lowest_world_co
         ob.location += to_ground_vec
-        
+
         # drop with align to hit normal
         if self.align:
-            to_center_vec = ob.location - hit_location #vec: hit_loc to origin
+            to_center_vec = ob.location - hit_location  # vec: hit_loc to origin
             # rotate object to align with face normal
             mat_normal = get_align_matrix(hit_location, hit_normal)
             rot_euler = mat_normal.to_euler()
@@ -117,16 +123,14 @@ def drop_objects(self, context):
             # move object above surface again
             to_center_vec.rotate(rot_euler)
             ob.location += to_center_vec
-        
 
-    #cleanup
+    # cleanup
     bpy.ops.object.select_all(action='DESELECT')
     tmp_ground.select = True
     bpy.ops.object.delete('EXEC_DEFAULT')
     for ob in obs:
         ob.select = True
     ground.select = True
-    
 
 
 class OBJECT_OT_drop_to_ground(Operator):
@@ -137,38 +141,33 @@ class OBJECT_OT_drop_to_ground(Operator):
     bl_description = "Drop selected objects on active object"
 
     align = BoolProperty(
-            name="Align to ground",
-            description="Aligns the object to the ground",
-            default=True)
+        name="Align to ground",
+        description="Aligns the object to the ground",
+        default=True)
     use_origin = BoolProperty(
-            name="Use Center",
-            description="Drop to objects origins",
-            default=False)
+        name="Use Center",
+        description="Drop to objects origins",
+        default=False)
 
     ##### POLL #####
     @classmethod
     def poll(cls, context):
         return len(context.selected_objects) >= 2
-    
+
     ##### EXECUTE #####
     def execute(self, context):
         print('\nDropping Objects')
         drop_objects(self, context)
         return {'FINISHED'}
 
-    
+
 def register():
     bpy.utils.register_module(__name__)
 
-    
+
 def unregister():
     bpy.utils.unregister_module(__name__)
 
 
 if __name__ == '__main__':
     register()
-    
-
-
-
-

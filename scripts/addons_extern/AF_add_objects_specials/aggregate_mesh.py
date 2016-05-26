@@ -1,8 +1,8 @@
-## simple agregador de 'particulas' / mallas
-## copia los objetos seleccionados sobre el objeto activo
-## basado en la posicion del cursor y un volumen definido
-## permite animar el crecimiento usando un modificador Build
-## necesita un Blender r38676 o mas reciente
+# simple agregador de 'particulas' / mallas
+# copia los objetos seleccionados sobre el objeto activo
+# basado en la posicion del cursor y un volumen definido
+# permite animar el crecimiento usando un modificador Build
+# necesita un Blender r38676 o mas reciente
 
 bl_info = {
     "name": "Aggregate Mesh",
@@ -14,15 +14,21 @@ bl_info = {
     "description": "Adds geometry to a mesh like in DLA aggregators.",
     "category": "Object"}
 
-import bpy, random, time, mathutils
+import bpy
+import random
+import time
+import mathutils
 from mathutils import Matrix
 
+
 def r(n):
-    return (round(random.gauss(0,n),2))
+    return (round(random.gauss(0, n), 2))
+
 
 def remover(sel=False):
     bpy.ops.object.editmode_toggle()
-    if sel: bpy.ops.mesh.select_all(action='SELECT')
+    if sel:
+        bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.mesh.remove_doubles(limit=0.001)
     bpy.ops.object.mode_set()
 
@@ -55,12 +61,13 @@ class Agregar(bpy.types.Operator):
         scn = bpy.context.scene
         obj = bpy.context.active_object
         wm = context.window_manager
-        mat = Matrix(((1, 0, 0, 0),(0, 1, 0, 0),(0, 0, 1, 0),(0, 0, 0, 1)))
+        mat = Matrix(((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1)))
         if obj.matrix_world != mat:
             self.report({'WARNING'}, 'Apply transformations to Active Object first..!')
             return{'FINISHED'}
         par = [o for o in bpy.context.selected_objects if o.type == 'MESH' and o != obj]
-        if not par: return{'FINISHED'}
+        if not par:
+            return{'FINISHED'}
 
         bpy.ops.object.mode_set()
         bpy.ops.object.select_all(action='DESELECT')
@@ -72,11 +79,11 @@ class Agregar(bpy.types.Operator):
             obj.modifiers[i].show_viewport = False
 
         cur = scn.cursor_location
-        for i in range (wm.numP):
+        for i in range(wm.numP):
             mes = random.choice(par).data
             x = bpy.data.objects.new('nuevo', mes)
             scn.objects.link(x)
-            origen = (r(wm.volX)+cur[0], r(wm.volY)+cur[1], r(wm.volZ)+cur[2])
+            origen = (r(wm.volX) + cur[0], r(wm.volY) + cur[1], r(wm.volZ) + cur[2])
             cpom = obj.closest_point_on_mesh(origen)
 
             if wm.cent:
@@ -86,7 +93,7 @@ class Agregar(bpy.types.Operator):
 
             if wm.nor:
                 x.rotation_mode = 'QUATERNION'
-                x.rotation_quaternion = cpom[1].to_track_quat('Z','Y')
+                x.rotation_quaternion = cpom[1].to_track_quat('Z', 'Y')
                 x.rotation_mode = 'XYZ'
                 x.rotation_euler[0] += r(wm.rotX)
                 x.rotation_euler[1] += r(wm.rotY)
@@ -112,12 +119,15 @@ class Agregar(bpy.types.Operator):
                 for f in range(len(tmp.faces)):
                     x_fv = tmp.faces[f].vertices
                     o_fv = [i + num_v for i in x_fv]
-                    if len(x_fv) == 4: obj.data.faces[num_f + f].vertices_raw = o_fv
-                    else: obj.data.faces[num_f + f].vertices = o_fv
+                    if len(x_fv) == 4:
+                        obj.data.faces[num_f + f].vertices_raw = o_fv
+                    else:
+                        obj.data.faces[num_f + f].vertices = o_fv
                 obj.data.update(calc_edges=True)
                 scn.update()
 
-                if wm.remo: remover()
+                if wm.remo:
+                    remover()
 
                 tmp.user_clear()
                 bpy.data.meshes.remove(tmp)
@@ -126,13 +136,15 @@ class Agregar(bpy.types.Operator):
                 scn.objects.active = obj
                 x.select = True
                 bpy.ops.object.join()
-        
-        for i in range(len(msv)): obj.modifiers[i].show_viewport = msv[i]
-        for o in par: o.select = True
+
+        for i in range(len(msv)):
+            obj.modifiers[i].show_viewport = msv[i]
+        for o in par:
+            o.select = True
         obj.select = True
         # remover(True) # better do it manually
 
-        print ('Tiempo:',round(time.time()-tim,4),'segundos')
+        print('Tiempo:', round(time.time() - tim, 4), 'segundos')
         return{'FINISHED'}
 
 
@@ -146,28 +158,29 @@ class PanelA(bpy.types.Panel):
     def draw(self, context):
         wm = context.window_manager
         layout = self.layout
-        
+
         column = layout.column(align=True)
         column.prop(wm, 'volX', slider=True)
         column.prop(wm, 'volY', slider=True)
         column.prop(wm, 'volZ', slider=True)
-        
+
         layout.label(text='Particles:')
         column = layout.column(align=True)
         column.prop(wm, 'baseSca', slider=True)
         column.prop(wm, 'varSca', slider=True)
-        
+
         column = layout.column(align=True)
         column.prop(wm, 'rotX', slider=True)
         column.prop(wm, 'rotY', slider=True)
         column.prop(wm, 'rotZ', slider=True)
-        
+
         column = layout.column(align=True)
         column.prop(wm, 'nor')
         column.prop(wm, 'cent')
         column.prop(wm, 'anim')
-        if wm.anim and wm.nor: column.prop(wm, 'remo')
-        
+        if wm.anim and wm.nor:
+            column.prop(wm, 'remo')
+
         layout.separator()
         layout.prop(wm, 'numP')
         layout.operator('object.agregar')
@@ -176,6 +189,7 @@ class PanelA(bpy.types.Panel):
 def register():
     bpy.utils.register_class(Agregar)
     bpy.utils.register_class(PanelA)
+
 
 def unregister():
     bpy.utils.unregister_class(Agregar)

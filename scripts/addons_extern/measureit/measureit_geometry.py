@@ -375,7 +375,7 @@ def draw_segments(context, myobj, op, region, rv3d):
                                 if ms.glocz is True:
                                     txt += "Z"
                                 txt += "]"
-                                draw_text(myobj, txtpoint2d[0], txtpoint2d[1], txt, rgb, fsize-1)
+                                draw_text(myobj, txtpoint2d[0], txtpoint2d[1], txt, rgb, fsize - 1)
 
                         except:
                             pass
@@ -519,8 +519,8 @@ def draw_segments(context, myobj, op, region, rv3d):
                                 draw_arrow(screen_point_ap1, screen_point_bp1, a_size, a_type, b_type)
                             else:
                                 vne = mathutils.Vector((b_p1[0] - a_p1[0],
-                                                       b_p1[1] - a_p1[1],
-                                                       b_p1[2] - a_p1[2]))
+                                                        b_p1[1] - a_p1[1],
+                                                        b_p1[2] - a_p1[2]))
                                 vne.normalize()
                                 vie = vne * ms.glspace
                                 pe = (b_p1[0] + vie[0], b_p1[1] + vie[1], b_p1[2] + vie[2])
@@ -786,7 +786,7 @@ def get_group_sum(myobj, tag):
         else:
             return " "
     except:
-            return " "
+        return " "
 
 
 # -------------------------------------------------------------
@@ -875,10 +875,10 @@ def draw_triangle(v1, v2, v3):
 
 # -------------------------------------------------------------
 # Draw an Arrow
-# 
+#
 # -------------------------------------------------------------
 def draw_arrow(v1, v2, size=20, a_typ="1", b_typ="1"):
-    
+
     rad45 = math.radians(45)
     rad315 = math.radians(315)
     rad90 = math.radians(90)

@@ -21,12 +21,11 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-
 bl_info = {"name": "Border Lines - BMesh Edition",
-           "description": "Draw thicker lines for border edges; this is a version "\
-                          "of the addon which should be faster than the original; "\
-                          "it allows thick display of active edge color, but notof fancy "\
-                          "edges (freestyle, crease, seam, sharp, etc.), which are "\
+           "description": "Draw thicker lines for border edges; this is a version "
+                          "of the addon which should be faster than the original; "
+                          "it allows thick display of active edge color, but notof fancy "
+                          "edges (freestyle, crease, seam, sharp, etc.), which are "
                           "nevertheless shown normally.",
            "author": "Quentin Wenger (Matpi)",
            "version": (1, 11),
@@ -55,8 +54,9 @@ def drawColorSize(coords, color):
     for coord in coords:
         glVertex3f(*coord)
 
+
 def drawCallback():
-                    
+
     if bpy.context.mode == 'EDIT_MESH':
 
         obj = bpy.context.object
@@ -84,7 +84,6 @@ def drawCallback():
                 else:
                     bm = bm_old[0]
 
-
                 no_depth = not bpy.context.space_data.use_occlude_geometry
 
                 if no_depth:
@@ -93,7 +92,7 @@ def drawCallback():
                     draw_with_test = False
 
                     if bl.finer_lines_behind_use:
-                        glLineWidth(bl.borderlines_width/4.0)
+                        glLineWidth(bl.borderlines_width / 4.0)
                         draw_with_test = True
 
                     glBegin(GL_LINES)
@@ -102,16 +101,15 @@ def drawCallback():
                         glColor3f(*bl.custom_color)
                         for edge in bm.edges:
                             if edge.is_valid and edge.is_boundary:
-                                coords = [matrix_world*vert.co for vert in edge.verts]
+                                coords = [matrix_world * vert.co for vert in edge.verts]
                                 for coord in coords:
                                     glVertex3f(*coord)
-
 
                     else:
                         active = bm.select_history.active
                         for edge in bm.edges:
                             if edge.is_valid and edge.is_boundary and not edge.hide:
-                                coords = [matrix_world*vert.co for vert in edge.verts]
+                                coords = [matrix_world * vert.co for vert in edge.verts]
 
                                 if active == edge:
                                     drawColorSize(coords, transform)
@@ -126,26 +124,23 @@ def drawCallback():
 
                     glEnable(GL_DEPTH_TEST)
 
-
                 if draw_with_test:
 
                     glBegin(GL_LINES)
-
 
                     if bl.custom_color_use:
                         glColor3f(*bl.custom_color)
                         for edge in bm.edges:
                             if edge.is_valid and edge.is_boundary:
-                                coords = [matrix_world*vert.co for vert in edge.verts]
+                                coords = [matrix_world * vert.co for vert in edge.verts]
                                 for coord in coords:
                                     glVertex3f(*coord)
-
 
                     else:
                         active = bm.select_history.active
                         for edge in bm.edges:
                             if edge.is_valid and edge.is_boundary:
-                                coords = [matrix_world*vert.co for vert in edge.verts]
+                                coords = [matrix_world * vert.co for vert in edge.verts]
 
                                 if active == edge:
                                     drawColorSize(coords, transform)
@@ -156,8 +151,6 @@ def drawCallback():
 
                     glEnd()
 
-                        
-
     elif bpy.context.mode == 'OBJECT':
         for obj in bpy.context.visible_objects:
             if obj and obj.type == 'MESH' and obj.data:
@@ -165,7 +158,7 @@ def drawCallback():
                     bl = obj.border_lines
 
                     if bl.borderlines_use:
-                        
+
                         mesh = obj.data
                         matrix_world = obj.matrix_world
                         settings = bpy.context.user_preferences.themes[0].view_3d
@@ -187,16 +180,16 @@ def drawCallback():
                             glColor3f(*settings.object_selected)
                         else:
                             glColor3f(*settings.wire)
-                            
+
                         for edge, count in zip(mesh.edges, counts):
                             # border edges
                             if count == 1:
-                                coords = [matrix_world*Vector(mesh.vertices[i].co) for i in edge.key]
+                                coords = [matrix_world * Vector(mesh.vertices[i].co) for i in edge.key]
                                 for coord in coords:
                                     glVertex3f(*coord)
-                            
+
                         glEnd()
-        
+
     glLineWidth(1.0)
 
 
@@ -218,6 +211,7 @@ class BorderLinesCopyUseOperator(bpy.types.Operator):
         context.area.tag_redraw()
         return {'FINISHED'}
 
+
 class BorderLinesCopyWidthOperator(bpy.types.Operator):
     bl_idname = "object.border_lines_copy_width"
     bl_label = "Copy width"
@@ -235,6 +229,7 @@ class BorderLinesCopyWidthOperator(bpy.types.Operator):
             obj.border_lines.borderlines_width = o.border_lines.borderlines_width
         context.area.tag_redraw()
         return {'FINISHED'}
+
 
 class BorderLinesCopyFinerOperator(bpy.types.Operator):
     bl_idname = "object.border_lines_copy_finer"
@@ -254,6 +249,7 @@ class BorderLinesCopyFinerOperator(bpy.types.Operator):
         context.area.tag_redraw()
         return {'FINISHED'}
 
+
 class BorderLinesCopyColorOperator(bpy.types.Operator):
     bl_idname = "object.border_lines_copy_color"
     bl_label = "Copy custom color"
@@ -272,6 +268,7 @@ class BorderLinesCopyColorOperator(bpy.types.Operator):
         context.area.tag_redraw()
         return {'FINISHED'}
 
+
 class BorderLinesCopyCustomOperator(bpy.types.Operator):
     bl_idname = "object.border_lines_copy_custom"
     bl_label = "Copy custom color use"
@@ -289,6 +286,7 @@ class BorderLinesCopyCustomOperator(bpy.types.Operator):
             obj.border_lines.custom_color_use = o.border_lines.custom_color_use
         context.area.tag_redraw()
         return {'FINISHED'}
+
 
 class BorderLinesCopySettingsOperator(bpy.types.Operator):
     bl_idname = "object.border_lines_copy_settings"
@@ -347,7 +345,7 @@ def displayBorderLinesPanel(self, context):
 
     if context.active_object and context.active_object.type == 'MESH':
         border_lines = context.active_object.border_lines
-    
+
         box = self.layout.box()
 
         split = box.split(percentage=0.8)
@@ -361,14 +359,14 @@ def displayBorderLinesPanel(self, context):
         col2.operator("object.border_lines_copy_use", text="", icon='COPYDOWN')
 
         if border_lines.borderlines_use:
-            
+
             col.prop(border_lines, "borderlines_width")
             col2.operator("object.border_lines_copy_width", text="", icon='COPYDOWN')
             col.prop(border_lines, "custom_color_use")
             col2.operator("object.border_lines_copy_custom", text="", icon='COPYDOWN')
-            
+
             if border_lines.custom_color_use:
-                split = col.split(percentage=0.1)    
+                split = col.split(percentage=0.1)
                 split.separator()
                 split.prop(border_lines, "custom_color", text="")
                 col2.operator("object.border_lines_copy_color", text="", icon='COPYDOWN')
@@ -378,7 +376,7 @@ def displayBorderLinesPanel(self, context):
                 col2.operator("object.border_lines_copy_finer", text="", icon='COPYDOWN')
 
         box.operator("object.border_lines_copy_settings", icon='COPYDOWN')
-            
+
 classes = [
     BorderLinesCopyUseOperator,
     BorderLinesCopyWidthOperator,
@@ -387,7 +385,8 @@ classes = [
     BorderLinesCopyCustomOperator,
     BorderLinesCopySettingsOperator,
     BorderLinesCollectionGroup,
-    ]    
+]
+
 
 def register():
     for cls in classes:
@@ -400,7 +399,6 @@ def register():
         bpy.types.SpaceView3D.draw_handler_remove(handle[0], 'WINDOW')
     handle[:] = [bpy.types.SpaceView3D.draw_handler_add(drawCallback, (), 'WINDOW', 'POST_VIEW')]
 
-    
 
 def unregister():
     bpy.types.VIEW3D_PT_view3d_shading.remove(displayBorderLinesPanel)
@@ -411,7 +409,7 @@ def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
     pass
-    
+
 
 if __name__ == "__main__":
     register()

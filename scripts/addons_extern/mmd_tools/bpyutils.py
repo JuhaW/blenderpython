@@ -2,7 +2,9 @@
 
 import bpy
 
+
 class __EditMode:
+
     def __init__(self, obj):
         if not isinstance(obj, bpy.types.Object):
             raise ValueError
@@ -18,7 +20,9 @@ class __EditMode:
     def __exit__(self, type, value, traceback):
         bpy.ops.object.mode_set(mode=self.__prevMode)
 
+
 class __SelectObjects:
+
     def __init__(self, active_object, selected_objects=[]):
         if not isinstance(active_object, bpy.types.Object):
             raise ValueError
@@ -31,7 +35,7 @@ class __SelectObjects:
             i.select = False
 
         self.__active_object = active_object
-        self.__selected_objects = [active_object]+selected_objects
+        self.__selected_objects = [active_object] + selected_objects
 
         self.__hides = []
         for i in self.__selected_objects:
@@ -47,6 +51,7 @@ class __SelectObjects:
         for i, j in zip(self.__selected_objects, self.__hides):
             i.hide = j
 
+
 def setParent(obj, parent):
     ho = obj.hide
     hp = parent.hide
@@ -57,6 +62,7 @@ def setParent(obj, parent):
     bpy.ops.object.parent_set(type='OBJECT', xmirror=False, keep_transform=False)
     obj.hide = ho
     parent.hide = hp
+
 
 def setParentToBone(obj, parent, bone_name):
     import bpy
@@ -70,6 +76,7 @@ def setParentToBone(obj, parent, bone_name):
     bpy.ops.object.parent_set(type='BONE', xmirror=False, keep_transform=False)
     bpy.ops.object.mode_set(mode='OBJECT')
 
+
 def edit_object(obj):
     """ Set the object interaction mode to 'EDIT'
 
@@ -79,6 +86,7 @@ def edit_object(obj):
             some functions...
     """
     return __EditMode(obj)
+
 
 def select_object(obj, objects=[]):
     """ Select objects.
@@ -91,6 +99,7 @@ def select_object(obj, objects=[]):
     """
     return __SelectObjects(obj, objects)
 
+
 def makeCapsule(segment=16, ring_count=8, radius=1.0, height=1.0, target_scene=None):
     import math
     if target_scene is None:
@@ -98,46 +107,46 @@ def makeCapsule(segment=16, ring_count=8, radius=1.0, height=1.0, target_scene=N
     mesh = bpy.data.meshes.new(name='Capsule')
     meshObj = bpy.data.objects.new(name='Capsule', object_data=mesh)
     vertices = []
-    top = (0, 0, height/2+radius)
+    top = (0, 0, height / 2 + radius)
     vertices.append(top)
 
-    f = lambda i: radius*i/ring_count
+    f = lambda i: radius * i / ring_count
     for i in range(ring_count, 0, -1):
-        z = f(i-1)
+        z = f(i - 1)
         t = math.sqrt(radius**2 - z**2)
         for j in range(segment):
-            theta = 2*math.pi/segment*j
+            theta = 2 * math.pi / segment * j
             x = t * math.sin(-theta)
             y = t * math.cos(-theta)
-            vertices.append((x,y,z+height/2))
+            vertices.append((x, y, z + height / 2))
 
     for i in range(ring_count):
         z = -f(i)
         t = math.sqrt(radius**2 - z**2)
         for j in range(segment):
-            theta = 2*math.pi/segment*j
+            theta = 2 * math.pi / segment * j
             x = t * math.sin(-theta)
             y = t * math.cos(-theta)
-            vertices.append((x,y,z-height/2))
+            vertices.append((x, y, z - height / 2))
 
-    bottom = (0, 0, -(height/2+radius))
+    bottom = (0, 0, -(height / 2 + radius))
     vertices.append(bottom)
 
     faces = []
     for i in range(1, segment):
-        faces.append([0, i, i+1])
+        faces.append([0, i, i + 1])
     faces.append([0, segment, 1])
     offset = segment + 1
-    for i in range(ring_count*2-1):
-        for j in range(segment-1):
+    for i in range(ring_count * 2 - 1):
+        for j in range(segment - 1):
             t = offset + j
-            faces.append([t-segment, t, t+1, t-segment+1])
-        faces.append([offset-1, offset+segment-1, offset, offset-segment])
+            faces.append([t - segment, t, t + 1, t - segment + 1])
+        faces.append([offset - 1, offset + segment - 1, offset, offset - segment])
         offset += segment
-    for i in range(segment-1):
+    for i in range(segment - 1):
         t = offset + i
-        faces.append([t-segment, offset, t-segment+1])
-    faces.append([offset-1, offset, offset-segment])
+        faces.append([t - segment, offset, t - segment + 1])
+    faces.append([offset - 1, offset, offset - segment])
 
     mesh.from_pydata(vertices, [], faces)
     target_scene.objects.link(meshObj)

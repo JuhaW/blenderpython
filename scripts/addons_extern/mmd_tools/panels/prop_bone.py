@@ -2,6 +2,7 @@
 
 from bpy.types import Panel
 
+
 class MMDBonePanel(Panel):
     bl_idname = 'BONE_PT_mmd_tools_bone'
     bl_label = 'MMD Bone Tools'
@@ -26,7 +27,7 @@ class MMDBonePanel(Panel):
         c.label('Information:')
         c.prop(pose_bone.mmd_bone, 'name_j')
         c.prop(pose_bone.mmd_bone, 'name_e')
-        c.label(text='ID: %d'%(pose_bone.mmd_bone.bone_id))
+        c.label(text='ID: %d' % (pose_bone.mmd_bone.bone_id))
 
         c = layout.column(align=True)
         row = c.row()
@@ -48,7 +49,7 @@ class MMDBonePanel(Panel):
         c.prop(pose_bone.mmd_bone, 'local_axis_z')
 
         c = layout.column()
-        
+
         row = layout.row(align=True)
         c = row.column()
         c.prop(pose_bone.mmd_bone, 'fixed_axis')

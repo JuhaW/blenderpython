@@ -154,7 +154,7 @@ class Import_Xps_Model_Op(bpy.types.Operator, ImportHelper):
         col.prop(self, "colorizeMesh")
         col.prop(self, "importNormals")
         col.prop(self, "vColors")
-        
+
         sub.enabled = self.joinMeshRips
         self.markSeams = self.joinMeshRips and self.markSeams
 
@@ -178,10 +178,10 @@ class Export_Xps_Model_Op(bpy.types.Operator, ExportHelper):
         name='Format',
         description='Choose Export Format',
         items=(
-                ('.xps', 'XPS', 'Export as XPS Binary format (.xps)'),
-                ('.mesh', 'MESH', 'Export as XnaLara/XPS Binary format (.mesh)'),
-                ('.ascii', 'ASCII', 'Export as XnaLara/XPS Ascii format (.ascii)'),
-                ),
+            ('.xps', 'XPS', 'Export as XPS Binary format (.xps)'),
+            ('.mesh', 'MESH', 'Export as XnaLara/XPS Binary format (.mesh)'),
+            ('.ascii', 'ASCII', 'Export as XnaLara/XPS Ascii format (.ascii)'),
+        ),
         default='.xps',
     )
 
@@ -401,6 +401,7 @@ class Export_Frames_To_Poses_Op(bpy.types.Operator, ExportHelper):
         export_xnalara_pose.getOutputPoseSequence(self.filepath)
         return {'FINISHED'}
 
+
 class ArmatureBoneDictRename_Op(bpy.types.Operator):
     bl_idname = 'xps_tools.bones_dictionary_rename'
     bl_label = 'Dictionary Rename'
@@ -414,18 +415,17 @@ class ArmatureBoneDictRename_Op(bpy.types.Operator):
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
     filepath = StringProperty(
-            name="File Path",
-            description="Bone Dictionary File",
-            maxlen=1024,
-            subtype='FILE_PATH',
-            )
-
+        name="File Path",
+        description="Bone Dictionary File",
+        maxlen=1024,
+        subtype='FILE_PATH',
+    )
 
     # filter File Extension
     filter_glob = bpy.props.StringProperty(
-            default="*.txt",
-            options={'HIDDEN'},
-            )
+        default="*.txt",
+        options={'HIDDEN'},
+    )
 
     @classmethod
     def poll(cls, context):
@@ -443,7 +443,7 @@ class ArmatureBoneDictRename_Op(bpy.types.Operator):
         if not self.filepath:
             self.filepath = 'BoneDict.txt'
         context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}  
+        return {'RUNNING_MODAL'}
 
     def check(self, context):
         import os
@@ -464,6 +464,7 @@ class ArmatureBoneDictRename_Op(bpy.types.Operator):
 
         return (change_ext)
 
+
 class ArmatureBoneDictRestore_Op(bpy.types.Operator):
     bl_idname = 'xps_tools.bones_dictionary_restore_name'
     bl_label = 'Dictionary Restore Names'
@@ -477,18 +478,17 @@ class ArmatureBoneDictRestore_Op(bpy.types.Operator):
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
     filepath = StringProperty(
-            name="File Path",
-            description="Bone Dictionary File",
-            maxlen=1024,
-            subtype='FILE_PATH',
-            )
-
+        name="File Path",
+        description="Bone Dictionary File",
+        maxlen=1024,
+        subtype='FILE_PATH',
+    )
 
     # filter File Extension
     filter_glob = bpy.props.StringProperty(
-            default="*.txt",
-            options={'HIDDEN'},
-            )
+        default="*.txt",
+        options={'HIDDEN'},
+    )
 
     @classmethod
     def poll(cls, context):
@@ -506,7 +506,7 @@ class ArmatureBoneDictRestore_Op(bpy.types.Operator):
         if not self.filepath:
             self.filepath = 'BoneDict.txt'
         context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}  
+        return {'RUNNING_MODAL'}
 
     def check(self, context):
         import os

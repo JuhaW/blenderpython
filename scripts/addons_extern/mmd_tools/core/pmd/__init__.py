@@ -4,12 +4,17 @@ import re
 import logging
 import collections
 
+
 class InvalidFileError(Exception):
     pass
+
+
 class UnsupportedVersionError(Exception):
     pass
 
+
 class FileStream:
+
     def __init__(self, path, file_obj):
         self.__path = path
         self.__file_obj = file_obj
@@ -39,11 +44,11 @@ class FileStream:
             self.__file_obj = None
 
 
-class  FileReadStream(FileStream):
+class FileReadStream(FileStream):
+
     def __init__(self, path, pmx_header=None):
         self.__fin = open(path, 'rb')
         FileStream.__init__(self, path, self.__fin)
-
 
     # READ / WRITE methods for general types
     def readInt(self):
@@ -85,7 +90,7 @@ class  FileReadStream(FileStream):
         fmt = '<'
         for i in range(size):
             fmt += 'f'
-        return list(struct.unpack(fmt, self.__fin.read(4*size)))
+        return list(struct.unpack(fmt, self.__fin.read(4 * size)))
 
     def readByte(self):
         v, = struct.unpack('<B', self.__fin.read(1))
@@ -120,14 +125,16 @@ class Header:
         self.model_name = fs.readStr(20)
         self.comment = fs.readStr(256)
 
+
 class Vertex:
+
     def __init__(self):
         self.position = [0.0, 0.0, 0.0]
         self.normal = [1.0, 0.0, 0.0]
         self.uv = [0.0, 0.0]
         self.bones = [-1, -1]
-        self.weight = 0 # min:0, max:100
-        self.enable_edge = 0 # 0: on, 1: off
+        self.weight = 0  # min:0, max:100
+        self.enable_edge = 0  # 0: on, 1: off
 
     def load(self, fs):
         self.position = fs.readVector(3)
@@ -138,7 +145,9 @@ class Vertex:
         self.weight = fs.readByte()
         self.enable_edge = fs.readByte()
 
+
 class Material:
+
     def __init__(self):
         self.diffuse = []
         self.specular_intensity = 0.5
@@ -168,7 +177,9 @@ class Material:
             if 'aA'.find(self.sphere_path[-1]) != -1:
                 self.sphere_mode = 2
 
+
 class Bone:
+
     def __init__(self):
         self.name = ''
         self.name_e = ''
@@ -190,7 +201,9 @@ class Bone:
         self.ik_bone = fs.readUnsignedShort()
         self.position = fs.readVector(3)
 
+
 class IK:
+
     def __init__(self):
         self.bone = 0
         self.target_bone = 0
@@ -200,7 +213,7 @@ class IK:
         self.ik_child_bones = []
 
     def __str__(self):
-        return '<IK bone: %d, target: %d, chain: %s, iter: %d, weight: %f, ik_children: %s'%(
+        return '<IK bone: %d, target: %d, chain: %s, iter: %d, weight: %f, ik_children: %s' % (
             self.bone,
             self.target_bone,
             self.ik_chain,
@@ -218,7 +231,9 @@ class IK:
         for i in range(self.ik_chain):
             self.ik_child_bones.append(fs.readUnsignedShort())
 
+
 class MorphData:
+
     def __init__(self):
         self.index = 0
         self.offset = []
@@ -227,7 +242,9 @@ class MorphData:
         self.index = fs.readUnsignedInt()
         self.offset = fs.readVector(3)
 
+
 class VertexMorph:
+
     def __init__(self):
         self.name = ''
         self.name_e = ''
@@ -243,7 +260,9 @@ class VertexMorph:
             t.load(fs)
             self.data.append(t)
 
+
 class RigidBody:
+
     def __init__(self):
         self.name = ''
         self.bone = -1
@@ -278,7 +297,9 @@ class RigidBody:
         self.friction = fs.readFloat()
         self.mode = fs.readByte()
 
+
 class Joint:
+
     def __init__(self):
         self.name = ''
         self.src_rigid = 0
@@ -312,7 +333,9 @@ class Joint:
         self.spring_constant = fs.readVector(3)
         self.spring_rotation_constant = fs.readVector(3)
 
+
 class Model:
+
     def __init__(self):
         self.header = None
         self.vertices = []
@@ -330,7 +353,6 @@ class Model:
         self.toon_textures = []
         self.rigid_bodies = []
         self.joints = []
-
 
     def load(self, fs):
         logging.info('importing pmd model from %s...', fs.path())
@@ -363,7 +385,7 @@ class Model:
         logging.info('------------------------------')
         self.faces = []
         face_vert_count = fs.readUnsignedInt()
-        for i in range(int(face_vert_count/3)):
+        for i in range(int(face_vert_count / 3)):
             f1 = fs.readUnsignedShort()
             f2 = fs.readUnsignedShort()
             f3 = fs.readUnsignedShort()
@@ -474,7 +496,7 @@ class Model:
         for i in range(t):
             bone_index = fs.readUnsignedShort()
             disp_index = fs.readByte()
-            self.bone_disp_lists[bone_disps[disp_index-1]].append(bone_index)
+            self.bone_disp_lists[bone_disps[disp_index - 1]].append(bone_index)
 
         for i, (k, items) in enumerate(self.bone_disp_lists.items()):
             logging.info('  Frame %d: %s', i, k.rstrip())
@@ -578,6 +600,7 @@ class Model:
         logging.info('----- Loaded %d joints', len(self.joints))
 
         logging.info('finished importing the model.')
+
 
 def load(path):
     with FileReadStream(path) as fs:

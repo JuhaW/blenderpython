@@ -19,6 +19,7 @@ class CleanRiggingObjects(Operator):
         rig.clean()
         return {'FINISHED'}
 
+
 class BuildRig(Operator):
     bl_idname = 'mmd_tools.build_rig'
     bl_label = 'Build'
@@ -32,6 +33,7 @@ class BuildRig(Operator):
         rig.build()
         context.scene.objects.active = obj
         return {'FINISHED'}
+
 
 class ApplyAdditionalTransformConstraints(Operator):
     bl_idname = 'mmd_tools.apply_additioinal_transform'
@@ -49,6 +51,7 @@ class ApplyAdditionalTransformConstraints(Operator):
         #context.scene.objects.active = obj
         return {'FINISHED'}
 
+
 class CreateMMDModelRoot(Operator):
     bl_idname = 'mmd_tools.create_mmd_model_root_object'
     bl_label = 'Create a MMD Model Root Object'
@@ -63,7 +66,7 @@ class CreateMMDModelRoot(Operator):
         with bpyutils.edit_object(arm) as data:
             bone = data.edit_bones.new(name=u'全ての親')
             bone.head = [0.0, 0.0, 0.0]
-            bone.tail = [0.0, 0.0, 1.0*self.scale]
+            bone.tail = [0.0, 0.0, 1.0 * self.scale]
         arm.pose.bones[u'全ての親'].mmd_bone.name_j = u'全ての親'
         arm.pose.bones[u'全ての親'].mmd_bone.name_e = 'Root'
         mmd_root = rig.rootObject().mmd_root

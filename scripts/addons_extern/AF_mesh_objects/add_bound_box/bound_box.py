@@ -30,17 +30,18 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
-#    importlib.reload(add_bbox_origin_setup)
+    importlib.reload(create_multi_bound_box)
     importlib.reload(add_bound_box)
     importlib.reload(object_bounding_box)
 
 
 else:
-#    from . import add_bbox_origin_setup
+    from . import create_multi_bound_box
     from . import add_bound_box
     from . import object_bounding_box
 
 import bpy
+
 
 class INFO_MT_mesh_boundbox_add(bpy.types.Menu):
     # Define the "Ice" menu
@@ -51,17 +52,18 @@ class INFO_MT_mesh_boundbox_add(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
         layout.operator("mesh.boundbox_add",
-            text = "Bound Box Add")
+                        text="Bound Box Add")
         layout.operator("mesh.multi_boundbox_add",
-            text = "Multi Bound Box Add")
+                        text="Multi Bound Box Add")
         layout.operator("object.min_bounds",
-            text="Minimum Bounds")
+                        text="Minimum Bounds")
 
 # Define "Extras" menu
+
+
 def menu_func(self, context):
     self.layout.separator()
     self.layout.menu("INFO_MT_mesh_boundbox_add", text="Bound Box", icon="LATTICE_DATA")
-
 
 
 def register():

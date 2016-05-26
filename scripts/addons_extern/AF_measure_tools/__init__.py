@@ -15,7 +15,7 @@
 #  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 # ##### END GPL LICENSE BLOCK #####
-# Contributed to by kromar, zmj100, meta-androcto, sambler, 
+# Contributed to by kromar, zmj100, meta-androcto, sambler,
 # o #
 
 
@@ -38,7 +38,9 @@ else:
     from . import lint
 
 
-import bpy, blf, bgl
+import bpy
+import blf
+import bgl
 import bmesh
 from bpy.props import BoolProperty, PointerProperty, FloatProperty, EnumProperty, IntProperty
 from bpy_extras.view3d_utils import location_3d_to_region_2d, region_2d_to_location_3d
@@ -62,26 +64,26 @@ def arithmeticMean(items):
     s = items[0].copy()
     for item in items[1:]:
         s += item
-    return s/len(items)
+    return s / len(items)
+
 
 def weightedMean(couples):
     """
     Weighted mean of the couples (item, weight).
     """
     # could be made nicer, but this is fast
-    items_weighted_sum = couples[0][0]*couples[0][1]
+    items_weighted_sum = couples[0][0] * couples[0][1]
     weights_sum = couples[0][1]
     for item, weight in couples:
-        items_weighted_sum += item*weight
+        items_weighted_sum += item * weight
         weights_sum += weight
-        
-    return items_weighted_sum/weights_sum
+
+    return items_weighted_sum / weights_sum
 
 
 def calculateTriangleArea(mesh, vertices, matrix):
-    vcs = [matrix*mesh.vertices[i].co for i in vertices]
+    vcs = [matrix * mesh.vertices[i].co for i in vertices]
     return area_tri(*vcs)
-
 
 
 def calculateArea(mesh, matrix=None):
@@ -105,7 +107,7 @@ def calculateArea(mesh, matrix=None):
                     area += calculateTriangleArea(mesh, tri, matrix)
 
     return area
-                
+
 
 def calculateTriangleVolume(vertices, reference_point):
     # vertices are already in the right order, thanks to Blender
@@ -118,7 +120,8 @@ def calculateTriangleVolume(vertices, reference_point):
     ref4[3] = 1.0
     vcs.append(ref4)
 
-    return Matrix(vcs).determinant()/6.0
+    return Matrix(vcs).determinant() / 6.0
+
 
 def calculateTriangleCOM(vertices, reference_point):
     v = vertices.copy()
@@ -147,7 +150,6 @@ def calculatePolygonVolume(mesh, polygon, reference_point):
         return volume
 
 
-
 def calculatePolygonCOM(mesh, polygon, reference_point):
     if len(polygon.vertices) == 3:
         vcs = [mesh.vertices[polygon.vertices[i]].co for i in (0, 1, 2)]
@@ -160,7 +162,7 @@ def calculatePolygonCOM(mesh, polygon, reference_point):
         v2 = calculateTriangleVolume(vcs2, reference_point)
         com1 = calculateTriangleCOM(vcs1, reference_point)
         com2 = calculateTriangleCOM(vcs2, reference_point)
-        return (com1*v1 + com2*v2)/(v1 + v2)
+        return (com1 * v1 + com2 * v2) / (v1 + v2)
 
     else:
         couples = []
@@ -184,9 +186,8 @@ def calculateVolume(mesh, reference_point=Vector((0.0, 0.0, 0.0))):
     volume = 0.0
     for polygon in mesh.polygons:
         volume += calculatePolygonVolume(mesh, polygon, reference_point)
-    
-    return volume
 
+    return volume
 
 
 def calculateCOM_Volume(mesh, reference_point=Vector((0.0, 0.0, 0.0))):
@@ -195,7 +196,7 @@ def calculateCOM_Volume(mesh, reference_point=Vector((0.0, 0.0, 0.0))):
         v = calculatePolygonVolume(mesh, polygon, reference_point)
         com = calculatePolygonCOM(mesh, polygon, reference_point)
         couples.append((com, v))
-    
+
     return weightedMean(couples)
 
 
@@ -203,7 +204,7 @@ def calculateCOM_Faces(mesh):
     couples = []
     for polygon in mesh.polygons:
         couples.append((polygon.center, polygon.area))
-    
+
     return weightedMean(couples)
 
 
@@ -212,16 +213,15 @@ def calculateCOM_Edges(mesh):
     for edge in mesh.edges:
         v1, v2 = [mesh.vertices[edge.vertices[i]].co for i in range(2)]
         # not necessary to run arithmeticMean() for 2 vertices...
-        couples.append(((v1 + v2)/2.0, (v2 - v1).length))
-    
+        couples.append(((v1 + v2) / 2.0, (v2 - v1).length))
+
     return weightedMean(couples)
 
 
 def calculateCOM_Vertices(mesh):
     points = [vertex.co for vertex in mesh.vertices]
-    
-    return arithmeticMean(points)
 
+    return arithmeticMean(points)
 
 
 def isManifold(mesh, do_check=True):
@@ -262,7 +262,7 @@ def isManifold(mesh, do_check=True):
 def isNormalsOrientationClean(mesh, do_check=True):
     if not do_check:
         return True
-    
+
     for i, p in enumerate(mesh.polygons):
         e = p.edge_keys
         set_e = set(e)
@@ -290,13 +290,14 @@ def us(qty):
     eg turn 12345678 into 12.3M
     """
 
-    if qty<1000:
+    if qty < 1000:
         return str(qty)
 
-    for suf in ['K','M','G','T','P','E']:
+    for suf in ['K', 'M', 'G', 'T', 'P', 'E']:
         qty /= 1000
-        if qty<1000:
+        if qty < 1000:
             return "%3.1f%s" % (qty, suf)
+
 
 class Properties_meshinfo(bpy.types.Panel):
     bl_label = "Mesh Summary"
@@ -314,7 +315,7 @@ class Properties_meshinfo(bpy.types.Panel):
         if len(meshes) == 1:
             row.label(text="1 Mesh object in this scene.", icon='OBJECT_DATA')
         else:
-            row.label(text=us(len(meshes))+" Mesh objects in this scene.", icon='OBJECT_DATA')
+            row.label(text=us(len(meshes)) + " Mesh objects in this scene.", icon='OBJECT_DATA')
             row = layout.row()
             if len(meshes) > prefs.display_limit:
                 row.label(text="Top %d mesh objects." % prefs.display_limit)
@@ -322,15 +323,15 @@ class Properties_meshinfo(bpy.types.Panel):
                 row.label(text="Top %d mesh objects." % len(meshes))
 
         row = layout.row()
-        row.prop(prefs,"calculate_modifier_verts")
+        row.prop(prefs, "calculate_modifier_verts")
         if len(meshes) > 0:
             dataCols = []
             row = layout.row()
-            dataCols.append(row.column()) # name
-            dataCols.append(row.column()) # verts
-            dataCols.append(row.column()) # verts after modifiers
-            dataCols.append(row.column()) # edges
-            dataCols.append(row.column()) # faces
+            dataCols.append(row.column())  # name
+            dataCols.append(row.column())  # verts
+            dataCols.append(row.column())  # verts after modifiers
+            dataCols.append(row.column())  # edges
+            dataCols.append(row.column())  # faces
 
             topMeshes = [(o, o.name, len(o.data.vertices), len(o.data.edges), len(o.data.polygons)) for o in meshes]
             topMeshes = sorted(topMeshes, key=itemgetter(2), reverse=True)[:prefs.display_limit]
@@ -355,7 +356,7 @@ class Properties_meshinfo(bpy.types.Panel):
                     detailRow = dataCols[2].row()
                     bm = bmesh.new()
                     bm.from_object(mo[0], context.scene)
-                    detailRow.label(text="("+us(len(bm.verts))+")")
+                    detailRow.label(text="(" + us(len(bm.verts)) + ")")
                     bm.free()
                 detailRow = dataCols[3].row()
                 detailRow.label(text=us(mo[3]))
@@ -376,53 +377,54 @@ class Properties_meshinfo(bpy.types.Panel):
             totRow.label(text=us(fTotal))
 
 # ------ Index ------
-def IM_select(indexList,type):
-    #indices = [4608]    #add more indices: [0, 1, 4, 722]
-    mesh =  bpy.context.active_object.data    
-    bpy.ops.object.mode_set(mode = 'EDIT', toggle = False)
+
+
+def IM_select(indexList, type):
+    # indices = [4608]    #add more indices: [0, 1, 4, 722]
+    mesh = bpy.context.active_object.data
+    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
     bpy.ops.mesh.reveal()
-    bpy.ops.mesh.select_all(action='DESELECT')    
-    bpy.ops.object.mode_set(mode = 'OBJECT', toggle = False)
-   
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
     if type == 'vertex':
-        bpy.context.scene.tool_settings.mesh_select_mode = (True, False, False)    
+        bpy.context.scene.tool_settings.mesh_select_mode = (True, False, False)
         for vert in mesh.vertices:
-            #print(vert.index)
+            # print(vert.index)
             for target in indexList:
                 if vert.index == target:
                     vert.select = True
-                    print(target, ' vertex selected')   
-                    
+                    print(target, ' vertex selected')
+
     if type == 'face':
         bpy.context.scene.tool_settings.mesh_select_mode = (False, False, True)
         for face in mesh.polygons:
-            #print(face.index)
+            # print(face.index)
             for target in indexList:
                 if face.index == target:
                     face.select = True
-                    print(target, ' face selected') 
-                    
+                    print(target, ' face selected')
+
     if type == 'edge':
         bpy.context.scene.tool_settings.mesh_select_mode = (False, True, False)
         for edge in mesh.edges:
-            #print(edge.index)
+            # print(edge.index)
             for target in indexList:
                 if edge.index == target:
                     edge.select = True
-                    print(target, ' edge selected') 
-            
-    
-    bpy.ops.object.mode_set(mode = 'EDIT', toggle = False)
+                    print(target, ' edge selected')
+
+    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
     #bpy.context.scene.tool_settings.mesh_select_mode = (True, True, True)
 
 
 def IM_show_extra_indices(self, context):
-    mesh =  bpy.context.active_object.data 
+    mesh = bpy.context.active_object.data
     config = bpy.context.scene.CONFIG_IndexMarker
     print("Show indices: ", config.show_extra_indices)
-    
-    #enable debug mode, show indices
-    #bpy.app.debug  to True while blender is running
+
+    # enable debug mode, show indices
+    # bpy.app.debug  to True while blender is running
     if config.show_extra_indices == True:
         bpy.app.debug = True
         mesh.show_extra_indices = True
@@ -432,13 +434,17 @@ def IM_show_extra_indices(self, context):
 
 # ------ Ruler ------
 
+
 def edit_mode_out():
-    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.mode_set(mode='OBJECT')
+
 
 def edit_mode_in():
-    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.object.mode_set(mode='EDIT')
 
 # ------ Ruler ------
+
+
 def draw_callback_px(self, context):
 
     if context.mode == "EDIT_MESH":
@@ -446,19 +452,19 @@ def draw_callback_px(self, context):
 
         font_id = 0
         font_size = context.scene.dt_custom_props.fs
-    
+
         ob_act = context.active_object
         bme = bmesh.from_edit_mesh(ob_act.data)
         mtrx = ob_act.matrix_world
-    
+
         list_0 = [v.index for v in bme.verts if v.select]
         if len(list_0) != 0:
             p = bme.verts[list_0[0]].co.copy()
             p_loc_2d = location_3d_to_region_2d(context.region, context.space_data.region_3d, p)
-        
+
             q = mtrx * bme.verts[list_0[0]].co.copy()
             q_loc_2d = location_3d_to_region_2d(context.region, context.space_data.region_3d, q)
-        
+
             # -- -- -- -- distance to adjacent vertices
             if context.scene.dt_custom_props.b0 == True:
                 list_ = [[v.index for v in e.verts] for e in bme.verts[list_0[0]].link_edges]
@@ -471,20 +477,20 @@ def draw_callback_px(self, context):
                     blf.position(font_id, loc_0_2d[0] + 4, loc_0_2d[1] + 4, 0)
                     blf.size(font_id, font_size, context.user_preferences.system.dpi)
                     blf.draw(font_id, str(round((p - p1).length, 4)))
-        
+
             bgl.glLineStipple(4, 0xAAAA)
             bgl.glEnable(bgl.GL_LINE_STIPPLE)
-        
+
             # -- -- -- -- distance to axis local global
             if context.scene.dt_custom_props.b1 == True:
-        
+
                 # -- -- -- -- local
                 if en0 == 'opt0':
-        
+
                     # -- -- -- -- x axis
                     px = mtrx * Vector((0.0, p[1], p[2]))
                     px_loc_2d = location_3d_to_region_2d(context.region, context.space_data.region_3d, px)
-        
+
                     bgl.glEnable(bgl.GL_BLEND)
                     bgl.glColor4f(1.0, 0.0, 0.0, context.scene.dt_custom_props.a)
                     bgl.glBegin(bgl.GL_LINES)
@@ -492,18 +498,18 @@ def draw_callback_px(self, context):
                     bgl.glVertex2f(px_loc_2d[0], px_loc_2d[1])
                     bgl.glEnd()
                     bgl.glDisable(bgl.GL_BLEND)
-        
+
                     if context.scene.dt_custom_props.b2 == False:
                         lx = (q_loc_2d + px_loc_2d) * 0.5
                         bgl.glColor4f(1.0, 0.0, 0.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, lx[0] + 4, lx[1] + 4, 0)
                         blf.size(font_id, font_size, context.user_preferences.system.dpi)
                         blf.draw(font_id, str(round(p[0], 4)))
-        
+
                     # -- -- -- -- y axis
                     py = mtrx * Vector((p[0], 0.0, p[2]))
                     py_loc_2d = location_3d_to_region_2d(context.region, context.space_data.region_3d, py)
-                    
+
                     bgl.glEnable(bgl.GL_BLEND)
                     bgl.glColor4f(0.0, 1.0, 0.0, context.scene.dt_custom_props.a)
                     bgl.glBegin(bgl.GL_LINES)
@@ -511,18 +517,18 @@ def draw_callback_px(self, context):
                     bgl.glVertex2f(py_loc_2d[0], py_loc_2d[1])
                     bgl.glEnd()
                     bgl.glDisable(bgl.GL_BLEND)
-                
+
                     if context.scene.dt_custom_props.b2 == False:
                         ly = (q_loc_2d + py_loc_2d) * 0.5
                         bgl.glColor4f(0.0, 1.0, 0.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, ly[0] + 4, ly[1] + 4, 0)
                         blf.size(font_id, font_size, context.user_preferences.system.dpi)
                         blf.draw(font_id, str(round(p[1], 4)))
-        
+
                     # -- -- -- -- z axis
                     pz = mtrx * Vector((p[0], p[1], 0.0))
                     pz_loc_2d = location_3d_to_region_2d(context.region, context.space_data.region_3d, pz)
-                
+
                     bgl.glEnable(bgl.GL_BLEND)
                     bgl.glColor4f(0.0, 0.0, 1.0, context.scene.dt_custom_props.a)
                     bgl.glBegin(bgl.GL_LINES)
@@ -530,37 +536,37 @@ def draw_callback_px(self, context):
                     bgl.glVertex2f(pz_loc_2d[0], pz_loc_2d[1])
                     bgl.glEnd()
                     bgl.glDisable(bgl.GL_BLEND)
-            
+
                     if context.scene.dt_custom_props.b2 == False:
                         lz = (q_loc_2d + pz_loc_2d) * 0.5
                         bgl.glColor4f(0.0, 0.0, 1.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, lz[0] + 4, lz[1] + 4, 0)
                         blf.size(font_id, font_size, context.user_preferences.system.dpi)
                         blf.draw(font_id, str(round(p[2], 4)))
-        
+
                     # -- -- -- --
                     if context.scene.dt_custom_props.b2 == True and context.scene.dt_custom_props.b1 == True:
                         blf.size(font_id, font_size, context.user_preferences.system.dpi)
-                
+
                         bgl.glColor4f(1.0, 0.0, 0.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, q_loc_2d[0] + 4, q_loc_2d[1] + 4 + font_size + 4 + font_size + 4, 0)
                         blf.draw(font_id, 'x ' + str(round(p[0], 4)))
-                
+
                         bgl.glColor4f(0.0, 1.0, 0.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, q_loc_2d[0] + 4, q_loc_2d[1] + 4 + font_size + 4, 0)
                         blf.draw(font_id, 'y ' + str(round(p[1], 4)))
-        
+
                         bgl.glColor4f(0.0, 0.0, 1.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, q_loc_2d[0] + 4, q_loc_2d[1] + 4, 0)
                         blf.draw(font_id, 'z ' + str(round(p[2], 4)))
-        
+
                 # -- -- -- -- global
                 elif en0 == 'opt1':
-        
+
                     # -- -- -- -- x axis
                     ip_x = intersect_line_plane(q, q + (Vector((1.0, 0.0, 0.0)) * 0.1), Vector((0.0, 1.0, 0.0)), Vector((1.0, 0.0, 0.0)))
                     ip_x_loc_2d = location_3d_to_region_2d(context.region, context.space_data.region_3d, ip_x)
-        
+
                     bgl.glEnable(bgl.GL_BLEND)
                     bgl.glColor4f(1.0, 0.0, 0.0, context.scene.dt_custom_props.a)
                     bgl.glBegin(bgl.GL_LINES)
@@ -568,18 +574,18 @@ def draw_callback_px(self, context):
                     bgl.glVertex2f(ip_x_loc_2d[0], ip_x_loc_2d[1])
                     bgl.glEnd()
                     bgl.glDisable(bgl.GL_BLEND)
-        
+
                     if context.scene.dt_custom_props.b2 == False:
                         loc_1_2d = (q_loc_2d + ip_x_loc_2d) * 0.5
                         bgl.glColor4f(1.0, 0.0, 0.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, loc_1_2d[0] + 4, loc_1_2d[1] + 4, 0)
                         blf.size(font_id, font_size, context.user_preferences.system.dpi)
                         blf.draw(font_id, str(round((q - ip_x).length, 4)))
-        
+
                     # -- -- -- -- y axis
                     ip_y = intersect_line_plane(q, q + (Vector((0.0, 1.0, 0.0)) * 0.1), Vector((1.0, 0.0, 0.0)), Vector((0.0, 1.0, 0.0)))
                     ip_y_loc_2d = location_3d_to_region_2d(context.region, context.space_data.region_3d, ip_y)
-        
+
                     bgl.glEnable(bgl.GL_BLEND)
                     bgl.glColor4f(0.0, 1.0, 0.0, context.scene.dt_custom_props.a)
                     bgl.glBegin(bgl.GL_LINES)
@@ -587,18 +593,18 @@ def draw_callback_px(self, context):
                     bgl.glVertex2f(ip_y_loc_2d[0], ip_y_loc_2d[1])
                     bgl.glEnd()
                     bgl.glDisable(bgl.GL_BLEND)
-        
+
                     if context.scene.dt_custom_props.b2 == False:
                         loc_2_2d = (q_loc_2d + ip_y_loc_2d) * 0.5
                         bgl.glColor4f(0.0, 1.0, 0.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, loc_2_2d[0] + 4, loc_2_2d[1] + 4, 0)
                         blf.size(font_id, font_size, context.user_preferences.system.dpi)
                         blf.draw(font_id, str(round((q - ip_y).length, 4)))
-        
+
                     # -- -- -- -- z axis
                     ip_z = intersect_line_plane(q, q + (Vector((0.0, 0.0, 1.0)) * 0.1), Vector((1.0, 0.0, 0.0)), Vector((0.0, 0.0, 1.0)))
                     ip_z_loc_2d = location_3d_to_region_2d(context.region, context.space_data.region_3d, ip_z)
-        
+
                     bgl.glEnable(bgl.GL_BLEND)
                     bgl.glColor4f(0.0, 0.0, 1.0, context.scene.dt_custom_props.a)
                     bgl.glBegin(bgl.GL_LINES)
@@ -606,97 +612,97 @@ def draw_callback_px(self, context):
                     bgl.glVertex2f(ip_z_loc_2d[0], ip_z_loc_2d[1])
                     bgl.glEnd()
                     bgl.glDisable(bgl.GL_BLEND)
-        
+
                     if context.scene.dt_custom_props.b2 == False:
                         loc_3_2d = (q_loc_2d + ip_z_loc_2d) * 0.5
                         bgl.glColor4f(0.0, 0.0, 1.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, loc_3_2d[0] + 4, loc_3_2d[1] + 4, 0)
                         blf.size(font_id, font_size, context.user_preferences.system.dpi)
                         blf.draw(font_id, str(round((q - ip_z).length, 4)))
-        
+
                     # -- -- -- --
                     if context.scene.dt_custom_props.b2 == True and context.scene.dt_custom_props.b1 == True:
                         blf.size(font_id, font_size, context.user_preferences.system.dpi)
-                
+
                         bgl.glColor4f(1.0, 0.0, 0.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, q_loc_2d[0] + 4, q_loc_2d[1] + 4 + font_size + 4 + font_size + 4, 0)
                         blf.draw(font_id, 'x ' + str(round((q - ip_x).length, 4)))
-                
+
                         bgl.glColor4f(0.0, 1.0, 0.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, q_loc_2d[0] + 4, q_loc_2d[1] + 4 + font_size + 4, 0)
                         blf.draw(font_id, 'y ' + str(round((q - ip_y).length, 4)))
-                
+
                         bgl.glColor4f(0.0, 0.0, 1.0, context.scene.dt_custom_props.a)
                         blf.position(font_id, q_loc_2d[0] + 4, q_loc_2d[1] + 4, 0)
                         blf.draw(font_id, 'z ' + str(round((q - ip_z).length, 4)))
-        
+
             # -- -- -- -- mouse location
             if context.scene.dt_custom_props.b4 == True:
-        
+
                 rgn = context.region      # region
                 rgn_3d = context.space_data.region_3d      # region 3d
-        
+
                 bgl.glEnable(bgl.GL_BLEND)
                 bgl.glColor4f(1.0, 1.0, 1.0, context.scene.dt_custom_props.a)
                 bgl.glBegin(bgl.GL_LINES)
-                bgl.glVertex2f(0, dt_buf.y )
+                bgl.glVertex2f(0, dt_buf.y)
                 bgl.glVertex2f(dt_buf.x - 15, dt_buf.y)
                 bgl.glEnd()
                 bgl.glDisable(bgl.GL_BLEND)
-        
+
                 bgl.glEnable(bgl.GL_BLEND)
                 bgl.glColor4f(1.0, 1.0, 1.0, context.scene.dt_custom_props.a)
                 bgl.glBegin(bgl.GL_LINES)
-                bgl.glVertex2f(rgn.width, dt_buf.y )
+                bgl.glVertex2f(rgn.width, dt_buf.y)
                 bgl.glVertex2f(dt_buf.x + 15, dt_buf.y)
                 bgl.glEnd()
                 bgl.glDisable(bgl.GL_BLEND)
-        
+
                 bgl.glEnable(bgl.GL_BLEND)
                 bgl.glColor4f(1.0, 1.0, 1.0, context.scene.dt_custom_props.a)
                 bgl.glBegin(bgl.GL_LINES)
-                bgl.glVertex2f(dt_buf.x, 0 )
+                bgl.glVertex2f(dt_buf.x, 0)
                 bgl.glVertex2f(dt_buf.x, dt_buf.y - 15)
                 bgl.glEnd()
                 bgl.glDisable(bgl.GL_BLEND)
-        
+
                 bgl.glEnable(bgl.GL_BLEND)
                 bgl.glColor4f(1.0, 1.0, 1.0, context.scene.dt_custom_props.a)
                 bgl.glBegin(bgl.GL_LINES)
-                bgl.glVertex2f(dt_buf.x, rgn.height )
+                bgl.glVertex2f(dt_buf.x, rgn.height)
                 bgl.glVertex2f(dt_buf.x, dt_buf.y + 15)
                 bgl.glEnd()
                 bgl.glDisable(bgl.GL_BLEND)
                 bgl.glDisable(bgl.GL_LINE_STIPPLE)
-        
+
                 t = str(dt_buf.x) + ', ' + str(dt_buf.y)
                 lo = region_2d_to_location_3d(context.region, context.space_data.region_3d, Vector((dt_buf.x, dt_buf.y)), Vector((0.0, 0.0, 0.0)))
                 t1 = '( ' + str(round(lo[0], 4)) + ', ' + str(round(lo[1], 4)) + ', ' + str(round(lo[2], 4)) + ' )'
-        
+
                 bgl.glColor4f(1.0, 1.0, 1.0, context.scene.dt_custom_props.a)
                 blf.position(font_id, dt_buf.x + 15, dt_buf.y + 15, 0)
                 blf.size(font_id, 14, context.user_preferences.system.dpi)
                 blf.draw(font_id, t1 if context.scene.dt_custom_props.b5 == True else t)
-        
+
             bgl.glDisable(bgl.GL_LINE_STIPPLE)
-        
+
             # -- -- -- -- angles
             if context.scene.dt_custom_props.b3 == True:
                 list_ek = [[v.index for v in e.verts] for e in bme.verts[list_0[0]].link_edges]
                 n1 = len(list_ek)
-                
+
                 for j in range(n1):
-                    vec1 = p - bme.verts[[ i for i in list_ek[j] if i != list_0[0] ][0]].co.copy()
-                    vec2 = p - bme.verts[[ i for i in list_ek[(j + 1) % n1] if i != list_0[0]][0]].co.copy()
+                    vec1 = p - bme.verts[[i for i in list_ek[j] if i != list_0[0]][0]].co.copy()
+                    vec2 = p - bme.verts[[i for i in list_ek[(j + 1) % n1] if i != list_0[0]][0]].co.copy()
                     ang = vec1.angle(vec2)
-        
+
                     a_loc_2d = location_3d_to_region_2d(context.region, context.space_data.region_3d, mtrx * (((p - (vec1.normalized() * 0.1)) + (p - (vec2.normalized() * 0.1))) * 0.5))
-        
+
                     bgl.glColor4f(0.0, 0.757, 1.0, context.scene.dt_custom_props.a)
                     blf.position(font_id, a_loc_2d[0], a_loc_2d[1], 0)
                     blf.size(font_id, font_size, context.user_preferences.system.dpi)
                     blf.draw(font_id, str(round(ang, 4) if context.scene.dt_custom_props.b6 == True else round(degrees(ang), 2)))
-        
+
             # -- -- -- -- tool on/off
                     bgl.glColor4f(1.0, 1.0, 1.0, 1.0)
                     blf.position(font_id, 150, 10, 0)
@@ -704,27 +710,29 @@ def draw_callback_px(self, context):
                     blf.draw(font_id, 'Ruler On')
 
 # ------ index ------
+
+
 class UIElements(bpy.types.PropertyGroup):
 
     get_indices = bpy.props.StringProperty(name="Index", description="input vertex, face or edge indices here for selection. example: 1,2,3")
     show_extra_indices = bpy.props.BoolProperty(name="Show selected indices", default=False, description="Display the index numbers of selected vertices, edges, and faces. Note: enables debug mode", update=IM_show_extra_indices)
 
-#======================================================================# 
-#         operators                                                      
 #======================================================================#
-   
-        
+#         operators
+#======================================================================#
+
+
 class OBJECT_OP_SelectVertices(bpy.types.Operator):
     bl_idname = "mesh.vertex_select"
     bl_label = "Select vertex"
     bl_description = "select vertices"
-            
+
     def execute(self, context):
-        #get arguments from UIElemtnts
+        # get arguments from UIElemtnts
         config = bpy.context.scene.CONFIG_IndexMarker
-        
-        #lets convert the values to int and pass the list to the select function
-        indexList=[]
+
+        # lets convert the values to int and pass the list to the select function
+        indexList = []
         detectList = config.get_indices.split(',')
         for i in detectList:
             if i and i.isdigit():
@@ -732,23 +740,24 @@ class OBJECT_OP_SelectVertices(bpy.types.Operator):
             else:
                 print("missing or wrong input")
                 break
-            
-        #print(indexList)
-        type='vertex'
-        IM_select(indexList,type)
-        return {'FINISHED'} 
- 
+
+        # print(indexList)
+        type = 'vertex'
+        IM_select(indexList, type)
+        return {'FINISHED'}
+
+
 class OBJECT_OP_SelectFaces(bpy.types.Operator):
     bl_idname = "mesh.face_select"
     bl_label = "Select face"
     bl_description = "select faces"
-            
+
     def execute(self, context):
-        #get arguments from UIElemtnts
+        # get arguments from UIElemtnts
         config = bpy.context.scene.CONFIG_IndexMarker
-        
-        #lets convert the values to int and pass the list to the select function
-        indexList=[]
+
+        # lets convert the values to int and pass the list to the select function
+        indexList = []
         detectList = config.get_indices.split(',')
         for i in detectList:
             if i and i.isdigit():
@@ -756,23 +765,24 @@ class OBJECT_OP_SelectFaces(bpy.types.Operator):
             else:
                 print("missing or wrong input")
                 break
-            
-        #print(indexList)
-        type='face'
-        IM_select(indexList,type)
-        return {'FINISHED'} 
+
+        # print(indexList)
+        type = 'face'
+        IM_select(indexList, type)
+        return {'FINISHED'}
+
 
 class OBJECT_OP_SelectEdges(bpy.types.Operator):
     bl_idname = "mesh.edge_select"
     bl_label = "Select edge"
     bl_description = "select edges"
-            
+
     def execute(self, context):
-        #get arguments from UIElemtnts
+        # get arguments from UIElemtnts
         config = bpy.context.scene.CONFIG_IndexMarker
-        
-        #lets convert the values to int and pass the list to the select function
-        indexList=[]
+
+        # lets convert the values to int and pass the list to the select function
+        indexList = []
         detectList = config.get_indices.split(',')
         for i in detectList:
             if i and i.isdigit():
@@ -780,26 +790,30 @@ class OBJECT_OP_SelectEdges(bpy.types.Operator):
             else:
                 print("missing or wrong input")
                 break
-            
-        #print(indexList)
-        type='edge'
-        IM_select(indexList,type)
-        return {'FINISHED'} 
+
+        # print(indexList)
+        type = 'edge'
+        IM_select(indexList, type)
+        return {'FINISHED'}
 
 # ------ ruler ------
+
+
 class dt_p_group0(bpy.types.PropertyGroup):
-    a = FloatProperty( name = '', default = 1.0, min = 0.1, max = 1.0, step = 10, precision = 1 )
-    fs = IntProperty( name = '', default = 14, min = 12, max = 40, step = 1 )
-    b0 = BoolProperty( name = '', default = False )
-    b1 = BoolProperty( name = '', default = True )
-    b2 = BoolProperty( name = '', default = False )
-    b3 = BoolProperty( name = '', default = False )
-    b4 = BoolProperty( name = '', default = False )
-    b5 = BoolProperty( name = '', default = False )
-    b6 = BoolProperty( name = '', default = False )
-    en0 = EnumProperty( items =( ('opt0', 'Local', ''), ('opt1', 'Global', '') ), name = '', default = 'opt0' )
+    a = FloatProperty(name='', default=1.0, min=0.1, max=1.0, step=10, precision=1)
+    fs = IntProperty(name='', default=14, min=12, max=40, step=1)
+    b0 = BoolProperty(name='', default=False)
+    b1 = BoolProperty(name='', default=True)
+    b2 = BoolProperty(name='', default=False)
+    b3 = BoolProperty(name='', default=False)
+    b4 = BoolProperty(name='', default=False)
+    b5 = BoolProperty(name='', default=False)
+    b6 = BoolProperty(name='', default=False)
+    en0 = EnumProperty(items=(('opt0', 'Local', ''), ('opt1', 'Global', '')), name='', default='opt0')
 
 # ------ ruler------
+
+
 class dt_buf():
     mha = 0
     text = 'Enable'
@@ -807,6 +821,8 @@ class dt_buf():
     y = 0
 
 # ------ ruler operator 0 ------
+
+
 class dt_op0(bpy.types.Operator):
     bl_idname = 'dt.op0_id'
     bl_label = 'Display Tool'
@@ -853,80 +869,83 @@ class dt_op0(bpy.types.Operator):
             return {'CANCELLED'}
 
 # ------ ------
+
+
 def menu_(self, context):
     layout = self.layout
-    
+
     layout.separator()
     col = layout.column()
-    col.label(text = 'Simple Ruler:')
+    col.label(text='Simple Ruler:')
 
-    row = col.split(0.60, align = True)
-    row.operator('dt.op0_id', text = dt_buf.text )
+    row = col.split(0.60, align=True)
+    row.operator('dt.op0_id', text=dt_buf.text)
 
     if dt_buf.text == 'Disable':
         col.label('Ruler Font Settings:')
-        row_ = col.split(0.50, align = True)
-        row_.prop(context.scene.dt_custom_props, 'fs', text = 'Size', slider = True)
-        row_.prop(context.scene.dt_custom_props, 'a', text = 'Alpha', slider = True)
-    
-        col.prop(context.scene.dt_custom_props, 'b0', text = 'Edge Length')
-    
-        row3 = col.row(align = False)
-        row3.prop(context.scene.dt_custom_props, 'b3', text = 'Angle', toggle = False)
+        row_ = col.split(0.50, align=True)
+        row_.prop(context.scene.dt_custom_props, 'fs', text='Size', slider=True)
+        row_.prop(context.scene.dt_custom_props, 'a', text='Alpha', slider=True)
+
+        col.prop(context.scene.dt_custom_props, 'b0', text='Edge Length')
+
+        row3 = col.row(align=False)
+        row3.prop(context.scene.dt_custom_props, 'b3', text='Angle', toggle=False)
         if context.scene.dt_custom_props.b3 == True:
-           row3.prop(context.scene.dt_custom_props, 'b6', text = 'Radians', toggle = False)
-    
-        col.prop(context.scene.dt_custom_props, 'b1', text = 'Distance To Axis', toggle = False)
+            row3.prop(context.scene.dt_custom_props, 'b6', text='Radians', toggle=False)
+
+        col.prop(context.scene.dt_custom_props, 'b1', text='Distance To Axis', toggle=False)
         if context.scene.dt_custom_props.b1 == True:
-            row1 = col.split(0.60, align = True)
-            row1.prop(context.scene.dt_custom_props, 'en0', text = '')
-            row1.prop(context.scene.dt_custom_props, 'b2', text = 'Mode', toggle = True)
-    
-        row2 = col.split(0.80, align = True)
-        row2.prop(context.scene.dt_custom_props, 'b4', text = 'Mouse Location', toggle = False)
+            row1 = col.split(0.60, align=True)
+            row1.prop(context.scene.dt_custom_props, 'en0', text='')
+            row1.prop(context.scene.dt_custom_props, 'b2', text='Mode', toggle=True)
+
+        row2 = col.split(0.80, align=True)
+        row2.prop(context.scene.dt_custom_props, 'b4', text='Mouse Location', toggle=False)
         if context.scene.dt_custom_props.b4 == True:
-            row2.prop(context.scene.dt_custom_props, 'b5', text = 'Bu', toggle = True)
+            row2.prop(context.scene.dt_custom_props, 'b5', text='Bu', toggle=True)
     layout.separator()
     col = layout.column()
-    col.label(text = 'Index Marker')
+    col.label(text='Index Marker')
     config = bpy.context.scene.CONFIG_IndexMarker
     layout = self.layout
     ob = context.object
     type = ob.type.capitalize()
     objects = bpy.context.selected_objects
     game = ob.game
-        
-        #make sure a object is selected, otherwise hide settings and display warning
+
+    # make sure a object is selected, otherwise hide settings and display warning
     if type == 'Mesh':
-            if not objects: 
-                row = layout.row()
-                row.label(text="No Active Object", icon='ERROR')
-            else:
-                row = layout.column()            
-                row.prop(config, "show_extra_indices")
-                row.prop(config, "get_indices")
-		
-                row = layout.row() 
-                row.operator("mesh.vertex_select", text="vertices")
-                row.operator("mesh.face_select", text="faces")
-                row.operator("mesh.edge_select", text="edges")
+        if not objects:
+            row = layout.row()
+            row.label(text="No Active Object", icon='ERROR')
+        else:
+            row = layout.column()
+            row.prop(config, "show_extra_indices")
+            row.prop(config, "get_indices")
+
+            row = layout.row()
+            row.operator("mesh.vertex_select", text="vertices")
+            row.operator("mesh.face_select", text="faces")
+            row.operator("mesh.edge_select", text="edges")
 
 # ------ class list ------
 
 class_list = [
-	dt_op0,
-	dt_p_group0,
+    dt_op0,
+    dt_p_group0,
 ]
+
 
 class AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     display_limit = IntProperty(name="Display limit",
-                        description="Maximum number of items to list",
-                        default=5, min=2, max=20)
+                                description="Maximum number of items to list",
+                                default=5, min=2, max=20)
     calculate_modifier_verts = BoolProperty(name="Calculate mod. vertices",
-                        description="Calculate vertex count after applying modifiers.",
-                        default=False)
+                                            description="Calculate vertex count after applying modifiers.",
+                                            default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -936,21 +955,25 @@ class AddonPreferences(bpy.types.AddonPreferences):
         layout.label(text="----Mesh Summary----")
         col = layout.column()
         row = col.row()
-        row.prop(self,"calculate_modifier_verts")
+        row.prop(self, "calculate_modifier_verts")
         row = col.row()
         row.prop(self, "display_limit")
-        col = row.column() # this stops the button stretching
-		
+        col = row.column()  # this stops the button stretching
+
 # ------ register ------
+
+
 def register():
     for c in class_list:
         bpy.utils.register_class(c)
-    bpy.types.Scene.dt_custom_props = PointerProperty(type = dt_p_group0)
+    bpy.types.Scene.dt_custom_props = PointerProperty(type=dt_p_group0)
     bpy.types.VIEW3D_PT_view3d_meshdisplay.append(menu_)
     bpy.utils.register_module(__name__)
-    bpy.types.Scene.CONFIG_IndexMarker = bpy.props.PointerProperty(type = UIElements)
+    bpy.types.Scene.CONFIG_IndexMarker = bpy.props.PointerProperty(type=UIElements)
 
 # ------ unregister ------
+
+
 def unregister():
     for c in class_list:
         bpy.utils.unregister_class(c)
@@ -964,4 +987,3 @@ def unregister():
 # ------ ------
 if __name__ == "__main__":
     register()
-

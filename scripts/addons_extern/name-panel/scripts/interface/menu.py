@@ -20,55 +20,56 @@
 import bpy
 from bpy.types import Menu
 
+
 class specials(Menu):
-  '''
-    Menu for name panel operators.
-  '''
-  bl_idname = 'VIEW3D_MT_name_panel_specials'
-  bl_label = 'Operators'
-  bl_description = 'Operators and settings.'
-
-  def draw(self, context):
     '''
-      Draw the menu body.
+      Menu for name panel operators.
     '''
+    bl_idname = 'VIEW3D_MT_name_panel_specials'
+    bl_label = 'Operators'
+    bl_description = 'Operators and settings.'
 
-    # layout
-    layout = self.layout
+    def draw(self, context):
+        '''
+          Draw the menu body.
+        '''
 
-    # option
-    option = context.scene.NamePanel
+        # layout
+        layout = self.layout
 
-    # batch auto name
-    layout.operator('view3d.batch_auto_name', icon='AUTO')
+        # option
+        option = context.scene.NamePanel
 
-    # bath name
-    layout.operator('wm.batch_name', icon='SORTALPHA')
+        # batch auto name
+        layout.operator('view3d.batch_auto_name', icon='AUTO')
 
-    # batch copy
-    layout.operator('view3d.batch_copy_name', icon='COPYDOWN')
-    layout.separator()
+        # bath name
+        layout.operator('wm.batch_name', icon='SORTALPHA')
 
-    # batch reset
-    layout.operator('view3d.reset_name_panel_settings', icon='FILE_REFRESH')
+        # batch copy
+        layout.operator('view3d.batch_copy_name', icon='COPYDOWN')
+        layout.separator()
 
-    # batch transfer
-    layout.operator('view3d.transfer_name_panel_settings', icon='RECOVER_AUTO')
+        # batch reset
+        layout.operator('view3d.reset_name_panel_settings', icon='FILE_REFRESH')
 
-    # separator
-    layout.separator()
+        # batch transfer
+        layout.operator('view3d.transfer_name_panel_settings', icon='RECOVER_AUTO')
 
-    # pin active object
-    layout.prop(option, 'pinActiveObject')
+        # separator
+        layout.separator()
 
-    # serparator
-    # layout.separator()
+        # pin active object
+        layout.prop(option, 'pinActiveObject')
 
-    # object names
-    # layout.operator('view3d.auto_name_object_names', icon='OBJECT_DATA')
+        # serparator
+        # layout.separator()
 
-    # constraint names
-    # layout.operator('view3d.auto_name_constraint_names', icon='CONSTRAINT')
+        # object names
+        # layout.operator('view3d.auto_name_object_names', icon='OBJECT_DATA')
 
-    # modifier names
-    # layout.operator('view3d.auto_name_modifier_names', icon='MODIFIER')
+        # constraint names
+        # layout.operator('view3d.auto_name_constraint_names', icon='CONSTRAINT')
+
+        # modifier names
+        # layout.operator('view3d.auto_name_modifier_names', icon='MODIFIER')

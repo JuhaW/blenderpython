@@ -1,6 +1,8 @@
 from .Utils.core import *
 
-# adds a context sensitive delete menu 
+# adds a context sensitive delete menu
+
+
 class DeleteMenu(bpy.types.Menu):
     bl_label = "Delete"
     bl_idname = "mesh.context_delete_menu"
@@ -14,19 +16,19 @@ class DeleteMenu(bpy.types.Menu):
 
     def init(self):
         sel_verts_num, sel_edges_num, sel_faces_num = get_selected()
-        
+
         if sel_verts_num and not sel_edges_num and not sel_faces_num:
             selected = "verts"
-            
+
         elif sel_verts_num and sel_edges_num and not sel_faces_num:
             selected = "edges"
-            
+
         elif sel_verts_num and sel_edges_num and sel_faces_num:
             selected = "faces"
-            
+
         else:
             selected = "none"
-            
+
         return selected
 
     def draw(self, context):
@@ -36,20 +38,20 @@ class DeleteMenu(bpy.types.Menu):
         if selected == "none":
             menu.add_item().label("Nothing to Delete")
             return
-        
+
         elif selected == "verts":
             self.draw_verts(menu)
-            
+
         elif selected == "edges":
             self.draw_edges(menu)
-            
+
         else:
             self.draw_faces(menu)
 
     def draw_verts(self, menu):
         prop = menu.add_item().operator("mesh.delete", "Verts", icon='VERTEXSEL')
         prop.type = 'VERT'
-        
+
         menu.add_item().operator("mesh.dissolve_verts", icon='SNAP_VERTEX')
         menu.add_item().operator("mesh.dissolve_limited", icon='STICKY_UVS_LOC')
 
@@ -101,10 +103,11 @@ class DeleteMenu(bpy.types.Menu):
 
         menu.add_item().operator("mesh.delete_edgeloop", icon='BORDER_LASSO')
         menu.add_item().operator("mesh.edge_collapse", icon='UV_EDGESEL')
-        
+
 ### ------------ New hotkeys and registration ------------ ###
 
 addon_keymaps = []
+
 
 def register():
 
@@ -115,6 +118,7 @@ def register():
     kmi = km.keymap_items.new('wm.call_menu', 'X', 'PRESS')
     kmi.properties.name = 'mesh.context_delete_menu'
     addon_keymaps.append((km, kmi))
+
 
 def unregister():
      # remove keymaps when add-on is deactivated

@@ -9,18 +9,18 @@
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of          #
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #
 #  GNU General Public License for more details.                            #
-#                                                                          #    
+#                                                                          #
 #  You should have received a copy of the GNU General Public License       #
 #  along with this program; if not, write to the Free Software Foundation, #
 #  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.      #
-#                                                                          # 
+#                                                                          #
 # ###################### END GPL LICENSE BLOCK #############################
 
 bl_info = {
     "name": "Retopo MT",
     "category": "Mesh",
     "author": "Will Souloumiac aka Pixivore, Cédric Lepiller aka Pitiwazou, Blenderlounge, OrAngE",
-    "version": (1,0,3),
+    "version": (1, 0, 3),
     "blender": (2, 73, 0),
     "location": "Editmode > ctrl+shift+X",
     "description": "Multiple tools for retopology.",
@@ -34,7 +34,8 @@ import bgl
 import bmesh
 import blf
 import copy
-import sys, os
+import sys
+import os
 from mathutils import *
 from math import *
 from bpy.props import IntProperty, FloatProperty
@@ -43,13 +44,14 @@ from bpy_extras.object_utils import AddObjectHelper, object_data_add
 
 ############### Prefs ########################
 
-#Class Prefs
+# Class Prefs
+
+
 class RetopoMTPrefs(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     bpy.types.Scene.Enable_Tab_01 = bpy.props.BoolProperty(default=False)
     bpy.types.Scene.Enable_Tab_02 = bpy.props.BoolProperty(default=False)
-    
 
     def draw(self, context):
         layout = self.layout
@@ -60,8 +62,8 @@ class RetopoMTPrefs(bpy.types.AddonPreferences):
             layout.label(text="This Addon helps you to make your retopo !")
             layout.label(text="It's an alpha version, so it can crash, think to save your work as soon as possible")
             layout.label(text="Don't hesitate to give your feeling and bug on the forums, Blender artist and Blenderlounge")
-            
-        layout.prop(context.scene, "Enable_Tab_02", text="URL's", icon="URL")   
+
+        layout.prop(context.scene, "Enable_Tab_02", text="URL's", icon="URL")
         if context.scene.Enable_Tab_02:
             row = layout.row()
             row.operator("wm.url_open", text="pixivores.com").url = "http://pixivores.com"
@@ -103,7 +105,7 @@ global g_Inverse
 global g_CTObj
 
 global g_SVScene
-global g_SVregion 
+global g_SVregion
 global g_SVrv3d
 
 global g_Selection
@@ -137,8 +139,9 @@ global g_bAutoMerge
 
 #########################################################################################################
 class cCursor:
+
     def __init__(self, _AngleStep, _Radius):
-        # Variables pour le curseur            
+        # Variables pour le curseur
         self.CircleListRaw = []
         self.CLR_C = []
         self.CurLoc = Vector((0.0, 0.0, 0.0))
@@ -152,11 +155,10 @@ class cCursor:
 #        self.BRadius = 1.0
         self.BRadius = _Radius * 20.0
         self.BSize = 6.0
-        self.DRadius = 1.0* 0.65
-        
+        self.DRadius = 1.0 * 0.65
+
         self.oldmx = 0
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def Hide(self):
@@ -165,28 +167,24 @@ class cCursor:
         bpy.context.window.cursor_modal_set("DEFAULT")
     #---------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------
     def Show(self):
         self.bHide = False
         # Hide cursor
         bpy.context.window.cursor_modal_set("NONE")
     #---------------------------------------------------------------------------------------------------
-        
-    
+
     #---------------------------------------------------------------------------------------------------
     def CutSize(self, event):
         self.bCutSize = True
         self.oldmx = event.mouse_region_x
     #---------------------------------------------------------------------------------------------------
-        
-        
+
     #---------------------------------------------------------------------------------------------------
     def BrushSize(self, event):
         self.bBrushSize = True
         self.oldmx = event.mouse_region_x
     #---------------------------------------------------------------------------------------------------
-
 
     #---------------------------------------------------------------------------------------------------
     def Create(self, _AngleStep, _radius):
@@ -205,7 +203,6 @@ class cCursor:
         self.NbPointsInPrimitive += 1
     #---------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------
     def RBenVe(self, Object, Dir):
         ObjectV = Object.normalized()
@@ -222,9 +219,9 @@ class cCursor:
             q.y = rotationAxis.y
             q.z = rotationAxis.z
             return q
-        rotationAxis = ObjectV.cross(DirV);
-        s = sqrt((1.0 + cosTheta) * 2.0);
-        invs = 1 / s;
+        rotationAxis = ObjectV.cross(DirV)
+        s = sqrt((1.0 + cosTheta) * 2.0)
+        invs = 1 / s
         q = Quaternion()
         q.w = s * 0.5
         q.x = rotationAxis.x * invs
@@ -233,25 +230,24 @@ class cCursor:
         return q
     #---------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------
     def Update(self):
         global g_normal
         global g_hit
         global g_mouse_x
-        
+
         NormalObject = Vector((0.0, 0.0, 1.0))
         if(g_normal == None):
-            return  
+            return
         qRot = self.RBenVe(NormalObject, g_normal)
 
         if(qRot != None):
             self.CLR_C.clear()
-            vc = Vector()        
+            vc = Vector()
             idx = 0
-            for i in range(int(len(self.CircleListRaw)/3)):
+            for i in range(int(len(self.CircleListRaw) / 3)):
                 vc.x = self.CircleListRaw[idx * 3]
-                vc.y = self.CircleListRaw[idx * 3  + 1]
+                vc.y = self.CircleListRaw[idx * 3 + 1]
                 vc.z = self.CircleListRaw[idx * 3 + 2]
                 vc = qRot * vc
                 self.CLR_C.append(vc.x)
@@ -261,7 +257,7 @@ class cCursor:
 
         if((self.bBrushSize == False) and (self.bCutSize == False)):
             self.CurLoc = g_hit
-            
+
         if(self.bBrushSize == True):
             if(self.BRadius >= 0.5):
                 self.BRadius += (g_mouse_x - self.oldmx) * 0.05
@@ -282,7 +278,6 @@ class cCursor:
             self.oldmx = g_mouse_x
     #---------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------
     def RotAndPos(self, hit, normal):
         NormalObject = Vector((0.0, 0.0, 1.0))
@@ -291,11 +286,11 @@ class cCursor:
         if(qRot != None):
             self.CLR_C.clear()
             self.CurLoc = hit
-            vc = Vector()        
+            vc = Vector()
             idx = 0
-            for i in range(int(len(self.CircleListRaw)/3)):
+            for i in range(int(len(self.CircleListRaw) / 3)):
                 vc.x = self.CircleListRaw[idx * 3]
-                vc.y = self.CircleListRaw[idx * 3  + 1]
+                vc.y = self.CircleListRaw[idx * 3 + 1]
                 vc.z = self.CircleListRaw[idx * 3 + 2]
                 vc = qRot * vc
                 self.CLR_C.append(vc.x)
@@ -303,16 +298,15 @@ class cCursor:
                 self.CLR_C.append(vc.z)
                 idx += 1
     #---------------------------------------------------------------------------------------------------
-            
 
     #---------------------------------------------------------------------------------------------------
     def Draw(self):
-        if(self.bHide == False):  
+        if(self.bHide == False):
             global g_region
             global g_rv3d
-            
+
             global g_bMerge
-            
+
             # Affichage du curseur
             bgl.glEnable(bgl.GL_BLEND)
             bgl.glLineWidth(1)
@@ -322,8 +316,8 @@ class cCursor:
                 bgl.glColor4f(0.97, 0.01, 0.04, 1.0)
             bgl.glBegin(bgl.GL_LINE_STRIP)
             idx = 0
-            for i in range(int(len(self.CLR_C)/3)):
-                vector3d = (self.CLR_C[idx * 3] * self.BRadius + self.CurLoc.x, self.CLR_C[idx * 3  + 1] * self.BRadius + self.CurLoc.y, self.CLR_C[idx * 3 + 2] * self.BRadius + self.CurLoc.z)
+            for i in range(int(len(self.CLR_C) / 3)):
+                vector3d = (self.CLR_C[idx * 3] * self.BRadius + self.CurLoc.x, self.CLR_C[idx * 3 + 1] * self.BRadius + self.CurLoc.y, self.CLR_C[idx * 3 + 2] * self.BRadius + self.CurLoc.z)
                 vector2d = bpy_extras.view3d_utils.location_3d_to_region_2d(g_region, g_rv3d, vector3d)
                 if(vector2d != None):
                     bgl.glVertex2f(*vector2d)
@@ -338,8 +332,8 @@ class cCursor:
             bgl.glLineWidth(1)
             bgl.glBegin(bgl.GL_LINE_STRIP)
             idx = 0
-            for i in range(int(len(self.CLR_C)/3)):
-                vector3d = (self.CLR_C[idx * 3] * 0.5 + self.CurLoc.x, self.CLR_C[idx * 3  + 1] * 0.5 + self.CurLoc.y, self.CLR_C[idx * 3 + 2] * 0.5 + self.CurLoc.z)
+            for i in range(int(len(self.CLR_C) / 3)):
+                vector3d = (self.CLR_C[idx * 3] * 0.5 + self.CurLoc.x, self.CLR_C[idx * 3 + 1] * 0.5 + self.CurLoc.y, self.CLR_C[idx * 3 + 2] * 0.5 + self.CurLoc.z)
                 vector2d = bpy_extras.view3d_utils.location_3d_to_region_2d(g_region, g_rv3d, vector3d)
                 bgl.glVertex2f(*vector2d)
                 idx += 1
@@ -348,8 +342,8 @@ class cCursor:
             bgl.glColor4f(0.87, 0.28, 0.098, 1.0)
             bgl.glBegin(bgl.GL_LINE_STRIP)
             idx = 0
-            for i in range(int(len(self.CLR_C)/3)):
-                vector3d = (self.CLR_C[idx * 3] * self.BSize * 0.05 + self.CurLoc.x, self.CLR_C[idx * 3  + 1] * self.BSize * 0.05 + self.CurLoc.y, self.CLR_C[idx * 3 + 2] * self.BSize * 0.05 + self.CurLoc.z)
+            for i in range(int(len(self.CLR_C) / 3)):
+                vector3d = (self.CLR_C[idx * 3] * self.BSize * 0.05 + self.CurLoc.x, self.CLR_C[idx * 3 + 1] * self.BSize * 0.05 + self.CurLoc.y, self.CLR_C[idx * 3 + 2] * self.BSize * 0.05 + self.CurLoc.z)
                 vector2d = bpy_extras.view3d_utils.location_3d_to_region_2d(g_region, g_rv3d, vector3d)
                 bgl.glVertex2f(*vector2d)
                 idx += 1
@@ -362,19 +356,18 @@ class cCursor:
                 vector3d = (self.CurLoc.x, self.CurLoc.y, self.CurLoc.z)
                 vector2d = bpy_extras.view3d_utils.location_3d_to_region_2d(g_region, g_rv3d, vector3d)
                 dim = blf.dimensions(font_id, str(int(self.BSize)))
-                blf.position(font_id, vector2d.x - dim[0]/2.0, vector2d.y - dim[1]/2.0, 0)
+                blf.position(font_id, vector2d.x - dim[0] / 2.0, vector2d.y - dim[1] / 2.0, 0)
                 blf.draw(font_id, str(int(self.BSize)))
     #---------------------------------------------------------------------------------------------------
-            
 
     #---------------------------------------------------------------------------------------------------
-    def DrawIcon(self, ShowCut = False, CT = False):
-        if(self.bHide == False):    
+    def DrawIcon(self, ShowCut=False, CT=False):
+        if(self.bHide == False):
             global g_region
             global g_rv3d
             global g_Cursor
             global g_rObject
-            
+
             bgl.glEnable(bgl.GL_BLEND)
             bgl.glPointSize(10)
             bgl.glColor4f(1.0, 1.0, 1.0, 1.0)
@@ -410,8 +403,8 @@ class cCursor:
 
 #########################################################################################################
 class cCurvePoint:
-    
-    def __init__(self, _hit = None, _normal = None, _p2d = None, _bPtFromMouse = False):
+
+    def __init__(self, _hit=None, _normal=None, _p2d=None, _bPtFromMouse=False):
         self.hit = Vector()
         if(_hit != None):
             self.hit = _hit
@@ -424,16 +417,14 @@ class cCurvePoint:
         if(_p2d != None):
             self.p2d[0] = _p2d[0]
             self.p2d[1] = _p2d[1]
-        bPtFromMouse = _bPtFromMouse            
+        bPtFromMouse = _bPtFromMouse
     #---------------------------------------------------------------------------------------------------
-        
-        
+
     #---------------------------------------------------------------------------------------------------
     def Set(self, _hit, _normal):
         self.hit = _hit
-        self.normal = _normal        
+        self.normal = _normal
     #---------------------------------------------------------------------------------------------------
-
 
     #---------------------------------------------------------------------------------------------------
     def Update(self, v2d):
@@ -443,70 +434,65 @@ class cCurvePoint:
 
 #########################################################################################################
 class cCurve:
-    
+
     def __init__(self):
         self.Curve = []
         self.BackCurve = []
         self.FrontCurve = []
-        
+
         self.NbPoints = 0
         self.NbBackPoints = 0
         self.NbFrontPoints = 0
-        
+
         self.length = -1.0
 
         self.MinDist = 0.1 * 0.0001
-        
+
         self.EndPoint = -1
-        
+
         self.Ref = []
         self.RefNbPoints = -1
 
         self.lastHit = Vector()
     #---------------------------------------------------------------------------------------------------
-        
-    
+
     #---------------------------------------------------------------------------------------------------
     def Reset(self):
         self.Curve.clear()
         self.BackCurve.clear()
         self.FrontCurve.clear()
         self.Ref.clear()
-        
+
         self.EndPoint = -1
-        
+
         self.NbPoints = 0
         self.NbBackPoints = 0
         self.NbFrontPoints = 0
         self.RefNbPoints = 0
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
-    def AddPoint(self, _hit, _normal, _p2d = None, _bPtFromMouse = False):
+    def AddPoint(self, _hit, _normal, _p2d=None, _bPtFromMouse=False):
         self.Curve.append(cCurvePoint(_hit, _normal, _p2d, _bPtFromMouse))
         self.NbPoints += 1
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
-    def AddFrontPoint(self, _hit, _normal, _p2d = None, _bPtFromMouse = False):
+    def AddFrontPoint(self, _hit, _normal, _p2d=None, _bPtFromMouse=False):
         self.FrontCurve.append(cCurvePoint(_hit, _normal, _p2d))
         self.NbFrontPoints += 1
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
-    def AddBackPoint(self, _hit, _normal, _p2d = None, _bPtFromMouse = False):
+    def AddBackPoint(self, _hit, _normal, _p2d=None, _bPtFromMouse=False):
         self.BackCurve.append(cCurvePoint(_hit, _normal, _p2d))
         self.NbBackPoints += 1
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
-    def Homogenize(self, cutDist = 0.001):
+    def Homogenize(self, cutDist=0.001):
         global g_bCurveCurrent
-        
+
         if(self.NbPoints > 0):
             self.length = 0
             self.Ref.clear()
@@ -514,34 +500,33 @@ class cCurve:
             lenPath = len(self.Curve)
             if(self.EndPoint > 0):
                 lenPath = self.EndPoint
-                
-            for i in range (1, lenPath):
+
+            for i in range(1, lenPath):
                 v = self.Curve[i].hit - self.Curve[i - 1].hit
                 lc = v.length
                 self.length += lc
                 # Teste si la longueur est supérieure à la distance minimale
                 if(lc > cutDist):
-                    NnPoints = int(lc/cutDist)
-                    vDir = v/NnPoints
+                    NnPoints = int(lc / cutDist)
+                    vDir = v / NnPoints
                     for c in range(0, NnPoints):
                         np = self.Curve[i - 1].hit + vDir * c
-                        
+
                         self.Ref.append(cCurvePoint(np, self.Curve[i - 1].normal))
                         self.RefNbPoints += 1
-                else:                        
+                else:
                     self.Ref.append(cCurvePoint(self.Curve[i - 1].hit, self.Curve[i - 1].normal))
                     self.RefNbPoints += 1
-                        
-            g_bCurveCurrent = True 
+
+            g_bCurveCurrent = True
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
     def Draw(self):
         global g_region
         global g_rv3d
         global g_bDrawing
-        
+
         if((g_bDrawing == False) and (g_bBSurface == False) and (g_bCTRetopo == False)):
             return
 
@@ -575,7 +560,6 @@ class cCurve:
             bgl.glVertex2f(self.Curve[self.NbPoints - 1].p2d[0], self.Curve[self.NbPoints - 1].p2d[1])
             bgl.glEnd()
 
-
         if(len(self.Ref) > 0):
             # Affichage de la ligne
             bgl.glEnable(bgl.GL_BLEND)
@@ -597,66 +581,60 @@ class cCurve:
             bgl.glDisable(bgl.GL_LINE_STIPPLE)
             bgl.glDisable(bgl.GL_BLEND)
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
     def Get2d(self, Index):
         return Vector((self.Curve[Index].p2d[0], self.Curve[Index].p2d[1], 0.0))
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
     def Set(self, Index, position):
         self.Curve[Index].hit = position
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
     def Get(self, Index):
         return self.Curve[Index].hit
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
-    def Update(self, _context = None, _callsl = None, _bPtFromMouse = False, _CTRetopo = False, _mc = None):
+    def Update(self, _context=None, _callsl=None, _bPtFromMouse=False, _CTRetopo=False, _mc=None):
         global g_hit
         global g_normal
         global g_mouse_x
         global g_mouse_y
-        
+
         lgthSq = (g_hit - self.lastHit).length_squared
-                            
+
         # Teste la distance entre 2 points (> MinDist)
         if(g_bCTRetopo == False):
             if(lgthSq > self.MinDist):
                 # Récupération du Hit point
                 self.AddPoint(g_hit, g_normal, (g_mouse_x, g_mouse_y), _bPtFromMouse)
                 self.lastHit = g_hit
-                
+
         if(g_bCTRetopo):
             if(_CTRetopo == True):
                 self.AddFrontPoint(g_hit, g_normal, (_mc.x, _mc.y))
-                hit, normal, face = Picking(_context, _callsl, _ray_origin = g_hit, _CTRetopo = True, _fp = _mc)
+                hit, normal, face = Picking(_context, _callsl, _ray_origin=g_hit, _CTRetopo=True, _fp=_mc)
                 if(hit != None):
                     self.AddBackPoint(hit, normal)
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
     def CTUpdate(self):
         if(g_bCTRetopo):
             self.Curve.clear()
             self.Curve = self.FrontCurve
             self.NbPoints = self.NbFrontPoints
-            
+
             self.BackCurve.reverse()
             self.Curve += self.BackCurve
             self.NbPoints += self.NbBackPoints
             self.NbBackPoints = 0
             self.NbFrontPoints = 0
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
     def Debug(self):
         print("----------------------------------------------------------")
@@ -676,11 +654,10 @@ class cCurve:
 #########################################################################################################
 
 
-
 ##################################################################################################
 class cVertex:
-    
-    def __init__(self, x, y, z, faceIdx = None, select = False, copy = None, BSelect = False):
+
+    def __init__(self, x, y, z, faceIdx=None, select=False, copy=None, BSelect=False):
         self.x = x
         self.y = y
         self.z = z
@@ -693,25 +670,22 @@ class cVertex:
         if(faceIdx != None):
             self.faceIndex = []
             for i, n in enumerate(faceIdx):
-                self.faceIndex.append(n)                            
+                self.faceIndex.append(n)
                 self.numFaces += 1
     #---------------------------------------------------------------------------------------------------
-                
-                
+
     #---------------------------------------------------------------------------------------------------
     def SetCoord(self, pos):
         self.x = pos.x
         self.y = pos.y
         self.z = pos.z
     #---------------------------------------------------------------------------------------------------
-                
-                
+
     #---------------------------------------------------------------------------------------------------
     def Update2d(self, pos2d):
         self.x2d, self.y2d = pos2d
     #---------------------------------------------------------------------------------------------------
-                
-                
+
     #---------------------------------------------------------------------------------------------------
     def AddFace(self, index):
         if(isinstance(index, int)):
@@ -722,10 +696,10 @@ class cVertex:
                     self.numFaces += 1
                     bReplace = True
                     break
-            if(bReplace == False):                
+            if(bReplace == False):
                 self.faceIndex.append(index)
                 self.numFaces += 1
-            
+
         if(isinstance(index, tuple)):
             n = 0
             for i in range(len(self.faceIndex[0:])):
@@ -738,61 +712,52 @@ class cVertex:
                 self.numFaces += 1
     #---------------------------------------------------------------------------------------------------
 
-                
     #---------------------------------------------------------------------------------------------------
     def BS_Select(self, value):
         self.BS_select = value
     #---------------------------------------------------------------------------------------------------
 
-                
     #---------------------------------------------------------------------------------------------------
     def Select(self, value):
         self.select = value
     #---------------------------------------------------------------------------------------------------
 
-                
     #---------------------------------------------------------------------------------------------------
     def Selected(self):
         return self.select
     #---------------------------------------------------------------------------------------------------
 
-                
     #---------------------------------------------------------------------------------------------------
     def Get(self):
         return (Vector((self.x, self.y, self.z)))
     #---------------------------------------------------------------------------------------------------
 
-                
     #---------------------------------------------------------------------------------------------------
     def Get2d(self):
         return ((self.x2d, self.y2d))
     #---------------------------------------------------------------------------------------------------
 
-       
     #---------------------------------------------------------------------------------------------------
     def Get2dv(self):
         return Vector((self.x2d, self.y2d, 0.0))
-       
+
 ##################################################################################################
 
-                
 
 ##################################################################################################
 class cVertices:
-    
+
     def __init__(self):
         self.list = []
         self.TotalVertices = 0
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def AddVertex(self, vertex):
         if(isinstance(vertex, cVertex)):
             self.list.append(vertex)
-            self.TotalVertices  += 1
+            self.TotalVertices += 1
     #---------------------------------------------------------------------------------------------------
-
 
     #---------------------------------------------------------------------------------------------------
     def Move(self, VertexLst, Location):
@@ -800,7 +765,6 @@ class cVertices:
             self.list[v].SetCoord(Location)
     #---------------------------------------------------------------------------------------------------
 
-            
     #---------------------------------------------------------------------------------------------------
     def GetFaceIndex(self, Index):
         try:
@@ -809,13 +773,11 @@ class cVertices:
             print("Error in GetFaceIndex() : ", Index)
     #---------------------------------------------------------------------------------------------------
 
-            
     #---------------------------------------------------------------------------------------------------
     def Get(self, Index):
         return Vector((self.list[Index].x, self.list[Index].y, self.list[Index].z))
     #---------------------------------------------------------------------------------------------------
 
-            
     #---------------------------------------------------------------------------------------------------
     def Get2d(self, Index):
         try:
@@ -824,62 +786,57 @@ class cVertices:
             print("Error in Get2d() : ", Index)
     #---------------------------------------------------------------------------------------------------
 
-            
     #---------------------------------------------------------------------------------------------------
     def Update(self, IndexFace, Index):
         self.list[Index].AddFace(IndexFace)
     #---------------------------------------------------------------------------------------------------
-
 
     #---------------------------------------------------------------------------------------------------
     def Debug(self):
         print("-------------------- Total vertices --> ", self.TotalVertices)
         print("-------------------------------------------------------------")
         for i, v in enumerate(self.list):
-#            print(i, "- (", v.x, ",", v.y, ",", v.z, ") - Nb Faces :", v.numFaces, "- Faces Index :", v.faceIndex[0:])
+            #            print(i, "- (", v.x, ",", v.y, ",", v.z, ") - Nb Faces :", v.numFaces, "- Faces Index :", v.faceIndex[0:])
             print(i, "- Nb Faces :", v.numFaces, "- Faces Index :", v.faceIndex[0:])
 ##################################################################################################
-            
 
 
 ##################################################################################################
 class cFace:
-    
-    def __init__(self, vertIdx = None, center = None, cx2d = -1, cy2d = -1, select = False):
+
+    def __init__(self, vertIdx=None, center=None, cx2d=-1, cy2d=-1, select=False):
         # Valeurs par défaut
         self.VertexIdx = []
         self.NbVertices = 0
-        
+
         self.Normal = Vector()
-        
+
         if(isinstance(vertIdx, tuple)):
             for i in range(len(vertIdx)):
                 self.VertexIdx.append(vertIdx[i])
                 self.NbVertices += 1
 
         self.CalculateNormal()
-                
+
         self.center = center
-            
+
         self.cx2d = cx2d
         self.cy2d = cy2d
-        
+
         self.select = select
-        
+
         self.ps = 0
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def CalculateNormal(self):
         global g_rObject
-        
+
         if(len(self.VertexIdx) > 1):
             edge0 = g_rObject.Vertices.Get(self.VertexIdx[0]) - g_rObject.Vertices.Get(self.VertexIdx[1])
             edge1 = g_rObject.Vertices.Get(self.VertexIdx[1]) - g_rObject.Vertices.Get(self.VertexIdx[2])
             self.Normal = edge0.cross(edge1)
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def Inverse(self):
@@ -895,13 +852,11 @@ class cFace:
             self.VertexIdx[1] = self.VertexIdx[2]
             self.VertexIdx[2] = tmp
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def GetCenter(self):
         return self.center
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def ReplaceVertex(self, i0, i1):
@@ -910,19 +865,16 @@ class cFace:
                 self.VertexIdx[i] = i1
                 break
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def Select(self, value):
         self.select = value
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def SetCenter2d(self, Center2d):
         self.cx2d, self.cy2d = Center2d
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def AddVertex(self, index):
@@ -934,10 +886,10 @@ class cFace:
                     self.NbVertices += 1
                     bReplace = True
                     break
-            if(bReplace == False):                
+            if(bReplace == False):
                 self.VertexIdx.append(index)
                 self.NbVertices += 1
-            
+
         if(isinstance(index, tuple)):
             n = 0
             for i in range(len(self.VertexIdx[0:])):
@@ -949,7 +901,6 @@ class cFace:
                 self.VertexIdx.append(index[i + n])
                 self.NbVertices += 1
     #---------------------------------------------------------------------------------------------------
-            
 
     #---------------------------------------------------------------------------------------------------
     def GetVerticesIndex(self):
@@ -958,16 +909,14 @@ class cFace:
 ##################################################################################################
 
 
-        
 ##################################################################################################
 class cFaces:
-    
+
     def __init__(self):
         self.list = []
         self.TotalFaces = 0
         self.DelFacesList = []
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def AddFace(self, face):
@@ -975,13 +924,11 @@ class cFaces:
         self.TotalFaces += 1
         return self.TotalFaces - 1
     #---------------------------------------------------------------------------------------------------
-        
-        
+
     #---------------------------------------------------------------------------------------------------
     def CenterUpdate(self, nface, center):
         self.list[nface].center = center
     #---------------------------------------------------------------------------------------------------
-            
 
     #---------------------------------------------------------------------------------------------------
     def GetVerticesIndex(self, nface):
@@ -989,16 +936,14 @@ class cFaces:
             return self.list[nface].VertexIdx
         except:
             print("Error : GetVerticesIndex : ", nface, " - TotalFaces : ", self.TotalFaces)
-            
+
     #---------------------------------------------------------------------------------------------------
-            
 
     #---------------------------------------------------------------------------------------------------
     def ReplaceVertex(self, index, i0, i1):
         self.list[index].ReplaceVertex(i0, i1)
-        
+
     #---------------------------------------------------------------------------------------------------
-            
 
     #---------------------------------------------------------------------------------------------------
     def Debug(self):
@@ -1010,10 +955,9 @@ class cFaces:
 ##################################################################################################
 
 
-        
 ##################################################################################################
 class cObject:
-    
+
     def __init__(self):
         self.Vertices = cVertices()
         self.Faces = cFaces()
@@ -1023,16 +967,16 @@ class cObject:
         self.GeomBSPath = cCurve()
 
         self.AM_dist = 0.05
-        
+
         self.NbEdges = 0
-        
+
         self.SelectPointDist = 10
         self.SaveSel = []
- 
+
         self.UndoVL = []
         self.UndoFL = []
         self.UndoNE = []
-        
+
         self.PointIdx = []
         self.MergeIdx = -1
         self.SelectedFace = -1
@@ -1040,10 +984,9 @@ class cObject:
         self.CTNCut = 10
         self.CTSel = []
         self.fpCT = None
-        
+
         self.Sg_hit = None
     #---------------------------------------------------------------------------------------------------
-
 
     #---------------------------------------------------------------------------------------------------
     def ResetCollapse(self):
@@ -1056,22 +999,20 @@ class cObject:
         global g_PosCutCTIcon
         global g_CTCurve
         global g_CTNCurve
-        
+
         self.pI0 = self.pI1 = self.pI0End = self.pI1End = -1
         self.FaceStart = self.FaceEnd = -1
         self.CTSel.clear()
         g_bCurveCurrent = False
-        g_PosSizeIcon = g_PosCutIcon = g_PosCutBef_in =  g_PosCutBef_out = None
+        g_PosSizeIcon = g_PosCutIcon = g_PosCutBef_in = g_PosCutBef_out = None
     #---------------------------------------------------------------------------------------------------
 
-        
     #---------------------------------------------------------------------------------------------------
     def Debug(self):
         print("------------------------ Object debug -----------------------")
         self.Vertices.Debug()
         self.Faces.Debug()
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def AddFace(self, face):
@@ -1080,14 +1021,12 @@ class cObject:
         for i, nf in enumerate(face.VertexIdx):
             self.Vertices.Update(n, nf)
     #---------------------------------------------------------------------------------------------------
-        
 
     #---------------------------------------------------------------------------------------------------
     def AddVertex(self, vertex):
-        self.Vertices.AddVertex(vertex)        
+        self.Vertices.AddVertex(vertex)
     #---------------------------------------------------------------------------------------------------
 
-                
     #---------------------------------------------------------------------------------------------------
     def Merge(self, IndexFrom, IndexTo):
         # Update vertex position
@@ -1097,7 +1036,6 @@ class cObject:
             print("Error in SetCoord() : ", IndexTo, IndexFrom)
     #---------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------
     def CreateGeometry(self):
         global g_bCurveCurrent
@@ -1106,33 +1044,32 @@ class cObject:
 
         global g_SizeIcon
         global g_CutIcon
-        
+
         global g_bAutoMerge
-        
+
         global g_rv3d
 
-        
         if((g_Cursor == None) or (g_Curve == None) or (g_bCurveCurrent == False)):
             return
-        
+
         # Maintenant la réference de la courbe, c'est 'RefCurve' pour travailler dessus
-        NbPoints = g_Curve.length/g_Cursor.BSize
+        NbPoints = g_Curve.length / g_Cursor.BSize
         if((NbPoints == 0) or (g_Curve.NbPoints < 2)):
-           return
-        DistPoint = g_Curve.length/NbPoints
+            return
+        DistPoint = g_Curve.length / NbPoints
         DistPoint_squared = DistPoint * DistPoint
-        
+
         RefPoint = 0
         self.GeomPath.Reset()
         self.GeomPath.AddPoint(g_Curve.Ref[0].hit, g_Curve.Ref[0].normal)
-        
+
         LastIndx = g_Curve.NbPoints - 1
         if(LastIndx <= 1):
-            return 
-        
+            return
+
         lp = 0
-        ldist = g_Curve.length/g_Cursor.BSize
-        for i in range (1, g_Curve.RefNbPoints):
+        ldist = g_Curve.length / g_Cursor.BSize
+        for i in range(1, g_Curve.RefNbPoints):
             v1 = g_Curve.Ref[i].hit
             v0 = g_Curve.Ref[i - 1].hit
             v = v1 - v0
@@ -1142,7 +1079,7 @@ class cObject:
                 self.GeomPath.AddPoint(g_Curve.Ref[i].hit, g_Curve.Ref[i].normal)
 
         self.GeomPath.AddPoint(g_Curve.Ref[len(g_Curve.Ref) - 1].hit, g_Curve.Ref[len(g_Curve.Ref) - 1].normal)
-                
+
         for i in range(1, self.GeomPath.NbPoints):
             # Calcul de la direction, si la liste n'est pas vide
             PrevIdx = i - 1
@@ -1153,13 +1090,13 @@ class cObject:
                 PrevNormal = self.GeomPath.Curve[PrevIdx].normal
                 PrevDir = Hit - PrevHit
                 PrevDir = PrevDir.normalized()
-                
+
                 self.GeomPath.Curve[PrevIdx].dir = PrevDir
                 # Calcul du vecteur perpendiculaire
                 PrevPerps = PrevDir.cross(PrevNormal)
                 # Sauvegarde de la perpendiculaire
                 self.GeomPath.Curve[PrevIdx].persp = PrevPerps
-                
+
                 self.GeomPath.Curve[i].persp = PrevPerps
 
         BRad = g_Cursor.BRadius
@@ -1171,13 +1108,13 @@ class cObject:
         if(self.pI0End >= 0):
             edge = self.Vertices.Get(self.pI1End) - self.Vertices.Get(self.pI0End)
             BRadEnd = edge.length * 10
-            incBRad = (BRadEnd - BRad)/g_Cursor.BSize
+            incBRad = (BRadEnd - BRad) / g_Cursor.BSize
             incBRad /= 20.0
-                
+
         origin = (0.0, 0.0, 0.0)
-        self.Facescale = BRad/20.0
+        self.Facescale = BRad / 20.0
         NbPointsCreated = 0
-        
+
         nVertex = []
         MergeList = []
         nVn = self.Vertices.TotalVertices
@@ -1216,10 +1153,10 @@ class cObject:
                                 nVertex.append(nVn)
                                 nVn += 1
                                 NbPointsCreated += 2
-            
+
             g_CutIcon.RotAndPos(hit, self.GeomPath.Curve[self.GeomPath.NbPoints - 1].normal)
             g_PosCutIcon = hit
-            if(self.pI0< 0):
+            if(self.pI0 < 0):
                 g_SizeIcon.RotAndPos(pt0, self.GeomPath.Curve[self.GeomPath.NbPoints - 1].normal)
                 g_PosSizeIcon = pt0
             else:
@@ -1228,12 +1165,12 @@ class cObject:
             # Création des faces
             nFaceIdx = self.NbEdges
             CurrentFace = self.Faces.TotalFaces
-            
+
             look_at, camera_pos = camera(bpy.context.space_data.region_3d)
 
             if((g_Cursor.BSize == 1) and (self.pI0End >= 0)):
                 # On créé la face directement
-                middle = self.Vertices.Get(self.pI0) + self.Vertices.Get(self.pI1) + self.Vertices.Get(self.pI1End) + self.Vertices.Get(self.pI0End)/4.0
+                middle = self.Vertices.Get(self.pI0) + self.Vertices.Get(self.pI1) + self.Vertices.Get(self.pI1End) + self.Vertices.Get(self.pI0End) / 4.0
                 fc = cFace((self.pI0, self.pI1, self.pI0End, self.pI1End), middle)
                 vs = camera_pos - self.Vertices.Get(fc.VertexIdx[0])
                 ps = vs.dot(fc.Normal)
@@ -1244,7 +1181,7 @@ class cObject:
                     fc.CalculateNormal()
                 self.AddFace(fc)
                 self.NbEdges += NbPointsCreated
-            else:                
+            else:
                 for idx in range(0, self.GeomPath.NbPoints - 1):
                     # Calcul le centre de la face
                     hit0 = self.GeomPath.Curve[idx].hit
@@ -1264,7 +1201,7 @@ class cObject:
                         if(idx > 0):
                             if(self.FaceEnd >= 0):
                                 if(idx == self.GeomPath.NbPoints - 2):
-                                    fc = cFace((nFaceIdx + (idx - 1)  * 2, nFaceIdx + (idx - 1) * 2 + 1, self.pI1End, self.pI0End), Center)
+                                    fc = cFace((nFaceIdx + (idx - 1) * 2, nFaceIdx + (idx - 1) * 2 + 1, self.pI1End, self.pI0End), Center)
                                     vs = camera_pos - self.Vertices.Get(fc.VertexIdx[0])
                                     ps = vs.dot(fc.Normal)
                                     if(not g_rv3d.is_perspective):
@@ -1274,7 +1211,7 @@ class cObject:
                                         fc.CalculateNormal()
                                     self.AddFace(fc)
                                 else:
-                                    fc = cFace((nFaceIdx + (idx - 1)  * 2, nFaceIdx + (idx - 1) * 2 + 1, nFaceIdx + ((idx - 1) + 1) * 2 + 1, nFaceIdx + ((idx - 1) + 1) * 2), Center)
+                                    fc = cFace((nFaceIdx + (idx - 1) * 2, nFaceIdx + (idx - 1) * 2 + 1, nFaceIdx + ((idx - 1) + 1) * 2 + 1, nFaceIdx + ((idx - 1) + 1) * 2), Center)
                                     vs = camera_pos - self.Vertices.Get(fc.VertexIdx[0])
                                     ps = vs.dot(fc.Normal)
                                     if(not g_rv3d.is_perspective):
@@ -1284,7 +1221,7 @@ class cObject:
                                         fc.CalculateNormal()
                                     self.AddFace(fc)
                             else:
-                                fc = cFace((nFaceIdx + (idx - 1)  * 2, nFaceIdx + (idx - 1) * 2 + 1, nFaceIdx + ((idx - 1) + 1) * 2 + 1, nFaceIdx + ((idx - 1) + 1) * 2), Center)
+                                fc = cFace((nFaceIdx + (idx - 1) * 2, nFaceIdx + (idx - 1) * 2 + 1, nFaceIdx + ((idx - 1) + 1) * 2 + 1, nFaceIdx + ((idx - 1) + 1) * 2), Center)
                                 vs = camera_pos - self.Vertices.Get(fc.VertexIdx[0])
                                 ps = vs.dot(fc.Normal)
                                 if(not g_rv3d.is_perspective):
@@ -1304,7 +1241,7 @@ class cObject:
                                 fc.CalculateNormal()
                             self.AddFace(fc)
                 self.NbEdges += NbPointsCreated
-                
+
         # Test if vertices to merge
         Merged = []
         if(g_bAutoMerge):
@@ -1325,17 +1262,16 @@ class cObject:
                 if(sj != -1):
                     MergeList.append([sj, nv])
                     Merged.append(sj)
-    
+
             for i in range(len(MergeList)):
                 if((MergeList[i][0] != None) and (MergeList[i][1] != None)):
                     self.Merge(MergeList[i][0], MergeList[i][1])
-                    
-                    
-            if(len(nVertex) >= 4):                    
+
+            if(len(nVertex) >= 4):
                 vStart0 = nVertex[0]
                 vStart1 = nVertex[1]
-                vEnd0   = nVertex[len(nVertex) - 2]
-                vEnd1   = nVertex[len(nVertex) - 1]
+                vEnd0 = nVertex[len(nVertex) - 2]
+                vEnd1 = nVertex[len(nVertex) - 1]
                 vec = self.Vertices.Get(vStart0) - self.Vertices.Get(vEnd0)
                 if(vec.length <= self.AM_dist):
                     self.Merge(vStart0, vEnd0)
@@ -1343,34 +1279,33 @@ class cObject:
                 if(vec.length <= self.AM_dist):
                     self.Merge(vStart1, vEnd1)
     #---------------------------------------------------------------------------------------------------
-                
 
     #---------------------------------------------------------------------------------------------------
     def CreateBSGeometry(self, nc):
         global g_Selection
         global g_BSCurve
-        
+
         if(g_BSCurrent < 0):
             return
 
         if(len(g_Selection) > 0):
-            NbPoints = g_BSCurve[nc].length/(len(g_Selection) - 1)
+            NbPoints = g_BSCurve[nc].length / (len(g_Selection) - 1)
             if((NbPoints == 0) or (g_BSCurve[nc].NbPoints < 2)):
-               return
-            DistPoint = g_BSCurve[nc].length/NbPoints
+                return
+            DistPoint = g_BSCurve[nc].length / NbPoints
             DistPoint_squared = DistPoint * DistPoint
-            
+
             RefPoint = 0
             self.GeomBSPath.Reset()
             self.GeomBSPath.AddPoint(g_BSCurve[nc].Ref[0].hit, g_BSCurve[nc].Ref[0].normal)
-            
+
             LastIndx = g_BSCurve[nc].NbPoints - 1
             if(LastIndx <= 1):
-                return 
-            
+                return
+
             lp = 0
-            ldist = g_BSCurve[nc].length/(len(g_Selection) - 1)
-            for i in range (1, g_BSCurve[nc].RefNbPoints):
+            ldist = g_BSCurve[nc].length / (len(g_Selection) - 1)
+            for i in range(1, g_BSCurve[nc].RefNbPoints):
                 v1 = g_BSCurve[nc].Ref[i].hit
                 v0 = g_BSCurve[nc].Ref[i - 1].hit
                 v = v1 - v0
@@ -1380,11 +1315,11 @@ class cObject:
                     self.GeomBSPath.AddPoint(g_BSCurve[nc].Ref[i].hit, g_BSCurve[nc].Ref[i].normal)
 
             self.GeomBSPath.AddPoint(g_BSCurve[nc].Ref[len(g_BSCurve[nc].Ref) - 1].hit, g_BSCurve[nc].Ref[len(g_BSCurve[nc].Ref) - 1].normal)
-                    
+
             NbPointsCreated = 0
             nvtx = self.Vertices.TotalVertices
             nSel = []
-            
+
             nVertex = []
             MergeList = []
             nVn = self.Vertices.TotalVertices
@@ -1398,11 +1333,11 @@ class cObject:
                     nvtx += 1
                     nVertex.append(nVn)
                     nVn += 1
-                    
+
             # Creation des faces
             ps = 0.0
             for vi in range(len(nSel) - 1):
-                center = self.Vertices.Get(g_Selection[vi]) + self.Vertices.Get(g_Selection[vi + 1]) + self.Vertices.Get(nSel[vi + 1]) + self.Vertices.Get(nSel[vi])/4.0
+                center = self.Vertices.Get(g_Selection[vi]) + self.Vertices.Get(g_Selection[vi + 1]) + self.Vertices.Get(nSel[vi + 1]) + self.Vertices.Get(nSel[vi]) / 4.0
                 fc = cFace((g_Selection[vi], g_Selection[vi + 1], nSel[vi + 1], nSel[vi]), center)
                 if(ps == 0.0):
                     vs = g_BSVs[nc] - self.Vertices.Get(fc.VertexIdx[0])
@@ -1414,10 +1349,10 @@ class cObject:
                     fc.Inverse()
                     fc.CalculateNormal()
                 self.AddFace(fc)
-                
-            g_Selection = nSel.copy()                
+
+            g_Selection = nSel.copy()
             self.NbEdges += NbPointsCreated
-            
+
             # On teste s'il y a des points à merger
             if(g_bAutoMerge):
                 for i, nv in enumerate(nVertex):
@@ -1426,7 +1361,7 @@ class cObject:
                     for j, v in enumerate(self.Vertices.list):
                         if(j not in nVertex):
                             vec = self.Vertices.Get(nv) - v.Get()
-                            if(vec.length <= self.AM_dist/1.0):
+                            if(vec.length <= self.AM_dist / 1.0):
                                 if(min == None):
                                     min = vec.length
                                     sj = j
@@ -1436,11 +1371,10 @@ class cObject:
                                         sj = j
                     if(sj != -1):
                         MergeList.append([sj, nv])
-        
+
                 for i in range(len(MergeList)):
                     self.Merge(MergeList[i][0], MergeList[i][1])
     #---------------------------------------------------------------------------------------------------
-
 
     #---------------------------------------------------------------------------------------------------
     def CreateCTGeometry(self, nc):
@@ -1449,27 +1383,27 @@ class cObject:
         global g_PosCutCTIcon
         global g_FirstPoint
         global g_EndPoint
-        
+
         if(g_CTNCurve < 0):
             return
-        
-        NbPoints = g_CTCurve[nc].length/self.CTNCut
+
+        NbPoints = g_CTCurve[nc].length / self.CTNCut
         if((NbPoints == 0) or (g_CTCurve[nc].NbPoints < 2)):
             return
-        DistPoint = g_CTCurve[nc].length/NbPoints
+        DistPoint = g_CTCurve[nc].length / NbPoints
         DistPoint_squared = DistPoint * DistPoint
-        
+
         RefPoint = 0
         self.GeomBSPath.Reset()
         self.GeomBSPath.AddPoint(g_CTCurve[nc].Ref[0].hit, g_CTCurve[nc].Ref[0].normal)
-        
+
         LastIndx = g_CTCurve[nc].NbPoints - 1
         if(LastIndx <= 1):
-            return 
-        
+            return
+
         lp = 0
-        ldist = g_CTCurve[nc].length/self.CTNCut
-        for i in range (1, g_CTCurve[nc].RefNbPoints):
+        ldist = g_CTCurve[nc].length / self.CTNCut
+        for i in range(1, g_CTCurve[nc].RefNbPoints):
             v1 = g_CTCurve[nc].Ref[i].hit
             v0 = g_CTCurve[nc].Ref[i - 1].hit
             v = v1 - v0
@@ -1479,7 +1413,7 @@ class cObject:
                 self.GeomBSPath.AddPoint(g_CTCurve[nc].Ref[i].hit, g_CTCurve[nc].Ref[i].normal)
 
         self.GeomBSPath.AddPoint(g_CTCurve[nc].Ref[len(g_CTCurve[nc].Ref) - 1].hit, g_CTCurve[nc].Ref[len(g_CTCurve[nc].Ref) - 1].normal)
-                
+
         NbPointsCreated = 0
         nvtx = self.Vertices.TotalVertices
         nSel = []
@@ -1505,11 +1439,11 @@ class cObject:
             if(nc > 0):
                 ps = 0.0
                 for vi in range(len(nSel) - 1):
-                    center = (self.Vertices.Get(self.CTSel[vi]) + self.Vertices.Get(self.CTSel[vi + 1]) + self.Vertices.Get(nSel[vi + 1]) + self.Vertices.Get(nSel[vi]))/4.0
+                    center = (self.Vertices.Get(self.CTSel[vi]) + self.Vertices.Get(self.CTSel[vi + 1]) + self.Vertices.Get(nSel[vi + 1]) + self.Vertices.Get(nSel[vi])) / 4.0
                     if(g_Inverse):
-                        fc = cFace((self.CTSel[vi], nSel[vi],  nSel[vi + 1], self.CTSel[vi + 1]), center)
-                    else:                        
-                        fc = cFace((self.CTSel[vi],  self.CTSel[vi + 1], nSel[vi + 1], nSel[vi]), center)
+                        fc = cFace((self.CTSel[vi], nSel[vi], nSel[vi + 1], self.CTSel[vi + 1]), center)
+                    else:
+                        fc = cFace((self.CTSel[vi], self.CTSel[vi + 1], nSel[vi + 1], nSel[vi]), center)
                     self.AddFace(fc)
 
         if(g_FirstPoint and g_EndPoint):
@@ -1520,12 +1454,11 @@ class cObject:
 
         if(len(nSel) > 0):
             self.fpCT = (nSel[0], nSel[len(nSel) - 1])
-        
+
         self.CTSel = nSel
-                
+
         self.NbEdges += NbPointsCreated
     #---------------------------------------------------------------------------------------------------
-
 
     #---------------------------------------------------------------------------------------------------
     def PinEndUpdate(self):
@@ -1533,7 +1466,7 @@ class cObject:
         global g_mouse_x
         global g_mouse_y
         global g_normal
-        
+
         if(self.FaceStart < 0):
             return
         else:
@@ -1546,9 +1479,9 @@ class cObject:
                         vert0 = self.Vertices.Get2d(VertList[0])
                         vert1 = self.Vertices.Get2d(VertList[1])
                         vert2 = self.Vertices.Get2d(VertList[2])
-                        
+
                         ret = geometry.intersect_point_tri_2d(Vector((g_mouse_x, g_mouse_y, 0.0)), vert0, vert1, vert2)
-                        if(ret !=0):
+                        if(ret != 0):
                             face.Select(True)
                             self.FaceEnd = i
                     else:
@@ -1557,16 +1490,16 @@ class cObject:
                         vert1 = self.Vertices.Get2d(VertList[1])
                         vert2 = self.Vertices.Get2d(VertList[2])
                         vert3 = self.Vertices.Get2d(VertList[3])
-                        
+
                         ret = geometry.intersect_point_quad_2d(Vector((g_mouse_x, g_mouse_y, 0.0)), vert0, vert1, vert2, vert3)
-                        if(ret !=0):
+                        if(ret != 0):
                             face.Select(True)
                             self.FaceEnd = i
 
                 if(self.FaceEnd >= 0):
                     # Recherche le segment qui a été coupé
                     nedge = g_Curve.NbPoints - 1
-                    while nedge > 0: 
+                    while nedge > 0:
                         p1 = g_Curve.Get2d(nedge)
                         p0 = g_Curve.Get2d(nedge - 1)
 
@@ -1575,7 +1508,7 @@ class cObject:
                         nf = 0
                         FaceEnd = self.Faces.list[self.FaceEnd]
                         ListIndex = FaceEnd.GetVerticesIndex()
-            
+
                         Found = False
                         nf = 0
                         for i in range(FaceEnd.NbVertices - 1):
@@ -1585,17 +1518,17 @@ class cObject:
                             if(ret != None):
                                 self.pI0End = ListIndex[nf]
                                 self.pI1End = ListIndex[nf + 1]
-                                
+
                                 # Calcul du milieu du segment
                                 p0 = self.Vertices.Get(self.pI0End)
                                 p1 = self.Vertices.Get(self.pI1End)
                                 middle = (p0 + p1) / 2.0
-                                
+
                                 g_Curve.Set((nedge - 1), middle)
                                 g_Curve.EndPoint = nedge
 
                                 Found = True
-                                
+
                                 break
                             nf += 1
 
@@ -1607,12 +1540,12 @@ class cObject:
                                 if(ret != None):
                                     self.pI0End = ListIndex[3]
                                     self.pI1End = ListIndex[0]
-                                    
+
                                     # Calcul du milieu du segment
                                     p0 = self.Vertices.Get(self.pI0End)
                                     p1 = self.Vertices.Get(self.pI1End)
                                     middle = (p0 + p1) / 2.0
-                                    
+
                                     g_Curve.Set((nedge - 1), middle)
                                     g_Curve.EndPoint = nedge
                             else:
@@ -1622,7 +1555,7 @@ class cObject:
                                 if(ret != None):
                                     self.pI0End = ListIndex[2]
                                     self.pI1End = ListIndex[0]
-                                    
+
                                     # Calcul du milieu du segment
                                     p0 = self.Vertices.Get(self.pI0End)
                                     p1 = self.Vertices.Get(self.pI1End)
@@ -1633,7 +1566,6 @@ class cObject:
                         else:
                             break
     #---------------------------------------------------------------------------------------------------
-                
 
     #---------------------------------------------------------------------------------------------------
     def PinUpdate(self):
@@ -1641,12 +1573,12 @@ class cObject:
         global g_mouse_x
         global g_mouse_y
         global g_normal
-        
+
         if((self.SelectedFace < 0) or (self.pI0 >= 0)):
             return
 
         if(g_Curve.NbPoints > 1):
-            # Recherche du point de départ 
+            # Recherche du point de départ
             p1 = Vector((g_mouse_x, g_mouse_y, 0.0))
             p0 = g_Curve.Get2d(0)
             # Teste tous les edges de la face par rapport au dernier edge
@@ -1661,7 +1593,7 @@ class cObject:
                 if(ret != None):
                     self.pI0 = ListIndex[nf]
                     self.pI1 = ListIndex[nf + 1]
-                    
+
                     # Calcul du milieu du segment
                     p0 = self.Vertices.Get(self.pI0)
                     p1 = self.Vertices.Get(self.pI1)
@@ -1670,7 +1602,7 @@ class cObject:
                     g_Curve.AddPoint(middle, g_normal)
 
                 nf += 1
-                
+
             if(FaceStart.NbVertices == 4):
                 pCE0 = self.Vertices.Get2d(ListIndex[3])
                 pCE1 = self.Vertices.Get2d(ListIndex[0])
@@ -1678,7 +1610,7 @@ class cObject:
                 if(ret != None):
                     self.pI0 = ListIndex[3]
                     self.pI1 = ListIndex[0]
-                    
+
                     # Calcul du milieu du segment
                     p0 = self.Vertices.Get(self.pI0)
                     p1 = self.Vertices.Get(self.pI1)
@@ -1692,7 +1624,7 @@ class cObject:
                 if(ret != None):
                     self.pI0 = ListIndex[2]
                     self.pI1 = ListIndex[0]
-                    
+
                     # Calcul du milieu du segment
                     p0 = self.Vertices.Get(self.pI0)
                     p1 = self.Vertices.Get(self.pI1)
@@ -1701,8 +1633,6 @@ class cObject:
                     g_Curve.AddPoint(middle, g_normal)
     #---------------------------------------------------------------------------------------------------
 
-
-
     #---------------------------------------------------------------------------------------------------
     def MergePointsInHit(self, hit):
         global g_Cursor
@@ -1710,11 +1640,9 @@ class cObject:
         if(hit != None):
             for i, vert in enumerate(self.Vertices.list):
                 l = (hit - vert.Get()).length
-                if(l < g_Cursor.BRadius/20.0):
+                if(l < g_Cursor.BRadius / 20.0):
                     vert.SetCoord(hit)
     #---------------------------------------------------------------------------------------------------
-
-
 
     #---------------------------------------------------------------------------------------------------
     def Update(self):
@@ -1724,11 +1652,11 @@ class cObject:
 
         global g_bDrawing
         global g_bMerge
-        
+
         global g_mouse_x
         global g_mouse_y
         global g_hit
-        
+
         global g_bLeftBM
         global g_bRightBM
         global g_CTRL
@@ -1738,7 +1666,7 @@ class cObject:
         # Edit:
 
         global g_Selection
-        
+
         if(g_bFaceCreating):
             return
 
@@ -1756,12 +1684,12 @@ class cObject:
                                 if(self.Faces.list[nface].ps > 0.0):
                                     bHide = True
                                     break
-                        if(bHide == False):                            
+                        if(bHide == False):
                             self.PointIdx.append(i)
                             vert.Select(True)
                             self.SelectedFace = -1
                 # Merge points around g_hit
-                #g_rObject.MergePointsInHit(g_hit)
+                # g_rObject.MergePointsInHit(g_hit)
 
             else:
                 for i, v in enumerate(self.PointIdx):
@@ -1779,10 +1707,10 @@ class cObject:
                             vert0 = self.Vertices.Get2d(VertList[0])
                             vert1 = self.Vertices.Get2d(VertList[1])
                             vert2 = self.Vertices.Get2d(VertList[2])
-                            
+
                             if(vert0 and vert1 and vert2):
                                 ret = geometry.intersect_point_tri_2d(Vector((g_mouse_x, g_mouse_y, 0.0)), vert0, vert1, vert2)
-                                if(ret !=0):
+                                if(ret != 0):
                                     face.Select(True)
                                     self.SelectedFace = i
                         else:
@@ -1791,7 +1719,7 @@ class cObject:
                             vert1 = self.Vertices.Get2d(VertList[1])
                             vert2 = self.Vertices.Get2d(VertList[2])
                             vert3 = self.Vertices.Get2d(VertList[3])
-                            
+
                             if(vert0 and vert1 and vert2 and vert3):
                                 ret = geometry.intersect_point_quad_2d(Vector((g_mouse_x, g_mouse_y, 0.0)), vert0, vert1, vert2, vert3)
                                 if(ret != 0):
@@ -1802,7 +1730,7 @@ class cObject:
             if(g_bPtMoving):
                 if(g_hit != None):
                     self.Vertices.Move(self.PointIdx, g_hit)
-                    
+
                     g_bMerge = False
                     min = None
                     for i, vert in enumerate(self.Vertices.list):
@@ -1824,7 +1752,6 @@ class cObject:
                 # Edit: Xtra Merge with CTRL + SHIFT
     #---------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------
     def MergeUpdate(self):
         global g_bMerge
@@ -1837,17 +1764,15 @@ class cObject:
         self.PointIdx.clear()
     #---------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------
     def PointSelected(self):
         return len(self.PointIdx)
     #---------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------
     def Undo(self, mode):
         global g_Selection
-        
+
         if(mode == 'SET'):
             self.UndoVL = copy.deepcopy(self.Vertices.list)
             self.UndoTotalVertices = self.Vertices.TotalVertices
@@ -1865,8 +1790,7 @@ class cObject:
             # Restore selection
             g_Selection = self.SaveSel
     #---------------------------------------------------------------------------------------------------
-                
-                
+
     #---------------------------------------------------------------------------------------------------
     def Draw(self):
         global g_region
@@ -1875,7 +1799,7 @@ class cObject:
         global g_PosCutIcon
         global g_PosSizeIcon
         global g_PosCutCTIcon
-        
+
         global g_PosSize2d
         global g_PosCut2d
         global g_bCurveCurrent
@@ -1886,7 +1810,7 @@ class cObject:
         global g_vertex_size
         global g_face_color
         global g_face_sel_color
-    
+
         # Transformation de tous les points
         for i in range(self.Vertices.TotalVertices):
             vector3d = self.Vertices.list[i].Get()
@@ -1906,9 +1830,9 @@ class cObject:
             if(face.ps < 0):
                 if(face.select == True):
                     bgl.glColor4f(g_face_sel_color[0], g_face_sel_color[1], g_face_sel_color[2], g_face_sel_color[3])
-                else:            
+                else:
                     bgl.glColor4f(g_face_color[0], g_face_color[1], g_face_color[2], g_face_color[3])
-                try:            
+                try:
                     if(face.NbVertices == 3):
                         bgl.glBegin(bgl.GL_TRIANGLES)
                         for i in range(face.NbVertices):
@@ -1922,7 +1846,7 @@ class cObject:
                             bgl.glVertex2f(*vertex.Get2d())
                         bgl.glEnd()
                 except:
-                    print("Geometry Draw : Error in GL_QUADS")                
+                    print("Geometry Draw : Error in GL_QUADS")
 
         bgl.glLineWidth(1)
         sface = None
@@ -1940,7 +1864,7 @@ class cObject:
                         vertex = self.Vertices.list[face.VertexIdx[i]]
                         bgl.glVertex2f(*vertex.Get2d())
                 except:
-                    print("Geometry Draw : Error in LineLoop")                
+                    print("Geometry Draw : Error in LineLoop")
                 bgl.glEnd()
 
                 bgl.glPointSize(g_vertex_size)
@@ -1971,49 +1895,46 @@ class cObject:
 #########################################################################################################
 
 
-
 #########################################################################################################
 def camera(view):
     look_at = view.view_location
     matrix = view.view_matrix
     pos = camera_position(matrix)
     camera_pos = Vector((pos[0], pos[1], pos[2]))
-    
+
     return look_at, camera_pos
 #########################################################################################################
-
 
 
 #########################################################################################################
 def camera_position(matrix):
     t = (matrix[0][3], matrix[1][3], matrix[2][3])
     r = (
-      (matrix[0][0], matrix[0][1], matrix[0][2]),
-      (matrix[1][0], matrix[1][1], matrix[1][2]),
-      (matrix[2][0], matrix[2][1], matrix[2][2])
+        (matrix[0][0], matrix[0][1], matrix[0][2]),
+        (matrix[1][0], matrix[1][1], matrix[1][2]),
+        (matrix[2][0], matrix[2][1], matrix[2][2])
     )
     rp = (
-      (-r[0][0], -r[1][0], -r[2][0]),
-      (-r[0][1], -r[1][1], -r[2][1]),
-      (-r[0][2], -r[1][2], -r[2][2])
+        (-r[0][0], -r[1][0], -r[2][0]),
+        (-r[0][1], -r[1][1], -r[2][1]),
+        (-r[0][2], -r[1][2], -r[2][2])
     )
     output = (
-      rp[0][0] * t[0] + rp[0][1] * t[1] + rp[0][2] * t[2],
-      rp[1][0] * t[0] + rp[1][1] * t[1] + rp[1][2] * t[2],
-      rp[2][0] * t[0] + rp[2][1] * t[1] + rp[2][2] * t[2],
+        rp[0][0] * t[0] + rp[0][1] * t[1] + rp[0][2] * t[2],
+        rp[1][0] * t[0] + rp[1][1] * t[1] + rp[1][2] * t[2],
+        rp[2][0] * t[0] + rp[2][1] * t[1] + rp[2][2] * t[2],
     )
     return output
 #########################################################################################################
 
 
-
 #########################################################################################################
-def Picking(context, self, ray_max = 10000.0, _ray_origin = None, _CTRetopo = False, _fp = None):
+def Picking(context, self, ray_max=10000.0, _ray_origin=None, _CTRetopo=False, _fp=None):
     global g_mouse_x
     global g_mouse_y
     global g_bCTRetopo
     global g_CTObj
-    
+
     # get the context arguments
     if(_CTRetopo == False):
         scene = context.scene
@@ -2025,8 +1946,7 @@ def Picking(context, self, ray_max = 10000.0, _ray_origin = None, _CTRetopo = Fa
         region = g_SVregion
         rv3d = g_SVrv3d
         coord = _fp.x, _fp.y
-        
-        
+
     # get the ray from the viewport and mouse
     view_vector = bpy_extras.view3d_utils.region_2d_to_vector_3d(region, rv3d, coord)
     ray_origin = bpy_extras.view3d_utils.region_2d_to_origin_3d(region, rv3d, coord)
@@ -2036,7 +1956,6 @@ def Picking(context, self, ray_max = 10000.0, _ray_origin = None, _CTRetopo = Fa
     if(_ray_origin != None):
         ray_origin = _ray_origin + view_vector * 0.05
     ray_target = ray_origin + (view_vector * ray_max)
-        
 
     #---------------------------------------------------------------------------------------------------
     def obj_ray_cast(obj, matrix):
@@ -2045,7 +1964,7 @@ def Picking(context, self, ray_max = 10000.0, _ray_origin = None, _CTRetopo = Fa
         ray_origin_obj = matrix_inv * ray_origin
         ray_target_obj = matrix_inv * ray_target
         hit, normal, face_index = obj.ray_cast(ray_origin_obj, ray_target_obj)
-        
+
         if face_index != -1:
             return hit, normal, face_index
         else:
@@ -2054,8 +1973,8 @@ def Picking(context, self, ray_max = 10000.0, _ray_origin = None, _CTRetopo = Fa
     # cast rays and find the closest object
     best_length_squared = ray_max * ray_max
     best_obj = None
-    
-    if(g_CTObj == None):    
+
+    if(g_CTObj == None):
         for obj in bpy.context.selectable_objects:
             if(obj.type == 'MESH'):
                 matrix = obj.matrix_world
@@ -2069,7 +1988,7 @@ def Picking(context, self, ray_max = 10000.0, _ray_origin = None, _CTRetopo = Fa
                         hits = hit_world
                         ns = normal
                         fs = face_index
-    else:                   
+    else:
         matrix = g_CTObj.matrix_world
         hit, normal, face_index = obj_ray_cast(g_CTObj, matrix)
         if hit is not None:
@@ -2081,17 +2000,16 @@ def Picking(context, self, ray_max = 10000.0, _ray_origin = None, _CTRetopo = Fa
                 hits = hit_world
                 ns = normal
                 fs = face_index
-                    
+
     if(g_bCTRetopo):
         if(best_obj != None):
-            g_CTObj = best_obj                    
-                
+            g_CTObj = best_obj
+
     if best_obj is not None:
         return hits, ns, fs
     else:
         return None, None, None
 #########################################################################################################
-
 
 
 #########################################################################################################
@@ -2101,17 +2019,17 @@ def draw_callback_px(self, context):
     global g_Cursor
     global g_Curve
     global g_rObject
-    
+
     global g_PosCutIcon
     global g_PosSizeIcon
     global g_PosCutCTIcon
 
     global g_bBSurface
     global g_BSCurve
-    
+
     global g_region
     global g_rv3d
-    
+
     font_id = 0
     #---------------------------------------------------------------------------------------------------
     g_region = bpy.context.region
@@ -2124,9 +2042,8 @@ def draw_callback_px(self, context):
     bgl.glColor4f(1.0, 1.0, 1.0, 1.0)
     if(g_bAutoMerge):
         blf.draw(font_id, "AutoMerge ON")
-    else:        
+    else:
         blf.draw(font_id, "AutoMerge OFF")
-
 
     blf.size(font_id, 20, 35)
     blf.position(font_id, self.TextPosition + 20, view_height - 70, 0)
@@ -2137,7 +2054,7 @@ def draw_callback_px(self, context):
         strInfos = "Cut : " + str(int(g_rObject.CTNCut))
         blf.draw(font_id, strInfos)
 
-    # Draw object    
+    # Draw object
     g_rObject.Draw()
     # Draw curve
     g_Curve.Draw()
@@ -2159,7 +2076,7 @@ def draw_callback_px(self, context):
                 # Affichage
                 if(vector2d != None):
                     bgl.glVertex2f(*vector2d)
-                    
+
             if(g_CTLines[i][1] != None):
                 vector3d = g_CTLines[i][1]
                 # Conversion en esapce 2d
@@ -2168,7 +2085,7 @@ def draw_callback_px(self, context):
                 if(vector2d != None):
                     bgl.glVertex2f(*vector2d)
             bgl.glEnd()
-            
+
             bgl.glPointSize(6)
             bgl.glColor4f(1.0, 0.8, 0.0, 1.0)
             bgl.glBegin(bgl.GL_POINTS)
@@ -2179,7 +2096,7 @@ def draw_callback_px(self, context):
                 # Affichage
                 if(vector2d != None):
                     bgl.glVertex2f(*vector2d)
-                    
+
             if(g_CTLines[i][1] != None):
                 vector3d = g_CTLines[i][1]
                 # Conversion en esapce 2d
@@ -2201,16 +2118,15 @@ def draw_callback_px(self, context):
 #########################################################################################################
 
 
-
 #########################################################################################################
 def getSelection():
     global g_Selection
-    
+
     selobj = bpy.context.active_object
     mesh = selobj.data
     bm = bmesh.from_edit_mesh(mesh)
     bmprev = bm.copy()
-    	
+
     SavIndexPoint = -1
 
     bmprev.verts.ensure_lookup_table()
@@ -2240,14 +2156,14 @@ def getSelection():
         vCurr = bmprev.verts[bmprev.edges[v.link_edges[SavIndex].index].verts[1].index].index
         if(bmprev.verts[bmprev.edges[v.link_edges[SavIndex].index].verts[0].index].index != SavIndexPoint):
             vCurr = bmprev.verts[bmprev.edges[v.link_edges[SavIndex].index].verts[0].index].index
-            
+
         edge = bmprev.verts[bmprev.edges[v.link_edges[SavIndex].index].verts[0].index].index, bmprev.verts[bmprev.edges[v.link_edges[SavIndex].index].verts[1].index].index
         for i, e in enumerate(eList):
             currEdge = e[0].verts[0].index, e[0].verts[1].index
             if(currEdge == edge):
                 e[1] = True
                 break
-        selPoints = []    
+        selPoints = []
         n = len(eList) - 1
         selPoints.append(SavIndexPoint)
         g_Selection.append(SavIndexPoint)
@@ -2257,7 +2173,7 @@ def getSelection():
                 currEdge = e[0].verts[0].index, e[0].verts[1].index
                 if(e[1] == False):
                     if(e[0].verts[0].index == vCurr):
-                        if(vCurr not in selPoints):                        
+                        if(vCurr not in selPoints):
                             selPoints.append(vCurr)
                             g_Selection.append(vCurr)
                         edge = currEdge
@@ -2265,19 +2181,18 @@ def getSelection():
                         e[1] = True
                         n -= 1
                     elif(e[0].verts[1].index == vCurr):
-                        if(vCurr not in selPoints):                        
+                        if(vCurr not in selPoints):
                             selPoints.append(vCurr)
                             g_Selection.append(vCurr)
                         edge = currEdge
                         vCurr = e[0].verts[0].index
                         e[1] = True
                         n -= 1
-        if(vCurr not in selPoints):                        
+        if(vCurr not in selPoints):
             selPoints.append(vCurr)
             g_Selection.append(vCurr)
 #########################################################################################################
-    
-    
+
 
 #########################################################################################################
 class RetopoMT(bpy.types.Operator):
@@ -2287,27 +2202,25 @@ class RetopoMT(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     #---------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------
     @classmethod
     def poll(cls, context):
         ob = context.active_object
         return(ob and ob.type == 'MESH' and context.mode == 'EDIT_MESH')
     #---------------------------------------------------------------------------------------------------
-    
-    
+
     #---------------------------------------------------------------------------------------------------
     def modal(self, context, event):
         context.area.tag_redraw()
-        
+
         global g_mouse_x
         global g_mouse_y
-        
+
         global g_normal
         global g_hit
         global g_faceIndex
         global g_bFaceCreating
-        
+
         global g_bBSurface
         global g_BSCurve
         global g_BSCurrent
@@ -2324,32 +2237,31 @@ class RetopoMT(bpy.types.Operator):
 
         global g_bDrawing
         global g_bPtMoving
-        global g_bMerge 
+        global g_bMerge
         global g_bAutoMerge
-        
+
         global g_PosSizeIcon
         global g_PosCutIcon
         global g_PosCutCTIcon
 
         global g_SVScene
-        global g_SVregion 
+        global g_SVregion
         global g_SVrv3d
-        
+
         global g_bLeftBM
         global g_SPACE
         global g_CTRL
         global g_SHIFT
-        
+
         global g_FirstPoint
         global g_EndPoint
         global g_Inverse
-        
+
         g_mouse_x = event.mouse_region_x
         g_mouse_y = event.mouse_region_y
-        
+
         ctrl = False
-        
-        
+
         #---------------------------------------------------------------------------------------------------
         if event.type == 'Z':
             if((event.value == "RELEASE") and (event.ctrl)):
@@ -2358,13 +2270,13 @@ class RetopoMT(bpy.types.Operator):
         #---------------------------------------------------------------------------------------------------
         if event.ctrl:
             g_CTRL = 'PRESS'
-        else:            
+        else:
             g_CTRL = 'RELEASE'
         #---------------------------------------------------------------------------------------------------
         if event.type in {'MIDDLEMOUSE', 'WHEELUPMOUSE', 'WHEELDOWNMOUSE'}:
             return {'PASS_THROUGH'}
         #---------------------------------------------------------------------------------------------------
-	### Edit: Maya/Silo ALT Navigation
+        # Edit: Maya/Silo ALT Navigation
         #---------------------------------------------------------------------------------------------------
         if ((event.type == 'RIGHTMOUSE') and (event.alt)):
             return {'PASS_THROUGH'}
@@ -2373,12 +2285,12 @@ class RetopoMT(bpy.types.Operator):
         if ((event.type == 'LEFTMOUSE') and (event.alt)):
             return {'PASS_THROUGH'}
         #---------------------------------------------------------------------------------------------------
-	### Edit: Maya/Silo ALT Navigation
+        # Edit: Maya/Silo ALT Navigation
         #---------------------------------------------------------------------------------------------------
         elif (event.type == 'MOUSEMOVE'):
             if((g_Cursor.bBrushSize == False) and (g_Cursor.bCutSize == False)):
                 g_hit, g_normal, g_faceIndex = Picking(context, self)
-                
+
             if(self.Icon):
                 if(self.SizeIcon):
                     if(g_hit != None):
@@ -2392,7 +2304,7 @@ class RetopoMT(bpy.types.Operator):
                             # Compute geometry
                             g_rObject.CreateGeometry()
                             self.oldLength = length
-            else:                
+            else:
                 if(g_hit != None):
                     # Show Cursor
                     g_Cursor.Show()
@@ -2418,7 +2330,7 @@ class RetopoMT(bpy.types.Operator):
                                 g_CTLines[g_CTNLines][1] = self.EndPoint
                                 g_CTLines[g_CTNLines][3] = self.EP2d
                                 g_EndPoint = False
-                            else:                                
+                            else:
                                 g_Curve.Update()
                                 g_rObject.PinUpdate()
                 else:
@@ -2438,17 +2350,17 @@ class RetopoMT(bpy.types.Operator):
                         self.EndPoint = g_hit
                         self.EP2d = mouse_loc_2d
                         g_EndPoint = True
-                        
+
                         g_CTLines[g_CTNLines][1] = self.EndPoint
                         g_CTLines[g_CTNLines][3] = self.EP2d
-                        
+
                         self.depth_location = mouse_loc_3d
-                        
+
         #---------------------------------------------------------------------------------------------------
         elif(event.type == 'LEFTMOUSE'):
             g_Cursor.bBrushSize = False
             g_Cursor.bCutSize = False
-            
+
             if(event.value == 'PRESS'):
                 if(g_hit != None):
                     if((event.ctrl == False) and (event.shift == False)):
@@ -2461,34 +2373,34 @@ class RetopoMT(bpy.types.Operator):
                                     self.SizeIcon = True
                                     self.Icon = True
 
-                        # Cut Icon 
+                        # Cut Icon
                         if(g_PosCutIcon != None):
                             dist = (g_PosCutIcon - g_hit).length_squared
                             if(dist < 0.01):
                                 self.CutIcon = True
                                 self.Icon = True
 
-                if(self.Icon == False):  
+                if(self.Icon == False):
                     # Set Undo object
                     g_rObject.Undo('SET')
                     # Reset object variables
                     g_rObject.ResetCollapse()
                     # Reset curve to draw
                     g_Curve.Reset()
-                    
+
                     g_PosSizeIcon = g_PosCutIcon = g_PosCutCTIcon = None
 
                     if(event.shift):
                         # Merge points around g_hit
                         g_rObject.MergePointsInHit(g_hit)
-                        
+
                     elif((g_rObject.PointSelected() > 0) and (g_SPACE == 'RELEASE')):
                         # Move point if selected
                         if(event.ctrl):
                             g_PosSizeIcon = g_PosCutIcon = g_PosCutCTIcon = None
                             # Set moving point
                             g_bPtMoving = True
-                            # Deselect points 
+                            # Deselect points
                             if(len(g_Selection) > 0):
                                 for i, vert in enumerate(g_Selection):
                                     g_rObject.Vertices.list[vert].BS_Select(False)
@@ -2496,14 +2408,14 @@ class RetopoMT(bpy.types.Operator):
                     else:
                         # Edit: Disable Draw on Tweak (CTRL)
                         if((event.value == 'PRESS') and (event.ctrl == False)):
-                        # Edit: Disable Draw on Tweak (CTRL)
+                            # Edit: Disable Draw on Tweak (CTRL)
                             g_bDrawing = True
                             if((g_rObject.SelectedFace >= 0) and (g_SPACE == 'RELEASE')):
                                 g_PosSizeIcon = g_PosCutIcon = g_PosCutCTIcon = None
 
                                 g_rObject.FaceStart = g_rObject.SelectedFace
                                 g_bFaceCreating = True
-                                # Deselect points 
+                                # Deselect points
                                 if(len(g_Selection) > 0):
                                     for i, vert in enumerate(g_Selection):
                                         g_rObject.Vertices.list[vert].BS_Select(False)
@@ -2527,12 +2439,12 @@ class RetopoMT(bpy.types.Operator):
                                         g_SVregion = context.region
                                         g_SVrv3d = context.region_data
                                 else:
-                                    # Deselect points 
+                                    # Deselect points
                                     if(len(g_Selection) > 0):
                                         for i, vert in enumerate(g_Selection):
                                             g_rObject.Vertices.list[vert].BS_Select(False)
                                     g_Selection.clear()
-                                        
+
                 g_bLeftBM = True
             else:
                 if(self.SizeIcon == False):
@@ -2553,18 +2465,18 @@ class RetopoMT(bpy.types.Operator):
                         g_rObject.PinEndUpdate()
                         g_Curve.Homogenize()
                         g_rObject.CreateGeometry()
-                        
+
                 if(g_bCTRetopo):
                     if((g_CTLines[g_CTNLines][0] != None) and ((g_CTLines[g_CTNLines][3].x - g_CTLines[g_CTNLines][2].x) != 0.0)):
                         g_CTCurve.append(cCurve())
                         g_CTNCurve += 1
-                        
+
                         div = 0.05
                         incx = 1.0
-                        cd = ((g_CTLines[g_CTNLines][3].y - g_CTLines[g_CTNLines][2].y)/(g_CTLines[g_CTNLines][3].x - g_CTLines[g_CTNLines][2].x)) * div
+                        cd = ((g_CTLines[g_CTNLines][3].y - g_CTLines[g_CTNLines][2].y) / (g_CTLines[g_CTNLines][3].x - g_CTLines[g_CTNLines][2].x)) * div
                         fp = g_CTLines[g_CTNLines][2]
-                        iter = abs(fp.x - g_CTLines[g_CTNLines][3].x)/div
-                        
+                        iter = abs(fp.x - g_CTLines[g_CTNLines][3].x) / div
+
                         g_Inverse = False
                         if(abs(g_CTLines[g_CTNLines][3].y - g_CTLines[g_CTNLines][2].y) > abs(g_CTLines[g_CTNLines][3].x - g_CTLines[g_CTNLines][2].x)):
                             if(g_CTLines[g_CTNLines][3].y < g_CTLines[g_CTNLines][2].y):
@@ -2572,7 +2484,7 @@ class RetopoMT(bpy.types.Operator):
                         else:
                             if(g_CTLines[g_CTNLines][3].x < g_CTLines[g_CTNLines][2].x):
                                 g_Inverse = True
-                        
+
                         if((fp.x - g_CTLines[g_CTNLines][3].x) > 0.0):
                             cd = -cd
                             incx = -incx
@@ -2580,24 +2492,24 @@ class RetopoMT(bpy.types.Operator):
                         while(iter > 0.0):
                             fp.x += incx * div
                             fp.y += cd
-                            
-                            g_hit, g_normal, g_faceIndex = Picking(context, self, _CTRetopo = True, _fp = fp)
+
+                            g_hit, g_normal, g_faceIndex = Picking(context, self, _CTRetopo=True, _fp=fp)
                             if(g_hit != None):
-                                g_CTCurve[g_CTNCurve].Update(_context = None, _callsl = self, _CTRetopo = True, _mc = fp)
+                                g_CTCurve[g_CTNCurve].Update(_context=None, _callsl=self, _CTRetopo=True, _mc=fp)
                                 nbg_hit += 1
-                            iter -= 1.0                                
+                            iter -= 1.0
                         g_CTCurve[g_CTNCurve].CTUpdate()
                     self.FirstPoint = self.EndPoint = None
-                        
+
                 if(g_bMerge):
-                    g_rObject.MergeUpdate()                        
+                    g_rObject.MergeUpdate()
 
                 self.Icon = False
                 self.CutIcon = False
                 self.SizeIcon = False
 
-                g_bFaceCreating = False                    
-                g_bDrawing = False                
+                g_bFaceCreating = False
+                g_bDrawing = False
                 g_bLeftBM = False
                 g_bPtMoving = False
         #---------------------------------------------------------------------------------------------------
@@ -2613,7 +2525,7 @@ class RetopoMT(bpy.types.Operator):
                                 g_Cursor.BSize -= 1.0
                                 if(g_Cursor.BSize < 1.0):
                                     g_Cursor.BSize = 1.0
-                                    
+
                                 g_rObject.Undo('BACK')
                                 # Update geometry
                                 g_rObject.CreateGeometry()
@@ -2633,7 +2545,7 @@ class RetopoMT(bpy.types.Operator):
                 g_SPACE = 'RELEASE'
                 if(g_bBSurface):
                     g_rObject.Undo('SET')
-                    
+
                     # Calcul direction
                     fpc = g_BSCurve[0].Curve[0].hit
                     lpc = g_BSCurve[0].Curve[(g_BSCurve[0].NbPoints - 1)].hit
@@ -2650,20 +2562,20 @@ class RetopoMT(bpy.types.Operator):
                     else:
                         # Inverse selection
                         g_Selection.reverse()
-                    
+
                     SaveSel = g_Selection.copy()
                     # Create geometry with curves
                     for i in range(len(g_BSCurve)):
                         g_BSCurve[i].Homogenize()
                         g_rObject.CreateBSGeometry(i)
-                        
+
                     g_Selection = SaveSel
-                    # Deselect points 
+                    # Deselect points
                     if(len(g_Selection) > 0):
                         for i, vert in enumerate(g_Selection):
                             g_rObject.Vertices.list[vert].BS_Select(False)
                     g_Selection.clear()
-                
+
                     g_bBSurface = False
                     g_BSCurrent = -1
                     g_BSCurve.clear()
@@ -2689,11 +2601,11 @@ class RetopoMT(bpy.types.Operator):
         elif event.type == 'W':
             if(event.value == 'RELEASE'):
                 if(g_PosCutCTIcon != None):
-                    if(g_rObject.CTNCut  > 1.0):
-                        g_rObject.CTNCut  -= 1.0
-                        if(g_rObject.CTNCut  < 1.0):
-                            g_rObject.CTNCut  = 1.0
-                            
+                    if(g_rObject.CTNCut > 1.0):
+                        g_rObject.CTNCut -= 1.0
+                        if(g_rObject.CTNCut < 1.0):
+                            g_rObject.CTNCut = 1.0
+
                         g_rObject.Undo('BACK')
                         # Calcul de la géométrie
                         for i in range(g_CTNCurve + 1):
@@ -2703,7 +2615,7 @@ class RetopoMT(bpy.types.Operator):
                         g_Cursor.BSize -= 1.0
                         if(g_Cursor.BSize < 1.0):
                             g_Cursor.BSize = 1.0
-                            
+
                         g_rObject.Undo('BACK')
                         # Update geometry
                         g_rObject.CreateGeometry()
@@ -2711,15 +2623,15 @@ class RetopoMT(bpy.types.Operator):
         elif event.type == 'X':
             if(event.value == 'RELEASE'):
                 if(g_PosCutCTIcon != None):
-                    g_rObject.CTNCut  += 1.0
-                        
+                    g_rObject.CTNCut += 1.0
+
                     g_rObject.Undo('BACK')
                     # Calcul de la géométrie
                     for i in range(g_CTNCurve + 1):
                         g_rObject.CreateCTGeometry(i)
                 if(g_PosCutIcon != None):
                     g_Cursor.BSize += 1.0
-                        
+
                     g_rObject.Undo('BACK')
                     # Update geometry
                     g_rObject.CreateGeometry()
@@ -2734,7 +2646,7 @@ class RetopoMT(bpy.types.Operator):
                     g_Cursor.BrushSize(event)
             else:
                 if(g_Cursor.bBrushSize == False):
-                    g_Cursor.CutSize(event)                
+                    g_Cursor.CutSize(event)
         #---------------------------------------------------------------------------------------------------
         elif(event.type == 'LEFT_SHIFT'):
             g_SHIFT = event.value
@@ -2745,36 +2657,35 @@ class RetopoMT(bpy.types.Operator):
                 return {'FINISHED'}
             if(event.value == 'RELEASE'):
                 self.bRunning = True
-                
+
         #---------------------------------------------------------------------------------------------------
         return {'RUNNING_MODAL'}
     #---------------------------------------------------------------------------------------------------
-
 
     #---------------------------------------------------------------------------------------------------
     def invoke(self, context, event):
         if context.object:
             self.bRunning = False
-            
+
             #---------------------------------------------------------------------------------------------------
             global g_Selection
             g_Selection = []
             getSelection()
-            
+
             #---------------------------------------------------------------------------------------------------
             # Get Global variables
             BSize = bpy.context.object.BrushCut
             BRadius = bpy.context.object.BrushSize
             CTNCut = bpy.context.object.CTNCut
-            
+
             AutoMerge = bpy.context.object.AutoMerge
-            
+
             uRO = bpy.context.user_preferences.system.use_region_overlap
             vd = bpy.context.area
             self.TextPosition = 0
             if(uRO):
                 self.TextPosition = vd.regions[1].width
-            
+
             #---------------------------------------------------------------------------------------------------
             # Search objects in Edit mode
             obE = None
@@ -2782,26 +2693,26 @@ class RetopoMT(bpy.types.Operator):
                 if(o.mode == 'EDIT'):
                     obE = o
                 else:
-                    o.select = False        
-                
+                    o.select = False
+
             #---------------------------------------------------------------------------------------------------
             bpy.ops.object.mode_set(mode='OBJECT')
-            
+
             o = obE
-            self.obName     = o.show_name
-            self.obAxis     = o.show_axis
-            self.obWire     = o.show_wire
-            self.obEdge     = o.show_all_edges
-            self.obBounds   = o.show_bounds
-            self.obTSpace   = o.show_texture_space
-            self.obTransp   = o.show_transparent
-            self.obX_Ray    = o.show_x_ray
+            self.obName = o.show_name
+            self.obAxis = o.show_axis
+            self.obWire = o.show_wire
+            self.obEdge = o.show_all_edges
+            self.obBounds = o.show_bounds
+            self.obTSpace = o.show_texture_space
+            self.obTransp = o.show_transparent
+            self.obX_Ray = o.show_x_ray
             self.obDrawType = o.draw_type
-            self.OBName     = o.name
+            self.OBName = o.name
             self.use_smooth = False
             if(len(o.data.polygons) > 0):
                 self.use_smooth = o.data.polygons[0].use_smooth
-            
+
             self.Modifiers = []
             prp = []
             self.prpLst = {}
@@ -2823,20 +2734,20 @@ class RetopoMT(bpy.types.Operator):
             try:
                 selectedVertices = False
                 for n, v in enumerate(o.data.vertices):
-                    g_rObject.AddVertex(cVertex(v.co.x, v.co.y, v.co.z, BSelect = v.select))
+                    g_rObject.AddVertex(cVertex(v.co.x, v.co.y, v.co.z, BSelect=v.select))
                     if(v.select == True):
                         selectedVertices = True
                     g_rObject.NbEdges += 1
-                    
+
                 for n, f in enumerate(o.data.polygons):
                     if(len(f.vertices) == 4):
-                        g_rObject.AddFace(cFace((f.vertices[0], f.vertices[3], f.vertices[2], f.vertices[1]))) 
+                        g_rObject.AddFace(cFace((f.vertices[0], f.vertices[3], f.vertices[2], f.vertices[1])))
                     if(len(f.vertices) == 3):
-                        g_rObject.AddFace(cFace((f.vertices[0], f.vertices[1], f.vertices[2]))) 
-                        
+                        g_rObject.AddFace(cFace((f.vertices[0], f.vertices[1], f.vertices[2])))
+
                 bpy.ops.object.mode_set(mode='OBJECT')
                 bpy.data.objects[self.OBName].select = True
-                bpy.ops.object.delete(use_global = False)
+                bpy.ops.object.delete(use_global=False)
             except:
                 self.report({'WARNING'}, "Error in execution")
                 return {'CANCELLED'}
@@ -2850,11 +2761,11 @@ class RetopoMT(bpy.types.Operator):
             self.oldLength = 0.0
             self.depth_location = Vector((0.0, 0.0, 0.0))
             self.last_ml = Vector((0.0, 0.0, 0.0))
-            
+
             #---------------------------------------------------------------------------------------------------
             global g_Curve
             g_Curve = cCurve()
-            
+
             #---------------------------------------------------------------------------------------------------
             global g_BSCurve
             g_BSCurve = []
@@ -2894,7 +2805,7 @@ class RetopoMT(bpy.types.Operator):
             g_hit = Vector()
             global g_faceIndex
             g_faceIndex = -1
-            
+
             #---------------------------------------------------------------------------------------------------
             global g_bAutoMerge
             g_bAutoMerge = AutoMerge
@@ -2908,10 +2819,9 @@ class RetopoMT(bpy.types.Operator):
             g_CutIcon = cCursor(45.0, 0.0155)
             global g_SizeIcon
             g_SizeIcon = cCursor(45.0, 0.0175)
-            
+
             g_Cursor.BSize = BSize
             g_Cursor.BRadius = BRadius
-
 
             #---------------------------------------------------------------------------------------------------
             global g_PosCutIcon
@@ -2926,10 +2836,10 @@ class RetopoMT(bpy.types.Operator):
             g_PosSize2d = (-1, -1)
             global g_PosCut2d
             g_PosCut2d = (-1, -1)
-            
+
             global g_bMerge
             g_bMerge = False
-            
+
             global g_bPtMoving
             g_bPtMoving = False
             global g_bFaceMoving
@@ -2957,21 +2867,21 @@ class RetopoMT(bpy.types.Operator):
 
             #---------------------------------------------------------------------------------------------------
             theme = bpy.context.user_preferences.themes['Default']
-            
+
             global g_wire_edit_color
             global g_vertex_color
             global g_vertex_sel_color
             global g_vertex_size
             global g_face_color
             global g_face_sel_color
-            
+
             g_wire_edit_color = theme.view_3d.wire_edit
-            g_vertex_color    = theme.view_3d.vertex
-            g_vertex_sel_color= theme.view_3d.vertex_select
-            g_vertex_size     = theme.view_3d.vertex_size
-            g_face_color      = theme.view_3d.face
-            g_face_sel_color  = theme.view_3d.face_select
-            
+            g_vertex_color = theme.view_3d.vertex
+            g_vertex_sel_color = theme.view_3d.vertex_select
+            g_vertex_size = theme.view_3d.vertex_size
+            g_face_color = theme.view_3d.face
+            g_face_sel_color = theme.view_3d.face_select
+
             # the arguments we pass the the callback
             args = (self, context)
             # Add the region OpenGL drawing callback
@@ -2996,32 +2906,31 @@ class RetopoMT(bpy.types.Operator):
 #########################################################################################################
 
 
-
 #########################################################################################################
     def finish(self):
         # Create mesh
         mesh = bpy.data.meshes.new(self.OBName)
         ob = bpy.data.objects.new(self.OBName, mesh)
         ob.location = Vector()
-     
+
         scn = bpy.context.scene
         scn.objects.link(ob)
         scn.objects.active = ob
         ob.select = True
 
-        ob.show_name          = self.obName
-        ob.show_axis          = self.obAxis
-        ob.show_wire          = self.obWire
-        ob.show_all_edges     = self.obEdge
-        ob.show_bounds        = self.obBounds
+        ob.show_name = self.obName
+        ob.show_axis = self.obAxis
+        ob.show_wire = self.obWire
+        ob.show_all_edges = self.obEdge
+        ob.show_bounds = self.obBounds
         ob.show_texture_space = self.obTSpace
-        ob.show_transparent   = self.obTransp
-        ob.show_x_ray         = self.obX_Ray
-        ob.draw_type          = self.obDrawType
-    
+        ob.show_transparent = self.obTransp
+        ob.show_x_ray = self.obX_Ray
+        ob.draw_type = self.obDrawType
+
         if(g_rObject.Vertices.TotalVertices > 0):
             verts = []
-            # Conversion du maillage 
+            # Conversion du maillage
             for i, v in enumerate(g_rObject.Vertices.list):
                 vt = (v.x, v.y, v.z)
                 verts.append(vt)
@@ -3040,9 +2949,9 @@ class RetopoMT(bpy.types.Operator):
                     ft.append(f.VertexIdx[1])
 
                 faces.append(ft.copy())
-            
+
             mesh.from_pydata(verts, [], faces)
-            mesh.update(calc_edges = True)    
+            mesh.update(calc_edges=True)
 
             for m in self.Modifiers:
                 mDst = ob.modifiers.new(m[0], m[1])
@@ -3050,31 +2959,28 @@ class RetopoMT(bpy.types.Operator):
                     setattr(mDst, self.prpLst[m[0]][i][0], self.prpLst[m[0]][i][1])
 
             for p in mesh.polygons:
-                p.use_smooth = self.use_smooth                    
+                p.use_smooth = self.use_smooth
 
         #---------------------------------------------------------------------------------------------------
-        self.bRunning = False     
+        self.bRunning = False
 
         #---------------------------------------------------------------------------------------------------
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.mesh.remove_doubles()
         bpy.ops.mesh.select_all()
-     
+
         #---------------------------------------------------------------------------------------------------
-        bpy.context.object.BrushCut     = g_Cursor.BSize
-        bpy.context.object.BrushSize    = g_Cursor.BRadius
-        bpy.context.object.CTNCut       = g_rObject.CTNCut
-        bpy.context.object.AutoMerge    = g_bAutoMerge
-        
-        
+        bpy.context.object.BrushCut = g_Cursor.BSize
+        bpy.context.object.BrushSize = g_Cursor.BRadius
+        bpy.context.object.CTNCut = g_rObject.CTNCut
+        bpy.context.object.AutoMerge = g_bAutoMerge
+
         bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')
         bpy.context.window.cursor_modal_set("DEFAULT")
 
         # Restore la vue par défaut
         bpy.context.area.header_text_set()
 #########################################################################################################
-
-
 
 
 #########################################################################################################
@@ -3085,15 +2991,15 @@ addon_keymaps = []
 
 #########################################################################################################
 def register():
-    bpy.utils.register_class(RetopoMTPrefs) 
+    bpy.utils.register_class(RetopoMTPrefs)
     # add operator
     for c in classes:
         bpy.utils.register_class(c)
 
-    bpy.types.Object.BrushSize  = bpy.props.FloatProperty(default = 1.0, min = 0.0, max = 100.0)
-    bpy.types.Object.BrushCut   = bpy.props.FloatProperty(default = 6.0, min = 0.0, max = 100.0)
-    bpy.types.Object.CTNCut     = bpy.props.FloatProperty(default = 6.0, min = 0.0, max = 100.0)
-    bpy.types.Object.AutoMerge  = bpy.props.BoolProperty(default = True)
+    bpy.types.Object.BrushSize = bpy.props.FloatProperty(default=1.0, min=0.0, max=100.0)
+    bpy.types.Object.BrushCut = bpy.props.FloatProperty(default=6.0, min=0.0, max=100.0)
+    bpy.types.Object.CTNCut = bpy.props.FloatProperty(default=6.0, min=0.0, max=100.0)
+    bpy.types.Object.AutoMerge = bpy.props.BoolProperty(default=True)
 
     # add keymap entry
     kcfg = bpy.context.window_manager.keyconfigs.addon
@@ -3106,12 +3012,12 @@ def register():
 
 #########################################################################################################
 def unregister():
-    bpy.utils.unregister_class(RetopoMTPrefs) 
+    bpy.utils.unregister_class(RetopoMTPrefs)
     # remove keymap entry
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    
+
     # remove operator and preferences
     for c in reversed(classes):
         bpy.utils.unregister_class(c)

@@ -28,11 +28,14 @@ bl_info = {
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/",
     "tracker_url": "",
     "category": "Object"}
-'''	
-import bpy, mathutils, math
+'''
+import bpy
+import mathutils
+import math
 from math import pi
 from bpy.props import *
 from mathutils import Vector
+
 
 class add_scene(bpy.types.Operator):
     bl_idname = "plane.add_scene"
@@ -40,11 +43,11 @@ class add_scene(bpy.types.Operator):
     bl_description = "Scene with 'infinite' plane"
     bl_register = True
     bl_undo = True
-    
+
     def execute(self, context):
         blend_data = context.blend_data
         ob = bpy.context.active_object
-	
+
 # add new scene
         bpy.ops.scene.new(type="NEW")
         scene = bpy.context.scene
@@ -59,32 +62,32 @@ class add_scene(bpy.types.Operator):
         scene.world = world
         world.use_sky_blend = True
         world.use_sky_paper = True
-        world.horizon_color = (0.004393,0.02121,0.050)
-        world.zenith_color = (0.03335,0.227,0.359)
+        world.horizon_color = (0.004393, 0.02121, 0.050)
+        world.zenith_color = (0.03335, 0.227, 0.359)
         world.light_settings.use_ambient_occlusion = True
         world.light_settings.ao_factor = 0.25
 # add camera
-        bpy.ops.object.camera_add(location = (7.48113,-6.50764,5.34367), rotation = (1.109319,0.010817,0.814928))
+        bpy.ops.object.camera_add(location=(7.48113, -6.50764, 5.34367), rotation=(1.109319, 0.010817, 0.814928))
         cam = bpy.context.active_object.data
         cam.lens = 35
         cam.draw_size = 0.1
-        bpy.ops.view3d.viewnumpad(type = 'CAMERA') 
+        bpy.ops.view3d.viewnumpad(type='CAMERA')
 # add point lamp
-        bpy.ops.object.lamp_add(type="POINT", location = (4.07625,1.00545,5.90386), rotation =(0.650328,0.055217,1.866391))
+        bpy.ops.object.lamp_add(type="POINT", location=(4.07625, 1.00545, 5.90386), rotation=(0.650328, 0.055217, 1.866391))
         lamp1 = bpy.context.active_object.data
         lamp1.name = "Point_Right"
         lamp1.energy = 1.0
         lamp1.distance = 30.0
         lamp1.shadow_method = "RAY_SHADOW"
-        lamp1.use_sphere = True        
+        lamp1.use_sphere = True
 # add point lamp2
-        bpy.ops.object.lamp_add(type="POINT", location = (-0.57101,-4.24586,5.53674), rotation =(1.571,0,0.785))
+        bpy.ops.object.lamp_add(type="POINT", location=(-0.57101, -4.24586, 5.53674), rotation=(1.571, 0, 0.785))
         lamp2 = bpy.context.active_object.data
         lamp2.name = "Point_Left"
         lamp2.energy = 1.0
         lamp2.distance = 30.0
 #        lamp2.shadow_method = "RAY_SHADOW"
-        
+
 # light Rim
         """
         # add spot lamp3
@@ -103,7 +106,7 @@ class add_scene(bpy.types.Operator):
 # add plane
 
         bpy.ops.mesh.primitive_plane_add(radius=22, view_align=False, enter_editmode=False, location=(0, 0, -1), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
- 
+
         bpy.ops.transform.rotate(value=-0.698132, axis=(0, 0, 1), constraint_axis=(False, False, True), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
@@ -115,8 +118,8 @@ class add_scene(bpy.types.Operator):
         bpy.ops.object.material_slot_add()
         plane.material_slots[0].material = planeMaterial
 
-            
-#Material settings
+
+# Material settings
         planeMaterial.preview_render_type = "CUBE"
         planeMaterial.diffuse_color = (0.2, 0.2, 0.2)
         planeMaterial.specular_color = (0.604, 0.465, 0.136)
@@ -128,6 +131,7 @@ class add_scene(bpy.types.Operator):
         planeMaterial.use_transparent_shadows = True
         return {"FINISHED"}
 
+
 class INFO_MT_add_scenesetup(bpy.types.Menu):
     bl_idname = "INFO_MT_plane.add_scene"
     bl_label = "Lighting Setups"
@@ -137,16 +141,20 @@ class INFO_MT_add_scenesetup(bpy.types.Menu):
         layout.operator_context = 'INVOKE_REGION_WIN'
 
         layout.operator("plane.add_scene",
-            text="Add scene")
+                        text="Add scene")
 
 #### REGISTER ####
+
+
 def add_object_button(self, context):
     self.layout.menu("INFO_MT_plane.add_scene", icon="PLUGIN")
+
 
 def register():
     bpy.utils.register_module(__name__)
 
     bpy.types.INFO_MT_add.append(add_object_button)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

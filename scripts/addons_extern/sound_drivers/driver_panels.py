@@ -4,16 +4,17 @@ from bpy.props import BoolProperty
 from sound_drivers.utils import get_icon, bpy_collections, icon_from_bpy_datapath
 
 
-class DRIVER_UL_driven_objects(bpy.types.UIList):    
+class DRIVER_UL_driven_objects(bpy.types.UIList):
     use_filter_empty = BoolProperty(name="Filter Empty", default=False, options=set(),
-                                              description="Whether to filter empty vertex groups")
+                                    description="Whether to filter empty vertex groups")
     use_filter_empty_reverse = BoolProperty(name="Reverse Empty", default=False, options=set(),
-                                                      description="Reverse empty filtering")
+                                            description="Reverse empty filtering")
     use_filter_name_reverse = BoolProperty(name="Reverse Name", default=False, options=set(),
-                                                     description="Reverse name filtering")
-                                                     
+                                           description="Reverse name filtering")
+
     use_filter_name = BoolProperty(name="Object Name", default=True, options=set(),
-                                                     description="Reverse name filtering")
+                                   description="Reverse name filtering")
+
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, filter_flg):
         ob = data
         self.use_filter_sort_alpha = True
@@ -21,12 +22,12 @@ class DRIVER_UL_driven_objects(bpy.types.UIList):
         coll = active_propname.strip("active_index")
 
         collection = getattr(bpy.data, coll)
-        obj = collection.get(item.name) 
-               
+        obj = collection.get(item.name)
+
         icon = get_icon(obj.type) if hasattr(obj, "type") else icon_from_bpy_datapath(repr(obj))
-        
+
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-           layout.label("  %s" % (item.name), icon=icon)
+            layout.label("  %s" % (item.name), icon=icon)
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label(text="", icon=icon)
@@ -35,41 +36,38 @@ class DRIVER_UL_driven_objects(bpy.types.UIList):
         col.label(item.name)
         return
 
-
-
     def draw_filter(self, context, layout):
         # Nothing much to say here, it's usual UI code...
         layout.label("filetereer")
         layout.prop(self, "filter_name")
         layout.prop(self, "use_filter_name")
-           
+
     def filter_items(self, context, data, propname):
 
         col = getattr(data, propname)
         filter_name = self.filter_name.lower()
 
         flt_flags = [self.bitflag_filter_item if any(
-                filter_name in filter_set for filter_set in (
-                    str(i), item.name.lower()
-                )
+            filter_name in filter_set for filter_set in (
+                str(i), item.name.lower()
             )
+        )
             else 0 for i, item in enumerate(col, 1)
         ]
 
         if self.use_filter_sort_alpha:
             flt_neworder = [x[1] for x in sorted(
-                    zip(
-                        [x[0] for x in sorted(enumerate(col), key=lambda x:( x[1].name))],
-                        range(len(col))
-                    )
+                zip(
+                    [x[0] for x in sorted(enumerate(col), key=lambda x:(x[1].name))],
+                    range(len(col))
                 )
+            )
             ]
         else:
             flt_neworder = []
 
-        #print(flt_flags, flt_neworder)    
+        #print(flt_flags, flt_neworder)
         return flt_flags, flt_neworder
-
 
 
 class DriversManagerPanel(bpy.types.Panel):
@@ -210,7 +208,7 @@ class DriversManagerPanel(bpy.types.Panel):
                            for dp, ds in object_drivers.items()
                            for i, sdi in ds.items()]
 
-                #REFACTO DLO
+                # REFACTO DLO
                 #dm.draw_layout(layout, context, drivers)
 
         row = box.row()
@@ -225,17 +223,16 @@ class DriversManagerPanel(bpy.types.Panel):
         '''
 
 
-
 class DriverPanel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_category = "Drivers"
     bl_label = " "
-     
-                
+
     def dic(self):
-        return(context.driver_manager.get_collection_dic(self.collection))    
-        
+        return(context.driver_manager.get_collection_dic(self.collection))
+
+
 class EditDriverPanel(DriverPanel):
 
     @classmethod
@@ -243,17 +240,16 @@ class EditDriverPanel(DriverPanel):
         return False
         #print("EDP", context.driver_manager.edit_driver is not None)
         return context.driver_manager is not None and context.driver_manager.edit_driver is not None
-    
+
     def draw_header(self, context):
         layout = self.layout
         dm = context.driver_manager
         ed = dm.edit_driver
         op = layout.operator("driver.edit", text="EDIT DRIVER", icon='CANCEL')
-        op.dindex=ed.index
-        op.toggle=True
+        op.dindex = ed.index
+        op.toggle = True
         layout.prop(ed.gui, "gui_types")
 
-              
     def draw(self, context):
         layout = self.layout
         dm = context.driver_manager
@@ -261,8 +257,9 @@ class EditDriverPanel(DriverPanel):
         if ed is not None:
             dm.draw_layout(layout, context, dm.get_object_dic("xxx", "yyy"))
             dm.driver_edit_draw(layout, context)
-            return None    
-    
+            return None
+
+
 class DriverCollectionPanel(DriverPanel):
     """Creates a Panel in the scene context of the properties editor"""
     bl_label = " "
@@ -295,16 +292,14 @@ class DriverCollectionPanel(DriverPanel):
         do = getattr(scene, "driver_objects")
         if do is None or dm is None:
             return False
-        #return True
-        return(do.use_filters == getattr(do.filters, cls.collection) 
+        # return True
+        return(do.use_filters == getattr(do.filters, cls.collection)
                and len(dm.get_collection_dic(cls.collection)))
-
 
     def draw_header(self, context):
         #self.layout.prop(context.scene, "use_gravity", text="")
         self.layout.label(icon=get_icon(self.collection), text=self.collection.title())
-    
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -326,7 +321,7 @@ class DriverCollectionPanel(DriverPanel):
         if self.collection.startswith("ob"):
             #dic = dm.get_driven_scene_objects(scene)
             ob = coll[index] if search else context.object
-            
+
             keys = [ob.name] if ob is not None else []
         elif self.collection.startswith("sce"):
             ob = context.scene
@@ -342,13 +337,12 @@ class DriverCollectionPanel(DriverPanel):
             ob = coll[index]
             keys = [ob.name]
             #keys = sorted(dic.keys())
-        
+
         if ob is None:
             layout.label("NO CONTEXT OBJECT")
             return None
         dm.check_deleted_drivers()
         dic = dm.get_object_dic(collection, ob.name)
-        
 
         obj = getattr(bpy.data, collection).get(ob.name)
 
@@ -362,21 +356,22 @@ class DriverCollectionPanel(DriverPanel):
             row.template_ID(context.scene.objects, "active")
         else:
             row.label(icon=icon, text=ob.name)
-        #obj = dm.find(dic[m][0][0]).driven_object.id_data            '''
+        # obj = dm.find(dic[m][0][0]).driven_object.id_data            '''
         dm.draw_layout(col, context, dic)
-        #dm.check_added_drivers(ob)
+        # dm.check_added_drivers(ob)
         return None
+
 
 def register():
     register_class(DriversManagerPanel)
-    
+
     register_class(EditDriverPanel)
-    propdic = { 
-                "bl_space_type" :  'VIEW_3D',
-                "bl_region_type" :  'TOOLS',
-                "bl_category" :  "Drivers",
-                
-                }
+    propdic = {
+        "bl_space_type": 'VIEW_3D',
+        "bl_region_type": 'TOOLS',
+        "bl_category": "Drivers",
+
+    }
     for collection in bpy_collections:
         propdic["collection"] = collection
         bl_idname = "SD_%s_Panel" % collection
@@ -386,13 +381,12 @@ def register():
         x = type(bl_idname, (DriverCollectionPanel,), propdic)
         register_class(x)
         register_class(col_ui_list)
-    
-      
+
     def get_dm(self):
-        
+
         dns = bpy.app.driver_namespace
         return dns.get("DriverManager")
-    
+
     bpy.types.Context.driver_manager = property(get_dm)
 
 
@@ -402,8 +396,7 @@ def unregister():
     for c in bpy_collections:
         unregister_class(getattr(bpy.types, "SD_%s_Panel" % c))
         unregister_class(getattr(bpy.types, "SD_%s_ui_list" % c))
-    #bpy.utils.unregister_class(DriverCollectionPanel)
+    # bpy.utils.unregister_class(DriverCollectionPanel)
     unregister_class(EditDriverPanel)
     # Need to remove all of these
     del bpy.types.Context.driver_manager
-

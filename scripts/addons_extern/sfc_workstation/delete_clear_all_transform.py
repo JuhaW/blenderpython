@@ -19,9 +19,8 @@
 # ***** END GPL LICENCE BLOCK *****
 
 
-
-#The entire code was written by CoDEmanX, but the idea was mine. Still full credit to CoDEmanX.
-#bl_info = {
+# The entire code was written by CoDEmanX, but the idea was mine. Still full credit to CoDEmanX.
+# bl_info = {
 #    "name": "Clear All",
 #    "description": "This script allows you to clear an objects Location, Rotation, and Scale at the same time",
 #    "author": "CoDEmanX,Albertofx",
@@ -33,6 +32,7 @@
 
 import bpy
 from mathutils import Matrix
+
 
 class OBJECT_OT_clear_all(bpy.types.Operator):
     """Clear Location, Rotation and Scale"""
@@ -54,6 +54,7 @@ def draw_func(self, context):
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.VIEW3D_MT_object_clear.append(draw_func)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

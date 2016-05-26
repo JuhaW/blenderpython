@@ -18,16 +18,18 @@
 
 # <pep8-80 compliant>
 
+
 class MapManager():
+
     def __init__(self):
         # The map is an association between a domain of vertex indices and the
         # corresponding range of arbitrary values.
-        self.map_ = dict() 
+        self.map_ = dict()
 
     def clip_domain(self, vertex_indices, action):
         # Truncate the map to include only the vertex indices in its domain
         # that intersect with the sequence of supplied vertex indices.
-        map_ = self.map_ 
+        map_ = self.map_
         if action == 'RETAIN':
             vertex_indices = set(self.map_.keys()).difference(vertex_indices)
         elif action != 'DISCARD':
@@ -36,22 +38,22 @@ class MapManager():
             if index in map_:
                 del map_[index]
 
-    def get_submap(self, vertex_indices, copy = False):
+    def get_submap(self, vertex_indices, copy=False):
         # Return a portion of the map, the keys of which intersect with the
         # supplied collection of vertex indices.
         map_ = self.map_
         if copy:
             return {
-                index : map_[index].copy()
+                index: map_[index].copy()
                 for index in vertex_indices
                 if index in map_
             }
         else:
             return {
-                index : map_[index]
+                index: map_[index]
                 for index in vertex_indices
                 if index in map_
-            } 
+            }
 
     def update(self, submap):
         # Update the items in the map with the items in the supplied submap
@@ -62,4 +64,4 @@ class MapManager():
                 map_[index] = submap[index]
 
     def reset(self):
-        self.__init__() 
+        self.__init__()

@@ -10,6 +10,7 @@ import bpy
 import mathutils
 import copy
 
+
 class MengerSponge(object):
     FACE_INDICES = [
         [3, 7, 4, 0],
@@ -51,7 +52,7 @@ class MengerSponge(object):
             (m, m, 0),
             (m, m, m),
             (0, m, m),
-            ]
+        ]
         self.__make_sub_sponge(points, None, self.__level)
         vertices = self.__make_vertices(width, height)
         return vertices, self.__faces
@@ -71,10 +72,10 @@ class MengerSponge(object):
         h_step = height / self.__max_point_number
         for p, i in sorted(self.__vertices_map.items(), key=lambda x: x[1]):
             vertices[i] = mathutils.Vector([
-                    p[0] * w_step - w2,
-                    p[1] * w_step - w2,
-                    p[2] * h_step - h2,
-                    ])
+                p[0] * w_step - w2,
+                p[1] * w_step - w2,
+                p[2] * h_step - h2,
+            ])
         return vertices
 
     def __make_sub_sponge(self, cur_points, face_vis, depth):
@@ -102,7 +103,7 @@ class MengerSponge(object):
                         width * x + base[0],
                         width * y + base[1],
                         width * z + base[2],
-                        )
+                    )
 
         for x in range(3):
             for y in range(3):
@@ -111,13 +112,13 @@ class MengerSponge(object):
                         continue
                     next_points = [
                         local_vert_map[(x, y, z)],
-                        local_vert_map[(x+1, y, z)],
-                        local_vert_map[(x+1, y, z+1)],
-                        local_vert_map[(x, y, z+1)],
-                        local_vert_map[(x, y+1, z)],
-                        local_vert_map[(x+1, y+1, z)],
-                        local_vert_map[(x+1, y+1, z+1)],
-                        local_vert_map[(x, y+1, z+1)],
+                        local_vert_map[(x + 1, y, z)],
+                        local_vert_map[(x + 1, y, z + 1)],
+                        local_vert_map[(x, y, z + 1)],
+                        local_vert_map[(x, y + 1, z)],
+                        local_vert_map[(x + 1, y + 1, z)],
+                        local_vert_map[(x + 1, y + 1, z + 1)],
+                        local_vert_map[(x, y + 1, z + 1)],
                     ]
                     visibility = copy.copy(self.__face_visibility[(x, y, z)])
                     if face_vis:
@@ -144,34 +145,35 @@ class AddMengerSponge(bpy.types.Operator):
         description="Sponge Level",
         min=0, max=4,
         default=1,
-        )
+    )
 
     radius = FloatProperty(
         name="Width",
         description="Sponge Radius",
         min=0.01, max=100.0,
         default=1.0,
-        )
+    )
 
     # generic transform props
     view_align = BoolProperty(
         name="Align to View",
         default=False,
-        )
+    )
     location = FloatVectorProperty(
         name="Location",
         subtype='TRANSLATION',
-        )
+    )
     rotation = FloatVectorProperty(
         name="Rotation",
         subtype='EULER',
-        )
+    )
     layers = BoolVectorProperty(
-            name="Layers",
-            size=20,
-            subtype='LAYER',
-            options={'HIDDEN', 'SKIP_SAVE'},
-            )
+        name="Layers",
+        size=20,
+        subtype='LAYER',
+        options={'HIDDEN', 'SKIP_SAVE'},
+    )
+
     def execute(self, context):
         sponger = MengerSponge(self.level)
         vertices, faces = sponger.create(self.radius * 2, self.radius * 2)
@@ -182,7 +184,7 @@ class AddMengerSponge(bpy.types.Operator):
         uvs = [(0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)]
         mesh.uv_textures.new()
         for i, uvloop in enumerate(mesh.uv_layers.active.data):
-            uvloop.uv = uvs[i%4]
+            uvloop.uv = uvs[i % 4]
 
         from bpy_extras import object_utils
         object_utils.object_data_add(context, mesh, operator=self)

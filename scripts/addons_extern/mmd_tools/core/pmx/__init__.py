@@ -3,12 +3,17 @@ import struct
 import os
 import logging
 
+
 class InvalidFileError(Exception):
     pass
+
+
 class UnsupportedVersionError(Exception):
     pass
 
+
 class FileStream:
+
     def __init__(self, path, file_obj, pmx_header):
         self.__path = path
         self.__file_obj = file_obj
@@ -37,25 +42,26 @@ class FileStream:
             self.__file_obj.close()
             self.__file_obj = None
 
+
 class FileReadStream(FileStream):
+
     def __init__(self, path, pmx_header=None):
         self.__fin = open(path, 'rb')
         FileStream.__init__(self, path, self.__fin, pmx_header)
 
     def __readIndex(self, size, typedict):
         index = None
-        if size in typedict :
+        if size in typedict:
             index, = struct.unpack(typedict[size], self.__fin.read(size))
         else:
-            raise ValueError('invalid data size %s'%str(size))
+            raise ValueError('invalid data size %s' % str(size))
         return index
 
     def __readSignedIndex(self, size):
-        return self.__readIndex(size, { 1 :"<b", 2 :"<h", 4 :"<i"})
+        return self.__readIndex(size, {1: "<b", 2: "<h", 4: "<i"})
 
     def __readUnsignedIndex(self, size):
-        return self.__readIndex(size, { 1 :"<B", 2 :"<H", 4 :"<I"})
-
+        return self.__readIndex(size, {1: "<B", 2: "<H", 4: "<I"})
 
     # READ methods for indexes
     def readVertexIndex(self):
@@ -103,7 +109,7 @@ class FileReadStream(FileStream):
         fmt = '<'
         for i in range(size):
             fmt += 'f'
-        return list(struct.unpack(fmt, self.__fin.read(4*size)))
+        return list(struct.unpack(fmt, self.__fin.read(4 * size)))
 
     def readByte(self):
         v, = struct.unpack('<B', self.__fin.read(1))
@@ -116,23 +122,25 @@ class FileReadStream(FileStream):
         v, = struct.unpack('<b', self.__fin.read(1))
         return v
 
+
 class FileWriteStream(FileStream):
+
     def __init__(self, path, pmx_header=None):
         self.__fout = open(path, 'wb')
         FileStream.__init__(self, path, self.__fout, pmx_header)
 
     def __writeIndex(self, index, size, typedict):
-        if size in typedict :
+        if size in typedict:
             self.__fout.write(struct.pack(typedict[size], int(index)))
         else:
-            raise ValueError('invalid data size %s'%str(size))
+            raise ValueError('invalid data size %s' % str(size))
         return
 
     def __writeSignedIndex(self, index, size):
-        return self.__writeIndex(index, size, { 1 :"<b", 2 :"<h", 4 :"<i"})
+        return self.__writeIndex(index, size, {1: "<b", 2: "<h", 4: "<i"})
 
     def __writeUnsignedIndex(self, index, size):
-        return self.__writeIndex(index, size, { 1 :"<B", 2 :"<H", 4 :"<I"})
+        return self.__writeIndex(index, size, {1: "<B", 2: "<H", 4: "<I"})
 
     # WRITE methods for indexes
     def writeVertexIndex(self, index):
@@ -152,7 +160,6 @@ class FileWriteStream(FileStream):
 
     def writeMaterialIndex(self, index):
         return self.__writeSignedIndex(index, self.header().material_index_size)
-
 
     def writeInt(self, v):
         self.__fout.write(struct.pack('<i', int(v)))
@@ -187,42 +194,47 @@ class FileWriteStream(FileStream):
     def writeSignedByte(self, v):
         self.__fout.write(struct.pack('<b', int(v)))
 
+
 class Encoding:
     _MAP = [
         (0, 'utf-16-le'),
         (1, 'utf-8'),
-        ]
+    ]
 
     def __init__(self, arg):
         self.index = 0
         self.charset = ''
         t = None
         if isinstance(arg, str):
-            t = list(filter(lambda x: x[1]==arg, self._MAP))
+            t = list(filter(lambda x: x[1] == arg, self._MAP))
             if len(t) == 0:
-                raise ValueError('invalid charset %s'%arg)
+                raise ValueError('invalid charset %s' % arg)
         elif isinstance(arg, int):
-            t = list(filter(lambda x: x[0]==arg, self._MAP))
+            t = list(filter(lambda x: x[0] == arg, self._MAP))
             if len(t) == 0:
-                raise ValueError('invalid index %d'%arg)
+                raise ValueError('invalid index %d' % arg)
         else:
             raise ValueError('invalid argument type')
         t = t[0]
         self.index = t[0]
-        self.charset  = t[1]
+        self.charset = t[1]
 
     def __repr__(self):
-        return '<Encoding charset %s>'%self.charset
+        return '<Encoding charset %s>' % self.charset
+
 
 class Coordinate:
     """ """
+
     def __init__(self, xAxis, zAxis):
         self.x_axis = xAxis
         self.z_axis = zAxis
 
+
 class Header:
     PMX_SIGN = b'PMX '
     VERSION = 2.0
+
     def __init__(self, model=None):
         self.sign = self.PMX_SIGN
         self.version = 0
@@ -253,9 +265,9 @@ class Header:
         s = 1
         if signed:
             s = 2
-        if (1<<8)/s > num:
+        if (1 << 8) / s > num:
             return 1
-        elif (1<<16)/s > num:
+        elif (1 << 16) / s > num:
             return 2
         else:
             return 4
@@ -272,7 +284,7 @@ class Header:
         logging.info('pmx format version: %f', self.version)
         if self.version != self.VERSION:
             logging.error('PMX version %.1f is unsupported', self.version)
-            raise UnsupportedVersionError('unsupported PMX version: %.1f'%self.version)
+            raise UnsupportedVersionError('unsupported PMX version: %.1f' % self.version)
         if fs.readByte() != 8:
             raise InvalidFileError
         self.encoding = Encoding(fs.readByte())
@@ -312,7 +324,7 @@ class Header:
         fs.writeByte(self.rigid_index_size)
 
     def __repr__(self):
-        return '<Header encoding %s, uvs %d, vtx %d, tex %d, mat %d, bone %d, morph %d, rigid %d>'%(
+        return '<Header encoding %s, uvs %d, vtx %d, tex %d, mat %d, bone %d, morph %d, rigid %d>' % (
             str(self.encoding),
             self.additional_uvs,
             self.vertex_index_size,
@@ -321,9 +333,11 @@ class Header:
             self.bone_index_size,
             self.morph_index_size,
             self.rigid_index_size,
-            )
+        )
+
 
 class Model:
+
     def __init__(self):
         self.header = None
 
@@ -384,7 +398,7 @@ class Model:
         logging.info('------------------------------')
         num_faces = fs.readInt()
         self.faces = []
-        for i in range(int(num_faces/3)):
+        for i in range(int(num_faces / 3)):
             f1 = fs.readVertexIndex()
             f2 = fs.readVertexIndex()
             f3 = fs.readVertexIndex()
@@ -471,11 +485,11 @@ class Model:
             if b.isIK:
                 for j, link in enumerate(b.ik_links):
                     if isinstance(link.minimumAngle, list) and len(link.minimumAngle) == 3:
-                        min_str = '(%f, %f, %f)'%tuple(link.minimumAngle)
+                        min_str = '(%f, %f, %f)' % tuple(link.minimumAngle)
                     else:
                         min_str = '(None, None, None)'
                     if isinstance(link.maximumAngle, list) and len(link.maximumAngle) == 3:
-                        max_str = '(%f, %f, %f)'%tuple(link.maximumAngle)
+                        max_str = '(%f, %f, %f)' % tuple(link.maximumAngle)
                     else:
                         max_str = '(None, None, None)'
                     logging.debug('    IK Link %d: %d, %s - %s', j, link.target, min_str, max_str)
@@ -594,7 +608,7 @@ comment(english):
         logging.info('finished exporting vertices.')
 
         logging.info('exporting faces...')
-        fs.writeInt(len(self.faces)*3)
+        fs.writeInt(len(self.faces) * 3)
         for f3, f2, f1 in self.faces:
             fs.writeVertexIndex(f1)
             fs.writeVertexIndex(f2)
@@ -653,17 +667,18 @@ comment(english):
         logging.info('finished exporting joints.')
         logging.info('finished exporting the model.')
 
-
     def __repr__(self):
-        return '<Model name %s, name_e %s, comment %s, comment_e %s, textures %s>'%(
+        return '<Model name %s, name_e %s, comment %s, comment_e %s, textures %s>' % (
             self.name,
             self.name_e,
             self.comment,
             self.comment_e,
             str(self.textures),
-            )
+        )
+
 
 class Vertex:
+
     def __init__(self):
         self.co = [0.0, 0.0, 0.0]
         self.normal = [0.0, 0.0, 0.0]
@@ -673,14 +688,14 @@ class Vertex:
         self.edge_scale = 1
 
     def __repr__(self):
-        return '<Vertex co %s, normal %s, uv %s, additional_uvs %s, weight %s, edge_scale %s>'%(
+        return '<Vertex co %s, normal %s, uv %s, additional_uvs %s, weight %s, edge_scale %s>' % (
             str(self.co),
             str(self.normal),
             str(self.uv),
             str(self.additional_uvs),
             str(self.weight),
             str(self.edge_scale),
-            )
+        )
 
     def load(self, fs):
         self.co = fs.readVector(3)
@@ -702,25 +717,28 @@ class Vertex:
         self.weight.save(fs)
         fs.writeFloat(self.edge_scale)
 
+
 class BoneWeightSDEF:
+
     def __init__(self, weight=0, c=None, r0=None, r1=None):
         self.weight = weight
         self.c = c
         self.r0 = r0
         self.r1 = r1
 
+
 class BoneWeight:
     BDEF1 = 0
     BDEF2 = 1
     BDEF4 = 2
-    SDEF  = 3
+    SDEF = 3
 
     TYPES = [
         (BDEF1, 'BDEF1'),
         (BDEF2, 'BDEF2'),
         (BDEF4, 'BDEF4'),
         (SDEF, 'SDEF'),
-        ]
+    ]
 
     def __init__(self):
         self.bones = []
@@ -728,14 +746,14 @@ class BoneWeight:
         self.type = self.BDEF1
 
     def convertIdToName(self, type_id):
-        t = list(filter(lambda x: x[0]==type_id, self.TYPES))
+        t = list(filter(lambda x: x[0] == type_id, self.TYPES))
         if len(t) > 0:
             return t[0][1]
         else:
             return None
 
     def convertNameToId(self, type_name):
-        t = list(filter(lambda x: x[1]==type_name, self.TYPES))
+        t = list(filter(lambda x: x[1] == type_name, self.TYPES))
         if len(t) > 0:
             return t[0][0]
         else:
@@ -767,7 +785,7 @@ class BoneWeight:
             self.weights.r0 = fs.readVector(3)
             self.weights.r1 = fs.readVector(3)
         else:
-            raise ValueError('invalid weight type %s'%str(self.type))
+            raise ValueError('invalid weight type %s' % str(self.type))
 
     def save(self, fs):
         fs.writeByte(self.type)
@@ -792,15 +810,16 @@ class BoneWeight:
             fs.writeVector(self.weights.r0)
             fs.writeVector(self.weights.r1)
         else:
-            raise ValueError('invalid weight type %s'%str(self.type))
+            raise ValueError('invalid weight type %s' % str(self.type))
 
 
 class Texture:
+
     def __init__(self):
         self.path = ''
 
     def __repr__(self):
-        return '<Texture path %s>'%str(self.path)
+        return '<Texture path %s>' % str(self.path)
 
     def load(self, fs):
         self.path = fs.readStr()
@@ -810,10 +829,13 @@ class Texture:
     def save(self, fs):
         fs.writeStr(os.path.relpath(self.path, os.path.dirname(fs.path())))
 
+
 class SharedTexture(Texture):
+
     def __init__(self):
         self.number = 0
         self.prefix = ''
+
 
 class Material:
     SPHERE_MODE_OFF = 0
@@ -848,7 +870,7 @@ class Material:
         self.vertex_count = 0
 
     def __repr__(self):
-        return '<Material name %s, name_e %s, diffuse %s, specular %s, ambient %s, double_side %s, drop_shadow %s, self_shadow_map %s, self_shadow %s, toon_edge %s, edge_color %s, edge_size %s, toon_texture %s, comment %s>'%(
+        return '<Material name %s, name_e %s, diffuse %s, specular %s, ambient %s, double_side %s, drop_shadow %s, self_shadow_map %s, self_shadow %s, toon_edge %s, edge_color %s, edge_size %s, toon_texture %s, comment %s>' % (
             self.name,
             self.name_e,
             str(self.diffuse),
@@ -933,6 +955,7 @@ class Material:
 
 
 class Bone:
+
     def __init__(self):
         self.name = ''
         self.name_e = ''
@@ -983,7 +1006,7 @@ class Bone:
         self.ik_links = []
 
     def __repr__(self):
-        return '<Bone name %s, name_e %s>'%(
+        return '<Bone name %s, name_e %s>' % (
             self.name,
             self.name_e,)
 
@@ -1001,12 +1024,12 @@ class Bone:
         else:
             self.displayConnection = fs.readVector(3)
 
-        self.isRotatable    = ((flags & 0x0002) != 0)
-        self.isMovable      = ((flags & 0x0004) != 0)
-        self.visible        = ((flags & 0x0008) != 0)
+        self.isRotatable = ((flags & 0x0002) != 0)
+        self.isMovable = ((flags & 0x0004) != 0)
+        self.visible = ((flags & 0x0008) != 0)
         self.isControllable = ((flags & 0x0010) != 0)
 
-        self.isIK           = ((flags & 0x0020) != 0)
+        self.isIK = ((flags & 0x0020) != 0)
 
         self.hasAdditionalRotate = ((flags & 0x0100) != 0)
         self.hasAdditionalLocation = ((flags & 0x0200) != 0)
@@ -1016,7 +1039,6 @@ class Bone:
             self.additionalTransform = (t, v)
         else:
             self.additionalTransform = None
-
 
         if flags & 0x0400:
             self.axis = fs.readVector(3)
@@ -1104,13 +1126,14 @@ class Bone:
 
 
 class IKLink:
+
     def __init__(self):
         self.target = None
         self.maximumAngle = None
         self.minimumAngle = None
 
     def __repr__(self):
-        return '<IKLink target %s>'%(str(self.target))
+        return '<IKLink target %s>' % (str(self.target))
 
     def load(self, fs):
         self.target = fs.readBoneIndex()
@@ -1131,6 +1154,7 @@ class IKLink:
         else:
             fs.writeByte(0)
 
+
 class Morph:
     CATEGORY_SYSTEM = 0
     CATEGORY_EYEBROW = 1
@@ -1145,7 +1169,7 @@ class Morph:
         self.category = category
 
     def __repr__(self):
-        return '<Morph name %s, name_e %s>'%(self.name, self.name_e)
+        return '<Morph name %s, name_e %s>' % (self.name, self.name_e)
 
     def type_index(self):
         raise NotImplementedError
@@ -1162,14 +1186,14 @@ class Morph:
             6: UVMorph,
             7: UVMorph,
             8: MaterialMorph,
-            }
+        }
 
         name = fs.readStr()
         name_e = fs.readStr()
         logging.debug('morph: %s', name)
         category = fs.readSignedByte()
         typeIndex = fs.readSignedByte()
-        ret = _CLASSES[typeIndex](name, name_e, category, type_index = typeIndex)
+        ret = _CLASSES[typeIndex](name, name_e, category, type_index=typeIndex)
         ret.load(fs)
         return ret
 
@@ -1187,7 +1211,9 @@ class Morph:
         for i in self.offsets:
             i.save(fs)
 
+
 class VertexMorph(Morph):
+
     def __init__(self, *args, **kwargs):
         Morph.__init__(self, *args, **kwargs)
 
@@ -1201,7 +1227,9 @@ class VertexMorph(Morph):
             t.load(fs)
             self.offsets.append(t)
 
+
 class VertexMorphOffset:
+
     def __init__(self):
         self.index = 0
         self.offset = []
@@ -1214,7 +1242,9 @@ class VertexMorphOffset:
         fs.writeVertexIndex(self.index)
         fs.writeVector(self.offset)
 
+
 class UVMorph(Morph):
+
     def __init__(self, *args, **kwargs):
         self.uv_index = kwargs.get('type_index', 3) - 3
         Morph.__init__(self, *args, **kwargs)
@@ -1230,7 +1260,9 @@ class UVMorph(Morph):
             t.load(fs)
             self.offsets.append(t)
 
+
 class UVMorphOffset:
+
     def __init__(self):
         self.index = 0
         self.offset = []
@@ -1243,7 +1275,9 @@ class UVMorphOffset:
         fs.writeVertexIndex(self.index)
         fs.writeVector(self.offset)
 
+
 class BoneMorph(Morph):
+
     def __init__(self, *args, **kwargs):
         Morph.__init__(self, *args, **kwargs)
 
@@ -1258,7 +1292,9 @@ class BoneMorph(Morph):
             t.load(fs)
             self.offsets.append(t)
 
+
 class BoneMorphOffset:
+
     def __init__(self):
         self.index = None
         self.location_offset = []
@@ -1274,7 +1310,9 @@ class BoneMorphOffset:
         fs.writeVector(self.location_offset)
         fs.writeVector(self.rotation_offset)
 
+
 class MaterialMorph(Morph):
+
     def __init__(self, *args, **kwargs):
         Morph.__init__(self, *args, **kwargs)
 
@@ -1288,6 +1326,7 @@ class MaterialMorph(Morph):
             t = MaterialMorphOffset()
             t.load(fs)
             self.offsets.append(t)
+
 
 class MaterialMorphOffset:
     TYPE_MULT = 0
@@ -1329,7 +1368,9 @@ class MaterialMorphOffset:
         fs.writeVector(self.sphere_texture_factor)
         fs.writeVector(self.toon_texture_factor)
 
+
 class GroupMorph(Morph):
+
     def __init__(self, *args, **kwargs):
         Morph.__init__(self, *args, **kwargs)
 
@@ -1344,7 +1385,9 @@ class GroupMorph(Morph):
             t.load(fs)
             self.offsets.append(t)
 
+
 class GroupMorphOffset:
+
     def __init__(self):
         self.morph = None
         self.factor = 0.0
@@ -1359,6 +1402,7 @@ class GroupMorphOffset:
 
 
 class Display:
+
     def __init__(self):
         self.name = ''
         self.name_e = ''
@@ -1368,10 +1412,10 @@ class Display:
         self.data = []
 
     def __repr__(self):
-        return '<Display name %s, name_e %s>'%(
+        return '<Display name %s, name_e %s>' % (
             self.name,
             self.name_e,
-            )
+        )
 
     def load(self, fs):
         self.name = fs.readStr()
@@ -1408,6 +1452,7 @@ class Display:
             else:
                 raise Exception('invalid value.')
 
+
 class Rigid:
     TYPE_SPHERE = 0
     TYPE_BOX = 1
@@ -1416,6 +1461,7 @@ class Rigid:
     MODE_STATIC = 0
     MODE_DYNAMIC = 1
     MODE_DYNAMIC_BONE = 2
+
     def __init__(self):
         self.name = ''
         self.name_e = ''
@@ -1439,10 +1485,10 @@ class Rigid:
         self.mode = 0
 
     def __repr__(self):
-        return '<Rigid name %s, name_e %s>'%(
+        return '<Rigid name %s, name_e %s>' % (
             self.name,
             self.name_e,
-            )
+        )
 
     def load(self, fs):
         self.name = fs.readStr()
@@ -1497,8 +1543,10 @@ class Rigid:
 
         fs.writeSignedByte(self.mode)
 
+
 class Joint:
     MODE_SPRING6DOF = 0
+
     def __init__(self):
         self.name = ''
         self.name_e = ''
@@ -1570,7 +1618,6 @@ class Joint:
         fs.writeVector(self.spring_rotation_constant)
 
 
-
 def load(path):
     with FileReadStream(path) as fs:
         logging.info('****************************************')
@@ -1589,6 +1636,7 @@ def load(path):
         logging.info(' mmd_tools.pmx module')
         logging.info('****************************************')
         return model
+
 
 def save(path, model):
     with FileWriteStream(path) as fs:

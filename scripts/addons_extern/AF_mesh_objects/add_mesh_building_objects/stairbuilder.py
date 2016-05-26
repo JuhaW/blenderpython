@@ -1,19 +1,19 @@
 # Stairs and railing creator script for blender 2.49
 # Author: Nick van Adium
 # Date: 2010 08 09
-# 
+#
 # Creates a straight-run staircase with railings and stringer
 # All components are optional and can be turned on and off by setting e.g. makeTreads=True or makeTreads=False
 # No GUI for the script, all parameters must be defined below
 # Current values assume 1 blender unit = 1 metre
-# 
+#
 # Stringer will rest on lower landing and hang from upper landing
 # Railings start on the lowest step and end on the upper landing
-# 
+#
 # NOTE: You must have numpy installed for this script to work!
 #       numpy is used to easily perform the necessary algebra
 #       numpy can be found at http://www.scipy.org/Download
-# 
+#
 # Note: I'm not sure how to use recalcNormals so not all normals points ouwards.
 #       Perhaps someone else can contribute this.
 #
@@ -86,8 +86,9 @@ global typ
 global typ_s
 global typ_t
 global rise
-global run               
-            
+global run
+
+
 class stairs(bpy.types.Operator):
     """Add stair objects"""
     bl_idname = "mesh.stairs"
@@ -112,187 +113,187 @@ class stairs(bpy.types.Operator):
     sId1 = ("sId1", "Classic", "Generate a classic style stringer")
     sId2 = ("sId2", "I-Beam", "Generate a steel I-beam stringer")
     sId3 = ("sId3", "C-Beam", "Generate a C-channel style stringer")
-    
-    typ = EnumProperty(name = "Type",
-                       description = "Type of staircase to generate",
-                       items = [id1, id2, id3, id4])
 
-    rise = FloatProperty(name = "Rise",
-                         description = "Single tread rise",
-                         min = 0.0, max = 1024.0,
-                         default = 0.20)
-    run = FloatProperty(name = "Run",
-                        description = "Single tread run",
-                        min = 0.0, max = 1024.0,
-                        default = 0.30)
+    typ = EnumProperty(name="Type",
+                       description="Type of staircase to generate",
+                       items=[id1, id2, id3, id4])
 
-    #for circular
-    rad1 = FloatProperty(name = "Inner Radius",
-                         description = "Inner radius for circular staircase",
-                         min = 0.0, max = 1024.0,
-                         soft_max = 10.0,
-                         default = 0.25)
-    rad2 = FloatProperty(name = "Outer Radius",
-                         description = "Outer radius for circular staircase",
-                         min = 0.0, max = 1024.0,
-                         soft_min = 0.015625, soft_max = 32.0,
-                         default = 1.0)
-    deg = FloatProperty(name = "Degrees",
-                        description = "Number of degrees the stairway rotates",
-                        min = 0.0, max = 92160.0, step = 5.0,
-                        default = 450.0)
-    center = BoolProperty(name = "Center Pillar",
-                          description = "Generate a central pillar",
-                          default = False)
+    rise = FloatProperty(name="Rise",
+                         description="Single tread rise",
+                         min=0.0, max=1024.0,
+                         default=0.20)
+    run = FloatProperty(name="Run",
+                        description="Single tread run",
+                        min=0.0, max=1024.0,
+                        default=0.30)
 
-    #for treads
-    make_treads = BoolProperty(name = "Make Treads",
-                              description = "Enable tread generation",
-                              default = True)
-    tread_w = FloatProperty(name = "Tread Width",
-                            description = "Width of each generated tread",
-                            min = 0.0001, max = 1024.0,
-                            default = 1.2)
-    tread_h = FloatProperty(name = "Tread Height",
-                            description = "Height of each generated tread",
-                            min = 0.0001, max = 1024.0,
-                            default = 0.04)
-    tread_t = FloatProperty(name = "Tread Toe",
-                            description = "Toe (aka \"nosing\") of each generated tread",
-                            min = 0.0, max = 10.0,
-                            default = 0.03)
-    tread_o = FloatProperty(name = "Tread Overhang",
-                            description = "How much tread \"overhangs\" the sides",
-                            min = 0.0, max = 1024.0,
-                            default = 0.025)
-    tread_n = IntProperty(name = "Number of Treads",
-                          description = "How many treads to generate",
-                          min = 1, max = 1024,
-                          default = 10)
-    typ_t = EnumProperty(name = "Tread Type",
-                         description = "Type/style of treads to generate",
-                         items = [tId1, tId2, tId3, tId4, tId5])
-    tread_tk = FloatProperty(name = "Thickness",
-                             description = "Thickness of the treads",
-                             min = 0.0001, max = 10.0,
-                             default = 0.02)
-    tread_sec = IntProperty(name = "Sections",
-                            description = "Number of sections to use for tread",
-                            min = 1, max = 1024,
-                            default = 5)
-    tread_sp = IntProperty(name = "Spacing",
-                           description = "Total spacing between tread sections as a percentage of total tread width",
-                           min = 0, max = 80,
-                           default = 5)
-    tread_sn = IntProperty(name = "Crosses",
-                           description = "Number of cross section supports",
-                           min = 2, max = 1024,
-                           default = 4)
-    #special circular tread properties:
-    tread_slc = IntProperty(name = "Slices",
-                            description = "Number of slices each tread is composed of",
-                            min = 1, max = 1024,
-                            soft_max = 16,
-                            default = 4)
+    # for circular
+    rad1 = FloatProperty(name="Inner Radius",
+                         description="Inner radius for circular staircase",
+                         min=0.0, max=1024.0,
+                         soft_max=10.0,
+                         default=0.25)
+    rad2 = FloatProperty(name="Outer Radius",
+                         description="Outer radius for circular staircase",
+                         min=0.0, max=1024.0,
+                         soft_min=0.015625, soft_max=32.0,
+                         default=1.0)
+    deg = FloatProperty(name="Degrees",
+                        description="Number of degrees the stairway rotates",
+                        min=0.0, max=92160.0, step=5.0,
+                        default=450.0)
+    center = BoolProperty(name="Center Pillar",
+                          description="Generate a central pillar",
+                          default=False)
 
-    #for posts
-    make_posts = BoolProperty(name = "Make Posts",
-                              description = "Enable post generation",
-                              default = True)
-    post_d = FloatProperty(name = "Post Depth",
-                           description = "Depth of generated posts",
-                           min = 0.0001, max = 10.0,
-                           default = 0.04)
-    post_w = FloatProperty(name = "Post Width",
-                           description = "Width of generated posts",
-                           min = 0.0001, max = 10.0,
-                           default = 0.04)
-    post_n = IntProperty(name = "Number of Posts",
-                         description = "Number of posts to generated",
-                         min = 1, max = 1024,
-                         default = 5)
+    # for treads
+    make_treads = BoolProperty(name="Make Treads",
+                               description="Enable tread generation",
+                               default=True)
+    tread_w = FloatProperty(name="Tread Width",
+                            description="Width of each generated tread",
+                            min=0.0001, max=1024.0,
+                            default=1.2)
+    tread_h = FloatProperty(name="Tread Height",
+                            description="Height of each generated tread",
+                            min=0.0001, max=1024.0,
+                            default=0.04)
+    tread_t = FloatProperty(name="Tread Toe",
+                            description="Toe (aka \"nosing\") of each generated tread",
+                            min=0.0, max=10.0,
+                            default=0.03)
+    tread_o = FloatProperty(name="Tread Overhang",
+                            description="How much tread \"overhangs\" the sides",
+                            min=0.0, max=1024.0,
+                            default=0.025)
+    tread_n = IntProperty(name="Number of Treads",
+                          description="How many treads to generate",
+                          min=1, max=1024,
+                          default=10)
+    typ_t = EnumProperty(name="Tread Type",
+                         description="Type/style of treads to generate",
+                         items=[tId1, tId2, tId3, tId4, tId5])
+    tread_tk = FloatProperty(name="Thickness",
+                             description="Thickness of the treads",
+                             min=0.0001, max=10.0,
+                             default=0.02)
+    tread_sec = IntProperty(name="Sections",
+                            description="Number of sections to use for tread",
+                            min=1, max=1024,
+                            default=5)
+    tread_sp = IntProperty(name="Spacing",
+                           description="Total spacing between tread sections as a percentage of total tread width",
+                           min=0, max=80,
+                           default=5)
+    tread_sn = IntProperty(name="Crosses",
+                           description="Number of cross section supports",
+                           min=2, max=1024,
+                           default=4)
+    # special circular tread properties:
+    tread_slc = IntProperty(name="Slices",
+                            description="Number of slices each tread is composed of",
+                            min=1, max=1024,
+                            soft_max=16,
+                            default=4)
 
-    #for railings
-    make_railings = BoolProperty(name = "Make Railings",
-                                 description = "Generate railings",
-                                 default = True)
-    rail_w = FloatProperty(name = "Railings Width",
-                           description = "Width of railings to generate",
-                           min = 0.0001, max = 10.0,
-                           default = 0.12)
-    rail_t = FloatProperty(name = "Railings Thickness",
-                           description = "Thickness of railings to generate",
-                           min = 0.0001, max = 10.0,
-                           default = 0.03)
-    rail_h = FloatProperty(name = "Railings Height",
-                           description = "Height of railings to generate",
-                           min = 0.0001, max = 10.0,
-                           default = 0.90)
+    # for posts
+    make_posts = BoolProperty(name="Make Posts",
+                              description="Enable post generation",
+                              default=True)
+    post_d = FloatProperty(name="Post Depth",
+                           description="Depth of generated posts",
+                           min=0.0001, max=10.0,
+                           default=0.04)
+    post_w = FloatProperty(name="Post Width",
+                           description="Width of generated posts",
+                           min=0.0001, max=10.0,
+                           default=0.04)
+    post_n = IntProperty(name="Number of Posts",
+                         description="Number of posts to generated",
+                         min=1, max=1024,
+                         default=5)
 
-    #for retainers
-    make_retainers = BoolProperty(name = "Make Retainers",
-                                  description = "Generate retainers",
-                                  default = True)
-    ret_w = FloatProperty(name = "Retainer Width",
-                          description = "Width of generated retainers",
-                          min = 0.0001, max = 10.0,
-                          default = 0.01)
-    ret_h = FloatProperty(name = "Retainer Height",
-                          description = "Height of generated retainers",
-                          min = 0.0001, max = 10.0,
-                          default = 0.01)
-    ret_n = IntProperty(name = "Number of Retainers",
-                        description = "Number of retainers to generated",
-                        min = 1, max = 1024,
-                        default = 3)
+    # for railings
+    make_railings = BoolProperty(name="Make Railings",
+                                 description="Generate railings",
+                                 default=True)
+    rail_w = FloatProperty(name="Railings Width",
+                           description="Width of railings to generate",
+                           min=0.0001, max=10.0,
+                           default=0.12)
+    rail_t = FloatProperty(name="Railings Thickness",
+                           description="Thickness of railings to generate",
+                           min=0.0001, max=10.0,
+                           default=0.03)
+    rail_h = FloatProperty(name="Railings Height",
+                           description="Height of railings to generate",
+                           min=0.0001, max=10.0,
+                           default=0.90)
 
-    #for stringer
-    make_stringer = BoolProperty(name = "Make Stringer",
-                                 description = "Generate stair stringer",
-                                 default = True)
-    typ_s = EnumProperty(name = "Stringer Type",
-                         description = "Type/style of stringer to generate",
-                         items = [sId1, sId2, sId3])
-    string_n = IntProperty(name = "Number of Stringers",
-                           description = "Number of stringers to generate",
-                           min = 1, max = 10,
-                           default = 1)
-    string_dis = BoolProperty(name = "Distributed",
-                              description = "Use distributed stringers",
-                              default = False)
-    string_w = FloatProperty(name = "Stringer width",
-                             description = "Width of stringer as a percentage of tread width",
-                             min = 0.0001, max = 100.0,
-                             default = 15.0)
-    string_h = FloatProperty(name = "Stringer Height",
-                             description = "Height of the stringer",
-                             min = 0.0001, max = 100.0,
-                             default = 0.3)
-    string_tw = FloatProperty(name = "Web Thickness",
-                              description = "Thickness of the beam's web as a percentage of width",
-                              min = 0.0001, max = 100.0,
-                              default = 25.0)
-    string_tf = FloatProperty(name = "Flange Thickness",
-                              description = "Thickness of the flange",
-                              min = 0.0001, max = 100.0,
-                              default = 0.05)
-    string_tp = FloatProperty(name = "Flange Taper",
-                              description = "Flange thickness taper as a percentage",
-                              min = 0.0, max = 100.0,
-                              default = 0.0)
-    string_g = BoolProperty(name = "Floating",
-                            description = "Cut bottom of strigner to be a \"floating\" section",
-                            default = False)
+    # for retainers
+    make_retainers = BoolProperty(name="Make Retainers",
+                                  description="Generate retainers",
+                                  default=True)
+    ret_w = FloatProperty(name="Retainer Width",
+                          description="Width of generated retainers",
+                          min=0.0001, max=10.0,
+                          default=0.01)
+    ret_h = FloatProperty(name="Retainer Height",
+                          description="Height of generated retainers",
+                          min=0.0001, max=10.0,
+                          default=0.01)
+    ret_n = IntProperty(name="Number of Retainers",
+                        description="Number of retainers to generated",
+                        min=1, max=1024,
+                        default=3)
 
-    use_original = BoolProperty(name = "Use legacy method",
-                                description = "Use the Blender 2.49 legacy method for stair generation",
-                                default = True)
-    rEnable = BoolProperty(name = "Right Details",
-                           description = "Generate right side details (posts/rails/retainers)",
-                           default = True)
-    lEnable = BoolProperty(name = "Left Details",
-                           description = "Generate left side details (posts/rails/retainers)",
-                           default = True)
+    # for stringer
+    make_stringer = BoolProperty(name="Make Stringer",
+                                 description="Generate stair stringer",
+                                 default=True)
+    typ_s = EnumProperty(name="Stringer Type",
+                         description="Type/style of stringer to generate",
+                         items=[sId1, sId2, sId3])
+    string_n = IntProperty(name="Number of Stringers",
+                           description="Number of stringers to generate",
+                           min=1, max=10,
+                           default=1)
+    string_dis = BoolProperty(name="Distributed",
+                              description="Use distributed stringers",
+                              default=False)
+    string_w = FloatProperty(name="Stringer width",
+                             description="Width of stringer as a percentage of tread width",
+                             min=0.0001, max=100.0,
+                             default=15.0)
+    string_h = FloatProperty(name="Stringer Height",
+                             description="Height of the stringer",
+                             min=0.0001, max=100.0,
+                             default=0.3)
+    string_tw = FloatProperty(name="Web Thickness",
+                              description="Thickness of the beam's web as a percentage of width",
+                              min=0.0001, max=100.0,
+                              default=25.0)
+    string_tf = FloatProperty(name="Flange Thickness",
+                              description="Thickness of the flange",
+                              min=0.0001, max=100.0,
+                              default=0.05)
+    string_tp = FloatProperty(name="Flange Taper",
+                              description="Flange thickness taper as a percentage",
+                              min=0.0, max=100.0,
+                              default=0.0)
+    string_g = BoolProperty(name="Floating",
+                            description="Cut bottom of strigner to be a \"floating\" section",
+                            default=False)
+
+    use_original = BoolProperty(name="Use legacy method",
+                                description="Use the Blender 2.49 legacy method for stair generation",
+                                default=True)
+    rEnable = BoolProperty(name="Right Details",
+                           description="Generate right side details (posts/rails/retainers)",
+                           default=True)
+    lEnable = BoolProperty(name="Left Details",
+                           description="Generate left side details (posts/rails/retainers)",
+                           default=True)
 
     # Draw the GUI:
     def draw(self, context):
@@ -317,7 +318,7 @@ class stairs(bpy.types.Operator):
             self.use_original = False
             box.prop(self, 'rEnable')
             box.prop(self, 'lEnable')
-            
+
         # Treads
         box = layout.box()
         box.prop(self, 'make_treads')
@@ -344,7 +345,7 @@ class stairs(bpy.types.Operator):
                     box.prop(self, 'tread_sn')
             elif self.typ == "id4":
                 box.prop(self, "tread_slc")
-                    
+
         # Posts
         box = layout.box()
         box.prop(self, 'make_posts')
@@ -352,7 +353,7 @@ class stairs(bpy.types.Operator):
             box.prop(self, 'post_d')
             box.prop(self, 'post_w')
             box.prop(self, 'post_n')
-            
+
         # Railings
         box = layout.box()
         box.prop(self, 'make_railings')
@@ -360,7 +361,7 @@ class stairs(bpy.types.Operator):
             box.prop(self, 'rail_w')
             box.prop(self, 'rail_t')
             box.prop(self, 'rail_h')
-            
+
         # Retainers
         box = layout.box()
         box.prop(self, 'make_retainers')
@@ -368,7 +369,7 @@ class stairs(bpy.types.Operator):
             box.prop(self, 'ret_w')
             box.prop(self, 'ret_h')
             box.prop(self, 'ret_n')
-            
+
         # Stringers
         box = layout.box()
         if self.typ != "id2":
@@ -399,7 +400,7 @@ class stairs(bpy.types.Operator):
                     box.prop(self, 'string_tf')
 
         # Tread support:
-##        if self.make_stringer and typ_s in ["sId2", "sId3"]:
+# if self.make_stringer and typ_s in ["sId2", "sId3"]:
 
     def execute(self, context):
         global G
@@ -413,7 +414,7 @@ class stairs(bpy.types.Operator):
         typ_t = self.typ_t
         rise = self.rise
         run = self.run
-        G=General(rise,run,self.tread_n)
+        G = General(rise, run, self.tread_n)
         if self.make_treads:
             if typ != "id4":
                 Treads(G,

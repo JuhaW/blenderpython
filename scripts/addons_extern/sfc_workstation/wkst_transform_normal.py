@@ -27,7 +27,7 @@ bl_info = {
     "warning": "",
     "url": "http://www.blenderartists.org/forum/showthread.php?380673-Transform-with-Normal-Axis-Contraint&p=2932621#post2932621",
     "url": "https://plus.google.com/u/0/+MarvinKBreuer/posts",
-    "category" : "User Interface"
+    "category": "User Interface"
 }
 
 
@@ -43,20 +43,18 @@ class WKST_N_Transform_Menu(bpy.types.Menu):
     bl_idname = "wkst.normal_transform_menu"
 
     def draw(self, context):
-        layout = self.layout    
+        layout = self.layout
 
         layout.menu("translate.normal_menu", text="N-Translate")
         layout.menu("rotate.normal_menu", text="N-Rotate")
         layout.menu("resize.normal_menu", text="N-Scale")
 
-        ###space###    
+        ###space###
         if context.mode == 'EDIT_MESH':
-            
+
             layout.separator()
-            
-            layout.operator("mesh.align_normal", "Align 2 Normal")
 
-
+            layout.operator('mesh.rot_con', 'Face-Rotation')
 
 
 class Translate_Normal_Menu(bpy.types.Menu):
@@ -65,28 +63,27 @@ class Translate_Normal_Menu(bpy.types.Menu):
     bl_idname = "translate.normal_menu"
 
     def draw(self, context):
-        layout = self.layout         
+        layout = self.layout
 
-        #layout.label("___Move___")
-        
-        props = layout.operator("transform.transform", text = "X-Axis")
+        # layout.label("___Move___")
+
+        props = layout.operator("transform.transform", text="X-Axis")
         props.mode = 'TRANSLATION'
         props.constraint_axis = (True, False, False)
         props.constraint_orientation = 'NORMAL'
-        props.snap_target = 'ACTIVE' 
+        props.snap_target = 'ACTIVE'
 
-        props = layout.operator("transform.transform", text = "Y-Axis")
+        props = layout.operator("transform.transform", text="Y-Axis")
         props.mode = 'TRANSLATION'
         props.constraint_axis = (False, True, False)
         props.constraint_orientation = 'NORMAL'
-        props.snap_target = 'ACTIVE' 
+        props.snap_target = 'ACTIVE'
 
-        props = layout.operator("transform.transform", text = "Z-Axis")
+        props = layout.operator("transform.transform", text="Z-Axis")
         props.mode = 'TRANSLATION'
         props.constraint_axis = (False, False, True)
         props.constraint_orientation = 'NORMAL'
-        props.snap_target = 'ACTIVE' 
-
+        props.snap_target = 'ACTIVE'
 
 
 class Resize_Normal_Menu(bpy.types.Menu):
@@ -95,26 +92,26 @@ class Resize_Normal_Menu(bpy.types.Menu):
     bl_idname = "resize.normal_menu"
 
     def draw(self, context):
-        layout = self.layout         
-        
-        #layout.label("___Scale___") 
-        
-        props = layout.operator("transform.resize", text = "X-Axis")
+        layout = self.layout
+
+        # layout.label("___Scale___")
+
+        props = layout.operator("transform.resize", text="X-Axis")
         props.constraint_axis = (True, False, False)
         props.constraint_orientation = 'NORMAL'
-        props.snap_target = 'ACTIVE' 
+        props.snap_target = 'ACTIVE'
 
-        props = layout.operator("transform.resize", text = "Y-Axis")
+        props = layout.operator("transform.resize", text="Y-Axis")
         props.constraint_axis = (False, True, False)
         props.constraint_orientation = 'NORMAL'
-        props.snap_target = 'ACTIVE' 
-        
-        props = layout.operator("transform.resize", text = "Z-Axis")
+        props.snap_target = 'ACTIVE'
+
+        props = layout.operator("transform.resize", text="Z-Axis")
         props.constraint_axis = (False, False, True)
         props.constraint_orientation = 'NORMAL'
-        props.snap_target = 'ACTIVE'                  
+        props.snap_target = 'ACTIVE'
 
-        props = layout.operator("transform.resize", text = "XY-Axis")
+        props = layout.operator("transform.resize", text="XY-Axis")
         props.constraint_axis = (True, True, False)
         props.constraint_orientation = 'NORMAL'
         props.snap_target = 'ACTIVE'
@@ -126,50 +123,48 @@ class Rotate_Normal_Menu(bpy.types.Menu):
     bl_idname = "rotate.normal_menu"
 
     def draw(self, context):
-        layout = self.layout         
-        
-        #layout.label("___Rotate___") 
-        
-        props = layout.operator("transform.rotate", text = "X-Axis")
+        layout = self.layout
+
+        # layout.label("___Rotate___")
+
+        props = layout.operator("transform.rotate", text="X-Axis")
         props.constraint_axis = (True, False, False)
         props.constraint_orientation = 'NORMAL'
-        props.snap_target = 'ACTIVE' 
+        props.snap_target = 'ACTIVE'
 
-        props = layout.operator("transform.rotate", text = "Y-Axis")
+        props = layout.operator("transform.rotate", text="Y-Axis")
         props.constraint_axis = (False, True, False)
         props.constraint_orientation = 'NORMAL'
-        props.snap_target = 'ACTIVE' 
-        
-        props = layout.operator("transform.rotate", text = "Z-Axis")
+        props.snap_target = 'ACTIVE'
+
+        props = layout.operator("transform.rotate", text="Z-Axis")
         props.constraint_axis = (False, False, True)
         props.constraint_orientation = 'NORMAL'
-        props.snap_target = 'ACTIVE'                  
+        props.snap_target = 'ACTIVE'
 
 
-        
 class AlignNormal(bpy.types.Operator):
     """Align selected Mesh to active Face in Normal Z Direction"""
     bl_idname = "mesh.align_normal"
     bl_label = "Align to Normal"
     bl_options = {'REGISTER', 'UNDO'}
 
-    manipul = bpy.props.BoolProperty(name="Set Normal Orientation",  description="Orientation", default=False) 
+    manipul = bpy.props.BoolProperty(name="Set Normal Orientation", description="Orientation", default=False)
 
     def execute(self, context):
         bpy.ops.view3d.pivot_active()
         bpy.ops.transform.resize(value=(1, 1, 0), constraint_axis=(False, False, True), constraint_orientation='NORMAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
-        for i in range (self.manipul):
+        for i in range(self.manipul):
             bpy.ops.space.normal()
 
         return {'FINISHED'}
 
-            
-        
-######-------------------------------------------------
+
+# -------------------------------------------------
 
 
-def transform_normal_draw(self,context):
+def transform_normal_draw(self, context):
     layout = self.layout
     col = layout.column(align=True)
     #col.label("Transform with Normal Axis Constraint")
@@ -179,8 +174,7 @@ def transform_normal_draw(self,context):
     if context.mode == 'EDIT_MESH':
         col.operator("mesh.align_normal", text="N-Align")
 
-    col.separator()                
-  
+    col.separator()
 
 
 ######------------################################################################
@@ -193,15 +187,15 @@ def register():
     bpy.utils.register_class(Rotate_Normal_Menu)
     bpy.utils.register_class(AlignNormal)
 
-    bpy.types.VIEW3D_PT_tools_transform.append(transform_normal_draw)    
-    bpy.types.VIEW3D_PT_tools_transform_mesh.append(transform_normal_draw)    
-    bpy.types.VIEW3D_PT_tools_transform_curve.append(transform_normal_draw)    
-    bpy.types.VIEW3D_PT_tools_transform_surface.append(transform_normal_draw)    
-    bpy.types.VIEW3D_PT_tools_mballedit.append(transform_normal_draw)    
-    bpy.types.VIEW3D_PT_tools_armatureedit_transform.append(transform_normal_draw)    
-    bpy.types.VIEW3D_PT_tools_latticeedit.append(transform_normal_draw)    
-    bpy.types.VIEW3D_MT_transform_object.prepend(transform_normal_draw)  
-    bpy.types.VIEW3D_MT_transform.prepend(transform_normal_draw)  
+    bpy.types.VIEW3D_PT_tools_transform.append(transform_normal_draw)
+    bpy.types.VIEW3D_PT_tools_transform_mesh.append(transform_normal_draw)
+    bpy.types.VIEW3D_PT_tools_transform_curve.append(transform_normal_draw)
+    bpy.types.VIEW3D_PT_tools_transform_surface.append(transform_normal_draw)
+    bpy.types.VIEW3D_PT_tools_mballedit.append(transform_normal_draw)
+    bpy.types.VIEW3D_PT_tools_armatureedit_transform.append(transform_normal_draw)
+    bpy.types.VIEW3D_PT_tools_latticeedit.append(transform_normal_draw)
+    bpy.types.VIEW3D_MT_transform_object.prepend(transform_normal_draw)
+    bpy.types.VIEW3D_MT_transform.prepend(transform_normal_draw)
 
 
 def unregister():

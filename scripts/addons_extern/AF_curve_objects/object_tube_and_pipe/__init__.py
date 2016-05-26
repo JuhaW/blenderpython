@@ -53,9 +53,11 @@ class add_pipe(Panel):
         layout.operator(Pipe.AddPipe.bl_idname, text="Pipe")
         layout.operator(Makemesh.Convert.bl_idname, text="Convert to Mesh")
 
+
 def register():
     bpy.utils.register_module(__name__)
     pass
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

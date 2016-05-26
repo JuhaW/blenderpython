@@ -17,7 +17,8 @@ __author__ = 'andrejivanis'
 #
 # END GPL LICENSE BLOCK #####
 
-import bpy, bmesh
+import bpy
+import bmesh
 
 
 # these make Function.view expected a SpaceView3D type, not SpaceTimeline
@@ -26,20 +27,21 @@ def add_to_all_visible_layers(obj, scn):
     if sd and type(sd) is bpy.types.SpaceView3D:
         scn.object_bases[obj.name].layers_from_view(bpy.context.space_data)
 
+
 def add_to_loc_view(obj, scn):
     layers = obj.layers[:]
 
-    add_to_all_visible_layers(obj,scn)
+    add_to_all_visible_layers(obj, scn)
     obj.layers = layers
 
-def duplicate_linked(objects, some_visible_obj = None, visible_only = True):
+
+def duplicate_linked(objects, some_visible_obj=None, visible_only=True):
     context = bpy.context
     scn = bpy.context.scene
     # sel = context.selected_objects
     bpy.ops.object.select_all(action='DESELECT')
     # for o in scn.objects:
     #     o.select = False
-
 
     # link all object not in scene and select them
     to_unlink = []
@@ -65,11 +67,9 @@ def duplicate_linked(objects, some_visible_obj = None, visible_only = True):
         add_to_all_visible_layers(o, scn)
     scn.update()
 
-
     bpy.ops.object.duplicate(linked=True)
     for o in objects:
         rehide(o)
-
 
     for o in to_unlink:
         scn.objects.unlink(o)
@@ -81,19 +81,17 @@ def duplicate_linked(objects, some_visible_obj = None, visible_only = True):
     return sel
 
 
-
-
 def unhide_temp(o):
     if o.hide:
         o.hide = False
         o['hide_temp'] = True
+
 
 def rehide(o):
     ht = o.get('hide_temp')
     if ht:
         del o["hide_temp"]
         o.hide = True
-
 
 
 def join_to_mesh(context, mesh, objects, some_visible_obj):
@@ -105,7 +103,7 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
 
     duplicate_linked(objects, some_visible_obj)
 
-    ## make real recursively in case of dupli groups inside dupli groups
+    # make real recursively in case of dupli groups inside dupli groups
     def doop(o):
         return o.dupli_type != 'NONE'
     while any([doop(o) for o in context.selected_objects]):
@@ -134,7 +132,7 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
         if len(m.materials) == 0:
             m.materials.append(None)
 
-        objcpy = bpy.data.objects.new('copy', object_data = m)
+        objcpy = bpy.data.objects.new('copy', object_data=m)
         scn.objects.link(objcpy)
         objcpy.layers = some_visible_obj.layers
         add_to_loc_view(objcpy, scn)
@@ -143,14 +141,11 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
         newObjs.append(objcpy)
         old_objs.append(obj)
 
-
-
     # set all the sharp angles from autosmooth
     for i, new_mesh in enumerate(applied_meshes):
         o = old_objs[i]
         if o.type != 'MESH':
             continue
-
 
         # make unique UVMap
         # TODO: I won't ever need this probably, but I should keep other maps
@@ -169,16 +164,11 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
 
         correct_normals(new_mesh, o.scale)
 
-
-
-
         if not o.data.use_auto_smooth or (o.data.use_auto_smooth and o.data.auto_smooth_angle == 180) or o.data.is_sjoin:
             pass
         else:
-            #looks like o.data.auto_smooth_angle is in radians although displayed in degrees in GUI
+            # looks like o.data.auto_smooth_angle is in radians although displayed in degrees in GUI
             correct_somoothing(new_mesh, o.data.auto_smooth_angle)
-
-
 
     # delete copied objects and select duplicate ones
     bpy.ops.object.delete(use_global=False)
@@ -186,19 +176,18 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
     for o in newObjs:
         o.select = True
 
-
-    ### clear the mesh geometry
+    # clear the mesh geometry
     # clear_mesh(mesh)
 
-    ## autosmooth on (might not always help)
+    # autosmooth on (might not always help)
     mesh.use_auto_smooth = True
     mesh.auto_smooth_angle = 180
 
-    #create new join object with given mesh
-    j_obj = bpy.data.objects.new(name = 'temp_obj', object_data= mesh)
+    # create new join object with given mesh
+    j_obj = bpy.data.objects.new(name='temp_obj', object_data=mesh)
 
     j_obj.select = True
-    j_obj.location = (0,0,0)
+    j_obj.location = (0, 0, 0)
     j_obj.layers = [True] * 20
     scn.objects.link(j_obj)
     # without this local view won't work
@@ -207,7 +196,7 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
 
     scn.objects.active = j_obj
 
-    ### join to mesh and delete objects if any left
+    # join to mesh and delete objects if any left
     bpy.ops.object.join()
 
     # for o in newObjs:
@@ -220,10 +209,9 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
         if m.users == 0:
             bpy.data.meshes.remove(m)
 
-
     # delete the joined object
     #  it looks like removing the object deletes materials of j_obj.data??? so I make a dummy mesh as a workaround
-    bug_fix = bpy.data.meshes.new(name = 'bug_fix')
+    bug_fix = bpy.data.meshes.new(name='bug_fix')
     j_obj.data = bug_fix
     for o in bpy.context.selected_objects[:]:
         scn.objects.unlink(o)
@@ -232,7 +220,7 @@ def join_to_mesh(context, mesh, objects, some_visible_obj):
 
     bpy.data.meshes.remove(bug_fix)
 
-    ## get old selection
+    # get old selection
     for o in sel:
         o.select = True
     scn.objects.active = act
@@ -264,8 +252,6 @@ def correct_normals(mesh, scale):
         bm.free()
 
 
-
-
 def correct_somoothing(mesh, angle):
     bm = bmesh.new()   # create an empty BMesh
     bm.from_mesh(mesh)   # fill it in from a Mesh
@@ -275,6 +261,7 @@ def correct_somoothing(mesh, angle):
     # Finish up, write the bmesh back to the mesh
     bm.to_mesh(mesh)
     bm.free()
+
 
 def bmesh_correct_somoothing(bm, angle):
 

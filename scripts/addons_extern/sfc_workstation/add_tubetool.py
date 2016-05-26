@@ -27,8 +27,8 @@ bl_info = {
     "author": "Dealga McArdle",
     "version": (0, 0, 4),
     "blender": (2, 7, 4),
-    "location": "specials menu",
-    "description": "Adds curve with endpoints on two selected polygons",
+    "location": "specials menu (key W)",
+    "description": "Adds curve with endpoints on two arbitrary polygons",
     "wiki_url": "",
     "tracker_url": "",
     "category": "Mesh"}
@@ -43,9 +43,9 @@ from bpy.props import (
 
 
 class TubeCallbackOps(bpy.types.Operator):
-    
+
     bl_idname = "object.tube_callback"
-    bl_label = "Tube Callback"
+    bl_label = "Tube Callback (private)"
     bl_options = {"INTERNAL"}
 
     current_name = StringProperty(default='')
@@ -209,7 +209,7 @@ def update_simple_tube(oper, context):
 
 
 class AddSimpleTube(bpy.types.Operator):
-    """create a curve with endpoints between two selected polygons"""
+
     bl_idname = "mesh.add_curvebased_tube"
     bl_label = "Add Simple Tube"
     bl_options = {'REGISTER', 'UNDO'}
@@ -272,12 +272,14 @@ class AddSimpleTube(bpy.types.Operator):
 
         er = not self.equal_radii
         # ROW 1
-        row = col.row(); split = row.split(percentage=0.5)
+        row = col.row()
+        split = row.split(percentage=0.5)
         prop_n_reset(split, "handle_ext_1", "handle 1", 2.0)  # left
         prop_n_reset(split, "point1_scale", "radius_1", 1.0, er)  # right
 
         # ROW 2
-        row = col.row(); split = row.split()
+        row = col.row()
+        split = row.split()
         prop_n_reset(split, "handle_ext_2", "handle 2", 2.0)  # left
         prop_n_reset(split, "point2_scale", "radius_2", 1.0, er)  # right
 
@@ -375,7 +377,6 @@ class AddSimpleTube(bpy.types.Operator):
         else:
             update_simple_tube(self, context)
             return {'FINISHED'}
-
 
 
 def register():

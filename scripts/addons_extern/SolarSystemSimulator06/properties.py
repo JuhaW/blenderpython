@@ -422,6 +422,7 @@ class SSSIMCalculation(bpy.types.PropertyGroup):
     # ------------------------------------------------
     # Update methods:
     # ------------------------------------------------
+
     def check_calc_frames(self, context):
         # end always later than start
         if self.frame_end <= self.frame_start:
@@ -515,6 +516,7 @@ class SSSIMSurface(bpy.types.PropertyGroup):
     # ------------------------------------------------
     # Update methods:
     # ------------------------------------------------
+
     def update_parent(self, context):
         obj = self.id_data
         if self.parent_is_valid:
@@ -628,6 +630,7 @@ class SSSIMScene(bpy.types.PropertyGroup):
     # ------------------------------------------------
     # Update methods:
     # ------------------------------------------------
+
     def update_objects(self, context):
         """Update orbits of planets and size of surfaces"""
         for obj in context.scene.objects:

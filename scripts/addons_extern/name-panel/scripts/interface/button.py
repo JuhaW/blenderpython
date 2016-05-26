@@ -18,11 +18,13 @@
 # ##### END GPL LICENSE BLOCK #####
 
 # batch name
-def batchName(self, context):
-  '''
-    Button for the batch name operator.
-  '''
 
-  # row
-  row = self.layout
-  row.operator('wm.batch_name', icon='SORTALPHA')
+
+def batchName(self, context):
+    '''
+      Button for the batch name operator.
+    '''
+
+    # row
+    row = self.layout
+    row.operator('wm.batch_name', icon='SORTALPHA')

@@ -74,9 +74,10 @@ class BasicTextMenu(bpy.types.Menu):
         layout.operator("txt.search_blenderscripting", text='Search bscripting')
         layout.operator("txt.search_stack", text='Search stack overflow')
 
+
 def has_selection(text):
-    return not (text.select_end_line == text.current_line and \
-    text.current_character == text.select_end_character)
+    return not (text.select_end_line == text.current_line and
+                text.current_character == text.select_end_character)
 
 
 # Sets the keymap to Ctrl + I for inside the text editor, will only
@@ -87,15 +88,16 @@ if True:
     new_shortcut = km.keymap_items.new('wm.call_menu', 'I', 'PRESS', ctrl=True)
     new_shortcut.properties.name = 'TEXT_MT_search_menu'
 
+
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.TEXT_HT_header.prepend(draw_item)
-     
+
 
 def unregister():
-    bpy.utils.unregister_module(__name__)    
+    bpy.utils.unregister_module(__name__)
     bpy.types.TEXT_HT_header.remove(draw_item)
 
-    
+
 if __name__ == "__main__":
     register()

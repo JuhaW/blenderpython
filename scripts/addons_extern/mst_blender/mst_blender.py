@@ -8,7 +8,8 @@ import random
 
 DENDRITE_GROUP_NAME = "DENDRITE_TREES"
 
-def buildTreeMesh(root_node, skin = False):
+
+def buildTreeMesh(root_node, skin=False):
     nodes = mstree.tree_to_list(root_node)
 
     vertices = [node.pos for node in nodes]
@@ -29,9 +30,10 @@ def buildTreeMesh(root_node, skin = False):
         obj.modifiers.new("DendriteThickness", 'SKIN')
         obj.modifiers["DendriteThickness"].use_smooth_shade = True
         for i, node in enumerate(nodes):
-            obj.data.skin_vertices[0].data[i].radius= (node.thickness * 0.005, node.thickness * 0.005)
+            obj.data.skin_vertices[0].data[i].radius = (node.thickness * 0.005, node.thickness * 0.005)
 
     return obj
+
 
 def buildTreeCurve(root_node):
     curve = bpy.data.curves.new('Tree', 'CURVE')
@@ -48,12 +50,12 @@ def buildTreeCurve(root_node):
         point.co = mathutils.Vector(node.pos)
         point.handle_left_type = 'VECTOR'
         point.handle_right_type = 'VECTOR'
-        
+
         if hasattr(node, 'thickness'):
             point.radius = node.thickness
-        
+
         if not node.children and len(nodes) > i + 1:
-            node = nodes[i+1].parent
+            node = nodes[i + 1].parent
             curve.splines.new('BEZIER')
             spline = curve.splines[-1]
             point = spline.bezier_points[0]
@@ -69,13 +71,18 @@ def buildTreeCurve(root_node):
     curve.fill_mode = 'FULL'
     return curve_object
 
-def spinPoints(points, axis, axis_direction, radians = math.pi, seed = None):
+
+def spinPoints(points, axis, axis_direction, radians=math.pi, seed=None):
     rng = random.Random()
     rng.seed(seed)
 
     dir_n = axis_direction / np.linalg.norm(axis_direction)
-    a = axis[0]; b = axis[1]; c = axis[2]
-    u = dir_n[0]; v = dir_n[1]; w = dir_n[2]
+    a = axis[0]
+    b = axis[1]
+    c = axis[2]
+    u = dir_n[0]
+    v = dir_n[1]
+    w = dir_n[2]
 
     new_points = []
 
@@ -83,15 +90,18 @@ def spinPoints(points, axis, axis_direction, radians = math.pi, seed = None):
 
     for point in points:
         rotation = rng.random() * radians
-        x = point[0]; y = point[1]; z = point[2]
-        v1 = (a*(v**2 + w**2) - u*(b*v + c*w - u*x - v*y - w*z)) * (1 - np.cos(rotation)) + x*np.cos(rotation) + (-c*v + b*w - w*y + v*z) * np.sin(rotation)
-        v2 = (b*(u**2 + w**2) - v*(a*u + c*w - u*x - v*y - w*z)) * (1 - np.cos(rotation)) + y*np.cos(rotation) + ( c*u - a*w + w*x - u*z) * np.sin(rotation)
-        v3 = (c*(u**2 + v**2) - w*(a*u + b*v - u*x - v*y - w*z)) * (1 - np.cos(rotation)) + z*np.cos(rotation) + (-b*u + a*v - v*x + u*y) * np.sin(rotation)
-        new_points.append((v1,v2,v3))
+        x = point[0]
+        y = point[1]
+        z = point[2]
+        v1 = (a * (v**2 + w**2) - u * (b * v + c * w - u * x - v * y - w * z)) * (1 - np.cos(rotation)) + x * np.cos(rotation) + (-c * v + b * w - w * y + v * z) * np.sin(rotation)
+        v2 = (b * (u**2 + w**2) - v * (a * u + c * w - u * x - v * y - w * z)) * (1 - np.cos(rotation)) + y * np.cos(rotation) + (c * u - a * w + w * x - u * z) * np.sin(rotation)
+        v3 = (c * (u**2 + v**2) - w * (a * u + b * v - u * x - v * y - w * z)) * (1 - np.cos(rotation)) + z * np.cos(rotation) + (-b * u + a * v - v * x + u * y) * np.sin(rotation)
+        new_points.append((v1, v2, v3))
 
     return np.array(new_points)
 
-def createTreeObject(options = None):
+
+def createTreeObject(options=None):
     if options is None:
         options = bpy.context.scene.mst_options
 
@@ -103,7 +113,7 @@ def createTreeObject(options = None):
     elif options.point_data_type == 'GROUP':
         source_group = bpy.data.groups[options.source_group]
         particle_points = [(x.location[0], x.location[1], x.location[2]) for x in source_group.objects]
-        
+
     # Get starting point from object, cursor or first particle and create numpy array from it
     if options.root_data_type == 'OBJECT':
         root_point = bpy.data.objects[options.root_data_object].location
@@ -134,11 +144,11 @@ def createTreeObject(options = None):
         points = spinPoints(points, np.array(location), np.array(axis))
 
     # Create the tree structure
-    root_node = mstree.mstree(points, balancing_factor = options.balancing_factor)
+    root_node = mstree.mstree(points, balancing_factor=options.balancing_factor)
 
     if options.add_thickness:
         # Calculate the diameter of the tree
-        diameter.add_quad_diameter(root_node, scale = options.thickness_scale, offset = options.thickness_offset, path_scale = options.path_scale)
+        diameter.add_quad_diameter(root_node, scale=options.thickness_scale, offset=options.thickness_offset, path_scale=options.path_scale)
 
     # Build the blender object from the tree data
     if options.build_type == 'MESH':
@@ -152,7 +162,8 @@ def createTreeObject(options = None):
 
     return obj
 
-def createMultipleTrees(points, normals, options = None):
+
+def createMultipleTrees(points, normals, options=None):
     if normals is not None:
         if len(points) != len(normals):
             raise ValueError("Points and normals need to be the same length")
@@ -169,7 +180,7 @@ def createMultipleTrees(points, normals, options = None):
         if normals is not None:
             normal = normals[i]
         else:
-            normal = (0,0,1)
+            normal = (0, 0, 1)
 
         particle_system.seed = intial_seed + i
 
@@ -189,58 +200,60 @@ def createMultipleTrees(points, normals, options = None):
 
     return objects
 
+
 class MSTProperties(bpy.types.PropertyGroup):
-    balancing_factor = bpy.props.FloatProperty(name = "Balancing factor", default = 0.5, min = 0.0, max = 1.0)
+    balancing_factor = bpy.props.FloatProperty(name="Balancing factor", default=0.5, min=0.0, max=1.0)
 
     point_data_type = bpy.props.EnumProperty(
-        name = "Point data type",
-        items = (
+        name="Point data type",
+        items=(
             ('PARTICLE', 'Particle system', 'Use the particles of a particle system as points'),
             ('GROUP', 'Group', 'Use locations of objects in group as points')
         ),
-        default = 'PARTICLE'
+        default='PARTICLE'
     )
 
-    source_object = bpy.props.StringProperty(name = "Object")
-    source_particle_system = bpy.props.StringProperty(name = "Particle System")
+    source_object = bpy.props.StringProperty(name="Object")
+    source_particle_system = bpy.props.StringProperty(name="Particle System")
 
-    source_group = bpy.props.StringProperty(name = "Object group")
+    source_group = bpy.props.StringProperty(name="Object group")
 
     root_data_type = bpy.props.EnumProperty(
-        name = "Root data type",
-        items = (
+        name="Root data type",
+        items=(
             ('PARTICLE', 'First Particle/Object', 'Use the first particle in particle system as root point'),
             ('CURSOR', '3D cursor', 'Use 3D cursor location as root point'),
             ('OBJECT', 'Object center', 'Use an object center as root point')
         ),
-        default = 'CURSOR'
+        default='CURSOR'
     )
 
-    root_data_object = bpy.props.StringProperty(name = "Root object")
+    root_data_object = bpy.props.StringProperty(name="Root object")
 
     build_type = bpy.props.EnumProperty(
-        name = "Build type",
-        items = (
+        name="Build type",
+        items=(
             ('MESH', 'Mesh', 'Build the tree out of vertices'),
             ('CURVE', 'Curve', 'Build the tree out of curves')
         ),
-        default = 'MESH'
+        default='MESH'
     )
 
-    random_spin = bpy.props.BoolProperty(name = "Random spin", default = False)
-    spin_object = bpy.props.StringProperty(name = "Axis object")
-    spin_degrees = bpy.props.FloatProperty(name = "Spin degrees", subtype = 'ANGLE', min = 0.0, max = 2*math.pi, default = math.pi)
-    spin_axis = bpy.props.EnumProperty(name = "Spin axis", items = (('X', 'X', 'Spin along the X-axis of the object'), ('Y', 'Y', 'Spin along the Y-axis of the object'), ('Z', 'Z', 'Spin along the Z-axis of the object')), default = 'Y')
+    random_spin = bpy.props.BoolProperty(name="Random spin", default=False)
+    spin_object = bpy.props.StringProperty(name="Axis object")
+    spin_degrees = bpy.props.FloatProperty(name="Spin degrees", subtype='ANGLE', min=0.0, max=2 * math.pi, default=math.pi)
+    spin_axis = bpy.props.EnumProperty(name="Spin axis", items=(('X', 'X', 'Spin along the X-axis of the object'), ('Y', 'Y', 'Spin along the Y-axis of the object'), ('Z', 'Z', 'Spin along the Z-axis of the object')), default='Y')
 
-    add_thickness = bpy.props.BoolProperty(name = "Add thickness")
-    thickness_scale = bpy.props.FloatProperty(name = "Scale", min = 0.0, default = 1.0)
-    thickness_offset = bpy.props.FloatProperty(name = "Offset", min = 0.0, default = 0.5)
-    path_scale = bpy.props.FloatProperty(name = "Path scale", min = 0.0, default = 100.0)
+    add_thickness = bpy.props.BoolProperty(name="Add thickness")
+    thickness_scale = bpy.props.FloatProperty(name="Scale", min=0.0, default=1.0)
+    thickness_offset = bpy.props.FloatProperty(name="Offset", min=0.0, default=0.5)
+    path_scale = bpy.props.FloatProperty(name="Path scale", min=0.0, default=100.0)
 
 
 class MSTDendriteProperties(bpy.types.PropertyGroup):
-    target_object = bpy.props.StringProperty(name = "Target object")
-    target_particle_system = bpy.props.StringProperty(name = "Target particle system")
+    target_object = bpy.props.StringProperty(name="Target object")
+    target_particle_system = bpy.props.StringProperty(name="Target particle system")
+
 
 class MSTPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
@@ -256,11 +269,11 @@ class MSTPanel(bpy.types.Panel):
 
         row = layout.row()
         row.prop(op, "balancing_factor")
-        
+
         row = layout.row()
         row.prop(op, "point_data_type")
         row = layout.row()
-        
+
         if op.point_data_type == 'PARTICLE':
             row.prop_search(op, "source_object", bpy.data, 'objects')
             if op.source_object in bpy.data.objects:
@@ -308,6 +321,7 @@ class MSTPanel(bpy.types.Panel):
         row = layout.row()
         row.operator("object.create_mst")
 
+
 class DendritePanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -341,10 +355,11 @@ class CreateMST(bpy.types.Operator):
     def execute(self, context):
         print("Creating MST")
         options = context.scene.mst_options
-        
+
         createTreeObject(options)
 
         return {'FINISHED'}
+
 
 class CreateDendrites(bpy.types.Operator):
     bl_idname = "object.create_dendrites"
@@ -371,6 +386,7 @@ class CreateDendrites(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class DeleteDendrites(bpy.types.Operator):
     bl_idname = "object.delete_dendrites"
     bl_label = "Delete dendrites"
@@ -384,16 +400,18 @@ class DeleteDendrites(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 def register():
     bpy.utils.register_class(MSTProperties)
-    bpy.types.Scene.mst_options = bpy.props.PointerProperty(type = MSTProperties)
+    bpy.types.Scene.mst_options = bpy.props.PointerProperty(type=MSTProperties)
     bpy.utils.register_class(MSTDendriteProperties)
-    bpy.types.Scene.mst_dendrite_options = bpy.props.PointerProperty(type = MSTDendriteProperties)
+    bpy.types.Scene.mst_dendrite_options = bpy.props.PointerProperty(type=MSTDendriteProperties)
     bpy.utils.register_class(CreateMST)
     bpy.utils.register_class(MSTPanel)
     bpy.utils.register_class(CreateDendrites)
     bpy.utils.register_class(DeleteDendrites)
     bpy.utils.register_class(DendritePanel)
+
 
 def unregister():
     bpy.utils.unregister_class(MSTProperties)

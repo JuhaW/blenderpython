@@ -28,20 +28,21 @@ __date__ = "XX XXX 2015"
 from bpy.props import *
 from bpy.types import AddonPreferences
 
+
 class MUV_Preferences(AddonPreferences):
     bl_idname = __package__
 
     enable_texproj = BoolProperty(
-            name="Enable feature: Texture Projection",
-            default=False,
-            )
+        name="Enable feature: Texture Projection",
+        default=False,
+    )
 
     enable_uvbb = BoolProperty(
-            name="Enable feature: UV Bounding Box",
-            default=False,
-            )
+        name="Enable feature: UV Bounding Box",
+        default=False,
+    )
 
     def draw(self, context):
         layout = self.layout
         layout.prop(self, "enable_uvbb")
-
+        layout.prop(self, "enable_texproj")

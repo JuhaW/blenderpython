@@ -236,18 +236,18 @@ class AddPresetSoundToolOperator(AddPresetBase, Operator):
     preset_menu = "WM_MT_operator_presets"
 
     operator = bpy.props.StringProperty(
-            name="Operator",
-            maxlen=64,
-            options={'HIDDEN'},
-            default="SPEAKER_OT_visualise"
-            )
+        name="Operator",
+        maxlen=64,
+        options={'HIDDEN'},
+        default="SPEAKER_OT_visualise"
+    )
 
     name = bpy.props.StringProperty(
         name="Name",
         description="Name of the preset, used to make the path name",
         maxlen=64,
         options={'SKIP_SAVE'},
-        )
+    )
 
     preset_defines = [
         "op = bpy.types.Scene.soundtool_op",
@@ -347,7 +347,7 @@ def shownote(self, context):
     freq = 27.5 * 2 ** (note / 12.0)
 
 notes_enum = EnumProperty(name="notelist", items=note_items(), default="A4",
-                     update=shownote)
+                          update=shownote)
 
 
 def register():

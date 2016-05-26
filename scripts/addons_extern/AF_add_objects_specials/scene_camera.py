@@ -27,11 +27,14 @@ bl_info = {
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/",
     "tracker_url": "",
     "category": "Object"}
-'''	
-import bpy, mathutils, math
+'''
+import bpy
+import mathutils
+import math
 from math import pi
 from bpy.props import *
 from mathutils import Vector
+
 
 class add_scene_camera(bpy.types.Operator):
     bl_idname = "camera.add_scene"
@@ -39,11 +42,11 @@ class add_scene_camera(bpy.types.Operator):
     bl_description = "Empty scene with Camera"
     bl_register = True
     bl_undo = True
-    
+
     def execute(self, context):
         blend_data = context.blend_data
         ob = bpy.context.active_object
-	
+
 # add new scene
         bpy.ops.scene.new(type="NEW")
         scene = bpy.context.scene
@@ -58,26 +61,30 @@ class add_scene_camera(bpy.types.Operator):
         scene.world = world
         world.use_sky_blend = True
         world.use_sky_paper = True
-        world.horizon_color = (0.004393,0.02121,0.050)
-        world.zenith_color = (0.03335,0.227,0.359)
+        world.horizon_color = (0.004393, 0.02121, 0.050)
+        world.zenith_color = (0.03335, 0.227, 0.359)
         world.light_settings.use_ambient_occlusion = True
         world.light_settings.ao_factor = 0.25
 # add camera
-        bpy.ops.object.camera_add(location = (7.48113,-6.50764,5.34367), rotation = (1.109319,0.010817,0.814928),)
+        bpy.ops.object.camera_add(location=(7.48113, -6.50764, 5.34367), rotation=(1.109319, 0.010817, 0.814928),)
         cam = bpy.context.active_object.data
         cam.lens = 35
         cam.draw_size = 0.1
-        bpy.ops.view3d.viewnumpad(type = 'CAMERA') 
+        bpy.ops.view3d.viewnumpad(type='CAMERA')
         return {"FINISHED"}
 
 #### REGISTER ####
+
+
 def add_object_button(self, context):
     self.layout.menu("INFO_MT_camera.add_scene", icon="PLUGIN")
+
 
 def register():
     bpy.utils.register_module(__name__)
 
     bpy.types.INFO_MT_add.append(add_object_button)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

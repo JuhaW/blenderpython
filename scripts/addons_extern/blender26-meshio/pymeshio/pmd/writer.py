@@ -9,6 +9,7 @@ from .. import pmd
 
 
 class Writer(common.BinaryWriter):
+
     def write_veritices(self, vertices):
         self.write_uint(len(vertices), 4)
         for v in vertices:
@@ -39,8 +40,8 @@ class Writer(common.BinaryWriter):
 
     def write_bones(self, bones):
         self.write_uint(len(bones), 2)
-        sBone=struct.Struct("=20sHHBH3f")
-        assert(sBone.size==39)
+        sBone = struct.Struct("=20sHHBH3f")
+        assert(sBone.size == 39)
         for b in bones:
             self.write_bytes(b.name, 20)
             self.write_uint(b.parent_index, 2)
@@ -134,7 +135,7 @@ def write(ios, model):
     """
     assert(isinstance(ios, io.IOBase))
     assert(isinstance(model, pmd.Model))
-    writer=Writer(ios)
+    writer = Writer(ios)
     writer.write_bytes(b"Pmd")
     writer.write_float(model.version)
     writer.write_bytes(model.name, 20)
@@ -155,7 +156,7 @@ def write(ios, model):
     for bone in model.bones:
         writer.write_bytes(bone.english_name, 20)
     for skin in model.morphs:
-        if skin.name==b'base':
+        if skin.name == b'base':
             continue
         writer.write_bytes(skin.english_name, 20)
     for g in model.bone_group_list:
@@ -165,4 +166,3 @@ def write(ios, model):
     writer.write_rigidbodies(model.rigidbodies)
     writer.write_joints(model.joints)
     return True
-

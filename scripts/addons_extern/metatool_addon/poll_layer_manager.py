@@ -18,7 +18,7 @@
 
 # <pep8 compliant>
 #
-#bl_info = {
+# bl_info = {
 #    "name": "Layer Management",
 #    "author": "Alfonso Annarumma",
 #    "version": (1, 5, 1),
@@ -364,9 +364,8 @@ class SCENE_OT_namedlayer_show_all(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
-### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
-### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
 
 # Sub Location
@@ -381,13 +380,14 @@ class SubLoc_LAYER():
     def poll(cls, context):
         return context.scene.osc_layer and ((getattr(context, "mode", 'EDIT_MESH') not in EDIT_MODES) and (context.area.spaces.active.type == 'VIEW_3D'))
 
+
 class SCENE_PT_namedlayer_layers(SubLoc_LAYER, bpy.types.Panel):
     bl_label = "[LAYER MANAGER]"
 
     #@classmethod
-    #def poll(self, context):
-        #return ((getattr(context, "mode", 'EDIT_MESH') not in EDIT_MODES) and
-                #(context.area.spaces.active.type == 'VIEW_3D'))
+    # def poll(self, context):
+    # return ((getattr(context, "mode", 'EDIT_MESH') not in EDIT_MODES) and
+    #(context.area.spaces.active.type == 'VIEW_3D'))
 
     def draw(self, context):
         scene = context.scene
@@ -478,24 +478,24 @@ class SCENE_PT_namedlayer_layers(SubLoc_LAYER, bpy.types.Panel):
                 icon = 'WIRE' if use_wire else 'POTATO'
                 op = row.operator("scene.namedlayer_toggle_wire", text="", emboss=True, icon=icon)
                 op.layer_idx = layer_idx
-                op.use_wire = not use_wire                 
+                op.use_wire = not use_wire
 
         if len(scene.objects) == 0:
             layout.label(text="No objects in scene")
 
     ############------------############
-       
+
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.operator("screen.redo_last", text="", icon="SCRIPTWIN")          
+        row.operator("screen.redo_last", text="", icon="SCRIPTWIN")
         row.operator("ed.undo_history", text="History")
         row.operator("ed.undo", text="", icon="LOOP_BACK")
         row.operator("ed.redo", text="", icon="LOOP_FORWARDS")
-        row.operator("wm.save_mainfile",text="",icon="FILE_TICK")    
-
+        row.operator("wm.save_mainfile", text="", icon="FILE_TICK")
 
 
 class SCENE_UL_namedlayer_groups(UIList):
+
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         layer_group = item
 
@@ -532,29 +532,29 @@ class SCENE_UL_namedlayer_groups(UIList):
             layout.alignment = 'CENTER'
 
 
-### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
-### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### 
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 
 # Sub Location
 class SubLoc_LAYERGRP():
     """Layer Groups"""
-    bl_category="LAYER"
+    bl_category = "LAYER"
     bl_region_type = 'TOOLS'
     #bl_region_type = 'UI'
-    bl_space_type = 'VIEW_3D' 
+    bl_space_type = 'VIEW_3D'
 
     @classmethod
     def poll(cls, context):
         return context.scene.osc_layergroup and ((getattr(context, "mode", 'EDIT_MESH') not in EDIT_MODES) and (context.area.spaces.active.type == 'VIEW_3D'))
-    
-    
+
+
 class SCENE_PT_namedlayer_groups(SubLoc_LAYERGRP, bpy.types.Panel):
     bl_label = "[LAYER GROUPS]"
 
     #@classmethod
-    #def poll(self, context):
-        #return ((getattr(context, "mode", 'EDIT_MESH') not in EDIT_MODES) and
-                #(context.area.spaces.active.type == 'VIEW_3D'))
+    # def poll(self, context):
+    # return ((getattr(context, "mode", 'EDIT_MESH') not in EDIT_MODES) and
+    #(context.area.spaces.active.type == 'VIEW_3D'))
 
     def draw(self, context):
         scene = context.scene
@@ -574,9 +574,9 @@ class SCENE_PT_namedlayer_groups(SubLoc_LAYERGRP, bpy.types.Panel):
 
 
 def register():
-    
-    bpy.utils.register_class(SCENE_PT_namedlayer_groups)    
-    bpy.utils.register_class(SCENE_PT_namedlayer_layers)   
+
+    bpy.utils.register_class(SCENE_PT_namedlayer_groups)
+    bpy.utils.register_class(SCENE_PT_namedlayer_layers)
     bpy.utils.register_module(__name__)
     bpy.types.Scene.layergroups = CollectionProperty(type=LayerGroup)
     # Unused, but this is needed for the TemplateList to work...
@@ -586,8 +586,8 @@ def register():
 
 
 def unregister():
-    bpy.utils.unregister_class(SCENE_PT_namedlayer_groups)      
-    bpy.utils.unregister_class(SCENE_PT_namedlayer_layers)    
+    bpy.utils.unregister_class(SCENE_PT_namedlayer_groups)
+    bpy.utils.unregister_class(SCENE_PT_namedlayer_layers)
     bpy.app.handlers.scene_update_post.remove(check_init_data)
     del bpy.types.Scene.layergroups
     del bpy.types.Scene.layergroups_index
@@ -597,13 +597,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
-
-
-
-
-
-
-
-
-

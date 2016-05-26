@@ -58,7 +58,7 @@ class PMXImporter:
     @staticmethod
     def flipUV_V(uv):
         u, v = uv
-        return [u, 1.0-v]
+        return [u, 1.0 - v]
 
     def __getMaterialIndexFromFaceIndex(self, face_index):
         count = 0
@@ -75,7 +75,7 @@ class PMXImporter:
         self.__rig = mmd_model.Model.create(pmxModel.name, pmxModel.name_e, self.__scale)
 
         mesh = bpy.data.meshes.new(name=pmxModel.name)
-        self.__meshObj = bpy.data.objects.new(name=pmxModel.name+'_mesh', object_data=mesh)
+        self.__meshObj = bpy.data.objects.new(name=pmxModel.name + '_mesh', object_data=mesh)
         self.__targetScene.objects.link(self.__meshObj)
 
         self.__armObj = self.__rig.armature()
@@ -115,12 +115,12 @@ class PMXImporter:
 
             if isinstance(pv.weight.weights, pmx.BoneWeightSDEF):
                 self.__vertexGroupTable[pv.weight.bones[0]].add(index=[i], weight=pv.weight.weights.weight, type='REPLACE')
-                self.__vertexGroupTable[pv.weight.bones[1]].add(index=[i], weight=1.0-pv.weight.weights.weight, type='REPLACE')
+                self.__vertexGroupTable[pv.weight.bones[1]].add(index=[i], weight=1.0 - pv.weight.weights.weight, type='REPLACE')
             elif len(pv.weight.bones) == 1:
                 self.__vertexGroupTable[pv.weight.bones[0]].add(index=[i], weight=1.0, type='REPLACE')
             elif len(pv.weight.bones) == 2:
                 self.__vertexGroupTable[pv.weight.bones[0]].add(index=[i], weight=pv.weight.weights[0], type='REPLACE')
-                self.__vertexGroupTable[pv.weight.bones[1]].add(index=[i], weight=1.0-pv.weight.weights[0], type='REPLACE')
+                self.__vertexGroupTable[pv.weight.bones[1]].add(index=[i], weight=1.0 - pv.weight.weights[0], type='REPLACE')
             elif len(pv.weight.bones) == 4:
                 # If two or more weights for the same bone is present, the second and subsequent will be ignored.
                 for bone, weight in reversed([x for x in zip(pv.weight.bones, pv.weight.weights) if x[0] >= 0]):
@@ -185,7 +185,7 @@ class PMXImporter:
 
             for b_bone in editBoneTable:
                 # Set the length of too short bones to 1 because Blender delete them.
-                if b_bone.length  < 0.001:
+                if b_bone.length < 0.001:
                     loc = mathutils.Vector([0, 0, 1]) * self.__scale
                     b_bone.tail = b_bone.head + loc
 
@@ -213,7 +213,7 @@ class PMXImporter:
         self.__mutedIkConsts.append(ikConst)
         ikConst.iterations = pmx_bone.loopCount
         ikConst.chain_count = len(pmx_bone.ik_links)
-        if pmx_bone.isRotatable and not pmx_bone.isMovable :
+        if pmx_bone.isRotatable and not pmx_bone.isMovable:
             ikConst.use_location = pmx_bone.isMovable
             ikConst.use_rotation = pmx_bone.isRotatable
         for i in pmx_bone.ik_links:
@@ -229,7 +229,6 @@ class PMXImporter:
                 bone.ik_min_y = i.minimumAngle[1]
                 bone.ik_min_z = i.minimumAngle[2]
 
-
     def __importBones(self):
         pmxModel = self.__model
 
@@ -244,25 +243,25 @@ class PMXImporter:
             b_bone.mmd_bone.is_visible = pmx_bone.visible
             b_bone.mmd_bone.is_controllable = pmx_bone.isControllable
 
-            if pmx_bone.displayConnection == -1 or pmx_bone.displayConnection == [0.0, 0.0, 0.0]:                
+            if pmx_bone.displayConnection == -1 or pmx_bone.displayConnection == [0.0, 0.0, 0.0]:
                 b_bone.mmd_bone.is_tip = True
                 logging.debug('bone %s is a tip bone', pmx_bone.name)
             elif not isinstance(pmx_bone.displayConnection, int):
                 b_bone.mmd_bone.use_tail_location = True
                 logging.debug('bone %s is using a vector tail', pmx_bone.name)
             else:
-                logging.debug('bone %s is not using a vector tail and is not a tip bone. DisplayConnection: %s', 
+                logging.debug('bone %s is not using a vector tail and is not a tip bone. DisplayConnection: %s',
                               pmx_bone.name, str(pmx_bone.displayConnection))
-                
+
             if pmx_bone.axis is not None and pmx_bone.parent != -1:
-                #The twist bones (type 8 in PMD) are special, without this the tail will not be displayed during export
+                # The twist bones (type 8 in PMD) are special, without this the tail will not be displayed during export
                 pose_bones[pmx_bone.parent].mmd_bone.use_tail_location = True
-                                
-            #Movable bones should have a tail too
+
+            # Movable bones should have a tail too
             if pmx_bone.isMovable and pmx_bone.visible:
                 b_bone.mmd_bone.use_tail_location = True
-            
-            #Some models don't have correct tail bones, let's try to fix it
+
+            # Some models don't have correct tail bones, let's try to fix it
             if re.search(u'先$', pmx_bone.name):
                 b_bone.mmd_bone.is_tip = True
 
@@ -284,7 +283,7 @@ class PMXImporter:
                 mmd_bone.has_additional_rotation = pmx_bone.hasAdditionalRotate
                 mmd_bone.has_additional_location = pmx_bone.hasAdditionalLocation
                 mmd_bone.additional_transform_influence = influ
-                mmd_bone.additional_transform_bone =  pose_bones[bone_index].name
+                mmd_bone.additional_transform_bone = pose_bones[bone_index].name
 
             if pmx_bone.localCoordinate is not None:
                 b_bone.mmd_bone.enabled_local_axes = True
@@ -293,7 +292,7 @@ class PMXImporter:
 
             if pmx_bone.axis is not None:
                 b_bone.mmd_bone.enabled_fixed_axis = True
-                b_bone.mmd_bone.fixed_axis=pmx_bone.axis
+                b_bone.mmd_bone.fixed_axis = pmx_bone.axis
 
             if b_bone.mmd_bone.is_tip:
                 b_bone.lock_rotation = [True, True, True]
@@ -312,23 +311,23 @@ class PMXImporter:
                 size = mathutils.Vector(rigid.size)
 
             obj = self.__rig.createRigidBody(
-                name = rigid.name,
-                name_e = rigid.name_e,
-                shape_type = rigid.type,
-                dynamics_type = rigid.mode,
-                location = loc,
-                rotation = rot,
-                size = size * self.__scale,
-                collision_group_number = rigid.collision_group_number,
-                collision_group_mask = [rigid.collision_group_mask & (1<<i) == 0 for i in range(16)],
-                arm_obj = self.__armObj,
+                name=rigid.name,
+                name_e=rigid.name_e,
+                shape_type=rigid.type,
+                dynamics_type=rigid.mode,
+                location=loc,
+                rotation=rot,
+                size=size * self.__scale,
+                collision_group_number=rigid.collision_group_number,
+                collision_group_mask=[rigid.collision_group_mask & (1 << i) == 0 for i in range(16)],
+                arm_obj=self.__armObj,
                 mass=rigid.mass,
-                friction = rigid.friction,
-                angular_damping = rigid.rotation_attenuation,
-                linear_damping = rigid.velocity_attenuation,
-                bounce = rigid.bounce,
-                bone = None if rigid.bone == -1 or rigid.bone is None else self.__boneTable[rigid.bone].name,
-                )
+                friction=rigid.friction,
+                angular_damping=rigid.rotation_attenuation,
+                linear_damping=rigid.velocity_attenuation,
+                bounce=rigid.bounce,
+                bone=None if rigid.bone == -1 or rigid.bone is None else self.__boneTable[rigid.bone].name,
+            )
             obj.hide = True
             self.__rigidObjGroup.objects.link(obj)
             self.__rigidTable.append(obj)
@@ -337,7 +336,6 @@ class PMXImporter:
             c.mute = False
         logging.debug('Finished importing rigid bodies in %f seconds.', time.time() - start_time)
 
-
     def __importJoints(self):
         self.__jointTable = []
         for joint in self.__model.joints:
@@ -345,24 +343,23 @@ class PMXImporter:
             rot = mathutils.Vector(joint.rotation) * self.TO_BLE_MATRIX * -1
 
             obj = self.__rig.createJoint(
-                name = joint.name,
-                name_e = joint.name_e,
-                location = loc,
-                rotation = rot,
-                size = 0.5 * self.__scale,
-                rigid_a = self.__rigidTable[joint.src_rigid],
-                rigid_b = self.__rigidTable[joint.dest_rigid],
-                maximum_location = mathutils.Vector(joint.maximum_location) * self.TO_BLE_MATRIX * self.__scale,
-                minimum_location = mathutils.Vector(joint.minimum_location) * self.TO_BLE_MATRIX * self.__scale,
-                maximum_rotation = mathutils.Vector(joint.maximum_rotation) * self.TO_BLE_MATRIX * -1,
-                minimum_rotation = mathutils.Vector(joint.minimum_rotation) * self.TO_BLE_MATRIX * -1,
-                spring_linear = mathutils.Vector(joint.spring_constant) * self.TO_BLE_MATRIX,
-                spring_angular = mathutils.Vector(joint.spring_rotation_constant) * self.TO_BLE_MATRIX,
-                )
+                name=joint.name,
+                name_e=joint.name_e,
+                location=loc,
+                rotation=rot,
+                size=0.5 * self.__scale,
+                rigid_a=self.__rigidTable[joint.src_rigid],
+                rigid_b=self.__rigidTable[joint.dest_rigid],
+                maximum_location=mathutils.Vector(joint.maximum_location) * self.TO_BLE_MATRIX * self.__scale,
+                minimum_location=mathutils.Vector(joint.minimum_location) * self.TO_BLE_MATRIX * self.__scale,
+                maximum_rotation=mathutils.Vector(joint.maximum_rotation) * self.TO_BLE_MATRIX * -1,
+                minimum_rotation=mathutils.Vector(joint.minimum_rotation) * self.TO_BLE_MATRIX * -1,
+                spring_linear=mathutils.Vector(joint.spring_constant) * self.TO_BLE_MATRIX,
+                spring_angular=mathutils.Vector(joint.spring_rotation_constant) * self.TO_BLE_MATRIX,
+            )
             obj.hide = True
             self.__jointTable.append(obj)
             self.__jointObjGroup.objects.link(obj)
-
 
     def __importMaterials(self):
         self.__importTextures()
@@ -380,7 +377,7 @@ class PMXImporter:
             mat.specular_alpha = i.specular[3]
             mat.use_shadows = i.enabled_self_shadow
             mat.use_transparent_shadows = i.enabled_self_shadow
-            mat.use_cast_buffer_shadows = i.enabled_self_shadow_map # only buffer shadows
+            mat.use_cast_buffer_shadows = i.enabled_self_shadow_map  # only buffer shadows
             if hasattr(mat, 'use_cast_shadows'):
                 # "use_cast_shadows" is not supported in older Blender (< 2.71),
                 # so we still use "use_cast_buffer_shadows".
@@ -397,7 +394,7 @@ class PMXImporter:
             mmd_mat.enabled_self_shadow_map = i.enabled_self_shadow_map
             mmd_mat.enabled_self_shadow = i.enabled_self_shadow
             mmd_mat.enabled_toon_edge = i.enabled_toon_edge
-            if(len(i.edge_color)==4):# If it cames from PMD it will not
+            if(len(i.edge_color) == 4):  # If it cames from PMD it will not
                 # have edge color and assigning an empty array
                 # will raise an error(ValueError)
                 mmd_mat.edge_color = i.edge_color
@@ -414,7 +411,7 @@ class PMXImporter:
                     mmd_mat.toon_texture = ''
             mmd_mat.comment = i.comment
 
-            self.__materialFaceCountTable.append(int(i.vertex_count/3))
+            self.__materialFaceCountTable.append(int(i.vertex_count / 3))
             self.__meshObj.data.materials.append(mat)
             fnMat = FnMaterial(mat)
             if i.texture != -1:
@@ -461,7 +458,7 @@ class PMXImporter:
             1: 'EYEBROW',
             2: 'EYE',
             3: 'MOUTH',
-            }
+        }
         for morph in filter(lambda x: isinstance(x, pmx.VertexMorph), pmxModel.morphs):
             shapeKey = self.__meshObj.shape_key_add(morph.name)
             vtx_morph = mmd_root.vertex_morphs.add()
@@ -480,7 +477,7 @@ class PMXImporter:
             1: 'EYEBROW',
             2: 'EYE',
             3: 'MOUTH',
-            }
+        }
         for morph in [x for x in self.__model.morphs if isinstance(x, pmx.MaterialMorph)]:
             mat_morph = mmd_root.material_morphs.add()
             mat_morph.name = morph.name
@@ -506,15 +503,15 @@ class PMXImporter:
             1: 'EYEBROW',
             2: 'EYE',
             3: 'MOUTH',
-            }
+        }
         for morph in [x for x in self.__model.morphs if isinstance(x, pmx.BoneMorph)]:
             bone_morph = mmd_root.bone_morphs.add()
             bone_morph.name = morph.name
             bone_morph.name_e = morph.name_e
             bone_morph.category = categories.get(morph.category, 'OTHER')
             for morph_data in morph.offsets:
-                data = bone_morph.data.add()    
-                bl_bone = self.__boneTable[morph_data.index]            
+                data = bone_morph.data.add()
+                bl_bone = self.__boneTable[morph_data.index]
                 data.bone = bl_bone.name
                 mat = VMDImporter.makeVMDBoneLocationToBlenderMatrix(bl_bone)
                 data.location = mat * mathutils.Vector(morph_data.location_offset) * self.__scale
@@ -528,7 +525,7 @@ class PMXImporter:
             1: 'EYEBROW',
             2: 'EYE',
             3: 'MOUTH',
-            }
+        }
 
         for i in pmxModel.display:
             frame = root.mmd_root.display_item_frames.add()

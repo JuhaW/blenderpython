@@ -18,70 +18,76 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-import bpy, io
+import bpy
+import io
 from .utils import *
 
+
 class SMD_MT_Updated(bpy.types.Menu):
-	bl_label = get_id("offerchangelog_title")
-	def draw(self,context):
-		self.layout.operator("wm.url_open",text=get_id("offerchangelog_offer"),icon='TEXT').url = "http://steamcommunity.com/groups/BlenderSourceTools#announcements"
+    bl_label = get_id("offerchangelog_title")
+
+    def draw(self, context):
+        self.layout.operator("wm.url_open", text=get_id("offerchangelog_offer"), icon='TEXT').url = "http://steamcommunity.com/groups/BlenderSourceTools#announcements"
 
 updater_supported = True
 try:
-	import urllib.request, urllib.error, zipfile
+    import urllib.request
+    import urllib.error
+    import zipfile
 except:
-	updater_supported = False
+    updater_supported = False
+
 
 class SmdToolsUpdate(bpy.types.Operator):
-	bl_idname = "script.update_smd"
-	bl_label = get_id("updater_title")
-	bl_description = get_id("updater_title_tip")
-	
-	@classmethod
-	def poll(self,context):
-		return updater_supported
+    bl_idname = "script.update_smd"
+    bl_label = get_id("updater_title")
+    bl_description = get_id("updater_title_tip")
 
-	def execute(self,context):	
-		print("Source Tools update...")
-		
-		import sys
-		cur_version = sys.modules.get(__name__.split(".")[0]).bl_info['version']		
+    @classmethod
+    def poll(self, context):
+        return updater_supported
 
-		try:			
-			data = urllib.request.urlopen("http://steamreview.org/BlenderSourceTools/latest.php").read().decode('ASCII').split("\n")
-			remote_ver = data[0].strip().split(".")
-			remote_bpy = data[1].strip().split(".")
-			download_url = "http://steamreview.org/BlenderSourceTools/" + data[2].strip()
-			
-			for i in range(min( len(remote_bpy), len(bpy.app.version) )):
-				if int(remote_bpy[i]) > bpy.app.version[i]:
-					self.report({'ERROR'},get_id("update_err_outdated", True).format( PrintVer(remote_bpy) ))
-					return {'FINISHED'}
-					
-			for i in range(min( len(remote_ver), len(cur_version) )):
-				try:
-					diff = int(remote_ver[i]) - int(cur_version[i])
-				except ValueError:
-					continue
-				if diff > 0:
-					print("Found new version {}, downloading from {}...".format(PrintVer(remote_ver), download_url))
-					
-					zip = zipfile.ZipFile( io.BytesIO(urllib.request.urlopen(download_url).read()))
-					zip.extractall(path=os.path.join(os.path.dirname( os.path.abspath( __file__ ) ),".."))
-					
-					self.report({'INFO'},get_id("update_done", True).format(PrintVer(remote_ver)))
-					bpy.ops.wm.call_menu(name="SMD_MT_Updated")
-					return {'FINISHED'}
-			
-			self.report({'INFO'},get_id("update_alreadylatest", True).format( PrintVer(cur_version) ))
-			return {'FINISHED'}
-			
-		except urllib.error.URLError as err:
-			self.report({'ERROR'}," ".join([get_id("update_err_downloadfailed") + str(err)]))
-			return {'CANCELLED'}
-		except zipfile.BadZipfile:
-			self.report({'ERROR'},get_id("update_err_corruption"))
-			return {'CANCELLED'}
-		except IOError as err:
-			self.report({'ERROR'}," ".join([get_id("update_err_unknown"), str(err)]))
-			return {'CANCELLED'}
+    def execute(self, context):
+        print("Source Tools update...")
+
+        import sys
+        cur_version = sys.modules.get(__name__.split(".")[0]).bl_info['version']
+
+        try:
+            data = urllib.request.urlopen("http://steamreview.org/BlenderSourceTools/latest.php").read().decode('ASCII').split("\n")
+            remote_ver = data[0].strip().split(".")
+            remote_bpy = data[1].strip().split(".")
+            download_url = "http://steamreview.org/BlenderSourceTools/" + data[2].strip()
+
+            for i in range(min(len(remote_bpy), len(bpy.app.version))):
+                if int(remote_bpy[i]) > bpy.app.version[i]:
+                    self.report({'ERROR'}, get_id("update_err_outdated", True).format(PrintVer(remote_bpy)))
+                    return {'FINISHED'}
+
+            for i in range(min(len(remote_ver), len(cur_version))):
+                try:
+                    diff = int(remote_ver[i]) - int(cur_version[i])
+                except ValueError:
+                    continue
+                if diff > 0:
+                    print("Found new version {}, downloading from {}...".format(PrintVer(remote_ver), download_url))
+
+                    zip = zipfile.ZipFile(io.BytesIO(urllib.request.urlopen(download_url).read()))
+                    zip.extractall(path=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+
+                    self.report({'INFO'}, get_id("update_done", True).format(PrintVer(remote_ver)))
+                    bpy.ops.wm.call_menu(name="SMD_MT_Updated")
+                    return {'FINISHED'}
+
+            self.report({'INFO'}, get_id("update_alreadylatest", True).format(PrintVer(cur_version)))
+            return {'FINISHED'}
+
+        except urllib.error.URLError as err:
+            self.report({'ERROR'}, " ".join([get_id("update_err_downloadfailed") + str(err)]))
+            return {'CANCELLED'}
+        except zipfile.BadZipfile:
+            self.report({'ERROR'}, get_id("update_err_corruption"))
+            return {'CANCELLED'}
+        except IOError as err:
+            self.report({'ERROR'}, " ".join([get_id("update_err_unknown"), str(err)]))
+            return {'CANCELLED'}

@@ -47,10 +47,10 @@ def create_widget(self, name):
         scene.objects.link(obj)
 
         # this will put the Widget objects out of the way on layer 19
-        WDGT_layers = (False, False, False, False, 
-			False, False, False, False, False, 
-			True, False, False, False, False, 
-			False, False, False, False, False, False)
+        WDGT_layers = (False, False, False, False,
+                       False, False, False, False, False,
+                       True, False, False, False, False,
+                       False, False, False, False, False, False)
         obj.layers = WDGT_layers
 
         return obj
@@ -214,10 +214,10 @@ class AddDofEmpty(bpy.types.Operator):
 
 def build_dolly_rig(context):
     # Define some useful variables:
-    boneLayer = (False, True, False, False, False, False, False, False, 
-			False, False, False, False, False, False, False, False, 
-			False, False, False, False, False, False, False, False, 
-			False, False, False, False, False, False, False, False)
+    boneLayer = (False, True, False, False, False, False, False, False,
+                 False, False, False, False, False, False, False, False,
+                 False, False, False, False, False, False, False, False,
+                 False, False, False, False, False, False, False, False)
 
     # Add the new armature object:
     bpy.ops.object.armature_add()
@@ -361,11 +361,11 @@ def build_dolly_rig(context):
 
 def build_crane_rig(context):
     # Define some useful variables:
-    boneLayer = (False, True, False, False, False, False, False, 
-			False, False, False, False, False, False, False, 
-			False, False, False, False, False, False, False, 
-			False, False, False, False, False, False, False, 
-			False, False, False, False)
+    boneLayer = (False, True, False, False, False, False, False,
+                 False, False, False, False, False, False, False,
+                 False, False, False, False, False, False, False,
+                 False, False, False, False, False, False, False,
+                 False, False, False, False)
 
     # Add the new armature object:
     bpy.ops.object.armature_add()

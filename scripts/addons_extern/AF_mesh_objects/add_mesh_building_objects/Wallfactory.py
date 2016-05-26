@@ -41,30 +41,30 @@ class add_mesh_wallb(bpy.types.Operator):
     """Add a wall mesh"""
     bl_idname = "mesh.wall_add"
     bl_label = "Add A Masonry Wall"
-    bl_options = {'REGISTER', 'UNDO'} # removes object, does not reset to "last" modification.
+    bl_options = {'REGISTER', 'UNDO'}  # removes object, does not reset to "last" modification.
     bl_description = "adds a block wall"
 
-    # UI items - API for properties - User accessable variables... 
+    # UI items - API for properties - User accessable variables...
 # not all options are via UI, and some operations just don't work yet.
 
     # only create object when True
     # False allows modifying several parameters without creating object
     ConstructTog = BoolProperty(name="Construct",
                                 description="Generate the object",
-                                default = True)
+                                default=True)
 
 # need to modify so radial makes a tower (normal); want "flat" setting to make disk (alternate)
     # make the wall circular - if not sloped it's a flat disc
     RadialTog = BoolProperty(name="Radial",
                              description="Make masonry radial",
-                             default = False)
+                             default=False)
 
     # curve the wall - if radial creates dome.
     SlopeTog = BoolProperty(name="Curved",
                             description="Make masonry sloped, or curved",
-                            default = False)
+                            default=False)
 
-#need to review defaults and limits for all of these UI objects.
+# need to review defaults and limits for all of these UI objects.
 
     # wall area/size
     WallStart = FloatProperty(name="Start",
@@ -113,7 +113,7 @@ class add_mesh_wallb(bpy.types.Operator):
                                  default=1.0, min=0.01, max=100.0)
     MergeBlock = BoolProperty(name="Merge Blocks",
                               description="Make big blocks (merge closely adjoining blocks)",
-                              default = False)
+                              default=False)
 
     # edging for blocks
     Grout = FloatProperty(name="Thickness",
@@ -123,17 +123,17 @@ class add_mesh_wallb(bpy.types.Operator):
                                   description="Random variance of block Grout",
                                   default=0.03, min=0.0, max=100.0)
     GroutDepth = FloatProperty(name="Depth",
-                          description="Grout Depth from the face of the blocks",
-                          default=0.1, min=0.0001, max=10.0)
+                               description="Grout Depth from the face of the blocks",
+                               default=0.1, min=0.0001, max=10.0)
     GroutDepthVariance = FloatProperty(name="Variance",
-                                  description="Random variance of block Grout Depth",
-                                  default=0.03, min=0.0, max=100.0)
+                                       description="Random variance of block Grout Depth",
+                                       default=0.03, min=0.0, max=100.0)
     GroutEdge = BoolProperty(name="Edging",
                              description="Grout perimiter",
-                             default = False)
+                             default=False)
 
-    #properties for openings
-    Opening1Tog = BoolProperty(name="Opening(s)",description="Make windows or doors", default = True)
+    # properties for openings
+    Opening1Tog = BoolProperty(name="Opening(s)", description="Make windows or doors", default=True)
     Opening1Width = FloatProperty(name="Width",
                                   description="The Width of opening 1",
                                   default=2.5, min=0.01, max=100.0)
@@ -168,14 +168,13 @@ class add_mesh_wallb(bpy.types.Operator):
                                              description="Thickness of the arch on the bottom of the opening",
                                              default=0.5, min=0.01, max=100.0)
     Opening1Bevel = FloatProperty(name="Bevel",
-                                             description="Angle block face",
-                                             default=0.25, min=-10.0, max=10.0)
-
+                                  description="Angle block face",
+                                  default=0.25, min=-10.0, max=10.0)
 
     # openings on top of wall.
     CrenelTog = BoolProperty(name="Crenels",
                              description="Make openings along top of wall",
-                             default = False)
+                             default=False)
     CrenelXP = FloatProperty(name="Width %",
                              description="Gap width in wall based % of wall width",
                              default=0.25, min=0.10, max=1.0)
@@ -183,18 +182,17 @@ class add_mesh_wallb(bpy.types.Operator):
                              description="Crenel Height as % of wall height",
                              default=0.10, min=0.10, max=1.0)
 
-
     # narrow openings in wall.
-#need to prevent overlap with arch openings - though inversion is an interesting effect.
+# need to prevent overlap with arch openings - though inversion is an interesting effect.
     SlotTog = BoolProperty(name="Slots",
                            description="Make narrow openings in wall",
-                           default = False)
+                           default=False)
     SlotRpt = BoolProperty(name="Repeat",
                            description="Repeat slots along wall",
-                           default = False)
+                           default=False)
     SlotWdg = BoolProperty(name="Wedged (n/a)",
                            description="Bevel edges of slots",
-                           default = False)
+                           default=False)
     SlotX = FloatProperty(name="Indent",
                           description="The x position or spacing of slots",
                           default=0.0, min=-100, max=100.0)
@@ -203,7 +201,7 @@ class add_mesh_wallb(bpy.types.Operator):
                             default=0.5, min=0.10, max=100.0)
     SlotV = BoolProperty(name="Vertical",
                          description="Vertical slots",
-                         default = True)
+                         default=True)
     SlotVH = FloatProperty(name="Height",
                            description="Height of vertical slot",
                            default=3.5, min=0.10, max=100.0)
@@ -212,62 +210,60 @@ class add_mesh_wallb(bpy.types.Operator):
                              default=5.00, min=-100.0, max=100.0)
     SlotH = BoolProperty(name="Horizontal",
                          description="Horizontal slots",
-                         default = False)
+                         default=False)
     SlotHW = FloatProperty(name="Width",
                            description="Width of horizontal slot",
                            default=2.5, min=0.10, max=100.0)
-#this should offset from VBtm... maybe make a % like crenels?
+# this should offset from VBtm... maybe make a % like crenels?
     SlotHBtm = FloatProperty(name="Bottom",
                              description="Z position for horizontal slot",
                              default=5.50, min=-100.0, max=100.0)
 
-
-    #properties for shelf (extend blocks in area)
-    ShelfTog = BoolProperty(name="Shelf",description="Add blocks in area by depth to make shelf/platform", default = False)
+    # properties for shelf (extend blocks in area)
+    ShelfTog = BoolProperty(name="Shelf", description="Add blocks in area by depth to make shelf/platform", default=False)
     ShelfX = FloatProperty(name="Left",
-                              description="The x position of Shelf",
-                              default=-5.00, min=-100, max=100.0)
+                           description="The x position of Shelf",
+                           default=-5.00, min=-100, max=100.0)
     ShelfZ = FloatProperty(name="Bottom",
-                              description="The z position of Shelf",
-                              default=10.0, min=-100, max=100.0)
+                           description="The z position of Shelf",
+                           default=10.0, min=-100, max=100.0)
     ShelfH = FloatProperty(name="Height",
-                                   description="The Height of Shelf area",
-                                   default=1.0, min=0.01, max=100.0)
+                           description="The Height of Shelf area",
+                           default=1.0, min=0.01, max=100.0)
     ShelfW = FloatProperty(name="Width",
-                                  description="The Width of shelf area",
-                                  default=5.0, min=0.01, max=100.0)
+                           description="The Width of shelf area",
+                           default=5.0, min=0.01, max=100.0)
     ShelfD = FloatProperty(name="Depth",
-                          description="Depth of each block for shelf (from cursor + 1/2 wall depth)",
-                          default=2.0, min=0.01, max=100.0)
-    ShelfBack = BoolProperty(name="Backside",description="Shelf on backside of wall", default = False)
+                           description="Depth of each block for shelf (from cursor + 1/2 wall depth)",
+                           default=2.0, min=0.01, max=100.0)
+    ShelfBack = BoolProperty(name="Backside", description="Shelf on backside of wall", default=False)
 
-
-    #properties for steps (extend blocks in area, progressive width)
-    StepTog = BoolProperty(name="Steps",description="Add blocks in area by depth with progressive width to make steps", default = False)
+    # properties for steps (extend blocks in area, progressive width)
+    StepTog = BoolProperty(name="Steps", description="Add blocks in area by depth with progressive width to make steps", default=False)
     StepX = FloatProperty(name="Left",
-                              description="The x position of steps",
-                              default=-9.00, min=-100, max=100.0)
+                          description="The x position of steps",
+                          default=-9.00, min=-100, max=100.0)
     StepZ = FloatProperty(name="Bottom",
-                              description="The z position of steps",
-                              default=0.0, min=-100, max=100.0)
+                          description="The z position of steps",
+                          default=0.0, min=-100, max=100.0)
     StepH = FloatProperty(name="Height",
-                                   description="The Height of step area",
-                                   default=10.0, min=0.01, max=100.0)
+                          description="The Height of step area",
+                          default=10.0, min=0.01, max=100.0)
     StepW = FloatProperty(name="Width",
-                                  description="The Width of step area",
-                                  default=8.0, min=0.01, max=100.0)
+                          description="The Width of step area",
+                          default=8.0, min=0.01, max=100.0)
     StepD = FloatProperty(name="Depth",
                           description="Depth of each block for steps (from cursor + 1/2 wall depth)",
                           default=1.0, min=0.01, max=100.0)
     StepV = FloatProperty(name="Riser",
-                                  description="Height of each step",
-                                  default=0.70, min=0.01, max=100.0)
+                          description="Height of each step",
+                          default=0.70, min=0.01, max=100.0)
     StepT = FloatProperty(name="Tread",
                           description="Width of each step",
                           default=1.0, min=0.01, max=100.0)
-    StepLeft = BoolProperty(name="High Left",description="Height left; else Height right", default = False)
-    StepOnly = BoolProperty(name="No Blocks",description="Steps only, no supporting blocks", default = False)
-    StepBack = BoolProperty(name="Backside",description="Steps on backside of wall", default = False)
+    StepLeft = BoolProperty(name="High Left", description="Height left; else Height right", default=False)
+    StepOnly = BoolProperty(name="No Blocks", description="Steps only, no supporting blocks", default=False)
+    StepBack = BoolProperty(name="Backside", description="Steps on backside of wall", default=False)
 
 ##
 ##
@@ -298,7 +294,7 @@ class add_mesh_wallb(bpy.types.Operator):
         box = layout.box()
         box.label(text='Block Sizing')
         box.prop(self, 'MergeBlock')
-#add checkbox for "fixed" sizing (ignore variance) a.k.a. bricks.
+# add checkbox for "fixed" sizing (ignore variance) a.k.a. bricks.
         box.prop(self, 'Width')
         box.prop(self, 'WidthVariance')
         box.prop(self, 'WidthMinimum')
@@ -346,7 +342,7 @@ class add_mesh_wallb(bpy.types.Operator):
         box = layout.box()
         box.prop(self, 'SlotTog')
         if self.properties.SlotTog:
-#		box.prop(self, 'SlotWdg')
+            #		box.prop(self, 'SlotWdg')
             box.prop(self, 'SlotX')
             box.prop(self, 'SlotGap')
             box.prop(self, 'SlotRpt')
@@ -411,13 +407,14 @@ class add_mesh_wallb(bpy.types.Operator):
         global stepBack
 
         # Create the wall when enabled (skip regen iterations when off)
-        if not self.properties.ConstructTog: return {'FINISHED'}
+        if not self.properties.ConstructTog:
+            return {'FINISHED'}
 
-        #enter the settings for the wall dimensions (area)
+        # enter the settings for the wall dimensions (area)
 # start can't be zero - min/max don't matter [if max less than end] but zero don't workie.
 # start can't exceed end.
         if not self.properties.WallStart or self.properties.WallStart >= self.properties.WallEnd:
-            self.properties.WallStart = NOTZERO # Reset UI if input out of bounds...
+            self.properties.WallStart = NOTZERO  # Reset UI if input out of bounds...
 
         dims['s'] = self.properties.WallStart
         dims['e'] = self.properties.WallEnd
@@ -426,12 +423,14 @@ class add_mesh_wallb(bpy.types.Operator):
 
         settings['eoff'] = self.properties.EdgeOffset
 
-        #retrieve the settings for the wall block properties
+        # retrieve the settings for the wall block properties
         settings['w'] = self.properties.Width
         settings['wv'] = self.properties.WidthVariance
         settings['wm'] = self.properties.WidthMinimum
-        if not radialized: settings['sdv'] = settings['w'] 
-        else: settings['sdv'] = 0.12
+        if not radialized:
+            settings['sdv'] = settings['w']
+        else:
+            settings['sdv'] = 0.12
 
         settings['h'] = self.properties.Height
         settings['hv'] = self.properties.HeightVariance
@@ -443,33 +442,40 @@ class add_mesh_wallb(bpy.types.Operator):
 
         if self.properties.MergeBlock:
             bigBlock = 1
-        else: bigBlock = 0
+        else:
+            bigBlock = 0
 
         settings['g'] = self.properties.Grout
         settings['gv'] = self.properties.GroutVariance
         settings['gd'] = self.properties.GroutDepth
         settings['gdv'] = self.properties.GroutDepthVariance
 
-        if self.properties.GroutEdge: settings['ge'] = 1
-        else: settings['ge'] = 0
+        if self.properties.GroutEdge:
+            settings['ge'] = 1
+        else:
+            settings['ge'] = 0
 
         # set wall shape modifiers
         if self.properties.RadialTog:
             radialized = 1
-#eliminate to allow user control for start/completion?
-            dims['s'] = 0.0 # complete radial
-            if dims['e'] > PI*2: dims['e'] = PI*2 # max end for circle
-            if dims['b'] < settings['g']: dims['b'] = settings['g'] # min bottom for grout extension
-        else: radialized = 0
+# eliminate to allow user control for start/completion?
+            dims['s'] = 0.0  # complete radial
+            if dims['e'] > PI * 2:
+                dims['e'] = PI * 2  # max end for circle
+            if dims['b'] < settings['g']:
+                dims['b'] = settings['g']  # min bottom for grout extension
+        else:
+            radialized = 0
 
-        if self.properties.SlopeTog: slope = 1
-        else: slope = 0
-
+        if self.properties.SlopeTog:
+            slope = 1
+        else:
+            slope = 0
 
         shelfExt = 0
         shelfBack = 0
 
-	# Add shelf if enabled
+        # Add shelf if enabled
         if self.properties.ShelfTog:
             shelfExt = 1
             shelfSpecs['h'] = self.properties.ShelfH
@@ -481,13 +487,12 @@ class add_mesh_wallb(bpy.types.Operator):
             if self.properties.ShelfBack:
                 shelfBack = 1
 
-
         stepMod = 0
         stepLeft = 0
         stepOnly = 0
         stepBack = 0
 
-	# Make steps if enabled
+        # Make steps if enabled
         if self.properties.StepTog:
             stepMod = 1
             stepSpecs['x'] = self.properties.StepX
@@ -507,17 +512,16 @@ class add_mesh_wallb(bpy.types.Operator):
             if self.properties.StepBack:
                 stepBack = 1
 
-
-        #enter the settings for the openings
-#when openings overlap they create inverse stonework - interesting but not the desired effect :)
-#if opening width == indent*2 the edge blocks fail (row of blocks cross opening) - bug.
+        # enter the settings for the openings
+# when openings overlap they create inverse stonework - interesting but not the desired effect :)
+# if opening width == indent*2 the edge blocks fail (row of blocks cross opening) - bug.
         openingSpecs = []
-        openingIdx = 0 # track opening array references for multiple uses
+        openingIdx = 0  # track opening array references for multiple uses
 
         # general openings with arch options - can be windows or doors.
         if self.properties.Opening1Tog:
             # set defaults...
-            openingSpecs += [{'w':0.5, 'h':0.5, 'x':0.8, 'z':2.7, 'rp':1, 'b':0.0, 'v':0, 'vl':0, 't':0, 'tl':0}]
+            openingSpecs += [{'w': 0.5, 'h': 0.5, 'x': 0.8, 'z': 2.7, 'rp': 1, 'b': 0.0, 'v': 0, 'vl': 0, 't': 0, 'tl': 0}]
 
             openingSpecs[openingIdx]['w'] = self.properties.Opening1Width
             openingSpecs[openingIdx]['h'] = self.properties.Opening1Height
@@ -532,17 +536,17 @@ class add_mesh_wallb(bpy.types.Operator):
             if self.properties.Opening1BtmArchTog:
                 openingSpecs[openingIdx]['vl'] = self.properties.Opening1BtmArch
                 openingSpecs[openingIdx]['tl'] = self.properties.Opening1BtmArchThickness
-            
+
             openingSpecs[openingIdx]['b'] = self.properties.Opening1Bevel
 
-            openingIdx += 1 # count window/door/arch openings
+            openingIdx += 1  # count window/door/arch openings
 
         # Slots (narrow openings)
         if self.properties.SlotTog:
 
-            if self.properties.SlotV: # vertical slots
+            if self.properties.SlotV:  # vertical slots
                 # set defaults...
-                openingSpecs += [{'w':0.5, 'h':0.5, 'x':0.0, 'z':2.7, 'rp':0, 'b':0.0, 'v':0, 'vl':0, 't':0, 'tl':0}]
+                openingSpecs += [{'w': 0.5, 'h': 0.5, 'x': 0.0, 'z': 2.7, 'rp': 0, 'b': 0.0, 'v': 0, 'vl': 0, 't': 0, 'tl': 0}]
 
                 openingSpecs[openingIdx]['w'] = self.properties.SlotGap
                 openingSpecs[openingIdx]['h'] = self.properties.SlotVH
@@ -552,23 +556,23 @@ class add_mesh_wallb(bpy.types.Operator):
 
                 # make them pointy...
                 openingSpecs[openingIdx]['v'] = self.properties.SlotGap
-                openingSpecs[openingIdx]['t'] = self.properties.SlotGap/2
+                openingSpecs[openingIdx]['t'] = self.properties.SlotGap / 2
                 openingSpecs[openingIdx]['vl'] = self.properties.SlotGap
-                openingSpecs[openingIdx]['tl'] = self.properties.SlotGap/2
+                openingSpecs[openingIdx]['tl'] = self.properties.SlotGap / 2
 
-                openingIdx += 1 # count vertical slot openings
+                openingIdx += 1  # count vertical slot openings
 
 # need to handle overlap of H and V slots...
 
-            if self.properties.SlotH: # Horizontal slots
+            if self.properties.SlotH:  # Horizontal slots
                 # set defaults...
-                openingSpecs += [{'w':0.5, 'h':0.5, 'x':0.0, 'z':2.7, 'rp':0, 'b':0.0, 'v':0, 'vl':0, 't':0, 'tl':0}]
+                openingSpecs += [{'w': 0.5, 'h': 0.5, 'x': 0.0, 'z': 2.7, 'rp': 0, 'b': 0.0, 'v': 0, 'vl': 0, 't': 0, 'tl': 0}]
 
                 openingSpecs[openingIdx]['w'] = self.properties.SlotHW
                 openingSpecs[openingIdx]['h'] = self.properties.SlotGap
                 openingSpecs[openingIdx]['x'] = self.properties.SlotX
                 openingSpecs[openingIdx]['z'] = self.properties.SlotHBtm
-#horizontal repeat isn't same spacing as vertical...
+# horizontal repeat isn't same spacing as vertical...
                 openingSpecs[openingIdx]['rp'] = self.properties.SlotRpt
 
                 # make them pointy...
@@ -578,48 +582,47 @@ class add_mesh_wallb(bpy.types.Operator):
 #				openingSpecs[openingIdx]['vl'] = self.properties.SlotGap
 #				openingSpecs[openingIdx]['tl'] = self.properties.SlotGap/2
 
-                openingIdx += 1 # count horizontal slot openings
-
+                openingIdx += 1  # count horizontal slot openings
 
         # Crenellations (top row openings)
         if self.properties.CrenelTog:
 
-# add bottom arch option?
-# perhaps a repeat toggle...
-# if crenel opening overlaps with arch opening it fills with blocks...
+            # add bottom arch option?
+            # perhaps a repeat toggle...
+            # if crenel opening overlaps with arch opening it fills with blocks...
 
             # set defaults...
-            openingSpecs += [{'w':0.5, 'h':0.5, 'x':0.0, 'z':2.7, 'rp':1, 'b':0.0, 'v':0, 'vl':0, 't':0, 'tl':0}]
+            openingSpecs += [{'w': 0.5, 'h': 0.5, 'x': 0.0, 'z': 2.7, 'rp': 1, 'b': 0.0, 'v': 0, 'vl': 0, 't': 0, 'tl': 0}]
 
             wallW = self.properties.WallEnd - self.properties.WallStart
-            crenelW = wallW*self.properties.CrenelXP # Width % opening.
+            crenelW = wallW * self.properties.CrenelXP  # Width % opening.
 
             wallH = self.properties.WallTop - self.properties.WallBottom
-            crenelH = wallH*self.properties.CrenelZP # % proportional height.
+            crenelH = wallH * self.properties.CrenelZP  # % proportional height.
 
             openingSpecs[openingIdx]['w'] = crenelW
             openingSpecs[openingIdx]['h'] = crenelH
 
             # calculate the spacing between openings.
             # this isn't the absolute start (left), it's opening center offset relative to cursor (space between openings)...
-            openingSpecs[openingIdx]['x'] = crenelW*2-1 # assume standard spacing
+            openingSpecs[openingIdx]['x'] = crenelW * 2 - 1  # assume standard spacing
 
-            if not radialized: # normal wall?
+            if not radialized:  # normal wall?
                 # set indent 0 (center) if opening is 50% or more of wall width, no repeat.
-                if crenelW*2 >= wallW:
+                if crenelW * 2 >= wallW:
                     openingSpecs[openingIdx]['x'] = 0
                     openingSpecs[openingIdx]['rp'] = 0
 
-            openingSpecs[openingIdx]['z'] = self.properties.WallTop - (crenelH/2) # set bottom of opening (center of hole)
+            openingSpecs[openingIdx]['z'] = self.properties.WallTop - (crenelH / 2)  # set bottom of opening (center of hole)
 
-            openingIdx += 1 # count crenel openings
+            openingIdx += 1  # count crenel openings
 
         #
         # Process the user settings to generate a wall
         #
         # generate the list of vertices for the wall...
         verts_array, faces_array = createWall(radialized, slope, openingSpecs, bigBlock,
-                shelfExt, shelfBack, stepMod, stepLeft, stepOnly, stepBack)
+                                              shelfExt, shelfBack, stepMod, stepLeft, stepOnly, stepBack)
 
         # Create new mesh
         mesh = bpy.data.meshes.new("Wall")
@@ -642,6 +645,6 @@ class add_mesh_wallb(bpy.types.Operator):
         ob_new.select = True
 
         ob_new.location = tuple(context.scene.cursor_location)
-        ob_new.rotation_quaternion = [1.0,0.0,0.0,0.0]
+        ob_new.rotation_quaternion = [1.0, 0.0, 0.0, 0.0]
 
         return {'FINISHED'}

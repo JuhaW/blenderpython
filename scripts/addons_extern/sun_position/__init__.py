@@ -40,11 +40,11 @@ bl_info = {
     "location": "World > Sun Position",
     "description": "Show sun position with objects and/or sky texture",
     "warning": "",
-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/" \
-        "Scripts/3D_interaction/Sun_Position",
-        "tracker_url": "https://projects.blender.org/tracker/" \
-        "index.php?func=detail&aid=29714",
-    "category": "3D View"}
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6/Py/"
+    "Scripts/3D_interaction/Sun_Position",
+    "tracker_url": "https://projects.blender.org/tracker/"
+    "index.php?func=detail&aid=29714",
+    "category": "Lighting"}
 
 import bpy
 from . properties import *
@@ -59,13 +59,13 @@ def register():
     bpy.utils.register_class(SunPosSettings)
     bpy.types.Scene.SunPos_property = (
         bpy.props.PointerProperty(type=SunPosSettings,
-                        name="Sun Position",
-                        description="Sun Position Settings"))
+                                  name="Sun Position",
+                                  description="Sun Position Settings"))
     bpy.utils.register_class(SunPosPreferences)
     bpy.types.Scene.SunPos_pref_property = (
         bpy.props.PointerProperty(type=SunPosPreferences,
-                        name="Sun Position Preferences",
-                        description="SP Preferences"))
+                                  name="Sun Position Preferences",
+                                  description="SP Preferences"))
 
     bpy.utils.register_class(SunPos_OT_Controller)
     bpy.utils.register_class(SunPos_OT_Preferences)

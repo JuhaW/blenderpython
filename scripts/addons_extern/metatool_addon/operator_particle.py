@@ -105,12 +105,7 @@ class Particle_WEIGHT(bpy.types.Operator):
 bpy.utils.register_class(Particle_WEIGHT)
 
 
-
-
-
-
-
-### Selectmode
+# Selectmode
 
 class Particle_PATH(bpy.types.Operator):
     """selectmode path"""
@@ -148,12 +143,12 @@ class Particle_POINT(bpy.types.Operator):
         bpy.context.scene.tool_settings.particle_edit.select_mode = 'POINT'
         return {'FINISHED'}
 
-#bpy.utils.register_class(Particle_POINT)
-
+# bpy.utils.register_class(Particle_POINT)
 
 
 def register():
     bpy.utils.register_module(__name__)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

@@ -6,7 +6,7 @@ from . import properties
 from . import operators
 from . import panels
 
-bl_info= {
+bl_info = {
     "name": "mmd_tools",
     "author": "sugiany",
     "version": (0, 5, 0),
@@ -35,12 +35,15 @@ bl_info= {
 #     if "auto_scene_setup" in locals():
 #         imp.reload(auto_scene_setup)
 
+
 def menu_func_import(self, context):
     self.layout.operator(operators.fileio.ImportPmx.bl_idname, text="MikuMikuDance Model (.pmd, .pmx)")
     self.layout.operator(operators.fileio.ImportVmd.bl_idname, text="MikuMikuDance Motion (.vmd)")
 
+
 def menu_func_export(self, context):
     self.layout.operator(operators.fileio.ExportPmx.bl_idname, text="MikuMikuDance model (.pmx)")
+
 
 def menu_func_armature(self, context):
     self.layout.operator(operators.model.CreateMMDModelRoot.bl_idname, text='Create MMD Model')
@@ -52,6 +55,7 @@ def register():
     bpy.types.INFO_MT_file_export.append(menu_func_export)
     bpy.types.INFO_MT_armature_add.append(menu_func_armature)
     properties.register()
+
 
 def unregister():
     bpy.types.INFO_MT_file_import.remove(menu_func_import)

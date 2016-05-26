@@ -23,6 +23,7 @@ import bpy
 from ..auxiliary_classes.ModalHelper import ModalHelper
 from ..auxiliary_classes.VertexProperties import VertexProperties
 
+
 class MeshBrush(bpy.types.Operator):
     bl_idname = "mesh.sct_mesh_brush"
     bl_label = "Mesh Brush"
@@ -49,7 +50,7 @@ class MeshBrush(bpy.types.Operator):
 
     def __init__(self):
         self.addon = bpy.context.user_preferences.addons[self.addon_key]
-        self.props = self.addon.preferences.mesh_brush 
+        self.props = self.addon.preferences.mesh_brush
 
     def draw_post_pixel_callback(self):
         props = self.props
@@ -59,19 +60,19 @@ class MeshBrush(bpy.types.Operator):
             if not props.brushes.primary_brush.is_on_mesh:
                 # Draw the primary brush oriented to the view.
                 props.brush_graphic.draw_region_circle(
-                    region_x = props.position_x,
-                    region_y = props.position_y,
-                    radius = props.radius,
-                    outline_color = props.outline_color,
-                    outline_thickness = props.outline_thickness,
-                    interior_color = props.interior_color
+                    region_x=props.position_x,
+                    region_y=props.position_y,
+                    radius=props.radius,
+                    outline_color=props.outline_color,
+                    outline_thickness=props.outline_thickness,
+                    interior_color=props.interior_color
                 )
 
     def draw_post_view_callback(self):
         props = self.props
         brushes = props.brushes
         brush_graphic = props.brush_graphic
-        brush_influence_graphic = props.brush_influence_graphic 
+        brush_influence_graphic = props.brush_influence_graphic
         primary_brush = brushes.primary_brush
 
         if primary_brush.is_on_mesh:
@@ -86,13 +87,13 @@ class MeshBrush(bpy.types.Operator):
             if props.brush_is_visible:
                 # Draw the primary brush oriented to the mesh.
                 brush_graphic.draw_brush(
-                    brush = primary_brush,
-                    outline_color = props.outline_color,
-                    outline_thickness = props.outline_thickness,
-                    interior_color = props.interior_color
+                    brush=primary_brush,
+                    outline_color=props.outline_color,
+                    outline_thickness=props.outline_thickness,
+                    interior_color=props.interior_color
                 )
 
-    def draw_pre_view_callback(self): 
+    def draw_pre_view_callback(self):
         bgl.glEnable(bgl.GL_POLYGON_OFFSET_FILL)
         bgl.glPolygonOffset(2, 0)
 
@@ -132,15 +133,15 @@ class MeshBrush(bpy.types.Operator):
             bpy.ops.object.join()
 
             # Remove duplicate vertices along the selection border.
-            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.remove_doubles(
-                threshold = 0.00001, use_unselected = True
+                threshold=0.00001, use_unselected=True
             )
 
             # Restore the selection.
             active_object.vertex_groups.active_index =\
                 self.selected_indices.index
-            bpy.ops.object.vertex_group_select() 
+            bpy.ops.object.vertex_group_select()
 
             # Remove the relevant vertex groups.
             active_object.vertex_groups.remove(self.unselected_faces)
@@ -168,7 +169,7 @@ class MeshBrush(bpy.types.Operator):
 
         # Return to Edit mode, if necessary.
         if active_object.mode != 'EDIT':
-            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.object.mode_set(mode='EDIT')
 
         # Restore the active area's header to its initial state.
         bpy.context.area.header_text_set()
@@ -240,7 +241,7 @@ class MeshBrush(bpy.types.Operator):
                         unselected_polygon_exists = True
 
             # Isolate the selection.
-            if self.selection_is_isolatable: 
+            if self.selection_is_isolatable:
                 # Determine what objects are selected in the scene.
                 selected = set(context.selected_objects)
 
@@ -259,7 +260,7 @@ class MeshBrush(bpy.types.Operator):
                 mesh_select_mode[0] = False
 
                 # Create a vertex group, and assign it to the unselected faces.
-                bpy.ops.mesh.select_all(action = 'INVERT')
+                bpy.ops.mesh.select_all(action='INVERT')
                 self.unselected_faces =\
                     active_object.vertex_groups.new("Unselected Faces")
                 bpy.ops.object.vertex_group_assign()
@@ -267,7 +268,7 @@ class MeshBrush(bpy.types.Operator):
                 # Separate the active mesh object into two objects containing
                 # the selected and unselected faces, respectively.  Hide the
                 # inactive object, thus isolating the portion of interest.
-                bpy.ops.mesh.separate(type = 'SELECTED')
+                bpy.ops.mesh.separate(type='SELECTED')
                 self.hidden_portion =\
                     set(context.selected_objects).difference(selected).pop()
                 self.hidden_portion.name =\
@@ -279,7 +280,7 @@ class MeshBrush(bpy.types.Operator):
                 # selection border.  Select these vertices, and write Edit
                 # mode's data to the mesh object.
                 bpy.ops.object.vertex_group_select()
-                bpy.ops.object.mode_set(mode = 'OBJECT')
+                bpy.ops.object.mode_set(mode='OBJECT')
 
                 # Create an octree that organizes the active mesh object's
                 # vertex indices according to their world space coordinates.
@@ -290,10 +291,10 @@ class MeshBrush(bpy.types.Operator):
                 # option is not enabled.
                 if not props.boundary_is_locked:
                     octree.remove_indices([
-                            vertex.index
-                            for vertex in vertices
-                            if vertex.select
-                        ]
+                        vertex.index
+                        for vertex in vertices
+                        if vertex.select
+                    ]
                     )
 
         # Enter Object mode and create an octree that organizes the active
@@ -445,7 +446,7 @@ class MeshBrush(bpy.types.Operator):
         context = bpy.context
         active_object = context.active_object
         props = self.props
-        brushes = props.brushes 
+        brushes = props.brushes
 
         # Move the brush in region space.
         props.position_x = region_x
@@ -484,7 +485,7 @@ class MeshBrush(bpy.types.Operator):
             # coordinates of each vertex index in the map.
             stroke_displacement_map = redo_stack.pop()
             for index in stroke_displacement_map:
-                vertices[index].co += stroke_displacement_map[index] 
+                vertices[index].co += stroke_displacement_map[index]
 
             # Push the redone stroke to the undo stack.
             undo_stack.append(stroke_displacement_map)
@@ -492,7 +493,7 @@ class MeshBrush(bpy.types.Operator):
             # Update the octree.
             model_matrix = active_object.matrix_world
             world_space_submap = {
-                index : model_matrix * vertices[index].co.copy()
+                index: model_matrix * vertices[index].co.copy()
                 for index in stroke_displacement_map
             }
             octree.coordinate_map.update(world_space_submap)
@@ -526,7 +527,7 @@ class MeshBrush(bpy.types.Operator):
             # Update the octree.
             model_matrix = active_object.matrix_world
             world_space_submap = {
-                index : model_matrix * vertices[index].co.copy()
+                index: model_matrix * vertices[index].co.copy()
                 for index in stroke_displacement_map
             }
             octree.coordinate_map.update(world_space_submap)

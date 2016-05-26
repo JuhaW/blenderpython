@@ -54,8 +54,8 @@ class MapObject:
                     break
 
         if x < self.origin.x or x > (self.origin.x + self.width) or \
-            y < self.origin.y or y > (self.origin.y + self.height) or \
-            y < 0 or y > reg.height:
+                y < self.origin.y or y > (self.origin.y + self.height) or \
+                y < 0 or y > reg.height:
             return False
         return True
 
@@ -69,7 +69,7 @@ class MapObject:
         for reg in self.view3d_area.regions:
             if reg.type == 'WINDOW':
                 if x < 20 or x > (reg.width - 20) or \
-                    y < 20 or y > (reg.height - 20):
+                        y < 20 or y > (reg.height - 20):
                     return True
                 else:
                     break
@@ -84,6 +84,7 @@ class MapClass:
         pass
 
     class grab:
+
         class spot:
             pass
 
@@ -198,12 +199,12 @@ class MapClass:
             self.start = True
             if self.mapLocation == 'PANEL':
                 self.handler1 = bpy.types.SpaceProperties.draw_handler_add(
-                                   Map_load_callback,
-                                   (self, context), 'WINDOW', 'POST_PIXEL')
+                    Map_load_callback,
+                    (self, context), 'WINDOW', 'POST_PIXEL')
             else:
                 self.handler1 = bpy.types.SpaceView3D.draw_handler_add(
-                                   Map_load_callback,
-                                   (self, context), 'WINDOW', 'POST_PIXEL')
+                    Map_load_callback,
+                    (self, context), 'WINDOW', 'POST_PIXEL')
             self.isActive = True
             return True
         else:
@@ -212,12 +213,12 @@ class MapClass:
     def activateBGLcallback(self, context):
         if self.mapLocation == 'PANEL':
             self.handler2 = bpy.types.SpaceProperties.draw_handler_add(
-                                Draw_map_callback,
-                                (self, context), 'WINDOW', 'POST_PIXEL')
+                Draw_map_callback,
+                (self, context), 'WINDOW', 'POST_PIXEL')
         else:
             self.handler2 = bpy.types.SpaceView3D.draw_handler_add(
-                                Draw_map_callback,
-                                (self, context), 'WINDOW', 'POST_PIXEL')
+                Draw_map_callback,
+                (self, context), 'WINDOW', 'POST_PIXEL')
         self.view3d_area = context.area
         self.set_view3d_area(self.view3d_area)
         bpy.ops.sunpos.map('INVOKE_DEFAULT')
@@ -295,8 +296,8 @@ class MapClass:
         fx = text.origin.x
         fy = text.origin.y + 140
         fy = text_line(fx + 10, fy, True, tColor, str(Sun.SP.Month) +
-                      " / " + str(Sun.SP.Day) +
-                      " / " + str(Sun.SP.Year))
+                       " / " + str(Sun.SP.Day) +
+                       " / " + str(Sun.SP.Year))
 
         fy = text_line(fx, fy, False, tColor, "  Day: ")
         fy = text_line(fx + 40, fy, True, vColor, str(Sun.SP.Day_of_year))
@@ -306,7 +307,7 @@ class MapClass:
         if Sun.ShowRiseSet:
             fy -= 10
             fy = text_line(fx, fy, True, tColor, "Solar Noon:")
-            fy = text_line(fx + 14, fy, True,  vColor,
+            fy = text_line(fx + 14, fy, True, vColor,
                            format_hms(Sun.SolarNoon.time))
             fy -= 10
             fy = text_line(fx, fy, False, tColor, "Rise: ")
@@ -363,7 +364,7 @@ class MapClass:
             if val:
                 return val
         elif event.type in ('RIGHTMOUSE', 'ESC',
-            'T', 'D', 'X', 'Y', 'R', 'S', 'E', 'A', 'O', 'C', 'H', 'F1'):
+                            'T', 'D', 'X', 'Y', 'R', 'S', 'E', 'A', 'O', 'C', 'H', 'F1'):
             Display.refresh()
             return Key_function[event.type](event)
 
@@ -678,15 +679,15 @@ def map_Y(event):
 ############################################################################
 
 Key_function = dict([('LEFT_CTRL', key_Ctrl), ('LEFT_ALT', key_Alt),
-                    ('RIGHT_CTRL', key_Ctrl), ('RIGHT_ALT', key_Alt),
-                    ('MIDDLEMOUSE', key_MiddleMouse),
-                    ('LEFTMOUSE', key_LeftMouse),
-                    ('RIGHTMOUSE', key_Esc), ('ESC', key_Esc),
-                    ('A', key_A), ('E', key_E), ('G', key_G), ('C', key_C),
-                    ('H', key_H), ('F1', key_H),
-                    ('R', key_R), ('S', key_S),
-                    ('T', key_TDOXY), ('D', key_TDOXY), ('O', key_TDOXY),
-                    ('X', key_TDOXY), ('Y', key_TDOXY)])
+                     ('RIGHT_CTRL', key_Ctrl), ('RIGHT_ALT', key_Alt),
+                     ('MIDDLEMOUSE', key_MiddleMouse),
+                     ('LEFTMOUSE', key_LeftMouse),
+                     ('RIGHTMOUSE', key_Esc), ('ESC', key_Esc),
+                     ('A', key_A), ('E', key_E), ('G', key_G), ('C', key_C),
+                     ('H', key_H), ('F1', key_H),
+                     ('R', key_R), ('S', key_S),
+                     ('T', key_TDOXY), ('D', key_TDOXY), ('O', key_TDOXY),
+                     ('X', key_TDOXY), ('Y', key_TDOXY)])
 
 # ---------------------------------------------------------------------------
 
@@ -806,7 +807,7 @@ def day_change_bounds(wf):
     else:
         Sun.SP.Day_of_year += wf
     dt = (datetime.date(Sun.SP.Year, 1, 1) +
-             datetime.timedelta(Sun.SP.Day_of_year - 1))
+          datetime.timedelta(Sun.SP.Day_of_year - 1))
     Sun.SP.Day = dt.day
     Sun.SP.Month = dt.month
     Display.refresh()
@@ -955,7 +956,7 @@ def Draw_map_callback(self, context):
     if context.area != Map.view3d_area:
         return
     elif context.area.type == 'PROPERTIES' and \
-        context.space_data.context != 'WORLD':
+            context.space_data.context != 'WORLD':
         return
 
     # Check if window area has changed for sticky zoom
@@ -1183,7 +1184,7 @@ def Draw_map_callback(self, context):
         color = night
     elif Sun.Elevation >= Sun.Sunrise.elevation:
         if Sun.Time >= Sun.Sunset.time and \
-            Sun.Elevation <= Sun.Sunset.elevation:
+                Sun.Elevation <= Sun.Sunset.elevation:
             color = night
         else:
             color = day

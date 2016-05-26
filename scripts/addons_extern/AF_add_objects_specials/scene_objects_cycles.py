@@ -28,11 +28,14 @@ bl_info = {
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/",
     "tracker_url": "",
     "category": "Object"}
-'''	
-import bpy, mathutils, math
+'''
+import bpy
+import mathutils
+import math
 from math import pi
 from bpy.props import *
 from mathutils import Vector
+
 
 class add_scene(bpy.types.Operator):
     bl_idname = "objects_cycles.add_scene"
@@ -40,16 +43,16 @@ class add_scene(bpy.types.Operator):
     bl_description = "Cycles Scene with Objects"
     bl_register = True
     bl_undo = True
-    
+
     def execute(self, context):
         blend_data = context.blend_data
         ob = bpy.context.active_object
-	
+
 # add new scene
 
         bpy.ops.scene.new(type="NEW")
         scene = bpy.context.scene
-        bpy.context.scene.render.engine='CYCLES'
+        bpy.context.scene.render.engine = 'CYCLES'
         scene.name = "scene_object_cycles"
 # render settings
         render = scene.render
@@ -61,32 +64,32 @@ class add_scene(bpy.types.Operator):
         scene.world = world
         world.use_sky_blend = True
         world.use_sky_paper = True
-        world.horizon_color = (0.004393,0.02121,0.050)
-        world.zenith_color = (0.03335,0.227,0.359)
+        world.horizon_color = (0.004393, 0.02121, 0.050)
+        world.zenith_color = (0.03335, 0.227, 0.359)
         world.light_settings.use_ambient_occlusion = True
         world.light_settings.ao_factor = 0.25
 # add camera
-        bpy.ops.object.camera_add(location = (7.48113,-6.50764,5.34367), rotation = (1.109319,0.010817,0.814928))
+        bpy.ops.object.camera_add(location=(7.48113, -6.50764, 5.34367), rotation=(1.109319, 0.010817, 0.814928))
         cam = bpy.context.active_object.data
         cam.lens = 35
         cam.draw_size = 0.1
-        bpy.ops.view3d.viewnumpad(type = 'CAMERA') 
+        bpy.ops.view3d.viewnumpad(type='CAMERA')
 # add point lamp
-        bpy.ops.object.lamp_add(type="POINT", location = (4.07625,1.00545,5.90386), rotation =(0.650328,0.055217,1.866391))
+        bpy.ops.object.lamp_add(type="POINT", location=(4.07625, 1.00545, 5.90386), rotation=(0.650328, 0.055217, 1.866391))
         lamp1 = bpy.context.active_object.data
         lamp1.name = "Point_Right"
         lamp1.energy = 1.0
         lamp1.distance = 30.0
         lamp1.shadow_method = "RAY_SHADOW"
-        lamp1.use_sphere = True        
+        lamp1.use_sphere = True
 # add point lamp2
-        bpy.ops.object.lamp_add(type="POINT", location = (-0.57101,-4.24586,5.53674), rotation =(1.571,0,0.785))
+        bpy.ops.object.lamp_add(type="POINT", location=(-0.57101, -4.24586, 5.53674), rotation=(1.571, 0, 0.785))
         lamp2 = bpy.context.active_object.data
         lamp2.name = "Point_Left"
         lamp2.energy = 1.0
         lamp2.distance = 30.0
 #        lamp2.shadow_method = "RAY_SHADOW"
-        
+
 # light Rim
         """
         # add spot lamp3
@@ -111,7 +114,6 @@ class add_scene(bpy.types.Operator):
         bpy.ops.object.modifier_add(type='SUBSURF')
         bpy.ops.object.shade_smooth()
 
-
         cube = bpy.context.active_object
 # add new material
 
@@ -119,12 +121,12 @@ class add_scene(bpy.types.Operator):
         bpy.ops.object.material_slot_add()
         cube.material_slots[0].material = cubeMaterial
 
-            
-#Material settings
+
+# Material settings
 # Diffuse
         cubeMaterial.preview_render_type = "CUBE"
         cubeMaterial.diffuse_color = (1.000, 0.373, 0.00)
-        cubeMaterial.diffuse_shader  = 'OREN_NAYAR' 
+        cubeMaterial.diffuse_shader = 'OREN_NAYAR'
         cubeMaterial.diffuse_intensity = 1.0
         cubeMaterial.roughness = 0.09002
 # Specular
@@ -170,7 +172,7 @@ class add_scene(bpy.types.Operator):
         mtex.use_rgb_to_intensity = True
         mtex.color = (1.000, 0.207, 0.000)
 #add monkey #
-        bpy.ops.mesh.primitive_monkey_add(location = (-0.32639,0.08901,1.49976))
+        bpy.ops.mesh.primitive_monkey_add(location=(-0.32639, 0.08901, 1.49976))
         bpy.ops.transform.rotate(value=(1.15019), axis=(0, 0, 1))
         bpy.ops.transform.rotate(value=(-0.683882), axis=(0, 1, 0))
         bpy.ops.object.modifier_add(type='SUBSURF')
@@ -182,12 +184,12 @@ class add_scene(bpy.types.Operator):
         bpy.ops.object.material_slot_add()
         monkey.material_slots[0].material = monkeyMaterial
 
-#Material settings
+# Material settings
         monkeyMaterial.preview_render_type = "MONKEY"
         monkeyMaterial.diffuse_color = (0.239, 0.288, 0.288)
         monkeyMaterial.specular_color = (0.604, 0.465, 0.136)
-        monkeyMaterial.diffuse_shader    = 'LAMBERT' 
-        monkeyMaterial.diffuse_intensity = 1.0 
+        monkeyMaterial.diffuse_shader = 'LAMBERT'
+        monkeyMaterial.diffuse_intensity = 1.0
         monkeyMaterial.specular_intensity = 0.3
         monkeyMaterial.ambient = 0
         monkeyMaterial.type = 'SURFACE'
@@ -198,11 +200,11 @@ class add_scene(bpy.types.Operator):
         monkeyMaterial.raytrace_mirror.use = True
         monkeyMaterial.raytrace_mirror.reflect_factor = 0.65
         monkeyMaterial.raytrace_mirror.fade_to = "FADE_TO_MATERIAL"
-        monkeyMaterial.use_nodes=True
+        monkeyMaterial.use_nodes = True
 # add plane
 
         bpy.ops.mesh.primitive_plane_add(radius=22, view_align=False, enter_editmode=False, location=(0, 0, -1), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
- 
+
         bpy.ops.transform.rotate(value=-0.698132, axis=(0, 0, 1), constraint_axis=(False, False, True), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
@@ -214,9 +216,9 @@ class add_scene(bpy.types.Operator):
         bpy.ops.object.material_slot_add()
         plane.material_slots[0].material = planeMaterial
 
-            
-#Material settings
-        planeMaterial.use_nodes=True
+
+# Material settings
+        planeMaterial.use_nodes = True
 
         planeMaterial.diffuse_color = (0.2, 0.2, 0.2)
         planeMaterial.specular_color = (0.604, 0.465, 0.136)
@@ -229,6 +231,8 @@ class add_scene(bpy.types.Operator):
         sc = bpy.context.scene
 
         return {'FINISHED'}
+
+
 class INFO_MT_add_scenesetup(bpy.types.Menu):
     bl_idname = "INFO_MT_objects_cycles.add_scene"
     bl_label = "Lighting Setups"
@@ -238,16 +242,20 @@ class INFO_MT_add_scenesetup(bpy.types.Menu):
         layout.operator_context = 'INVOKE_REGION_WIN'
 
         layout.operator("light.add_scene",
-            text="Add scene")
+                        text="Add scene")
 
 #### REGISTER ####
+
+
 def menu_func(self, context):
     self.layout.menu("INFO_MT_objects_cycles.add_scene", icon="PLUGIN")
+
 
 def register():
     bpy.utils.register_module(__name__)
 
     bpy.types.INFO_MT_add.append(menu_func)
+
 
 def unregister():
     bpy.utils.unregister_module(__name__)

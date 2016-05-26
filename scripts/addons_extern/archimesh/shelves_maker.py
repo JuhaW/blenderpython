@@ -37,7 +37,7 @@ class ShelvesProperties(bpy.types.PropertyGroup):
     sX = bpy.props.FloatProperty(name='width', min=0.001, max=10, default=1, precision=3, description='Furniture width')
     wY = bpy.props.FloatProperty(name='', min=-10, max=10, default=0, precision=3, description='Modify y size')
     wZ = bpy.props.FloatProperty(name='', min=-10, max=10, default=0, precision=3, description='Modify z size')
-    # Cabinet position shift   
+    # Cabinet position shift
     pX = bpy.props.FloatProperty(name='', min=0, max=10, default=0, precision=3, description='Position x shift')
     pY = bpy.props.FloatProperty(name='', min=-10, max=10, default=0, precision=3, description='Position y shift')
     pZ = bpy.props.FloatProperty(name='', min=-10, max=10, default=0, precision=3, description='Position z shift')
@@ -101,7 +101,7 @@ class SHELVES(bpy.types.Operator):
                                         description='Number total of shelves units')
     shelves = bpy.props.CollectionProperty(type=ShelvesProperties)
 
-    # Materials        
+    # Materials
     crt_mat = bpy.props.BoolProperty(name="Create default Cycles materials",
                                      description="Create default materials for Cycles render.", default=True)
 
@@ -154,10 +154,10 @@ class SHELVES(bpy.types.Operator):
     def execute(self, context):
         if bpy.context.mode == "OBJECT":
             # Create all elements
-            for i in range(len(self.shelves)-1, self.shelves_num):
+            for i in range(len(self.shelves) - 1, self.shelves_num):
                 self.shelves.add()
 
-            # Create shelves    
+            # Create shelves
             create_shelves_mesh(self)
             return {'FINISHED'}
         else:
@@ -283,7 +283,7 @@ def generate_shelves(self):
     boxes[0].select = True
     bpy.context.scene.objects.active = boxes[0]
 
-    # Create materials        
+    # Create materials
     if self.crt_mat:
         mat = create_diffuse_material("Shelves_material", False, 0.8, 0.8, 0.8)
         for box in boxes:
@@ -324,7 +324,7 @@ def create_unit(stype, objname, thickness, sthickness, sx, sy, sz, px, py, pz, l
         thickness = 0
 
     # ------------------------------
-    # Left side 
+    # Left side
     # ------------------------------
     if left and stype != "99":
         # Full side
@@ -403,10 +403,10 @@ def create_unit(stype, objname, thickness, sthickness, sx, sy, sz, px, py, pz, l
     posz1 = bottom
 
     for x in range(shelves):
-        # bottom 
+        # bottom
         if x == 0:
             posz1 = bottom
-        # top 
+        # top
         if x == shelves - 1:
             posz1 = sz - top - sthickness
 
