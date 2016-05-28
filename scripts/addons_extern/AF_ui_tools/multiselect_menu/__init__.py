@@ -46,35 +46,17 @@ class VIEW3D_MT_Multiselect_Menu(Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        layout.operator("multi.vert",
-                        text="Vertex",
-                        icon='VERTEXSEL')
-
-        layout.operator("multi.edge",
-                        text="Edge",
-                        icon='EDGESEL')
-
-        layout.operator("multi.face",
-                        text="Face",
-                        icon='FACESEL')
+        layout.operator("multi.vert", text="Vertex", icon='VERTEXSEL')
+        layout.operator("multi.edge", text="Edge", icon='EDGESEL')
+        layout.operator("multi.face", text="Face", icon='FACESEL')
 
         layout.separator()
-        layout.operator("multi.vertedge",
-                        text="Vertex/Edge",
-                        icon='EDITMODE_HLT')
-
-        layout.operator("multi.vertface",
-                        text="Vertex/Face",
-                        icon='ORTHO')
-
-        layout.operator("multi.edgeface",
-                        text="Edge/Face",
-                        icon='SNAP_FACE')
+        layout.operator("multi.vertedge", text="Vertex/Edge", icon='EDITMODE_HLT')
+        layout.operator("multi.vertface", text="Vertex/Face", icon='ORTHO')
+        layout.operator("multi.edgeface", text="Edge/Face", icon='SNAP_FACE')
 
         layout.separator()
-        layout.operator("multi.vertedgeface",
-                        text="Vertex/Edge/Face",
-                        icon='SNAP_VOLUME')
+        layout.operator("multi.vertedgeface", text="Vertex/Edge/Face", icon='SNAP_VOLUME')
 
         layout.separator()
 
@@ -89,24 +71,13 @@ class VIEW3D_MT_Multiselect_Menu_Pie(Menu):
         pie = layout.menu_pie()
 
         # 1 (position 4)
-        pie.operator("multi.vert",
-                     text="Vertex Select",
-                     icon='VERTEXSEL')
-
+        pie.operator("multi.vert", text="Vertex Select", icon='VERTEXSEL')
         # 2 (position 6)
-        pie.operator("multi.edge",
-                     text="Edge Select",
-                     icon='EDGESEL')
-
+        pie.operator("multi.edge", text="Edge Select", icon='EDGESEL')
         # 3 (position 2)
-        pie.operator("multi.face",
-                     text="Face Select",
-                     icon='FACESEL')
-
+        pie.operator("multi.face", text="Face Select", icon='FACESEL')
         # 4 (position 8)
-        pie.operator("wm.call_menu_pie",
-                     text="Multiselect",
-                     icon='FACESEL').name = "MultiPie"
+        pie.operator("wm.call_menu_pie", text="Multiselect", icon='FACESEL').name = "MultiPie"
 
 
 class MultiPie(Menu):
@@ -119,24 +90,13 @@ class MultiPie(Menu):
         pie = layout.menu_pie()
 
         # 1 (position 4)
-        pie.operator("multi.vertedge",
-                     text="Vertex/Edge",
-                     icon='EDITMODE_HLT')
-
+        pie.operator("multi.vertedge", text="Vertex/Edge", icon='EDITMODE_HLT')
         # 2 (position 6)
-        pie.operator("multi.vertface",
-                     text="Vertex/Face",
-                     icon='ORTHO')
-
+        pie.operator("multi.vertface", text="Vertex/Face", icon='ORTHO')
         # 3 (position 2)
-        pie.operator("multi.edgeface",
-                     text="Edge/Face",
-                     icon='SNAP_FACE')
-
+        pie.operator("multi.edgeface", text="Edge/Face", icon='SNAP_FACE')
         # 4 (position 8)
-        pie.operator("multi.vertedgeface",
-                     text="Vert/Edge/Face",
-                     icon='SNAP_VOLUME')
+        pie.operator("multi.vertedgeface", text="Vert/Edge/Face", icon='SNAP_VOLUME')
 
 
 class SelModeVert(Operator):
@@ -233,9 +193,9 @@ class SelModeVertEdgeFace(Operator):
 def update_Prefs(self, context):
     """Function to toggle keymaps and menu style."""
     wm = bpy.context.window_manager
-    km = wm.keyconfigs.user.keymaps['Mesh']
+    km = wm.keyconfigs.addon.keymaps['Mesh']
 
-    if wm.keyconfigs.user:
+    if wm.keyconfigs.addon:
         # Multiselect Pie
         if self.pie_toggle:
             for kmi in km.keymap_items:
@@ -279,6 +239,9 @@ class MultiSelectPreferences(
         col.prop(self, "pie_toggle")
 
 
+addon_keymaps = []
+
+
 classes = [
     VIEW3D_MT_Multiselect_Menu,
     VIEW3D_MT_Multiselect_Menu_Pie,
@@ -299,18 +262,12 @@ def register():
         bpy.utils.register_class(cls)
 
     wm = bpy.context.window_manager
-    km = wm.keyconfigs.user.keymaps['Mesh']
 
-    # remove default keybinding
-    for kmi in km.keymap_items:
-        if kmi.idname == 'wm.call_menu' and \
-                kmi.properties.name == "VIEW3D_MT_edit_mesh_select_mode":
-            km.keymap_items.remove(kmi)
-            break
-
-    # add multiselect keybinding
+    km = wm.keyconfigs.addon.keymaps.new(name='Mesh')
     kmi = km.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
     kmi.properties.name = "VIEW3D_MT_Multiselect_Menu"
+
+    addon_keymaps.append(km)
 
 
 def unregister():
@@ -318,19 +275,15 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     wm = bpy.context.window_manager
-    km = wm.keyconfigs.user.keymaps['Mesh']
 
-    # remove multiselect keybinding
-    for kmi in km.keymap_items:
-        if kmi.idname == 'wm.call_menu_pie' or kmi.idname == 'wm.call_menu':
-            if kmi.properties.name == "VIEW3D_MT_Multiselect_Menu_Pie" or \
-                    kmi.properties.name == "VIEW3D_MT_Multiselect_Menu":
+    if wm.keyconfigs.addon:
+        for km in addon_keymaps:
+            for kmi in km.keymap_items:
                 km.keymap_items.remove(kmi)
-                continue
 
-    # replace default keymap
-    kmi = km.keymap_items.new('wm.call_menu', 'TAB', 'PRESS', ctrl=True)
-    kmi.properties.name = "VIEW3D_MT_edit_mesh_select_mode"
+            # wm.keyconfigs.addon.keymaps.remove(km)
+
+    addon_keymaps.clear()
 
 
 if __name__ == "__main__":
