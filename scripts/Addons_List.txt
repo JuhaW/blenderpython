@@ -288,6 +288,7 @@ On Mesh Control: Vladimir Pylev
 Tracking to Natron: Jeffrey "Italic_" Hoover
 Wahooney Unity Export Tools: Keith (Wahooney) Boshoff
 Cutout Animation Tools: Andreas Esau (Ndee85)
+Lock View: Jason Van Gumster (Fweeb)
 
 Thats a long list!!!!!!
 
