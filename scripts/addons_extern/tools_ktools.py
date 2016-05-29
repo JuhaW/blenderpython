@@ -2034,28 +2034,35 @@ def menu_func(self, context):
     self.layout.menu("VIEW3D_MT_edit_mesh_ktools_menuEdit", text="KTools")
 
 
+classes = [
+    calc_normals,
+    snaptoaxis,
+    quickbool,
+    autotubes,
+    basicRename,
+    cut_tool,
+    customAutoSmooth,
+    shrinkwrapSmooth,
+    buildCorner,
+    drawPoly,
+    toggleSilhouette,
+    growLoop,
+    extendLoop,
+    shrinkLoop,
+    paintSelect,
+    pathSelectRing,
+    ktools_menu,
+    VIEW3D_MT_edit_mesh_ktools_menuEdit,
+    ktools,
+    ktools_mesh
+]
+
+
 # Register and Unregister all the operators
 def register():
-    bpy.utils.register_class(calc_normals)
-    bpy.utils.register_class(snaptoaxis)
-    bpy.utils.register_class(quickbool)
-    bpy.utils.register_class(autotubes)
-    bpy.utils.register_class(basicRename)
-    bpy.utils.register_class(cut_tool)
-    bpy.utils.register_class(customAutoSmooth)
-    bpy.utils.register_class(shrinkwrapSmooth)
-    bpy.utils.register_class(buildCorner)
-    bpy.utils.register_class(drawPoly)
-    bpy.utils.register_class(toggleSilhouette)
-    bpy.utils.register_class(growLoop)
-    bpy.utils.register_class(extendLoop)
-    bpy.utils.register_class(shrinkLoop)
-    bpy.utils.register_class(paintSelect)
-    bpy.utils.register_class(pathSelectRing)
-    bpy.utils.register_class(ktools_menu)
-    bpy.utils.register_class(VIEW3D_MT_edit_mesh_ktools_menuEdit)
-    bpy.utils.register_class(ktools)
-    bpy.utils.register_class(ktools_mesh)
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
     bpy.types.VIEW3D_MT_edit_mesh_specials.append(menu_func)
 
     kc = bpy.context.window_manager.keyconfigs.addon
@@ -2072,26 +2079,9 @@ def register():
 
 
 def unregister():
-    bpy.utils.unregister_class(calc_normals)
-    bpy.utils.unregister_class(snaptoaxis)
-    bpy.utils.unregister_class(quickbool)
-    bpy.utils.unregister_class(autotubes)
-    bpy.utils.unregister_class(basicRename)
-    bpy.utils.unregister_class(cut_tool)
-    bpy.utils.unregister_class(customAutoSmooth)
-    bpy.utils.unregister_class(shrinkwrapSmooth)
-    bpy.utils.unregister_class(buildCorner)
-    bpy.utils.unregister_class(drawPoly)
-    bpy.utils.unregister_class(toggleSilhouette)
-    bpy.utils.unregister_class(growLoop)
-    bpy.utils.unregister_class(extendLoop)
-    bpy.utils.unregister_class(shrinkLoop)
-    bpy.utils.unregister_class(paintSelect)
-    bpy.utils.unregister_class(pathSelectRing)
-    bpy.utils.unregister_class(ktools_menu)
-    bpy.utils.unregister_class(VIEW3D_MT_edit_mesh_ktools_menuEdit)
-    bpy.utils.unregister_class(ktools)
-    bpy.utils.unregister_class(ktools_mesh)
+    for cls in classes[::-1]:
+        bpy.utils.unregister_class(cls)
+
     bpy.types.VIEW3D_MT_edit_mesh_specials.remove(menu_func)
 
     kc = bpy.context.window_manager.keyconfigs.addon
