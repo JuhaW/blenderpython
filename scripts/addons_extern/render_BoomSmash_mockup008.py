@@ -138,7 +138,7 @@ def draw_boomsmash_panel(context, layout):
     # subcol.prop(bp, "incremental")
     subcol.prop(bp, "use_stamp")
     subcol.prop(bp, "onlyrender")
-    subcol.prop(bp, "scene_cam")
+    # subcol.prop(bp, "scene_cam")
 
     subcol = split.column()
     subcol.prop(bp, "transparent")
