@@ -11,7 +11,7 @@ bl_info = {
     'wiki_url': 'https://github.com/miniukof/bl-leader_key',
     'version': (0, 0, 1),
     'blender': (2, 76, 11),
-    'category': 'User Interface',
+    'category': 'Development',
 }
 
 
