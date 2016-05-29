@@ -2062,10 +2062,10 @@ def register():
     if kc:
         # Add KTools object menu to inputs
         km = kc.keymaps.new(name="Object Mode", space_type="EMPTY")
-        kmi = km.keymap_items.new('object.ktools', 'Q', 'PRESS', shift=True)
+        kmi = km.keymap_items.new('object.ktools', 'Q', 'PRESS')
         # Add KTools edit menu to inputs
         km = kc.keymaps.new(name="Mesh", space_type="EMPTY")
-        kmi = km.keymap_items.new('mesh.ktools_mesh', 'Q', 'PRESS', shift=True)
+        kmi = km.keymap_items.new('mesh.ktools_mesh', 'Q', 'PRESS')
         # Add paint select to CTRL+SHIFT+ALT+LeftMouse
         km = kc.keymaps.new(name="3D View", space_type="VIEW_3D")
         kmi = km.keymap_items.new('view3d.select_paint', 'ACTIONMOUSE', 'PRESS', shift=True, ctrl=True, alt=True)
