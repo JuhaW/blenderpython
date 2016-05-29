@@ -23,9 +23,9 @@ bl_info = {
     'author': 'Antonio Vazquez (antonioya)',
     'version': (1, 0, 1),
     "blender": (2, 6, 9),
-    'location': 'Properties pane > IsKeyFree Tools',
+    'location': 'Properties Panel > IsKeyFree Tools',
     'description': 'Find free shortcuts and inform of used keys',
-    'category': 'User Interface'}
+    'category': 'Development'}
 
 import bpy
 from bpy.props import *
