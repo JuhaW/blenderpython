@@ -146,26 +146,6 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
             col.operator('mesh.subdivide', text='Subdivide')
             col.operator('mesh.dissolve_limited', text='Dissolve Limited')
 
-
-class EditToolsSettings(bpy.types.PropertyGroup):
-
-    vert_settings = BoolProperty(
-        name="Vert",
-        default=False)
-
-    edge_settings = BoolProperty(
-        name="Edge",
-        default=False)
-
-    face_settings = BoolProperty(
-        name="Face",
-        default=False)
-
-    utils_settings = BoolProperty(
-        name="Utils",
-        default=False)
-
-
 class EditToolsPanel(bpy.types.Panel):
     bl_label = 'Mesh Edit Tools'
     bl_space_type = 'VIEW_3D'
@@ -175,22 +155,25 @@ class EditToolsPanel(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
-
+        scene = context.scene
+        VERTDROP = scene.UTVertDrop
+        EDGEDROP = scene.UTEdgeDrop
+        FACEDROP = scene.UTFaceDrop
+        UTILSDROP = scene.UTUtilsDrop
+        view = context.space_data
+        toolsettings = context.tool_settings
         layout = self.layout
-        wm = bpy.context.window_manager
 
         # Vert options
-        box = layout.box()
-        col = box.column(align=False)
-        if wm.edit_tools_settings.vert_settings:
-            file_icon = 'TRIA_DOWN'
-        else:
-            file_icon = 'TRIA_RIGHT'
-        col.prop(wm.edit_tools_settings, "vert_settings",
-                 icon=file_icon, toggle=True)
-        if wm.edit_tools_settings.vert_settings:
-            layout = self.layout
-            row = layout.row()
+        box1 = self.layout.box()
+        col = box1.column(align=True)
+        row = col.row(align=True)
+        row.prop(scene, "UTVertDrop", icon="TRIA_DOWN")
+        if not VERTDROP:
+            row.menu("VIEW3D_MT_Select_Vert", icon="VERTEXSEL", text="")
+        if VERTDROP:
+            row = col.row(align=True)
+            row.alignment = 'CENTER'
             row.label(text="Vert Tools:", icon="VERTEXSEL")
             row = layout.split(0.70)
             row.operator('mesh.vertex_chamfer', text='Chamfer')
@@ -198,18 +181,15 @@ class EditToolsPanel(bpy.types.Panel):
             row = layout.split(0.70)
             row.operator('mesh.random_vertices', text='Random Vertices')
             row.operator('help.random_vert', text='?')
-            row = layout.row()
 
         # Edge options
-        box = layout.box()
-        col = box.column(align=True)
-        if wm.edit_tools_settings.edge_settings:
-            modifier_icon = 'TRIA_DOWN'
-        else:
-            modifier_icon = 'TRIA_RIGHT'
-        col.prop(wm.edit_tools_settings, "edge_settings",
-                 icon=modifier_icon, toggle=True)
-        if wm.edit_tools_settings.edge_settings:
+        box1 = self.layout.box()
+        col = box1.column(align=True)
+        row = col.row(align=True)
+        row.prop(scene, "UTEdgeDrop", icon="TRIA_DOWN")
+        if not EDGEDROP:
+            row.menu("VIEW3D_MT_Select_Edge", icon="EDGESEL", text="")
+        if EDGEDROP:
             layout = self.layout
             row = layout.row()
             row.label(text="Edge Tools:", icon="EDGESEL")
@@ -228,18 +208,17 @@ class EditToolsPanel(bpy.types.Panel):
             row = layout.split(0.70)
             row.operator('bpt.mesh_to_wall', text='Mesh to wall')
             row.operator('help.wall', text='?')
-            row = layout.row()
 
         # Face options
-        box = layout.box()
-        col = box.column(align=True)
-        if wm.edit_tools_settings.face_settings:
-            object_icon = 'TRIA_DOWN'
-        else:
-            object_icon = 'TRIA_RIGHT'
-        col.prop(wm.edit_tools_settings, "face_settings",
-                 icon=object_icon, toggle=True)
-        if wm.edit_tools_settings.face_settings:
+        box1 = self.layout.box()
+        col = box1.column(align=True)
+        row = col.row(align=True)
+        row.prop(scene, "UTFaceDrop", icon="TRIA_DOWN")
+
+        if not FACEDROP:
+            row.menu("VIEW3D_MT_Select_Face", icon="FACESEL", text="")
+
+        if FACEDROP:
             layout = self.layout
             row = layout.row()
             row.label(text="Face Tools:", icon="FACESEL")
@@ -258,18 +237,17 @@ class EditToolsPanel(bpy.types.Panel):
             row = layout.split(0.70)
             row.operator('sp_sol.op0_id', text='Split Solidify')
             row.operator('help.solidify', text='?')
-            row = layout.row()
 
         # Utils options
-        box = layout.box()
-        col = box.column(align=True)
-        if wm.edit_tools_settings.utils_settings:
-            rename_icon = 'TRIA_DOWN'
-        else:
-            rename_icon = 'TRIA_RIGHT'
-        col.prop(wm.edit_tools_settings, "utils_settings",
-                 icon=rename_icon, toggle=True)
-        if wm.edit_tools_settings.utils_settings:
+        box1 = self.layout.box()
+        col = box1.column(align=True)
+        row = col.row(align=True)
+        row.prop(scene, "UTUtilsDrop", icon="TRIA_DOWN")
+
+        if not UTILSDROP:
+            row.menu("VIEW3D_MT_Edit_MultiMET", icon="LOOPSEL", text="")
+
+        if UTILSDROP:
             layout = self.layout
             row = layout.row()
             row.label(text="Utilities:")
@@ -285,8 +263,128 @@ class EditToolsPanel(bpy.types.Panel):
             row.operator('mesh.subdivide', text='Subdivide')
             row = layout.row()
             row.operator('mesh.dissolve_limited', text='Dissolve Limited')
-# Addons Preferences
 
+
+# ********** Edit Multiselect **********
+class VIEW3D_MT_Edit_MultiMET(bpy.types.Menu):
+    bl_label = "Multi Select"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator_context = 'INVOKE_REGION_WIN'
+
+        prop = layout.operator("wm.context_set_value", text="Vertex Select",
+                               icon='VERTEXSEL')
+        prop.value = "(True, False, False)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value", text="Edge Select",
+                               icon='EDGESEL')
+        prop.value = "(False, True, False)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value", text="Face Select",
+                               icon='FACESEL')
+        prop.value = "(False, False, True)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value",
+                               text="Vertex & Edge Select",
+                               icon='EDITMODE_HLT')
+        prop.value = "(True, True, False)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value",
+                               text="Vertex & Face Select",
+                               icon='ORTHO')
+        prop.value = "(True, False, True)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value",
+                               text="Edge & Face Select",
+                               icon='SNAP_FACE')
+        prop.value = "(False, True, True)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value",
+                               text="Vertex & Edge & Face Select",
+                               icon='SNAP_VOLUME')
+        prop.value = "(True, True, True)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+class VIEW3D_MT_Select_Vert(bpy.types.Menu):
+    bl_label = "Select Vert"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator_context = 'INVOKE_REGION_WIN'
+
+        prop = layout.operator("wm.context_set_value", text="Vertex Select",
+                               icon='VERTEXSEL')
+        prop.value = "(True, False, False)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value",
+                               text="Vertex & Edge Select",
+                               icon='EDITMODE_HLT')
+        prop.value = "(True, True, False)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value",
+                               text="Vertex & Face Select",
+                               icon='ORTHO')
+        prop.value = "(True, False, True)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+class VIEW3D_MT_Select_Edge(bpy.types.Menu):
+    bl_label = "Select Edge"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator_context = 'INVOKE_REGION_WIN'
+
+        prop = layout.operator("wm.context_set_value", text="Edge Select",
+                               icon='EDGESEL')
+        prop.value = "(False, True, False)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value",
+                               text="Vertex & Edge Select",
+                               icon='EDITMODE_HLT')
+        prop.value = "(True, True, False)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value",
+                               text="Edge & Face Select",
+                               icon='SNAP_FACE')
+        prop.value = "(False, True, True)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+class VIEW3D_MT_Select_Face(bpy.types.Menu):
+    bl_label = "Select Face"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator_context = 'INVOKE_REGION_WIN'
+
+        prop = layout.operator("wm.context_set_value", text="Face Select",
+                               icon='FACESEL')
+        prop.value = "(False, False, True)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value",
+                               text="Vertex & Face Select",
+                               icon='ORTHO')
+        prop.value = "(True, False, True)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+        prop = layout.operator("wm.context_set_value",
+                               text="Edge & Face Select",
+                               icon='SNAP_FACE')
+        prop.value = "(False, True, True)"
+        prop.data_path = "tool_settings.mesh_select_mode"
+
+# Addons Preferences
 
 class AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -305,24 +403,40 @@ def menu_func(self, context):
 
 
 def register():
-
+    bpy.types.Scene.UTVertDrop = bpy.props.BoolProperty(
+        name="Vert",
+        default=False,
+        description="Vert Tools")
+    bpy.types.Scene.UTEdgeDrop = bpy.props.BoolProperty(
+        name="Edge",
+        default=False,
+        description="Edge Tools")
+    bpy.types.Scene.UTFaceDrop = bpy.props.BoolProperty(
+        name="Face",
+        default=False,
+        description="Face Tools")
+    bpy.types.Scene.UTUtilsDrop = bpy.props.BoolProperty(
+        name="Utils",
+        default=False,
+        description="Misc Utils")
     bpy.utils.register_module(__name__)
     wm = bpy.context.window_manager
-    bpy.types.WindowManager.edit_tools_settings = bpy.props.PointerProperty(type=EditToolsSettings)
 
     # Add "Extras" menu to the "Add Mesh" menu
     bpy.types.VIEW3D_MT_edit_mesh_specials.append(menu_func)
 
 
 def unregister():
-
+    del bpy.types.Scene.UTVertDrop
+    del bpy.types.Scene.UTEdgeDrop
+    del bpy.types.Scene.UTFaceDrop
+    del bpy.types.Scene.UTUtilsDrop
     wm = bpy.context.window_manager
     bpy.utils.unregister_module(__name__)
 
     # Remove "Extras" menu from the "Add Mesh" menu.
     bpy.types.VIEW3D_MT_edit_mesh_specials.remove(menu_func)
 
-    del bpy.types.WindowManager.edit_tools_settings
 
 if __name__ == "__main__":
     register()
