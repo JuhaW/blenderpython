@@ -5,7 +5,7 @@ bl_info = {
     "blender": (2, 7, 1),
     "location": "View3D > Tools > Animation > Boomsmash",
     "description": "Have quick access for opengl previews without the need to change your render settings",
-    "warning": "It's very first beta! The addon is in progress!",
+    "warning": "Beta",
     "category": "Render"}
 
 import bpy
@@ -78,7 +78,6 @@ class DoBoom(bpy.types.Operator):
     bl_options = {'REGISTER'}
 
     def execute(self, context):
-        cs = context.scene
         rd = context.scene.render
         sd = context.space_data
         bp = context.scene.boom_props
@@ -91,7 +90,7 @@ class DoBoom(bpy.types.Operator):
         old_alpha_mode = rd.alpha_mode
         # old_image_settings = rd.image_settings
         old_resolution_percentage = rd.resolution_percentage
-        old_frame_step = cs.frame_step
+        old_frame_step = context.scene.frame_step
 
         # afecto settings originales
         rd.use_stamp = bp.use_stamp

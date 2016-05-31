@@ -41,11 +41,11 @@ class OrientPie(Menu):
         pie.operator("pie.orientation", text="Local").space = 'LOCAL'
         pie.operator("pie.orientation", text="Gimbal").space = 'GIMBAL'
 
-        # XXX: Persistent list of custom orientations when on a non-custom orientation
+        # XXX: Display only custom orientations
         pie = pie.box()
         pie.prop(view, "transform_orientation", text="")
-
         pie = layout.menu_pie()
+
         pie.operator("pie.orientation", text="Normal").space = 'NORMAL'
         pie.operator("pie.orientation", text="View").space = 'VIEW'
 

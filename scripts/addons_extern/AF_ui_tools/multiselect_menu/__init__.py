@@ -1,6 +1,6 @@
 # view3d_multiselect_menu.py (c) 2011 Sean Olson (liquidApe)
 # Original Script by: Mariano Hidalgo (uselessdreamer)
-# contributed to by: Crouch, sim88, sam, meta-androcto, Michael W and Italic_
+# contributed to by: Crouch, sim88, sam, meta-androcto, Michael W and italic
 #
 # ##### BEGIN GPL LICENSE BLOCK #####
 #

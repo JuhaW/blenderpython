@@ -43,8 +43,8 @@ class NatronTrackExport(bpy.types.Operator):
     def execute(self, context):
         activeClipName = [area.spaces[0].clip.name
                           for area in bpy.context.screen.areas
-                          if area.type == 'CLIP_EDITOR'
-                          and area.spaces[0].clip is not None]
+                          if area.type == 'CLIP_EDITOR' and
+                          area.spaces[0].clip is not None]
         activeClip = bpy.data.movieclips[activeClipName[0]]
         activeClipDim = activeClip.size[:]
 
