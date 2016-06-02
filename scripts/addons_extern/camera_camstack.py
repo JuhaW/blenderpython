@@ -1,4 +1,30 @@
-"""A script to create a stack of cameras for handheld motion, based on my Maya script."""
+"""
+CamStack is used to create a hierarchy of cameras for the express purpose of creating handheld camera motion.
+
+New: Create a new stack at scene origin based on parameters given in the CamStack panel.
+Generate: Create a stack based on selected camera(s) and their data.
+Split (for use with an existing stack): Make current camera single-user and
+link all child cameras to the split camera.
+
+Normal animation goes on camera objects. _main is the standard layout pass for
+basic moves and composition. _handheld1 is the first layer of lower-frequency
+handheld motion. _handheld2 is the second layer. _shake1 is the first layer of
+high-frequency shake (vibrations, turbulence, etc.). _shake2 is the second layer.
+Second layers are not always necessary, but provide an easy way to add animation
+non-destructively. Look through each camera to see its effect on the shot.
+
+Focal length and focus are on the camera data. When linked, all changes
+in this data will propagate to the other cameras. Split cameras to enable
+further tweaking of these parameters.
+
+_global_move_control is used to reposition or scale the stack to fit a scene
+after animation has been made. For example, the animator spends a week on
+a shot, then set dressing or the plate change the scene.
+Transform _global_move_control to reposition the cameras
+while maintaining camera animation.
+
+Based on my original Maya script here: https://github.com/Italic-/maya-scripts/blob/master/py/cameraStack.py
+"""
 
 bl_info = {
     'name': 'CamStack',
