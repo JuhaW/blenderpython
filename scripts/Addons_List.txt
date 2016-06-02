@@ -290,6 +290,7 @@ Wahooney Unity Export Tools: Keith (Wahooney) Boshoff
 Cutout Animation Tools: Andreas Esau (Ndee85)
 Lock View: Jason Van Gumster (Fweeb)
 CamStack: Jeffrey Hoover (italic)
+Anim Quick Tools: Joel Daniels
 
 Thats a long list!!!!!!
 
