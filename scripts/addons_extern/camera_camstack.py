@@ -24,6 +24,11 @@
     while maintaining camera animation.
 
     Based on my original Maya script here: https://github.com/Italic-/maya-scripts/blob/master/py/cameraStack.py
+
+    This script is licensed under the Apache 2.0 license.
+    See details of this license here:
+    https://www.apache.org/licenses/LICENSE-2.0
+
 """
 
 bl_info = {
