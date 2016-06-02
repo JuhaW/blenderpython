@@ -1,29 +1,29 @@
 """
-CamStack is used to create a hierarchy of cameras for the express purpose of creating handheld camera motion.
+    CamStack is used to create a hierarchy of cameras for the express purpose of creating handheld camera motion.
 
-New: Create a new stack at scene origin based on parameters given in the CamStack panel.
-Generate: Create a stack based on selected camera(s) and their data.
-Split (for use with an existing stack): Make current camera single-user and
-link all child cameras to the split camera.
+    New: Create a new stack at scene origin based on parameters given in the CamStack panel.
+    Generate: Create a stack based on selected camera(s) and their data.
+    Split (for use with an existing stack): Make current camera single-user and
+    link all child cameras to the split camera.
 
-Normal animation goes on camera objects. _main is the standard layout pass for
-basic moves and composition. _handheld1 is the first layer of lower-frequency
-handheld motion. _handheld2 is the second layer. _shake1 is the first layer of
-high-frequency shake (vibrations, turbulence, etc.). _shake2 is the second layer.
-Second layers are not always necessary, but provide an easy way to add animation
-non-destructively. Look through each camera to see its effect on the shot.
+    Normal animation goes on camera objects. _main is the standard layout pass for
+    basic moves and composition. _handheld1 is the first layer of lower-frequency
+    handheld motion. _handheld2 is the second layer. _shake1 is the first layer of
+    high-frequency shake (vibrations, turbulence, etc.). _shake2 is the second layer.
+    Second layers are not always necessary, but provide an easy way to add animation
+    non-destructively. Look through each camera to see its effect on the shot.
 
-Focal length and focus are on the camera data. When linked, all changes
-in this data will propagate to the other cameras. Split cameras to enable
-further tweaking of these parameters.
+    Focal length and focus are on the camera data. When linked, all changes
+    in this data will propagate to the other cameras. Split cameras to enable
+    further tweaking of these parameters.
 
-_global_move_control is used to reposition or scale the stack to fit a scene
-after animation has been made. For example, the animator spends a week on
-a shot, then set dressing or the plate change the scene.
-Transform _global_move_control to reposition the cameras
-while maintaining camera animation.
+    _global_move_control is used to reposition or scale the stack to fit a scene
+    after animation has been made. For example, the animator spends a week on
+    a shot, then set dressing or the plate change the scene.
+    Transform _global_move_control to reposition the cameras
+    while maintaining camera animation.
 
-Based on my original Maya script here: https://github.com/Italic-/maya-scripts/blob/master/py/cameraStack.py
+    Based on my original Maya script here: https://github.com/Italic-/maya-scripts/blob/master/py/cameraStack.py
 """
 
 bl_info = {
@@ -154,10 +154,6 @@ class VIEW3D_OT_camstack_new(Operator):
             enter_editmode=False,
             location=(0.0, 0.0, 0.0),
             rotation=(0.0, 0.0, 0.0),  # Radians
-            layers=(
-                False, False, False, False, False, False, False, False, False, True,
-                False, False, False, False, False, False, False, False, False, False
-            )
         )
         global_move = context.object
         global_move.data.use_path = False
@@ -169,10 +165,6 @@ class VIEW3D_OT_camstack_new(Operator):
             view_align=False,
             location=(0.0, 0.0, 0.0),
             rotation=(1.5707964, 0.0, 0.0),  # Radians
-            layers=(
-                False, False, False, False, False, False, False, False, False, True,
-                False, False, False, False, False, False, False, False, False, False
-            )
         )
         main_cam = context.object
         main_cam.data.name = cam_name
@@ -197,12 +189,11 @@ class VIEW3D_OT_camstack_generator(Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.selected_objects is not None)
+        return (context.scene.objects.active)
 
     def execute(self, context):
         log = logging.getLogger(__name__ + ".genLogger")
         log.setLevel('INFO')
-        log.info("Generating stack from existing camera(s).")
 
         sel = context.selected_objects
 
@@ -218,6 +209,8 @@ class VIEW3D_OT_camstack_generator(Operator):
             log.debug("List: %s", str(cam_list))
 
             for item in cam_list:
+                log.info("Generating stack from existing camera(s).")
+
                 main_cam = item
                 cam_name = item.name
 
@@ -238,10 +231,6 @@ class VIEW3D_OT_camstack_generator(Operator):
                     enter_editmode=False,
                     location=(0.0, 0.0, 0.0),
                     rotation=(0.0, 0.0, 0.0),  # Radians
-                    layers=(
-                        False, False, False, False, False, False, False, False, False, True,
-                        False, False, False, False, False, False, False, False, False, False
-                    )
                 )
                 global_move = context.object
                 global_move.data.use_path = False
@@ -274,7 +263,7 @@ class VIEW3D_OT_camstack_split(Operator):
 
     @classmethod
     def poll(cls, context):
-        return (context.scene.objects.active.type == 'CAMERA')
+        return (context.scene.objects.active and context.scene.objects.active.type == 'CAMERA')
 
     def execute(self, context):
         log = logging.getLogger(__name__ + ".splitLogger")
