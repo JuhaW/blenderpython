@@ -291,6 +291,8 @@ Cutout Animation Tools: Andreas Esau (Ndee85)
 Lock View: Jason Van Gumster (Fweeb)
 CamStack: Jeffrey Hoover (italic)
 Anim Quick Tools: Joel Daniels
+Viewport Time Scrub: Frankie
+Hierarchy Tools: kurzemnieks
 
 Thats a long list!!!!!!
 
