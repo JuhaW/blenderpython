@@ -180,6 +180,11 @@ class VIEW3D_OT_camstack_new(Operator):
 
         subCam(context, main_cam, cam_name)
 
+        bpy.ops.object.select_all(action='DESELECT')
+        main_cam.select = True
+        context.scene.objects.active = main_cam
+        context.scene.update()
+
         log.info("Complete\n")
 
         return {'FINISHED'}
@@ -254,6 +259,8 @@ class VIEW3D_OT_camstack_generator(Operator):
             self.report({'ERROR'}, "Select a camera")
             return {'CANCELLED'}
 
+        context.scene.update()
+
         log.info("Complete\n")
 
         return {'FINISHED'}
@@ -295,6 +302,8 @@ class VIEW3D_OT_camstack_split(Operator):
         context.scene.objects.active = current_cam
         bpy.ops.object.make_links_data(type='OBDATA')
         log.debug("Cameras: %s \nUsing new data: %s", context.selected_objects, current_cam.data.name)
+
+        context.scene.update()
 
         log.info("Complete\n")
 
