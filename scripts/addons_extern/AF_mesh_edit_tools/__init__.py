@@ -30,7 +30,18 @@ bl_info = {
     "tracker_url": "",
     "category": "Addon Factory"}
 
+# Import From Folder
+from .mesh_select_tools import mesh_select_by_direction
+from .mesh_select_tools import mesh_select_by_edge_length
+from .mesh_select_tools import mesh_select_by_pi
+from .mesh_select_tools import mesh_select_by_type
+from .mesh_select_tools import mesh_select_connected_faces
+from .mesh_select_tools import mesh_select_innermost
+from .mesh_select_tools import mesh_index_select
+from .mesh_select_tools import mesh_selection_topokit
+from .mesh_select_tools import mesh_info_select
 
+# Import From Files
 if "bpy" in locals():
     import importlib
     importlib.reload(face_inset_fillet)
@@ -46,6 +57,7 @@ if "bpy" in locals():
     importlib.reload(mesh_edges_length)
     importlib.reload(random_vertices)
     importlib.reload(mesh_fastloop)
+    importlib.reload(mesh_edgetools)
 
 else:
     from . import face_inset_fillet
@@ -61,6 +73,7 @@ else:
     from . import mesh_edges_length
     from . import random_vertices
     from . import mesh_fastloop
+    from . import mesh_edgetools
 
 import bpy
 from bpy.props import BoolProperty
@@ -109,7 +122,6 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
                          text="Set Edge Length")
             col.operator("bpt.mesh_to_wall",
                          text="Edge(s) to Wall")
-
             row = split.row(align=True)
             col = split.column()
             col.label(text="Utilities")
@@ -117,7 +129,7 @@ class VIEW3D_MT_edit_mesh_extras(bpy.types.Menu):
                          text="Fast loop")
             col.operator('mesh.flip_normals', text='Normals Flip')
             col.operator('mesh.remove_doubles', text='Remove Doubles')
-            col.operator('mesh.remove_doubles', text='Remove Doubles')
+
             col.operator('mesh.subdivide', text='Subdivide')
             col.operator('mesh.dissolve_limited', text='Dissolve Limited')
 
@@ -170,6 +182,7 @@ class EditToolsPanel(bpy.types.Panel):
         row = col.row(align=True)
         row.prop(scene, "UTVertDrop", icon="TRIA_DOWN")
         if not VERTDROP:
+            row.menu("VIEW3D_MT_selectvert_edit_mesh_add", icon="RESTRICT_SELECT_OFF", text="")
             row.menu("VIEW3D_MT_Select_Vert", icon="VERTEXSEL", text="")
         if VERTDROP:
             row = col.row(align=True)
@@ -188,7 +201,12 @@ class EditToolsPanel(bpy.types.Panel):
         row = col.row(align=True)
         row.prop(scene, "UTEdgeDrop", icon="TRIA_DOWN")
         if not EDGEDROP:
+
+            row.menu("VIEW3D_MT_selectedge_edit_mesh_add", icon="RESTRICT_SELECT_OFF", text="")
+            row.menu("VIEW3D_MT_edit_mesh_edgelength", icon="SNAP_EDGE", text="")
+            row.menu("VIEW3D_MT_edit_mesh_edgetools", icon="GRID", text="")
             row.menu("VIEW3D_MT_Select_Edge", icon="EDGESEL", text="")
+
         if EDGEDROP:
             layout = self.layout
             row = layout.row()
@@ -216,6 +234,7 @@ class EditToolsPanel(bpy.types.Panel):
         row.prop(scene, "UTFaceDrop", icon="TRIA_DOWN")
 
         if not FACEDROP:
+            row.menu("VIEW3D_MT_selectface_edit_mesh_add", icon="RESTRICT_SELECT_OFF", text="")
             row.menu("VIEW3D_MT_Select_Face", icon="FACESEL", text="")
 
         if FACEDROP:
@@ -263,7 +282,10 @@ class EditToolsPanel(bpy.types.Panel):
             row.operator('mesh.subdivide', text='Subdivide')
             row = layout.row()
             row.operator('mesh.dissolve_limited', text='Dissolve Limited')
-
+            row = layout.row(align=True)
+            row.operator('mesh.select_vert_index', icon="VERTEXSEL", text="Vert Index")
+            row.operator('mesh.select_edge_index', icon="EDGESEL", text="Edge Index")
+            row.operator('mesh.select_face_index', icon="FACESEL", text="Face Index")
 
 # ********** Edit Multiselect **********
 class VIEW3D_MT_Edit_MultiMET(bpy.types.Menu):
@@ -312,6 +334,7 @@ class VIEW3D_MT_Edit_MultiMET(bpy.types.Menu):
         prop.value = "(True, True, True)"
         prop.data_path = "tool_settings.mesh_select_mode"
 
+# Select Tools
 class VIEW3D_MT_Select_Vert(bpy.types.Menu):
     bl_label = "Select Vert"
 
@@ -384,6 +407,89 @@ class VIEW3D_MT_Select_Face(bpy.types.Menu):
         prop.value = "(False, True, True)"
         prop.data_path = "tool_settings.mesh_select_mode"
 
+class VIEW3D_MT_selectface_edit_mesh_add(bpy.types.Menu):
+    bl_label = "Select by Face"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator_context = 'INVOKE_REGION_WIN'
+        layout.label(text = 'Face Select')
+        layout.separator()
+        layout.operator("data.facetype_select",
+            text="Triangles").face_type = "3"
+        layout.operator("data.facetype_select",
+            text="Quads").face_type = "4"
+        layout.operator("data.facetype_select",
+            text="Ngons").face_type = "5"
+        layout.separator()
+        layout.operator("mesh.select_vert_index",
+            text="By Face Index")
+        layout.operator("mesh.select_by_direction",
+            text="By Direction")
+        layout.operator("mesh.select_by_pi",
+            text="By Pi")
+        layout.operator("mesh.select_connected_faces",
+            text="By Connected Faces")
+        layout.operator("mesh.e2e_efe",
+            text="Neighbors by Face")
+        layout.operator("mesh.f2f_fvnef",
+            text="Neighbors by Vert not Edge")
+        layout.operator("mesh.conway",
+            text="Conway")
+
+class VIEW3D_MT_selectedge_edit_mesh_add(bpy.types.Menu):
+    bl_label = "Select by Edge"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator_context = 'INVOKE_REGION_WIN'
+        layout.label(text = 'Edge Select')
+        layout.separator()
+        layout.operator("mesh.select_vert_index",
+            text="By Edge Index")
+        layout.operator("mesh.select_by_direction",
+            text="By Direction")
+        layout.operator("mesh.select_by_pi",
+            text="By Pi")
+        layout.operator("mesh.select_by_edge_length",
+            text="By Edge Length")
+        layout.separator()
+        layout.operator("mesh.e2e_eve",
+            text="Neighbors by Vert")
+        layout.operator("mesh.e2e_evfe",
+            text="Neighbors by Vert + Face")
+        layout.operator("mesh.e2e_efnve",
+            text="Lateral Neighbors")
+        layout.operator("mesh.e2e_evnfe",
+            text="Longitudinal Edges")
+#        layout.operator("mesh.je",
+#            text="only_edge_selection")
+
+class VIEW3D_MT_selectvert_edit_mesh_add(bpy.types.Menu):
+    bl_label = "Select by Vert"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator_context = 'INVOKE_REGION_WIN'
+        layout.label(text = 'Vert Select')
+        layout.separator()
+        layout.operator("mesh.select_vert_index",
+            text="By Vert Index")
+        layout.operator("mesh.select_by_direction",
+            text="By Direction")
+        layout.operator("mesh.select_by_pi",
+            text="By Pi")
+#        layout.operator("mesh.select_innermost",
+#            text="innermost")
+        layout.separator()
+        layout.operator("mesh.v2v_by_edge",
+            text="Neighbors by Edge")
+        layout.operator("mesh.e2e_eve",
+            text="Neighbors by Vert")
+        layout.operator("mesh.e2e_efe",
+            text="Neighbors by Face")
+        layout.operator("mesh.v2v_facewise",
+            text="Neighbors by Face - Edge")
 # Addons Preferences
 
 class AddonPreferences(bpy.types.AddonPreferences):
@@ -396,11 +502,18 @@ class AddonPreferences(bpy.types.AddonPreferences):
         layout.label(text="Edit Mode toolshelf or W key specials")
 
 # Define "Extras" menu
-
-
 def menu_func(self, context):
-    self.layout.menu('VIEW3D_MT_edit_mesh_extras', icon='PLUGIN')
+    self.layout.menu('VIEW3D_MT_edit_mesh_extras')
+    self.layout.menu('VIEW3D_MT_edit_mesh_edgetools', text='Edge Tools')
 
+# Define "Select" Menu
+def menu_select(self, context):
+    if context.tool_settings.mesh_select_mode[2]:
+        self.layout.menu("mesh.face_select_tools", icon="FACESEL")
+    if context.tool_settings.mesh_select_mode[1]:
+        self.layout.menu("mesh.edge_select_tools", icon="EDGESEL")
+    if context.tool_settings.mesh_select_mode[0]:
+        self.layout.menu("mesh.vert_select_tools", icon="VERTEXSEL")
 
 def register():
     bpy.types.Scene.UTVertDrop = bpy.props.BoolProperty(
@@ -422,9 +535,13 @@ def register():
     bpy.utils.register_module(__name__)
     wm = bpy.context.window_manager
 
-    # Add "Extras" menu to the "Add Mesh" menu
-    bpy.types.VIEW3D_MT_edit_mesh_specials.append(menu_func)
-
+    # Add "Extras" menu to the "" menu
+    bpy.types.VIEW3D_MT_edit_mesh_specials.prepend(menu_func)
+    bpy.types.VIEW3D_MT_select_edit_mesh.prepend(menu_select)
+    try:
+        bpy.types.VIEW3D_MT_Select_Edit_Mesh.prepend(menu_select)
+    except:
+        pass
 
 def unregister():
     del bpy.types.Scene.UTVertDrop
@@ -434,9 +551,13 @@ def unregister():
     wm = bpy.context.window_manager
     bpy.utils.unregister_module(__name__)
 
-    # Remove "Extras" menu from the "Add Mesh" menu.
+    # Remove "Extras" menu from the "" menu.
     bpy.types.VIEW3D_MT_edit_mesh_specials.remove(menu_func)
-
+    bpy.types.VIEW3D_MT_select_edit_mesh.remove(menu_select)
+    try:
+        bpy.types.VIEW3D_MT_Select_Edit_Mesh.remove(menu_select)
+    except:
+        pass
 
 if __name__ == "__main__":
     register()
