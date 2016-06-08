@@ -3078,20 +3078,233 @@ def register():
         addon_keymaps.append((km, kmi))
 
 
-#        addon_keymaps.append(km)
+
 
 # Register / Unregister Classes
 def unregister():
     bpy.utils.unregister_module(__name__)
 
+    # Get Rid of the Key Map #
     wm = bpy.context.window_manager
 
-    if wm.keyconfigs.addon:
-        for km in addon_keymaps:
-            for kmi in km.keymap_items:
-                km.keymap_items.remove(kmi)
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Object Non-modal']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.objecteditmode":
+                    km.keymap_items.remove(kmi)
 
-            wm.keyconfigs.addon.keymaps.remove(km)
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['3D View Generic']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.viewnumpad":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Screen']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.areaviews":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Sculpt']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.sculpt":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Sculpt']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.sculpttwo":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['3D View Generic']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.originpivot":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['3D View Generic']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.manipulator":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['3D View Generic']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.snapping":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['3D View Generic']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.orientation":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['3D View Generic']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.shadingview":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['3D View Generic']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.objectshading":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['3D View Generic']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.pivotpoint":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Object Mode']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.proportional_obj":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Mesh']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.proportional_edt":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Mesh']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.align":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Mesh']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.delete":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Object Mode']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.applytranforms":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Object Mode']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.selectionsom":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Mesh']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.selectionsem":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Text']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.texteditor":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Object Non-modal']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.animation":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Window']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.saveopen":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Image']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.uvsselectmode":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Image']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "uv.cursor_set":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['UV Editor']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.uvsweldalign":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Image Paint']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.texturepaint":
+                    km.keymap_items.remove(kmi)
+
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps['Sculpt']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.sculpt":
+                    km.keymap_items.remove(kmi)
+
+
+    wm.keyconfigs.addon.keymaps.remove(km)
 
     # clear the list
     del addon_keymaps[:]
