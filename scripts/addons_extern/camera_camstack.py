@@ -66,6 +66,7 @@ def subCam(context, main_cam, cam_name):
     # Handheld1
     bpy.ops.object.duplicate(linked=True)
     handheld1 = context.object
+    handheld1.animation_data_clear()
     handheld1.name = cam_name + "_handheld1"
     handheld1.parent = main_cam
     handheld1.location = (0, 0, 0)
@@ -77,6 +78,7 @@ def subCam(context, main_cam, cam_name):
     # Handheld2
     bpy.ops.object.duplicate(linked=True)
     handheld2 = context.object
+    handheld1.animation_data_clear()
     handheld2.name = cam_name + "_handheld2"
     handheld2.parent = handheld1
     handheld2.location = (0, 0, 0)
@@ -88,6 +90,7 @@ def subCam(context, main_cam, cam_name):
     # Shake1
     bpy.ops.object.duplicate(linked=True)
     shake1 = context.object
+    handheld1.animation_data_clear()
     shake1.name = cam_name + "_shake1"
     shake1.parent = handheld2
     shake1.location = (0, 0, 0)
@@ -99,6 +102,7 @@ def subCam(context, main_cam, cam_name):
     # Shake2
     bpy.ops.object.duplicate(linked=True)
     shake2 = context.object
+    handheld1.animation_data_clear()
     shake2.name = cam_name + "_shake2"
     shake2.parent = shake1
     shake2.location = (0, 0, 0)
