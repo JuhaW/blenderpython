@@ -2,7 +2,7 @@
     CamStack is used to create a hierarchy of cameras for the express purpose of creating handheld camera motion.
 
     New: Create a new stack at scene origin based on parameters given in the CamStack panel.
-    Generate: Create a stack based on selected camera(s) and their data.
+    Generate: Create a stack based on selected camera(s) and their data. Safe to use with existing animation.
     Split (for use with an existing stack): Make current camera single-user and
     link all child cameras to the split camera.
 
@@ -63,12 +63,14 @@ def subCam(context, main_cam, cam_name):
     context.scene.objects.active = main_cam
     log.debug("Active object: '%s'", context.scene.objects.active.name)
 
-    # Handheld1
+    # Handheld1 - Set properties, locks and axes
     bpy.ops.object.duplicate(linked=True)
     handheld1 = context.object
     handheld1.animation_data_clear()
     handheld1.name = cam_name + "_handheld1"
     handheld1.parent = main_cam
+    handheld1.rotation_mode = 'XYZ'
+    handheld1.object.lock_rotation[0:3] = (False, False, True)
     handheld1.location = (0, 0, 0)
     handheld1.rotation_euler = (0, 0, 0)
     handheld1.scale = (0.9, 0.9, 0.9)
