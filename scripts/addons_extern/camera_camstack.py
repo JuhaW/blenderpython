@@ -70,7 +70,7 @@ def subCam(context, main_cam, cam_name):
     handheld1.name = cam_name + "_handheld1"
     handheld1.parent = main_cam
     handheld1.rotation_mode = 'XYZ'
-    handheld1.object.lock_rotation[0:3] = (False, False, True)
+    handheld1.lock_rotation[0:3] = (False, False, True)
     handheld1.location = (0, 0, 0)
     handheld1.rotation_euler = (0, 0, 0)
     handheld1.scale = (0.9, 0.9, 0.9)
