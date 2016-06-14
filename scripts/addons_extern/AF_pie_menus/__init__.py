@@ -21,6 +21,8 @@ from math import *
 from bpy.props import IntProperty, BoolProperty, FloatProperty, EnumProperty, PointerProperty, StringProperty, CollectionProperty
 from bpy.types import PropertyGroup
 
+import inspect
+
 from . import pie_modes_menu
 from . import pie_views_numpad_menu
 from . import pie_sculpt_menu
