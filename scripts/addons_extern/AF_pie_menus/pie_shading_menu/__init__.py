@@ -12,7 +12,7 @@ bl_info = {
 }
 
 import bpy
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 from bpy.types import Menu, Header
 from bpy.types import Menu, Header
 from bpy.props import IntProperty, FloatProperty, BoolProperty
@@ -252,7 +252,7 @@ class ShadingFlat(bpy.types.Operator):
         return {'FINISHED'}
 
 # Pie Material
-class MaterialListMenu(bpy.types.Menu):  # menu appelé par le pie
+class MaterialListMenu(bpy.types.Menu):  # menu appelï¿½ par le pie
     bl_idname = "object.material_list_menu"
     bl_label = "Material_list"
 
@@ -264,13 +264,13 @@ class MaterialListMenu(bpy.types.Menu):  # menu appelé par le pie
             for mat in bpy.data.materials:
                 name = mat.name
                 try:
-                    icon_val = layout.icon(mat)  # récupère l'icon du materiau
+                    icon_val = layout.icon(mat)  # rï¿½cupï¿½re l'icon du materiau
                 except:
                     icon_val = 1
                     print("WARNING [Mat Panel]: Could not get icon value for %s" % name)
 
-                op = col.operator("object.apply_material", text=name, icon_value=icon_val)  # opérateur qui apparait dans le menu pour chaque matériau présent dans les datas materials
-                op.mat_to_assign = name  # on "stock" le nom du matériau dans la variable "mat_to_assign" declarée dans la class opérateur "ApplyMaterial"
+                op = col.operator("object.apply_material", text=name, icon_value=icon_val)  # opï¿½rateur qui apparait dans le menu pour chaque matï¿½riau prï¿½sent dans les datas materials
+                op.mat_to_assign = name  # on "stock" le nom du matï¿½riau dans la variable "mat_to_assign" declarï¿½e dans la class opï¿½rateur "ApplyMaterial"
         else:
             layout.label("No data materials")
 
@@ -287,17 +287,17 @@ class ApplyMaterial(bpy.types.Operator):
             obj = context.object
             bm = bmesh.from_edit_mesh(obj.data)
 
-            selected_face = [f for f in bm.faces if f.select]  # si des faces sont sélectionnées, elles sont stockées dans la liste "selected_faces"
+            selected_face = [f for f in bm.faces if f.select]  # si des faces sont sï¿½lectionnï¿½es, elles sont stockï¿½es dans la liste "selected_faces"
 
             mat_name = [mat.name for mat in bpy.context.object.material_slots if len(bpy.context.object.material_slots)]  # pour tout les material_slots, on stock les noms des mat de chaque slots dans la liste "mat_name"
 
-            if self.mat_to_assign in mat_name:  # on test si le nom du mat sélectionné dans le menu est présent dans la liste "mat_name" (donc, si un des slots possède le materiau du même nom). Si oui:
-                context.object.active_material_index = mat_name.index(self.mat_to_assign)  # on definit le slot portant le nom du comme comme étant le slot actif
-                bpy.ops.object.material_slot_assign()  # on assigne le matériau à la sélection
+            if self.mat_to_assign in mat_name:  # on test si le nom du mat sï¿½lectionnï¿½ dans le menu est prï¿½sent dans la liste "mat_name" (donc, si un des slots possï¿½de le materiau du mï¿½me nom). Si oui:
+                context.object.active_material_index = mat_name.index(self.mat_to_assign)  # on definit le slot portant le nom du comme comme ï¿½tant le slot actif
+                bpy.ops.object.material_slot_assign()  # on assigne le matï¿½riau ï¿½ la sï¿½lection
             else:  # sinon
                 bpy.ops.object.material_slot_add()  # on ajout un slot
                 bpy.context.object.active_material = bpy.data.materials[self.mat_to_assign]  # on lui assigne le materiau choisi
-                bpy.ops.object.material_slot_assign()  # on assigne le matériau à la sélection
+                bpy.ops.object.material_slot_assign()  # on assigne le matï¿½riau ï¿½ la sï¿½lection
 
             return {'FINISHED'}
 
@@ -337,7 +337,7 @@ classes = [
     ShadingFlat,
     MaterialListMenu,
     ApplyMaterial,
-    ]  
+    ]
 
 addon_keymaps = []
 

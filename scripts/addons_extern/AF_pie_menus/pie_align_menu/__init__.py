@@ -12,7 +12,7 @@ bl_info = {
 }
 
 import bpy, bmesh
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 from bpy.types import Menu, Header
 from bpy.props import IntProperty, FloatProperty, BoolProperty
 from mathutils import *
@@ -332,7 +332,7 @@ classes = [
     AlignYFront,
     AlignZTop,
     AlignZBottom,
-    ]  
+    ]
 
 addon_keymaps = []
 

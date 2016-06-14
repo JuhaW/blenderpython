@@ -12,7 +12,7 @@ bl_info = {
 }
 
 import bpy
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 from bpy.types import Menu, Header
 from bpy.props import IntProperty, FloatProperty, BoolProperty, StringProperty
 
@@ -56,7 +56,7 @@ class PieOrientation(Menu):
 classes = [
     OrientationVariable,
     PieOrientation,
-    ]  
+    ]
 
 addon_keymaps = []
 

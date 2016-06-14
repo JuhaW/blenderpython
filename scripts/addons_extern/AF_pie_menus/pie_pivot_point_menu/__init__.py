@@ -12,7 +12,7 @@ bl_info = {
 }
 
 import bpy
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 from bpy.types import Menu, Header
 from bpy.props import IntProperty, FloatProperty, BoolProperty
 import rna_keymap_ui
@@ -73,7 +73,7 @@ classes = [
     PiePivotPoint,
     PivotPointVariable,
     UsePivotAlign,
-    ]  
+    ]
 
 addon_keymaps = []
 

@@ -12,7 +12,7 @@ bl_info = {
 }
 
 import bpy
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 from bpy.types import Menu, Header
 from bpy.props import IntProperty, FloatProperty, BoolProperty
 
@@ -136,7 +136,7 @@ classes = [
     LockCameraTransforms,
     PieViewallSelGlobEtc,
     PerspOrthoView,
-    ]  
+    ]
 
 addon_keymaps = []
 
