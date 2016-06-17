@@ -8,7 +8,7 @@ bl_info = {
     "location": "Tab key",
     "warning": "",
     "wiki_url": "",
-    "category": "Pie"
+    "category": "3D View"
 }
 
 import bpy
@@ -261,9 +261,14 @@ class PieObjectEditMode(Menu):
     def draw(self, context):
         layout = self.layout
         toolsettings = context.tool_settings
-        ob = context
+        obj = context.object
+        
+        if obj and obj.type == 'MESH' and obj.mode in {'OBJECT'}:
+            pie = layout.menu_pie()
+            pie.operator_enum("OBJECT_OT_mode_set", "mode")
 
-        if ob.object.type == 'MESH':
+        ## Mesh Edit Mode ##
+        if obj and obj.type == 'MESH' and obj.mode in {'EDIT'}:
             pie = layout.menu_pie()
             # 4 - LEFT
             pie.operator("class.vertex", text="Vertex", icon='VERTEXSEL')
@@ -286,41 +291,35 @@ class PieObjectEditMode(Menu):
             row = box.row(align=True)
             row.operator("wm.call_menu_pie", text="V/E/F Modes", icon='UV_VERTEXSEL').name = "pie.vertexedgesfacesmodes"
 
-        elif ob.object.type == 'CURVE':
+        if obj and obj.type == 'CURVE':
             pie = layout.menu_pie()
             pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
 
-        elif ob.object.type == 'ARMATURE':
+        if obj and obj.type == 'ARMATURE':
             pie = layout.menu_pie()
             pie.operator("object.editmode_toggle", text="Edit Mode", icon='OBJECT_DATAMODE')
             pie.operator("object.posemode_toggle", text="Pose", icon='POSE_HLT')
             pie.operator("class.object", text="Object Mode", icon='OBJECT_DATAMODE')
 
-        elif ob.object.type == 'FONT':
+        if obj and obj.type == 'FONT':
             pie = layout.menu_pie()
             pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
 
-        elif ob.object.type == 'SURFACE':
+        if obj and obj.type ==  'SURFACE':
             pie = layout.menu_pie()
             pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
 
-        elif ob.object.type == 'ARMATURE':
+        if obj and obj.type ==  'ARMATURE':
             pie = layout.menu_pie()
             pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
 
-        elif ob.object.type == 'META':
+        if obj and obj.type ==  'META':
             pie = layout.menu_pie()
             pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
 
-        elif ob.object.type == 'LATTICE':
+        if obj and obj.type ==  'LATTICE':
             pie = layout.menu_pie()
             pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-        elif ob.object.type == 'ARMATURE':
-            pie = layout.menu_pie()
-            pie.operator("object.editmode_toggle", text="Edit/Object", icon='OBJECT_DATAMODE')
-
-
 
 classes = [
     PieObjectEditMode,

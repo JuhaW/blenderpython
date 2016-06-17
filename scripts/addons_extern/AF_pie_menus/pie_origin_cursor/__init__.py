@@ -1,6 +1,6 @@
 
 bl_info = {
-    "name": "Origin/Pivot: Key: 'Shift S' ",
+    "name": "Origin/Cursor: Key: 'Shift S' ",
     "description": "Origin/Pivot Menu",
     "author": "pitiwazou, meta-androcto",
     "version": (0, 1, 0),
@@ -8,7 +8,7 @@ bl_info = {
     "location": "Shift S",
     "warning": "",
     "wiki_url": "",
-    "category": "Pie"
+    "category": "Object"
 }
 
 import bpy
@@ -64,24 +64,42 @@ class PieOriginPivot(Menu):
 
     def draw(self, context):
         layout = self.layout
+        obj = context.object
         pie = layout.menu_pie()
-        # 4 - LEFT
-        pie.operator("object.pivotobottom", text="Origin to Bottom", icon='TRIA_DOWN')
-        # 6 - RIGHT
-        pie.operator("view3d.snap_cursor_to_selected", text="Cursor to Selected", icon='ROTACTIVE')
-        # 2 - BOTTOM
-        pie.operator("view3d.snap_selected_to_cursor", text="Selection to Cursor", icon='CLIPUV_HLT').use_offset = False
-        # 8 - TOP
-        pie.operator("object.origin_set", text="Origin To 3D Cursor", icon='CURSOR').type = 'ORIGIN_CURSOR'
-        # 7 - TOP - LEFT
-        pie.operator("object.pivot2selection", text="Origin To Selection", icon='SNAP_INCREMENT')
-        # 9 - TOP - RIGHT
-        pie.operator("object.origin_set", text="Origin To Geometry", icon='ROTATE').type = 'ORIGIN_GEOMETRY'
-        # 1 - BOTTOM - LEFT
-        pie.operator("object.origin_set", text="Geometry To Origin", icon='BBOX').type = 'GEOMETRY_ORIGIN'
-        # 3 - BOTTOM - RIGHT
-        pie.operator("wm.call_menu_pie", text="Others", icon='CURSOR').name = "origin.pivotmenu"
-
+        if obj and obj.type == 'MESH':
+            # 4 - LEFT
+            pie.operator("object.pivotobottom", text="Origin to Bottom", icon='TRIA_DOWN')
+            # 6 - RIGHT
+            pie.operator("view3d.snap_cursor_to_selected", text="Cursor to Selected", icon='ROTACTIVE')
+            # 2 - BOTTOM
+            pie.operator("view3d.snap_selected_to_cursor", text="Selection to Cursor", icon='CLIPUV_HLT').use_offset = False
+            # 8 - TOP
+            pie.operator("object.origin_set", text="Origin To 3D Cursor", icon='CURSOR').type = 'ORIGIN_CURSOR'
+            # 7 - TOP - LEFT
+            pie.operator("object.pivot2selection", text="Origin To Selection", icon='SNAP_INCREMENT')
+            # 9 - TOP - RIGHT
+            pie.operator("object.origin_set", text="Origin To Geometry", icon='ROTATE').type = 'ORIGIN_GEOMETRY'
+            # 1 - BOTTOM - LEFT
+            pie.operator("object.origin_set", text="Geometry To Origin", icon='BBOX').type = 'GEOMETRY_ORIGIN'
+            # 3 - BOTTOM - RIGHT
+            pie.operator("wm.call_menu_pie", text="Others", icon='CURSOR').name = "origin.pivotmenu"
+        else:
+            # 4 - LEFT
+#            pie.operator("object.pivotobottom", text="Origin to Bottom", icon='TRIA_DOWN')
+            # 6 - RIGHT
+            pie.operator("view3d.snap_cursor_to_selected", text="Cursor to Selected", icon='ROTACTIVE')
+            # 2 - BOTTOM
+            pie.operator("view3d.snap_selected_to_cursor", text="Selection to Cursor", icon='CLIPUV_HLT').use_offset = False
+            # 8 - TOP
+            pie.operator("object.origin_set", text="Origin To 3D Cursor", icon='CURSOR').type = 'ORIGIN_CURSOR'
+            # 7 - TOP - LEFT
+            pie.operator("object.pivot2selection", text="Origin To Selection", icon='SNAP_INCREMENT')
+            # 9 - TOP - RIGHT
+            pie.operator("object.origin_set", text="Origin To Geometry", icon='ROTATE').type = 'ORIGIN_GEOMETRY'
+            # 1 - BOTTOM - LEFT
+            pie.operator("object.origin_set", text="Geometry To Origin", icon='BBOX').type = 'GEOMETRY_ORIGIN'
+            # 3 - BOTTOM - RIGHT
+            pie.operator("wm.call_menu_pie", text="Others", icon='CURSOR').name = "origin.pivotmenu"
 
 # Origin/Pivot menu1  - Shift + S
 class OriginPivotMenu(Menu):

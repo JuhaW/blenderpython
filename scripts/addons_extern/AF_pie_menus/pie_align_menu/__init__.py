@@ -1,14 +1,14 @@
 
 bl_info = {
     "name": "Align Menu: Key: 'Alt X'",
-    "description": "Align Menu",
+    "description": " V/E/F Align",
     "author": "pitiwazou, meta-androcto",
     "version": (0, 1, 0),
     "blender": (2, 77, 0),
     "location": "Alt X key",
     "warning": "",
     "wiki_url": "",
-    "category": "Pie"
+    "category": "Edit Mode"
 }
 
 import bpy, bmesh
@@ -54,11 +54,11 @@ class PieAlign(Menu):
         row.operator("alignz.bottom", text="Neg")
         row.operator("alignz.top", text="Pos")
         # 3 - BOTTOM - RIGHT
-        box = pie.split().column()
-        row = box.row(align=True)
-        box.operator("mesh.vertex_align", icon='ALIGN', text="Align")
-        box.operator("retopo.space", icon='ALIGN', text="Distribute")
-        box.operator("mesh.vertex_inline", icon='ALIGN', text="Align & Distribute")
+#        box = pie.split().column()
+#        row = box.row(align=True)
+#        box.operator("mesh.vertex_align", icon='ALIGN', text="Align")
+#        box.operator("retopo.space", icon='ALIGN', text="Distribute")
+#        box.operator("mesh.vertex_inline", icon='ALIGN', text="Align & Distribute")
 
 # Align X
 class AlignX(bpy.types.Operator):

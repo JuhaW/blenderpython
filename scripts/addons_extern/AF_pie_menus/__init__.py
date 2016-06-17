@@ -26,7 +26,7 @@ import inspect
 from . import pie_modes_menu
 from . import pie_views_numpad_menu
 from . import pie_sculpt_menu
-from . import pie_origin_pivot
+from . import pie_origin_cursor
 from . import pie_manipulator_menu
 from . import pie_snap_menu
 from . import pie_orientation_menu
@@ -34,6 +34,13 @@ from . import pie_shading_menu
 from . import pie_pivot_point_menu
 from . import pie_proportional_menu
 from . import pie_align_menu
+from . import pie_delete_menu
+from . import pie_apply_transform_menu
+from . import pie_select_menu
+from . import pie_text_editor_menu
+from . import pie_animation_menu
+from . import pie_save_open_menu
+
 
 bl_info = {
     'name': 'UI Pie Menu',
@@ -52,7 +59,7 @@ sub_modules = [
     pie_modes_menu,
     pie_views_numpad_menu,
     pie_sculpt_menu,
-    pie_origin_pivot,
+    pie_origin_cursor,
     pie_manipulator_menu,
     pie_snap_menu,
     pie_orientation_menu,
@@ -60,6 +67,12 @@ sub_modules = [
     pie_pivot_point_menu,
     pie_proportional_menu,
     pie_align_menu,
+    pie_delete_menu,
+    pie_apply_transform_menu,
+    pie_select_menu,
+    pie_text_editor_menu,
+    pie_animation_menu,
+    pie_save_open_menu,
     ]
 
 

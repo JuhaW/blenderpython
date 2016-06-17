@@ -8,7 +8,7 @@ bl_info = {
     "location": "Alt Space",
     "warning": "",
     "wiki_url": "",
-    "category": "Pie"
+    "category": "3D View"
 }
 
 import bpy
