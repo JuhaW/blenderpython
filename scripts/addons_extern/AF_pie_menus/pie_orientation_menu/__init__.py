@@ -52,9 +52,15 @@ class OrientPie(Menu):
 
 addon_keymaps = []
 
+classes = [
+    OrientPie,
+    OrientPoll
+]
+
 
 def register():
-    bpy.utils.register_module(__name__)
+    for cls in classes:
+        bpy.utils.register_class(cls)
 
     wm = bpy.context.window_manager
 
@@ -65,7 +71,8 @@ def register():
 
 
 def unregister():
-    bpy.utils.unregister_module(__name__)
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
 
     wm = bpy.context.window_manager
     if wm.keyconfigs.addon:
