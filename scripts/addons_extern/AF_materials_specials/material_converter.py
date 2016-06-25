@@ -736,6 +736,7 @@ class OBJECT_PT_xps_convert(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "material"
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         sc = context.scene
@@ -743,10 +744,29 @@ class OBJECT_PT_xps_convert(bpy.types.Panel):
         row = layout.row()
         box = row.box()
         box.label(text='Multi Image Support (Imports)')
+        box.operator('help.nodeconvert', text='Usage Information Guide', icon='INFO')
         box.operator("xps_tools.convert_to_cycles_all", text='Convert All to Nodes ', icon='TEXTURE')
         box.operator("xps_tools.convert_to_cycles_selected", text='Convert Active to Nodes', icon='TEXTURE')
         box.operator("xps_tools.restore_bi_materials_all", text='To BI Nodes On', icon='TEXTURE')
 
+class Nodeconv_help(bpy.types.Operator):
+    bl_idname = 'help.nodeconvert'
+    bl_description = 'Read Instructions & Current Limitations'
+    bl_label = ''
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label('**Convert Imported Materials/Image Textures**:')
+        layout.label('Converts BI non node materials to BI Nodes')
+        layout.label('Then Converts BI Nodes to Cycles Nodes')
+        layout.label('**Supports Imported Files**:')
+        layout.label('.fbx, .dae, .obj, .3ds, .xna, & more')
+        layout.label('Not all Files will produce good results')
+        layout.label('Supports Alpha & Nor & Spec & Diff')
+        layout.label('Save Your Work Often')
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_popup(self, width=300)
 
 def register():
     bpy.utils.register_module(__name__)

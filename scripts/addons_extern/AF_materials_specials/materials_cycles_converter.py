@@ -491,6 +491,7 @@ class OBJECT_PT_scenemassive(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "material"
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         sc = context.scene
@@ -502,11 +503,32 @@ class OBJECT_PT_scenemassive(bpy.types.Panel):
         box.operator("ml.restore", text='To BI Nodes Off', icon='MATERIAL')
         row = layout.row()
         box = row.box()
-        box.label(text='Blender Internal Texture (One Per Object)')
+        box.label(text='BI Texture To Image File')
+        box.operator('help.biconvert', text='Usage Information Guide', icon='INFO')
         box.prop(sc, "EXTRACT_ALPHA", text='Extract Alpha Textures (slow)')
         box.prop(sc, "EXTRACT_PTEX", text='Extract Procedural Textures (slow)')
         box.prop(sc, "EXTRACT_OW", text='Re-extract Textures')
 
+
+class BIconv_help(bpy.types.Operator):
+    bl_idname = 'help.biconvert'
+    bl_description = 'Read Instructions & Current Limitations'
+    bl_label = ''
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label('**Converts Bi Materials to Cycles Nodes**:')
+        layout.label('Converts Basic BI non node materials')
+        layout.label('Some material combinations are unsupported')
+        layout.label('**Converts Bi Textures to Image Files**:')
+        layout.label('Single Texture per use is only supported')
+        layout.label('Requires Run As Administrator on Windows OS')
+        layout.label('Saves to My Documents folder')
+        layout.label('Created Texture can be Packed into your Saved File')
+        layout.label('Save Your Work Often')
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_popup(self, width=300)
 '''
         # Locking of nodes objects
         try:
