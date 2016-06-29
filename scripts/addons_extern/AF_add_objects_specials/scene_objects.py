@@ -107,7 +107,7 @@ class add_scene(bpy.types.Operator):
 
         bpy.ops.mesh.primitive_plane_add(radius=22, view_align=False, enter_editmode=False, location=(0, 0, -1), layers=(True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False))
 
-        bpy.ops.transform.rotate(value=-0.698132, axis=(0, 0, 1), constraint_axis=(False, False, True), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
+        bpy.ops.transform.rotate(value=-0.8, axis=(0, 0, 1), constraint_axis=(False, False, True), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
 
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
