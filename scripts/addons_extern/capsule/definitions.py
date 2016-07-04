@@ -1,283 +1,8 @@
-import bpy
-import bmesh
-import time
-from math import *
-
-#//////////////////////// - USER INTERFACE FUNCTIONS - ////////////////////////
-
-
-def GenerateVisibilityList(self, context):
-    smn = context.scene.GTSmn
-    scn = context.scene.GTScn
-
-    smn.scene_update_toggle = True
-
-    print("Generating Visibility List")
-
-    HP = smn.visibility_collection.add()
-    HP.name = "High-Poly"
-    HP.nameIcon = 1
-    HP.type = scn.visibility_HP
-
-    LP = smn.visibility_collection.add()
-    LP.name = "Low-Poly"
-    LP.nameIcon = 1
-    LP.type = scn.visibility_LP
-
-    CG = smn.visibility_collection.add()
-    CG.name = "Cage"
-    CG.nameIcon = 1
-    CG.type = scn.visibility_CG
-
-    CX = smn.visibility_collection.add()
-    CX.name = "Collision"
-    CX.nameIcon = 1
-    CX.type = scn.visibility_CX
-
-    BS = smn.visibility_collection.add()
-    BS.name = "Parents"
-    BS.nameIcon = 2
-    BS.type = scn.visibility_base
-
-    CM = smn.visibility_collection.add()
-    CM.name = "Children"
-    CM.nameIcon = 2
-    CM.type = scn.visibility_component
-
-    FZ = smn.visibility_collection.add()
-    FZ.name = "Freeze"
-    FZ.nameIcon = 3
-    FZ.type = scn.visibility_freeze
-
-    smn.scene_update_toggle = False
-    smn.vis_update_toggle = True
-
-
-def ClearVisibilityList(self, context):
-    smn = context.scene.GTSmn
-
-    smn.visibility_collection.clear()
-    # You can also use delete, but it didn't seem to clear everything, so this makes
-    # sure everything in your collection is DEAD O_O
-
-
-def GenerateComponentList(self, context):
-    mnu = context.active_object.GTMnu
-    obj = context.active_object
-
-    for child in obj.children:
-        GTObj = child.GTObj
-
-        entry = mnu.component_collection.add()
-        entry.name = GTObj.component_name
-        entry.type = GTObj.visibility
-
-        # print(int(GTObj.visibility))
-
-    context.scene.GTSmn.component_update_toggle = True
-
-
-def ClearComponentList(self, context):
-    mnu = context.object.GTMnu
-
-    mnu.component_collection.clear()
-
-
-def GenerateFreezeList(self, context):
-    mnu = context.active_object.GTMnu
-    obj = context.active_object
-
-    mnu.freeze_collection.clear()
-
-    i = 0
-
-    for item in bpy.data.objects:
-        if obj.GTObj.base_name == item.GTObj.base_name:
-            if item.GTObj.is_frozen is True:
-                if item.GTObj.object_type is "1":
-                    print("FOUND A FREEZE OBJECT")
-                    entry = mnu.freeze_collection.add()
-                    entry.name = item.GTObj.freeze_name
-                    entry.type = item.GTObj.freeze_type
-                    entry.view = item.GTObj.freeze_hide
-                    entry.index = i
-                    item.GTObj.freeze_index = i
-
-                    i += 1
-
-    context.scene.GTSmn.component_update_toggle = True
-
-
-def ClearFreezeList(self, context):
-    mnu = context.active_object.GTMnu
-
-    mnu.freeze_collection.clear()
-
-
-#//////////////////////// - GENERAL FUNCTIONS - ////////////////////////
-
-def GenerateObjectShading(target, scn):
-
-    obj = target.GTObj
-
-    # Focus the object to ensure the values can be accessed at this stage if its hidden or unselectable.
-    FocusObject(target)
-
-    # First check that the visibility category that matches the object's type is
-    # defined as object settings
-    stageType = '1'
-    objectType = '1'
-
-    if int(obj.asset_type) is 1:
-        stageType = scn.visibility_HP
-    elif int(obj.asset_type) is 2:
-        stageType = scn.visibility_LP
-    elif int(obj.asset_type) is 3:
-        stageType = scn.visibility_CG
-    elif int(obj.asset_type) is 4:
-        stageType = scn.visibility_CX
-
-    if int(obj.object_type) is 1:
-        objectType = scn.visibility_base
-    elif int(obj.object_type) is 2:
-        objectType = scn.visibility_component
-
-    # If the object is frozen, we've got some other options to employ!
-    if obj.is_frozen is True:
-
-        target.hide_select = False
-
-        if obj.freeze_hide is True:
-            print("Starting to shade")
-            type = scn.visibility_freeze
-
-            if int(type) is 2:
-                ShadeNormal(target)
-            elif int(type) is 3:
-                ShadeBoxBounds(target)
-            elif int(type) is 4:
-                ShadeWireframe(target)
-            elif int(type) is 5:
-                ShadeWire(target)
-            elif int(type) is 6:
-                print("Hiding Frozen")
-                ShadeHide(target)
-
-        else:
-            print("Freeze view is false, hiding")
-            ShadeHide(target)
-
-        target.hide_select = True
-
-    # Now check to see whether either of them isnt 1.
-    # If both of them arent 1, stage type takes precedent over object type
-    elif int(stageType) != 1 and int(objectType) != 1 or int(stageType) != 1:
-
-        #print("Shading stage type 1")
-
-        if int(stageType) is 2:
-            ShadeNormal(target)
-        elif int(stageType) is 3:
-            ShadeBoxBounds(target)
-        elif int(stageType) is 4:
-            ShadeWireframe(target)
-        elif int(stageType) is 5:
-            ShadeWire(target)
-        elif int(stageType) is 6:
-            ShadeHide(target)
-
-    elif int(objectType) != 1:
-
-        #print("Shading stage type 2")
-
-        if int(objectType) is 2:
-            ShadeNormal(target)
-        elif int(objectType) is 3:
-            ShadeBoxBounds(target)
-        elif int(objectType) is 4:
-            ShadeWireframe(target)
-        elif int(objectType) is 5:
-            ShadeWire(target)
-        elif int(objectType) is 6:
-            ShadeHide(target)
-
-    # If were here, both object and stage types equal one, and we will use the object-defined vis settings
-    else:
-        type = obj.visibility
-
-        #print("Shading object defined")
-
-        if int(type) is 1:
-            ShadeNormal(target)
-        elif int(type) is 2:
-            ShadeBoxBounds(target)
-        elif int(type) is 3:
-            ShadeWireframe(target)
-        elif int(type) is 4:
-            ShadeWire(target)
-        elif int(type) is 5:
-            ShadeHide(target)
-
-
-# The top one kind of acts like a shading reset, the others perform more nuanced shading.
-def ShadeNormal(target):
-    #print("Shading Normal")
-    FocusObject(target)
-    target.draw_type = "TEXTURED"
-    target.show_wire = False
-    target.show_x_ray = False
-    target.hide = False
-    bpy.types.SpaceView3D.view_selected = "SOLID"
-
-
-def ShadeBoxBounds(target):
-    #print("Shading Box Bounds")
-    ShadeNormal(target)
-    target.draw_type = "BOUNDS"
-
-
-def ShadeWireframe(target):
-    #print("Shading Wireframe")
-    ShadeNormal(target)
-    target.draw_type = "WIRE"
-
-
-def ShadeWire(target):
-    #print("Shading Wire")
-    ShadeNormal(target)
-    target.show_wire = True
-
-
-def ShadeTexture(target):
-    #print("Shading Texture")
-    ShadeNormal(target)
-    bpy.types.SpaceView3D.view_selected = "TEXTURED"
-
-
-def ShadeHide(target):
-    #print("Hiding Object")
-    ShadeNormal(target)
-    target.hide = True
-
-
-def SolidifyGroupShade(groupName):
-    # For every object in the group, set it's shading to Solid
-    if groupName in bpy.data.groups:
-        group = bpy.data.groups[groupName]
-
-        for object in group.objects:
-            ShadeNormal(object)
-
-
-def DefaultGroupShade(groupName, scn):
-
-    # For every object in the group, call GenerateObjectShading
-    if groupName in bpy.data.groups:
-        group = bpy.data.groups[groupName]
-
-        for object in group.objects:
-            GenerateObjectShading(object, scn)
-
+import bpy, bmesh, time
+from math import pi, radians, degrees
+from mathutils import Vector
+
+#//////////////////// - BASIC DEFINITIONS - ///////////////////////
 
 def FocusObject(target):
 
@@ -288,11 +13,24 @@ def FocusObject(target):
     if target.hide_select is True:
         target.hide_select = False
 
-    # Select and make target active
+    # If the mode is not object, we have to change it before using the
+    # Select All command
+    bpy.context.scene.objects.active = bpy.data.objects[target.name]
+
+    prevMode = ''
+    if target.mode != 'OBJECT':
+        prevMode = target.mode
+        bpy.context.scene.objects.active = bpy.data.objects[target.name]
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+    #### Select and make target active
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.scene.objects.active = bpy.data.objects[target.name]
     bpy.ops.object.select_pattern(pattern=target.name)
 
+    # Set the mode back
+    if prevMode != '':
+        bpy.ops.object.mode_set(mode=prevMode)
 
 def SelectObject(target):
 
@@ -305,7 +43,6 @@ def SelectObject(target):
 
     target.select = True
 
-
 def ActivateObject(target):
 
     # If the target isnt visible, MAKE IT FUCKING VISIBLE.
@@ -317,10 +54,9 @@ def ActivateObject(target):
 
     bpy.context.scene.objects.active = bpy.data.objects[target.name]
 
+def DuplicateObject(target):
 
-def DuplicateObject(target, targetLocation):
-
-    # Select and make target active
+    #### Select and make target active
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.scene.objects.active = bpy.data.objects[target.name]
     bpy.ops.object.select_pattern(pattern=target.name)
@@ -338,46 +74,27 @@ def DuplicateObject(target, targetLocation):
     # To preserve the scale, it has to be applied.  Sorreh!
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
+def DuplicateObjects(targets):
 
-def MergeObject(target):
+    #### Select and make target active
+    bpy.ops.object.select_all(action='DESELECT')
 
-    # Ensure all modifiers on the stack are applied
-    for modifier in target.modifiers:
+    for target in targets:
+        bpy.context.scene.objects.active = bpy.data.objects[target.name]
+        bpy.ops.object.select_pattern(pattern=target.name)
 
-        # First find if the modifier has a object
-        print("GTMerge - Found modifier in base, applying")
-        modObject = FindObjectInModifier(modifier)
+    # Duplicate the object
+    bpy.ops.object.duplicate_move()
 
-        bpy.ops.object.select_all(action='DESELECT')
-        SelectObject(base)
-        bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier.name)
+    # Now switch the active object to the duplicate
+    duplicate = bpy.context.active_object
 
-        # If it does, delete the object after applying the mod
-        if modObject != None:
-            print("GTMerge - Found object to delete.  BAI")
-            FocusObject(modObject)
-            bpy.ops.object.delete(use_global=False)
+    # Now set the transform details
+    duplicate.rotation_euler = target.rotation_euler
+    duplicate.rotation_axis_angle = target.rotation_axis_angle
 
-    if len(target.children) is not 0:
-        for child in target.children:
-
-            print("GTMerge - Found modifier in component, applying")
-            FocusObject(child)
-
-            for modifier in child.modifiers:
-                bpy.ops.object.modifier_apply(apply_as='DATA', modifier=modifier.name)
-
-    # Now select all the components
-    for child in target.children:
-        SelectObject(child)
-
-    # Now make the base object active
-    bpy.ops.object.select_pattern(pattern=target.name)
-    bpy.context.scene.objects.active = bpy.data.objects[target.name]
-
-    # Now JOIN!
-    bpy.ops.object.join()
-
+    # To preserve the scale, it has to be applied.  Sorreh!
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
 def DeleteObject(target):
 
@@ -387,7 +104,6 @@ def DeleteObject(target):
 
     # Currently removing just in case...
     DeleteObjectByMemory(target)
-
 
 def DeleteObjectByMemory(target):
 
@@ -403,884 +119,1105 @@ def DeleteObjectByMemory(target):
 
     return
 
+def SwitchObjectMode(newMode, target):
+    # Switches the object mode if it is currently not equal to the
+    # current object mode.
+    bpy.context.scene.objects.active = bpy.data.objects[target.name]
+    prevMode = target.mode
+    if target.mode != newMode:
+        bpy.context.scene.objects.active = bpy.data.objects[target.name]
+        bpy.ops.object.mode_set(mode=newMode)
+        return prevMode
 
-def MoveObject(target, location):
-    # Preserving the objects location has to happen again, e_e
+def MoveObject(target, context, location):
+	# This doesnt need the cursor, and will ensure nothing is animated
+	# in the process
+
+    print(">>>>>> Moving Object <<<<<<")
+
+    copyLocation = Vector((location[0], location[1], location[2]))
+
+    # Prevent auto keyframing from being active
+    autoKey = context.scene.tool_settings.use_keyframe_insert_auto
+    lockTransform = target.lock_location
+
+    context.scene.tool_settings.use_keyframe_insert_auto = False
+    target.lock_location = (False, False, False)
+
+    # Save the current cursor location
     cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
     previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
 
-    # Move the cursor to the location
-    bpy.data.scenes[bpy.context.scene.name].cursor_location = location
+    # This line is actually super-important, not sure why though...
+    # FocusObject should fill the role of deselection...
+    bpy.ops.object.select_all(action='DESELECT')
 
-    # Focus the object
+    # Calculate the translation vector using the 3D cursor
     FocusObject(target)
+    bpy.ops.view3d.snap_cursor_to_selected()
+    cursor_location = Vector((0.0, 0.0, 0.0))
 
-    # SNAP IT
-    bpy.ops.view3D.snap_selected_to_cursor()
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            cursor_location = area.spaces[0].cursor_location
 
-    # Restore the location
+    # Calculate the movement difference
+    locationDiff = copyLocation - cursor_location
+
+    bpy.ops.transform.translate(
+        value=locationDiff,
+        constraint_axis=(False, False, False),
+        constraint_orientation='GLOBAL',
+        mirror=False,
+        proportional='DISABLED',
+        proportional_edit_falloff='SMOOTH',
+        proportional_size=1.0,
+        snap=False,
+        snap_target='CLOSEST',
+        snap_point=(0.0, 0.0, 0.0),
+        snap_align=False,
+        snap_normal=(0.0, 0.0, 0.0),
+        gpencil_strokes=False,
+        texture_space=False,
+        remove_on_cancel=False,
+        release_confirm=False)
+
+    # Position the cursor back to it's original location
     bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
 
+    # Restore the previous setting
+    context.scene.tool_settings.use_keyframe_insert_auto = autoKey
+    target.lock_location = lockTransform
 
-def MoveObjectToObject(target, locationTarget):
+def MoveBone(target, bone, context, location):
+	# This doesnt need the cursor, and will ensure nothing is animated
+	# in the process
 
-    # Preserving the objects location has to happen again, e_e
+    #print(">>> Moving Object <<<")
+
+    copyLocation = Vector((0.0, 0.0, 0.0))
+    copyLocation[0] = location[0]
+    copyLocation[1] = location[1]
+    copyLocation[2] = location[2]
+
+    # Prevent auto keyframing from being active
+    autoKey = context.scene.tool_settings.use_keyframe_insert_auto
+    lockTransform = target.lock_location
+
+    context.scene.tool_settings.use_keyframe_insert_auto = False
+    target.lock_location = (False, False, False)
+
+    # Save the current cursor location
     cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
     previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
 
-    # Focus the object
-    FocusObject(locationTarget)
-    bpy.ops.view3D.snap_cursor_to_selected()
+    # This line is actually super-important, not sure why though...
+    # FocusObject should fill the role of deselection...
+    bpy.ops.object.select_all(action='DESELECT')
 
-    # SNAP IT
-    FocusObject(target)
-    bpy.ops.view3D.snap_selected_to_cursor()
+    # Calculate the translation vector using the 3D cursor
+    prevMode = SwitchObjectMode('POSE', target)
+    bpy.data.objects[target.name].data.bones.active = bpy.data.objects[target.name].pose.bones[bone.name].bone
+    bpy.ops.view3d.snap_cursor_to_selected()
+    cursor_location = Vector((0.0, 0.0, 0.0))
 
-    # Restore the location
+    #print("RAWR")
+
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            cursor_location = area.spaces[0].cursor_location
+
+    #print(cursor_location)
+
+    # Calculate the movement difference
+    locationDiff = copyLocation - cursor_location
+
+    bpy.ops.transform.translate(
+        value=locationDiff,
+        constraint_axis=(False, False, False),
+        constraint_orientation='GLOBAL',
+        mirror=False,
+        proportional='DISABLED',
+        proportional_edit_falloff='SMOOTH',
+        proportional_size=1.0,
+        snap=False,
+        snap_target='CLOSEST',
+        snap_point=(0.0, 0.0, 0.0),
+        snap_align=False,
+        snap_normal=(0.0, 0.0, 0.0),
+        gpencil_strokes=False,
+        texture_space=False,
+        remove_on_cancel=False,
+        release_confirm=False)
+
+    #print("Object", bone.name, "moved.... ", bone.location)
+
+    SwitchObjectMode(prevMode, target)
+
+    # Position the cursor back to it's original location
+    #bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
+
+    # Restore the previous setting
+    #context.scene.tool_settings.use_keyframe_insert_auto = autoKey
+    #target.lock_location = lockTransform
+
+def MoveObjects(targetLead, targets, context, location):
+	# This doesnt need the cursor, and will ensure nothing is animated
+	# in the process
+
+    copyLocation = Vector((location[0], location[1], location[2]))
+
+    print(">>>> Moving Objects <<<<")
+    print("Objects being moved...", targets)
+    print("Total Count...", len(targets))
+    print("Movement Location:",copyLocation)
+
+    # Prevent auto keyframing and location lock from being active
+    autoKey = context.scene.tool_settings.use_keyframe_insert_auto
+    lockTransform = targetLead.lock_location
+
+    context.scene.tool_settings.use_keyframe_insert_auto = False
+    targetLead.lock_location = (False, False, False)
+
+    # Save the current cursor location
+    cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
+    previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
+
+    # Calculate the translation vector using the 3D cursor
+    bpy.ops.object.select_all(action='DESELECT')
+    FocusObject(targetLead)
+    bpy.ops.view3d.snap_cursor_to_selected()
+    rootLocation = Vector((0.0, 0.0, 0.0))
+
+    print("Movement Location:",copyLocation)
+
+    print("RAWR")
+
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            rootLocation = area.spaces[0].cursor_location
+
+    print("Root Location:", rootLocation)
+    print("Movement Location:",copyLocation)
+
+    # Calculate the movement difference
+    locationDiff = copyLocation - rootLocation
+
+    print("Final Movement", locationDiff)
+
+    targetsToRemove = []
+
+    # Check if any targets are children of any other object
+    for child in targetLead.children:
+        print("Checking TargetLead for Children...")
+        for target in targets:
+            if child.name == target.name:
+                print("Removing Target", target.name)
+                targetsToRemove.append(target)
+
+    for target in targets:
+        print("Checking Targets for Children...", target.name)
+        for child in target.children:
+            print("Found Child ", child.name)
+            for otherTarget in targets:
+                if child.name == otherTarget.name:
+                    print("Removing Target", child.name)
+                    targetsToRemove.append(child)
+
+    for target in targetsToRemove:
+        if target in targets:
+            targets.remove(target)
+
+    print("Child Check Complete.")
+
+    bpy.ops.object.select_all(action='DESELECT')
+
+    # Lets try moving all the fucking objects this time
+    FocusObject(targetLead)
+
+    for item in targets:
+        SelectObject(item)
+
+    print("Targets to be moved...", targets)
+
+    bpy.ops.transform.translate(
+        value=locationDiff,
+        constraint_axis=(False, False, False),
+        constraint_orientation='GLOBAL',
+        mirror=False,
+        proportional='DISABLED',
+        proportional_edit_falloff='SMOOTH',
+        proportional_size=1.0,
+        snap=False,
+        snap_target='CLOSEST',
+        snap_point=(0.0, 0.0, 0.0),
+        snap_align=False,
+        snap_normal=(0.0, 0.0, 0.0),
+        gpencil_strokes=False,
+        texture_space=False,
+        remove_on_cancel=False,
+        release_confirm=False)
+
+    print("Root Object", targetLead.name, "Moved... ", targetLead.location)
+    print("Location difference found:", locationDiff)
+
+    # Position the cursor back to it's original location
     bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
 
+    # Restore the previous setting
+    context.scene.tool_settings.use_keyframe_insert_auto = autoKey
+    targetLead.lock_location = lockTransform
 
-def AddToGroup(target, groupName):
+def RotateObjectSafe(target, context, rotation, forward):
 
-    print("---Inside AddToGroup---")
+    print(">>> RotateObjectsSafe Used - Rotating... <<<")
 
-    # Find and add the object to the group, and ensure everything runs smoothly
-    if groupName in bpy.data.groups:
-        print("O - Found the group in AddToGroup")
+    # Prevent auto keyframing and location lock from being active
+    autoKey = context.scene.tool_settings.use_keyframe_insert_auto
+    context.scene.tool_settings.use_keyframe_insert_auto = False
 
-        group = bpy.data.groups[groupName]
-        #print("Setting to group:")
-        # print(group.name)
+    FocusObject(target)
 
-        for object in group.objects:
-            print(object.name)
+    # Obtain the current rotation mode
+    order = target.rotation_mode
+    print("Euler Mode...", order)
 
-        # This is used to understand whether the component is alone, or whether
-        # as a base, if another base exists within the object
-        if len(group.objects) is not 0:
-            target.GTGrp.is_own_group = False
+    # Sort out how we're going to filter through the rotation order
+    rotationOrder = []
+    rotationComponents = []
+    axisX = [0, (1.0, 0.0, 0.0), (True, False, False)]
+    axisY = [1, (0.0, 1.0, 0.0), (False, True, False)]
+    axisZ = [2, (0.0, 0.0, 1.0), (False, False, True)]
+
+    if order == 'ZYX':
+        if forward is True:
+            rotationComponents = [axisZ, axisY, axisX]
+        else:
+            rotationComponents = [axisX, axisY, axisZ]
+    elif order == 'ZXY':
+        if forward is True:
+            rotationComponents = [axisZ, axisX, axisY]
+        else:
+            rotationComponents = [axisY, axisX, axisZ]
+    elif order == 'YZX':
+        if forward is True:
+            rotationComponents = [axisY, axisZ, axisX]
+        else:
+            rotationComponents = [axisX, axisZ, axisY]
+    elif order == 'YXZ':
+        if forward is True:
+            rotationComponents = [axisY, axisX, axisZ]
+        else:
+            rotationComponents = [axisZ, axisX, axisY]
+    elif order == 'XZY':
+        if forward is True:
+            rotationComponents = [axisX, axisZ, axisY]
+        else:
+            rotationComponents = [axisY, axisZ, axisX]
+    elif order == 'XYZ':
+        if forward is True:
+            rotationComponents = [axisX, axisY, axisZ]
+        else:
+            rotationComponents = [axisZ, axisY, axisX]
+
+
+    # Set the pivot to be the target object
+    backupPivot = 'CURSOR'
+    backupAlign = False
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            backupPivot = area.spaces[0].pivot_point
+            backupAlign = area.spaces[0].use_pivot_point_align
+            area.spaces[0].pivot_point = 'ACTIVE_ELEMENT'
+            area.spaces[0].use_pivot_point_align = False
+
+    print("Rotating Target...", target, rotation)
+    print("Target Rotation...", rotation)
+
+    # Rotate in Euler order
+    for i, item in enumerate(rotationComponents):
+        if rotation[item[0]] != 1:
+
+            print("Rotating...", rotation[item[0]])
+            bpy.ops.transform.rotate(
+                value=rotation[item[0]],
+                axis=item[1],
+                constraint_axis=item[2],
+                constraint_orientation='GLOBAL',
+                release_confirm=True
+                )
+
+            print("Rotated in the", item[0], "axis...", degrees(target.rotation_euler[item[0]]))
+
+    # Restore the pivot
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            area.spaces[0].pivot_point = backupPivot
+            area.spaces[0].use_pivot_point_align = backupAlign
+
+    # Restore the previous setting
+    context.scene.tool_settings.use_keyframe_insert_auto = autoKey
+
+def MoveAll(target, context, location):
+    # This doesnt need the cursor, and will ensure nothing is animated
+	# in the process
+
+    copyLocation = Vector((0.0, 0.0, 0.0))
+    copyLocation[0] = location[0]
+    copyLocation[1] = location[1]
+    copyLocation[2] = location[2]
+
+    print(">>>> Moving EVERYTHING <<<<")
+
+    # Prevent auto keyframing and location lock from being active
+    autoKey = context.scene.tool_settings.use_keyframe_insert_auto
+    lockTransform = target.lock_location
+
+    context.scene.tool_settings.use_keyframe_insert_auto = False
+    target.lock_location = (False, False, False)
+
+    # Save the current cursor location
+    cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
+    previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
+
+    # Calculate the translation vector using the 3D cursor
+    bpy.ops.object.select_all(action='DESELECT')
+    FocusObject(target)
+    bpy.ops.view3d.snap_cursor_to_selected()
+    rootLocation = Vector((0.0, 0.0, 0.0))
+
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            print(area.spaces[0].cursor_location)
+            rootLocation = area.spaces[0].cursor_location
+
+    print("Root Location:", rootLocation)
+    print("Movement Location:",copyLocation)
+
+    # Calculate the movement difference
+    locationDiff = copyLocation - rootLocation
+    print("Final Movement", locationDiff)
+
+    bpy.ops.object.select_all(action='SELECT')
+    ActivateObject(target)
+    print("Selected Objects for movement...", len(bpy.context.selected_objects))
+
+    bpy.ops.transform.translate(
+        value=locationDiff,
+        constraint_axis=(False, False, False),
+        constraint_orientation='GLOBAL',
+        mirror=False,
+        proportional='DISABLED',
+        proportional_edit_falloff='SMOOTH',
+        proportional_size=1.0,
+        snap=False,
+        snap_target='CLOSEST',
+        snap_point=(0.0, 0.0, 0.0),
+        snap_align=False,
+        snap_normal=(0.0, 0.0, 0.0),
+        gpencil_strokes=False,
+        texture_space=False,
+        remove_on_cancel=False,
+        release_confirm=False
+        )
+
+    print("Root Object", target.name, "Moved... ", rootLocation)
+
+    # Position the cursor back to it's original location
+    bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
+
+    # Restore the previous setting
+    context.scene.tool_settings.use_keyframe_insert_auto = autoKey
+    target.lock_location = lockTransform
+
+def RotateAll(target, context, rotation, constraintAxis):
+
+    print(">>> Rotating Scene <<<")
+
+    # Prevent auto keyframing and location lock from being active
+    autoKey = context.scene.tool_settings.use_keyframe_insert_auto
+    context.scene.tool_settings.use_keyframe_insert_auto = False
+
+    bpy.ops.object.select_all(action='SELECT')
+    ActivateObject(target)
+
+    # Set the pivot to be the target object
+    backupPivot = 'CURSOR'
+    backupAlign = False
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            backupPivot = area.spaces[0].pivot_point
+            backupAlign = area.spaces[0].use_pivot_point_align
+            area.spaces[0].pivot_point = 'ACTIVE_ELEMENT'
+            area.spaces[0].use_pivot_point_align = False
+
+    bpy.ops.transform.rotate(
+        value=radians(rotation),
+        axis=(1.0, 1.0, 1.0),
+        constraint_axis=constraintAxis,
+        constraint_orientation='GLOBAL',
+        release_confirm=True
+        )
+
+    # Restore the pivot
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            area.spaces[0].pivot_point = backupPivot
+            area.spaces[0].use_pivot_point_align = backupAlign
+
+    # Restore the previous setting
+    context.scene.tool_settings.use_keyframe_insert_auto = autoKey
+
+def RotateAllSafe(target, context, rotation, forward):
+
+    print(">>> RotateAllQuaternion Used - Rotating... <<<")
+
+    # Prevent auto keyframing and location lock from being active
+    autoKey = context.scene.tool_settings.use_keyframe_insert_auto
+    context.scene.tool_settings.use_keyframe_insert_auto = False
+
+    bpy.ops.object.select_all(action='SELECT')
+    ActivateObject(target)
+
+    # Obtain the current rotation mode
+    order = target.rotation_mode
+    print("Euler Mode...", order)
+
+    # Sort out how we're going to filter through the rotation order
+    rotationOrder = []
+    rotationComponents = []
+    axisX = [0, (1.0, 0.0, 0.0), (True, False, False)]
+    axisY = [1, (0.0, 1.0, 0.0), (False, True, False)]
+    axisZ = [2, (0.0, 0.0, 1.0), (False, False, True)]
+
+    if order == 'ZYX':
+        if forward is True:
+            rotationComponents = [axisZ, axisY, axisX]
+        else:
+            rotationComponents = [axisX, axisY, axisZ]
+    elif order == 'ZXY':
+        if forward is True:
+            rotationComponents = [axisZ, axisX, axisY]
+        else:
+            rotationComponents = [axisY, axisX, axisZ]
+    elif order == 'YZX':
+        if forward is True:
+            rotationComponents = [axisY, axisZ, axisX]
+        else:
+            rotationComponents = [axisX, axisZ, axisY]
+    elif order == 'YXZ':
+        if forward is True:
+            rotationComponents = [axisY, axisX, axisZ]
+        else:
+            rotationComponents = [axisZ, axisX, axisY]
+    elif order == 'XZY':
+        if forward is True:
+            rotationComponents = [axisX, axisZ, axisY]
+        else:
+            rotationComponents = [axisY, axisZ, axisX]
+    elif order == 'XYZ':
+        if forward is True:
+            rotationComponents = [axisX, axisY, axisZ]
+        else:
+            rotationComponents = [axisZ, axisY, axisX]
+
+
+    # Set the pivot to be the target object
+    backupPivot = 'CURSOR'
+    backupAlign = False
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            backupPivot = area.spaces[0].pivot_point
+            backupAlign = area.spaces[0].use_pivot_point_align
+            area.spaces[0].pivot_point = 'ACTIVE_ELEMENT'
+            area.spaces[0].use_pivot_point_align = False
+
+    print("Rotating Target...", target, rotation)
+    print("Target Rotation...", rotation)
+
+    # Rotate in Euler order
+    for i, item in enumerate(rotationComponents):
+        if rotation[item[0]] != 1:
+
+            print("Rotating...", rotation[item[0]])
+            bpy.ops.transform.rotate(
+                value=rotation[item[0]],
+                axis=item[1],
+                constraint_axis=item[2],
+                constraint_orientation='GLOBAL',
+                release_confirm=True
+                )
+
+            print("Rotated in the", item[0], "axis...", degrees(target.rotation_euler[item[0]]))
+
+    # Restore the pivot
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            area.spaces[0].pivot_point = backupPivot
+            area.spaces[0].use_pivot_point_align = backupAlign
+
+    # Restore the previous setting
+    context.scene.tool_settings.use_keyframe_insert_auto = autoKey
+
+
+def ScaleAll(context, scale, constraintAxis):
+
+    print(">>>> Scaling EVERYTHING <<<<")
+
+    # Prevent auto keyframing and location lock from being active
+    autoKey = context.scene.tool_settings.use_keyframe_insert_auto
+    context.scene.tool_settings.use_keyframe_insert_auto = False
+
+    bpy.ops.object.select_all(action='SELECT')
+
+    bpy.ops.transform.resize(
+        value=scale,
+        constraint_axis=constraintAxis,
+        constraint_orientation='GLOBAL',
+        mirror=False,
+        proportional='DISABLED',
+        proportional_edit_falloff='SMOOTH',
+        proportional_size=1.0,
+        snap=False,
+        snap_target='CLOSEST',
+        snap_point=(0.0, 0.0, 0.0),
+        snap_align=False,
+        snap_normal=(0.0, 0.0, 0.0),
+        gpencil_strokes=False,
+        texture_space=False,
+        remove_on_cancel=False,
+        release_confirm=False
+        )
+
+    # Restore the previous setting
+    context.scene.tool_settings.use_keyframe_insert_auto = autoKey
+
+def CheckSuffix(string, suffix):
+
+    strLength = len(string)
+    suffixLength = len(suffix)
+    diff = strLength - suffixLength
+    index = string.rfind(suffix)
+
+    #print("String Length...", strLength)
+    #print("Suffix Length...", suffixLength)
+    #print("Diff............", diff)
+    #print("Index...........", index)
+
+    if index == diff and index != -1:
+        #print("Suffix is True")
+        return True
+
+    else:
+        #print("Suffix is False")
+        return False
+
+def CheckPrefix(string, prefix):
+
+    strLength = len(string)
+    prefixLength = len(prefix)
+    index = string.find(prefix)
+
+    print("String..........", string)
+    print("Prefix..........", prefix)
+    print("String Length...", strLength)
+    print("Prefix Length...", prefixLength)
+    print("Index...........", index)
+
+    if index == 0:
+        print("Suffix is True")
+        return True
+
+    else:
+        print("Suffix is False")
+        return False
+
+
+
+def CheckForTags(context, string):
+
+    scn = context.scene.CAPScn
+    user_preferences = context.user_preferences
+    addon_prefs = user_preferences.addons[__package__].preferences
+
+    hasLP = CheckSuffix(string, addon_prefs.lp_tag)
+    hasHP = CheckSuffix(string, addon_prefs.hp_tag)
+    hasCG = CheckSuffix(string, addon_prefs.cg_tag)
+    hasCX = CheckSuffix(string, addon_prefs.cx_tag)
+
+    if hasLP is False and hasHP is False and hasCG is False and hasCX is False:
+        return False
+
+    else:
+        return True
+
+def RemoveObjectTag(context, object, export_default):
+
+    scn = context.scene.CAPScn
+
+    print(">>> Removing Tags <<<")
+
+    # Create a new string to return
+    newString = ""
+
+    for tag in export_default.tags:
+        #print("Found tag...", tag.name)
+        passed_type_filter = False
+
+        #If the object matches the type filter, we can continue
+        #print("Checking Type Filter.....", tag.object_type)
+
+        typeFilter = 'NONE'
+
+        if tag.object_type == '1':
+            typeFilter = 'NONE'
+            #print("Object matches type filter")
+            passed_type_filter = True
+
+        elif tag.object_type == '2':
+            typeFilter = 'MESH'
+        elif tag.object_type == '3':
+            typeFilter = 'CURVE'
+        elif tag.object_type == '4':
+            typeFilter = 'SURFACE'
+        elif tag.object_type == '5':
+            typeFilter = 'META'
+        elif tag.object_type == '6':
+            typeFilter = 'FONT'
+        elif tag.object_type == '7':
+            typeFilter = 'ARMATURE'
+        elif tag.object_type == '8':
+            typeFilter = 'LATTICE'
+        elif tag.object_type == '9':
+            typeFilter = 'EMPTY'
+        elif tag.object_type == '10':
+            typeFilter = 'CAMERA'
+        elif tag.object_type == '11':
+            typeFilter = 'LAMP'
+        elif tag.object_type == '12':
+            typeFilter = 'SPEAKER'
+
+        #print("Type Filter Found...", typeFilter)
+
+        if tag.object_type != '1':
+            if object.type == typeFilter:
+                #print("Object matches type filter")
+                passed_type_filter = True
+
+        if passed_type_filter is True:
+            if tag.name_filter != "":
+                if tag.name_filter_type is '1':
+                    if CheckSuffix(object.name, tag.name_filter) is True:
+                        newString = object.name.replace(tag.name_filter, "")
+                        print("Tag removed, new name:", newString)
+                        return newString
+
+                elif tag.name_filter_type is '2':
+                    if object.name.find(tag.name_filter) == 0:
+                        newString = object.name.replace(tag.name_filter, "")
+                        print("Tag removed, new name:", newString)
+                        return newString
+
+                elif tag.name_filter_type is '3':
+                    if object.name.find(tag.name_filter) != -1:
+                        newString = object.name.replace(tag.name_filter, "")
+                        print("Tag removed, new name:", newString)
+                        return newString
+
+    print("Could not remove tag, none found.  Exiting...")
+    return ""
+
+def IdentifyObjectTag(context, object, export_default):
+
+    scn = context.scene
+
+    print(">>> Checking Name Filter <<<")
+
+    i = 0
+
+    # Now collect objects based on the filtering categories
+    for tag in export_default.tags:
+        #print("Found tag...", tag.name)
+
+        # NAME CHECK!
+        passed_name_filter = False
+        passed_type_filter = False
+
+        if tag.name_filter != "":
+            if tag.name_filter_type is '1':
+                if CheckSuffix(object.name, tag.name_filter) is True:
+                    #print("Object matches name filter")
+                    passed_name_filter = True
+
+            elif tag.name_filter_type is '2':
+                if object.name.find(tag.name_filter) == 0:
+                    #print("Object matches name filter")
+                    passed_name_filter = True
+
+            elif tag.name_filter_type is '3':
+                if object.name.find(tag.name_filter) != -1:
+                    #print("Object matches name filter")
+                    passed_name_filter = True
 
         else:
-            target.GTGrp.is_own_group = True
+            #print("Object matches name filter")
+            passed_name_filter = True
 
-        group.objects.link(target)
+        #print("Checking Type Filter.....", tag.object_type)
 
-        if len(target.children) is not 0:
-            for child in target.children:
-                group = bpy.data.groups[groupName]
-                group.objects.link(child)
+        typeFilter = 'NONE'
 
-        print("X - Exiting AddToGroup")
-        return
+        if tag.object_type == '1':
+            typeFilter = 'NONE'
+            #print("Object matches type filter")
+            passed_type_filter = True
 
-    # Otherwise create a new group
-    print("O - Creating new group")
-    FocusObject(target)
-    bpy.ops.group.create(name=groupName)
-    group = bpy.data.groups[groupName]
-    # group.objects.link(target)
+        elif tag.object_type == '2':
+            typeFilter = 'MESH'
+        elif tag.object_type == '3':
+            typeFilter = 'CURVE'
+        elif tag.object_type == '4':
+            typeFilter = 'SURFACE'
+        elif tag.object_type == '5':
+            typeFilter = 'META'
+        elif tag.object_type == '6':
+            typeFilter = 'FONT'
+        elif tag.object_type == '7':
+            typeFilter = 'ARMATURE'
+        elif tag.object_type == '8':
+            typeFilter = 'LATTICE'
+        elif tag.object_type == '9':
+            typeFilter = 'EMPTY'
+        elif tag.object_type == '10':
+            typeFilter = 'CAMERA'
+        elif tag.object_type == '11':
+            typeFilter = 'LAMP'
+        elif tag.object_type == '12':
+            typeFilter = 'SPEAKER'
 
-    if len(target.children) is not 0:
-        for child in target.children:
-            FocusObject(child)
-            group.objects.link(child)
+        #print("Type Filter Found...", typeFilter)
 
-    print("X - Exiting AddToGroup")
+        if tag.object_type != '1':
+            if object.type == typeFilter:
+                print("Object matches type filter")
+                passed_type_filter = True
 
+        if passed_type_filter is True and passed_name_filter is True:
+            print("Filter Found! ...", str(i))
+            return i
 
-def AddToExistingGroup(target, destination):
+        i += 1
 
-    print("---Inside AddToExistingGroup---")
+    return -1
 
-    groupName = destination.GTObj.asset_name
+def CompareObjectWithTag(context, object, tag):
+    scn = context.scene
 
-    # Find the group object specified
-    if groupName in bpy.data.groups:
-        print("O - Found group specified")
-        group = bpy.data.groups[groupName]
-        group.objects.link(target)
+    print(">>> Comparing Object With Tag <<<")
 
-        if len(target.children) is not 0:
-            for child in target.children:
-                group.objects.link(child)
+    # NAME CHECK!
+    passed_name_filter = False
+    passed_type_filter = False
 
-    else:
-        print("! - Found no existing object")
-        return False
+    if tag.name_filter != "":
+        if tag.name_filter_type is '1':
+            if CheckSuffix(object.name, tag.name_filter) is True:
+                #print("Object matches name filter")
+                passed_name_filter = True
 
+        elif tag.name_filter_type is '2':
+            if object.name.find(tag.name_filter) == 0:
+                #print("Object matches name filter")
+                passed_name_filter = True
 
-def AddToNewGroup(target, groupName, increment):
-    # This is exclusively for singular objects exiting groups or base parenting, that need
-    # a group not inhabited by another object
-    print("---Inside AddToNewGroup---")
-
-    # Find the group object specified
-    if groupName in bpy.data.groups:
-        print("O - Found group specified")
-        group = bpy.data.groups[groupName]
-
-        # Now see if there are any objects in it
-        if len(group.objects) is not 0:
-
-            print("! - Group has objects, incrementing...")
-            # If there is, increment the name and attempt adding again
-            newGroupName = groupName + "0" + str(increment + 1)
-            AddToNewGroup(target, newGroupName, increment + 1)
-
-            return
-
-        # If not, move in!
-        else:
-            print("O - Group has no objects, adding...")
-            group.objects.link(target)
-            target.GTGrp.is_own_group = True
-
-            if len(target.children) is not 0:
-                for child in target.children:
-                    group.objects.link(child)
-
-            target.GTObj.old_asset_name = groupName
-            target.GTObj.asset_name = groupName
-
-            return
-
-        return
+        elif tag.name_filter_type is '3':
+            if object.name.find(tag.name_filter) != -1:
+                #print("Object matches name filter")
+                passed_name_filter = True
 
     else:
-        # Otherwise create a new group
-        print("O - Creating new group")
-        bpy.ops.group.create(name=groupName)
-        group = bpy.data.groups[groupName]
+        #print("Object matches name filter")
+        passed_name_filter = True
+
+    #print("Checking Type Filter.....", tag.object_type)
+
+    typeFilter = 'NONE'
+
+    if tag.object_type == '1':
+        typeFilter = 'NONE'
+        #print("Object matches type filter")
+        passed_type_filter = True
+
+    elif tag.object_type == '2':
+        typeFilter = 'MESH'
+    elif tag.object_type == '3':
+        typeFilter = 'CURVE'
+    elif tag.object_type == '4':
+        typeFilter = 'SURFACE'
+    elif tag.object_type == '5':
+        typeFilter = 'META'
+    elif tag.object_type == '6':
+        typeFilter = 'FONT'
+    elif tag.object_type == '7':
+        typeFilter = 'ARMATURE'
+    elif tag.object_type == '8':
+        typeFilter = 'LATTICE'
+    elif tag.object_type == '9':
+        typeFilter = 'EMPTY'
+    elif tag.object_type == '10':
+        typeFilter = 'CAMERA'
+    elif tag.object_type == '11':
+        typeFilter = 'LAMP'
+    elif tag.object_type == '12':
+        typeFilter = 'SPEAKER'
+
+    #print("Type Filter Found...", typeFilter)
+
+    if tag.object_type != '1':
+        if object.type == typeFilter:
+            #print("Object matches type filter")
+            passed_type_filter = True
+
+    if passed_type_filter is True and passed_name_filter is True:
+        print("Object matches tag!")
+        return True
+
+    print("Object doesn't match tag...")
+    return False
+
+def FindObjectsWithName(context, object_name):
+    objects_found = []
+
+    for object in context.scene.objects:
+        if object.name.find(object_name) != -1:
+            objects_found.append(object)
+
+    return objects_found
+
+def FindObjectWithTag(context, object_name, tag):
+
+    scn = context.scene
+
+    print(">>> Checking Name Filter <<<")
+
+    # First, we need to make the name of the object to search for
+    search_name = ""
+    search_object = None
+
+    if tag.name_filter != "":
+        if tag.name_filter_type is '1':
+            search_name = object_name + tag.name_filter
+
+        elif tag.name_filter_type is '2':
+            search_name = tag.name_filter + object_name
+
+        if bpy.data.objects.find(search_name) != -1:
+            search_object = bpy.data.objects[search_name]
+            #print("Found search object......", search_object.name)
+            #print("Checking Type Filter.....", tag.object_type)
+
+            typeFilter = 'NONE'
+
+            if tag.object_type == '1':
+                typeFilter = 'NONE'
+                #print("Object matches type filter")
+                return search_object
+
+            elif tag.object_type == '2':
+                typeFilter = 'MESH'
+            elif tag.object_type == '3':
+                typeFilter = 'CURVE'
+            elif tag.object_type == '4':
+                typeFilter = 'SURFACE'
+            elif tag.object_type == '5':
+                typeFilter = 'META'
+            elif tag.object_type == '6':
+                typeFilter = 'FONT'
+            elif tag.object_type == '7':
+                typeFilter = 'ARMATURE'
+            elif tag.object_type == '8':
+                typeFilter = 'LATTICE'
+            elif tag.object_type == '9':
+                typeFilter = 'EMPTY'
+            elif tag.object_type == '10':
+                typeFilter = 'CAMERA'
+            elif tag.object_type == '11':
+                typeFilter = 'LAMP'
+            elif tag.object_type == '12':
+                typeFilter = 'SPEAKER'
 
-        target.GTGrp.is_own_group = True
+            #print("Type Filter Found...", typeFilter)
 
-        if len(target.children) is not 0:
-            # group.objects.link(target)
-            for child in target.children:
-                #group = bpy.data.groups[groupName]
-                group.objects.link(child)
+            if tag.object_type != '1':
+                if search_object.type == typeFilter:
+                    print("Object matches type filter")
+                    return search_object
 
-        # This is called after all objects are assigned, as it renames everything in the group
-        target.GTObj.old_asset_name = groupName
-        target.GTObj.asset_name = groupName
+    print("Object doesn't match type filter")
+    return None
 
-        print("# - New Asset Name:")
-        print(target.GTObj.asset_name)
 
-        return
+def SearchModifiers(target, currentList):
 
-
-def AddToMultiGroup(target, destination):
-
-    print("---Inside AddToMultiGroup---")
-
-    groupName = destination.GTObj.asset_name
-
-    # Find and add the object to the group, and ensure everything runs smoothly
-    # This adds extra functionality for if the object being joined has only one object
-    if groupName in bpy.data.groups:
-        print("O - Found the group in AddToGroup")
-
-        group = bpy.data.groups[groupName]
-
-        hasGroup = 0
-
-        print("? - Counting number of objects in group that have a group")
-        # This is used to create a dummy object if only two main objects inhabit this
-        for object in group.objects:
-            if object.GTGrp.has_group_object is True:
-                hasGroup += 1
-
-        print("# - hasGroup Total")
-        print(hasGroup)
-        # If no objects in the group have a group, we need to set one up.
-        # Find the object that is it's own object and set it up there.
-        alreadyDone = False
-
-        if hasGroup == 0:
-            print("? - No objects found, searching")
-            for object in group.objects:
-                if alreadyDone == False:
-                    if object.GTGrp.is_own_group is True:
-                        print("> - Setting up Dummy")
-
-                        # Create the dummy! owo
-                        alreadyDone = True
-                        CreateGroupDummy(object.GTObj.asset_name, '1')
-
-                        object.GTGrp.is_own_group = False
-                        object.GTGrp.has_group_object = True
-
-                        AttachToDummy(object)
-
-                        if len(object.children) is not 0:
-                            for child in object.children:
-                                child.GTGrp.has_group_object = True
-
-        print("> - Linking object to found group")
-        group.objects.link(target)
-        target.GTGrp.is_own_group = False
-        target.GTGrp.has_group_object = True
-
-        target.GTObj.old_asset_name = groupName
-        target.GTObj.asset_name = groupName
-
-        if len(target.children) is not 0:
-            for child in target.children:
-                print("> - Linking children to found group")
-                #group = bpy.data.groups[groupName]
-                group.objects.link(child)
-                child.GTGrp.has_group_object = True
-                child.GTObj.old_asset_name = groupName
-                child.GTObj.asset_name = groupName
-
-        AttachToDummy(target)
-
-        print("X - Exiting AddToMultiGroup")
-
-        return
-
-    # Otherwise create a new group
-    print("O - Creating new group")
-    bpy.ops.group.create(name=groupName)
-    group = bpy.data.groups[groupName]
-    # group.objects.link(target)
-
-    CreateGroupDummy(target.GTObj.asset_name, '1')
-    target.GTGrp.has_group_object = True
-
-    if len(target.children) is not 0:
-        group.objects.link(target)
-
-        for child in target.children:
-            child.GTGrp.has_group_object = True
-            # group.objects.link(child)
-
-    print("X - Exiting AddToMultiGroup")
-
-
-def FindInGroup(targetName, groupName):
-    print("Rawr")
-
-    # Find the object in the group, return a boolean as to whether it was found or not
-    if groupName in bpy.data.groups:
-        print("GroupName Found")
-        group = bpy.data.groups[groupName]
-
-        if target.name in group.objects:
-            return True
-
-        else:
-            return False
-
-    else:
-        return False
-
-
-def RemoveFromAllGroups(target):
-
-    print("Inside Remove From All Groups")
-    FocusObject(target)
-    bpy.ops.group.objects_remove_all()
-
-    if len(target.children) is not 0:
-        for child in target.children:
-            FocusObject(child)
-            bpy.ops.group.objects_remove_all()
-
-    # Temporary code to try and delete ghost objects
-    # Doesn't currently work, exclude for now
-    # if target.GTObj.asset_name in bpy.data.groups:
-        #group = bpy.data.groups[target.GTObj.asset_name]
-
-        # if len(group.objects) == 0:
-            # bpy.ops.group.delete(target.GTObj.asset_name)
-
-
-def SwitchToExistingGroup(target, destination):
-
-    obj = target.GTObj
-    grp = target.GTGrp
-    oldAsset = obj.assetName
-    FocusObject(target)
-
-    print("---Inside SwitchToNewAsset---")
-
-    # -------- FAILSAFES ------------
-    if destination is None:
-        print("! - HEY!  You didnt specify a destination!")
-        return False
-
-    if target is None:
-        print("! - HEY!  You didnt specify a target!")
-        return False
-
-    # First off, if the target and destination are identical, tell the caller to fuck off.
-    if target.name == destination.name:
-        print("! - The target and destination are the same, fuck off o_o")
-        return False
-
-    # -------- DETACH ------------
-    # Now thats checked, remove the target from any group it was in
-    RemoveFromAllGroups(target)
-
-    # -------- PREPARATION ------------
-    # If this object has a parent, cut the ambilical cord
-    if target.parent is not None:
-        print("! - The target has a parent, cutting ambilical...")
-        parent = target.parent
-        ClearParent(target)
-
-    # Now if this object was in a group previously, detach it from any dummy
-    if grp.has_group_object is True:
-        DetachFromDummy(target)
-        grp.has_group_object = False
-
-        # If a parent is flying, assign tags to the children
-        if sel(target.children) is not 0:
-            for child in target.children:
-                child.GTGrp.has_group_object = False
-                GenerateName(child)
-
-    # -------- SWITCH ------------
-    AddToGroup(target, destination)
-
-    # -------- CUSTOMS -----------
-    CheckAsset(oldAsset)
-
-    # Do a quick check to ensure this object is alone
-    obj.object_type = '1'
-
-    GenerateName(target)
-
-    return True
-
-
-def SwitchToNewAsset(target, newAssetName):
-
-    obj = target.GTObj
-    grp = target.GTGrp
-    oldAsset = obj.asset_name
-    FocusObject(target)
-
-    print("---Inside SwitchToNewAsset---")
-
-    # -------- FAILSAFES ------------
-    if target is None:
-        print("! - HEY!  You didnt specify a target!")
-        return False
-
-    if newAssetName is "" or newAssetName is "None":
-        print("! - HEY!  You didnt specify a proper asset name!")
-        return False
-
-    # -------- DETACH ------------
-    # Now thats checked, remove the target from any group it was in
-    RemoveFromAllGroups(target)
-
-    # -------- PREPARATION ------------
-    # If this object has a parent, cut the ambilical cord
-    if target.parent is not None:
-        print("! - The target has a parent, cutting ambilical...")
-        parent = target.parent
-        ClearParent(target)
-
-    # Now if this object was in a group previously, detach it from any dummy
-    if grp.has_group_object is True:
-        DetachFromDummy(target)
-        grp.has_group_object = False
-
-        # If a parent is flying, assign tags to the children
-        if len(target.children) is not 0:
-            for child in target.children:
-                child.GTGrp.has_group_object = False
-                GenerateName(child)
-
-    # -------- SWITCH ------------
-    AddToNewGroup(target, newAssetName, 0)
-
-    # -------- CUSTOMS -----------
-    CheckAsset(oldAsset)
-
-    # Finally ensure the object is 'top-level', now it's alone
-    obj.object_type = '1'
-
-    GenerateName(target)
-
-    return True
-
-
-def SwitchToGroupAsset(target, destination):
-
-    obj = target.GTObj
-    grp = target.GTGrp
-    oldAsset = obj.asset_name
-    oldObjectType = '1'
-    FocusObject(target)
-
-    print("---Inside SwitchToNewAsset---")
-
-    # -------- FAILSAFES ------------
-    if destination is None:
-        print("! - HEY!  You didnt specify a destination!")
-        return False
-
-    if target is None:
-        print("! - HEY!  You didnt specify a target!")
-        return False
-
-    # First off, if the target and destination are identical, tell the caller to fuck off.
-    if target.name == destination.name:
-        print("! - The target and destination are the same, fuck off o_o")
-        return False
-
-    # Additionally, if the object selected has any children for some reason, it cant be further
-    # parented.
-    # if len(target.children) is not 0:
-        #print("! - The target is already a parent, you cant currently parent a parent :/")
-        # return False
-
-    # -------- DETACH ------------
-    # Now thats checked, remove the target from any group it was in
-    RemoveFromAllGroups(target)
-
-    # -------- PREPARATION ------------
-    # If this object has a parent, cut the ambilical cord
-    if target.parent is not None:
-        print("! - The target has a parent, cutting ambilical...")
-        parent = target.parent
-        ClearParent(target)
-
-    # Now if this object was in a group previously, detach it from any dummy
-    if grp.has_group_object is True:
-        DetachFromDummy(target)
-        grp.has_group_object = False
-
-    # -------- FLIGHT ------------
-    AddToMultiGroup(target, destination)
-
-    # -------- CUSTOMS -----------
-    # Ensure the target name doesn't clash with any other object name inside the group
-    print("? - Checking the same base name isnt in the group:")
-    if target.GTObj.object_type is '1':
-        target.GTObj.base_name = target.GTObj.base_name
-
-    else:
-        target.GTObj.component_name = target.GTObj.component_name
-
-    # Check the previously left asset to see if anything needs to be done
-    CheckAsset(oldAsset)
-
-    GenerateName(target)
-
-    return True
-
-
-def SwitchToParentAsset(target, destination):
-
-    obj = target.GTObj
-    grp = target.GTGrp
-    oldAsset = obj.asset_name
-    oldObjectType = '1'
-    FocusObject(target)
-
-    print("---Inside SwitchToParentAsset---")
-
-    # -------- FAILSAFES ------------
-    if destination is None:
-        print("! - HEY!  You didnt specify a destination!")
-        return False
-
-    if target is None:
-        print("! - HEY!  You didnt specify a target!")
-        return False
-
-    # First off, if the target and destination are identical, tell the caller to fuck off.
-    if target.name == destination.name:
-        print("! - The target and destination are the same, fuck off o_o")
-        return False
-
-    # Additionally, if the object selected has any children for some reason, it cant be further
-    # parented.
-    if len(target.children) is not 0:
-        print("! - The target is already a parent, you cant currently parent a parent :/")
-        return False
-
-    # -------- DETACH ------------
-    # Now thats checked, remove the target from any group it was in
-    RemoveFromAllGroups(target)
-
-    # -------- PREPARATION ------------
-    # If this object has a parent, cut the ambilical cord
-    # Also track whether the object was parented or not
-    if target.parent is not None:
-        print("! - The target has a parent, cutting ambilical...")
-        parent = target.parent
-        ClearParent(target)
-        oldObjectType = '2'
-
-    else:
-        oldObjectType = '1'
-
-    # Now if this object was in a group previously, detach it from any dummy
-    if grp.has_group_object is True:
-        DetachFromDummy(target)
-        grp.has_group_object = False
-
-    # -------- FLIGHT ------------
-    AddParent(target, destination)
-    AddToExistingGroup(target, destination)
-
-    # -------- CUSTOMS -----------
-    # Make sure it's set to now have it's own group
-    grp.is_own_group = False
-
-    # If the object's new parent has a group, this object needs it to be added
-    if target.parent.GTGrp.has_group_object is True:
-        AttachToDummy(target)
-        grp.has_group_object = True
-        target.GTObj.old_asset_name = target.parent.GTObj.asset_name
-        target.GTObj.asset_name = target.parent.GTObj.asset_name
-
-    # Check the previously left asset to see if anything needs to be done
-    CheckAsset(oldAsset)
-
-    # Finally set the object as being a parent of another object
-    obj.old_object_type = oldObjectType
-    obj.object_type = '2'
-
-    GenerateName(target)
-    GenerateName(destination)
-
-    return True
-
-
-def DetachParent(target):
-
-    # So basically, all of the things from SwitchToNewAsset, without any of the parent or group detaching.
-    obj = target.GTObj
-    grp = target.GTGrp
-    FocusObject(target)
-
-    print("---Inside DetachParent---")
-
-    # -------- FAILSAFES ------------
-    if target is None:
-        print("! - HEY!  You didnt specify a target!")
-        return False
-
-    if target.parent is None:
-        print("! - HEY!  This asset doesn't have a parent, fuck off!")
-        return False
-
-    parent = target.parent
-
-    # *sigh* , have to do this the hard way
-    # First detach the parent from the dummy
-    if grp.has_group_object is True:
-        DetachFromDummy(target.parent)
-
-    # NOW WE CAN CLEAR THE PARENT
-    ClearParent(target)
-
-    # Now if this object was in a group previously, attach it to the dummy
-    if grp.has_group_object is True:
-        AttachToDummy(target)
-        grp.has_group_object = True
-
-    # Used to ensure it doesnt increment anything when the child leaves the parent
-    obj.update_toggle = True
-    obj.base_name = "None"
-
-    GenerateName(target)
-    AttachToDummy(parent)
-
-    # Finally ensure the object is 'top-level', now it's alone
-    obj.object_type = '1'
-
-    return True
-
-
-def CheckAsset(groupName):
-
-    # This function tries to refresh any settings for groups that have been edited, but are not
-    # the focus of an operator
-
-    # This code checks whether there's a multi-base asset
-    # There may be an issue with this code as SwitchAsset is used by components as well as base objects they belong to.
-    print("-" * 40)
-    print("---Inside CheckAsset---")
-    print(groupName)
-
-    if groupName in bpy.data.groups:
-        group = bpy.data.groups[groupName]
-        baseCount = 0
-        compCount = 0
-        hasGroup = 0
-        finalCount = 0
-        baseObject = None
-
-        if len(group.objects) is not 0:
-            for object in group.objects:
-                if object.GTObj.object_type is '1':
-                    if object.GTGrp.is_group_object is False and object.GTGrp.is_origin_point is False:
-                        print(object.name)
-                        baseObject = object
-                        baseCount += 1
-
-                # If the object has no parent, we can determine it as having an attachment to the dummy
-                elif object.parent is None:
-                    print(object.name)
-                    compCount += 1
-
-                # If the group we left has a group object, count it up
-                if object.GTGrp.has_group_object is True:
-                    print(object.name)
-                    hasGroup += 1
-
-            finalCount = baseCount + compCount
-            print("# - Final Count = ")
-            print(finalCount)
-            print("# - Has Group = ")
-            print(finalCount)
-
-            if finalCount == 1 or hasGroup == 1:
-                print("! - The group only has one base or component, delete the dummy!")
-                print("# - The group with one base or component is.....")
-                print(group.name)
-                emptyObject = None
-                originObject = None
-                normalObjects = []
-
-                # Preserving the objects location has to happen again, e_e
-                cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
-                previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
-
-                # Sort through the objects we have to catch the empties and store the normal objects
-                for object in group.objects:
-                    if object.GTGrp.is_origin_point is True:
-                        originObject = object
-                    elif object.GTGrp.is_group_object is True:
-                        emptyObject = object
-
-                    else:
-                        normalObjects.append(object)
-
-                # If we didn't find an empty or origin object, we cant continue as theres
-                # nothing to do.
-                if emptyObject is None or originObject is None:
-                    return
-
-                # Delete the empty objects, ensuring that normal objects are detached first
-                if originObject is not None:
-                    DeleteObject(originObject)
-
-                if emptyObject is not None:
-                    for object in normalObjects:
-                        DetachFromDummy(object)
-
-                    DeleteObject(emptyObject)
-
-                # Now move the normal object out of the asset
-                # We need to figure out if theres only one top-level object or not (AKA, the group
-                # dissolved due to a parenting operation)
-
-                multipleObjects = False
-
-                if len(normalObjects) > 1:
-                    multipleObjects = True
-
-                for object in normalObjects:
-
-                    if object.GTObj.object_type is '1':
-                        print("> - Base found, switching to new asset")
-                        print(object.name)
-                        print(object.GTObj.base_name)
-                        SwitchToNewAsset(object, object.GTObj.component_name)
-
-                    elif multipleObjects is True:
-                        if object.parent is not None:
-                            print("> - Child found, doing nothing")
-
-                    elif multipleObjects is False:
-                        print("> - Component found, switching to new asset")
-                        SwitchToNewAsset(object, object.GTObj.component_name)
-
-                # Restore the cursor location a final time
-                bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
-
-    print("-" * 40)
-
-# Checks the name to see if anything is wrong, and fixes any issues with it.
-
-
-def GenerateName(object):
-
-    # New naming paradigm, component name is now the default name.
-    #print("---Inside GenerateName---")
-
-    if object.GTGrp.is_group_object is True:
-        assetName = object.GTObj.asset_name
-        object.name = assetName + "Dummy"
-        return None
-
-    elif object.GTGrp.is_origin_point is True:
-        assetName = object.GTObj.asset_name
-        object.name = assetName + "Origin"
-        return None
-
-    else:
-        # Gather the object names
-        stageEx = FindAssetTypeName(object)
-
-        assetName = ""
-        assetEx = ""
-        if object.GTGrp.has_group_object is True:
-            assetName = object.GTObj.asset_name
-            assetEx = "_"
-
-        baseName = ""
-        baseEx = ""
-        if object.GTObj.base_name != "None" or object.GTObj.base_name != "":
-            if object.parent is not None:
-                #print("> - Generating Parent Name")
-                # print(object.GTObj.base_name)
-                baseName = object.GTObj.base_name
-                baseEx = "_"
-
-        compName = ""
-        compEx = ""
-        if object.GTObj.component_name != "None" or object.GTObj.component_name != "":
-            #print("> - Generating Object Name")
-            # print(object.GTObj.component_name)
-            compName = object.GTObj.component_name
-            compEx = "_"
-
-        freezeEx = ""
-        if object.GTObj.is_frozen is True:
-            freezeEx = "_FZ"
-
-        object.name = assetName + assetEx + baseName + baseEx + compName + compEx + stageEx + freezeEx
-
-        return None
-
-
-def CheckGroupName(target, name, increment):
-
-    print("---Inside CheckGroupName---")
-    print("# - Target:")
-    print(target.name)
-    print("# - Name Being Searched:")
-    print(name)
-
-    # This definition ensures the name currently set for the object group isn't taken by another group.
-
-    if name in bpy.data.groups:
-        print("! - Found group object")
-
-        group = bpy.data.groups[name]
-
-        print("# - Group name =")
-        print(group.name)
-
-        for object in group.objects:
-            if object.name == target.name:
-                print("> - We are in the group found, no need to change")
-                return name
-
-        # Now see if there are any objects in it
-        if len(group.objects) >= 1:
-            if group.objects[0].name != target.name:
-                print("! - Group has objects, incrementing")
-
-                # If there is, increment the name and attempt adding again
-                newName = name + "0" + str(increment + 1)
-                finalName = CheckGroupName(target, newName, (increment + 1))
-
-                return finalName
-
-        print("> - Group has no objects, leaving")
-        # Othewrwise return the new name
-
-        return name
-
-    return name
-
-
-def CheckObjectName(target, name, increment):
-
-    obj = target.GTObj
-    grp = target.GTGrp
-    objects = []
-
-    print("---Inside CheckObjectName---")
-    print("# - Name to be searched for:")
-    print(name)
+    print(">>> Searching Modifiers <<<")
     print(target.name)
 
-    # This definition ensures the name currently set for the component isn't taken by another component in the same group.
+    object_list = []
 
-    if obj.asset_name in bpy.data.groups:
-        group = bpy.data.groups[obj.asset_name]
+    mod_types = {'ARRAY', 'BOOLEAN', 'MIRROR', 'SCREW', 'ARMATURE', 'CAST', 'CURVE', 'HOOK', 'LATTICE', 'MESH_DEFORM', 'SHRINKWRAP', 'SIMPLE_DEFORM', 'WARP', 'WAVE'}
 
-        print("# - Group name =")
-        print(group.name)
+    # This is used to define all modifiers that share the same object location property
+    mod_normal_types = {'BOOLEAN', 'SCREW', 'ARMATURE', 'CAST', 'CURVE', 'HOOK', 'LATTICE', 'MESH_DEFORM'}
 
-        objects = FindDummyConstraintObjects(obj.asset_name)
+    #Finds all the components in the object through modifiers that use objects
+    for modifier in target.modifiers:
+        if modifier.type in mod_types:
+            print("Modifier Found...", modifier)
 
-        if target.parent is not None:
-            for object in objects:
-                if target.parent.name == object.name:
-                    print("> - Group has no matches, leaving")
-                    return name
+            #Normal Object Types
+            if modifier.type in mod_normal_types:
+                if modifier.object is not None:
+                    print("Object Found In", modifier.name, ":", modifier.object.name)
 
-        for object in objects:
-            print("# - Searching Object:")
-            print(object.name)
-            if object.GTObj.component_name == name or object.GTObj.base_name == name:
-                print("! - Same component name")
-                if object.name != target.name:
-                    print("! - Identical Name Found, Incrementing...")
-                    print("# - Object Name Found = ")
-                    print(object.name)
+                    # Find out if this object matches others in the list before adding it.
+                    if (modifier.object in currentList) == False:
+                        print("Object successfully added.")
+                        object_list.append(modifier.object)
+                        currentList.append(modifier.object)
 
-                    # If there is, increment the name and attempt adding again
-                    newName = name + "0" + str(increment + 1)
-                    finalName = CheckObjectName(target, newName, (increment + 1))
+            #Array
+            elif modifier.type == 'ARRAY':
+                if modifier.start_cap is not None:
+                    print("Object Found In", modifier.name, ":", modifier.start_cap.name)
 
-                    # In case the object being checked is already in the same group as the
-                    # object found, the name need regenerating to avoid overlap
-                    GenerateName(object)
+                    if (modifier.start_cap in currentList) == False:
+                        print("Object successfully added.")
+                        object_list.append(modifier.start_cap)
+                        currentList.append(modifier.start_cap)
 
-                    return finalName
+            #Mirror
+            elif modifier.type == 'MIRROR':
+                if modifier.mirror_object is not None:
+                    print("Object Found In", modifier.name, ":", modifier.mirror_object.name)
 
-        print("> - Group has no matches, leaving")
-        return name
+                    if (modifier.mirror_object in currentList) == False:
+                        print("Object successfully added.")
+                        object_list.append(modifier.mirror_object)
+                        currentList.append(modifier.mirror_object)
 
-    return name
+            #Shrinkwrap
+            elif modifier.type == 'SHRINKWRAP':
+                if modifier.target is not None:
+                    print("Object Found In", modifier.name, ":", modifier.target.name)
+
+                    if (modifier.target in currentList) == False:
+                        print("Object successfully added.")
+                        object_list.append(modifier.target)
+                        currentList.append(modifier.target)
+
+            #Simple Deform
+            elif modifier.type == 'SIMPLE_DEFORM':
+                if modifier.origin is not None:
+                    print("Object Found In", modifier.name, ":", modifier.origin.name)
+
+                    if (modifier.origin in currentList) == False:
+                        print("Object successfully added.")
+                        object_list.append(modifier.origin)
+                        currentList.append(modifier.origin)
+
+            #Warp
+            elif modifier.type == 'WARP':
+                if modifier.object_from is not None:
+                    print("Object Found In", modifier.name, ":", modifier.object_from.name)
+
+                    if (modifier.object_from in currentList) == False:
+                        print("Object successfully added.")
+                        object_list.append(modifier.object_from)
+                        currentList.append(modifier.object_from)
+
+                if modifier.object_to is not None:
+                    print("Object Found In", modifier.name, ":", modifier.object_to.name)
+
+                    if (modifier.object_to in currentList) == False:
+                        print("Object successfully added.")
+                        object_list.append(modifier.object_to)
+                        currentList.append(modifier.object_to)
+
+            #Wave
+            elif modifier.type == 'WAVE':
+                if modifier.start_position_object is not None:
+                    print("Object Found In", modifier.name, ":", modifier.start_position_object.name)
+
+                    if (modifier.start_position_object in currentList) == False:
+                        print("Object successfully added.")
+                        object_list.append(modifier.start_position_object)
+                        currentList.append(modifier.start_position_object)
 
 
-def FindAssetTypeName(object):
+    return object_list
 
-    # Obtains the right asset type extension for the object.
-    # Make a temp variable
-    assetEx = "Temp"
+def SearchConstraints(target, currentList):
 
-    # Find the asset extension it needs
-    if int(object.GTObj.asset_type) is 1:
-        assetEx = "HP"
-    if int(object.GTObj.asset_type) is 2:
-        assetEx = "LP"
-    if int(object.GTObj.asset_type) is 3:
-        assetEx = "CG"
-    if int(object.GTObj.asset_type) is 4:
-        assetEx = "CX"
-    if int(object.GTObj.asset_type) is 5:
-        assetEx = "SM"
+    print(">>> Searching Constraints <<<")
+    print(target.name)
 
-    return assetEx
+    object_list = []
 
+    con_types_target = {'COPY_LOCATION', 'COPY_ROTATION', 'COPY_SCALE', 'COPY_TRANSFORMS', 'LIMIT_DISTANCE', 'TRANSFORM', 'CLAMP_TO', 'DAMPED_TRACK', 'LOCKED_TRACK', 'STRETCH_TO', 'TRACK_TO', 'ACTION', 'FLOOR', 'FOLLOW_PATH', 'PIVOT', 'SHRINKWRAP'}
 
+    con_types_alt = {'RAWR'}
+
+    for constraint in target.constraints:
+        #Normal Object Types
+        if constraint.type in con_types_target:
+            if constraint.target is not None:
+                print("Object Found In", constraint.name, ":", constraint.target.name)
+
+                if (constraint.target in currentList) == False:
+                    print("Object successfully added.")
+                    object_list.append(constraint.target)
+                    currentList.append(constraint.target)
+
+    return object_list
+
+def GetDependencies(objectList):
+
+    print(">>> Getting Dependencies <<<")
+
+    totalFoundList = []
+    totalFoundList += objectList
+
+    print("objectList...", objectList)
+
+    checkedList = []
+    currentList = []
+    currentList += objectList
+
+    while len(currentList) != 0:
+        item = currentList.pop()
+        print("Checking new objects...", item.name)
+
+        modifierOutput = SearchModifiers(item, totalFoundList)
+        constraintOutput = SearchConstraints(item, totalFoundList)
+
+        currentList += modifierOutput
+        currentList += constraintOutput
+
+        checkedList.append(item)
+        totalFoundList.append(item)
+
+        # Parents can affect the export indirectly, so it needs to be looked at.
+        if item.parent != None:
+            if (item.parent in totalFoundList) is False:
+                print("Parent found in", item.name, ":", item.parent.name)
+                currentList.append(item.parent)
+
+    print("Total found objects...", len(checkedList))
+    print(checkedList)
+
+    return checkedList
+
+# Should help me avoid the bus issue.
 def AddParent(child, parent):
 
     # I now have to add the cursor stuff here too, just in case...
@@ -1302,7 +1239,6 @@ def AddParent(child, parent):
     FocusObject(child)
     bpy.ops.view3D.snap_selected_to_cursor()
     bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
-
 
 def ClearParent(child):
     # Prepare the 3D cursor so it can keep the object in it's current location
@@ -1329,786 +1265,68 @@ def ClearParent(child):
     bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
     child.matrix_world = matrixcopy
 
+def FindWorldSpaceObjectLocation(target, context):
 
-# This is used for searching through modifiers to find objects in them!
-def SearchModifiers(target):
-
-    object_list = []
-
-    mod_types = {'ARRAY', 'BOOLEAN', 'MIRROR', 'SCREW', 'ARMATURE', 'CAST', 'CURVE', 'HOOK', 'LATTICE', 'MESH_DEFORM', 'SHRINKWRAP', 'SIMPLE_DEFORM', 'WARP', 'WAVE'}
-
-    # This is used to define all modifiers that share the same object location
-    mod_normal_types = {'BOOLEAN', 'SCREW', 'ARMATURE', 'CAST', 'CURVE', 'HOOK', 'LATTICE', 'MESH_DEFORM'}
-
-    # Finds all the components in the object through modifiers that use objects
-    for modifier in target.modifiers:
-
-        print("GTFIND - Modifiers Found")
-        if modifier.type in mod_types:
-            print("GTFIND - Right Type Found")
-
-            # Normal Object Types
-            if modifier.type in mod_normal_types:
-                print("GTFIND - Normal Object Found")
-                if modifier.object is not None:
-                    object_list.append(modifier.object)
-
-                    # If the modifier is a boolean, it should really have a specific default visibility option :P
-                    if modifier.type == 'BOOLEAN':
-                        modifier.object.GTObj.visibility = '3'
-
-            # Array
-            elif modifier.type == 'ARRAY':
-                if modifier.start_cap is not None:
-                    object_list.append(modifier.start_cap)
-
-            # Mirror
-            elif modifier.type == 'MIRROR':
-                print("GTFIND - Mirror Found")
-                if modifier.mirror_object is not None:
-                    object_list.append(modifier.mirror_object)
-
-            # Shrinkwrap
-            elif modifier.type == 'SHRINKWRAP':
-                print("GTFIND - Boolean Found")
-                if modifier.target is not None:
-                    object_list.append(modifier.target)
-
-            # Simple Deform
-            elif modifier.type == 'SIMPLE_DEFORM':
-                print("GTFIND - Boolean Found")
-                if modifier.origin is not None:
-                    object_list.append(modifier.origin)
-
-            # Warp
-            elif modifier.type == 'WARP':
-                print("GTFIND - Boolean Found")
-                if modifier.object_from is not None:
-                    object_list.append(modifier.object_from)
-                elif modifier.object_to is not None:
-                    object_list.append(modifier.object_to)
-
-            # Wave
-            elif modifier.type == 'WAVE':
-                print("GTFIND - Boolean Found")
-                if modifier.start_position_object is not None:
-                    object_list.append(modifier.start_position_object)
-
-    return object_list
-
-# This is used for searching through modifiers to find objects in them!
-
-
-def FindObjectInModifier(modifier):
-
-    return_object = None
-
-    mod_types = {'ARRAY', 'BOOLEAN', 'MIRROR', 'SCREW', 'ARMATURE', 'CAST', 'CURVE', 'HOOK', 'LATTICE', 'MESH_DEFORM', 'SHRINKWRAP', 'SIMPLE_DEFORM', 'WARP', 'WAVE'}
-
-    # This is used to define all modifiers that share the same object location
-    mod_normal_types = {'BOOLEAN', 'SCREW', 'ARMATURE', 'CAST', 'CURVE', 'HOOK', 'LATTICE', 'MESH_DEFORM'}
-
-    if modifier.type in mod_types:
-        print("GTFIND - Right Type Found")
-
-        # Normal Object Types
-        if modifier.type in mod_normal_types:
-            print("GTFIND - Boolean Found")
-            if modifier.object is not None:
-                return_object = modifier.object
-
-        # Array
-        elif modifier.type == 'ARRAY':
-            if modifier.start_cap is not None:
-                return_object = modifier.start_cap
-
-        # Mirror
-        elif modifier.type == 'MIRROR':
-            print("GTFIND - Mirror Found")
-            if modifier.mirror_object is not None:
-                return_object = modifier.mirror_object
-
-        # Shrinkwrap
-        elif modifier.type == 'SHRINKWRAP':
-            print("GTFIND - Boolean Found")
-            if modifier.target is not None:
-                return_object = modifier.target
-
-        # Simple Deform
-        elif modifier.type == 'SIMPLE_DEFORM':
-            print("GTFIND - Boolean Found")
-            if modifier.origin is not None:
-                return_object = modifier.origin
-
-        # Warp
-        elif modifier.type == 'WARP':
-            print("GTFIND - Boolean Found")
-            if modifier.object_from is not None:
-                return_object = modifier.object_from
-            elif modifier.object_to is not None:
-                return_object = modifier.object_to
-
-        # Wave
-        elif modifier.type == 'WAVE':
-            print("GTFIND - Boolean Found")
-            if modifier.start_position_object is not None:
-                return_object = modifier.start_position_object
-
-    print(return_object)
-    return return_object
-
-
-def LockTransform(objectName):
-
-    bpy.data.objects[objectName].lock_location[0] = True
-    bpy.data.objects[objectName].lock_location[1] = True
-    bpy.data.objects[objectName].lock_location[2] = True
-
-    bpy.data.objects[objectName].lock_rotation[0] = True
-    bpy.data.objects[objectName].lock_rotation[1] = True
-    bpy.data.objects[objectName].lock_rotation[2] = True
-
-    bpy.data.objects[objectName].lock_scale[0] = True
-    bpy.data.objects[objectName].lock_scale[1] = True
-    bpy.data.objects[objectName].lock_scale[2] = True
-
-
-def UnlockTransform(objectName):
-
-    bpy.data.objects[objectName].lock_location[0] = False
-    bpy.data.objects[objectName].lock_location[1] = False
-    bpy.data.objects[objectName].lock_location[2] = False
-
-    bpy.data.objects[objectName].lock_rotation[0] = False
-    bpy.data.objects[objectName].lock_rotation[1] = False
-    bpy.data.objects[objectName].lock_rotation[2] = False
-
-    bpy.data.objects[objectName].lock_scale[0] = False
-    bpy.data.objects[objectName].lock_scale[1] = False
-    bpy.data.objects[objectName].lock_scale[2] = False
-
-
-def FindHighestLocation(objects):
-
-    print("Rawr")
-
-    # Iterate through the objects, counting as we go along:
-    i = -1
-    highestZ = 0
-
-    # First find the lowest Z value in the object
-    for object in objects:
-        i += 1
-
-        if i == 0:
-            highestZ = object.location[2]
-
-        else:
-            if object.location[2] > highestZ:
-                highestZ = object.location[2]
-
-    return highestZ
-
-
-def FindLowestLocation(objects):
-
-    # Iterate through the objects, counting as we go along:
-    i = -1
-    lowestZ = 0
-
-    # First find the lowest Z value in the object
-    for object in objects:
-        i += 1
-
-        if i == 0:
-            lowestZ = object.location[2]
-
-        else:
-            if object.location[2] < lowestZ:
-                lowestZ = object.location[2]
-
-    return lowestZ
-
-
-def FindMedianLocation(objects):
-
-    print("Rawr")
-
-    xTotal = 0
-    yTotal = 0
-    zTotal = 0
-    count = 0
-
-    # Iterate through the objects, counting as we go along:
-    for object in objects:
-        count += 1
-        xTotal += object.location[0]
-        yTotal += object.location[1]
-        zTotal += object.location[2]
-
-    # Now divide each value by the count
-    xFinal = xTotal / count
-    yFinal = yTotal / count
-    zFinal = zTotal / count
-
-    return [xFinal, yFinal, zFinal]
-
-
-def CreateGroupDummy(groupName, dummyEnum):
-
-    # Gather objects for placing the dummy location
-    objects = FindDummyConstraintObjects(groupName)
-
-    # Save the current cursor location
+    # Preserve the current 3D cursor
     cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
     previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
 
-    # Find the median point in the group objects
-    dummyLocation = FindMedianLocation(objects)
-
-    # Position the cursor to the location
-    bpy.data.scenes[bpy.context.scene.name].cursor_location = dummyLocation
-
-    # Generate the Group Dummy
-    dummy = GenerateGroupDummy(dummyEnum)
-    dummy.GTObj.old_asset_name = groupName
-    dummy.GTObj.asset_name = groupName
-    dummy.GTObj.is_GT_asset = True
-    dummy.GTGrp.is_group_object = True
-
-    # Lock scale and rotation
-    bpy.data.objects[dummy.name].lock_rotation[0] = True
-    bpy.data.objects[dummy.name].lock_rotation[1] = True
-    bpy.data.objects[dummy.name].lock_rotation[2] = True
-
-    bpy.data.objects[dummy.name].lock_scale[0] = True
-    bpy.data.objects[dummy.name].lock_scale[1] = True
-    bpy.data.objects[dummy.name].lock_scale[2] = True
-
-    FocusObject(dummy)
-
-    # Assign it to the group
-    AddToGroup(dummy, groupName)
-
-    # Position the cursor back to it's original location
-    bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
-
-    # Generate the object name
-    GenerateName(dummy)
-
-    # Generate the origin
-    GenerateOrigin(groupName)
-
-    # Refocus the dummy
-    FocusObject(dummy)
-
-
-def GenerateGroupDummy(dummyEnum):
-
-    bpy.ops.object.select_all(action='DESELECT')
-    bpy.ops.object.add(type='EMPTY')
-    obj = bpy.context.scene.objects.active
-
-    if int(dummyEnum) is 1:
-        obj.empty_draw_type = 'PLAIN_AXES'
-
-    elif int(dummyEnum) is 2:
-        obj.empty_draw_type = 'SINGLE_ARROW'
-
-    elif int(dummyEnum) is 3:
-        obj.empty_draw_type = 'CIRCLE'
-
-    elif int(dummyEnum) is 4:
-        obj.empty_draw_type = 'CUBE'
-
-    elif int(dummyEnum) is 5:
-        obj.empty_draw_type = 'CONE'
-
-    return obj
-
-
-def AttachToDummy(target):
-
-    for constraint in target.constraints:
-        #print("Found a constraint")
-        if constraint.name == "Group Location":
-            #print("The object already has the constraint, leaving...")
-            return None
-
-    #print("---Inside AttachToDummy---")
-    # print("# - Target Object:")
-    # print(target.name)
-    dummy = None
-    groupName = target.GTObj.asset_name
-
-    # First find the dummy
-    if groupName in bpy.data.groups:
-        #print("O - GroupName Found")
-        group = bpy.data.groups[groupName]
-
-        for object in group.objects:
-            # print(object.name)
-            if object.GTGrp.is_group_object is True:
-                #print("Dummy Found")
-                dummy = object
-
-    if dummy is None:
-        #print("Returning False")
-        return None
-
-    # Save the current cursor location
-    cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
-    previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
-
+    # Calculate the translation vector using the 3D cursor
     FocusObject(target)
-    bpy.ops.view3D.snap_cursor_to_selected()
+    bpy.ops.view3d.snap_cursor_to_selected()
+    cursor_location = bpy.data.scenes[bpy.context.scene.name].cursor_location
 
-    # Add the child of constraint
-    bpy.ops.object.constraint_add(type="CHILD_OF")
-    constraint = target.constraints[0].name = "Group Location"
-    target.constraints["Group Location"].target = dummy
+    # Because vectors are pointers, we need to keep regenerating them
+    cursorLocCopy = Vector((cursor_location[0], cursor_location[1], cursor_location[2]))
 
-    SelectObject(target)
-    bpy.ops.view3D.snap_selected_to_cursor(use_offset=False)
-
-    # Restore the cursor location a final time
+    # Restore the original cursor location and matrix
     bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
 
-    #print("X - Exiting AttachToDummy")
+    return cursorLocCopy
 
+def FindWorldSpaceBoneLocation(target, context, bone):
 
-def DetachFromDummy(target):
-
-    #print("---Inside DetachFromDummy---")
-
-    for constraint in target.constraints:
-        #print("Found a constraint")
-        if constraint.name == "Group Location":
-            continue
-        else:
-            return None
-
-    #print("O - Detaching dummy")
-    groupName = target.GTObj.asset_name
-
-    # Save the current cursor location
+    # Preserve the current 3D cursor
     cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
     previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
 
-    FocusObject(target)
-    bpy.ops.view3D.snap_cursor_to_selected()
-
-    for constraint in target.constraints:
-        if constraint.name == "Group Location":
-            target.constraints.remove(constraint)
-
-    SelectObject(target)
-    bpy.ops.view3D.snap_selected_to_cursor(use_offset=False)
-
-    bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
-
-    #print("X - Exiting DetachFromDummy")
-
-
-def UpdateDummyLocation(groupName, scene):
-
-    # Allows the user to set the location of the dummy object
-    empties = []
-    empties = FindEmptyObjects(groupName)
-
-    sel = empties[0]
-    obj = sel.GTObj
-    scn = scene.GTScn
-    grp = sel.GTGrp
-
-    objects = FindDummyConstraintObjects(sel.GTObj.asset_name)
-    FinalZ = 0
-    offset = 0
-    location = []
-
-    # Now we can start operating.
-    # If its the freeform option, we don't do anything here
-    if sel.GTGrp.group_dummy_location is '2':
-        return None
-
-    # Detach every found object from the dummy
-    for object in objects:
-        DetachFromDummy(object)
-
-    # Auto-Update Method, uses code pinched from Update_DummyPosition
-    if sel.GTGrp.group_dummy_location is '1':
-
-        # Get the median point for X and Y positioning
-        location = FindMedianLocation(objects)
-
-        # Find out whether it has been switched to be positioned above or below the object
-        if grp.group_dummy_loc is '1':
-            #print("Dummy Location is Above")
-            ZLocation = FindHighestLocation(objects)
-            offset = grp.group_dummy_offset
-            FinalZ = ZLocation + offset
-
-        elif grp.group_dummy_loc is '2':
-            #print("Dummy Location is Below")
-            ZLocation = FindLowestLocation(objects)
-            offset = grp.group_dummy_offset
-            FinalZ = ZLocation - offset
-
-        # Offset that positively or negatively by the distance variable
-        location[2] = FinalZ
-
-        MoveObject(sel, location)
-
-    # Method for snapping the dummy to a object.
-    elif sel.GTGrp.group_dummy_location is '3':
-
-        # Get the selected object
-        selEnum = int(grp.dummy_object_select)
-
-        count = -1
-        count += 1
-
-        if obj.asset_name in bpy.data.groups:
-            group = bpy.data.groups[obj.asset_name]
-
-            for object in group.objects:
-                count += 1
-
-                if selEnum == count:
-                    location = object.location
-
-                    MoveObject(sel, location)
-
-                    # Any assignment to a location array caused the fucking object to move
-                    # This is more complex than required because I had to work around it :/
-                    offset = grp.group_dummy_offset
-                    newLocation = location
-                    z = newLocation[2]
-                    z += offset
-
-                    MoveObject(sel, (newLocation[0], newLocation[1], z))
-
-    # Reattach every object
-    for object in objects:
-        AttachToDummy(object)
-
-    FocusObject(sel)
-
-    print("Rawr")
-
-
-def FindDummyConstraintObjects(groupName):
-
-    objects = []
-
-    # First gather all the objects in the group, minus the dummy
-    if groupName in bpy.data.groups:
-        group = bpy.data.groups[groupName]
-
-        for object in group.objects:
-            if object.GTGrp.is_group_object is False and object.GTGrp.is_origin_point is False:
-                if object.GTObj.object_type == '1':
-                    #print("Adding object")
-                    # print(object.name)
-                    objects.append(object)
-
-                elif object.GTObj.object_type == '2':
-                    if object.parent is None:
-                        #print("Adding object")
-                        # print(object.name)
-                        objects.append(object)
-
-    return objects
-
-
-def FindEmptyObjects(groupName):
-
-    objects = []
-    emptyObject = None
-    originObject = None
-
-    # Get the group
-    if groupName in bpy.data.groups:
-        group = bpy.data.groups[groupName]
-
-        for object in group.objects:
-            if object.GTGrp.is_group_object is True:
-                emptyObject = object
-
-            elif object.GTGrp.is_origin_point is True:
-                originObject = object
-
-    # Now append them in order
-    objects.append(emptyObject)
-    objects.append(originObject)
-
-    return objects
-
-
-def GenerateOrigin(groupName):
-
-    # Get the lowest point for the object group
-    objects = FindDummyConstraintObjects(groupName)
-    ZLocation = FindLowestLocation(objects)
-    location = FindMedianLocation(objects)
-
-    location[2] = ZLocation
-
-    # Save the current cursor location and relocate it to a new position
-    cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
-    previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
-
-    bpy.data.scenes[bpy.context.scene.name].cursor_location = location
-
-    # Generate the Origin Point
+    # Calculate the translation vector using the 3D cursor
     bpy.ops.object.select_all(action='DESELECT')
-    bpy.ops.object.add(type='EMPTY')
-    origin = bpy.context.scene.objects.active
-    origin.empty_draw_type = 'SPHERE'
+    prevMode = SwitchObjectMode('POSE', target)
+    bpy.data.objects[target.name].data.bones.active = bpy.data.objects[target.name].pose.bones[bone.name].bone
+    bpy.ops.view3d.snap_cursor_to_selected()
+    cursor_location = Vector((0.0, 0.0, 0.0))
 
-    origin.GTGrp.is_origin_point = True
-    origin.GTObj.old_asset_name = groupName
-    origin.GTObj.asset_name = groupName
-    origin.GTObj.is_GT_asset = True
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            cursor_location = area.spaces[0].cursor_location
 
-    # Lock scale and rotation
-    bpy.data.objects[origin.name].lock_rotation[0] = True
-    bpy.data.objects[origin.name].lock_rotation[1] = True
-    bpy.data.objects[origin.name].lock_rotation[2] = True
+    # Because vectors are pointers, we need to keep regenerating them
+    cursorLocCopy = Vector((0.0, 0.0, 0.0))
+    cursorLocCopy[0] = cursor_location[0]
+    cursorLocCopy[1] = cursor_location[1]
+    cursorLocCopy[2] = cursor_location[2]
 
-    AddToGroup(origin, groupName)
-    AttachToDummy(origin)
+    SwitchObjectMode(prevMode, target)
 
+    # Restore the original cursor location and matrix
+    bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
 
-def GenerateGroupPlinth(dummyEnum):
+    return cursorLocCopy
 
-    return None
+def GetSceneGroups(scene, hasObjects):
+    groups = []
 
+    for item in scene.objects:
+        for group in item.users_group:
+            groupAdded = False
 
-def SwitchStage(target):
+            for found_group in groups:
+                if found_group.name == group.name:
+                    groupAdded = True
 
-    return None
+            if hasObjects is False or len(group.objects) > 0:
+                if groupAdded == False:
+                    groups.append(group)
 
-
-def ChangeStageGroup(target, oldGroup, newGroup):
-
-    return None
-
-
-def ChangeStageComponentName(target):
-
-    return None
-
-
-def ChangeStageBaseName(target):
-
-    return None
-
-
-def ChangeStageAssetName(target):
-
-    return None
-
-
-def SetObjectOrigin(object, enum, context):
-
-    print("Inside ASKETCH_SetObjectOrigin")
-
-    # Set to Object Base
-    if enum == 1:
-        print("Setting to COM")
-
-        # Enter the object!
-        object_data = bpy.context.object.data
-        bpy.ops.object.editmode_toggle()
-        bpy.ops.mesh.select_all(action="DESELECT")
-        bpy.ops.object.editmode_toggle()
-
-        # Setup the correct tools to select vertices
-        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-        sel_mode = context.tool_settings.mesh_select_mode
-        context.tool_settings.mesh_select_mode = [True, False, False]
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
-        i = -1
-        lowestZ = 0
-
-        # First find the lowest Z value in the object
-        for vertex in object_data.vertices:
-            i += 1
-            print(i)
-
-            # Used to define a reference point for the first vertex, in case 0 is
-            # lower than any vertex on the model.
-            if i == 0:
-                lowestZ = vertex.co.z
-
-            else:
-                if vertex.co.z < lowestZ:
-                    lowestZ = vertex.co.z
-
-        # Now select all vertices with lowestZ
-
-        for vertex in object_data.vertices:
-            if vertex.co.z == lowestZ:
-                vertex.select = True
-                print("Vertex Selected!")
-
-        # Restore previous settings
-        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-        context.tool_settings.mesh_select_mode = sel_mode
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
-        # Saves the current cursor location
-        cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
-        previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
-
-        # Snap the cursor
-        bpy.ops.object.editmode_toggle()
-        bpy.ops.view3D.snap_cursor_to_selected()
-        bpy.ops.mesh.select_all(action="DESELECT")
-        bpy.ops.object.editmode_toggle()
-
-        # Set the origin
-        FocusObject(object)
-        bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-
-        # Restore the original cursor location
-        bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
-
-    # Set to Absolute Lowest
-    elif enum == 2:
-        # Enter the object!
-        object_data = bpy.context.object.data
-        bpy.ops.object.editmode_toggle()
-        bpy.ops.mesh.select_all(action="DESELECT")
-        bpy.ops.object.editmode_toggle()
-
-        # Setup the correct tools to select vertices
-        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-        sel_mode = context.tool_settings.mesh_select_mode
-        context.tool_settings.mesh_select_mode = [True, False, False]
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
-        i = -1
-        lowestZ = 0
-
-        # First find the lowest Z value in the object
-        for vertex in object_data.vertices:
-            i += 1
-            print(i)
-
-            # This code converts vertex coordinates from object space to world space.
-            vertexWorld = object.matrix_world * vertex.co
-
-            # Used to define a reference point for the first vertex, in case 0 is
-            # lower than any vertex on the model.
-            if i == 0:
-                lowestZ = vertexWorld.z
-
-            else:
-                if vertexWorld.z < lowestZ:
-                    lowestZ = vertexWorld.z
-
-        # Now select all vertices with lowestZ
-
-        for vertex in object_data.vertices:
-            vertexWorld = object.matrix_world * vertex.co
-
-            if vertexWorld.z == lowestZ:
-                vertex.select = True
-                print("Vertex Selected!")
-
-        # Restore previous settings
-        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-        context.tool_settings.mesh_select_mode = sel_mode
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
-        # Saves the current cursor location
-        cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
-        previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
-
-        # Snap the cursor
-        bpy.ops.object.editmode_toggle()
-        bpy.ops.view3D.snap_cursor_to_selected()
-        bpy.ops.mesh.select_all(action="DESELECT")
-        bpy.ops.object.editmode_toggle()
-
-        # Set the origin
-        FocusObject(object)
-        bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-
-        # Restore the original cursor location
-        bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
-
-    # Set to COM
-    elif enum == 3:
-        print("Setting to COM")
-
-        # Set the origin
-        bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY')
-
-    elif enum == 4:
-        print("Setting to Vertex Group")
-
-        # Enter the object!
-        object_data = bpy.context.object.data
-        bpy.ops.object.editmode_toggle()
-        bpy.ops.mesh.select_all(action="DESELECT")
-        bpy.ops.object.editmode_toggle()
-
-        # Setup the correct tools to select vertices
-        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-        sel_mode = context.tool_settings.mesh_select_mode
-        context.tool_settings.mesh_select_mode = [True, False, False]
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
-        index = int(bpy.context.active_object.GTMnu.vertex_groups) - 1
-
-        # Search through all vertices in the object to find the ones belonging to the
-        # Selected vertex group
-        for vertex in object_data.vertices:
-            for group in vertex.groups:
-                if group.group == index:
-                    vertex.select = True
-                    print("Vertex Selected!")
-
-        # Restore previous settings
-        bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-        context.tool_settings.mesh_select_mode = sel_mode
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
-        # Saves the current cursor location
-        cursor_loc = bpy.data.scenes[bpy.context.scene.name].cursor_location
-        previous_cursor_loc = [cursor_loc[0], cursor_loc[1], cursor_loc[2]]
-
-        # Snap the cursor
-        bpy.ops.object.editmode_toggle()
-        bpy.ops.view3D.snap_cursor_to_selected()
-        bpy.ops.mesh.select_all(action="DESELECT")
-        bpy.ops.object.editmode_toggle()
-
-        # Set the origin
-        FocusObject(object)
-        bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-
-        # Restore the original cursor location
-        bpy.data.scenes[bpy.context.scene.name].cursor_location = previous_cursor_loc
-
-
-def FindFreezeObject(target, index):
-
-    # Inside the group, find an object with a matching name and a freeze tag
-    groupName = target.GTObj.asset_name
-
-    if groupName in bpy.data.groups:
-        group = bpy.data.groups[groupName]
-
-        for object in group.objects:
-            if object.GTObj.base_name == target.GTObj.base_name:
-                if object.GTObj.is_frozen is True:
-                    if object.GTObj.freeze_index == index:
-                        print("O - Object found, returning...")
-                        return object
-
-    return None
+    return groups
