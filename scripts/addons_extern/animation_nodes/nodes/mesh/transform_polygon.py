@@ -6,8 +6,7 @@ from ... base_types.node import AnimationNode
 pivotTypeItems = [
     ("CENTER", "Center", "Use the center of the polygon as pivot", "NONE", 0),
     ("WORLD_ORIGIN", "World", "Use the (0, 0, 0) vector as pivot for all polygons", "NONE", 1),
-    ("CUSTOM", "Custom", "Use a custom vector as pivot", "NONE", 2)]
-
+    ("CUSTOM", "Custom", "Use a custom vector as pivot", "NONE", 2) ]
 
 class TransformPolygonNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_TransformPolygonNode"
@@ -16,35 +15,32 @@ class TransformPolygonNode(bpy.types.Node, AnimationNode):
     def pivotTypeChanged(self, context):
         self.generateSockets()
 
-    pivotType = EnumProperty(name="Pivot Type", default="CENTER",
-                             items=pivotTypeItems, update=pivotTypeChanged)
+    pivotType = EnumProperty(name = "Pivot Type", default = "CENTER",
+        items = pivotTypeItems, update = pivotTypeChanged)
 
     def create(self):
         self.generateSockets()
-        self.outputs.new("an_PolygonSocket", "Polygon", "polygon")
+        self.newOutput("Polygon", "Polygon", "polygon")
 
     def draw(self, layout):
-        layout.prop(self, "pivotType", text="Pivot")
+        layout.prop(self, "pivotType", text = "Pivot")
 
     @keepNodeState
     def generateSockets(self):
         self.inputs.clear()
-        self.inputs.new("an_PolygonSocket", "Polygon", "polygon").dataIsModified = True
-        self.inputs.new("an_MatrixSocket", "Matrix", "matrix")
+        self.newInput("Polygon", "Polygon", "polygon").dataIsModified = True
+        self.newInput("Matrix", "Matrix", "matrix")
 
         if self.pivotType == "CUSTOM":
-            self.inputs.new("an_VectorSocket", "Pivot", "pivot")
+            self.newInput("Vector", "Pivot", "pivot")
 
     def getExecutionCode(self):
         matrixName = "matrix"
 
         if self.pivotType in ("CENTER", "CUSTOM"):
             pivotName = "polygon.center" if self.pivotType == "CENTER" else "pivot"
-            yield "offsetMatrix = mathutils.Matrix.Translation({})".format(pivotName)
+            yield "offsetMatrix = Matrix.Translation({})".format(pivotName)
             yield "transformMatrix = offsetMatrix * matrix * offsetMatrix.inverted()"
             matrixName = "transformMatrix"
 
         yield "polygon.vertexLocations = [{} * location for location in polygon.vertexLocations]".format(matrixName)
-
-    def getUsedModules(self):
-        return ["mathutils"]

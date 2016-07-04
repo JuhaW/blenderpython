@@ -3,7 +3,6 @@ import bmesh
 import itertools
 from mathutils import Vector
 
-
 class MeshData:
     __slots__ = ("vertices", "edges", "polygons")
 
@@ -12,28 +11,32 @@ class MeshData:
         self.edges = edges
         self.polygons = polygons
 
+    def __repr__(self):
+        return "<AN Mesh Data Object: Vertices: {}, Edges: {}, Polygons: {}>".format(
+                len(self.vertices), len(self.edges), len(self.polygons))
+
     def copy(self):
         return MeshData(copyVectorList(self.vertices), copy2dList(self.edges), copy2dList(self.polygons))
 
-    def isValid(self, checkTupleLengths=True, checkIndices=True):
+    def isValid(self, checkTupleLengths = True, checkIndices = True):
         try:
             if checkTupleLengths:
-                if not self.hasValidEdgeTupleLengths():
-                    return False
-                if not self.hasValidPolygonTupleLengths():
-                    return False
+                if not self.hasValidEdgeTupleLengths(): return False
+                if not self.hasValidPolygonTupleLengths(): return False
             if checkIndices:
-                if not self.hasValidIndices():
-                    return False
+                if not self.hasValidIndices(): return False
         except:
             return False
         return True
 
     def hasValidEdgeTupleLengths(self):
-        return all(len(edge) == 2 for edge in self.edges)
+        checkTuple = tuple([2] * len(self.edges))
+        edgeTupleLengths = tuple(map(len, self.edges))
+        return checkTuple == edgeTupleLengths
 
     def hasValidPolygonTupleLengths(self):
-        return all(len(polygon) >= 3 for polygon in self.polygons)
+        polygonTupleLengths = set(map(len, self.polygons))
+        return all(amount >= 3 for amount in polygonTupleLengths)
 
     def hasValidIndices(self):
         maxEdgeIndex = max(itertools.chain([-1], *self.edges))
@@ -45,22 +48,31 @@ class MeshData:
         return max(maxEdgeIndex, maxPolygonIndex) < len(self.vertices) and min(minEdgeIndex, minPolygonIndex) >= 0
 
 
+
+
 class Vertex:
     __slots__ = ("location", "normal", "groupWeights")
 
     @staticmethod
+    def fromBMeshVert(bmeshVert):
+        return Vertex(
+                 bmeshVert.co,
+                 bmeshVert.normal,
+                 [])
+
+    @staticmethod
     def fromMeshVertexInLocalSpace(meshVertex):
         return Vertex(
-            meshVertex.co.copy(),
-            meshVertex.normal.copy(),
-            [group.weight for group in meshVertex.groups])
+                 meshVertex.co.copy(),
+                 meshVertex.normal.copy(),
+                 [group.weight for group in meshVertex.groups])
 
     @staticmethod
     def fromMeshVertexInWorldSpace(meshVertex, vertexTransformation, normalTransformation):
         return Vertex(
-            vertexTransformation * meshVertex.co,
-            normalTransformation * meshVertex.normal,
-            [group.weight for group in meshVertex.groups])
+                 vertexTransformation * meshVertex.co,
+                 normalTransformation * meshVertex.normal,
+                 [group.weight for group in meshVertex.groups])
 
     def __init__(self, location, normal, groupWeights):
         self.location = location
@@ -75,24 +87,34 @@ class Polygon:
     __slots__ = ("vertexLocations", "normal", "center", "area", "materialIndex")
 
     @staticmethod
+    def fromBMeshFace(bmeshFace, centerWeighted = False):
+        vertexLocations = [v.co for v in bmeshFace.verts]
+        return Polygon(
+                 vertexLocations,
+                 bmeshFace.normal,
+                 bmeshFace.calc_center_median_weighted() if centerWeighted else bmeshFace.calc_center_median(),
+                 bmeshFace.calc_area(),
+                 bmeshFace.material_index)
+ 
+    @staticmethod
     def fromMeshPolygonInLocalSpace(meshPolygon, allVertexLocations):
         vertexLocations = [allVertexLocations[index].copy() for index in meshPolygon.vertices]
         return Polygon(
-            vertexLocations,
-            meshPolygon.normal.copy(),
-            meshPolygon.center.copy(),
-            meshPolygon.area,
-            meshPolygon.material_index)
+                 vertexLocations,
+                 meshPolygon.normal.copy(),
+                 meshPolygon.center.copy(),
+                 meshPolygon.area,
+                 meshPolygon.material_index)
 
     @staticmethod
     def fromMeshPolygonInWorldSpace(meshPolygon, allVertexLocations, transformation, normalTransformation, scale):
         vertexLocations = [allVertexLocations[index].copy() for index in meshPolygon.vertices]
         return Polygon(
-            vertexLocations,
-            normalTransformation * meshPolygon.normal,
-            transformation * meshPolygon.center,
-            meshPolygon.area * scale,
-            meshPolygon.material_index)
+                 vertexLocations,
+                 normalTransformation * meshPolygon.normal,
+                 transformation * meshPolygon.center,
+                 meshPolygon.area * scale,
+                 meshPolygon.material_index)
 
     def __init__(self, vertexLocations, normal, center, area, materialIndex):
         self.vertexLocations = vertexLocations
@@ -112,7 +134,6 @@ class Polygon:
 
 def copyVectorList(list):
     return [vertex.copy() for vertex in list]
-
 
 def copy2dList(list):
     return [element[:] for element in list]

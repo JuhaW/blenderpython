@@ -3,7 +3,6 @@ from . utils import findNearestParameterOnLine
 
 
 class PolySpline(Spline):
-
     def __init__(self):
         self.type = "POLY"
         self.points = []
@@ -42,8 +41,7 @@ class PolySpline(Spline):
     def update(self):
         def recreateSegments():
             self.segments = []
-            if len(self.points) < 2:
-                return
+            if len(self.points) < 2: return
             for left, right in zip(self.points[:-1], self.points[1:]):
                 self.segments.append(PolySegment(left, right))
             if self.isCyclic:
@@ -56,7 +54,7 @@ class PolySpline(Spline):
             self.uniformParameterConverter = None
             self.isChanged = False
 
-    def getLength(self, resolution=0):
+    def getLength(self, resolution = 0):
         length = 0
         for segment in self.segments:
             length += segment.getLength()
@@ -68,6 +66,7 @@ class PolySpline(Spline):
             parameter = segment.project(coordinates)
             parameters.append((parameter + i) / len(self.segments))
         return parameters
+
 
     # evaluation
     #############################
@@ -88,16 +87,16 @@ class PolySpline(Spline):
         else:
             return self.segmentAmount - 1, 1
 
+
     # point distribution
     #############################
 
     def getEqualDistanceParameters(self, amount):
-        if amount < 2:
-            return [0.0]
-        if not self.isEvaluable:
-            return [0.0]
+        if amount < 2: return [0.0]
+        if not self.isEvaluable: return [0.0]
 
         totalLength = self.getLength()
+        if totalLength < 0.0001: return [0.0] * amount
         distancePerStep = totalLength / amount
 
         parameters = [0.0]
@@ -109,13 +108,11 @@ class PolySpline(Spline):
         targetPointAmount = len(targetPoints)
 
         for i, point in enumerate(targetPoints):
-            if point == lastVector:
-                continue
+            if point == lastVector: continue
 
             while True:
                 distanceToLastVector = (point - lastVector).length
                 totalDistance = distanceToLastVector + previousDistance
-
                 if totalDistance >= distancePerStep:
                     # find vector with correct distance
                     surplusDistance = totalDistance - distancePerStep
@@ -144,7 +141,6 @@ class PolySpline(Spline):
 
 
 class PolySegment:
-
     def __init__(self, left, right):
         self.left = left
         self.right = right

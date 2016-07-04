@@ -8,8 +8,7 @@ dataByIdentifier = defaultdict(None)
 
 dataDirectionItems = {
     ("IMPORT", "Import", "Receive the data from somewhere else", "IMPORT", 0),
-    ("EXPORT", "Export", "Another script can read the data from this node", "EXPORT", 1)}
-
+    ("EXPORT", "Export", "Another script can read the data from this node", "EXPORT", 1) }
 
 class DataInterfaceNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_DataInterfaceNode"
@@ -18,14 +17,14 @@ class DataInterfaceNode(bpy.types.Node, AnimationNode):
     def dataDirectionChanged(self, context):
         self.recreateSocket()
 
-    dataDirection = EnumProperty(name="Data Direction", default="IMPORT",
-                                 items=dataDirectionItems, update=dataDirectionChanged)
+    dataDirection = EnumProperty(name = "Data Direction", default = "IMPORT",
+        items = dataDirectionItems, update = dataDirectionChanged)
 
     def create(self):
         self.recreateSocket()
 
     def draw(self, layout):
-        layout.prop(self, "dataDirection", text="")
+        layout.prop(self, "dataDirection", text = "")
 
     def getExecutionCode(self):
         if self.dataDirection == "EXPORT":
@@ -52,6 +51,6 @@ class DataInterfaceNode(bpy.types.Node, AnimationNode):
         self.outputs.clear()
 
         if self.dataDirection == "EXPORT":
-            self.inputs.new("an_GenericSocket", "Value", "value")
+            self.newInput("Generic", "Value", "value")
         if self.dataDirection == "IMPORT":
-            self.outputs.new("an_GenericSocket", "Value", "value")
+            self.newOutput("Generic", "Value", "value")

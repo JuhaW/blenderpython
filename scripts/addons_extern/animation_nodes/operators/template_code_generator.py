@@ -1,7 +1,6 @@
 import bpy
 from .. utils.names import toVariableName
 
-
 class TemplateCodeGenerator(bpy.types.Operator):
     bl_idname = "an.generator_template_code"
     bl_label = "Generate Template Code"
@@ -28,7 +27,6 @@ class TemplateCodeGenerator(bpy.types.Operator):
             textBlock = bpy.data.texts.new("Template Code")
         textBlock.from_string(code)
 
-
 def iterNodeCreationLines(node, nodeNames):
     name = toVariableName(node.name)
     nodeNames[node] = name
@@ -36,7 +34,6 @@ def iterNodeCreationLines(node, nodeNames):
     parameterText = "'{}', x = {:.0f}, y = {:.0f}{}".format(node.bl_idname, node.location.x, node.location.y, labelText)
     yield "{} = self.newNode({})".format(name, parameterText)
 
-    if not node.isAnimationNode:
-        return
+    if not node.isAnimationNode: return
     for line in node.getTemplateCodeString().split("\n"):
         yield line.replace("self", name)

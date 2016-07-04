@@ -3,8 +3,7 @@ from bpy.props import *
 from ... tree_info import keepNodeState
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
-from ... sockets.info import getBaseDataTypeItemsCallback, toIdName, toListIdName, isBase, toBaseDataType, isLimitedList, toGeneralListIdName
-
+from ... sockets.info import isBase, toBaseDataType, toListDataType
 
 class GetListElementNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_GetListElementNode"
@@ -12,21 +11,21 @@ class GetListElementNode(bpy.types.Node, AnimationNode):
     dynamicLabelType = "HIDDEN_ONLY"
 
     def assignedTypeChanged(self, context):
-        self.baseIdName = toIdName(self.assignedType)
-        self.listIdName = toListIdName(self.assignedType)
         self.generateSockets()
 
-    assignedType = StringProperty(update=assignedTypeChanged)
-    baseIdName = StringProperty()
-    listIdName = StringProperty()
+    assignedType = StringProperty(update = assignedTypeChanged)
 
-    clampIndex = BoolProperty(name="Clamp Index", default=False,
-                              description="Clamp the index between the lowest and highest possible index",
-                              update=executionCodeChanged)
+    clampIndex = BoolProperty(name = "Clamp Index", default = False,
+        description = "Clamp the index between the lowest and highest possible index",
+        update = executionCodeChanged)
 
-    allowNegativeIndex = BoolProperty(name="Allow Negative Index",
-                                      description="-2 means the second last list element",
-                                      update=executionCodeChanged, default=False)
+    allowNegativeIndex = BoolProperty(name = "Allow Negative Index",
+        description = "-2 means the second last list element",
+        update = executionCodeChanged, default = False)
+
+    makeCopy = BoolProperty(name = "Make Copy", default = True,
+        description = "Output a copy of the list element to make it independed",
+        update = executionCodeChanged)
 
     def create(self):
         self.assignedType = "Float"
@@ -34,8 +33,9 @@ class GetListElementNode(bpy.types.Node, AnimationNode):
     def drawAdvanced(self, layout):
         layout.prop(self, "clampIndex")
         layout.prop(self, "allowNegativeIndex")
+        layout.prop(self, "makeCopy")
         self.invokeSocketTypeChooser(layout, "assignListDataType",
-                                     socketGroup="LIST", text="Change Type", icon="TRIA_RIGHT")
+            socketGroup = "LIST", text = "Change Type", icon = "TRIA_RIGHT")
 
     def drawLabel(self):
         if self.inputs["Index"].isUnlinked:
@@ -56,9 +56,10 @@ class GetListElementNode(bpy.types.Node, AnimationNode):
             else:
                 yield "element = list[index] if 0 <= index < len(list) else fallback"
 
-        socket = self.outputs[0]
-        if socket.isCopyable:
-            yield "element = " + socket.getCopyExpression().replace("value", "element")
+        if self.makeCopy:
+            socket = self.outputs[0]
+            if socket.isCopyable():
+                yield "element = " + socket.getCopyExpression().replace("value", "element")
 
     def edit(self):
         dataType = self.getWantedDataType()
@@ -70,31 +71,28 @@ class GetListElementNode(bpy.types.Node, AnimationNode):
         elementOutputs = self.outputs["Element"].dataTargets
 
         if listInput is not None:
-            idName = listInput.bl_idname
-            if isLimitedList(idName):
-                idName = toGeneralListIdName(idName)
-            return toBaseDataType(idName)
-        if fallbackInput is not None:
-            return fallbackInput.dataType
-        if len(elementOutputs) == 1:
-            return elementOutputs[0].dataType
+            if listInput.dataType in ("Edge Indices", "Polygon Indices"): return "Integer"
+            return toBaseDataType(listInput.dataType)
+        if fallbackInput is not None: return fallbackInput.dataType
+        if len(elementOutputs) == 1: return elementOutputs[0].dataType
         return self.outputs["Element"].dataType
 
     def assignListDataType(self, listDataType):
         self.assignType(toBaseDataType(listDataType))
 
     def assignType(self, baseDataType):
-        if not isBase(baseDataType):
-            return
-        if baseDataType == self.assignedType:
-            return
+        if not isBase(baseDataType): return
+        if baseDataType == self.assignedType: return
         self.assignedType = baseDataType
 
     @keepNodeState
     def generateSockets(self):
         self.inputs.clear()
         self.outputs.clear()
-        self.inputs.new(self.listIdName, "List", "list")
-        self.inputs.new("an_IntegerSocket", "Index", "index")
-        self.inputs.new(self.baseIdName, "Fallback", "fallback").hide = True
-        self.outputs.new(self.baseIdName, "Element", "element")
+
+        baseDataType = self.assignedType
+        listDataType = toListDataType(self.assignedType)
+        self.newInput(listDataType, "List", "list")
+        self.newInput("Integer", "Index", "index")
+        self.newInput(baseDataType, "Fallback", "fallback").hide = True
+        self.newOutput(baseDataType, "Element", "element")

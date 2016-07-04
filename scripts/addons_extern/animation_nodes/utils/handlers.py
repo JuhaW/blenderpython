@@ -15,32 +15,21 @@ renderInitHandlers = []
 renderCancelHandlers = []
 renderCompleteHandlers = []
 
-
 def eventHandler(event):
     def eventHandlerDecorator(function):
-        if event == "FILE_LOAD_POST":
-            fileLoadPostHandlers.append(function)
-        if event == "ADDON_LOAD_POST":
-            addonLoadPostHandlers.append(function)
-        if event == "SCENE_UPDATE_POST":
-            sceneUpdatePostHandlers.append(function)
-        if event == "FRAME_CHANGE_POST":
-            frameChangePostHandlers.append(function)
+        if event == "FILE_LOAD_POST": fileLoadPostHandlers.append(function)
+        if event == "ADDON_LOAD_POST": addonLoadPostHandlers.append(function)
+        if event == "SCENE_UPDATE_POST": sceneUpdatePostHandlers.append(function)
+        if event == "FRAME_CHANGE_POST": frameChangePostHandlers.append(function)
 
-        if event == "RENDER_INIT":
-            renderInitHandlers.append(function)
-        if event == "RENDER_PRE":
-            renderPreHandlers.append(function)
-        if event == "RENDER_CANCEL":
-            renderCancelHandlers.append(function)
-        if event == "RENDER_COMPLETE":
-            renderCompleteHandlers.append(function)
+        if event == "RENDER_INIT": renderInitHandlers.append(function)
+        if event == "RENDER_PRE": renderPreHandlers.append(function)
+        if event == "RENDER_CANCEL": renderCancelHandlers.append(function)
+        if event == "RENDER_COMPLETE": renderCompleteHandlers.append(function)
         return function
     return eventHandlerDecorator
 
 addonChanged = False
-
-
 @persistent
 def sceneUpdatePost(scene):
     for handler in sceneUpdatePostHandlers:
@@ -52,42 +41,35 @@ def sceneUpdatePost(scene):
         for handler in addonLoadPostHandlers:
             handler()
 
-
 @persistent
 def loadPost(scene):
     for handler in fileLoadPostHandlers:
         handler()
-
 
 @persistent
 def renderPre(scene):
     for handler in renderPreHandlers:
         handler()
 
-
 @persistent
 def frameChangedPost(scene):
     for handler in frameChangePostHandlers:
         handler(scene)
-
 
 @persistent
 def renderInitialized(scene):
     for handler in renderInitHandlers:
         handler()
 
-
 @persistent
 def renderCancelled(scene):
     for handler in renderCancelHandlers:
         handler()
 
-
 @persistent
 def renderCompleted(scene):
     for handler in renderCancelHandlers:
         handler()
-
 
 def registerHandlers():
     bpy.app.handlers.frame_change_post.append(frameChangedPost)
@@ -101,7 +83,6 @@ def registerHandlers():
 
     global addonChanged
     addonChanged = True
-
 
 def unregisterHandlers():
     bpy.app.handlers.frame_change_post.remove(frameChangedPost)

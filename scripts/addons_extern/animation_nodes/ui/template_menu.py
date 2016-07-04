@@ -1,14 +1,12 @@
 import bpy
 
-
 class TemplatesMenu(bpy.types.Menu):
     bl_idname = "an_templates_menu"
     bl_label = "Templates Menu"
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("an.empty_subprogram_template")
-        layout.separator()
+
         layout.operator("an.grid_arrange_objects_template")
         layout.operator("an.random_vertices_offset_template")
         layout.operator("an.network_from_particles_template")
@@ -22,15 +20,14 @@ class TemplatesMenu(bpy.types.Menu):
         layout.operator("an.grid_3d_template")
         layout.operator("an.animate_individual_letters_template")
 
-
 class TemplatesMenuInHeader(bpy.types.Header):
     bl_idname = "an_templates_menu_in_header"
     bl_space_type = "NODE_EDITOR"
 
     def draw(self, context):
-        if context.space_data.tree_type != "an_AnimationNodeTree":
-            return
-
+        if context.space_data.tree_type != "an_AnimationNodeTree": return
+    
         layout = self.layout
         layout.separator()
-        layout.menu("an_templates_menu", text="Templates")
+        layout.menu("an_subprograms_menu", text = "Subprograms")
+        layout.menu("an_templates_menu", text = "Templates")

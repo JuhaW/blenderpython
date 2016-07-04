@@ -4,26 +4,25 @@ from ... utils.code import isCodeValid
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
 
-
 class ObjectAttributeOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ObjectAttributeOutputNode"
     bl_label = "Object Attribute Output"
     bl_width_default = 160
 
-    attribute = StringProperty(name="Attribute", default="",
-                               update=executionCodeChanged)
+    attribute = StringProperty(name = "Attribute", default = "",
+        update = executionCodeChanged)
 
     errorMessage = StringProperty()
 
     def create(self):
-        self.inputs.new("an_ObjectSocket", "Object", "object").defaultDrawType = "PROPERTY_ONLY"
-        self.inputs.new("an_GenericSocket", "Value", "value")
-        self.outputs.new("an_ObjectSocket", "Object", "object")
+        self.newInput("Object", "Object", "object", defaultDrawType = "PROPERTY_ONLY")
+        self.newInput("Generic", "Value", "value")
+        self.newOutput("Object", "Object", "object")
 
     def draw(self, layout):
-        layout.prop(self, "attribute", text="")
+        layout.prop(self, "attribute", text = "")
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon="ERROR")
+            layout.label(self.errorMessage, icon = "ERROR")
 
     def getExecutionCode(self):
         code = self.evaluationExpression
@@ -31,8 +30,7 @@ class ObjectAttributeOutputNode(bpy.types.Node, AnimationNode):
         if not isCodeValid(code):
             self.errorMessage = "Invalid Syntax"
             return
-        else:
-            self.errorMessage = ""
+        else: self.errorMessage = ""
 
         yield "try:"
         yield "    self.errorMessage = ''"
@@ -48,7 +46,11 @@ class ObjectAttributeOutputNode(bpy.types.Node, AnimationNode):
 
     @property
     def evaluationExpression(self):
-        if self.attribute.startswith("["):
-            return "object" + self.attribute + " = value"
-        else:
-            return "object." + self.attribute + " = value"
+        if self.attribute.startswith("["): return "object" + self.attribute + " = value"
+        else: return "object." + self.attribute + " = value"
+
+    def getBakeCode(self):
+        if isCodeValid(self.attribute):
+            yield "if object is not None:"
+            yield "    try: object.keyframe_insert({})".format(repr(self.attribute))
+            yield "    except: pass"

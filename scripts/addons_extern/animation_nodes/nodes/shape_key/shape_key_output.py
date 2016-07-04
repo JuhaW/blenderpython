@@ -3,7 +3,6 @@ from bpy.props import *
 from ... utils.layout import writeText
 from ... base_types.node import AnimationNode
 
-
 class ShapeKeyOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ShapeKeyOutputNode"
     bl_label = "Shape Key Output"
@@ -12,15 +11,15 @@ class ShapeKeyOutputNode(bpy.types.Node, AnimationNode):
     errorMessage = StringProperty()
 
     def create(self):
-        self.inputs.new("an_ShapeKeySocket", "Shape Key", "shapeKey").defaultDrawType = "PROPERTY_ONLY"
+        self.newInput("Shape Key", "Shape Key", "shapeKey").defaultDrawType = "PROPERTY_ONLY"
 
-        self.inputs.new("an_FloatSocket", "Value", "value").setRange(0, 1)
-        self.inputs.new("an_FloatSocket", "Slider Min", "sliderMin")
-        self.inputs.new("an_FloatSocket", "Slider Max", "sliderMax")
-        self.inputs.new("an_StringSocket", "Name", "name")
-        self.inputs.new("an_BooleanSocket", "Mute", "mute")
+        self.newInput("Float", "Value", "value").setRange(0, 1)
+        self.newInput("Float", "Slider Min", "sliderMin")
+        self.newInput("Float", "Slider Max", "sliderMax")
+        self.newInput("String", "Name", "name")
+        self.newInput("Boolean", "Mute", "mute")
 
-        self.outputs.new("an_ShapeKeySocket", "Shape Key", "shapeKey")
+        self.newOutput("Shape Key", "Shape Key", "shapeKey")
 
         for socket in self.inputs[1:]:
             socket.useIsUsedProperty = True
@@ -30,7 +29,7 @@ class ShapeKeyOutputNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         if self.errorMessage != "":
-            writeText(layout, self.errorMessage, width=25, icon="ERROR")
+            writeText(layout, self.errorMessage, width = 25, icon = "ERROR")
 
     def drawAdvanced(self, layout):
         writeText(layout, "")
@@ -39,14 +38,9 @@ class ShapeKeyOutputNode(bpy.types.Node, AnimationNode):
         yield "if shapeKey is not None:"
 
         s = self.inputs
-        if s["Value"].isUsed:
-            yield "    shapeKey.value = value"
-        if s["Slider Min"].isUsed:
-            yield "    shapeKey.slider_min = sliderMin"
-        if s["Slider Max"].isUsed:
-            yield "    shapeKey.slider_max = sliderMax"
-        if s["Name"].isUsed:
-            yield "    shapeKey.name = name"
-        if s["Mute"].isUsed:
-            yield "    shapeKey.mute = mute"
+        if s["Value"].isUsed:      yield "    shapeKey.value = value"
+        if s["Slider Min"].isUsed: yield "    shapeKey.slider_min = sliderMin"
+        if s["Slider Max"].isUsed: yield "    shapeKey.slider_max = sliderMax"
+        if s["Name"].isUsed:       yield "    shapeKey.name = name"
+        if s["Mute"].isUsed:       yield "    shapeKey.mute = mute"
         yield "    pass"

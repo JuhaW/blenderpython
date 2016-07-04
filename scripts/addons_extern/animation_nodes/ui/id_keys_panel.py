@@ -3,7 +3,6 @@ from .. id_keys import getAllIDKeys
 from .. utils.layout import splitAlignment
 from .. utils.operators import makeOperator
 
-
 class IDKeyPanel(bpy.types.Panel):
     bl_idname = "an_id_keys_panel"
     bl_label = "ID Keys"
@@ -14,7 +13,7 @@ class IDKeyPanel(bpy.types.Panel):
     def draw(self, context):
         object = context.active_object
         if object is None:
-            self.layout.label("Select an object", icon="INFO")
+            self.layout.label("Select an object", icon = "INFO")
         else:
             self.drawForObject(self.layout, object)
 
@@ -34,20 +33,18 @@ class IDKeyPanel(bpy.types.Panel):
         left.label(key.name)
 
         if object.id_keys.exists(*key):
-            props = right.operator("an.remove_id_key_on_selected_objects", text="Remove", icon="X", emboss=False)
+            props = right.operator("an.remove_id_key_on_selected_objects", text = "Remove", icon = "X", emboss = False)
         else:
-            props = right.operator("an.create_id_key_on_selected_objects", text="Create", icon="NEW", emboss=False)
+            props = right.operator("an.create_id_key_on_selected_objects", text = "Create", icon = "NEW", emboss = False)
         props.dataType = key.type
         props.propertyName = key.name
 
-
-@makeOperator("an.create_id_key_on_selected_objects", "Create ID Keys", arguments=["String", "String"])
+@makeOperator("an.create_id_key_on_selected_objects", "Create ID Keys", arguments = ["String", "String"])
 def createIDKeyOnSelectedObjects(dataType, propertyName):
     for object in bpy.context.selected_objects:
         object.id_keys.create(dataType, propertyName)
 
-
-@makeOperator("an.remove_id_key_on_selected_objects", "Remove ID Keys", arguments=["String", "String"])
+@makeOperator("an.remove_id_key_on_selected_objects", "Remove ID Keys", arguments = ["String", "String"])
 def createIDKeyOnSelectedObjects(dataType, propertyName):
     for object in bpy.context.selected_objects:
         object.id_keys.remove(dataType, propertyName)

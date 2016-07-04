@@ -1,8 +1,6 @@
 import hashlib
 
 # Changing this function can result in broken files
-
-
 def hashStringToNumber(text):
     md5 = hashlib.md5()
     md5.update(text.encode("utf-8"))

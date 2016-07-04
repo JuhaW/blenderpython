@@ -2,7 +2,6 @@ import bpy
 from mathutils.bvhtree import BVHTree
 from .. base_types.socket import AnimationNodeSocket
 
-
 class BVHTreeSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_BVHTreeSocket"
     bl_label = "BVHTree Socket"
@@ -12,5 +11,12 @@ class BVHTreeSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     comparable = True
     storable = True
 
-    def getValue(self):
-        return BVHTree.FromPolygons(vertices=[], polygons=[])
+    @classmethod
+    def getDefaultValue(cls):
+        return BVHTree.FromPolygons(vertices = [], polygons = [])
+
+    @classmethod
+    def correctValue(cls, value):
+        if isinstance(value, BVHTree):
+            return value, 0
+        return cls.getDefaultValue(), 2

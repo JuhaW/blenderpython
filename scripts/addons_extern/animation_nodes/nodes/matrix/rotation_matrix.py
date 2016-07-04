@@ -7,8 +7,7 @@ axisItems = [
     ("X", "X", "", "", 0),
     ("Y", "Y", "", "", 1),
     ("Z", "Z", "", "", 2),
-    ("ALL", "All", "", "", 3)]
-
+    ("ALL", "All", "", "", 3) ]
 
 class RotationMatrixNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_RotationMatrixNode"
@@ -17,26 +16,23 @@ class RotationMatrixNode(bpy.types.Node, AnimationNode):
     def axisChanged(self, context):
         self.generateInput()
 
-    axis = EnumProperty(default="X", items=axisItems, update=axisChanged)
+    axis = EnumProperty(default = "X", items = axisItems, update = axisChanged)
 
     def create(self):
         self.generateInput()
-        self.outputs.new("an_MatrixSocket", "Matrix", "matrix")
+        self.newOutput("Matrix", "Matrix", "matrix")
 
     def draw(self, layout):
-        layout.prop(self, "axis", expand=True)
+        layout.prop(self, "axis", expand = True)
 
     def getExecutionCode(self):
         if len(self.axis) == 1:
-            return "matrix = mathutils.Matrix.Rotation(angle, 4, '{}')".format(self.axis)
+            return "matrix = Matrix.Rotation(angle, 4, '{}')".format(self.axis)
         else:
             return "matrix = angle.to_matrix(); matrix.resize_4x4()"
 
     @keepNodeState
     def generateInput(self):
         self.inputs.clear()
-        socketType = "an_FloatSocket" if len(self.axis) == 1 else "an_EulerSocket"
-        self.inputs.new(socketType, "Angle", "angle")
-
-    def getUsedModules(self):
-        return ["mathutils"]
+        socketType = "Float" if len(self.axis) == 1 else "Euler"
+        self.newInput(socketType, "Angle", "angle")

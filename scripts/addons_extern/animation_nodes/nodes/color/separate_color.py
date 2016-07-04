@@ -1,5 +1,4 @@
-import bpy
-import colorsys
+import bpy, colorsys
 from bpy.props import *
 from ... tree_info import keepNodeState
 from ... base_types.node import AnimationNode
@@ -15,7 +14,6 @@ targetTypeItems = [
     ("HSL", "HSL", "Hue, Saturation, Lightness"),
     ("YIQ", "YIQ", "Luma, Chrominance")]
 
-
 class SeparateColorNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SeparateColorNode"
     bl_label = "Separate Color"
@@ -24,11 +22,11 @@ class SeparateColorNode(bpy.types.Node, AnimationNode):
     def targetTypeChanged(self, context):
         self.recreateOutputs()
 
-    targetType = EnumProperty(name="Target Type", items=targetTypeItems,
-                              default="RGB", update=targetTypeChanged)
+    targetType = EnumProperty(name = "Target Type", items = targetTypeItems,
+                                    default = "RGB", update = targetTypeChanged)
 
     def create(self):
-        self.inputs.new("an_ColorSocket", "Color", "color")
+        self.newInput("Color", "Color", "color")
         self.recreateOutputs()
 
     @keepNodeState
@@ -36,39 +34,35 @@ class SeparateColorNode(bpy.types.Node, AnimationNode):
         self.outputs.clear()
 
         if self.targetType == "RGB":
-            self.outputs.new("an_FloatSocket", "Red", "r")
-            self.outputs.new("an_FloatSocket", "Green", "g")
-            self.outputs.new("an_FloatSocket", "Blue", "b")
+            self.newOutput("Float", "Red", "r")
+            self.newOutput("Float", "Green", "g")
+            self.newOutput("Float", "Blue", "b")
         elif self.targetType == "HSV":
-            self.outputs.new("an_FloatSocket", "Hue", "h")
-            self.outputs.new("an_FloatSocket", "Saturation", "s")
-            self.outputs.new("an_FloatSocket", "Value", "v")
+            self.newOutput("Float", "Hue", "h")
+            self.newOutput("Float", "Saturation", "s")
+            self.newOutput("Float", "Value", "v")
         elif self.targetType == "HSL":
-            self.outputs.new("an_FloatSocket", "Hue", "h")
-            self.outputs.new("an_FloatSocket", "Saturation", "s")
-            self.outputs.new("an_FloatSocket", "Lightness", "l")
+            self.newOutput("Float", "Hue", "h")
+            self.newOutput("Float", "Saturation", "s")
+            self.newOutput("Float", "Lightness", "l")
         elif self.targetType == "YIQ":
-            self.outputs.new("an_FloatSocket", "Y Luma", "y")
-            self.outputs.new("an_FloatSocket", "I In phase", "i")
-            self.outputs.new("an_FloatSocket", "Q Quadrature", "q")
+            self.newOutput("Float", "Y Luma", "y")
+            self.newOutput("Float", "I In phase", "i")
+            self.newOutput("Float", "Q Quadrature", "q")
 
-        self.outputs.new("an_FloatSocket", "Alpha", "alpha")
+        self.newOutput("Float", "Alpha", "alpha")
 
     def draw(self, layout):
-        layout.prop(self, "targetType", expand=True)
+        layout.prop(self, "targetType", expand = True)
 
     def drawLabel(self):
         return "{}a from Color".format(self.targetType)
 
     def getExecutionCode(self):
-        if self.targetType == "RGB":
-            yield "r, g, b = color[0], color[1], color[2]"
-        elif self.targetType == "HSV":
-            yield "h, s, v = colorsys.rgb_to_hsv(color[0], color[1], color[2])"
-        elif self.targetType == "HSL":
-            yield "h, l, s = colorsys.rgb_to_hls(color[0], color[1], color[2])"
-        elif self.targetType == "YIQ":
-            yield "y, i, q = colorsys.rgb_to_yiq(color[0], color[1], color[2])"
+        if self.targetType == "RGB":    yield "r, g, b = color[0], color[1], color[2]"
+        elif self.targetType == "HSV":  yield "h, s, v = colorsys.rgb_to_hsv(color[0], color[1], color[2])"
+        elif self.targetType == "HSL":  yield "h, l, s = colorsys.rgb_to_hls(color[0], color[1], color[2])"
+        elif self.targetType == "YIQ":  yield "y, i, q = colorsys.rgb_to_yiq(color[0], color[1], color[2])"
         yield "alpha = color[3]"
 
     def getUsedModules(self):

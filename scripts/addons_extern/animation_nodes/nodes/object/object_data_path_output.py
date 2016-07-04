@@ -2,7 +2,6 @@ import bpy
 from bpy.props import *
 from ... base_types.node import AnimationNode
 
-
 class ObjectDataPathOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ObjectDataPathOutputNode"
     bl_label = "Object Data Path Output"
@@ -10,25 +9,23 @@ class ObjectDataPathOutputNode(bpy.types.Node, AnimationNode):
     errorMessage = StringProperty()
 
     def create(self):
-        self.inputs.new("an_ObjectSocket", "Object", "object").defaultDrawType = "PROPERTY_ONLY"
-        self.inputs.new("an_StringSocket", "Path", "path")
-        self.inputs.new("an_IntegerSocket", "Array Index", "arrayIndex")
-        self.inputs.new("an_GenericSocket", "Value", "value")
-        self.outputs.new("an_ObjectSocket", "Object", "object")
+        self.newInput("Object", "Object", "object", defaultDrawType = "PROPERTY_ONLY")
+        self.newInput("String", "Path", "path")
+        self.newInput("Integer", "Array Index", "arrayIndex", value = -1)
+        self.newInput("Generic", "Value", "value")
+        self.newOutput("Object", "Object", "object")
 
     def draw(self, layout):
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon="ERROR")
+            layout.label(self.errorMessage, icon = "ERROR")
 
     def drawAdvanced(self, layout):
-        self.invokeFunction(layout, "clearCache", text="Clear Cache")
+        self.invokeFunction(layout, "clearCache", text = "Clear Cache")
 
     def execute(self, object, path, arrayIndex, value):
-        if object is None:
-            return object
+        if object is None: return object
         setAttributeFunction = getSetFunction(object, path)
-        if setAttributeFunction is None:
-            return object
+        if setAttributeFunction is None: return object
         try:
             setAttributeFunction(object, arrayIndex, value)
             self.errorMessage = ""
@@ -36,25 +33,26 @@ class ObjectDataPathOutputNode(bpy.types.Node, AnimationNode):
             self.errorMessage = "Error"
         return object
 
+    def getBakeCode(self):
+        yield "if object is not None:"
+        yield "    try: object.keyframe_insert(path, index = arrayIndex)"
+        yield "    except: pass"
+
     def clearCache(self):
         cache.clear()
 
 cache = {}
 
-
 def getSetFunction(object, attribute):
-    if attribute in cache:
-        return cache[attribute]
+    if attribute in cache: return cache[attribute]
 
     function = createSetFunction(object, attribute)
     cache[attribute] = function
     return function
 
-
 def createSetFunction(object, dataPath):
     needsIndex = dataPathBelongsToArray(object, dataPath)
-    if needsIndex is None:
-        return None
+    if needsIndex is None: return None
     data = {}
     if needsIndex:
         exec(setAttributeWithIndex.replace("#dataPath#", dataPath), data, data)
@@ -72,7 +70,6 @@ setAttributeWithoutIndex = '''
 def setAttributeWithoutIndex(object, index, value):
     object.#dataPath# = value
 '''
-
 
 def dataPathBelongsToArray(object, dataPath):
     if "." in dataPath:

@@ -1,9 +1,7 @@
 import bpy
 from bpy.props import *
-from .. tree_info import getNodeByIdentifier
 from .. id_keys import findIDKeysInCurrentFile
 from .. utils.enum_items import enumItemsFromDicts
-
 
 class IDKeySearch(bpy.types.Operator):
     bl_idname = "an.choose_id_key"
@@ -14,11 +12,10 @@ class IDKeySearch(bpy.types.Operator):
     def getSearchItems(self, context):
         itemDict = []
         for dataType, name in findIDKeysInCurrentFile():
-            itemDict.append({"value": dataType + " * " + name, "name": name})
+            itemDict.append({"value" : dataType + " * " + name, "name" : name})
         return enumItemsFromDicts(itemDict)
 
-    item = EnumProperty(items=getSearchItems)
-    nodeIdentifier = StringProperty()
+    item = EnumProperty(items = getSearchItems)
     callback = StringProperty()
 
     def invoke(self, context, event):
@@ -26,9 +23,7 @@ class IDKeySearch(bpy.types.Operator):
         return {"CANCELLED"}
 
     def execute(self, context):
-        if self.item == "NONE":
-            return {"CANCELLED"}
-        node = getNodeByIdentifier(self.nodeIdentifier)
+        if self.item == "NONE": return {"CANCELLED"}
         dataType, name = self.item.split(" * ")
-        getattr(node, self.callback)(dataType, name)
+        self.an_executeCallback(self.callback, dataType, name)
         return {"FINISHED"}

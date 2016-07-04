@@ -17,7 +17,6 @@ categoryItems = [
     ("BOUNCE", "Bounce", "", "IPO_BOUNCE", 9),
     ("ELASTIC", "Elastic", "", "IPO_ELASTIC", 10)]
 
-
 class InterpolationSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_InterpolationSocket"
     bl_label = "Interpolation Socket"
@@ -27,21 +26,20 @@ class InterpolationSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     comparable = True
     storable = True
 
-    category = EnumProperty(name="Interpolation Category", default="LINEAR",
-                            items=categoryItems, update=propertyChanged)
+    category = EnumProperty(name = "Interpolation Category", default = "LINEAR",
+                            items = categoryItems, update = propertyChanged)
 
-    easeIn = BoolProperty(name="Ease In", default=False, update=propertyChanged)
-    easeOut = BoolProperty(name="Ease Out", default=True, update=propertyChanged)
+    easeIn = BoolProperty(name = "Ease In", default = False, update = propertyChanged)
+    easeOut = BoolProperty(name = "Ease Out", default = True, update = propertyChanged)
 
-    def drawProperty(self, layout, text):
-        col = layout.column(align=True)
-        if text != "":
-            col.label(text)
-        row = col.row(align=True)
-        row.prop(self, "category", text="")
+    def drawProperty(self, layout, text, node):
+        col = layout.column(align = True)
+        if text != "": col.label(text)
+        row = col.row(align = True)
+        row.prop(self, "category", text = "")
         if self.category != "LINEAR":
-            row.prop(self, "easeIn", text="", icon="IPO_EASE_IN")
-            row.prop(self, "easeOut", text="", icon="IPO_EASE_OUT")
+            row.prop(self, "easeIn", text = "", icon = "IPO_EASE_IN")
+            row.prop(self, "easeOut", text = "", icon = "IPO_EASE_OUT")
 
     def getValue(self):
         return getInterpolationPreset(self.category, self.easeIn, self.easeOut)
@@ -51,3 +49,49 @@ class InterpolationSocket(bpy.types.NodeSocket, AnimationNodeSocket):
 
     def setProperty(self, data):
         self.category, self.easeIn, self.easeOut = data
+
+    @classmethod
+    def getDefaultValue(cls):
+        return getInterpolationPreset("LINEAR")
+
+    @classmethod
+    def correctValue(cls, value):
+        if isInterpolation(value):
+            return value, 0
+        return cls.getDefaultValue(), 2
+
+
+class InterpolationListSocket(bpy.types.NodeSocket, AnimationNodeSocket):
+    bl_idname = "an_InterpolationListSocket"
+    bl_label = "Interpolation List Socket"
+    dataType = "Interpolation List"
+    baseDataType = "Interpolation"
+    allowedInputTypes = ["Interpolation List"]
+    drawColor = (0.7, 0.4, 0.3, 0.5)
+    storable = False
+    comparable = False
+
+    @classmethod
+    def getDefaultValue(cls):
+        return []
+
+    @classmethod
+    def getDefaultValueCode(cls):
+        return "[]"
+
+    @classmethod
+    def getCopyExpression(cls):
+        return "value[:]"
+
+    @classmethod
+    def correctValue(cls, value):
+        if isinstance(value, list):
+            if all(isInterpolation(element) for element in value):
+                return value, 0
+        return cls.getDefaultValue(), 2
+
+
+def isInterpolation(value):
+    try: return isinstance(value(0.5), (float, int))
+    except: pass
+    return False

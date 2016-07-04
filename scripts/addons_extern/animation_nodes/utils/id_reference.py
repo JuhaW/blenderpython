@@ -2,10 +2,8 @@ import bpy
 
 hashByObjectName = {}
 
-
 def updateObjectReference(object):
     hashByObjectName[object.name] = hash(object)
-
 
 def tryToFindObjectReference(name):
     object = bpy.data.objects.get(name)
@@ -14,8 +12,7 @@ def tryToFindObjectReference(name):
         return object
 
     savedHash = hashByObjectName.get(name, None)
-    if savedHash is None:
-        return None
+    if savedHash is None: return None
 
     for object in bpy.data.objects:
         if hash(object) == savedHash:

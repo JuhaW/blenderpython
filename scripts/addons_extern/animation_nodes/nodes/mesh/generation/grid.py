@@ -2,31 +2,27 @@ import bpy
 from bpy.props import *
 from mathutils import Vector
 from .... base_types.node import AnimationNode
-from .... algorithms.mesh_generation.indices_utils import gridQuadPolygonIndices, gridQuadEdgeIndices
+from .... algorithms.mesh_generation.indices_utils import GridMeshIndices
 from .... algorithms.mesh_generation.basic_shapes import gridVertices
 from .... events import executionCodeChanged
-
 
 class GridMeshNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_GridMeshNode"
     bl_label = "Grid Mesh"
     bl_width_default = 160
 
-    centerGrid = BoolProperty(name="Center", default=True, update=executionCodeChanged)
+    centerGrid = BoolProperty(name = "Center", default = True, update = executionCodeChanged)
 
     def create(self):
-        divisionsSockets = [
-            self.inputs.new("an_IntegerSocket", "X Divisions", "xDivisions"),
-            self.inputs.new("an_IntegerSocket", "Y Divisions", "yDivisions")]
-        for socket in divisionsSockets:
-            socket.value = 5
-            socket.minValue = 2
-        self.inputs.new("an_FloatSocket", "X Distance", "xDistance").value = 1
-        self.inputs.new("an_FloatSocket", "Y Distance", "yDistance").value = 1
-        self.inputs.new("an_VectorSocket", "Offset", "offset").isDataModified = True
-        self.outputs.new("an_VectorListSocket", "Vertices", "vertices")
-        self.outputs.new("an_EdgeIndicesListSocket", "Edge Indices", "edgeIndices")
-        self.outputs.new("an_PolygonIndicesListSocket", "Polygon Indices", "polygonIndices")
+        self.newInput("Integer", "X Divisions", "xDivisions", value = 5, minValue = 2)
+        self.newInput("Integer", "Y Divisions", "yDivisions", value = 5, minValue = 2)
+        self.newInput("Float", "X Distance", "xDistance", value = 1)
+        self.newInput("Float", "Y Distance", "yDistance", value = 1)
+        self.newInput("Vector", "Offset", "offset", isDataModified = True)
+
+        self.newOutput("Vector List", "Vertices", "vertices")
+        self.newOutput("Edge Indices List", "Edge Indices", "edgeIndices")
+        self.newOutput("Polygon Indices List", "Polygon Indices", "polygonIndices")
 
     def draw(self, layout):
         layout.prop(self, "centerGrid")
@@ -39,7 +35,7 @@ class GridMeshNode(bpy.types.Node, AnimationNode):
         offset.y -= (yDivisions - 1) * yDistance / 2 if self.centerGrid else 0
 
         vertices = gridVertices(xDivisions, yDivisions, xDistance, yDistance, offset) if self.outputs[0].isLinked else []
-        edgeIndices = gridQuadEdgeIndices(xDivisions, yDivisions) if self.outputs[1].isLinked else []
-        polygonIndices = gridQuadPolygonIndices(xDivisions, yDivisions) if self.outputs[2].isLinked else []
+        edgeIndices = GridMeshIndices.innerQuadEdges(xDivisions, yDivisions) if self.outputs[1].isLinked else []
+        polygonIndices = GridMeshIndices.innerQuadPolygons(xDivisions, yDivisions) if self.outputs[2].isLinked else []
 
         return vertices, edgeIndices, polygonIndices

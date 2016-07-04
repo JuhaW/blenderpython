@@ -1,12 +1,9 @@
 from itertools import chain
 from mathutils import Vector
 
-
 def setSplinesOnBlenderObject(object, splines):
-    if object is None:
-        return
-    if object.type != "CURVE":
-        return
+    if object is None: return
+    if object.type != "CURVE": return
 
     bSplines = object.data.splines
     bSplines.clear()

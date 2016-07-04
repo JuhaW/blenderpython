@@ -2,19 +2,19 @@ import bpy
 import random
 from bpy.props import *
 from ... events import treeChanged
+from ... sockets.info import toBaseDataType
 from ... base_types.node import AnimationNode
-from ... sockets.info import toIdName, toBaseDataType
 from . subprogram_sockets import subprogramInterfaceChanged
 from ... tree_info import keepNodeLinks, getNodeByIdentifier
 
 addTypeItems = [
     ("APPEND", "Append", "Add one element to the output list", "NONE", 0),
-    ("EXTEND", "Extend", "Add a custom amount of elements to the output list", "NONE", 1)]
-
+    ("EXTEND", "Extend", "Add a custom amount of elements to the output list", "NONE", 1) ]
 
 class LoopGeneratorOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_LoopGeneratorOutputNode"
     bl_label = "Loop Generator Output"
+    dynamicLabelType = "ALWAYS"
 
     def dataTypeChanged(self, context):
         self.outputName = self.listDataType
@@ -22,19 +22,18 @@ class LoopGeneratorOutputNode(bpy.types.Node, AnimationNode):
         subprogramInterfaceChanged()
 
     def nameChanged(self, context):
-        self.label = self.outputName
         subprogramInterfaceChanged()
 
     def loopInputIdentifierChanged(self, context):
         subprogramInterfaceChanged()
         treeChanged()
 
-    listDataType = StringProperty(update=dataTypeChanged)
-    addType = EnumProperty(name="Add Type", items=addTypeItems, update=dataTypeChanged)
+    listDataType = StringProperty(update = dataTypeChanged)
+    addType = EnumProperty(name = "Add Type", items = addTypeItems, update = dataTypeChanged)
 
-    outputName = StringProperty(name="Generator Name", update=nameChanged)
-    loopInputIdentifier = StringProperty(update=loopInputIdentifierChanged)
-    sortIndex = IntProperty(default=0)
+    outputName = StringProperty(name = "Generator Name", update = nameChanged)
+    loopInputIdentifier = StringProperty(update = loopInputIdentifierChanged)
+    sortIndex = IntProperty(default = 0)
 
     def create(self):
         self.listDataType = "Vector List"
@@ -42,24 +41,23 @@ class LoopGeneratorOutputNode(bpy.types.Node, AnimationNode):
 
     def draw(self, layout):
         node = self.loopInputNode
-        if node:
-            layout.label(node.subprogramName, icon="GROUP_VERTEX")
+        if node: layout.label(node.subprogramName, icon = "GROUP_VERTEX")
 
     def drawAdvanced(self, layout):
-        layout.prop(self, "outputName", text="Name")
+        layout.prop(self, "outputName", text = "Name")
         layout.prop(self, "addType")
         self.invokeSocketTypeChooser(layout, "setListDataType",
-                                     socketGroup="LIST", text="Change Type", icon="TRIA_RIGHT")
+            socketGroup = "LIST", text = "Change Type", icon = "TRIA_RIGHT")
+
+    def drawLabel(self):
+        return self.outputName
 
     def edit(self):
         network = self.network
-        if network.type != "Invalid":
-            return
-        if network.loopInAmount != 1:
-            return
-        loopInput = network.loopInputNode
-        if self.loopInputIdentifier == loopInput.identifier:
-            return
+        if network.type != "Invalid": return
+        if network.loopInAmount != 1: return
+        loopInput = network.getLoopInputNode()
+        if self.loopInputIdentifier == loopInput.identifier: return
         self.loopInputIdentifier = loopInput.identifier
 
     def setListDataType(self, dataType):
@@ -69,16 +67,11 @@ class LoopGeneratorOutputNode(bpy.types.Node, AnimationNode):
     def generateSockets(self):
         self.inputs.clear()
 
-        if self.addType == "APPEND":
-            dataType = toBaseDataType(self.listDataType)
-        elif self.addType == "EXTEND":
-            dataType = self.listDataType
-        socket = self.inputs.new(toIdName(dataType), dataType, "input")
-        socket.defaultDrawType = "TEXT_ONLY"
+        if self.addType == "APPEND": dataType = toBaseDataType(self.listDataType)
+        elif self.addType == "EXTEND": dataType = self.listDataType
 
-        socket = self.inputs.new("an_BooleanSocket", "Condition", "condition")
-        socket.value = True
-        socket.hide = True
+        self.newInput(dataType, dataType, "input", defaultDrawType = "TEXT_ONLY")
+        self.newInput("Boolean", "Condition", "condition", value = True, hide = True)
 
     def delete(self):
         subprogramInterfaceChanged()
@@ -95,24 +88,19 @@ class LoopGeneratorOutputNode(bpy.types.Node, AnimationNode):
 
     @property
     def loopInputNode(self):
-        try:
-            return getNodeByIdentifier(self.loopInputIdentifier)
-        except:
-            return None
+        try: return getNodeByIdentifier(self.loopInputIdentifier)
+        except: return None
 
     @property
     def conditionSocket(self):
-        try:
-            return self.inputs["Condition"]
-        except:
-            return self.inputs["Enabled"]
+        try: return self.inputs["Condition"]
+        except: return self.inputs["Enabled"]
 
     @property
     def addSocket(self):
         for socket in self.inputs:
             if socket.name not in ("Condition", "Enabled"):
                 return socket
-
 
 def getRandomInt():
     random.seed()
