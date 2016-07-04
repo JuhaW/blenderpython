@@ -28,7 +28,7 @@ bl_info = {
     "warning": "This addon is still in development.",
     "wiki_url": "https://github.com/ndee85/coa_tools/wiki",
     "tracker_url": "https://github.com/ndee85/coa_tools/issues",
-    "category": "Ndee Tools" }
+    "category": "Tools" }
 
 
 import bpy
