@@ -35,10 +35,8 @@ def _prop(attr):
             if value is not None:
                 return self.override[attr]
         return getattr(self, '_' + attr)
-
     def fset(self, value):
         self.override[attr] = value
-
     def fdel(self):
         if attr in self.override:
             del self.override[attr]
@@ -154,7 +152,6 @@ class UnitSystem:
     @property
     def bupg(self):
         return self.grid_view
-
     @bupg.setter
     def bupg(self, value):
         self.grid_view = value
@@ -163,7 +160,6 @@ class UnitSystem:
     @property
     def dpg(self):
         return self.dx
-
     @dpg.setter
     def dpg(self, value):
         self.dx = value
@@ -172,7 +168,6 @@ class UnitSystem:
     @property
     def bupd(self):
         return 1.0 / self.dpbu
-
     @bupd.setter
     def bupd(self, value):
         self.dpbu = 1.0 / value
@@ -181,7 +176,6 @@ class UnitSystem:
     @property
     def gpbu(self):
         return 1.0 / self.grid_view
-
     @gpbu.setter
     def gpbu(self, value):
         self.grid_view = 1.0 / value
@@ -190,7 +184,6 @@ class UnitSystem:
     @property
     def gpd(self):
         return 1.0 / self.dx
-
     @gpd.setter
     def gpd(self, value):
         self.dx = 1.0 / value
@@ -513,14 +506,14 @@ class UnitSystem:
 
     def __str__(self):
         ls = ['UnitSystem:',
-              '    system: {}, scale_length: {}, ' +
-              'grid_scale: {}, grid_subdivisions: {},',
+              '    system: {}, scale_length: {}, ' + \
+                  'grid_scale: {}, grid_subdivisions: {},',
               '    unit:            {}',
               '    dpbu:            {} (dot per blenderUnit)',
               '    dx, dpg:         {} (dot per grid)',
               '    grid_view, bupg: {} (blenderUnit per grid)',
-              '    unit_pow:        {} (grid_scale * 10 ** unit_pow -> ' +
-              'blenderUnit per grid (only system is \'NONE\'))']
+              '    unit_pow:        {} (grid_scale * 10 ** unit_pow -> ' + \
+                  'blenderUnit per grid (only system is \'NONE\'))']
         text = '\n'.join(ls)
         text = text.format(self.system, self.scale_length,
                            self.grid_scale, self.grid_subdivisions,

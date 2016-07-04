@@ -1,17 +1,17 @@
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
-#  This program is free software you can redistribute it and/or
+#  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation either version 2
+#  as published by the Free Software Foundation; either version 2
 #  of the License, or (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY without even the implied warranty of
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with this program if not, write to the Free Software Foundation,
+#  along with this program; if not, write to the Free Software Foundation,
 #  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 # ##### END GPL LICENSE BLOCK #####
@@ -48,10 +48,10 @@ TEXT_NAME = 'valid_shortcuts.txt'
 
 
 class ListValidKeysPreferences(
-        utils.AddonKeyMapUtility,
-        utils.AddonPreferences,
-        bpy.types.PropertyGroup if '.' in __name__ else
-        bpy.types.AddonPreferences):
+    utils.AddonKeyMapUtility,
+    utils.AddonPreferences,
+    bpy.types.PropertyGroup if '.' in __name__ else
+    bpy.types.AddonPreferences):
     bl_idname = __name__
 
     output = bpy.props.EnumProperty(
@@ -227,7 +227,7 @@ class WM_OT_list_valid_keys(bpy.types.Operator):
         area_region_types = set(r.type for r in context.area.regions)
         area_region_types = self.sorted_region_types(area_region_types)
         visible_region_types = set(r.type for r in context.area.regions
-                                   if r.id != 0)
+                           if r.id != 0)
         flow = column.column_flow(2)
         for region_type in area_region_types:
             col = flow.column()

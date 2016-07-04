@@ -39,6 +39,7 @@ import traceback
 import bpy
 import bmesh
 import bgl
+import mathutils.geometry
 from mathutils import *
 
 try:
@@ -108,14 +109,6 @@ class QuickBooleanPreferences(
         subtype='COLOR_GAMMA',
     )
 
-    # 0にした所で無制限にはならないよ
-    undo_limit = bpy.props.IntProperty(
-        name='Undo Limit',
-        default=5,
-        min=0,
-        max=20
-    )
-
     def draw(self, context):
         layout = self.layout
 
@@ -124,9 +117,7 @@ class QuickBooleanPreferences(
         col.prop(self, 'color')
         col.prop(self, 'snap_color')
 
-        col = split.column()
-        col.prop(self, 'undo_limit')
-
+        split.column()
         split.column()
 
         super().draw(context, layout.column())
@@ -204,13 +195,13 @@ def unwrap_uvs(context, ob, actob):
                 loop.uv = co
 
 
-def _intersect_edit(context, verts, edges, faces, invert):
+def _intersect_edit(context, verts, edges, faces, reverse):
     """
     :type context: bpy.types.Context
     :type verts: list
     :type edges: list
     :type faces: list
-    :type invert: bool
+    :type reverse: bool
     """
 
     ob = context.active_object
@@ -223,7 +214,7 @@ def _intersect_edit(context, verts, edges, faces, invert):
 
     cut_verts = [bm.verts.new(obimat * co) for co in verts]
     cut_edges = [bm.edges.new((cut_verts[v1], cut_verts[v2]))
-                 for v1, v2, in edges]
+                for v1, v2, in edges]
     cut_faces = [bm.faces.new([cut_verts[v] for v in f]) for f in faces]
     cutting_elems = cut_verts + cut_edges + cut_faces
     cutting_elems = set(cutting_elems)
@@ -248,7 +239,7 @@ def _intersect_edit(context, verts, edges, faces, invert):
                 ele.hide = True
                 hidden_elems.append(ele)
     # 非選択要素で選択要素を切り取る(DIFFERENCE)
-    operation = 'INTERSECT' if invert else 'DIFFERENCE'
+    operation = 'INTERSECT' if reverse else 'DIFFERENCE'
     bpy.ops.mesh.intersect_boolean(operation=operation, use_swap=True)
 
     bpy.ops.mesh.select_all(action='SELECT')
@@ -268,6 +259,13 @@ def _intersect_edit(context, verts, edges, faces, invert):
                 for f in edge.link_faces:
                     if not f[layer]:
                         materials.append(f.material_index)
+            if not materials:
+                for edge in face.edges:
+                    for f in edge.link_faces:
+                        for e in f.edges:
+                            for f2 in e.link_faces:
+                                if not f2[layer]:
+                                    materials.append(f2.material_index)
             if materials:
                 count = {materials.count(k): k for k in set(materials)}
                 face.material_index = count[max(count)]
@@ -278,6 +276,13 @@ def _intersect_edit(context, verts, edges, faces, invert):
                     for f in edge.link_faces:
                         if not f[layer]:
                             images.append(f[tex_layer].image)
+                if not images:
+                    for edge in face.edges:
+                        for f in edge.link_faces:
+                            for e in f.edges:
+                                for f2 in e.link_faces:
+                                    if not f2[layer]:
+                                        images.append(f2[tex_layer].image)
                 if images:
                     count = {images.count(k): k for k in set(images)}
                     face[tex_layer].image = count[max(count)]
@@ -299,13 +304,13 @@ def _intersect_edit(context, verts, edges, faces, invert):
     bmesh.update_edit_mesh(ob.data)
 
 
-def _intersect_object(context, verts, edges, faces, invert):
+def _intersect_object(context, verts, edges, faces, reverse):
     """
     :type context: bpy.types.Context
     :type verts: list
     :type edges: list
     :type faces: list
-    :type invert: bool
+    :type reverse: bool
     """
 
     actob = context.active_object
@@ -330,7 +335,7 @@ def _intersect_object(context, verts, edges, faces, invert):
 
     mod = actob.modifiers.new('Boolean Cutoff', 'BOOLEAN')
     mod.object = ob
-    mod.operation = 'INTERSECT' if invert else 'DIFFERENCE'
+    mod.operation = 'INTERSECT' if reverse else 'DIFFERENCE'
     i = list(actob.modifiers).index(mod)
     for _ in range(i):
         bpy.ops.object.modifier_move_up(modifier=mod.name)
@@ -366,6 +371,13 @@ def _intersect_object(context, verts, edges, faces, invert):
                 for f in ekey_polys[ekey]:
                     if not f.select:
                         materials.append(f.material_index)
+            if not materials:
+                for ekey in poly.edge_keys:
+                    for f in ekey_polys[ekey]:
+                        for k in f.edge_keys:
+                            for f2 in ekey_polys[k]:
+                                if not f2.select:
+                                    materials.append(f2.material_index)
             if materials:
                 count = {materials.count(k): k for k in set(materials)}
                 poly.material_index = count[max(count)]
@@ -376,6 +388,14 @@ def _intersect_object(context, verts, edges, faces, invert):
                     for f in ekey_polys[ekey]:
                         if not f.select:
                             images.append(tex_layer.data[f.index].image)
+                if not images:
+                    for ekey in poly.edge_keys:
+                        for f in ekey_polys[ekey]:
+                            for k in f.edge_keys:
+                                for f2 in ekey_polys[k]:
+                                    if not f2.select:
+                                        images.append(
+                                            tex_layer.data[f2.index].image)
                 if images:
                     count = {images.count(k): k for k in set(images)}
                     tex_layer.data[poly.index].image = count[max(count)]
@@ -401,8 +421,26 @@ def _intersect_object(context, verts, edges, faces, invert):
     bpy.data.meshes.remove(mesh)
 
 
-def intersect(context, mode, mouse_coords, invert, circle_segments,
-              use_cursor_limit):
+def calc_circle_coords(loc, radius, segments, direction):
+    coords = []
+    angle = math.pi * 2 / segments
+    start = math.pi * 0.5
+    d = {'VERT_TOP': 0, 'EDGE_TOP': 1, 'VERT_RIGHT': 2, 'EDGE_RIGHT': 3}
+    direction = d[direction]
+    if direction % 2 == 1:
+        start += angle / 2
+    start -= math.pi * 0.5 * int(direction / 2)
+
+    for i in range(segments):
+        a = math.pi * 2 / segments * i + start
+        x = math.cos(a) * radius
+        y = math.sin(a) * radius
+        coords.append(loc + Vector([x, y]))
+    return coords
+
+
+def intersect(context, mode, mouse_coords, reverse, circle_segments,
+              circle_direction, use_cursor_limit):
     """
     :type context: bpy.types.Context
     """
@@ -472,12 +510,8 @@ def intersect(context, mode, mouse_coords, invert, circle_segments,
     elif mode == 'CIRCLE':
         p1, p2 = mouse_coords
         radius = (p2 - p1).length
-        coords = []
-        for i in range(circle_segments):
-            a = math.pi * 2 / circle_segments * i + math.pi * 0.5
-            x = math.cos(a) * radius
-            y = math.sin(a) * radius
-            coords.append(p1 + Vector([x, y]))
+        coords = calc_circle_coords(p1, radius, circle_segments,
+                                    circle_direction)
 
     else:  # if mode == 'POLYGON':
         coords = mouse_coords
@@ -502,9 +536,9 @@ def intersect(context, mode, mouse_coords, invert, circle_segments,
 
     # boolean
     if context.mode == 'EDIT_MESH':
-        _intersect_edit(context, verts, edges, faces, invert)
+        _intersect_edit(context, verts, edges, faces, reverse)
     else:
-        _intersect_object(context, verts, edges, faces, invert)
+        _intersect_object(context, verts, edges, faces, reverse)
 
 
 class GrabCursor:
@@ -512,7 +546,6 @@ class GrabCursor:
     modal operator 実行中に他の modal operator を呼ぶと、それが終了した際に
     Continuous Grab が無効化される為。
     """
-
     def __init__(self):
         self._grab_cursor_wrapping = [None, None]
         """:type: list[int]"""
@@ -576,8 +609,8 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
 
     bl_options = {'REGISTER', 'UNDO'}
 
-    props = ('mode', 'invert', 'use_cursor_limit', 'circle_segments',
-             'continuity')
+    props = ('mode', 'reverse', 'use_cursor_limit', 'circle_segments',
+             'circle_direction', 'continuity')
     mode = bpy.props.EnumProperty(
         name='Mode',
         items=[('LINE', 'Line', ''),
@@ -587,8 +620,8 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
                ],
         default='LINE'
     )
-    invert = bpy.props.BoolProperty(
-        name='Invert'
+    reverse = bpy.props.BoolProperty(
+        name='reverse'
     )
     use_cursor_limit = bpy.props.BoolProperty(
         name='Cursor Limit',
@@ -599,6 +632,22 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
         default=16,
         min=3,
         max=500
+    )
+    # circle_direction = bpy.props.IntProperty(
+    #     name='Circle Direction',
+    #     default=0,
+    #     min=0,
+    #     max=3,
+    # )
+    circle_direction = bpy.props.EnumProperty(
+        name='Circle Direction',
+        items=[
+            ('VERT_TOP', 'Vert Top', ''),
+            ('EDGE_TOP', 'Edge Top', ''),
+            ('VERT_RIGHT', 'Vert Right', ''),
+            ('EDGE_RIGHT', 'Edge Right', '')
+        ],
+        default='VERT_TOP',
     )
     continuity = bpy.props.BoolProperty(
         name='Continuity',
@@ -663,21 +712,31 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
             return 'ON' if value else 'OFF'
 
         text = 'Mode (TAB/L/B/C/P): {}'.format(self.mode.title())
-        text += ', Invert (I): {}'.format(on_off(self.invert))
+        text += ', reverse (R): {}'.format(on_off(self.reverse))
         if self.mode == 'POLYGON':
             text += ', Apply Polygon (Space/Ret/LDoubleClick)'
         if self.mode == 'CIRCLE':
-            text += ', Segments (+/-): {}'.format(self.circle_segments)
+            if self.left_mouse:
+                fmt = ', Segments (+/-/WheelUp/WheelDown): {}'
+            else:
+                fmt = ', Segments (+/-): {}'
+            text += fmt.format(self.circle_segments)
+            d = self.circle_direction.replace('_', ' ').title()
+            text += ', Direction (D): {}'.format(d)
 
         text += ', Cursor Limit (Z): ' + on_off(self.use_cursor_limit)
 
         text += ', Snap Grid (Ctrl): ' + on_off(self.mco_ctrl)
-        text += ', Precision (Shift):' + on_off(self.mco_shift)
+        text += ', Precision (Shift): ' + on_off(self.mco_shift)
+        text += ', Move (Alt): ' + on_off(self.mco_shift)
 
-        if self.undo_keymap_items:
-            text += ', Undo ({})'.format(kmi_to_str(self.undo_keymap_items[0]))
-        if self.redo_keymap_items:
-            text += ', Redo ({})'.format(kmi_to_str(self.redo_keymap_items[0]))
+        if not self.left_mouse:
+            if self.undo_keymap_items:
+                text += ', Undo ({})'.format(
+                    kmi_to_str(self.undo_keymap_items[0]))
+            if self.redo_keymap_items:
+                text += ', Redo ({})'.format(
+                    kmi_to_str(self.redo_keymap_items[0]))
 
         # text += ', mco: [{}, {}]'.format(int(self.mco[0]), int(self.mco[1]))
         context.area.header_text_set(text)
@@ -700,21 +759,19 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
         """
         :type context: bpy.types.Context
         """
-        if self.history_index == 0:
+        if self.history_index == -1:
             return
         self.history_index -= 1
-        self.bmesh_to_mesh(context, self.history[self.history_index],
-                           context.active_object.data)
+        bpy.ops.ed.undo()
 
     def redo(self, context):
         """
         :type context: bpy.types.Context
         """
-        if self.history_index == len(self.history) - 1:
+        if self.history_index == self.history_count - 1:
             return
         self.history_index += 1
-        self.bmesh_to_mesh(context, self.history[self.history_index],
-                           context.active_object.data)
+        bpy.ops.ed.redo()
 
     def exit(self, context):
         """
@@ -723,14 +780,16 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
         bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
         self.prop_save(context)
         self.header_text_clear(context)
-        self.history.clear()
         self.bm_bak = None
 
     def cancel(self, context):
         """
         :type context: bpy.types.Context
         """
-        self.bmesh_to_mesh(context, self.bm_bak, context.active_object.data)
+        # self.bmesh_to_mesh(context, self.bm_bak, context.active_object.data)
+        for _ in range(self.history_count):
+            bpy.ops.ed.undo()
+        bpy.ops.ed.flush_edits()
 
     def find_keymap_items(self, context):
         kc = context.window_manager.keyconfigs.active  # 'Blender'
@@ -791,7 +850,7 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
                 return True
         return False
 
-    def modify_mouse_coord(self, context, apply=True):
+    def modified_mouse_coord(self, context):
         region = context.region
         rv3d = context.region_data
 
@@ -805,27 +864,36 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
             co = unit_system.snap_local_grid(context, co, self.mco_shift)
             mco = project(region, rv3d, co).to_2d()
 
-        if apply and self.mouse_coords and self.mode != 'POLYGON':
-            self.mouse_coords[-1] = mco
         return mco
 
     def intersect(self, context):
         intersect(context, self.mode, self.mouse_coords,
-                  self.invert, self.circle_segments, self.use_cursor_limit)
+                  self.reverse, self.circle_segments, self.circle_direction,
+                  self.use_cursor_limit)
 
-        # history
-        ob = context.active_object
-        if context.mode == 'EDIT_MESH':
-            bm = bmesh.from_edit_mesh(ob.data).copy()
+        self.history_count += 1
+        self.history_index += 1
+        msg = self.bl_label + ' (modal)'
+        bpy.ops.ed.undo_push(message=msg)
+
+    def alt_move(self, context):
+        """alt key押しっぱなしで移動"""
+        if self.mco_alt and self.mouse_coords_alt_press:
+            unit_system = unitsystem.UnitSystem(context)
+            vec = self.mco_mod - self.mco_alt
+            if self.mco_ctrl:
+                scalar = unit_system.dpg
+                if self.mco_shift:
+                    scalar *= 0.1
+                dx = unit_system.snap_value(vec[0], scalar)
+                dy = unit_system.snap_value(vec[1], scalar)
+            else:
+                dx, dy = vec
+            for i, co in enumerate(self.mouse_coords_alt_press):
+                self.mouse_coords[i] = co + Vector((dx, dy))
+            return True
         else:
-            bm = bmesh.new()
-            bm.from_mesh(ob.data)
-        self.history[self.history_index + 1:] = []
-        self.history.append(bm)
-        self.history_index = len(self.history) - 1
-        if len(self.history) > self.undo_limit:
-            self.history[:1] = []
-            self.history_index -= 1
+            return False
 
     def modal(self, context, event):
         """
@@ -854,32 +922,42 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
                     self.mco_shift = mco.copy()
             elif event.value == 'RELEASE':
                 self.mco_shift = None
+            block = True
         elif event.type in {'LEFT_CTRL', 'RIGHT_CTRL'}:
             if event.value == 'PRESS':
                 self.mco_ctrl = mco.copy()
             elif event.value == 'RELEASE':
                 self.mco_ctrl = None
+            block = True
         elif event.type in {'LEFT_ALT', 'RIGHT_ALT'}:
             if event.value == 'PRESS':
                 self.mco_alt = mco.copy()
+                self.mouse_coords_alt_press = self.mouse_coords[:]
             elif event.value == 'RELEASE':
                 self.mco_alt = None
+                self.mouse_coords_alt_press.clear()
+            block = True
 
-        mco = self.modify_mouse_coord(context)
-        self.mco_mod = mco.copy()
+        mco_mod = self.modified_mouse_coord(context)
+        if self.mouse_coords and self.mode != 'POLYGON':
+            if not self.mouse_coords_alt_press:
+                self.mouse_coords[-1] = mco_mod
+        self.mco_mod = mco_mod.copy()
+
+        self.alt_move(context)
 
         if event.type == 'LEFTMOUSE':
             if event.value == 'PRESS':
                 if self.mode in {'LINE', 'BOX', 'CIRCLE'}:
-                    self.mouse_coords.extend([mco, mco])
+                    self.mouse_coords.extend([mco_mod, mco_mod])
                 else:
-                    self.mouse_coords.append(mco)
+                    self.mouse_coords.append(mco_mod)
                 self.left_mouse = True
-                block = True
             elif event.value == 'RELEASE':
                 if self.mode in {'LINE', 'BOX', 'CIRCLE'}:
                     self.intersect(context)
                     self.mouse_coords.clear()
+                    self.mouse_coords_alt_press.clear()
                     if not self.continuity:
                         self.exit(context)
                         return {'FINISHED'}
@@ -890,88 +968,115 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
                         self.mouse_coords.pop(-1)
                         self.intersect(context)
                         self.mouse_coords.clear()
+                        self.mouse_coords_alt_press.clear()
                         if not self.continuity:
                             self.exit(context)
                             return {'FINISHED'}
                 self.left_mouse = False
-                block = True
+            block = True
 
         elif event.type in {'SPACE', 'RET', 'NUMPAD_ENTER'}:
             if event.value == 'PRESS':
                 if self.mode == 'POLYGON' and self.mouse_coords:
                     self.intersect(context)
                     self.mouse_coords.clear()
+                    self.mouse_coords_alt_press.clear()
                     if not self.continuity:
                         self.exit(context)
                         return {'FINISHED'}
                 else:
                     self.exit(context)
                     return {'FINISHED'}
-                block = True
+            block = True
 
         elif event.type == 'MOUSEMOVE':
-            if self.left_mouse and self.mouse_coords:
-                self.mouse_coords[-1] = mco
+            if self.mco_alt and self.mouse_coords_alt_press:
+                pass
+            else:
+                if self.left_mouse and self.mouse_coords:
+                    self.mouse_coords[-1] = mco_mod
             block = True
 
         elif event.type in {'ESC', 'RIGHTMOUSE'}:
             if event.value == 'PRESS':
                 if self.mouse_coords:
                     self.mouse_coords.clear()
+                    self.mouse_coords_alt_press.clear()
                 else:
                     self.cancel(context)
                     self.exit(context)
                     return {'CANCELLED'}
-                block = True
+            block = True
 
         elif event.type == 'TAB':
             if event.value == 'PRESS':
                 values = ['LINE', 'BOX', 'CIRCLE', 'POLYGON']
                 i = values.index(self.mode)
                 self.mode = values[(i + 1) % len(values)]
-                block = True
+            block = True
         elif event.type == 'L':
             if event.value == 'PRESS':
                 self.mode = 'LINE'
                 self.mouse_coords.clear()
-                block = True
+                self.mouse_coords_alt_press.clear()
+            block = True
         elif event.type == 'B':
             if event.value == 'PRESS':
                 self.mode = 'BOX'
                 self.mouse_coords.clear()
-                block = True
+                self.mouse_coords_alt_press.clear()
+            block = True
         elif event.type == 'C':
             if event.value == 'PRESS':
                 self.mode = 'CIRCLE'
                 self.mouse_coords.clear()
-                block = True
-        elif event.type == 'F':
+                self.mouse_coords_alt_press.clear()
+            block = True
+        elif event.type == 'P':
             if event.value == 'PRESS':
                 self.mode = 'POLYGON'
                 self.mouse_coords.clear()
-                block = True
-        elif event.type == 'I':
+                self.mouse_coords_alt_press.clear()
+            block = True
+        elif event.type == 'R':
             if event.value == 'PRESS':
-                self.invert ^= True
-                block = True
+                self.reverse ^= True
+            block = True
         elif event.type == 'NUMPAD_PLUS':
             if event.value == 'PRESS':
                 self.circle_segments += 1
-                block = True
+            block = True
         elif event.type == 'NUMPAD_MINUS':
             if event.value == 'PRESS':
                 self.circle_segments -= 1
+            block = True
+        elif event.type == 'D':
+            if event.value == 'PRESS':
+                items = {'VERT_TOP': 0, 'EDGE_TOP': 1, 'VERT_RIGHT': 2,
+                         'EDGE_RIGHT': 3}
+                i = (items[self.circle_direction] + 1) % 4
+                self.circle_direction = {v: k for k, v in items.items()}[i]
+            block = True
+        elif event.type in {'WHEELUPMOUSE', 'WHEELDOWNMOUSE'}:
+            if self.mode == 'CIRCLE' and self.left_mouse:
+                if event.value == 'PRESS':
+                    if event.type == 'WHEELUPMOUSE':
+                        self.circle_segments += 1
+                    else:
+                        self.circle_segments -= 1
                 block = True
 
         elif event.type == 'Z':
-            if event.value == 'PRESS':
-                if (not event.shift and not event.ctrl and not event.alt and
-                        not event.oskey):
+            if (not event.shift and not event.ctrl and not event.alt and
+                    not event.oskey):
+                if event.value == 'PRESS':
                     self.use_cursor_limit ^= True
-                    block = True
+                block = True
 
         if not block:
-            if self.is_undo_event(context, event):
+            if self.left_mouse:
+                block = True
+            elif self.is_undo_event(context, event):
                 self.undo(context)
                 block = True
             elif self.is_redo_event(context, event):
@@ -994,28 +1099,17 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
         """
         self.handle = None
         self.bm_bak = None  # BMesh
-        self.history = []  # list of BMesh
-        self.history_index = 0
+        self.history_count = 0
+        self.history_index = -1
         self.mouse_coords = []  # region coords (2D Vector)
+        self.mouse_coords_alt_press = []
         self.mco = self.mco_mod = None
         self.left_mouse = False
         self.mco_shift = self.mco_ctrl = self.mco_alt = None
         self.view_keymap_items = []
         self.undo_keymap_items = []
         self.redo_keymap_items = []
-        prefs = QuickBooleanPreferences.get_instance()
-        self.undo_limit = prefs.undo_limit
 
-        ob = context.active_object
-        if context.mode == 'EDIT_MESH':
-            bm = bmesh.from_edit_mesh(ob.data).copy()
-        else:
-            bm = bmesh.new()
-            bm.from_mesh(ob.data)
-        self.bm_bak = bm
-        self.history.append(self.bm_bak)
-
-        # self.mco = Vector((event.mouse_region_x, event.mouse_region_y))
         self.mco = Vector(self.grab_cursor(context, event))
         self.mco_mod = self.mco
 
@@ -1038,7 +1132,7 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
         :type context: bpy.types.Context
         """
 
-        prefs = QuickBooleanPreferences.get_prefs()
+        prefs = QuickBooleanPreferences.get_instance()
         color = prefs.color
         snap_color = prefs.snap_color
 
@@ -1050,15 +1144,23 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
         bgl.glEnable(bgl.GL_BLEND)
         bgl.glColor4f(*color)
 
-        show_invert = (self.invert and self.mouse_coords and
-                       (self.mode != 'POLYGON' or len(self.mouse_coords) > 2))
-        if show_invert:
+        show_reversed = False
+        if self.reverse:
+            if self.mode == 'POLYGON':
+                if len(self.mouse_coords) >= 3:
+                    show_reversed = True
+            else:
+                if len(self.mouse_coords) >= 2:
+                    if self.mouse_coords[0] != self.mouse_coords[1]:
+                        show_reversed = True
+        if show_reversed:
             bgl.glEnable(bgl.GL_DEPTH_TEST)
             bgl.glClearDepth(1.0)
             bgl.glClear(bgl.GL_DEPTH_BUFFER_BIT)
             bgl.glDepthMask(1)
             bgl.glColorMask(0, 0, 0, 0)
 
+        lines = []
         if self.mouse_coords:
             if self.mode == 'LINE':
                 w = region.width
@@ -1083,29 +1185,42 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
                 for co in coords:
                     bgl.glVertex2f(*co)
                 bgl.glEnd()
+                lines = self.mouse_coords
 
             elif self.mode == 'BOX':
                 p1, p2 = self.mouse_coords
                 bgl.glRectf(p1[0], p1[1], p2[0], p2[1])
+                lines = [p1,
+                         Vector((p2[0], p1[1])),
+                         Vector((p2[0], p2[1])),
+                         Vector((p1[0], p2[1])),
+                         p1]
             elif self.mode == 'CIRCLE':
                 p1, p2 = self.mouse_coords
                 bgl.glBegin(bgl.GL_TRIANGLE_FAN)
                 bgl.glVertex2f(*p1)
                 r = (p2 - p1).length
-                for i in range(self.circle_segments + 1):
-                    a = math.pi * 2 / self.circle_segments * i + math.pi / 2
-                    x = math.cos(a) * r + p1[0]
-                    y = math.sin(a) * r + p1[1]
-                    bgl.glVertex2f(x, y)
+                coords = calc_circle_coords(p1, r, self.circle_segments,
+                                            self.circle_direction)
+                for co in coords:
+                    bgl.glVertex2f(*co)
+                bgl.glVertex2f(*coords[0])
                 bgl.glEnd()
+                lines = coords + [coords[0]]
             elif self.mode == 'POLYGON':
                 if len(self.mouse_coords) >= 3:
-                    bgl.glBegin(bgl.GL_POLYGON)
-                    for co in self.mouse_coords:
-                        bgl.glVertex2f(*co)
-                    bgl.glEnd()
+                    tris = mathutils.geometry.tessellate_polygon(
+                        [[co.to_3d() for co in self.mouse_coords]])
 
-        if show_invert:
+                    bgl.glBegin(bgl.GL_TRIANGLES)
+                    for tri in tris:
+                        for i in tri:
+                            bgl.glVertex2f(*self.mouse_coords[i])
+                    bgl.glEnd()
+                if len(self.mouse_coords) > 1:
+                    lines = self.mouse_coords + [self.mouse_coords[0]]
+
+        if show_reversed:
             bgl.glColorMask(1, 1, 1, 1)
             bgl.glBegin(bgl.GL_QUADS)
             bgl.glVertex3f(0, 0, -1)
@@ -1115,16 +1230,18 @@ class MESH_OT_intersect_cutoff(GrabCursor, bpy.types.Operator):
             bgl.glEnd()
             bgl.glDisable(bgl.GL_DEPTH_TEST)
 
+        bgl.glColor4f(*color[:3], 1.0)
+        bgl.glPointSize(1)
+        bgl.glLineWidth(1)
+        if len(lines) > 1:
+            bgl.glBegin(bgl.GL_LINE_STRIP)
+            for co in lines:
+                bgl.glVertex2f(*co)
+            bgl.glEnd()
         if self.mode == 'POLYGON':
-            if 1 <= len(self.mouse_coords) <= 2:
+            if len(self.mouse_coords) == 1:
                 bgl.glPointSize(5)
-                bgl.glLineWidth(3)
-                if len(self.mouse_coords) == 1:
-                    bgl.glColor4f(*color[:3], 1.0)
-                    bgl.glBegin(bgl.GL_POINTS)
-                else:
-                    bgl.glColor4f(*color[:3], 1.0)
-                    bgl.glBegin(bgl.GL_LINES)
+                bgl.glBegin(bgl.GL_POINTS)
                 for co in self.mouse_coords:
                     bgl.glVertex2f(*co)
                 bgl.glEnd()
@@ -1178,6 +1295,7 @@ class QuickBooleanPanel(bpy.types.Panel):
     @classmethod
     def draw_property(cls, src, src_properties, attr, layout, text=None,
                       skip_hidden=True, row=False, **kwargs):
+
         """オペレータ実行時のプロパティ表示を再現する。
         :type attr: str
         :type layout: bpy.types.UILayout
@@ -1293,7 +1411,8 @@ def unregister():
     try:
         del bpy.context.window_manager['quick_boolean']
     except:
-        traceback.print_exc()
+        # traceback.print_exc()
+        pass
 
     for cls in classes[::-1]:
         bpy.utils.unregister_class(cls)
