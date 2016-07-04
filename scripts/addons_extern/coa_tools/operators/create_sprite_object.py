@@ -17,7 +17,7 @@ Created by Andreas Esau
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
+    
 import bpy
 import bpy_extras
 import bpy_extras.view3d_utils
@@ -33,17 +33,15 @@ import json
 from bpy.app.handlers import persistent
 from .. functions import *
 
-# Create Sprite Object
-
-
+######################################################################################################################################### Create Sprite Object
 class CreateSpriteObject(bpy.types.Operator):
     bl_idname = "wm.coa_create_sprite_object"
     bl_label = "Create Sprite Object"
-    bl_options = {"REGISTER", "UNDO"}
-
+    bl_options = {"REGISTER","UNDO"}
+    
     def execute(self, context):
         obj = context.active_object
-
+        
         if context.active_object != None and obj.type == "ARMATURE" and obj.mode == "POSE":
             context.scene.objects.active = None
         bpy.ops.object.empty_add(type='PLAIN_AXES', radius=1, view_align=False, location=context.scene.cursor_location)
