@@ -38,6 +38,7 @@ if "bpy" in locals():
     importlib.reload(scene_materials)
     importlib.reload(scene_objects)
     importlib.reload(scene_objects_cycles)
+    importlib.reload(scene_texture_render)
     importlib.reload(pixelate_3d)
     importlib.reload(object_add_chain)
     importlib.reload(drop_to_ground)
@@ -59,6 +60,7 @@ else:
     from . import scene_materials
     from . import scene_objects
     from . import scene_objects_cycles
+    from . import scene_texture_render
     from . import pixelate_3d
     from . import object_add_chain
     from . import oscurart_chain_maker
@@ -164,7 +166,8 @@ class INFO_MT_scene_elements_add(bpy.types.Menu):
                         text="Scene_Plane")
         layout.operator("objects_cycles.add_scene",
                         text="Scene_Objects_Cycles")
-
+        layout.operator("objects_texture.add_scene",
+                        text="Scene_Textures_Cycles")
 
 class INFO_MT_mesh_lamps_add(bpy.types.Menu):
     # Define the "mesh objects" menu
