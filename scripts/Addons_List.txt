@@ -293,6 +293,7 @@ CamStack: Jeffrey Hoover (italic)
 Anim Quick Tools: Joel Daniels
 Viewport Time Scrub: Frankie
 Hierarchy Tools: kurzemnieks
+ColorRamp Dropper: Quentin Wenger (Matpi)
 
 Thats a long list!!!!!!
 
