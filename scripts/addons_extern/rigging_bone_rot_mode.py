@@ -1,34 +1,34 @@
 '''
-    Bone Rotation Modes
+Bone Rotation Modes
 
-    Changes a bone(s) rotation mode based on user input.
+Changes a bone(s) rotation mode based on user input.
 
-    Usage:
-        After installing the addon, (normal installation), it can be enabled
-        under User Prefences -> Addons -> Rigging -> Bone Rotation Mode. Once
-        enabled, selecting an armature object and entering pose mode, a new
-        panel will appear in the tool shelf called - 'Change Bone's Rotation
-        Mode' - that will give you the options to use this tool.
+Usage:
+    After installing the addon, (normal installation), it can be enabled
+    under User Prefences -> Addons -> Rigging -> Bone Rotation Mode. Once
+    enabled, selecting an armature object and entering pose mode, a new
+    panel will appear in the tool shelf called - 'Change Bone's Rotation
+    Mode' - that will give you the options to use this tool.
 
-        Options:
-            Selected Bones - A check box, when enabled this addon will only
-            work on selected bones, otherwise it will work on all bones in
-            the current armature object.
+    Options:
+        Selected Bones - A check box, when enabled this addon will only
+        work on selected bones, otherwise it will work on all bones in
+        the current armature object.
 
-            Rotation Mode - The rotation mode you wish to change the bone(s)
-            to.
+        Rotation Mode - The rotation mode you wish to change the bone(s)
+        to.
 
-            Change Rotation Mode - Invokes this script and changes the rotation
-            mode of the bone(s) and indicated in the above 2 parameters.
+        Change Rotation Mode - Invokes this script and changes the rotation
+        mode of the bone(s) and indicated in the above 2 parameters.
 
-    1/4/2014:
-        First initial alpha release. All the functionality that I desire from
-        this addon is there and working. This is only considered an alpha
-        release because it's not been tested by anyone other than myself.
+1/4/2014:
+    First initial alpha release. All the functionality that I desire from
+    this addon is there and working. This is only considered an alpha
+    release because it's not been tested by anyone other than myself.
 
-    1/5/2014:
-        Added 'undo' to the script. Now when you change a bone(s) rotation
-        it can be undone by CTRL-Z, likewise, CTRL-Y works as well.
+1/5/2014:
+    Added 'undo' to the script. Now when you change a bone(s) rotation
+    it can be undone by CTRL-Z, likewise, CTRL-Y works as well.
 '''
 
 
@@ -56,6 +56,7 @@ class BoneRotationPanel(bpy.types.Panel):
     bl_label = "Change Bone's Rotation Mode"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
+    bl_category = "Animation"
 
     @classmethod
     def poll(self, context):
