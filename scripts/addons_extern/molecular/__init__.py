@@ -30,7 +30,7 @@ bl_info = {
 
 import bpy
 try:
-    from molecular import cmolcore
+    from . import cmolcore
 except:
     print("cmolcore not working")
 from random import random
