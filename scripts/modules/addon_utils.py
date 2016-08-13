@@ -26,7 +26,7 @@ __all__ = (
     "disable",
     "reset_all",
     "module_bl_info",
-    )
+)
 
 import bpy as _bpy
 _user_preferences = _bpy.context.user_preferences
@@ -160,7 +160,7 @@ def modules_refresh(module_cache=addons_fake_modules):
     for path in path_list:
 
         # force all contrib addons to be 'TESTING'
-        if path.endswith(("addons_contrib", "addons_extern", )):
+        if path.endswith(("addons_contrib", "addons_extern")):
             force_support = 'TESTING'
         else:
             force_support = None
@@ -462,7 +462,7 @@ def module_bl_info(mod, info_basis=None):
             "category": "",
             "warning": "",
             "show_expanded": False,
-            }
+        }
 
     addon_info = getattr(mod, "bl_info", {})
 
