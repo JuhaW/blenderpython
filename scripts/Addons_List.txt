@@ -294,6 +294,7 @@ Anim Quick Tools: Joel Daniels
 Viewport Time Scrub: Frankie
 Hierarchy Tools: kurzemnieks
 ColorRamp Dropper: Quentin Wenger (Matpi)
+Surface Normal Constraint: Stan Paillereau
 
 Thats a long list!!!!!!
 
