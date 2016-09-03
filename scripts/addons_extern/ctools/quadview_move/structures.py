@@ -1,17 +1,17 @@
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
-#  This program is free software you can redistribute it and/or
+#  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation either version 2
+#  as published by the Free Software Foundation; either version 2
 #  of the License, or (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY without even the implied warranty of
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with this program if not, write to the Free Software Foundation,
+#  along with this program; if not, write to the Free Software Foundation,
 #  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 # ##### END GPL LICENSE BLOCK #####
@@ -36,7 +36,7 @@
 
 
 import ctypes
-from ctypes import CDLL, Structure, Union, POINTER, cast, \
+from ctypes import CDLL, Structure, Union, POINTER, addressof, cast, \
     c_char, c_char_p, c_double, c_float, c_short, c_int, c_void_p, \
     py_object, c_ssize_t, c_uint, c_int8, c_uint8, CFUNCTYPE
 import numpy as np
@@ -95,11 +95,166 @@ def set_fields(cls, *field_items):
 ###############################################################################
 # blenkernel / makesdna / windowmanager/ editors
 ###############################################################################
+class Link(Structure):
+    """source/blender/makesdna/DNA_listBase.h: 47"""
+
+Link._fields_ = fields(
+    Link, '*next', '*prev',
+)
+
+
 class ListBase(Structure):
     """source/blender/makesdna/DNA_listBase.h: 59"""
     _fields_ = fields(
         c_void_p, 'first', 'last',
     )
+
+    def remove(self, vlink):
+        """
+        void BLI_remlink(ListBase *listbase, void *vlink)
+        {
+            Link *link = vlink;
+
+            if (link == NULL) return;
+
+            if (link->next) link->next->prev = link->prev;
+            if (link->prev) link->prev->next = link->next;
+
+            if (listbase->last == link) listbase->last = link->prev;
+            if (listbase->first == link) listbase->first = link->next;
+        }
+        """
+        link = vlink
+        if not vlink:
+            return
+
+        if link.next:
+            link.next.contents.prev = link.prev
+        if link.prev:
+            link.prev.contents.next = link.next
+
+        if self.last == addressof(link):
+            self.last = cast(link.prev, c_void_p)
+        if self.first == addressof(link):
+            self.first = cast(link.next, c_void_p)
+
+    def find(self, number):
+        """
+        void *BLI_findlink(const ListBase *listbase, int number)
+        {
+            Link *link = NULL;
+
+            if (number >= 0) {
+                link = listbase->first;
+                while (link != NULL && number != 0) {
+                    number--;
+                    link = link->next;
+                }
+            }
+
+            return link;
+        }
+        """
+        link_p = None
+        if number >= 0:
+            link_p = cast(c_void_p(self.first), POINTER(Link))
+            while link_p and number != 0:
+                number -= 1
+                link_p = link_p.contents.next
+        return link_p.contents if link_p else None
+
+    def insert_after(self, vprevlink, vnewlink):
+        """
+        void BLI_insertlinkafter(ListBase *listbase, void *vprevlink, void *vnewlink)
+        {
+            Link *prevlink = vprevlink;
+            Link *newlink = vnewlink;
+
+            /* newlink before nextlink */
+            if (newlink == NULL) return;
+
+            /* empty list */
+            if (listbase->first == NULL) {
+                listbase->first = newlink;
+                listbase->last = newlink;
+                return;
+            }
+
+            /* insert at head of list */
+            if (prevlink == NULL) {
+                newlink->prev = NULL;
+                newlink->next = listbase->first;
+                newlink->next->prev = newlink;
+                listbase->first = newlink;
+                return;
+            }
+
+            /* at end of list */
+            if (listbase->last == prevlink) {
+                listbase->last = newlink;
+            }
+
+            newlink->next = prevlink->next;
+            newlink->prev = prevlink;
+            prevlink->next = newlink;
+            if (newlink->next) {
+                newlink->next->prev = newlink;
+            }
+        }
+        """
+        prevlink = vprevlink
+        newlink = vnewlink
+
+        if not newlink:
+            return
+
+        def gen_ptr(link):
+            if isinstance(link, (int, type(None))):
+                return cast(c_void_p(link), POINTER(Link))
+            else:
+                return ctypes.pointer(link)
+
+        if not self.first:
+            self.first = self.last = addressof(newlink)
+            return
+
+        if not prevlink:
+            newlink.prev = None
+            newlink.next = gen_ptr(self.first)
+            newlink.next.contents.prev = gen_ptr(newlink)
+            self.first = addressof(newlink)
+            return
+
+        if self.last == addressof(prevlink):
+            self.last = addressof(newlink)
+
+        newlink.next = prevlink.next
+        newlink.prev = gen_ptr(prevlink)
+        prevlink.next = gen_ptr(newlink)
+        if newlink.next:
+            newlink.next.prev = gen_ptr(newlink)
+
+    def insert(self, i, vlink):
+        self.insert_after(self.find(i - 1), vlink)
+
+    def test(self):
+        link1 = Link()
+        link2 = Link()
+        self.insert_after(None, link1)
+        # self.insert_after(link1, link2)
+        self.insert(1, link2)
+        def eq(a, b):
+            return addressof(a) == addressof(b)
+        assert (self.first == addressof(link1))
+        assert (self.last == addressof(link2))
+        assert (eq(link1.next.contents, link2))
+        assert (eq(link2.prev.contents, link1))
+        assert (eq(link1.next.contents.prev.contents, link1))
+        assert (eq(link2.prev.contents.next.contents, link2))
+
+        self.remove(link2)
+        assert(self.last == addressof(link1))
+        assert(not link1.next)
 
 
 class rcti(Structure):
@@ -372,10 +527,10 @@ RegionView3D._fields_ = fields(
     c_float, 'dist',  # distance from 'ofs' along -viewinv[2] vector, where result is negative as is 'ofs'
     c_float, 'camdx', 'camdy',  # camera view offsets, 1.0 = viewplane moves entire width/height
     c_float, 'pixsize',  # runtime only
-    c_float, 'ofs[3]',  # view center & orbit pivot, negative of worldspace location, also matches -viewinv[3][0:3] in ortho mode.
+    c_float, 'ofs[3]',  # view center & orbit pivot, negative of worldspace location, also matches -viewinv[3][0:3] in ortho mode. 
     c_float, 'camzoom',  # viewport zoom on the camera frame, see BKE_screen_view3d_zoom_to_fac
     c_char, 'is_persp',   # check if persp/ortho view, since 'persp' cant be used for this since
-    # it can have cameras assigned as well. (only set in view3d_winmatrix_set)
+                            # it can have cameras assigned as well. (only set in view3d_winmatrix_set)
     c_char, 'persp',
     c_char, 'view',
     c_char, 'viewlock',
@@ -408,7 +563,7 @@ class GPUFXSettings(Structure):
         c_void_p, 'ssao',  # GPUSSAOSettings
         c_char, 'fx_flag',  # eGPUFXFlags
         c_char, 'pad[7]',
-    )
+        )
 
 
 class View3D(Structure):
@@ -456,7 +611,7 @@ View3D._fields_ = fields(
 
     c_float, 'lens', 'grid',
     c_float, 'near', 'far',
-    c_float, 'ofs[3]',  # DNA_DEPRECATED  # XXX deprecated
+    c_float, 'ofs[3]',  #  DNA_DEPRECATED  # XXX deprecated
     c_float, 'cursor[3]',
 
     c_short, 'matcap_icon',  # icon id
@@ -492,9 +647,9 @@ View3D._fields_ = fields(
 
     # # XXX deprecated?
     # struct bGPdata *gpd  DNA_DEPRECATED        # Grease-Pencil Data (annotation layers)
-    #
+    # 
     # short usewcol, dummy3[3]
-    #
+    # 
     #  # multiview - stereo 3d
     # short stereo3d_flag
     # char stereo3d_camera
@@ -502,7 +657,7 @@ View3D._fields_ = fields(
     # float stereo3d_convergence_factor
     # float stereo3d_volume_alpha
     # float stereo3d_convergence_alpha
-    #
+    # 
     # # local grid
     # char localgrid, cursor_snap_grid, dummy[2]
     # float lg_loc[3], dummy2[2] // orign(x,y,z)
@@ -557,6 +712,33 @@ wmEvent._fields_ = fields(
 )
 
 
+# wmOperatorType.flag
+OPTYPE_REGISTER = (1 << 0)  # register operators in stack after finishing
+OPTYPE_UNDO = (1 << 1)  # do undo push after after
+OPTYPE_BLOCKING = (1 << 2)  # let blender grab all input from the WM (X11)
+OPTYPE_MACRO = (1 << 3)
+OPTYPE_GRAB_CURSOR = (1 << 4)  # grabs the cursor and optionally enables
+                               # continuous cursor wrapping
+OPTYPE_PRESET = (1 << 5)  # show preset menu
+
+# some operators are mainly for internal use
+# and don't make sense to be accessed from the
+# search menu, even if poll() returns true.
+# currently only used for the search toolbox */
+OPTYPE_INTERNAL = (1 << 6)
+
+OPTYPE_LOCK_BYPASS = (1 << 7)  # Allow operator to run when interface is locked
+
+
+class ExtensionRNA(Structure):
+    _fields_ = fields(
+        c_void, '*data',
+        c_void, '*srna',  # <StructRNA>
+        c_void_p,'call',  # <StructCallbackFunc>
+        c_void_p,'free'  # <StructFreeFunc>
+    )
+
+
 class wmOperatorType(Structure):
     """source/blender/windowmanager/WM_types.h: 518"""
     _fields_ = fields(
@@ -564,12 +746,50 @@ class wmOperatorType(Structure):
         c_char_p, 'idname',
         c_char_p, 'translation_context',
         c_char_p, 'description',
-        # 以下略
+
+        c_void_p, 'exec',
+        c_void_p, 'check',
+        c_void_p, 'invoke',
+        c_void_p, 'cancel',
+        c_void_p, 'modal',
+
+        c_void_p, 'poll',
+
+        c_void_p, 'ui',
+
+        c_void_p, 'srna',  # <StructRNA>
+
+        c_void_p, 'last_properties',  # <IDProperty>
+
+        c_void_p, 'prop',  # <PropertyRNA>
+
+        ListBase, 'macro',
+
+        c_void_p, 'modalkeymap',  # <wmKeyMap>
+
+        c_void_p, 'pyop_poll',
+
+        ExtensionRNA, 'ext',
+
+        c_short, 'flag',
     )
 
 
 class wmOperator(Structure):
-    """source/blender/makesdna/DNA_windowmanager_types.h: 344"""
+    """source/blender/makesdna/DNA_windowmanager_types.h: 344
+
+    pythonインスタンスからの取得方法:
+    # python/intern/bpy_operator.c: 423: pyop_getinstance()
+    pyop = bpy.ops.wm.splash
+    opinst = pyop.get_instance()
+    pyrna = ct.cast(ct.c_void_p(id(opinst)),
+                     ct.POINTER(structures.BPy_StructRNA)).contents
+    # wmOperator
+    op = ct.cast(ct.c_void_p(pyrna.ptr.data),
+                 ct.POINTER(structures.wmOperator)).contents
+    # wmOperatorType
+    ot = op.type.contents
+    """
 
 wmOperator._fields_ = fields(
     wmOperator, '*next', '*prev',
@@ -871,16 +1091,14 @@ class MCol(Structure):
 # new face structure, replaces MFace, which is now only used for storing tessellations.
 class MPoly(Structure):
     _fields_ = fields(
-        # offset into loop array and number of loops in the face
+        # offset into loop array and number of loops in the face 
         c_int, 'loopstart',
-        c_int, 'totloop',  # keep signed since we need to subtract when getting the previous loop
+        c_int, 'totloop',  # keep signed since we need to subtract when getting the previous loop 
         c_short, 'mat_nr',
         c_char, 'flag', 'pad',
     )
 
 # the e here is because we want to move away from relying on edge hashes.
-
-
 class MLoop(Structure):
     _fields_ = fields(
         c_uint, 'v',  # vertex index
@@ -909,7 +1127,7 @@ class Mesh(Structure):
         c_void, '*mselect',  # struct MSelect
 
         # BMESH ONLY
-        # new face structures
+        #new face structures
         c_void, '*mpoly',  # struct MPoly
         c_void, '*mtpoly',  # struct MTexPoly
         c_void, '*mloop',  # struct MLoop
@@ -918,7 +1136,7 @@ class Mesh(Structure):
         # END BMESH ONLY
 
         # mface stores the tessellation (triangulation) of the mesh,
-        # real faces are now stored in nface.
+        # real faces are now stored in nface. 
         c_void, '*mface',  # struct MFace  # array of mesh object mode faces for tessellation
         c_void, '*mtface',  # struct MTFace  # store tessellation face UV's and texture here
         c_void, '*tface',  # struct TFace  # DNA_DEPRECATED   # deprecated, use mtface
@@ -962,9 +1180,9 @@ class CustomDataLayer(Structure):
         c_int, 'offset',     # in editmode, offset of layer in block
         c_int, 'flag',       # general purpose flag
         c_int, 'active',     # number of the active layer of this type
-        c_int, 'active_rnd',  # number of the layer to render
-        c_int, 'active_clone',  # number of the layer to render
-        c_int, 'active_mask',  # number of the layer to render
+        c_int, 'active_rnd', # number of the layer to render
+        c_int, 'active_clone', # number of the layer to render
+        c_int, 'active_mask', # number of the layer to render
         c_int, 'uid',        # shape keyblock unique id reference
         c_char, 'name[64]',  # layer name, MAX_CUSTOMDATA_LAYER_NAME
         c_void, '*data',     # layer data
@@ -1029,9 +1247,9 @@ DerivedMesh._fields_ = fields(
     c_void, '*recalcTessellation',  # void (*recalcTessellation)(DerivedMesh * dm)
 
     # * Loop tessellation cache
-    CFUNCTYPE(c_int, POINTER(DerivedMesh)), '*recalcLoopTri',  # void (*recalcLoopTri)(DerivedMesh * dm)
+    CFUNCTYPE(c_int, POINTER(DerivedMesh)),  '*recalcLoopTri',  # void (*recalcLoopTri)(DerivedMesh * dm)
     # * accessor functions
-    CFUNCTYPE(POINTER(MLoopTri), POINTER(DerivedMesh)), '*getLoopTriArray',  # const struct MLoopTri *(*getLoopTriArray)(DerivedMesh * dm)
+    CFUNCTYPE(POINTER(MLoopTri), POINTER(DerivedMesh)), '*getLoopTriArray',  #const struct MLoopTri *(*getLoopTriArray)(DerivedMesh * dm)
     CFUNCTYPE(c_int, POINTER(DerivedMesh)), '*getNumLoopTri',  # int (*getNumLoopTri)(DerivedMesh *dm)
 
     # Misc. Queries
@@ -1400,7 +1618,6 @@ class PyObject_HEAD(ctypes.Structure):
         ('ob_type', ctypes.c_void_p),
     ]
 
-
 class PyObject_VAR_HEAD(ctypes.Structure):
     _fields_ = [
         # py_object, '_ob_next', '_ob_prev';  # When Py_TRACE_REFS is defined
@@ -1424,7 +1641,7 @@ class PointerRNA(Structure):
     """makesrna/RNA_types.h"""
     _fields_ = fields(
         _PointerRNA_id, 'id',
-        c_void_p, 'type',  # <StructRNA>
+        c_void_p, 'type',  # <StructRNA> &RNA_Operator 等の値
         c_void_p, 'data',
     )
 
@@ -1488,7 +1705,7 @@ PropertyRNA._fields_ = fields(
     # python handle to hold all callbacks
     # * (in a pointer array at the moment, may later be a tuple)
     c_void, '*py_data',
-)
+    )
 
 
 class FloatPropertyRNA(Structure):
@@ -1525,6 +1742,14 @@ FloatPropertyRNA._fields_ = fields(
     # c_float, 'defaultvalue',
     # c_float, '*defaultarray',   # <cost float>
 )
+
+
+class BPy_StructRNA(Structure):
+    """python/intern/bpy_rna.h"""
+    _fields_ = fields(
+        PyObject_HEAD, 'head',
+        PointerRNA, 'ptr',
+    )
 
 
 class BPy_PropertyRNA(Structure):

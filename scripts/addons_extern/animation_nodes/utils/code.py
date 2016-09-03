@@ -1,6 +1,5 @@
 import ast
 
-
 def isCodeValid(code):
     try:
         ast.parse(code)

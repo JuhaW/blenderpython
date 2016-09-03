@@ -4,16 +4,14 @@ from ... tree_info import keepNodeState
 from ... ui.info_popups import showTextPopup
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
-from ... sockets.info import (toIdName, toListIdName, toBaseDataType, isBase,
-                              isComparable, toListDataType)
+from ... sockets.info import toBaseDataType, isBase, isComparable, toListDataType, isList
 
 removeTypeItems = [
     ("FIRST_OCCURRENCE", "First Occurrence", "", "", 0),
     ("ALL_OCCURRENCES", "All Occurrences", "", "", 1),
-    ("INDEX", "Index", "", "", 2)]
+    ("INDEX", "Index", "", "", 2) ]
 
 defaultDataType = "Float"
-
 
 class RemoveListElementNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_RemoveListElementNode"
@@ -21,15 +19,11 @@ class RemoveListElementNode(bpy.types.Node, AnimationNode):
 
     def assignedTypeChanged(self, context):
         if self.isAllowedDataType(self.assignedType):
-            self.baseIdName = toIdName(self.assignedType)
-            self.listIdName = toListIdName(self.assignedType)
             self.generateSockets()
         else:
             self.reset_and_show_error()
 
-    assignedType = StringProperty(update=assignedTypeChanged)
-    baseIdName = StringProperty()
-    listIdName = StringProperty()
+    assignedType = StringProperty(update = assignedTypeChanged)
 
     def removeTypeChanged(self, context):
         if self.isAllowedDataType(self.assignedType):
@@ -37,18 +31,18 @@ class RemoveListElementNode(bpy.types.Node, AnimationNode):
         else:
             self.reset_and_show_error()
 
-    removeType = EnumProperty(name="Remove Type", default="FIRST_OCCURRENCE",
-                              items=removeTypeItems, update=removeTypeChanged)
+    removeType = EnumProperty(name = "Remove Type", default = "FIRST_OCCURRENCE",
+        items = removeTypeItems, update = removeTypeChanged)
 
     def create(self):
         self.assignedType = defaultDataType
 
     def draw(self, layout):
-        layout.prop(self, "removeType", text="")
+        layout.prop(self, "removeType", text = "")
 
     def drawAdvanced(self, layout):
         self.invokeSocketTypeChooser(layout, "assignListDataType",
-                                     socketGroup="LIST", text="Change Type", icon="TRIA_RIGHT")
+            socketGroup = "LIST", text = "Change Type", icon = "TRIA_RIGHT")
 
     def getExecutionCode(self):
         yield "outList = inList"
@@ -67,16 +61,15 @@ class RemoveListElementNode(bpy.types.Node, AnimationNode):
     def getWantedDataType(self):
         listInput = self.inputs["List"].dataOrigin
         if listInput is not None:
-            return toBaseDataType(listInput.bl_idname)
+            if isList(listInput.bl_idname):
+                return toBaseDataType(listInput.bl_idname)
 
         if self.removeType in ("FIRST_OCCURRENCE", "ALL_OCCURRENCES"):
             elementInput = self.inputs["Element"].dataOrigin
-            if elementInput is not None:
-                return elementInput.dataType
+            if elementInput is not None: return elementInput.dataType
 
         listOutputs = self.outputs["List"].dataTargets
-        if len(listOutputs) == 1:
-            return toBaseDataType(listOutputs[0].dataType)
+        if len(listOutputs) == 1: return toBaseDataType(listOutputs[0].dataType)
 
         return toBaseDataType(self.inputs["List"].bl_idname)
 
@@ -84,10 +77,8 @@ class RemoveListElementNode(bpy.types.Node, AnimationNode):
         self.assignType(toBaseDataType(listDataType))
 
     def assignType(self, baseDataType):
-        if not isBase(baseDataType):
-            return
-        if baseDataType == self.assignedType:
-            return
+        if not isBase(baseDataType): return
+        if baseDataType == self.assignedType: return
         self.assignedType = baseDataType
 
     def isAllowedDataType(self, dataType):
@@ -103,21 +94,24 @@ class RemoveListElementNode(bpy.types.Node, AnimationNode):
 
     def show_type_error(self, dataType):
         text = "This list type only supports element removal using an index: '{}'".format(toListDataType(dataType))
-        showTextPopup(text=text, title="Error", icon="ERROR")
+        showTextPopup(text = text, title = "Error", icon = "ERROR")
 
     @keepNodeState
     def generateSockets(self):
         self.inputs.clear()
         self.outputs.clear()
 
+        baseDataType = self.assignedType
+        listDataType = toListDataType(self.assignedType)
+
         if self.removeType in ("FIRST_OCCURRENCE", "INDEX"):
-            self.inputs.new(self.listIdName, "List", "inList").dataIsModified = True
+            self.newInput(listDataType, "List", "inList", dataIsModified = True)
         else:
-            self.inputs.new(self.listIdName, "List", "inList")
+            self.newInput(listDataType, "List", "inList")
 
         if self.removeType in ("FIRST_OCCURRENCE", "ALL_OCCURRENCES"):
-            self.inputs.new(self.baseIdName, "Element", "element").defaultDrawType = "PREFER_PROPERTY"
+            self.newInput(baseDataType, "Element", "element", defaultDrawType = "PREFER_PROPERTY")
         elif self.removeType == "INDEX":
-            self.inputs.new("an_IntegerSocket", "Index", "index")
+            self.newInput("Integer", "Index", "index")
 
-        self.outputs.new(self.listIdName, "List", "outList")
+        self.newOutput(listDataType, "List", "outList")

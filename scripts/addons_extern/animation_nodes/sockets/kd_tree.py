@@ -2,7 +2,6 @@ import bpy
 from mathutils.kdtree import KDTree
 from .. base_types.socket import AnimationNodeSocket
 
-
 class KDTreeSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     bl_idname = "an_KDTreeSocket"
     bl_label = "KDTree Socket"
@@ -12,7 +11,14 @@ class KDTreeSocket(bpy.types.NodeSocket, AnimationNodeSocket):
     comparable = True
     storable = True
 
-    def getValue(self):
+    @classmethod
+    def getDefaultValue(cls):
         kdTree = KDTree(0)
         kdTree.balance()
         return kdTree
+
+    @classmethod
+    def correctValue(cls, value):
+        if isinstance(value, KDTree):
+            return value, 0
+        return cls.getDefaultValue(), 2

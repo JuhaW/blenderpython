@@ -1,6 +1,5 @@
 import bpy
 
-
 class RemoveNodeTree(bpy.types.Operator):
     bl_idname = "an.remove_node_tree"
     bl_label = "Remove Animation Node Tree"
@@ -8,12 +7,9 @@ class RemoveNodeTree(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         space = context.space_data
-        if not space:
-            return False
-        if space.type != "NODE_EDITOR":
-            return False
-        if space.tree_type != "an_AnimationNodeTree":
-            return False
+        if not space: return False
+        if space.type != "NODE_EDITOR": return False
+        if space.tree_type != "an_AnimationNodeTree": return False
         return space.node_tree is not None
 
     def invoke(self, context, event):

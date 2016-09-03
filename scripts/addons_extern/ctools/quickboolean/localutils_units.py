@@ -29,7 +29,6 @@ from . import localutils_utils as _utils
 
 
 class UnitError(ValueError):
-
     def __init__(self, value=''):
         self.value = value
 
@@ -38,7 +37,6 @@ class UnitError(ValueError):
 
 
 class _void:
-
     def __bool__(self):
         return False
 
@@ -354,9 +352,8 @@ def unit_to_num(string, unit_system='mixed', scale_length=1, use_decimal=False):
 
     if use_decimal:
         pattern = '(^|(?<=[^a-zA-Z_]))' + \
-                  '(?P<float>(\d+\.?\d*|\d*\.\d+)(?P<e>[eE][+-]?\d+|))'  # + \
-        # '(?=[^a-zA-Z_]|$)'
-
+                  '(?P<float>(\d+\.?\d*|\d*\.\d+)(?P<e>[eE][+-]?\d+|))'# + \
+                  # '(?=[^a-zA-Z_]|$)'
         def func(match):
             float_string = match.group('float')
             if '.' in float_string or match.group('e'):
@@ -419,7 +416,7 @@ def unit_to_num(string, unit_system='mixed', scale_length=1, use_decimal=False):
             unit_string += string[start: end] + ' * '
             if use_decimal:
                 unit_string += 'Decimal(str(' + str(scalar) + ')) / ' \
-                    'Decimal(str(' + str(scale_length) + '))'
+                             'Decimal(str(' + str(scale_length) + '))'
             else:
                 unit_string += str(scalar) + ' / ' + str(scale_length)
         unit_string += ')'
@@ -539,8 +536,6 @@ def _mantissa_exp_to_str(mantissa, exp, normalize=False):
 
 
 """未使用"""
-
-
 def _round_float(value, rounding_exp=None, rounding=None):
     if rounding_exp is None:
         rounding_exp = 0

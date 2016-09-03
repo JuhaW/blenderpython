@@ -39,7 +39,6 @@ GLA_PIXEL_OFS = 0.375
 
 
 class Buffer:
-
     def __new__(self, type, dimensions=0, template=None):
         """
         :param type: GL_BYTE('bool','byte'), GL_SHORT('short'),
@@ -112,7 +111,6 @@ def glSwitch(attr, value):
 
 
 class GCM(contextlib._GeneratorContextManager):
-
     @classmethod
     def contextmanager(cls, func):
         sig = inspect.signature(cls.__init__)
@@ -142,7 +140,6 @@ class GCM(contextlib._GeneratorContextManager):
 
 
 class GLSettings:
-
     def __init__(self, context, view_matrix=None, perspective_matrix=None):
         rv3d = context.region_data
         if view_matrix is None:

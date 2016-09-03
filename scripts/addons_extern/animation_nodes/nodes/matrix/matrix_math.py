@@ -5,20 +5,20 @@ from ... base_types.node import AnimationNode
 
 operationItems = [("MULTIPLY", "Multiply", "")]
 
-
 class MatrixMathNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_MatrixMathNode"
     bl_label = "Matrix Math"
 
-    operation = EnumProperty(name="Operation", items=operationItems, update=executionCodeChanged)
+    operation = EnumProperty(name = "Operation", items = operationItems,
+        update = executionCodeChanged)
 
     def create(self):
-        self.inputs.new("an_MatrixSocket", "A", "a")
-        self.inputs.new("an_MatrixSocket", "B", "b")
-        self.outputs.new("an_MatrixSocket", "Result", "result")
+        self.newInput("Matrix", "A", "a")
+        self.newInput("Matrix", "B", "b")
+        self.newOutput("Matrix", "Result", "result")
 
     def draw(self, layout):
-        layout.prop(self, "operation", text="")
+        layout.prop(self, "operation", text = "")
 
     def getExecutionCode(self):
         if self.operation == "MULTIPLY":

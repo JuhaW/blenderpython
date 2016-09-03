@@ -9,7 +9,6 @@ from .. graphics.drawing_2d import drawText, setTextDrawingDpi
 
 statisticsViewIsActive = False
 
-
 class StatisticsDrawer(bpy.types.Operator):
     bl_idname = "an.statistics_drawer"
     bl_label = "Statistics Drawer"
@@ -49,10 +48,8 @@ class StatisticsDrawer(bpy.types.Operator):
 
         mousePosition = Vector((event.mouse_region_x, event.mouse_region_y))
         if "CTRL" in event.type:
-            if event.value == "PRESS":
-                self.enableViewDrag = True
-            if event.value == "RELEASE":
-                self.enableViewDrag = False
+            if event.value == "PRESS": self.enableViewDrag = True
+            if event.value == "RELEASE": self.enableViewDrag = False
         if self.enableViewDrag:
             self.drawOffset += mousePosition - self.lastMousePosition
         self.lastMousePosition = mousePosition
@@ -81,7 +78,7 @@ class StatisticsDrawer(bpy.types.Operator):
 
         text = "Hold CTRL to drag the statistics - Press ESC or RMB to exit this view"
         drawText(text, 10 * dpiFactor, region.height - 20 * dpiFactor,
-                 color=(0, 0, 0, 0.5), size=11)
+            color = (0, 0, 0, 0.5), size = 11)
 
         offset = self.drawOffset.copy()
         self.drawNodeTreeTable(offset, dpiFactor)
@@ -93,10 +90,10 @@ class StatisticsDrawer(bpy.types.Operator):
         table = self.nodeTreeTable
 
         table.clearColumns()
-        table.newColumn("Tree", 200 * dpiFactor, "CENTER", font=0)
-        table.newColumn("Nodes", 80 * dpiFactor, "RIGHT", font=1)
-        table.newColumn("Links", 80 * dpiFactor, "RIGHT", font=1)
-        table.newColumn("Subprograms", 110 * dpiFactor, "RIGHT", font=1)
+        table.newColumn("Tree", 200 * dpiFactor, "CENTER", font = 0)
+        table.newColumn("Nodes", 80 * dpiFactor, "RIGHT", font = 1)
+        table.newColumn("Links", 80 * dpiFactor, "RIGHT", font = 1)
+        table.newColumn("Subprograms", 110 * dpiFactor, "RIGHT", font = 1)
 
         table.rowHeight = 22 * dpiFactor
         table.headerRowHeight = 30 * dpiFactor
@@ -110,9 +107,9 @@ class StatisticsDrawer(bpy.types.Operator):
         table = self.mostUsedNodesTable
 
         table.clearColumns()
-        table.newColumn("#", 30 * dpiFactor, "RIGHT", font=1)
-        table.newColumn("Node", 170 * dpiFactor, "LEFT", font=0)
-        table.newColumn("Amount", 80 * dpiFactor, "RIGHT", font=1)
+        table.newColumn("#", 30 * dpiFactor, "RIGHT", font = 1)
+        table.newColumn("Node", 170 * dpiFactor, "LEFT", font = 0)
+        table.newColumn("Amount", 80 * dpiFactor, "RIGHT", font = 1)
 
         table.rowHeight = 22 * dpiFactor
         table.headerRowHeight = 30 * dpiFactor
@@ -123,44 +120,41 @@ class StatisticsDrawer(bpy.types.Operator):
         table.draw(location)
 
 
+
 def createNodeTreeTable(statistics):
     table = Table()
 
     for stats in statistics.nodeTreeStats + [statistics.combinedStats]:
         table.newRow({
-            "Tree": stats.name,
-            "Nodes": "{} / {}".format(stats.functionalNodeAmount, stats.totalNodeAmount),
-            "Links": stats.totalLinkAmount,
-            "Subprograms": stats.subprogramAmount})
+            "Tree" : stats.name,
+            "Nodes" : "{} / {}".format(stats.functionalNodeAmount, stats.totalNodeAmount),
+            "Links" : stats.totalLinkAmount,
+            "Subprograms" : stats.subprogramAmount})
 
     return table
-
 
 def createMostUsedNodesTable(statistics):
     table = Table()
     stats = statistics.combinedStats
-    items = sorted(stats.amountByLabel.items(), key=lambda x: x[1], reverse=True)[:10]
+    items = sorted(stats.amountByLabel.items(), key = lambda x: x[1], reverse = True)[:10]
 
     for i, (name, amount) in enumerate(items, 1):
         table.newRow({
-            "#": str(i),
-            "Node": name,
-            "Amount": amount})
+            "#" : str(i),
+            "Node" : name,
+            "Amount" : amount})
 
     return table
 
 
 class NodeStatistics:
-
     def __init__(self, nodeTrees):
         self.nodeTreeAmount = len(nodeTrees)
         self.nodeTreeStats = [TreeStatistics.fromTree(tree) for tree in nodeTrees]
         self.combinedStats = TreeStatistics.fromMerge(self.nodeTreeStats)
         self.combinedStats.name = "Sum:"
 
-
 class TreeStatistics:
-
     def __init__(self):
         self.name = ""
         self.totalNodeAmount = 0
@@ -182,8 +176,8 @@ class TreeStatistics:
             stats.amountByLabel[node.bl_label] += 1
 
         stats.functionalNodeAmount = stats.totalNodeAmount \
-            - stats.amountByLabel["Reroute"] \
-            - stats.amountByLabel["Frame"]
+                     - stats.amountByLabel["Reroute"] \
+                     - stats.amountByLabel["Frame"]
 
         return stats
 

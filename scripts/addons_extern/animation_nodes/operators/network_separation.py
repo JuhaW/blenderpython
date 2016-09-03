@@ -1,7 +1,6 @@
 import bpy
 from . an_operator import AnimationNodeOperator
 
-
 class SelectActiveNetwork(bpy.types.Operator, AnimationNodeOperator):
     bl_idname = "an.select_active_network"
     bl_label = "Select Active Network"
@@ -12,7 +11,6 @@ class SelectActiveNetwork(bpy.types.Operator, AnimationNodeOperator):
         for node in nodes:
             node.select = True
         return {"FINISHED"}
-
 
 class ColorActiveNetwork(bpy.types.Operator, AnimationNodeOperator):
     bl_idname = "an.color_active_network"
@@ -27,7 +25,6 @@ class ColorActiveNetwork(bpy.types.Operator, AnimationNodeOperator):
             node.color = sourceNode.color
         return {"FINISHED"}
 
-
 class FrameActiveNetwork(bpy.types.Operator, AnimationNodeOperator):
     bl_idname = "an.frame_active_network"
     bl_label = "Frame Active Network"
@@ -36,7 +33,7 @@ class FrameActiveNetwork(bpy.types.Operator, AnimationNodeOperator):
     def execute(self, context):
         nodes = context.active_node.network.getNodes()
         nodeTree = nodes[0].getNodeTree()
-        frameNode = nodeTree.nodes.new(type="NodeFrame")
+        frameNode = nodeTree.nodes.new(type = "NodeFrame")
         for node in nodes:
             while node.parent is not None:
                 node = node.parent

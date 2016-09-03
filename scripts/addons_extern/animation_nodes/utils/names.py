@@ -3,64 +3,50 @@ import bpy
 import random
 import keyword
 
-
 def toDataPath(name):
     return '["{}"]'.format(name)
 
-
-def getPossibleObjectName(name="object"):
+def getPossibleObjectName(name = "object"):
     return getPossibleName(bpy.data.objects, name)
 
-
-def getPossibleCurveName(name="curve"):
+def getPossibleCurveName(name = "curve"):
     return getPossibleName(bpy.data.curves, name)
 
-
-def getPossibleMeshName(name="mesh"):
+def getPossibleMeshName(name = "mesh"):
     return getPossibleName(bpy.data.meshes, name)
 
-
-def getPossibleCameraName(name="camera"):
+def getPossibleCameraName(name = "camera"):
     return getPossibleName(bpy.data.cameras, name)
 
-
-def getPossibleLampName(name="lamp"):
+def getPossibleLampName(name = "lamp"):
     return getPossibleName(bpy.data.lamps, name)
 
-
-def getPossibleNodeName(nodeTree, name="node"):
+def getPossibleNodeName(nodeTree, name = "node"):
     return getPossibleName(nodeTree.nodes, name)
 
-
-def getPossibleSocketName(node, name="socket"):
+def getPossibleSocketName(node, name = "socket"):
     while True:
         name = getPossibleName(node.inputs, name)
         if name not in node.outputs:
             break
     return name
 
-
-def getPossibleName(field, name="element"):
+def getPossibleName(field, name = "element"):
     randomString = getRandomString(3)
     counter = 1
     while field.get(name + randomString + str(counter)):
         counter += 1
     return name + randomString + str(counter)
 
-
 def getRandomString(length):
     random.seed()
     return ''.join(random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(length))
 
-
 def toVariableName(name):
     variable = re.sub("\W+", "", name)
-    if keyword.iskeyword(variable):
-        variable += "_"
-    if variable == "":
-        variable = "_"
+    if keyword.iskeyword(variable): variable += "_"
+    if variable == "": variable = "_"
     return variable
-
 
 def toInterfaceName(sourceName):
     tempName = ""

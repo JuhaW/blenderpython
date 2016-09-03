@@ -6,15 +6,13 @@ from .. utils.nodes import getAnimationNodeClasses, newNodeAtCursor, invokeTrans
 
 itemsByIdentifier = {}
 
-
 def getSearchItems(self, context):
     itemsByIdentifier.clear()
     items = []
     for item in itertools.chain(iterSingleNodeItems()):
         itemsByIdentifier[item.identifier] = item
-        items.append({"value": item.identifier, "name": item.searchTag})
+        items.append({"value" : item.identifier, "name" : item.searchTag})
     return enumItemsFromDicts(items)
-
 
 class NodeSearch(bpy.types.Operator):
     bl_idname = "an.node_search"
@@ -22,14 +20,12 @@ class NodeSearch(bpy.types.Operator):
     bl_options = {"REGISTER"}
     bl_property = "item"
 
-    item = EnumProperty(items=getSearchItems)
+    item = EnumProperty(items = getSearchItems)
 
     @classmethod
     def poll(cls, context):
-        try:
-            return context.space_data.node_tree.bl_idname == "an_AnimationNodeTree"
-        except:
-            return False
+        try: return context.space_data.node_tree.bl_idname == "an_AnimationNodeTree"
+        except: return False
 
     def invoke(self, context, event):
         context.window_manager.invoke_search_popup(self)
@@ -41,7 +37,6 @@ class NodeSearch(bpy.types.Operator):
 
 
 class InsertItem:
-
     @property
     def identifier(self):
         return ""
@@ -52,6 +47,7 @@ class InsertItem:
 
     def insert(self):
         pass
+
 
 
 # Single Nodes
@@ -67,10 +63,8 @@ def iterSingleNodeItems():
             else:
                 yield SingleNodeInsertionItem(node.bl_idname, customSearch)
 
-
 class SingleNodeInsertionItem:
-
-    def __init__(self, idName, tag, settings={}):
+    def __init__(self, idName, tag, settings = {}):
         self.idName = idName
         self.tag = tag
         self.settings = settings

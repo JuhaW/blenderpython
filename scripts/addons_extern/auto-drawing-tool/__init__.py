@@ -33,23 +33,21 @@ bl_info = {
     "category": "Animation"
 }
 
-
 def register():
     bpy.utils.register_module(__name__)
 
     # Input on toolshelf before execution --------------------------
     #  In Panel subclass, In bpy.types.Operator subclass, reference them by context.scene.~.
     bpy.types.Scene.draw_start_frame = bpy.props.IntProperty(
-        name="Start Frame",
-        description="Set start frame",
-        default=1
+        name = "Start Frame",
+        description = "Set start frame",
+        default = 1
     )
     bpy.types.Scene.draw_end_frame = bpy.props.IntProperty(
-        name="End Frame",
-        description="Set end frame",
-        default=100
+        name = "End Frame",
+        description = "Set end frame",
+        default = 100
     )
-
 
 def unregister():
     # Delete bpy.types.Scene.~.

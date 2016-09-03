@@ -17,7 +17,7 @@ Created by Andreas Esau
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
+    
 import bpy
 import bpy_extras
 import bpy_extras.view3d_utils
@@ -38,35 +38,35 @@ def get_bone_shapes(self, context):
     enum_items = []
     names_list = []
     i = 0
-
+    
     for obj in bpy.data.objects:
         if "_custom_shape" in obj.name:
             names_list.append(obj.name)
-    names_list = sorted(names_list)
-
+    names_list = sorted(names_list)        
+    
     for name in names_list:
-        enum_items.append((name, name, name, "MESH_DATA", i))
+        enum_items.append((name,name,name,"MESH_DATA",i))
         i += 1
-    enum_items.append(("NEW_SHAPE", "New Shape", "Create new Shape", "NEW", i + 1))
-    return enum_items
+    enum_items.append(("NEW_SHAPE","New Shape","Create new Shape","NEW",i+1))        
+    return enum_items        
 
 
 class DrawBoneShape(bpy.types.Operator):
-    bl_idname = "bone.coa_draw_bone_shape"
+    bl_idname = "bone.coa_draw_bone_shape" 
     bl_label = "Create Bone Shape"
-
-    bone_shapes = EnumProperty(name="Bone Shapes", description="List of all custom Bone Shapes.", items=get_bone_shapes)
-
-    def draw(self, context):
+    
+    bone_shapes = EnumProperty(name="Bone Shapes",description="List of all custom Bone Shapes.",items=get_bone_shapes)
+    
+    def draw(self,context):
         layout = self.layout
         row = layout.row()
-        row.prop(self, "bone_shapes")
-
-    def invoke(self, context, event):
+        row.prop(self,"bone_shapes")
+    
+    def invoke(self,context,event):
         self.bone_shapes = "NEW_SHAPE"
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
-
+    
     def execute(self, context):
         if context.active_object.type == "ARMATURE" and context.active_object.mode == "POSE":
             if self.bone_shapes == "NEW_SHAPE":
@@ -74,9 +74,10 @@ class DrawBoneShape(bpy.types.Operator):
             else:
                 shape_name = context.active_pose_bone.name + "_custom_shape"
                 if shape_name not in bpy.data.objects:
-                    bone_shape = bpy.data.meshes.new_from_object(context.scene, bpy.data.objects[self.bone_shapes], False, "PREVIEW")
+                    bone_shape = bpy.data.meshes.new_from_object(context.scene,bpy.data.objects[self.bone_shapes],False,"PREVIEW")                    
                     bone_shape.name = shape_name
                 bpy.ops.object.coa_edit_mesh(mode="DRAW_BONE_SHAPE")
         else:
-            self.report({'WARNING'}, "Select Bone in Pose Mode.")
+            self.report({'WARNING'},"Select Bone in Pose Mode.")
         return {'FINISHED'}
+

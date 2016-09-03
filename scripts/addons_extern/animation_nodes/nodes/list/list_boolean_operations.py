@@ -1,49 +1,43 @@
 import bpy
 import itertools
 from bpy.props import *
+from ... sockets.info import isList
 from ... tree_info import keepNodeLinks
 from ... events import executionCodeChanged
-from ... sockets.info import toIdName, isList
 from ... base_types.node import AnimationNode
 
 operationItems = [
     ("UNION", "Union", "Elements that are at least in one of both lists", "NONE", 0),
     ("INTERSECTION", "Intersection", "Elements that are in both lists", "NONE", 1),
     ("DIFFERENCE", "Difference", "Elements that are in list 1 but not in list 2", "NONE", 2),
-    ("SYMMETRIC_DIFFERENCE", "Symmetric Difference", "Elements that are in list 1 or in list 2 but not in both", "NONE", 3)]
-
+    ("SYMMETRIC_DIFFERENCE", "Symmetric Difference", "Elements that are in list 1 or in list 2 but not in both", "NONE", 3) ]
 
 class ListBooleanOperationsNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ListBooleanOperationsNode"
     bl_label = "List Boolean Operations"
 
     def assignedTypeChanged(self, context):
-        self.listIdName = toIdName(self.assignedType)
         self.generateSockets()
 
-    operation = EnumProperty(name="Operation", default="UNION",
-                             items=operationItems, update=executionCodeChanged)
+    operation = EnumProperty(name = "Operation", default = "UNION",
+        items = operationItems, update = executionCodeChanged)
 
-    assignedType = StringProperty(update=assignedTypeChanged)
-    listIdName = StringProperty()
+    assignedType = StringProperty(update = assignedTypeChanged)
 
     def create(self):
         self.assignedType = "Object List"
 
     def draw(self, layout):
-        layout.prop(self, "operation", text="")
+        layout.prop(self, "operation", text = "")
 
     def getExecutionCode(self):
         op = self.operation
         # I don't use sets here to keep the order the elements come in
-        if op == "UNION":
-            return "outList = self.execute_Union(list1, list2)"
-        if op == "INTERSECTION":
-            return "outList = self.execute_Intersection(list1, list2)"
-        if op == "DIFFERENCE":
-            return "outList = self.execute_Difference(list1, list2)"
-        if op == "SYMMETRIC_DIFFERENCE":
-            return "outList = self.execute_SymmetricDifference(list1, list2)"
+        # But we could speedup this node by using sets to see if an element is already inserted
+        if op == "UNION": return "outList = self.execute_Union(list1, list2)"
+        if op == "INTERSECTION": return "outList = self.execute_Intersection(list1, list2)"
+        if op == "DIFFERENCE": return "outList = self.execute_Difference(list1, list2)"
+        if op == "SYMMETRIC_DIFFERENCE": return "outList = self.execute_SymmetricDifference(list1, list2)"
 
     def execute_Union(self, list1, list2):
         outList = []
@@ -95,25 +89,20 @@ class ListBooleanOperationsNode(bpy.types.Node, AnimationNode):
         listInput2 = self.inputs[1].dataOrigin
         listOutputs = self.outputs[0].dataTargets
 
-        if listInput1 is not None:
-            return listInput1.dataType
-        if listInput2 is not None:
-            return listInput2.dataType
-        if len(listOutputs) == 1:
-            return listOutputs[0].dataType
+        if listInput1 is not None: return listInput1.dataType
+        if listInput2 is not None: return listInput2.dataType
+        if len(listOutputs) == 1: return listOutputs[0].dataType
         return self.inputs[0].dataType
 
     def assignType(self, listDataType):
-        if not isList(listDataType):
-            return
-        if listDataType == self.assignedType:
-            return
+        if not isList(listDataType): return
+        if listDataType == self.assignedType: return
         self.assignedType = listDataType
 
     @keepNodeLinks
     def generateSockets(self):
         self.inputs.clear()
         self.outputs.clear()
-        self.inputs.new(self.listIdName, "List 1", "list1").dataIsModified = True
-        self.inputs.new(self.listIdName, "List 2", "list2").dataIsModified = True
-        self.outputs.new(self.listIdName, "List", "outList")
+        self.newInput(self.assignedType, "List 1", "list1", dataIsModified = True)
+        self.newInput(self.assignedType, "List 2", "list2", dataIsModified = True)
+        self.newOutput(self.assignedType, "List", "outList")

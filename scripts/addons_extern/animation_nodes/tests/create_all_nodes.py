@@ -1,7 +1,6 @@
 import bpy
 from .. base_types.node import AnimationNode
 
-
 class CreateAllNodes(bpy.types.Operator):
     bl_idname = "an.create_all_nodes"
     bl_label = "Create All Nodes"
@@ -9,10 +8,8 @@ class CreateAllNodes(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         space = context.space_data
-        if space.type != "NODE_EDITOR":
-            return False
-        if space.edit_tree is None:
-            return False
+        if space.type != "NODE_EDITOR": return False
+        if space.edit_tree is None: return False
         return space.edit_tree.bl_idname == "an_AnimationNodeTree"
 
     def execute(self, context):
@@ -22,5 +19,5 @@ class CreateAllNodes(bpy.types.Operator):
             node = tree.nodes.new(nodeClass.bl_idname)
             node.location[0] = 300 * (i % 10)
             node.location[1] = -300 * (i // 10)
-        self.report(type={"INFO"}, message="{} nodes created".format(len(nodeClasses)))
+        self.report(type = {"INFO"}, message = "{} nodes created".format(len(nodeClasses)))
         return {"FINISHED"}

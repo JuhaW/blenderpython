@@ -38,7 +38,7 @@ QUAT_AXIS = OrderedDict(
      ('right', RIGHT),
      ('top', TOP),
      ('bottom', BOTTOM)
-     ))
+    ))
 
 
 def quat_to_axis_view(quat, local_grid_rotation=None, epsilon=1e-6):
@@ -80,7 +80,7 @@ def project(region, rv3d, vec):
     return Vector((x, y, z))
 
 
-def unproject(region, rv3d, vec, depth_location: "world coords"=None):
+def unproject(region, rv3d, vec, depth_location:"world coords"=None):
     """Region Coords (2D / 3D) -> World Coords (3D).
     Region座標は左手系で、Zのクリッピング範囲は0~1。
     :type region: bpy.types.Region
@@ -111,7 +111,7 @@ def project_v3(sx, sy, persmat, vec) -> "3D Vector":
     return Vector((x, y, z))
 
 
-def unproject_v3(sx, sy, persmat, vec, depth_location: "world coords"=None,
+def unproject_v3(sx, sy, persmat, vec, depth_location:"world coords"=None,
                  inverted=False) -> "3D Vector":
     """Window Coords -> World Coords. unprojectより少しだけ速い。"""
     invpmat = persmat if inverted else persmat.inverted()

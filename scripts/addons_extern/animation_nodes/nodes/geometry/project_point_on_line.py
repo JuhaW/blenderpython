@@ -2,21 +2,20 @@ import bpy
 from bpy.props import *
 from ... base_types.node import AnimationNode
 
-
 class ProjectPointOnLineNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ProjectPointOnLineNode"
     bl_label = "Project Point on Line"
+    bl_width_default = 160
     searchTags = ["Distance Point to Line", "Closest Point on Line"]
 
     def create(self):
-        self.width = 160
-        self.inputs.new("an_VectorSocket", "Point", "point")
-        self.inputs.new("an_VectorSocket", "Line Start", "lineStart").value = (0, 0, 0)
-        self.inputs.new("an_VectorSocket", "Line End", "lineEnd").value = (0, 0, 1)
+        self.newInput("Vector", "Point", "point")
+        self.newInput("Vector", "Line Start", "lineStart", value = (0, 0, 0))
+        self.newInput("Vector", "Line End", "lineEnd", value = (0, 0, 1))
 
-        self.outputs.new("an_VectorSocket", "Projection", "projection")
-        self.outputs.new("an_FloatSocket", "Projection Factor", "factor")
-        self.outputs.new("an_FloatSocket", "Distance", "distance")
+        self.newOutput("Vector", "Projection", "projection")
+        self.newOutput("Float", "Projection Factor", "factor")
+        self.newOutput("Float", "Distance", "distance")
 
     def getExecutionCode(self):
         isLinked = self.getLinkedOutputsDict()

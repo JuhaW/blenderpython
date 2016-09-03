@@ -227,7 +227,7 @@ class tessellate(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     object_name = bpy.props.StringProperty(name="", description="Name of the generated object")
-    zscale = bpy.props.FloatProperty(name="Scale", default=1, soft_min=0, soft_max=10, description="Scale factor for the component thickness")
+    zscale = bpy.props.FloatProperty(name="Scale", default=1, soft_min=0, soft_max=5, description="Scale factor for the component thickness")
     scale_mode = bpy.props.EnumProperty(items=(('COSTANT', "Costant", ""), ('ADAPTIVE', "Proportional", "")), default='COSTANT', name="Z-Scale according to faces size")
     offset = bpy.props.FloatProperty(name="Surface Offset", default=0, min=-1, max=1, soft_min=-1, soft_max=1, description="Surface offset")
     mode = bpy.props.EnumProperty(items=(('COSTANT', "Costant", ""), ('ADAPTIVE', "Adaptive", "")), default='ADAPTIVE', name="Component Mode")
@@ -235,11 +235,11 @@ class tessellate(bpy.types.Operator):
     gen_modifiers = bpy.props.BoolProperty(name="Generator Modifiers", default=False, description="Apply modifiers to base object")
     com_modifiers = bpy.props.BoolProperty(name="Component Modifiers", default=False, description="Apply modifiers to component object")
     merge = bpy.props.BoolProperty(name="Merge", default=False, description="Merge vertices in adjacent duplicates")
-    merge_thres = bpy.props.FloatProperty(name="Distance", default=0.001, soft_min=0, soft_max=10, description="Limit below which to merge vertices")
+    merge_thres = bpy.props.FloatProperty(name="Distance", default=0.001, soft_min=0, soft_max=5, description="Limit below which to merge vertices")
     generator = bpy.props.StringProperty(name="", description="Base object for the tessellation")
     component = bpy.props.StringProperty(name="", description="Component object for the tessellation")
     bool_random = bpy.props.BoolProperty(name="Randomize", default=False, description="Randomize component rotation")
-    random_seed = bpy.props.IntProperty(name="Seed", default=0, soft_min=0, soft_max=10, description="Random seed")
+    random_seed = bpy.props.IntProperty(name="Seed", default=0, soft_min=0, soft_max=5, description="Random seed")
     #vertex_group = layout.prop_search(act, "vertexgroup", act, "vertex_groups", text="Scale")
 
     working_on = ""

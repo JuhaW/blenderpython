@@ -4,33 +4,31 @@ from mathutils import Vector
 from ... base_types.node import AnimationNode
 from ... events import propertyChanged
 
-
 class an_EdgesToPlanesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_EdgesToPlanesNode"
     bl_label = "Edges to Planes"
+    bl_width_default = 150
 
     calculateDirection = BoolProperty(
-        name="Calculate Direction",
-        description="Calculate a rectangle instead of a parallelogram (takes more time)",
-        default=True, update=propertyChanged)
+        name = "Calculate Direction",
+        description = "Calculate a rectangle instead of a parallelogram (takes more time)",
+        default = True, update = propertyChanged)
 
     errorMessage = StringProperty()
 
     def create(self):
-        self.inputs.new("an_VectorListSocket", "Vertices", "vertices")
-        self.inputs.new("an_EdgeIndicesListSocket", "Edges", "edges")
-        self.inputs.new("an_FloatSocket", "Width", "width").value = 0.01
-        socket = self.inputs.new("an_VectorSocket", "Up Vector", "upVector")
-        socket.value = (0.001, 0.001, 0.999)
-        socket.hide = True
-        self.outputs.new("an_VectorListSocket", "Vertices", "outVertices")
-        self.outputs.new("an_PolygonIndicesListSocket", "Polygons", "polygons")
-        self.width += 10
+        self.newInput("Vector List", "Vertices", "vertices")
+        self.newInput("Edge Indices List", "Edges", "edges")
+        self.newInput("Float", "Width", "width", value = 0.01)
+        self.newInput("Vector", "Up Vector", "upVector", value = (0.001, 0.001, 0.999), hide = True)
+
+        self.newOutput("Vector List", "Vertices", "outVertices")
+        self.newOutput("Polygon Indices List", "Polygons", "polygons")
 
     def draw(self, layout):
         layout.prop(self, "calculateDirection")
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon="ERROR")
+            layout.label(self.errorMessage, icon = "ERROR")
 
     def execute(self, vertices, edges, width, upVector):
         try:
@@ -39,6 +37,7 @@ class an_EdgesToPlanesNode(bpy.types.Node, AnimationNode):
         except IndexError:
             self.errorMessage = "Missing vertices"
             return [], []
+
 
     def calculatePlanes(self, vertices, edges, width, upVector):
         newVertices = []

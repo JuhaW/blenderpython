@@ -3,20 +3,19 @@ from bpy.props import *
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
 
-
 class ObjectVisibilityOutputNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_ObjectVisibilityOutputNode"
     bl_label = "Object Visibility Output"
 
     def create(self):
-        self.inputs.new("an_ObjectSocket", "Object", "object").defaultDrawType = "PROPERTY_ONLY"
-        self.inputs.new("an_BooleanSocket", "Hide", "hide")
-        self.inputs.new("an_BooleanSocket", "Hide Render", "hideRender")
-        self.inputs.new("an_BooleanSocket", "Hide Select", "hideSelect")
-        self.inputs.new("an_BooleanSocket", "Show Name", "showName")
-        self.inputs.new("an_BooleanSocket", "Show Axis", "showAxis")
-        self.inputs.new("an_BooleanSocket", "Show X-Ray", "showXRay")
-        self.outputs.new("an_ObjectSocket", "Object", "object")
+        self.newInput("Object", "Object", "object", defaultDrawType = "PROPERTY_ONLY")
+        self.newInput("Boolean", "Hide", "hide")
+        self.newInput("Boolean", "Hide Render", "hideRender")
+        self.newInput("Boolean", "Hide Select", "hideSelect")
+        self.newInput("Boolean", "Show Name", "showName")
+        self.newInput("Boolean", "Show Axis", "showAxis")
+        self.newInput("Boolean", "Show X-Ray", "showXRay")
+        self.newOutput("Object", "Object", "object")
 
         for socket in self.inputs[1:]:
             socket.useIsUsedProperty = True
@@ -27,60 +26,64 @@ class ObjectVisibilityOutputNode(bpy.types.Node, AnimationNode):
             socket.hide = True
 
     def drawAdvanced(self, layout):
-        layout.operator("wm.call_menu", text="Node Info / Help", icon="INFO").name = "an.show_object_visibility_output_help"
+        layout.operator("wm.call_menu", text = "Node Info / Help", icon = "INFO").name = "an.show_object_visibility_output_help"
 
     def getExecutionCode(self):
         yield "if object is not None:"
 
         s = self.inputs
-        if s["Hide"].isUsed:
-            yield "    object.hide = hide"
-        if s["Hide Render"].isUsed:
-            yield "    object.hide_render = hideRender"
-        if s["Hide Select"].isUsed:
-            yield "    object.hide_select = hideSelect"
+        if s["Hide"].isUsed:        yield "    object.hide = hide"
+        if s["Hide Render"].isUsed: yield "    object.hide_render = hideRender"
+        if s["Hide Select"].isUsed: yield "    object.hide_select = hideSelect"
 
-        if s["Show Name"].isUsed:
-            yield "    object.show_name = showName"
-        if s["Show Axis"].isUsed:
-            yield "    object.show_axis = showAxis"
-        if s["Show X-Ray"].isUsed:
-            yield "    object.show_x_ray = showXRay"
+        if s["Show Name"].isUsed:   yield "    object.show_name = showName"
+        if s["Show Axis"].isUsed:   yield "    object.show_axis = showAxis"
+        if s["Show X-Ray"].isUsed:  yield "    object.show_x_ray = showXRay"
 
         yield "    pass"
 
+    def getBakeCode(self):
+        yield "if object is not None:"
+        s = self.inputs
+        if s["Hide"].isUsed:        yield "    object.keyframe_insert('hide')"
+        if s["Hide Render"].isUsed: yield "    object.keyframe_insert('hide_render')"
+        if s["Hide Select"].isUsed: yield "    object.keyframe_insert('hide_select')"
+
+        if s["Show Name"].isUsed:   yield "    object.keyframe_insert('show_name')"
+        if s["Show Axis"].isUsed:   yield "    object.keyframe_insert('show_axis')"
+        if s["Show X-Ray"].isUsed:  yield "    object.keyframe_insert('show_x_ray')"
 
 class ShowHelp(bpy.types.Menu):
     bl_idname = "an.show_object_visibility_output_help"
     bl_label = "Object Visibility Output node | Blender - Animation Nodes"
     bl_icon = "FORCE_TURBULENCE"
 
-    helpText = StringProperty(default="help here")
-    noteText = StringProperty(default="note here")
+    helpText = StringProperty(default = "help here")
+    noteText = StringProperty(default = "note here")
     helpLines = []
     noteLines = []
 
     def draw(self, context):
         layout = self.layout
         layout.operator_context = "INVOKE_DEFAULT"
-        layout.label('''Help, comments, notes.''', icon="INFO")
-        row = layout.row(align=True)
+        layout.label('''Help, comments, notes.''', icon = "INFO")
+        row = layout.row(align = True)
 
-        col = row.column(align=True)
+        col = row.column(align = True)
         helpLines = self.helpText.split("\n")
         for li in helpLines:
             if li:
-                col.label(text=li)
+                col.label(text = li)
 
-        col = row.column(align=True)
+        col = row.column(align = True)
         noteLines = self.noteText.split("\n")
         for li in noteLines:
             if li:
-                col.label(text=li)
+                col.label(text = li)
 
-        layout.label("o.g. 08.2015", icon="INFO")
+        layout.label("o.g. 08.2015", icon = "INFO")
 
-    helpText = '''
+    helpText ='''
 Purpose:
     This is a convenience node made to ease some ui procedures.
     Especially useful for objects generated by AN, when many.
@@ -106,7 +109,7 @@ Usage:
        show axis = show origin and xyz tripod of the object
        show Xray = shows the object in front of others, never hidden
 '''
-    noteText = '''
+    noteText ='''
 notes:
     By default, parameters are Not checked.
     Normally it all are Unchecked so that nothing is changed by accident.

@@ -7,11 +7,9 @@ from ... utils.handlers import eventHandler
 from ... utils.names import toInterfaceName
 from ... events import executionCodeChanged
 from ... base_types.node import AnimationNode
-from ... utils.blender_ui import getAreaWithType
 from . subprogram_base import SubprogramBaseNode
 from ... execution.units import getSubprogramUnitByIdentifier
 from . subprogram_sockets import SubprogramData, subprogramInterfaceChanged
-
 
 class ScriptNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
     bl_idname = "an_ScriptNode"
@@ -22,80 +20,82 @@ class ScriptNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
         self.errorMessage = ""
         executionCodeChanged()
 
-    executionCode = StringProperty(default="")
-    textBlockName = StringProperty(default="")
+    executionCode = StringProperty(default = "")
+    textBlockName = StringProperty(default = "")
 
-    debugMode = BoolProperty(name="Debug Mode", default=True,
-                             description="Give error message inside the node", update=debugModeChanged)
+    debugMode = BoolProperty(name = "Debug Mode", default = True,
+        description = "Give error message inside the node", update = debugModeChanged)
     errorMessage = StringProperty()
 
-    interactiveMode = BoolProperty(name="Interactive Mode", default=True,
-                                   description="Recompile the script on each change in the text block")
+    interactiveMode = BoolProperty(name = "Interactive Mode", default = True,
+        description = "Recompile the script on each change in the text block")
 
     def create(self):
         self.randomizeNetworkColor()
         self.subprogramName = "My Script"
-        self.inputs.new("an_NodeControlSocket", "New Input", "newInput")
-        self.outputs.new("an_NodeControlSocket", "New Output", "newOutput")
+        self.newInput("an_NodeControlSocket", "New Input", "newInput")
+        self.newOutput("an_NodeControlSocket", "New Output", "newOutput")
 
     def draw(self, layout):
         layout.separator()
 
-        col = layout.column(align=True)
-        row = col.row(align=True)
-        self.invokeFunction(row, "createNewTextBlock", icon="ZOOMIN")
-        row.prop_search(self, "textBlockName", bpy.data, "texts", text="")
-        subrow = row.row(align=True)
+        col = layout.column(align = True)
+        row = col.row(align = True)
+        if self.textBlock is None:
+            self.invokeFunction(row, "createNewTextBlock", icon = "ZOOMIN")
+        else:
+            self.invokeAreaChooser(row, "viewTextBlockInArea", icon = "ZOOM_SELECTED")
+        row.prop_search(self, "textBlockName",  bpy.data, "texts", text = "")
+        subrow = row.row(align = True)
         subrow.active = self.textBlock is not None
-        self.invokeFunction(subrow, "writeToTextBlock", icon="COPYDOWN",
-                            description="Write script code into the selected text block")
+        self.invokeFunction(subrow, "writeToTextBlock", icon = "COPYDOWN",
+            description = "Write script code into the selected text block")
 
-        subcol = col.column(align=True)
+        subcol = col.column(align = True)
         subcol.scale_y = 1.4
         subcol.active = self.textBlock is not None
 
         icon = "NONE"
         text = self.textInTextBlock
         if text is not None:
-            if self.executionCode != text:
-                icon = "ERROR"
+            if self.executionCode != text: icon = "ERROR"
 
         if not self.interactiveMode:
-            self.invokeFunction(subcol, "readFromTextBlock", text="Import Changes", icon=icon,
-                                description="Import the changes from the selected text block")
+            self.invokeFunction(subcol, "readFromTextBlock", text = "Import Changes", icon = icon,
+                description = "Import the changes from the selected text block")
 
-        layout.prop(self, "subprogramName", text="", icon="GROUP_VERTEX")
+        layout.prop(self, "subprogramName", text = "", icon = "GROUP_VERTEX")
 
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon="ERROR")
+            layout.label(self.errorMessage, icon = "ERROR")
 
         layout.separator()
 
     def drawAdvanced(self, layout):
         col = layout.column()
         col.label("Description:")
-        col.prop(self, "subprogramDescription", text="")
+        col.prop(self, "subprogramDescription", text = "")
         layout.prop(self, "debugMode")
         layout.prop(self, "interactiveMode")
 
     def drawControlSocket(self, layout, socket):
         if socket in list(self.inputs):
-            self.invokeSocketTypeChooser(layout, "newInput", text="New Input", icon="ZOOMIN")
+            self.invokeSocketTypeChooser(layout, "newInputSocket", text = "New Input", icon = "ZOOMIN")
         else:
-            self.invokeSocketTypeChooser(layout, "newOutput", text="New Output", icon="ZOOMIN")
+            self.invokeSocketTypeChooser(layout, "newOutputSocket", text = "New Output", icon = "ZOOMIN")
 
     def edit(self):
         removedLink = self.removeLinks()
         if removedLink:
             text = "Please use an 'Invoke Subprogram' node to execute the script node"
-            showTextPopup(text=text, title="Info", icon="INFO")
+            showTextPopup(text = text, title = "Info", icon = "INFO")
 
-    def newInput(self, dataType):
-        socket = self.inputs.new(toIdName(dataType), dataType)
+    def newInputSocket(self, dataType):
+        socket = self.newInput(dataType, dataType)
         self.setupSocket(socket)
 
-    def newOutput(self, dataType):
-        socket = self.outputs.new(toIdName(dataType), dataType)
+    def newOutputSocket(self, dataType):
+        socket = self.newOutput(dataType, dataType)
         self.setupSocket(socket)
 
     def setupSocket(self, socket):
@@ -133,34 +133,30 @@ class ScriptNode(bpy.types.Node, AnimationNode, SubprogramBaseNode):
         return data
 
     def createNewTextBlock(self):
-        textBlock = bpy.data.texts.new(name=self.subprogramName + " Code")
+        textBlock = bpy.data.texts.new(name = self.subprogramName)
         self.textBlockName = textBlock.name
         self.writeToTextBlock()
-        area = getAreaWithType("TEXT_EDITOR")
-        if area:
-            area.spaces.active.text = textBlock
+
+    def viewTextBlockInArea(self, area):
+        area.type = "TEXT_EDITOR"
+        area.spaces.active.text = self.textBlock
 
     def writeToTextBlock(self):
-        if not self.textBlock:
-            return
+        if not self.textBlock: return
         self.textBlock.from_string(self.executionCode)
 
     def readFromTextBlock(self):
-        if not self.textBlock:
-            return
+        if not self.textBlock: return
         self.executionCode = self.textInTextBlock
         self.errorMessage = ""
         executionCodeChanged()
 
     def interactiveUpdate(self):
-        if not self.textBlock:
-            return
+        if not self.textBlock: return
         text = self.textInTextBlock
-        if self.executionCode == text:
-            return
+        if self.executionCode == text: return
         executionUnit = self.executionUnit
-        if executionUnit is None:
-            return
+        if executionUnit is None: return
         self.executionCode = text
         executionUnit.scriptUpdated()
 

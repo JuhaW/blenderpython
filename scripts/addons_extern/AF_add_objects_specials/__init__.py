@@ -18,12 +18,12 @@
 # by meta-androcto #
 
 bl_info = {
-    "name": "AF: Add Advanced",
+    "name": "Add Object Specials",
     "author": "Meta Androcto, ",
     "version": (0, 2),
     "blender": (2, 75, 0),
-    "location": "View3D > Add > Scene Elements",
-    "description": "Add Scenes & Lights, Objects.",
+    "location": "View3D > Add ",
+    "description": "Add Object & Camera extras",
     "warning": "",
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.6"
     "/Py/Scripts",
@@ -33,11 +33,6 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
-    importlib.reload(scene_camera)
-    importlib.reload(scene_lighting)
-    importlib.reload(scene_materials)
-    importlib.reload(scene_objects)
-    importlib.reload(scene_objects_cycles)
     importlib.reload(pixelate_3d)
     importlib.reload(object_add_chain)
     importlib.reload(drop_to_ground)
@@ -46,19 +41,11 @@ if "bpy" in locals():
     importlib.reload(dupli_spin)
     importlib.reload(aggregate_mesh)
     importlib.reload(unfold_transition)
-    importlib.reload(add_light_template)
-    importlib.reload(advanced_camera_rigs)
-    importlib.reload(trilighting)
     importlib.reload(copy2)
     importlib.reload(MakeStruts)
     importlib.reload(Random_Box_Structure)
 
 else:
-    from . import scene_camera
-    from . import scene_lighting
-    from . import scene_materials
-    from . import scene_objects
-    from . import scene_objects_cycles
     from . import pixelate_3d
     from . import object_add_chain
     from . import oscurart_chain_maker
@@ -68,16 +55,13 @@ else:
     from . import dupli_spin
     from . import aggregate_mesh
     from . import unfold_transition
-    from . import add_light_template
-    from . import advanced_camera_rigs
-    from . import trilighting
     from . import copy2
     from . import MakeStruts
     from . import Random_Box_Structure
 
 import bpy
 
-
+'''
 class create_menu(bpy.types.Panel):
     bl_label = 'Add Factory'
     bl_space_type = 'VIEW_3D'
@@ -96,7 +80,7 @@ class create_menu(bpy.types.Panel):
                         text="Circle Array", icon='MOD_ARRAY')
         layout.operator("object.procedural_dupli_spin",
                         text="Dupli Splin", icon='MOD_ARRAY')
-
+'''
 
 class INFO_MT_mesh_chain_add(bpy.types.Menu):
     # Define the "mesh objects" menu
@@ -147,61 +131,6 @@ class INFO_MT_quick_tools_add(bpy.types.Menu):
         layout.operator("object.make_structure",
                         text="Random Boxes", icon='SEQ_SEQUENCER')
 
-
-class INFO_MT_scene_elements_add(bpy.types.Menu):
-    # Define the "mesh objects" menu
-    bl_idname = "INFO_MT_scene_elements"
-    bl_label = "Test scenes"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator_context = 'INVOKE_REGION_WIN'
-        layout.operator("camera.add_scene",
-                        text="Scene_Camera")
-        layout.operator("materials.add_scene",
-                        text="Scene_Objects_BI")
-        layout.operator("plane.add_scene",
-                        text="Scene_Plane")
-        layout.operator("objects_cycles.add_scene",
-                        text="Scene_Objects_Cycles")
-
-
-class INFO_MT_mesh_lamps_add(bpy.types.Menu):
-    # Define the "mesh objects" menu
-    bl_idname = "INFO_MT_scene_lamps"
-    bl_label = "Lighting Sets"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator_context = 'INVOKE_REGION_WIN'
-        layout.operator("object.add_single_spot",
-                        text="Add Single Spot")
-        layout.operator("object.add_basic_3point",
-                        text="Add 3 Point Spot Setup")
-        layout.operator("object.add_basic_2point",
-                        text="Add 2 Point Setup")
-        layout.operator("object.add_area_3point",
-                        text="Add 3 Point Setup")
-        layout.operator("object.add_light_template",
-                        text="Add Light Template")
-        layout.operator("object.trilighting",
-                        text="Add Tri Lighting")
-
-
-class INFO_MT_mesh_cameras_add(bpy.types.Menu):
-    # Define the "mesh objects" menu
-    bl_idname = "INFO_MT_scene_cameras"
-    bl_label = "Camera Sets"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.operator_context = 'INVOKE_REGION_WIN'
-        layout.operator("object.build_dolly_rig",
-                        text="Dolly Rig")
-        layout.operator("object.build_crane_rig",
-                        text="Crane Rig")
-
-
 # Define "Extras" menu
 def menu(self, context):
 
@@ -209,11 +138,9 @@ def menu(self, context):
     layout.operator_context = 'INVOKE_REGION_WIN'
     self.layout.separator()
     layout.label(text="Add Factory")
-    self.layout.menu("INFO_MT_scene_elements", icon="SCENE_DATA")
-    self.layout.menu("INFO_MT_scene_lamps", icon="LAMP_SPOT")
     self.layout.menu("INFO_MT_array_mods", icon="MOD_ARRAY")
     self.layout.menu("INFO_MT_quick_tools", icon="MOD_BUILD")
-    self.layout.menu("INFO_MT_scene_cameras", icon="OUTLINER_DATA_CAMERA")
+
 
 # Addons Preferences
 
@@ -228,23 +155,24 @@ class AddonPreferences(bpy.types.AddonPreferences):
         layout.label(text="Drop, Pixelate & Wrecking Ball")
         layout.label(text="Array Mods:")
         layout.label(text="Circle Array, Chains, Vert to Edge, Aggregate")
-        layout.label(text="Lighting Sets:")
-        layout.label(text="Spots, Points & Tri Lights")
-        layout.label(text="Test Scenes:")
-        layout.label(text="Basic pre-built test scenes Cycles & BI")
-
 
 def register():
     bpy.utils.register_module(__name__)
     # Add "Extras" menu to the "Add Mesh" menu
     bpy.types.INFO_MT_add.append(menu)
-
+    try:
+        bpy.types.VIEW3D_MT_AddMenu.prepend(menu)
+    except:
+        pass
 
 def unregister():
 
     # Remove "Extras" menu from the "Add Mesh" menu.
     bpy.types.INFO_MT_add.remove(menu)
-
+    try:
+        bpy.types.VIEW3D_MT_AddMenu.remove(menu)
+    except:
+        pass
     bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":

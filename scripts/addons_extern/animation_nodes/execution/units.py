@@ -2,57 +2,57 @@ import traceback
 from .. import problems
 from collections import defaultdict
 from . cache import clearExecutionCache
-from .. utils.nodes import getAnimationNodeTrees
+from . measurements import resetMeasurements
 from . main_execution_unit import MainExecutionUnit
 from . loop_execution_unit import LoopExecutionUnit
 from . group_execution_unit import GroupExecutionUnit
 from . script_execution_unit import ScriptExecutionUnit
 from .. tree_info import getNetworksByType, getSubprogramNetworks
+from .. utils.nodes import getAnimationNodeTrees, iterAnimationNodes
 from .. problems import ExceptionDuringCodeCreation, CouldNotSetupExecutionUnits
 
 _mainUnitsByNodeTree = defaultdict(list)
 _subprogramUnitsByIdentifier = {}
 
-
-def createExecutionUnits():
+def createExecutionUnits(nodeByID):
     reset()
     try:
-        createMainUnits()
-        createSubprogramUnits()
+        createMainUnits(nodeByID)
+        createSubprogramUnits(nodeByID)
     except:
-        print("\n" * 5)
+        print("\n"*5)
         traceback.print_exc()
         ExceptionDuringCodeCreation().report()
 
-
 def reset():
+    resetMeasurements()
     _mainUnitsByNodeTree.clear()
     _subprogramUnitsByIdentifier.clear()
 
+    for node in iterAnimationNodes():
+        for socket in node.outputs:
+            socket.execution.neededCopies = 0
 
-def createMainUnits():
+def createMainUnits(nodeByID):
     for network in getNetworksByType("Main"):
-        unit = MainExecutionUnit(network)
+        unit = MainExecutionUnit(network, nodeByID)
         _mainUnitsByNodeTree[network.treeName].append(unit)
 
-
-def createSubprogramUnits():
+def createSubprogramUnits(nodeByID):
     for network in getSubprogramNetworks():
         if network.type == "Group":
-            unit = GroupExecutionUnit(network)
+            unit = GroupExecutionUnit(network, nodeByID)
         if network.type == "Loop":
-            unit = LoopExecutionUnit(network)
+            unit = LoopExecutionUnit(network, nodeByID)
         if network.type == "Script":
-            unit = ScriptExecutionUnit(network)
+            unit = ScriptExecutionUnit(network, nodeByID)
         _subprogramUnitsByIdentifier[network.identifier] = unit
 
 
 def setupExecutionUnits():
     try:
-        if len(getAnimationNodeTrees()) == 0:
-            return
-        if not problems.canExecute():
-            return
+        if len(getAnimationNodeTrees()) == 0: return
+        if not problems.canExecute(): return
 
         for unit in getExecutionUnits():
             unit.setup()
@@ -64,10 +64,9 @@ def setupExecutionUnits():
         for unit in getExecutionUnits():
             unit.insertSubprogramFunctions(subprograms)
     except:
-        print("\n" * 5)
+        print("\n"*5)
         traceback.print_exc()
         CouldNotSetupExecutionUnits().report()
-
 
 def finishExecutionUnits():
     for unit in getExecutionUnits():
@@ -79,10 +78,8 @@ def finishExecutionUnits():
 def getMainUnitsByNodeTree(nodeTree):
     return _mainUnitsByNodeTree[nodeTree.name]
 
-
 def getSubprogramUnitByIdentifier(identifier):
     return _subprogramUnitsByIdentifier.get(identifier, None)
-
 
 def getSubprogramUnitsByName(name):
     programs = []
@@ -91,12 +88,9 @@ def getSubprogramUnitsByName(name):
             programs.append(subprogram)
     return programs
 
-
 def getExecutionUnitByNetwork(network):
     for unit in getExecutionUnits():
-        if unit.network == network:
-            return unit
-
+        if unit.network == network: return unit
 
 def getExecutionUnits():
     units = []

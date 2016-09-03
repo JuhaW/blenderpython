@@ -2,7 +2,6 @@ import bpy
 import textwrap
 from . blender_ui import getDpiFactor
 
-
 def splitAlignment(layout):
     row = layout.row()
     left = row.row()
@@ -11,12 +10,11 @@ def splitAlignment(layout):
     right.alignment = "RIGHT"
     return left, right
 
-
-def writeText(layout, text, width=30, icon="NONE", autoWidth=False):
+def writeText(layout, text, width = 30, icon = "NONE", autoWidth = False):
     if autoWidth == True:
         width = bpy.context.region.width / getDpiFactor() / 7
 
-    col = layout.column(align=True)
+    col = layout.column(align = True)
     col.scale_y = 0.85
     prefix = " "
     for paragraph in text.split("\n"):
@@ -28,7 +26,6 @@ def writeText(layout, text, width=30, icon="NONE", autoWidth=False):
             subcol.label("")
 
         for line in lines:
-            col.label(prefix + line, icon=icon)
-            if icon != "NONE":
-                prefix = "     "
+            col.label(prefix + line, icon = icon)
+            if icon != "NONE": prefix = "     "
             icon = "NONE"

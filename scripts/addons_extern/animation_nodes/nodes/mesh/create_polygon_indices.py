@@ -2,7 +2,6 @@ import bpy
 from bpy.props import *
 from ... base_types.node import AnimationNode
 
-
 class CreatePolygonIndicesNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_CreatePolygonIndicesNode"
     bl_label = "Create Polygon Indices"
@@ -10,12 +9,12 @@ class CreatePolygonIndicesNode(bpy.types.Node, AnimationNode):
     errorMessage = StringProperty()
 
     def create(self):
-        self.inputs.new("an_IntegerListSocket", "Indices", "indices")
-        self.outputs.new("an_PolygonIndicesSocket", "Polygon Indices", "polygonIndices")
+        self.newInput("Integer List", "Indices", "indices")
+        self.newOutput("Polygon Indices", "Polygon Indices", "polygonIndices")
 
     def draw(self, layout):
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon="ERROR")
+            layout.label(self.errorMessage, icon = "ERROR")
 
     def execute(self, indices):
         if len(indices) >= 3:

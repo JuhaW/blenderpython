@@ -1,15 +1,14 @@
 import bpy
 from bpy.props import *
 from collections import defaultdict
+from ... sockets.info import isList
 from ... utils.code import isCodeValid
 from ... tree_info import keepNodeState
 from ... utils.names import toVariableName
 from ... events import executionCodeChanged
-from ... sockets.info import toIdName, isList
 from ... base_types.node import AnimationNode
 from ... utils.enum_items import enumItemsFromDicts
 from mathutils.geometry import distance_point_to_plane
-
 
 class SortingTemplate:
     identifier = "NONE"
@@ -27,6 +26,7 @@ class SortingTemplate:
         return []
 
 
+
 # Object List Sorting
 ##################################################
 
@@ -35,17 +35,16 @@ class SortObjectListWithDirectionTemplate(bpy.types.PropertyGroup, SortingTempla
     dataType = "Object List"
     label = "Direction"
 
-    useInitialTransforms = BoolProperty(name="Use Initial Transforms", default=False)
+    useInitialTransforms = BoolProperty(name = "Use Initial Transforms", default = False)
 
     def setup(self, node):
-        node.inputs.new("an_VectorSocket", "Direction", "direction").value = (0, 0, 1)
+        node.newInput("Vector", "Direction", "direction", value = (0, 0, 1))
 
     def draw(self, layout):
         layout.prop(self, "useInitialTransforms")
 
     def sort(self, objects, reverse, direction):
-        if not all(objects):
-            return "List elements must not be None"
+        if not all(objects): return "List elements must not be None"
 
         distance = distance_point_to_plane
         if self.useInitialTransforms:
@@ -53,33 +52,30 @@ class SortObjectListWithDirectionTemplate(bpy.types.PropertyGroup, SortingTempla
         else:
             keyFunction = lambda object: distance(object.location, (0, 0, 0), direction)
 
-        return sorted(objects, key=keyFunction, reverse=reverse)
-
+        return sorted(objects, key = keyFunction, reverse = reverse)
 
 class SortObjectListByPointDistanceTemplate(bpy.types.PropertyGroup, SortingTemplate):
     identifier = "OBJECT_LIST__POINT_DISTANCE"
     dataType = "Object List"
     label = "Point Distance"
 
-    useInitialTransforms = BoolProperty(name="Use Initial Transforms", default=False)
+    useInitialTransforms = BoolProperty(name = "Use Initial Transforms", default = False)
 
     def setup(self, node):
-        node.inputs.new("an_VectorSocket", "Point", "point")
+        node.newInput("Vector", "Point", "point")
 
     def draw(self, layout):
         layout.prop(self, "useInitialTransforms")
 
     def sort(self, objects, reverse, point):
-        if not all(objects):
-            return "List elements must not be None"
+        if not all(objects): return "List elements must not be None"
 
         if self.useInitialTransforms:
             keyFunction = lambda object: (object.id_keys.get("Transforms", "Initial Transforms")[0] - point).length_squared
         else:
             keyFunction = lambda object: (object.location - point).length_squared
 
-        return sorted(objects, key=keyFunction, reverse=reverse)
-
+        return sorted(objects, key = keyFunction, reverse = reverse)
 
 class SortObjectListByNameTemplate(bpy.types.PropertyGroup, SortingTemplate):
     identifier = "OBJECT_LIST__NAME"
@@ -87,10 +83,9 @@ class SortObjectListByNameTemplate(bpy.types.PropertyGroup, SortingTemplate):
     label = "Name"
 
     def sort(self, objects, reverse):
-        if not all(objects):
-            return "List elements must not be None"
+        if not all(objects): return "List elements must not be None"
 
-        return sorted(objects, key=lambda x: x.name, reverse=reverse)
+        return sorted(objects, key = lambda x: x.name, reverse = reverse)
 
 
 # Polygon List Sorting
@@ -102,12 +97,13 @@ class SortPolygonListWithDirectionTemplate(bpy.types.PropertyGroup, SortingTempl
     label = "Direction"
 
     def setup(self, node):
-        node.inputs.new("an_VectorSocket", "Direction", "direction").value = (0, 0, 1)
+        node.newInput("Vector", "Direction", "direction", value = (0, 0, 1))
 
     def sort(self, polygons, reverse, direction):
         distance = distance_point_to_plane
         keyFunction = lambda polygon: distance(polygon.center, (0, 0, 0), direction)
-        return sorted(polygons, key=keyFunction, reverse=reverse)
+        return sorted(polygons, key = keyFunction, reverse = reverse)
+
 
 
 # Collect templates in a property group
@@ -126,8 +122,9 @@ class SortingTemplates(bpy.types.PropertyGroup):
         return getattr(self, identifier)
 
 for template in SortingTemplate.__subclasses__():
-    setattr(SortingTemplates, template.identifier, PointerProperty(type=template))
+    setattr(SortingTemplates, template.identifier, PointerProperty(type = template))
     SortingTemplates.templateIdentifiersByDataType[template.dataType].append(template.identifier)
+
 
 
 # Actual Node
@@ -135,41 +132,38 @@ for template in SortingTemplate.__subclasses__():
 
 keyListTypeItems = [
     ("FLOAT", "Float", "", "NONE", 0),
-    ("STRING", "String", "", "NONE", 1)]
-
+    ("STRING", "String", "", "NONE", 1) ]
 
 class SortListNode(bpy.types.Node, AnimationNode):
     bl_idname = "an_SortListNode"
     bl_label = "Sort List"
     bl_width_default = 190
 
-    templates = PointerProperty(type=SortingTemplates)
+    templates = PointerProperty(type = SortingTemplates)
 
     def assignedTypeChanged(self, context):
-        self.listIdName = toIdName(self.assignedType)
         self.generateSockets()
 
-    assignedType = StringProperty(update=assignedTypeChanged)
-    listIdName = StringProperty()
+    assignedType = StringProperty(update = assignedTypeChanged)
 
     def getSortTypeItems(self, context):
         items = []
-        items.append({"value": "CUSTOM", "name": "Custom"})
-        items.append({"value": "KEY_LIST", "name": "Key List"})
+        items.append({"value" : "CUSTOM", "name" : "Custom"})
+        items.append({"value" : "KEY_LIST", "name" : "Key List"})
         for template in self.templates.getTemplates(self.assignedType):
-            items.append({"value": template.identifier, "name": template.label})
+            items.append({"value" : template.identifier, "name" : template.label})
         return enumItemsFromDicts(items)
 
     def sortTypeChanged(self, context):
         self.generateSockets()
 
-    sortType = EnumProperty(name="Sort Type", update=sortTypeChanged,
-                            items=getSortTypeItems)
+    sortType = EnumProperty(name = "Sort Type", update = sortTypeChanged,
+        items = getSortTypeItems)
 
-    sortKey = StringProperty(update=executionCodeChanged, default="e")
+    sortKey = StringProperty(update = executionCodeChanged, default = "e")
 
-    keyListType = EnumProperty(name="Key List Type", default="FLOAT",
-                               items=keyListTypeItems, update=sortTypeChanged)
+    keyListType = EnumProperty(name = "Key List Type", default = "FLOAT",
+        items = keyListTypeItems, update = sortTypeChanged)
 
     def elementNameChanged(self, context):
         variableName = toVariableName(self.elementName)
@@ -177,8 +171,8 @@ class SortListNode(bpy.types.Node, AnimationNode):
             self.elementName = variableName
         executionCodeChanged()
 
-    elementName = StringProperty(name="Element Name", default="e",
-                                 update=elementNameChanged)
+    elementName = StringProperty(name = "Element Name", default = "e",
+        update = elementNameChanged)
 
     errorMessage = StringProperty()
 
@@ -187,19 +181,19 @@ class SortListNode(bpy.types.Node, AnimationNode):
         self.sortType = "CUSTOM"
 
     def draw(self, layout):
-        layout.prop(self, "sortType", text="Type")
+        layout.prop(self, "sortType", text = "Type")
 
         if self.sortType == "CUSTOM":
-            col = layout.column(align=True)
+            col = layout.column(align = True)
             col.label("Key (use {} for the element)".format(repr(self.elementName)))
-            col.prop(self, "sortKey", text="")
+            col.prop(self, "sortKey", text = "")
         elif self.sortType == "KEY_LIST":
-            layout.prop(self, "keyListType", text="Keys")
+            layout.prop(self, "keyListType", text = "Keys")
         else:
             self.activeTemplate.draw(layout)
 
         if self.errorMessage != "":
-            layout.label(self.errorMessage, icon="ERROR")
+            layout.label(self.errorMessage, icon = "ERROR")
 
     def drawAdvanced(self, layout):
         layout.prop(self, "elementName")
@@ -261,17 +255,13 @@ class SortListNode(bpy.types.Node, AnimationNode):
         listInput = self.inputs[0].dataOrigin
         listOutputs = self.outputs[0].dataTargets
 
-        if listInput is not None:
-            return listInput.dataType
-        if len(listOutputs) == 1:
-            return listOutputs[0].dataType
+        if listInput is not None: return listInput.dataType
+        if len(listOutputs) == 1: return listOutputs[0].dataType
         return self.inputs[0].dataType
 
     def assignType(self, listDataType):
-        if not isList(listDataType):
-            return
-        if listDataType == self.assignedType:
-            return
+        if not isList(listDataType): return
+        if listDataType == self.assignedType: return
         self.assignedType = listDataType
 
         if self.sortType not in ("CUSTOM", "KEY_LIST"):
@@ -281,16 +271,18 @@ class SortListNode(bpy.types.Node, AnimationNode):
     def generateSockets(self):
         self.inputs.clear()
         self.outputs.clear()
-        self.inputs.new(self.listIdName, "List", "inList").dataIsModified = True
-        self.inputs.new("an_BooleanSocket", "Reverse", "reverseOutput").value = False
+
+        listDataType = self.assignedType
+        self.newInput(listDataType, "List", "inList", dataIsModified = True)
+        self.newInput("Boolean", "Reverse", "reverseOutput", value = False)
 
         if self.sortType == "KEY_LIST":
             if self.keyListType == "FLOAT":
-                self.inputs.new("an_FloatListSocket", "Key List", "keyList")
+                self.newInput("Float List", "Key List", "keyList")
             elif self.keyListType == "STRING":
-                self.inputs.new("an_StringListSocket", "Key List", "keyList")
+                self.newInput("String List", "Key List", "keyList")
 
-        self.outputs.new(self.listIdName, "Sorted List", "outList")
+        self.newOutput(listDataType, "Sorted List", "outList")
 
         self.setupActiveTemplate()
 
@@ -301,6 +293,5 @@ class SortListNode(bpy.types.Node, AnimationNode):
 
     @property
     def activeTemplate(self):
-        if self.sortType in ("CUSTOM", "KEY_LIST"):
-            return None
+        if self.sortType in ("CUSTOM", "KEY_LIST"): return None
         return self.templates.getTemplate(self.sortType)
