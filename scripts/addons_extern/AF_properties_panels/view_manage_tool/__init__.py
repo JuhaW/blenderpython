@@ -13,7 +13,7 @@ import mathutils
 import bmesh
 from bpy.props import FloatProperty, IntProperty, BoolProperty, EnumProperty, StringProperty
 from mathutils import Matrix, Vector
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 
 #----------------------------------------------------------------------------
 

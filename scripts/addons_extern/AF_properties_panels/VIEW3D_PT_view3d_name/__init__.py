@@ -11,7 +11,7 @@ bl_info = {
     "category": "Item"
 }
 import bpy
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 
 
 class DataNameToObjectName(bpy.types.Operator):

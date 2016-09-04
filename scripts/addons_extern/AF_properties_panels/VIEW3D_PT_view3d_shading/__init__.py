@@ -19,7 +19,7 @@ bl_info = {
     "category": "Shading"}
 
 import bpy
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 
 
 class WT_HideAllWire(bpy.types.Operator):
