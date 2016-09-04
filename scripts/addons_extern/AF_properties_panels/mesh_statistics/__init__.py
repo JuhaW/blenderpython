@@ -39,7 +39,7 @@ from mathutils import Matrix, Vector
 from mathutils.geometry import area_tri  # , tessellate_polygon
 from bpy_extras.mesh_utils import ngon_tessellate, edge_face_count
 from bgl import glBegin, glPointSize, glColor3f, glVertex3f, glEnd, GL_POINTS
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 
 handle = []
 do_draw = [False]

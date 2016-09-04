@@ -38,7 +38,7 @@ import os
 
 import bpy
 from bl_operators.presets import AddPresetBase
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 
 
 def get_default_presets():

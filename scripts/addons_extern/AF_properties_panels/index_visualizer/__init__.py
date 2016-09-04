@@ -26,7 +26,7 @@ import mathutils
 from bpy_extras import view3d_utils
 from bpy.props import *
 from collections import namedtuple
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 __author__ = "Nutti <nutti.metro@gmail.com>"
 __status__ = "Production"
 __version__ = "1.0"

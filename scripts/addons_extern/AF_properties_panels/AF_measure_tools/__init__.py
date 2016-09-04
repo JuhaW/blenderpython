@@ -49,7 +49,7 @@ from mathutils import Vector, Matrix
 from math import degrees
 from bpy_extras.mesh_utils import ngon_tessellate, edge_face_count
 from bgl import glBegin, glPointSize, glColor3f, glVertex3f, glEnd, GL_POINTS
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 # ------ Mesh Statistics ------
 handle = []
 do_draw = [False]

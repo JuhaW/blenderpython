@@ -11,7 +11,7 @@ bl_info = {
     "category": "3D Cursor"
 }
 import bpy
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 ################
 # オペレーター #
 ################

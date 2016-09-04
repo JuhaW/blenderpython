@@ -11,7 +11,7 @@ import bpy
 import bmesh
 from bpy.props import EnumProperty, PointerProperty
 from bpy.types import PropertyGroup
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 mesh_check_handle = []
 display_color = [False]
 

@@ -38,7 +38,7 @@ bl_info = {"name": "Border Lines - BMesh Edition",
            }
 
 
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 import bpy
 from bpy_extras.mesh_utils import edge_face_count
 from mathutils import Vector

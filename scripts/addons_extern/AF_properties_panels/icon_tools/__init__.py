@@ -37,7 +37,7 @@ from bpy.types import Header, Menu, Panel, Operator
 from math import sin, cos
 import bmesh
 from bpy_extras import object_utils
-from .utils import AddonPreferences, SpaceProperty
+from ..utils import AddonPreferences, SpaceProperty
 """ ---------------------------------------------------------------- """
 """ Replace Tool Shelf """
 """

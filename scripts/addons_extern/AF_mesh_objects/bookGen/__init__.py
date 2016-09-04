@@ -34,6 +34,7 @@ from mathutils import Vector
 import random
 import time
 from math import pi, radians, sin, cos
+from bpy.props import EnumProperty, FloatProperty, IntProperty, BoolProperty
 
 from .utils import *
 
@@ -47,53 +48,53 @@ class bookGen(bpy.types.Operator):
         if(self.hinge_inset > self.cover_thickness):
             self.hinge_inset = self.cover_thickness - self.cover_thickness / 8
 
-    mode = bpy.props.EnumProperty(name="mode", items=(('stack', "stack", "Generate a stack of books"), ('shelf', "shelf", "Generate a shelf of books")), default='shelf')
+    mode = EnumProperty(name="mode", items=(('stack', "stack", "Generate a stack of books"), ('shelf', "shelf", "Generate a shelf of books")), default='shelf')
 
-    width = bpy.props.FloatProperty(name="width", default=1, min=0)
-    scale = bpy.props.FloatProperty(name="scale", default=1, min=0)
-    seed = bpy.props.IntProperty(name="seed", default=0)
+    width = FloatProperty(name="width", default=1, min=0)
+    scale = FloatProperty(name="scale", default=1, min=0)
+    seed = IntProperty(name="seed", default=0)
 
-    axis = bpy.props.EnumProperty(name="axis", items=(("0", "x", "distribute along the x-axis"), ("1", "y", "distribute along the y-axis"), ("2", "custom", "distribute along a custom axis")))
-    angle = bpy.props.FloatProperty(name="angle", unit='ROTATION')
+    axis = EnumProperty(name="axis", items=(("0", "x", "distribute along the x-axis"), ("1", "y", "distribute along the y-axis"), ("2", "custom", "distribute along a custom axis")))
+    angle = FloatProperty(name="angle", unit='ROTATION')
 
-    alignment = bpy.props.EnumProperty(name="alignment", items=(("0", "spline", "align books at the spline (usually front in a shelf)"), ("1", "fore egde", "align books along there fore edge (usually back in a shelf)"), ("2", "center", "align along center")))
+    alignment = EnumProperty(name="alignment", items=(("0", "spline", "align books at the spline (usually front in a shelf)"), ("1", "fore egde", "align books along there fore edge (usually back in a shelf)"), ("2", "center", "align along center")))
 
-    book_height = bpy.props.FloatProperty(name="height", default=3.0, min=.0, unit="LENGTH")
-    rndm_book_height_factor = bpy.props.FloatProperty(name=" random", default=1, min=.0, soft_max=1, subtype="FACTOR")
+    book_height = FloatProperty(name="height", default=3.0, min=.0, unit="LENGTH")
+    rndm_book_height_factor = FloatProperty(name=" random", default=1, min=.0, soft_max=1, subtype="FACTOR")
 
-    book_width = bpy.props.FloatProperty(name="width", default=0.5, min=.01, unit="LENGTH")
-    rndm_book_width_factor = bpy.props.FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
+    book_width = FloatProperty(name="width", default=0.5, min=.01, unit="LENGTH")
+    rndm_book_width_factor = FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
 
-    book_depth = bpy.props.FloatProperty(name="depth", default=3.0, min=.0, unit="LENGTH")
-    rndm_book_depth_factor = bpy.props.FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
+    book_depth = FloatProperty(name="depth", default=3.0, min=.0, unit="LENGTH")
+    rndm_book_depth_factor = FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
 
-    cover_thickness = bpy.props.FloatProperty(name="cover thickness", default=0.05, min=.0, step=.02, unit="LENGTH", update=hinge_inset_guard)
-    rndm_cover_thickness_factor = bpy.props.FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
+    cover_thickness = FloatProperty(name="cover thickness", default=0.05, min=.0, step=.02, unit="LENGTH", update=hinge_inset_guard)
+    rndm_cover_thickness_factor = FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
 
-    textblock_offset = bpy.props.FloatProperty(name="textblock offset", default=0.1, min=.0, unit="LENGTH")
-    rndm_textblock_offset_factor = bpy.props.FloatProperty(name="randon", default=1, min=.0, soft_max=1, subtype="FACTOR")
+    textblock_offset = FloatProperty(name="textblock offset", default=0.1, min=.0, unit="LENGTH")
+    rndm_textblock_offset_factor = FloatProperty(name="randon", default=1, min=.0, soft_max=1, subtype="FACTOR")
 
-    spline_curl = bpy.props.FloatProperty(name="spline curl", default=0.01, step=.02, min=.0, unit="LENGTH")
-    rndm_spline_curl_factor = bpy.props.FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
+    spline_curl = FloatProperty(name="spline curl", default=0.01, step=.02, min=.0, unit="LENGTH")
+    rndm_spline_curl_factor = FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
 
-    hinge_inset = bpy.props.FloatProperty(name="hinge inset", default=0.03, min=.0, step=.01, unit="LENGTH", update=hinge_inset_guard)
-    rndm_hinge_inset_factor = bpy.props.FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
+    hinge_inset = FloatProperty(name="hinge inset", default=0.03, min=.0, step=.01, unit="LENGTH", update=hinge_inset_guard)
+    rndm_hinge_inset_factor = FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
 
-    hinge_width = bpy.props.FloatProperty(name="hinge width", default=0.08, min=.0, step=.05, unit="LENGTH")
-    rndm_hinge_width_factor = bpy.props.FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
+    hinge_width = FloatProperty(name="hinge width", default=0.08, min=.0, step=.05, unit="LENGTH")
+    rndm_hinge_width_factor = FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
 
-    spacing = bpy.props.FloatProperty(name="spacing", default=0.05, min=.0, unit="LENGTH")
-    rndm_spacing_factor = bpy.props.FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
+    spacing = FloatProperty(name="spacing", default=0.05, min=.0, unit="LENGTH")
+    rndm_spacing_factor = FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
 
-    subsurf = bpy.props.BoolProperty(name="Add Subsurf-Modifier", default=False)
-    smooth = bpy.props.BoolProperty(name="shade smooth", default=False)
-    unwrap = bpy.props.BoolProperty(name="unwrap", default=True)
+    subsurf = BoolProperty(name="Add Subsurf-Modifier", default=False)
+    smooth = BoolProperty(name="shade smooth", default=False)
+    unwrap = BoolProperty(name="unwrap", default=True)
 
     # stack additions
 
-    height = bpy.props.FloatProperty(name="height", default=1, min=.0, )
-    rotation = bpy.props.FloatProperty(name="rotation", default=0, unit='ROTATION')
-    rndm_rotation_factor = bpy.props.FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
+    height = FloatProperty(name="height", default=1, min=.0, )
+    rotation = FloatProperty(name="rotation", default=0, unit='ROTATION')
+    rndm_rotation_factor = FloatProperty(name="random", default=1, min=.0, soft_max=1, subtype="FACTOR")
 
     cur_width = 0
 
