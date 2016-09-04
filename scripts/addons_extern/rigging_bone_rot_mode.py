@@ -61,8 +61,9 @@ class BoneRotationPanel(bpy.types.Panel):
     @classmethod
     def poll(self, context):
         # check mode
-        return (bpy.context.active_object.type == "ARMATURE"
-                and context.mode == "POSE")
+        return (context.active_object and 
+            context.active_object.type == "ARMATURE" and
+            context.mode == "POSE")
 
     def draw(self, context):
         wm = bpy.context.window_manager
