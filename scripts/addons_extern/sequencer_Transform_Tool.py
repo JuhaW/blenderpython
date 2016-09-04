@@ -1555,12 +1555,14 @@ item_pivot_point = (('0', 'Median Point', '', 'ROTATECENTER', 0), ('1', 'Individ
 
 def register():
     bpy.utils.register_module(__name__)
-    bpy.types.Scene.seq_cursor2d_loc = IntVectorProperty(name="Scales", description="location of the cursor2d",
-                                                         subtype='XYZ',
-                                                         default=(50, 50),
-                                                         size=2,
-                                                         step=1,
-                                                         update=update_seq_cursor2d_loc)
+    bpy.types.Scene.seq_cursor2d_loc = IntVectorProperty(
+        name="Scales", description="location of the cursor2d",
+        subtype='XYZ',
+        default=(50, 50),
+        size=2,
+        step=1,
+        update=update_seq_cursor2d_loc
+    )
     bpy.types.Scene.seq_pivot_type = bpy.props.EnumProperty(name="Pivot Point", default="1", items=item_pivot_point, update=update_pivot_point)
     bpy.types.SEQUENCER_HT_header.append(Add_Icon_Pivot_Point)
 
