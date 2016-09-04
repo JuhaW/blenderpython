@@ -17,18 +17,18 @@
 # ##### END GPL LICENSE BLOCK #####
 
 '''
-    Add-on : Dynamic Text
-        Par : Double Z.
+Add-on : Dynamic Text
+    Par : Double Z.
 
-    Description :
-        Cet add-on permet le changement du contenu d'un objet Text 3D en fonction du temps.
-        Par la suite, des éléments tel que le baking (pour permettre le linkage sur d'autres projets), les transitions et l'import de fichiers *.srt ont été rajoutés.
+Description :
+    Cet add-on permet le changement du contenu d'un objet Text 3D en fonction du temps.
+    Par la suite, des éléments tel que le baking (pour permettre le linkage sur d'autres projets), les transitions et l'import de fichiers *.srt ont été rajoutés.
 
-    Remerciements :
-        Dono pour l'idée des transitions
-        Boby pour l'idée du baking du texte.
-        e5dy/edddy pour m'avoir averti sur les potentiels bugs du a l'utilisation des bpy.ops au sein d'un script ainsi qu'a l'explication d'un début de solution très utile pour contourner cela.
-        Le forum du Blenderclan pour être un bon forum Francophone sur Blender.
+Remerciements :
+    Dono pour l'idée des transitions
+    Boby pour l'idée du baking du texte.
+    e5dy/edddy pour m'avoir averti sur les potentiels bugs du a l'utilisation des bpy.ops au sein d'un script ainsi qu'a l'explication d'un début de solution très utile pour contourner cela.
+    Le forum du Blenderclan pour être un bon forum Francophone sur Blender.
 '''
 
 bl_info = {
