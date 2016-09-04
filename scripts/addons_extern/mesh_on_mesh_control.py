@@ -13,7 +13,7 @@ bl_info = {
     "author": "Vladimir Pylev",
     "version": (1, 0),
     "blender": (2, 77, 0),
-    "location": "3D View -> Tools",
+    "location": "View3d tools panel",
     "warning": "",  # used for warning icon and text in addons panel
     "category": "Mesh"
 }
