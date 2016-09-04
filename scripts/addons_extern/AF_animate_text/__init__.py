@@ -27,7 +27,7 @@ bl_info = {
     "description": "Typing & Counting Animated Text",
     "warning": "",
     "wiki_url": "",
-    "category": "Animation"
+    "category": "Addons Factory"
 }
 
 import bpy
