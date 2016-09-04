@@ -17,7 +17,7 @@ from bpy_extras import view3d_utils
 from bpy_extras import image_utils
 from bpy.props import BoolProperty, IntProperty, FloatProperty, IntVectorProperty, StringProperty, CollectionProperty
 
-######################################  add transform channel #############################################################################
+# add transform channel
 
 
 class TF_Add_Transform(bpy.types.Operator):
@@ -850,7 +850,7 @@ class TF_Alpha(bpy.types.Operator):
 
         return {ret}
 
-######################################   Crop draw Function ########################################
+# Crop draw Function
 
 
 def crop_scale(seq, fac_init):
@@ -1152,7 +1152,7 @@ class TF_Crop(bpy.types.Operator):
 
         return {ret}
 
-######################################   Selection draw Function ########################################
+# Selection draw Function
 
 
 def rotate_point(p, angle):
@@ -1251,7 +1251,7 @@ class TF_Draw_Selection(bpy.types.Operator):
 
         return {'RUNNING_MODAL'}
 
-######################################   Selection ########################################
+# Selection
 
 
 class TF_Select(bpy.types.Operator):
@@ -1307,7 +1307,7 @@ class TF_Select(bpy.types.Operator):
         bpy.ops.sequencer.tf_draw_selection('INVOKE_DEFAULT')
         return {'FINISHED'}
 
-########################   Menu Key frame #######################################################
+#Menu Key frame
 
 
 class TF_Call_Menu(bpy.types.Operator):
@@ -1382,7 +1382,7 @@ class TF_Menu_Insert_KF(bpy.types.Menu):
         layout.operator("sequencer.tf_insert_keyframe", text="CropScale").ch = (0, 0, 1, 0, 1)
         layout.separator()
         layout.operator("sequencer.tf_insert_keyframe", text="All").ch = (1, 1, 1, 1, 1)
-# Menu select layer #####################################################"
+# Menu select layer
 
 
 class TF_Call_Menu_Layers(bpy.types.Operator):
@@ -1454,7 +1454,7 @@ class TF_Select_Layers(bpy.types.Operator):
         bpy.context.scene.sequence_editor.active_strip = context.scene.sequence_editor.sequences[self.name]
         bpy.ops.sequencer.tf_draw_selection('INVOKE_DEFAULT')
         return {'FINISHED'}
-##########################  Draw 2d cursor ###################################
+# Draw 2d cursor
 
 
 def draw_callback_px_2d_cursor(self, context):
@@ -1521,7 +1521,7 @@ class TF_Set_Cursor2D(bpy.types.Operator):
         temp = context.region.view2d.region_to_view(event.mouse_region_x, event.mouse_region_y)
         context.scene.seq_cursor2d_loc = [round(temp[0]), round(temp[1])]
         return {'FINISHED'}
-##########################  Icone    ###################################
+# Icon
 
 
 def Add_Icon_Pivot_Point(self, context):
