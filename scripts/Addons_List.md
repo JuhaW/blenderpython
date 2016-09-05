@@ -463,6 +463,14 @@ Sculpt Geometry Tools | Stanislav Blinov
 Sculpt Tools UI | Ian Lloyd Dela Cruz, Nicholas Bishop, Roberto Roch, Bartosz Styperek, Piotr Adamowicz
 
 
+### Movie Clip Editor ###
+
+Name | Author
+---- | ----
+Clean Faulty Tracks | Sebastian Koenig, Andreas Schuster
+Highpass Filter | Björn Sonnenschein
+
+
 ### Sequencer ###
 
 Name | Author
