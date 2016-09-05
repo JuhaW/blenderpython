@@ -202,6 +202,7 @@ QuickTalk Lipsyncher | [Adam Priest](tentacles.org.uk)
 Slow Parent Fun | liero
 Sound Drivers | batFINGER
 Time Offset | liero
+Timeline Key Mover | Joel Daniels
 Unbake F-Curve | liero
 Unfold transition | liero, Atom
 
