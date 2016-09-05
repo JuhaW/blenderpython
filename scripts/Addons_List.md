@@ -275,6 +275,7 @@ Objects exporter (obj) | jasperge
 pymeshio (.pmd)(.pmx)(.mqo) | ousttrue
 Save Layers and Passes in Named Folders | Tamir Lousky, Luciano Mu�oz
 Tracking to Natron | Jeffrey Hoover (italic)
+Unity Export Tools | Keith Boshoff (Wahooney)
 Wahooney Unity Export Tools | Keith (Wahooney) Boshoff
 XNALara/XPS Import/Export | johnzero7
 xNormal applink | Joel Daniels
