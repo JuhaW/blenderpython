@@ -8,6 +8,7 @@ Most of these are functional in Blender 2.75.
 Copy these items into `scripts/modules` and restart Blender.
 * addons_utils.py (included)
 * dairin0d module (included)
+* Copy [space_view3d.py](https://developer.blender.org/T46853) into `scripts/startup/bl_ui/`
 
 
 ## Addons Factory ##
