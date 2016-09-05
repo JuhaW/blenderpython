@@ -196,6 +196,7 @@ F-Curve Samples/Keyframes conversion | Quentin Wenger (Matpi)
 FCurve Tools | cotejrp1
 Ghost Frames | Joel Daniels
 Ghosting | liero
+Ivo Animation Toolbox | Ivo Grigull (Loolarge)
 Lightbox | Claudio Andaur (malefico)
 Marker Jumping | Greg Zaal
 QuickTalk Lipsyncher | [Adam Priest](tentacles.org.uk)
@@ -405,7 +406,6 @@ Advanced Boomsmash | Luciano Mu�oz & Cristi�n Hasb�n
 CyclesWireframing | Gustaf Blomqvist
 Easy Light Map | Mehdi Seifi
 EasyFX | Nils Soderman (rymdnisse)
-Luxrender |
 Precise Render Border Adjust | Lapineige
 Progressive Animation Render | Greg Zaal
 Render AutoSplit | Ted VjBros
