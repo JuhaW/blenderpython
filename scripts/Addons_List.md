@@ -139,6 +139,7 @@ Modules and individual scripts.
 Name | Author
 ---- | ----
 Advanced Align Tools | Lell, Anfeo
+Alternate Unhide | Jonathan Williamson
 Border Lines - BMesh Edition | Quentin Wenger (Matpi)
 Bullet Viewport Constraints Tool | bashi
 Display Layers | Vincent Gires
