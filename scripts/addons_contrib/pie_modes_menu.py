@@ -417,6 +417,11 @@ def register():
         # kmi.active = True
         addon_keymaps.append((km, kmi))
 
+        km = wm.keyconfigs.addon.keymaps.new(name='Grease Pencil Stroke Edit Mode')
+        kmi = km.keymap_items.new('wm.call_menu_pie', 'TAB', 'PRESS')
+        kmi.properties.name = "pie.objecteditmode"
+        addon_keymaps.append((km, kmi))
+
 
 def unregister():
     for cls in classes:
@@ -426,6 +431,12 @@ def unregister():
     kc = wm.keyconfigs.addon
     if kc:
         km = kc.keymaps['Object Non-modal']
+        for kmi in km.keymap_items:
+            if kmi.idname == 'wm.call_menu_pie':
+                if kmi.properties.name == "pie.objecteditmode":
+                    km.keymap_items.remove(kmi)
+
+        km = kc.keymaps['Grease Pencil Stroke Edit Mode']
         for kmi in km.keymap_items:
             if kmi.idname == 'wm.call_menu_pie':
                 if kmi.properties.name == "pie.objecteditmode":
