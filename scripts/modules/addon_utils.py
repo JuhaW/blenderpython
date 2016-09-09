@@ -52,9 +52,6 @@ def paths():
     # CONTRIB SCRIPTS: good for testing but not official scripts yet
     # if folder addons_contrib/ exists, scripts in there will be loaded too
     addon_paths += _bpy.utils.script_paths("addons_contrib")
-
-    # EXTERNAL SCRIPTS: user folder
-    # if folder addons_extern/ exists, scripts in there will be loaded too
     addon_paths += _bpy.utils.script_paths("addons_extern")
 
     return addon_paths
@@ -160,7 +157,7 @@ def modules_refresh(module_cache=addons_fake_modules):
     for path in path_list:
 
         # force all contrib addons to be 'TESTING'
-        if path.endswith(("addons_contrib", "addons_extern")):
+        if path.endswith(("addons_contrib", "addons_extern" )):
             force_support = 'TESTING'
         else:
             force_support = None
