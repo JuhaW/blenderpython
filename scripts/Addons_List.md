@@ -139,6 +139,7 @@ Modules and individual scripts.
 Name | Author
 ---- | ----
 Advanced Align Tools | Lell, Anfeo
+Alternate Unhide | Jonathan Williamson
 Border Lines - BMesh Edition | Quentin Wenger (Matpi)
 Bullet Viewport Constraints Tool | bashi
 Display Layers | Vincent Gires
@@ -190,16 +191,19 @@ BRIK - Blender Ragdoll Implementation Kit | Marcus Jenkins (FunkyWyrm)
 Change Keying Sets | sambler
 Commotion | Mikhail Rachinskiy
 Dynamic Parent | Roman Volodin, Eibriel
+F-Curve Editor Tools | Joel Daniels
 F-Curve Samples/Keyframes conversion | Quentin Wenger (Matpi)
 FCurve Tools | cotejrp1
 Ghost Frames | Joel Daniels
 Ghosting | liero
+Ivo Animation Toolbox | Ivo Grigull (Loolarge)
 Lightbox | Claudio Andaur (malefico)
 Marker Jumping | Greg Zaal
 QuickTalk Lipsyncher | [Adam Priest](tentacles.org.uk)
 Slow Parent Fun | liero
 Sound Drivers | batFINGER
 Time Offset | liero
+Timeline Key Mover | Joel Daniels
 Unbake F-Curve | liero
 Unfold transition | liero, Atom
 
@@ -273,6 +277,7 @@ Objects exporter (obj) | jasperge
 pymeshio (.pmd)(.pmx)(.mqo) | ousttrue
 Save Layers and Passes in Named Folders | Tamir Lousky, Luciano Mu�oz
 Tracking to Natron | Jeffrey Hoover (italic)
+Unity Export Tools | Keith Boshoff (Wahooney)
 Wahooney Unity Export Tools | Keith (Wahooney) Boshoff
 XNALara/XPS Import/Export | johnzero7
 xNormal applink | Joel Daniels
@@ -401,7 +406,6 @@ Advanced Boomsmash | Luciano Mu�oz & Cristi�n Hasb�n
 CyclesWireframing | Gustaf Blomqvist
 Easy Light Map | Mehdi Seifi
 EasyFX | Nils Soderman (rymdnisse)
-Luxrender |
 Precise Render Border Adjust | Lapineige
 Progressive Animation Render | Greg Zaal
 Render AutoSplit | Ted VjBros
@@ -460,6 +464,14 @@ Mask Tools | Yigit Savtur
 Sculpt Broshes | IK3D
 Sculpt Geometry Tools | Stanislav Blinov
 Sculpt Tools UI | Ian Lloyd Dela Cruz, Nicholas Bishop, Roberto Roch, Bartosz Styperek, Piotr Adamowicz
+
+
+### Movie Clip Editor ###
+
+Name | Author
+---- | ----
+Clean Faulty Tracks | Sebastian Koenig, Andreas Schuster
+Highpass Filter | Björn Sonnenschein
 
 
 ### Sequencer ###
