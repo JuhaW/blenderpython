@@ -183,7 +183,7 @@ class VIEW3D_PT_tools_add_object(View3DPanel, Panel):
 
 
 class VIEW3D_PT_tools_transform(View3DPanel, Panel):
-    bl_category = "Tools"
+    bl_category = "Transform"
     bl_context = "objectmode"
     bl_label = "Transform"
 
@@ -241,7 +241,7 @@ class VIEW3D_PT_tools_object(View3DPanel, Panel):
 
 
 class VIEW3D_PT_tools_relations(View3DPanel, Panel):
-    bl_category = "Relations"
+    bl_category = "Tools"
     bl_context = "objectmode"
     bl_label = "Relations"
 
@@ -344,7 +344,7 @@ class VIEW3D_PT_tools_add_mesh_edit(View3DPanel, Panel):
 
 
 class VIEW3D_PT_tools_transform_mesh(View3DPanel, Panel):
-    bl_category = "Tools"
+    bl_category = "Transform"
     bl_context = "mesh_edit"
     bl_label = "Transform"
 
@@ -517,10 +517,20 @@ class VIEW3D_PT_tools_meshedit_options(View3DPanel, Panel):
             col.row().prop(tool_settings, "vertex_group_user", expand=True)
 
 # ********** default tools for editmode_curve ****************
+class VIEW3D_PT_tools_add_curve_edit(View3DPanel, Panel):
+    bl_category = "Create"
+    bl_context = "curve_edit"
+    bl_label = "Add Curves"
 
+    def draw(self, context):
+        layout = self.layout
+
+        col = layout.column(align=True)
+
+        VIEW3D_PT_tools_add_object.draw_add_curve(col, label=True)
 
 class VIEW3D_PT_tools_transform_curve(View3DPanel, Panel):
-    bl_category = "Tools"
+    bl_category = "Transform"
     bl_context = "curve_edit"
     bl_label = "Transform"
 
@@ -572,19 +582,6 @@ class VIEW3D_PT_tools_curveedit(View3DPanel, Panel):
         col.operator("curve.subdivide")
         col.operator("curve.smooth")
         col.operator("transform.vertex_random")
-
-
-class VIEW3D_PT_tools_add_curve_edit(View3DPanel, Panel):
-    bl_category = "Create"
-    bl_context = "curve_edit"
-    bl_label = "Add Curves"
-
-    def draw(self, context):
-        layout = self.layout
-
-        col = layout.column(align=True)
-
-        VIEW3D_PT_tools_add_object.draw_add_curve(col, label=True)
 
 
 class VIEW3D_PT_tools_curveedit_options_stroke(View3DPanel, Panel):
@@ -642,9 +639,21 @@ class VIEW3D_PT_tools_curveedit_options_stroke(View3DPanel, Panel):
 
 
 # ********** default tools for editmode_surface ****************
+class VIEW3D_PT_tools_add_surface_edit(View3DPanel, Panel):
+    bl_category = "Create"
+    bl_context = "surface_edit"
+    bl_label = "Add Surfaces"
+
+    def draw(self, context):
+        layout = self.layout
+
+        col = layout.column(align=True)
+
+        VIEW3D_PT_tools_add_object.draw_add_surface(col)
+
 
 class VIEW3D_PT_tools_transform_surface(View3DPanel, Panel):
-    bl_category = "Tools"
+    bl_category = "Transform"
     bl_context = "surface_edit"
     bl_label = "Transform"
 
@@ -681,19 +690,6 @@ class VIEW3D_PT_tools_surfaceedit(View3DPanel, Panel):
         col = layout.column(align=True)
         col.label(text="Deform:")
         col.operator("transform.vertex_random")
-
-
-class VIEW3D_PT_tools_add_surface_edit(View3DPanel, Panel):
-    bl_category = "Create"
-    bl_context = "surface_edit"
-    bl_label = "Add Surfaces"
-
-    def draw(self, context):
-        layout = self.layout
-
-        col = layout.column(align=True)
-
-        VIEW3D_PT_tools_add_object.draw_add_surface(col)
 
 
 # ********** default tools for editmode_text ****************
@@ -772,6 +768,17 @@ class VIEW3D_PT_tools_armatureedit_options(View3DPanel, Panel):
 
 
 # ********** default tools for editmode_mball ****************
+class VIEW3D_PT_tools_add_mball_edit(View3DPanel, Panel):
+    bl_category = "Create"
+    bl_context = "mball_edit"
+    bl_label = "Add Metaball"
+
+    def draw(self, context):
+        layout = self.layout
+
+        col = layout.column(align=True)
+
+        VIEW3D_PT_tools_add_object.draw_add_mball(col)
 
 
 class VIEW3D_PT_tools_mballedit(View3DPanel, Panel):
@@ -791,19 +798,6 @@ class VIEW3D_PT_tools_mballedit(View3DPanel, Panel):
         col = layout.column(align=True)
         col.label(text="Deform:")
         col.operator("transform.vertex_random")
-
-
-class VIEW3D_PT_tools_add_mball_edit(View3DPanel, Panel):
-    bl_category = "Create"
-    bl_context = "mball_edit"
-    bl_label = "Add Metaball"
-
-    def draw(self, context):
-        layout = self.layout
-
-        col = layout.column(align=True)
-
-        VIEW3D_PT_tools_add_object.draw_add_mball(col)
 
 
 # ********** default tools for editmode_lattice ****************
