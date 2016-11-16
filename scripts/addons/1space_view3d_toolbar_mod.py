@@ -182,23 +182,6 @@ class VIEW3D_PT_tools_add_object(View3DPanel, Panel):
             layout.operator_menu_enum("object.group_instance_add", "group", text="Group Instance", icon='GROUP_VERTEX')
 
 
-class VIEW3D_PT_tools_transform(View3DPanel, Panel):
-    bl_category = "Transform"
-    bl_context = "objectmode"
-    bl_label = "Transform"
-
-    def draw(self, context):
-        layout = self.layout
-
-        col = layout.column(align=True)
-        col.operator("transform.translate")
-        col.operator("transform.rotate")
-        col.operator("transform.resize", text="Scale")
-
-        col = layout.column(align=True)
-        col.operator("transform.mirror", text="Mirror")
-
-
 class VIEW3D_PT_tools_object(View3DPanel, Panel):
     bl_category = "Tools"
     bl_context = "objectmode"
@@ -238,6 +221,54 @@ class VIEW3D_PT_tools_object(View3DPanel, Panel):
                 row = col.row(align=True)
                 row.operator("object.data_transfer", text="Data")
                 row.operator("object.datalayout_transfer", text="Data Layout")
+
+class VIEW3D_PT_tools_transform(View3DPanel, Panel):
+    bl_category = "Transform"
+    bl_context = "objectmode"
+    bl_label = "Transform"
+
+    def draw(self, context):
+        layout = self.layout
+
+        col = layout.column(align=True)
+        col.operator("transform.translate")
+        col.operator("transform.rotate")
+        col.operator("transform.resize", text="Scale")
+
+        col = layout.column(align=True)
+        col.operator("transform.mirror", text="Mirror")
+
+class VIEW3D_PT_tools_layers(View3DPanel, Panel):
+    bl_category = "Layers"
+    bl_context = "objectmode"
+    bl_label = "Visible Layers"
+
+
+    @classmethod
+    def poll(cls, context):
+        return (context.object is not None)
+
+    def draw_header(self, context):
+
+        row = self.layout.row(align=True)
+        row.scale_x = 0.7
+        row.scale_y = 0.7
+        row.prop(context.scene, 'layers', text="")
+
+    def draw(self, context):
+
+        if (context.object):
+            if (context.object.type == 'ARMATURE'):
+                self.layout.label(text="Bone Layer")
+                col = self.layout.column()
+                col.scale_y = 0.7
+                col.prop(context.object.data, 'layers', text="")
+
+        objs = []
+        for obj in bpy.data.objects:
+            for i in range(len(obj.layers)):
+                if (obj.layers[i] and context.scene.layers[i]):
+                    objs.append(obj)
 
 
 class VIEW3D_PT_tools_relations(View3DPanel, Panel):
