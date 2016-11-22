@@ -223,7 +223,7 @@ class VIEW3D_PT_tools_object(View3DPanel, Panel):
                 row.operator("object.datalayout_transfer", text="Data Layout")
 
 class VIEW3D_PT_tools_transform(View3DPanel, Panel):
-    bl_category = "Transform"
+    bl_category = "Move"
     bl_context = "objectmode"
     bl_label = "Transform"
 
@@ -237,6 +237,24 @@ class VIEW3D_PT_tools_transform(View3DPanel, Panel):
 
         col = layout.column(align=True)
         col.operator("transform.mirror", text="Mirror")
+
+class VIEW3D_PT_tools_display(View3DPanel, Panel):
+    bl_category = "Display"
+    bl_context = "objectmode"
+    bl_label = "Display"
+
+    def draw(self, context):
+        layout = self.layout
+        obj = context.active_object
+        if obj:
+            obj_type = obj.type
+            if obj_type in {'MESH', 'CURVE', 'SURFACE'}:
+                col = layout.column(align=True)
+                col.label(text="Shading:")
+                row = col.row(align=True)
+                row.operator("object.shade_smooth", text="Smooth")
+                row.operator("object.shade_flat", text="Flat")
+
 
 class VIEW3D_PT_tools_layers(View3DPanel, Panel):
     bl_category = "Layers"

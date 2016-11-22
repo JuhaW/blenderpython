@@ -3081,6 +3081,7 @@ class VIEW3D_MT_edit_gpencil_transform(Menu):
 
 
 class VIEW3D_PT_transform_orientations(Panel):
+    bl_category = "Transform"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Transform Orientations"
@@ -3107,21 +3108,10 @@ class VIEW3D_PT_transform_orientations(Panel):
             row.operator("transform.delete_orientation", text="", icon='X')
 
 
-class VIEW3D_PT_grease_pencil(GreasePencilDataPanel, Panel):
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-
-    # NOTE: this is just a wrapper around the generic GP Panel
-
-
-class VIEW3D_PT_grease_pencil_palettecolor(GreasePencilPaletteColorPanel, Panel):
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-
-    # NOTE: this is just a wrapper around the generic GP Panel
 
 
 class VIEW3D_PT_view3d_properties(Panel):
+    bl_category = "Display"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "View"
@@ -3170,6 +3160,7 @@ class VIEW3D_PT_view3d_properties(Panel):
 
 
 class VIEW3D_PT_view3d_cursor(Panel):
+    bl_category = "3d Cursor"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "3D Cursor"
@@ -3187,6 +3178,7 @@ class VIEW3D_PT_view3d_cursor(Panel):
 
 
 class VIEW3D_PT_view3d_name(Panel):
+    bl_category = "Properties"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Item"
@@ -3210,8 +3202,76 @@ class VIEW3D_PT_view3d_name(Panel):
                 row.label(text="", icon='BONE_DATA')
                 row.prop(bone, "name", text="")
 
+class VIEW3D_PT_view3d_tools(Panel):
+    bl_category = "Tools"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_label = "Tools"
+
+    @classmethod
+    def poll(cls, context):
+        view = context.space_data
+        return (view is not None)
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator("ed.undo")
+        layout.operator("ed.redo")
+        layout.separator()
+
+        layout.operator("ed.undo_history")
+
+
+class VIEW3D_PT_view3d_meshstatvis(Panel):
+    bl_category = "Tools"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_label = "Mesh Analysis"
+
+    @classmethod
+    def poll(cls, context):
+        # The active object check is needed because of local-mode
+        return (context.active_object and (context.mode == 'EDIT_MESH'))
+
+    def draw_header(self, context):
+        mesh = context.active_object.data
+
+        self.layout.prop(mesh, "show_statvis", text="")
+
+    def draw(self, context):
+        layout = self.layout
+
+        mesh = context.active_object.data
+        statvis = context.tool_settings.statvis
+        layout.active = mesh.show_statvis
+
+        layout.prop(statvis, "type")
+        statvis_type = statvis.type
+        if statvis_type == 'OVERHANG':
+            row = layout.row(align=True)
+            row.prop(statvis, "overhang_min", text="")
+            row.prop(statvis, "overhang_max", text="")
+            layout.prop(statvis, "overhang_axis", expand=True)
+        elif statvis_type == 'THICKNESS':
+            row = layout.row(align=True)
+            row.prop(statvis, "thickness_min", text="")
+            row.prop(statvis, "thickness_max", text="")
+            layout.prop(statvis, "thickness_samples")
+        elif statvis_type == 'INTERSECT':
+            pass
+        elif statvis_type == 'DISTORT':
+            row = layout.row(align=True)
+            row.prop(statvis, "distort_min", text="")
+            row.prop(statvis, "distort_max", text="")
+        elif statvis_type == 'SHARP':
+            row = layout.row(align=True)
+            row.prop(statvis, "sharp_min", text="")
+            row.prop(statvis, "sharp_max", text="")
+
 
 class VIEW3D_PT_view3d_display(Panel):
+    bl_category = "Display"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Display"
@@ -3274,6 +3334,7 @@ class VIEW3D_PT_view3d_display(Panel):
 
 
 class VIEW3D_PT_view3d_stereo(Panel):
+    bl_category = "Tools"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Stereoscopy"
@@ -3314,6 +3375,7 @@ class VIEW3D_PT_view3d_stereo(Panel):
 
 
 class VIEW3D_PT_view3d_shading(Panel):
+    bl_category = "Display"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Shading"
@@ -3364,6 +3426,7 @@ class VIEW3D_PT_view3d_shading(Panel):
 
 
 class VIEW3D_PT_view3d_motion_tracking(Panel):
+    bl_category = "Animation"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Motion Tracking"
@@ -3394,7 +3457,23 @@ class VIEW3D_PT_view3d_motion_tracking(Panel):
         row.prop(view, "tracks_draw_size", text="")
 
 
+class VIEW3D_PT_grease_pencil(GreasePencilDataPanel, Panel):
+    bl_category = "Grease Pencil"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    # NOTE: this is just a wrapper around the generic GP Panel
+
+class VIEW3D_PT_grease_pencil_palettecolor(GreasePencilPaletteColorPanel, Panel):
+    bl_category = "Grease Pencil"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    # NOTE: this is just a wrapper around the generic GP Panel
+
+
 class VIEW3D_PT_view3d_meshdisplay(Panel):
+    bl_category = "Display"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Mesh Display"
@@ -3461,53 +3540,8 @@ class VIEW3D_PT_view3d_meshdisplay(Panel):
             layout.prop(mesh, "show_extra_indices")
 
 
-class VIEW3D_PT_view3d_meshstatvis(Panel):
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_label = "Mesh Analysis"
-
-    @classmethod
-    def poll(cls, context):
-        # The active object check is needed because of local-mode
-        return (context.active_object and (context.mode == 'EDIT_MESH'))
-
-    def draw_header(self, context):
-        mesh = context.active_object.data
-
-        self.layout.prop(mesh, "show_statvis", text="")
-
-    def draw(self, context):
-        layout = self.layout
-
-        mesh = context.active_object.data
-        statvis = context.tool_settings.statvis
-        layout.active = mesh.show_statvis
-
-        layout.prop(statvis, "type")
-        statvis_type = statvis.type
-        if statvis_type == 'OVERHANG':
-            row = layout.row(align=True)
-            row.prop(statvis, "overhang_min", text="")
-            row.prop(statvis, "overhang_max", text="")
-            layout.prop(statvis, "overhang_axis", expand=True)
-        elif statvis_type == 'THICKNESS':
-            row = layout.row(align=True)
-            row.prop(statvis, "thickness_min", text="")
-            row.prop(statvis, "thickness_max", text="")
-            layout.prop(statvis, "thickness_samples")
-        elif statvis_type == 'INTERSECT':
-            pass
-        elif statvis_type == 'DISTORT':
-            row = layout.row(align=True)
-            row.prop(statvis, "distort_min", text="")
-            row.prop(statvis, "distort_max", text="")
-        elif statvis_type == 'SHARP':
-            row = layout.row(align=True)
-            row.prop(statvis, "sharp_min", text="")
-            row.prop(statvis, "sharp_max", text="")
-
-
 class VIEW3D_PT_view3d_curvedisplay(Panel):
+    bl_category = "Display"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Curve Display"
@@ -3530,6 +3564,7 @@ class VIEW3D_PT_view3d_curvedisplay(Panel):
 
 
 class VIEW3D_PT_background_image(Panel):
+    bl_category = "Display"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Background Images"
@@ -3637,6 +3672,7 @@ class VIEW3D_PT_background_image(Panel):
 
 
 class VIEW3D_PT_etch_a_ton(Panel):
+    bl_category = "Tools"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Skeleton Sketching"
@@ -3694,6 +3730,7 @@ class VIEW3D_PT_etch_a_ton(Panel):
 
 
 class VIEW3D_PT_context_properties(Panel):
+    bl_category = "Properties"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Properties"
