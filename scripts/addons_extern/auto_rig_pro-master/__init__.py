@@ -21,7 +21,7 @@
 bl_info = {
     "name": "Auto-Rig Pro",
     "author": "Artell",
-    "version": (2, 7),
+    "version": (2, 8),
     "blender": (2, 7, 5),
     "location": "3D View > Properties> Auto-Rig Pro",
     "description": "Automatic rig creation based on reference bones. Includes IK-FK snap and Proxy picker addons.",
@@ -31,18 +31,19 @@ bl_info = {
 
 if "bpy" in locals():
     import importlib
-    if "snap_ikfk" in locals():
-        importlib.reload(snap_ikfk)
+    if "rig_functions" in locals():
+        importlib.reload(rig_functions)
     if "auto_rig" in locals():
         importlib.reload(auto_rig)
-
+    if "auto_rig_smart" in locals():
+        importlib.reload(auto_rig_smart)
 
 import bpy
 from bpy.app.handlers import persistent
 #import script files
-from . import snap_ikfk
+from . import rig_functions
 from . import auto_rig
-
+from . import auto_rig_smart
 
 
 
@@ -51,7 +52,8 @@ def register():
     bpy.utils.register_module(__name__)
     #register properties and misc
     auto_rig.register()
-
+    auto_rig_smart.register()
+    rig_functions.register()
   
 
 def unregister():
@@ -59,8 +61,8 @@ def unregister():
     bpy.utils.unregister_module(__name__)
     #unregister properties and misc
     auto_rig.unregister()
-
-   
+    auto_rig_smart.unregister()
+    rig_functions.unregister()
 
 
 if __name__ == "__main__":

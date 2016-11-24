@@ -56,15 +56,15 @@ class MI_Deform(bpy.types.Operator):
                ('Y', 'Y', ''),
                ('Z', 'Z', ''),
                ),
-        default='X'
+        default = 'X'
     )
     # deform_direction = EnumProperty(
-    # items=(('Top', 'Top', ''),
-    #('Bottom', 'Bottom', ''),
-    #('Left', 'Left', ''),
-    #('Right', 'Right', ''),
-    #),
-    # default = 'Top'
+        # items=(('Top', 'Top', ''),
+               #('Bottom', 'Bottom', ''),
+               #('Left', 'Left', ''),
+               #('Right', 'Right', ''),
+               #),
+        # default = 'Top'
     #)
 
     def execute(self, context):
@@ -87,8 +87,8 @@ class MI_Deform(bpy.types.Operator):
 
         return self.execute(context)
         # else:
-        # self.report({'WARNING'}, "View3D not found, cannot run operator")
-        # return {'CANCELLED'}
+            # self.report({'WARNING'}, "View3D not found, cannot run operator")
+            # return {'CANCELLED'}
 
 
 def reset_all_values(self):
@@ -186,7 +186,7 @@ def deform_obj(obj, context, self):
                 if self.twist_angle != 0:
                     twist_angle = self.twist_angle * (visual_up_pos / visual_max)
                     # if self.deform_axis == 'X':
-                    # rot_angle = -rot_angle
+                        # rot_angle = -rot_angle
                     rot_mat = None
                     if self.deform_axis != 'Z':
                         rot_mat = Matrix.Rotation(twist_angle, 3, 'Z')
@@ -237,8 +237,8 @@ def deform_obj(obj, context, self):
                         vert.co.z += move_offset
 
     # obj.data.update()
-    # bpy.ops.mesh.normals_make_consistent()  # recalculate normals
-    # bpy.ops.object.editmode_toggle()
-    # bpy.ops.object.editmode_toggle()
+    #bpy.ops.mesh.normals_make_consistent()  # recalculate normals
+    #bpy.ops.object.editmode_toggle()
+    #bpy.ops.object.editmode_toggle()
     bm.normal_update()
     bmesh.update_edit_mesh(obj.data)

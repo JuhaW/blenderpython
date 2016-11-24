@@ -10,9 +10,39 @@ bl_info = {
 
 import bpy, bmesh, mathutils, math
 
+print("\n START AUTO-RIG PRO ...\n")
+
 debug_print = False
 
  ##########################  CLASSES  ##########################
+class pick_bone(bpy.types.Operator):
+      
+    #tooltip
+    """ Pick the bone driver """
+    
+    bl_idname = "id.pick_bone"
+    bl_label = "pick_bone"
+    bl_options = {'UNDO'}   
+    
+    @classmethod
+    def poll(cls, context):       
+        return (context.active_object != None)
+
+    def execute(self, context):
+        use_global_undo = context.user_preferences.edit.use_global_undo
+        context.user_preferences.edit.use_global_undo = False
+        
+        if context.object.type != 'ARMATURE':      
+            self.report({'ERROR'}, "First select a bone to pick it.")
+            return{'FINISHED'}
+        
+        try:           
+            _pick_bone()        
+                       
+        finally:
+            context.user_preferences.edit.use_global_undo = use_global_undo        
+        return {'FINISHED'}
+ 
 class create_driver(bpy.types.Operator):
       
     #tooltip
@@ -266,6 +296,7 @@ class align_all_bones(bpy.types.Operator):
             _align_arm_bones()        
             _align_leg_bones()
             _align_spine_bones()
+            _set_inverse()
             
             bpy.context.object.show_x_ray = False            
                        
@@ -275,6 +306,11 @@ class align_all_bones(bpy.types.Operator):
 
     
  ##########################  FUNCTIONS  ##########################
+def _pick_bone():
+ 
+    bpy.context.scene.driver_bone = bpy.context.object.data.bones.active.name
+    
+ 
 def _create_driver():
         
     obj = bpy.context.active_object
@@ -287,9 +323,9 @@ def _create_driver():
     new_var = new_driver.driver.variables.new()
     new_var.type = 'TRANSFORMS'
     new_var.targets[0].id = bpy.data.objects["rig"]
-    new_var.targets[0].bone_target = bpy.context.object.driver_bone
+    new_var.targets[0].bone_target = bpy.context.scene.driver_bone
 
-    new_var.targets[0].transform_type = bpy.context.object.driver_transform
+    new_var.targets[0].transform_type = bpy.context.scene.driver_transform
     new_var.targets[0].transform_space = 'LOCAL_SPACE' 
  
  
@@ -310,6 +346,8 @@ def _set_picker_camera():
     bpy.context.scene.objects.active = cam_ui
     bpy.ops.view3d.object_as_camera()
     bpy.context.space_data.lock_camera_and_layers = False 
+    bpy.context.space_data.show_relationship_lines = False
+
     
     #restore the scene camera
     bpy.context.scene.camera = current_cam
@@ -333,12 +371,18 @@ def _bind_to_rig():
     bpy.context.scene.objects.active = char_mesh
     bpy.context.object.modifiers["Armature"].name = "rig_add"
     bpy.context.object.modifiers["Armature.001"].name = "rig"
-    #reorder at the top
+    #re-order at the top
     for i in range(0,20):
         bpy.ops.object.modifier_move_up(modifier="rig")
     for i in range(0,20):
         bpy.ops.object.modifier_move_up(modifier="rig_add")
-
+    
+    #put mirror at first
+    for m in bpy.context.object.modifiers:
+        if m.type == 'MIRROR':
+            for i in range(0,20):
+                bpy.ops.object.modifier_move_up(modifier=m.name)
+    
     bpy.context.object.modifiers["rig"].use_deform_preserve_volume = True
     #unparent
     bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
@@ -386,8 +430,9 @@ def _align_arm_bones():
         print("\n START ALIGNING ARM BONES ... \n")
     
     #disable the proxy picker to avoid bugs
-    proxy_picker_state = bpy.context.scene.Proxy_Picker.active    
+
     try:
+        proxy_picker_state = bpy.context.scene.Proxy_Picker.active   
         bpy.context.scene.Proxy_Picker.active = False
     except:
         pass    
@@ -467,15 +512,17 @@ def _align_arm_bones():
     stretch_arm.tail = stretch_arm.head + dir
     mirror_hack()  
         
-    # pin controller
+    # arm pin controller
     init_selection("c_stretch_arm_pin"+side)
     stretch_arm_pin = get_bone("c_stretch_arm_pin"+side)
+    stretch_arm = get_bone(stretch_arm_name+side)
     arm = get_bone(arm_name+side)
     dir = stretch_arm.tail - stretch_arm.head
     stretch_arm_pin.head = arm.tail
-    stretch_arm_pin.tail = stretch_arm_pin.head + dir
+    stretch_arm_pin.tail = stretch_arm_pin.head + (dir*0.05)
     mirror_hack()       
         
+    #arms
     for bone in forearms:
         init_selection(bone)
         current_arm = bpy.context.object.data.edit_bones[bone]
@@ -618,19 +665,12 @@ def _align_arm_bones():
         #shoulder visual position
     init_selection("c_p_shoulder"+side)
     p_shoulder = get_bone("c_p_shoulder"+side)
-    #test if has breast to set the shoulder visual position
-    has_breast = False
-    try:
-        breast_02 = get_bone("c_breast_02"+side)
-        has_breast = True
-    except:
-        has_breast = False
-        
     shoulder = get_bone("c_shoulder"+side)
+    breast_02 = get_bone("c_breast_02"+side)
     
     p_shoulder.head = (shoulder.head + shoulder.tail)/2
     p_shoulder.head[2] += 0.05
-    if has_breast == True:
+    if bpy.context.object.rig_breast:
         p_shoulder.head[1] = breast_02.head[1]
     else:
         p_shoulder.head[1] += -0.08
@@ -730,6 +770,8 @@ def _align_arm_bones():
             bone_name = finger[:-11]+"1_ref"+ side         
         if "thumb1_base" in finger: #thumb1 base case
             bone_name = "thumb1_ref"+ side
+        if "_rot." in finger: # rotation bone case
+            bone_name = finger[2:-6]+"_ref"+side
             
         bone_ref = bpy.context.object.data.edit_bones[bone_name]    
         current_bone = bpy.context.object.data.edit_bones[finger]
@@ -753,7 +795,10 @@ def _align_arm_bones():
     bpy.context.object.data.pose_position = 'POSE'   
     
     #reset the proxy picker state
-    bpy.context.scene.Proxy_Picker.active = proxy_picker_state
+    try:
+        bpy.context.scene.Proxy_Picker.active = proxy_picker_state
+    except:
+        pass
     
     if debug_print == True:    
         print("\n FINISH ALIGNING ARM BONES...\n")
@@ -765,8 +810,9 @@ def _align_leg_bones():
         print("\n START ALIGNING LEG BONES ... \n")
     
     #disable the proxy picker to avoid bugs
-    proxy_picker_state = bpy.context.scene.Proxy_Picker.active    
+    
     try:
+        proxy_picker_state = bpy.context.scene.Proxy_Picker.active    
         bpy.context.scene.Proxy_Picker.active = False
     except:
         pass    
@@ -1105,6 +1151,23 @@ def _align_leg_bones():
             bpy.ops.armature.calculate_roll(type='GLOBAL_NEG_Z')
             mirror_hack()
             
+    # toes fingers
+    obj = bpy.context.object
+    toes_bool_list = [obj.rig_toes_pinky, obj.rig_toes_ring, obj.rig_toes_middle, obj.rig_toes_index, obj.rig_toes_thumb]
+    toes_list=["toes_pinky", "toes_ring", "toes_middle", "toes_index", "toes_thumb"]
+ 
+
+    for t in range (0,5): 
+        if toes_bool_list[t]:
+            max = 4
+            if t == 4:
+                max = 3
+            for i in range (1,max):            
+                ref_bone = toes_list[t]+str(i)+"_ref"        
+                c_bone = "c_"+toes_list[t]+str(i)             
+             
+                copy_bone_transforms_mirror(ref_bone, c_bone)
+            
             
     #foot roll
     init_selection("c_foot_roll"+side)
@@ -1146,6 +1209,7 @@ def _align_leg_bones():
     c_bot_bend.tail = bot_ref.tail - dir/2    
     mirror_hack()
     
+    #POSE MODE ONLY
     # reset stretchy bone length
     bpy.ops.object.mode_set(mode='OBJECT')   
     bpy.ops.object.mode_set(mode='POSE')     
@@ -1175,11 +1239,7 @@ def _align_leg_bones():
             except KeyError:
                 if debug_print == True:
                     print("can't reset the stretch for : " + bone)
-    """            
-    #restore the save displayed layers          
-    for i in range(0,31):
-        bpy.context.object.data.layers[i] = layers_select[i]
-    """
+ 
     
     #display layers 16, 0, 1 only   
     _layers = bpy.context.object.data.layers
@@ -1194,12 +1254,29 @@ def _align_leg_bones():
     bpy.context.object.data.pose_position = 'POSE'
 
     #reset the proxy picker state
-    bpy.context.scene.Proxy_Picker.active = proxy_picker_state
+    try:
+        bpy.context.scene.Proxy_Picker.active = proxy_picker_state
+    except:
+        pass
     
     if debug_print == True:    
         print("\n FINISH ALIGNING LEG BONES...\n")
     
     #--END ALIGN LEGS BONES
+    
+def _set_inverse():
+    # reset child of constraints (in pose position only, not rest pose)
+    child_of_bones = ["c_foot_ik.l", "c_foot_ik.r", "c_hand_ik.l", "c_hand_ik.r" ]
+    
+    for b in child_of_bones:
+        set_inverse_cns(b)    
+    
+def set_inverse_cns(b):
+        pbone = bpy.context.active_object.pose.bones[b]
+        context_copy = bpy.context.copy()
+        context_copy["constraint"] = pbone.constraints["Child Of"]
+        bpy.context.active_object.data.bones.active = pbone.bone
+        bpy.ops.constraint.childof_set_inverse(context_copy, constraint="Child Of", owner='BONE') 
 
 def _align_spine_bones():
     
@@ -1207,8 +1284,9 @@ def _align_spine_bones():
         print("\n START ALIGNING SPINE BONES ... \n")
     
     #disable the proxy picker to avoid bugs
-    proxy_picker_state = bpy.context.scene.Proxy_Picker.active    
+   
     try:
+        proxy_picker_state = bpy.context.scene.Proxy_Picker.active    
         bpy.context.scene.Proxy_Picker.active = False
     except:
         pass    
@@ -1251,14 +1329,16 @@ def _align_spine_bones():
     p_root_master = bpy.context.object.data.edit_bones["c_p_root_master.x"]
     
     copy_bone_transforms(c_root_ref, c_root_master)
-    get_pose_bone("c_root_master.x").custom_shape_scale = 0.1 / (c_root_master.tail[2] - c_root_master.head[2]) 
+    get_pose_bone("c_root_master.x").custom_shape_scale = 0.1 / c_root_master.length 
     
         # set the visual shape position
-    dir = p_root_master.tail - p_root_master.head
-    p_root_master.head = c_root_master.head + (c_root_master.tail-c_root_master.head)/2
-    p_root_master.head[1] += -0.04
-    p_root_master.tail = p_root_master.head + dir
-    p_root_master.tail[1] = p_root_master.head[1]
+    dir = c_root_ref.tail - c_root_ref.head
+    p_root_master.head = c_root_master.head + (c_root_master.tail-c_root_master.head)/2  
+    p_root_master.tail = p_root_master.head + dir/1.5
+        # set the bone vertical if not quadruped
+    if not bpy.context.object.rig_type == 'quadruped':
+        p_root_master.tail[1] = p_root_master.head[1]
+
     
     #align root
     init_selection("c_root.x")
@@ -1270,16 +1350,17 @@ def _align_spine_bones():
     c_root.head = c_root_ref.tail
     c_root.tail = c_root_ref.head
     c_root.roll = c_root_ref.roll
-    get_pose_bone("c_root.x").custom_shape_scale = 0.1 / abs(c_root.tail[2] - c_root.head[2]) 
+    get_pose_bone("c_root.x").custom_shape_scale = 0.1 / c_root.length
     copy_bone_transforms(c_root, root)
     
         # set the visual shape position
-    dir = p_root.tail - p_root.head 
-    p_root.head = c_root_ref.head + (c_root_ref.tail-c_root_ref.head)/2
-    p_root.head[1] += -0.04
+    dir = c_root_ref.tail - c_root_ref.head 
+    p_root.head = c_root_ref.head + (c_root_ref.tail-c_root_ref.head)/2  
     p_root.tail = p_root.head + dir
-    p_root.tail[1] = p_root.head[1]
     p_root.roll = 0
+    # set the bone vertical if not quadruped
+    if not bpy.context.object.rig_type == 'quadruped':
+        p_root.tail[1] = p_root.head[1]
     
         #root bend
     root_bend = get_bone("c_root_bend.x")
@@ -1287,6 +1368,13 @@ def _align_spine_bones():
     root_bend.head = c_root.head +(c_root.tail - c_root.head)/2
     root_bend.tail = root_bend.head + dir
     root_bend.roll = 0
+    
+    # align tail if any
+    if bpy.context.object.rig_tail:
+        tails = ["tail_00", "tail_01", "tail_02", "tail_03"]
+        
+        for bone in tails:            
+             copy_bone_transforms(get_bone(bone+"_ref.x"), get_bone("c_"+bone+".x"))
     
     #align spine 01
     init_selection("c_spine_01.x")
@@ -1299,24 +1387,26 @@ def _align_spine_bones():
     copy_bone_transforms(c_spine_01, spine_01) 
     
         # set the visual shape position
-    p_spine_01.head = c_spine_01.head
-    p_spine_01.head[1] += -0.03
+    p_spine_01.head = c_spine_01.head   
     p_spine_01.tail = p_spine_01.head + (c_spine_01.tail-c_spine_01.head)
-    p_spine_01.tail[1] = p_spine_01.head[1]
-    get_pose_bone("c_spine_01.x").custom_shape_scale = 0.2 / abs(p_spine_01.tail[2] - p_spine_01.head[2]) 
+    # set the bone vertical if not quadruped
+    if not bpy.context.object.rig_type == 'quadruped':
+        p_spine_01.tail[1] = p_spine_01.head[1]
+    get_pose_bone("c_spine_01.x").custom_shape_scale = 0.3 / p_spine_01.length
+    
     
         #waist bend
     waist_bend = get_bone("c_waist_bend.x")
     waist_bend.head = p_spine_01.head
     waist_bend.tail = p_spine_01.tail - (p_spine_01.tail - p_spine_01.head)/2
     waist_bend.roll = 0
-    get_pose_bone("c_waist_bend.x").custom_shape_scale = 0.15 / abs(p_spine_01.tail[2] - p_spine_01.head[2]) 
+    get_pose_bone("c_waist_bend.x").custom_shape_scale = 0.15 / p_spine_01.length 
         #spine_01_bend
     spine_01_bend = get_bone("c_spine_01_bend.x")
     spine_01_bend.head = p_spine_01.tail
     spine_01_bend.tail = p_spine_01.tail - (p_spine_01.tail - p_spine_01.head)/2
     spine_01_bend.roll = 0
-    get_pose_bone("c_spine_01_bend.x").custom_shape_scale = 0.075 / abs(spine_01_bend.tail[2] - spine_01_bend.head[2]) 
+    get_pose_bone("c_spine_01_bend.x").custom_shape_scale = 0.075 / spine_01_bend.length 
     
      #align spine 02
     init_selection("c_spine_02.x")
@@ -1327,19 +1417,22 @@ def _align_spine_bones():
     
     copy_bone_transforms(spine_02_ref, c_spine_02) 
     copy_bone_transforms(c_spine_02, spine_02) 
-    get_pose_bone("c_spine_02.x").custom_shape_scale = 0.3 / abs(c_spine_02.tail[2] - c_spine_02.head[2]) 
+    get_pose_bone("c_spine_02.x").custom_shape_scale = 0.3 / c_spine_02.length 
     
         # set the visual shape position
     p_spine_02.head = c_spine_02.head + (c_spine_02.tail - c_spine_02.head)/2
-    p_spine_02.head[1] += -0.04
     p_spine_02.tail = p_spine_02.head + (c_spine_02.tail-c_spine_02.head)/1.5
-    p_spine_02.tail[1] = p_spine_02.head[1]    
+    # set the bone vertical if not quadruped
+    if not bpy.context.object.rig_type == 'quadruped':
+        p_spine_02.tail[1] = p_spine_02.head[1]
+ 
+    
         #spine_02_bend
     spine_02_bend = get_bone("c_spine_02_bend.x")
     spine_02_bend.head = p_spine_02.head
     spine_02_bend.tail = p_spine_02.head - (p_spine_02.tail - p_spine_02.head)/3
     spine_02_bend.roll = 0
-    get_pose_bone("c_spine_02_bend.x").custom_shape_scale = 0.08/ abs(spine_02_bend.tail[2] - spine_02_bend.head[2]) 
+    get_pose_bone("c_spine_02_bend.x").custom_shape_scale = 0.08/ spine_02_bend.length 
     
     #align neck    
     init_selection("c_neck.x")
@@ -1440,6 +1533,12 @@ def _align_spine_bones():
         ref_bone = get_bone(chin[2:-2]+"_ref.x")
         copy_bone_transforms(ref_bone, bone)
         
+        # ears
+    if bpy.context.object.rig_ears:
+        ears_list=["ear_01", "ear_02"]
+        for ear in ears_list:
+            copy_bone_transforms_mirror(ear+"_ref", "c_"+ear)
+        
         #mouth
     tongs = ["c_tong_01.x", "c_tong_02.x", "c_tong_03.x"]
     for tong in tongs:        
@@ -1529,83 +1628,34 @@ def _align_spine_bones():
     eye_target_side.tail[2] = eye_target_x.tail[2]
     mirror_hack()
         
-   # breast
-    breasts = ["c_breast_01"+side, "c_breast_02"+side]
-    # test if has breast 
-    has_breast = False
-    try:
-        breast_02 = get_bone("c_breast_02"+side)
-        has_breast = True
-    except:
-        has_breast = False
-        
-    if has_breast == True: 
-        breast_dyn = get_bone("breast_dyn.x") 
-        dist = breast_dyn.head[1] - get_bone("c_breast_01"+side).head[1]
-        dir = breast_dyn.tail - breast_dyn.head
-            
+   # if breast enabled 
+    if bpy.context.object.rig_breast: 
+        breasts = ["c_breast_01"+side, "c_breast_02"+side]   
+
         for bone in breasts:
             init_selection(bone)
             current_bone = get_bone(bone)
-            mirror_bone = get_bone(bone[:-2]+".r")
-            
-            if bpy.context.object.rig_gender == 'male':
-                current_bone.layers[22] = True              
-                mirror_bone.layers[22] = True
-                current_bone.layers[0] = False              
-                mirror_bone.layers[0] = False
-                current_bone.use_deform = False
-                mirror_bone.use_deform = False
-            if bpy.context.object.rig_gender == 'female':
-                current_bone.layers[0] = True
-                mirror_bone.layers[0] = True
-                current_bone.layers[22] = False              
-                mirror_bone.layers[22] = False
-                current_bone.use_deform = True
-                mirror_bone.use_deform = True  
+            current_pose_bone = get_pose_bone(bone)     
                 
             try:
                 ref_bone = get_bone(bone[2:-2] + "_ref" + side)
+                # set transforms
                 copy_bone_transforms(ref_bone, current_bone)
                 mirror_hack()
+                # set draw scale
+                if not "_02" in bone: 
+                    current_pose_bone.custom_shape_scale = 4
+                    if side == ".l":
+                        get_pose_bone(bone[:-2]+".r").custom_shape_scale = 4
+                    if side == ".r":
+                        get_pose_bone(bone[:-2]+".l").custom_shape_scale = 4
+
             except:
                 if debug_print == True:
                     print("no breast ref, skip it")
            
-        #dynamic        
-        breast_dyn = get_bone("breast_dyn.x") 
-        breast_dyn.head = get_bone("c_breast_01"+side).head
-        breast_dyn.head[0] = 0
-        breast_dyn.head[1] += dist
-        breast_dyn.tail = breast_dyn.head + dir
-        
-        if bpy.context.object.rig_gender == 'female':           
-            breast_dyn.layers[0] = True  
-            breast_dyn.layers[22] = False
-            
-        if bpy.context.object.rig_gender == 'male':
-            breast_dyn.layers[22] = True          
-            breast_dyn.layers[0] = False
-                
-        #proxy bones
-        breast_proxy = ["c_breast_01_proxy", "c_breast_02_proxy"]
-        
-        for b_proxy in breast_proxy:    
-            if bpy.context.object.rig_gender == 'female':
-                #get_bone(b_proxy+".l").hide = False
-                #get_bone(b_proxy+".r").hide = False
-                if "01" in b_proxy:
-                    switch_bone_layer(b_proxy, 22, 0, True)                    
-                if "02" in b_proxy:
-                    switch_bone_layer(b_proxy, 22, 1, True)
-                    
-            if bpy.context.object.rig_gender == 'male':
-                #get_bone(b_proxy+".l").hide = True
-                #get_bone(b_proxy+".r").hide = True      
-                if "01" in b_proxy:
-                    switch_bone_layer(b_proxy, 0, 22, True)                                                 
-                if "02" in b_proxy:
-                    switch_bone_layer(b_proxy, 1, 22, True)
+     
+    
     
     # eyebrows
     eyebrows = []
@@ -1653,7 +1703,10 @@ def _align_spine_bones():
         print("\n FINISHED COPYING TO RIG ADD ")
     
     #reset the proxy picker state
-    bpy.context.scene.Proxy_Picker.active = proxy_picker_state    
+    try:
+        bpy.context.scene.Proxy_Picker.active = proxy_picker_state    
+    except:
+        pass
     
     #--END ALIGN SPINE BONES
     
@@ -1700,6 +1753,22 @@ def copy_bone_transforms(bone1, bone2):
     bone2.head = bone1.head
     bone2.tail = bone1.tail
     bone2.roll = bone1.roll
+
+def copy_bone_transforms_mirror(bone1, bone2):
+    
+    bone01 = get_bone(bone1+".l")
+    bone02 = get_bone(bone2+".l")
+    
+    bone02.head = bone01.head
+    bone02.tail = bone01.tail
+    bone02.roll = bone01.roll
+    
+    bone01 = get_bone(bone1+".r")
+    bone02 = get_bone(bone2+".r")
+    
+    bone02.head = bone01.head
+    bone02.tail = bone01.tail
+    bone02.roll = bone01.roll
     
 def copy_bones_to_rig_add():
     bpy.data.objects["rig_add"].hide = False
@@ -1733,6 +1802,337 @@ def edit_rig(rig):
     rig.select = True
     bpy.context.scene.objects.active = rig
     bpy.ops.object.mode_set(mode='EDIT')
+    
+def update_breast(self, context):
+
+    current_mode = bpy.context.mode
+    bpy.ops.object.mode_set(mode='EDIT')
+    
+    #breast toggle   
+    breasts = ["breast_01", "breast_02"]        
+   
+    for bone in breasts:  
+        # if disabled
+        if not bpy.context.object.rig_breast: 
+            # move rig bone layer
+            switch_bone_layer("c_"+bone, 1, 22, True)
+            # disable deform
+            get_bone("c_"+bone+".l").use_deform = False
+            get_bone("c_"+bone+".r").use_deform = False
+            # move proxy and ref bone layer             
+            switch_bone_layer("c_"+bone+"_proxy", 1, 22, True)
+            switch_bone_layer(bone+"_ref", 17, 22, True)
+            
+        # if enabled
+        else: 
+            # move rig bone layer
+            switch_bone_layer("c_"+bone, 22, 1, True)             
+            # enable deform
+            get_bone("c_"+bone+".l").use_deform = True
+            get_bone("c_"+bone+".r").use_deform = True
+            # move proxy bone layer
+            switch_bone_layer("c_"+bone+"_proxy", 22, 1, True)
+            switch_bone_layer(bone+"_ref", 22, 17, True)
+
+    #restore saved mode    
+    if current_mode == 'EDIT_ARMATURE':
+        current_mode = 'EDIT'
+        
+    bpy.ops.object.mode_set(mode=current_mode)
+    
+    return None
+    
+def update_tail(self, context):
+
+    current_mode = bpy.context.mode
+    bpy.ops.object.mode_set(mode='EDIT')
+    
+    #tail toggle   
+    tails = ["tail_00.x", "tail_01.x","tail_02.x", "tail_03.x"]        
+   
+    for bone in tails:  
+        # if disabled
+        if not bpy.context.object.rig_tail: 
+            # move rig bone layer
+            switch_bone_layer("c_"+bone, 0, 22, False)
+            # disable deform
+            get_bone("c_"+bone).use_deform = False
+            # move proxy and ref bone layer             
+            switch_bone_layer("c_"+bone[:-2]+"_proxy.x", 0, 22, False)
+            switch_bone_layer(bone[:-2]+"_ref.x", 17, 22, False)
+            
+        # if enabled
+        else: 
+            # move rig bone layer
+            switch_bone_layer("c_"+bone, 22, 0, False)             
+            # enable deform
+            get_bone("c_"+bone).use_deform = True   
+            # move proxy bone layer
+            switch_bone_layer("c_"+bone[:-2]+"_proxy.x", 22, 0, False)
+            switch_bone_layer(bone[:-2]+"_ref.x", 22, 17, False)
+
+    #restore saved mode    
+    if current_mode == 'EDIT_ARMATURE':
+        current_mode = 'EDIT'
+        
+    bpy.ops.object.mode_set(mode=current_mode)
+    
+    return None
+    
+def update_toes(self, context):
+
+    current_mode = bpy.context.mode
+    bpy.ops.object.mode_set(mode='EDIT')
+    obj = bpy.context.object   
+
+    toes_list=["toes_pinky", "toes_ring", "toes_middle", "toes_index", "toes_thumb"]
+    toes_bool_list = [obj.rig_toes_pinky, obj.rig_toes_ring, obj.rig_toes_middle, obj.rig_toes_index, obj.rig_toes_thumb]
+    
+    # the global toes bone deform will set to false if no additional toes are enabled
+    get_bone("toes_01.l").use_deform = True
+    get_bone("toes_01.r").use_deform = True
+ 
+    # 3 bones toes
+    for t in range (0,5):        
+        max = 4
+        if t == 4:
+            max = 3        
+        for i in range (1,max):
+            #toes disabled   
+            if not toes_bool_list[t]:
+                # ref bones
+                switch_bone_layer(toes_list[t]+str(i)+"_ref", 17, 22, True)
+                # proxy bones
+                switch_bone_layer("c_"+toes_list[t]+str(i)+"_proxy", 0, 22, True)
+                # control bones
+                switch_bone_layer("c_"+toes_list[t]+str(i), 0, 22, True)
+                get_bone("c_"+toes_list[t]+str(i)+".l").use_deform = False
+                get_bone("c_"+toes_list[t]+str(i)+".r").use_deform = False
+                
+            # toes enabled
+            else:
+                # set global toes bone to false if any additional toes is enabled
+                get_bone("toes_01.l").use_deform = False
+                get_bone("toes_01.r").use_deform = False
+                # ref bones
+                switch_bone_layer(toes_list[t]+str(i)+"_ref", 22, 17, True)
+                # proxy bones
+                switch_bone_layer("c_"+toes_list[t]+str(i)+"_proxy", 22, 0, True)
+                 # control bones
+                switch_bone_layer("c_"+toes_list[t]+str(i), 22, 0, True)
+                get_bone("c_"+toes_list[t]+str(i)+".l").use_deform = True
+                get_bone("c_"+toes_list[t]+str(i)+".r").use_deform = True
+  
+ 
+    
+    #restore saved mode    
+    if current_mode == 'EDIT_ARMATURE':
+        current_mode = 'EDIT'
+        
+    bpy.ops.object.mode_set(mode=current_mode)
+    
+    return None
+    
+def update_fingers(self, context):
+
+    current_mode = bpy.context.mode
+    bpy.ops.object.mode_set(mode='EDIT')
+    obj = bpy.context.object   
+
+    fingers_list=["pinky", "ring", "middle", "index", "thumb"]
+    fingers_bool_list = [obj.rig_pinky, obj.rig_ring, obj.rig_middle, obj.rig_index, obj.rig_thumb]
+
+ 
+    # 3 bones toes
+    for t in range (0,5): 
+        max = 4      
+        for i in range (0,max):        
+            
+            ref_bone = fingers_list[t]+str(i)+"_ref"
+            proxy_bone = "c_"+fingers_list[t]+str(i)+"_proxy"
+            c_bone = "c_"+fingers_list[t]+str(i)
+                
+            if i == 0:                
+                ref_bone = fingers_list[t]+str(i+1)+"_base_ref"
+                proxy_bone = "c_"+fingers_list[t]+str(i+1)+"_base_proxy"
+                c_bone = "c_"+fingers_list[t]+str(i+1)+"_base"
+                
+                if t == 4: # thumb
+                    ref_bone = fingers_list[t]+str(i+1)+"_ref"
+                   
+                
+            #finger disabled   
+            if not fingers_bool_list[t]:                    
+                # ref bones
+                switch_bone_layer(ref_bone, 17, 22, True)
+                # proxy bones
+                switch_bone_layer(proxy_bone, 0, 22, True)
+                # control bones
+                switch_bone_layer(c_bone, 0, 22, True)
+                get_bone(c_bone+".l").use_deform = False
+                get_bone(c_bone+".r").use_deform = False
+                
+            # fingers enabled
+            else:       
+                # ref bones
+                switch_bone_layer(ref_bone, 22, 17, True)
+                # proxy bones
+                switch_bone_layer(proxy_bone, 22, 0, True)
+                 # control bones
+                switch_bone_layer(c_bone, 22, 0, True)
+                get_bone(c_bone+".l").use_deform = True
+                get_bone(c_bone+".r").use_deform = True
+
+                
+    #restore saved mode    
+    if current_mode == 'EDIT_ARMATURE':
+        current_mode = 'EDIT'
+        
+    bpy.ops.object.mode_set(mode=current_mode)
+    
+    return None
+    
+def update_ears(self, context):
+
+    current_mode = bpy.context.mode
+    bpy.ops.object.mode_set(mode='EDIT')
+    obj = bpy.context.object   
+
+    ears_list=["ear_01", "ear_02"]    
+   
+    for ear in ears_list:        
+        
+        ref_bone = ear+"_ref"
+        proxy_bone = "c_"+ear+"_proxy"
+        c_bone = "c_"+ear            
+                      
+        #ear disabled   
+        if not obj.rig_ears:                    
+            # ref bones
+            switch_bone_layer(ref_bone, 17, 22, True)
+            # proxy bones
+            switch_bone_layer(proxy_bone, 0, 22, True)
+            # control bones
+            switch_bone_layer(c_bone, 0, 22, True)
+            get_bone(c_bone+".l").use_deform = False
+            get_bone(c_bone+".r").use_deform = False
+            
+        # ear enabled
+        else:       
+            # ref bones
+            switch_bone_layer(ref_bone, 22, 17, True)
+            # proxy bones
+            switch_bone_layer(proxy_bone, 22, 0, True)
+             # control bones
+            switch_bone_layer(c_bone, 22, 0, True)
+            get_bone(c_bone+".l").use_deform = True
+            get_bone(c_bone+".r").use_deform = True
+
+                
+    #restore saved mode    
+    if current_mode == 'EDIT_ARMATURE':
+        current_mode = 'EDIT'
+        
+    bpy.ops.object.mode_set(mode=current_mode)
+    
+    return None
+    
+def update_facial(self, context):
+
+    current_mode = bpy.context.mode
+    bpy.ops.object.mode_set(mode='EDIT')
+    obj = bpy.context.object   
+
+    # REF BONES
+    facial_ref = ['eyebrow_full_ref.r', 'eyebrow_03_ref.r', 'eyebrow_02_ref.r', 'eyebrow_01_ref.r', 'eyebrow_01_end_ref.r', 'eyebrow_full_ref.l', 'eyebrow_03_ref.l', 'eyebrow_02_ref.l', 'eyebrow_01_ref.l', 'eyebrow_01_end_ref.l', 'cheek_inflate_ref.l', 'cheek_inflate_ref.r', 'lips_bot_ref.l', 'lips_bot_01_ref.r', 'lips_bot_01_ref.l', 'lips_bot_ref.r', 'lips_smile_ref.r', 'lips_smile_ref.l', 'lips_corner_mini_ref.r', 'lips_corner_mini_ref.l', 'lips_top_ref.l', 'lips_top_ref.r', 'lips_top_01_ref.l', 'lips_top_01_ref.r', 'lips_top_ref.x', 'lips_bot_ref.x', 'lips_roll_top_ref.x', 'lips_roll_bot_ref.x', 'tong_01_ref.x', 'tong_02_ref.x', 'tong_03_ref.x', 'teeth_bot_ref.x', 'chin_01_ref.x', 'chin_02_ref.x', 'teeth_top_ref.x', 'eye_offset_ref.l', 'eyelid_top_ref.l', 'eyelid_bot_ref.l', 'eyelid_top_01_ref.l', 'eyelid_top_02_ref.l', 'eyelid_top_03_ref.l', 'eyelid_bot_01_ref.l', 'eyelid_bot_02_ref.l', 'eyelid_bot_03_ref.l', 'eyelid_corner_01_ref.l', 'eyelid_corner_02_ref.l', 'eye_offset_ref.r', 'eyelid_top_ref.r', 'eyelid_bot_ref.r', 'eyelid_top_01_ref.r', 'eyelid_top_02_ref.r', 'eyelid_top_03_ref.r', 'eyelid_bot_01_ref.r', 'eyelid_bot_02_ref.r', 'eyelid_bot_03_ref.r', 'eyelid_corner_01_ref.r', 'eyelid_corner_02_ref.r', 'cheek_smile_ref.l', 'cheek_smile_ref.r', 'nose_03_ref.x', 'nose_01_ref.x', 'nose_02_ref.x', 'jaw_ref.x']
+   
+    for bone_ref in facial_ref:         
+        
+        #ear disabled   
+        if not obj.rig_facial:                    
+            # ref bones
+            switch_bone_layer(bone_ref, 17, 22, False) 
+             # proxy bones
+            #switch_bone_layer(proxy_bone, 22, 0, True)
+            #get_bone(c_bone+".r").use_deform = False
+            
+        # ear enabled
+        else:       
+            # ref bones
+            switch_bone_layer(bone_ref, 22, 17, False)
+            # proxy bones
+            #switch_bone_layer(proxy_bone, 22, 0, True)
+            # control bones
+            #switch_bone_layer(c_bone, 22, 0, True)
+            #get_bone(c_bone+".l").use_deform = True
+       
+    # CONTROL BONES
+    facial_layer0_deform =['c_teeth_top.x', 'c_jawbone.x', 'c_teeth_bot.x', 'c_lips_bot.l', 'c_lips_bot_01.r', 'c_lips_bot_01.l', 'c_lips_bot.r', 'c_lips_bot.x', 'c_lips_smile.r', 'c_lips_smile.l', 'c_lips_top.l', 'c_lips_top.r', 'c_lips_top_01.l', 'c_lips_top_01.r', 'c_lips_top.x', 'eyelid_top.l', 'eyelid_bot.l', 'c_eye.l', 'eyelid_top.r', 'eyelid_bot.r', 'c_eye.r']
+    facial_layer0_no_deform = ['c_tong_01.x', 'c_tong_02.x', 'c_tong_03.x', 'c_lips_corner_mini.r', 'c_lips_corner_mini.l', 'c_lips_roll_top.x', 'c_lips_roll_bot.x', 'c_eyelid_top.l', 'c_eyelid_bot.l', 'c_eyelid_top.r', 'c_eyelid_bot.r', 'c_eyebrow_full.r', 'c_eyebrow_03.r', 'c_eyebrow_02.r', 'c_eyebrow_01.r', 'c_eyebrow_01_end.r', 'c_eyebrow_full.l', 'c_eyebrow_03.l', 'c_eyebrow_02.l', 'c_eyebrow_01.l', 'c_eyebrow_01_end.l']
+    facial_layer1_deform = ['c_chin_01.x', 'c_chin_02.x', 'c_eye_offset.l', 'c_cheek_smile.l', 'c_eye_offset.r', 'c_cheek_smile.r', 'c_nose_03.x', 'c_nose_01.x', 'c_nose_02.x', 'c_cheek_inflate.l', 'c_cheek_inflate.r']
+    facial_layer1_no_deform = ['eye_ref.l', 'c_eyelid_top_01.l', 'c_eyelid_top_02.l', 'c_eyelid_top_03.l', 'c_eyelid_bot_01.l', 'c_eyelid_bot_02.l', 'c_eyelid_bot_03.l', 'c_eyelid_corner_01.l', 'c_eyelid_corner_02.l', 'c_eyelid_top_01.r', 'c_eyelid_top_02.r', 'c_eyelid_top_03.r', 'c_eyelid_bot_01.r', 'c_eyelid_bot_02.r', 'c_eyelid_bot_03.r', 'c_eyelid_corner_01.r', 'c_eyelid_corner_02.r', 'eye_ref.r']
+    facial_layer8_deform = ['c_eye_ref_track.l', 'c_eye_ref_track.r', 'tong_03.x', 'tong_02.x', 'tong_01.x']
+
+    
+    for bone in facial_layer0_deform:
+        if not obj.rig_facial:#disabled  
+            switch_bone_layer(bone, 0, 22, False)
+            get_bone(bone).use_deform = False
+        else:#enabled
+            switch_bone_layer(bone, 22, 0, False)
+            get_bone(bone).use_deform = True
+    
+    for bone in facial_layer0_no_deform:
+        if not obj.rig_facial:#disabled  
+            switch_bone_layer(bone, 0, 22, False)            
+        else:#enabled
+            switch_bone_layer(bone, 22, 0, False)
+    
+    for bone in facial_layer1_deform:
+        if not obj.rig_facial:#disabled  
+            switch_bone_layer(bone, 1, 22, False)
+            get_bone(bone).use_deform = False
+        else:#enabled
+            switch_bone_layer(bone, 22, 1, False)
+            get_bone(bone).use_deform = True  
+    
+    for bone in facial_layer1_no_deform:
+        if not obj.rig_facial:#disabled  
+            switch_bone_layer(bone, 1, 22, False)            
+        else:#enabled
+            switch_bone_layer(bone, 22, 1, False)
+            
+    for bone in facial_layer8_deform:
+        if not obj.rig_facial:#disabled   
+            get_bone(bone).use_deform = False
+        else:#enabled
+            get_bone(bone).use_deform = True
+            
+    # PROXY BONES
+    facial_proxy_layer0 = ['c_eye_proxy.r', 'c_eye_ref_proxy.r', 'c_eyelid_top_proxy.r', 'c_eye_proxy.l', 'c_eye_ref_proxy.l', 'c_eyelid_top_proxy.l', 'c_jawbone_proxy.x', 'c_eyebrow_01_proxy.l', 'c_eyebrow_01_proxy.r', 'c_eyelid_bot_proxy.r', 'c_eyelid_bot_proxy.l', 'c_eyebrow_02_proxy.l', 'c_eyebrow_03_proxy.l', 'c_eyebrow_02_proxy.r', 'c_eyebrow_03_proxy.r', 'c_eyebrow_01_end_proxy.l', 'c_eyebrow_01_end_proxy.r', 'c_eyebrow_full_proxy.l', 'c_eyebrow_full_proxy.r', 'c_lips_smile_proxy.l', 'c_lips_corner_mini_proxy.l', 'c_lips_smile_proxy.r', 'c_lips_corner_mini_proxy.r', 'c_lips_top_proxy.x', 'c_lips_bot_proxy.x', 'c_lips_roll_bot_proxy.x', 'c_teeth_top_proxy.x', 'c_teeth_bot_proxy.x', 'c_lips_bot_01_proxy.l', 'c_lips_bot_01_proxy.r', 'c_tong_01_proxy.x', 'c_tong_03_proxy.x', 'c_tong_02_proxy.x', 'c_lips_roll_top_proxy.x', 'c_lips_top_proxy.l', 'c_lips_top_proxy.r', 'c_lips_bot_proxy.l', 'c_lips_bot_proxy.r', 'c_lips_top_01_proxy.l', 'c_lips_top_01_proxy.r', 'c_eye_target_proxy.r', 'c_eye_target_proxy.l', 'c_eye_target_proxy.x']
+    facial_proxy_layer1 = ['c_eye_offset_proxy.l', 'c_eye_offset_proxy.r', 'c_cheek_inflate_proxy.r', 'c_cheek_smile_proxy.r', 'c_cheek_smile_proxy.l', 'c_eyelid_corner_02_proxy.r', 'c_eyelid_corner_02_proxy.l', 'c_nose_01_proxy.x', 'c_nose_03_proxy.x', 'c_chin_01_proxy.x', 'c_chin_02_proxy.x', 'c_nose_02_proxy.x', 'c_cheek_inflate_proxy.l', 'c_eyelid_corner_01_proxy.r', 'c_eyelid_corner_01_proxy.l', 'c_eyelid_top_03_proxy.r', 'c_eyelid_top_03_proxy.l', 'c_eyelid_top_02_proxy.r', 'c_eyelid_top_02_proxy.l', 'c_eyelid_top_01_proxy.r', 'c_eyelid_top_01_proxy.l', 'c_eyelid_bot_01_proxy.r', 'c_eyelid_bot_01_proxy.l', 'c_eyelid_bot_02_proxy.r', 'c_eyelid_bot_02_proxy.l', 'c_eyelid_bot_03_proxy.r', 'c_eyelid_bot_03_proxy.l']
+    
+    for bone in facial_proxy_layer0:
+        if not obj.rig_facial:#disabled   
+            switch_bone_layer(bone, 0, 22, False)            
+        else:#enabled
+            switch_bone_layer(bone, 22, 0, False)
+            
+    for bone in facial_proxy_layer1:
+        if not obj.rig_facial:#disabled   
+            switch_bone_layer(bone, 1, 22, False)            
+        else:#enabled
+            switch_bone_layer(bone, 22, 1, False)
+
+                
+    #restore saved mode    
+    if current_mode == 'EDIT_ARMATURE':
+        current_mode = 'EDIT'
+        
+    bpy.ops.object.mode_set(mode=current_mode)
+    
+    return None
+
 
 
 # END FUNCTIONS
@@ -1741,6 +2141,7 @@ def edit_rig(rig):
 ###########  UI PANEL  ###################
 
 class proxy_utils_ui(bpy.types.Panel):
+    bl_category = "Animation"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_label = "Auto-Rig Pro"
@@ -1749,57 +2150,147 @@ class proxy_utils_ui(bpy.types.Panel):
     @classmethod
     # buttons visibility conditions
     
-    def poll(cls, context):
-        if bpy.context.active_object is not None:
-            if context.mode == 'POSE' or context.mode == 'OBJECT' or context.mode == 'EDIT':
+    def poll(cls, context):   
+       
+        if bpy.context.active_object is not None:                     
+            if context.mode == 'POSE' or context.mode == 'OBJECT' or context.mode == 'EDIT_ARMATURE':
                 return True
             else:
                 return False
         else:
             return False
-        
+
+
     def draw(self, context):
-        layout = self.layout
+        layout = self.layout.column(align=True)
         object = context.object
         scene = context.scene
         col = layout.column(align=False)
-        #BUTTONS
-        layout.label("Rig Type:")
-        layout.prop(object, "rig_gender", expand=True)
+    
+
+        #BUTTONS    
+        if bpy.context.active_object is not None:    
+            if bpy.context.active_object.type == 'ARMATURE':
+                layout.label("Rig Definition:")
+                layout.prop(object, "rig_type", "", expand=False)
+                row = layout.column(align=True).row(align=True)
+                row.prop(object, "rig_facial", "Facial")        
+                row.prop(object, "rig_breast", "Breast")        
+                row = layout.column(align=True).row(align=True) 
+                row.prop(object, "rig_tail", "Tail")  
+                row.prop(object, "rig_ears", "Ears")        
+                
+                layout.label("Fingers:")
+                row = layout.column(align=True).row(align=True)          
+                row.prop(object, "rig_pinky", "Pinky")
+                row.prop(object, "rig_ring", "Ring")
+                row = layout.column(align=True).row(align=True)   
+                row.prop(object, "rig_middle", "Middle")           
+                row.prop(object, "rig_index", "Index")
+                row = layout.column(align=True).row(align=True)     
+                row.prop(object, "rig_thumb", "Thumb")
+                
+                layout.label("Toes:")
+                row = layout.column(align=True).row(align=True)        
+                row.prop(object, "rig_toes_pinky", "Pinky")
+                row.prop(object, "rig_toes_ring", "Ring")
+                row = layout.column(align=True).row(align=True)     
+                row.prop(object, "rig_toes_middle", "Middle")          
+                row.prop(object, "rig_toes_index", "Index")
+                row = layout.column(align=True).row(align=True)     
+                row.prop(object, "rig_toes_thumb", "Thumb")
         
-        layout.separator()  
+        layout.separator()
+        layout.separator()
+          
         layout.operator("id.edit_ref", text="Edit Reference Bones", icon = 'EDIT')
-        layout.separator()  
-        
-        
-        layout.operator("id.align_all_bones", text="Match to Rig", icon = 'POSE_HLT')
-        #layout.operator("id.align_arm_bones", text="Match Arms")
-        #layout.operator("id.align_leg_bones", text="Match Legs")
-        #layout.operator("id.align_spine_bones", text="Match Spine")
+        layout.operator("id.align_all_bones", text="Match to Rig", icon = 'POSE_HLT')    
              
         layout.separator()
+        
         layout.label("Mesh Binding:")
         row = layout.column(align=True).row(align=True)        
         row.operator("id.bind_to_rig", text="Bind")
-        row.operator("id.unbind_to_rig", text="Unbind")     
+        row.operator("id.unbind_to_rig", text="Unbind") 
+            
         layout.separator()
         layout.operator("id.set_picker_camera", text="Set Rig UI Cam", icon = 'CAMERA_DATA')
         layout.separator()
+        layout.separator()
         
-        layout.label("Driver Creation Tools:")
-        layout.prop(object, "driver_bone")
-        layout.prop(object, "driver_transform")
-        layout.operator("id.create_driver", text="Create Driver")     
+      
+        if bpy.data.objects.get("rig") is not None:
+                
+            layout.label("Shapekeys Driver Tools:")   
+            #layout.label(context.active_object.name)     
+            #layout.prop(scene, "driver_bone")
+            layout.operator("id.pick_bone", text="Pick Bone")
+            
+            active_armature = ""
+            
+            try:
+                if object.type == 'ARMATURE':
+                        active_armature = object.data.name
+                else:
+                    active_armature = bpy.data.armatures[0].name  
+            except:
+                active_armature = bpy.data.armatures[0].name    
+            
+                    
+            layout.prop_search(context.scene, "driver_bone", bpy.data.armatures[active_armature], "bones", "")
+     
+            layout.prop(scene, "driver_transform", text = "")
+            layout.operator("id.create_driver", text="Create Driver")   
     
     
 ###########  REGISTER  ##################
 
 def register():  
-    bpy.types.Object.rig_gender = bpy.props.EnumProperty(items=(('male', 'Male', 'Male rig type'),('female', 'Female', 'Female rig type')), name = "rig gender")
-    bpy.types.Object.driver_bone = bpy.props.StringProperty(name="Bone Name", description="Bone driving the shape key")
-    bpy.types.Object.driver_transform = bpy.props.EnumProperty(items=(('LOC_X', 'Loc X', 'X Location'),('LOC_Y', 'Loc Y', 'Y Location'), ('LOC_Z', 'Loc Z', 'Z Location'), ('ROT_X', 'Rot X', 'X Rotation'), ('ROT_Y', 'Rot Y', 'Y Rotation'), ('ROT_Z', 'Rot Z', 'Z Rotation'), ('SCALE_X', 'Scale X', 'X Scale'), ('SCALE_Y', 'Scale Y', 'Y Scale'), ('SCALE_Z', 'Scale Z', 'Z Scale')), name = "Bone Transform")
+    bpy.types.Object.rig_type = bpy.props.EnumProperty(items=(
+    ('biped', 'Biped', 'Biped Rig Type'),    
+    ('quadruped', 'Quadruped', 'Quadruped rig type')), 
+    name = "Rig Type")
+    bpy.types.Object.rig_facial = bpy.props.BoolProperty(default=True, update=update_facial)
+    bpy.types.Object.rig_tail = bpy.props.BoolProperty(default=False, update=update_tail)
+    bpy.types.Object.rig_breast = bpy.props.BoolProperty(default=True, update=update_breast)
+    
+    bpy.types.Object.rig_ears = bpy.props.BoolProperty(default=True, update=update_ears)
+    
+    bpy.types.Object.rig_pinky = bpy.props.BoolProperty(default=True, update=update_fingers)
+    bpy.types.Object.rig_ring = bpy.props.BoolProperty(default=True, update=update_fingers)
+    bpy.types.Object.rig_middle = bpy.props.BoolProperty(default=True, update=update_fingers)
+    bpy.types.Object.rig_index = bpy.props.BoolProperty(default=True, update=update_fingers)
+    bpy.types.Object.rig_thumb = bpy.props.BoolProperty(default=True, update=update_fingers)
+    
+    bpy.types.Object.rig_toes_pinky = bpy.props.BoolProperty(default=False, update=update_toes)
+    bpy.types.Object.rig_toes_ring = bpy.props.BoolProperty(default=False, update=update_toes)
+    bpy.types.Object.rig_toes_middle = bpy.props.BoolProperty(default=False, update=update_toes)
+    bpy.types.Object.rig_toes_index = bpy.props.BoolProperty(default=False, update=update_toes)
+    bpy.types.Object.rig_toes_thumb = bpy.props.BoolProperty(default=False, update=update_toes)
+    
+    bpy.types.Scene.driver_bone = bpy.props.StringProperty(name="Bone Name", description="Bone driving the shape key")
+    bpy.types.Scene.driver_transform = bpy.props.EnumProperty(items=(('LOC_X', 'Loc X', 'X Location'),('LOC_Y', 'Loc Y', 'Y Location'), ('LOC_Z', 'Loc Z', 'Z Location'), ('ROT_X', 'Rot X', 'X Rotation'), ('ROT_Y', 'Rot Y', 'Y Rotation'), ('ROT_Z', 'Rot Z', 'Z Rotation'), ('SCALE_X', 'Scale X', 'X Scale'), ('SCALE_Y', 'Scale Y', 'Y Scale'), ('SCALE_Z', 'Scale Z', 'Z Scale')), name = "Bone Transform")
     
 def unregister():  
-    del bpy.types.Object.rig_gender
-    del bpy.types.Object.driver_bone
-    del bpy.types.Object.driver_transform
+    del bpy.types.Object.rig_type
+    del bpy.types.Object.rig_facial
+    del bpy.types.Object.rig_tail
+    del bpy.types.Object.rig_breast
+    
+    del bpy.types.Object.rig_ears
+    
+    del bpy.types.Object.rig_pinky
+    del bpy.types.Object.rig_ring
+    del bpy.types.Object.rig_middle
+    del bpy.types.Object.rig_index
+    del bpy.types.Object.rig_thumb  
+     
+    del bpy.types.Object.rig_toes_pinky
+    del bpy.types.Object.rig_toes_ring
+    del bpy.types.Object.rig_toes_middle
+    del bpy.types.Object.rig_toes_index
+    del bpy.types.Object.rig_toes_thumb    
+   
+    del bpy.types.Scene.driver_bone
+    del bpy.types.Scene.driver_transform
+    

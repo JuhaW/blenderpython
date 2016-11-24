@@ -2315,7 +2315,7 @@ def Menu_Options(self, context):
     layout.label("Set geometry origin")  # TODO
 
 
-@LeftRightPanel(idname="VIEW3D_PT_batch_transforms", space_type='VIEW_3D', category="Transform", label="Batch Transforms")
+@LeftRightPanel(idname="VIEW3D_PT_batch_transforms", space_type='VIEW_3D', category="Move", label="Batch Transforms")
 class Panel_Category:
     # def draw_header(self, context):
     #    layout = NestedLayout(self.layout)

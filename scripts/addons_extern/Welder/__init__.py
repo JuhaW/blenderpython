@@ -216,8 +216,7 @@ class OBJECT_OT_HelloButton(bpy.types.Operator):
         
         
         return {'FINISHED'}
-    
-bpy.utils.register_module(__name__)
+
 
 def register():
 	bpy.utils.register_module(__name__)	

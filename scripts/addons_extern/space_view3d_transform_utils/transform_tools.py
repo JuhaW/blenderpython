@@ -3548,7 +3548,7 @@ addon.type_extend("Scene", "transform_tools", (TransformToolsPG | prop()))
 #addon.Internal.transform_tools = TransformToolsPG | prop()
 
 
-@LeftRightPanel(idname="VIEW3D_PT_transform_tools", space_type='VIEW_3D', category="Transform", label="Transform Tools")
+@LeftRightPanel(idname="VIEW3D_PT_transform_tools", space_type='VIEW_3D', category="Move", label="Transform Tools")
 class Panel_Transform_Tools:
 
     def draw_header(self, context):

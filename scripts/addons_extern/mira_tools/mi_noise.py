@@ -47,7 +47,7 @@ class MI_Noise(bpy.types.Operator):
                ('Fractal', 'Fractal', ''),
                ('HeteroTerrain', 'HeteroTerrain', ''),
                ),
-        default='Turbulence'
+        default = 'Turbulence'
     )
 
     intensity = FloatProperty(default=1.0)
@@ -58,6 +58,7 @@ class MI_Noise(bpy.types.Operator):
     amplitude_scale = FloatProperty(default=0.5)
     frequency_scale = FloatProperty(default=2.0)
     hard = BoolProperty(default=True)
+
 
     def execute(self, context):
 
@@ -74,8 +75,8 @@ class MI_Noise(bpy.types.Operator):
 
         return self.execute(context)
         # else:
-        # self.report({'WARNING'}, "View3D not found, cannot run operator")
-        # return {'CANCELLED'}
+            # self.report({'WARNING'}, "View3D not found, cannot run operator")
+            # return {'CANCELLED'}
 
 
 def noise_obj(obj, context, self):

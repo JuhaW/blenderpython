@@ -31,7 +31,7 @@ bl_info = {
     "category": "3D View"
     }
 
-import bpy, os
+import bpy
 from bpy.types import Operator
 
 
@@ -184,7 +184,7 @@ def menu(self, context):
     if (context.active_object):
         if (len(context.active_object.modifiers)):
             col = self.layout.column(align=True)
-            layout = self.layout
+
             row = col.row(align=True)
             row.operator(ApplyAllModifiers.bl_idname,
                          icon='IMPORT', text="Apply All")
@@ -198,12 +198,7 @@ def menu(self, context):
             row.operator(ToggleAllShowExpanded.bl_idname,
                          icon='FULLSCREEN_ENTER',
                          text="Toggle Stack")
-            pcoll = preview_collections["main"]
 
-            for _ in range(0, 10):
-                row = layout.row()
-                my_icon = pcoll["icon-image-" + str(_) + ".png"]
-                row.operator("render.render", icon_value=my_icon.icon_id)
 
 def menu_func(self, context):
     if (context.active_object):
@@ -213,26 +208,11 @@ def menu_func(self, context):
             layout.operator(ApplyAllModifiers.bl_idname,
                             icon='IMPORT',
                             text="Apply All Modifiers")
-preview_collections = {}
+
 
 def register():
-
-    # Note that preview collections returned by bpy.utils.previews
-    # are regular py objects - you can use them to store custom data.
-    import bpy.utils.previews
-    pcoll = bpy.utils.previews.new()
-
-    # path to the folder where the icon is
-    # the path is calculated relative to this py file inside the addon folder
-    my_icons_dir = os.path.join(os.path.dirname(__file__), "icons")
-
-    # load a preview thumbnail of a file and store in the previews collection
-    for _ in range(0, 10):
-        icon_name = "icon-image-" + str(_) + ".png"
-        pcoll.load(icon_name, os.path.join(my_icons_dir, icon_name), 'IMAGE')
-
-        preview_collections["main"] = pcoll
     bpy.utils.register_module(__name__)
+
     # Add "Specials" menu to the "Modifiers" menu
     bpy.types.DATA_PT_modifiers.prepend(menu)
 
@@ -241,9 +221,6 @@ def register():
 
 
 def unregister():
-    for pcoll in preview_collections.values():
-        bpy.utils.previews.remove(pcoll)
-    preview_collections.clear()
     # Remove "Specials" menu from the "Modifiers" menu.
     bpy.types.DATA_PT_modifiers.remove(menu)
 
