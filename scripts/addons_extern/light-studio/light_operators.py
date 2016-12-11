@@ -285,7 +285,7 @@ class BlenderLightStudioPanelStudio(bpy.types.Panel):
     bl_label = "Studio"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_category = "Light Studio"
+    bl_category = "Create"
 
     @classmethod
     def poll(cls, context):
@@ -306,7 +306,7 @@ class BlenderLightStudioPanelLight(bpy.types.Panel):
     bl_label = "Lights"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_category = "Light Studio"
+    bl_category = "Create"
 
     @classmethod
     def poll(cls, context):
@@ -325,7 +325,7 @@ class BLS_ProfileList(bpy.types.Panel):
     bl_label = "Profiles"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_category = "Light Studio"
+    bl_category = "Create"
 
     @classmethod
     def poll(cls, context):
@@ -358,7 +358,7 @@ class BlenderLightStudioPanelSelected(bpy.types.Panel):
     bl_label = "Selected Light"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_category = "Light Studio"
+    bl_category = "Create"
 
     @classmethod
     def poll(cls, context):
