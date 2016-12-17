@@ -979,11 +979,11 @@ class ScreencastKeysStatusSetOrigin(bpy.types.Operator):
 
 
 class ScreencastKeysPanel(bpy.types.Panel):
-    bl_category = "Display"
     bl_idname = 'WM_PT_screencast_keys'
     bl_label = 'Screencast Keys'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
+    bl_category = 'Display'
 
     def draw_header(self, context):
         layout = self.layout

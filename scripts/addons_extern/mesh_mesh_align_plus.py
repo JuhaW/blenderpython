@@ -5359,10 +5359,10 @@ class MAPlusGui(bpy.types.Panel):
 
 class QuickAlignPointsGUI(bpy.types.Panel):
     bl_idname = "quick_align_points_gui"
-    bl_label = "Quick Align Points"
+    bl_label = "Mesh Align Plus"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_category = "Mesh Align Plus"
+    bl_category = "Move"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
@@ -5435,16 +5435,8 @@ class QuickAlignPointsGUI(bpy.types.Panel):
             text="Whole Mesh"
         )
 
+# Quick Align Lines
 
-class QuickAlignLinesGUI(bpy.types.Panel):
-    bl_idname = "quick_align_lines_gui"
-    bl_label = "Quick Align Lines"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
-    bl_category = "Mesh Align Plus"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
         layout = self.layout
         maplus_data_ptr = bpy.types.AnyType(bpy.context.scene.maplus_data)
         addon_data = bpy.context.scene.maplus_data
@@ -5503,16 +5495,8 @@ class QuickAlignLinesGUI(bpy.types.Panel):
             text="Whole Mesh"
         )
 
+# Quick Align Planes
 
-class QuickAlignPlanesGUI(bpy.types.Panel):
-    bl_idname = "quick_align_planes_gui"
-    bl_label = "Quick Align Planes"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
-    bl_category = "Mesh Align Plus"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
         layout = self.layout
         maplus_data_ptr = bpy.types.AnyType(bpy.context.scene.maplus_data)
         addon_data = bpy.context.scene.maplus_data
@@ -5571,16 +5555,8 @@ class QuickAlignPlanesGUI(bpy.types.Panel):
             text="Whole Mesh"
         )
 
+# Quick Axis Rotate
 
-class QuickAxisRotateGUI(bpy.types.Panel):
-    bl_idname = "quick_axis_rotate_gui"
-    bl_label = "Quick Axis Rotate"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
-    bl_category = "Mesh Align Plus"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
         layout = self.layout
         maplus_data_ptr = bpy.types.AnyType(bpy.context.scene.maplus_data)
         addon_data = bpy.context.scene.maplus_data
@@ -5634,16 +5610,8 @@ class QuickAxisRotateGUI(bpy.types.Panel):
             text="Whole Mesh"
         )
 
+# Quick Directional Move
 
-class QuickDirectionalSlideGUI(bpy.types.Panel):
-    bl_idname = "quick_directional_slide_gui"
-    bl_label = "Quick Directional Move"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
-    bl_category = "Mesh Align Plus"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
         layout = self.layout
         maplus_data_ptr = bpy.types.AnyType(bpy.context.scene.maplus_data)
         addon_data = bpy.context.scene.maplus_data
@@ -5708,16 +5676,8 @@ class QuickDirectionalSlideGUI(bpy.types.Panel):
             text="Whole Mesh"
         )
 
+# Quick Scale Match Edge
 
-class QuickSMEGUI(bpy.types.Panel):
-    bl_idname = "quick_sme_gui"
-    bl_label = "Quick Scale Match Edge"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
-    bl_category = "Mesh Align Plus"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
         layout = self.layout
         maplus_data_ptr = bpy.types.AnyType(bpy.context.scene.maplus_data)
         addon_data = bpy.context.scene.maplus_data

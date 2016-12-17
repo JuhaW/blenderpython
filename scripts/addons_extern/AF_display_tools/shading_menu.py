@@ -22,7 +22,7 @@
 # ***** END GPL LICENCE BLOCK *****
 
 bl_info = {
-    "name": "Display Tools",
+    "name": "shade Tools",
     "author": "Jordi Vall-llovera Medina, Jhon Wallace",
     "version": (1, 6, 0),
     "blender": (2, 7, 0),

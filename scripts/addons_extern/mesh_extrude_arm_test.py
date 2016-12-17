@@ -414,7 +414,7 @@ class UI(bpy.types.Panel):
     bl_label = 'MExtrude'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-
+    bl_category = "Create"
     def draw(self, context):
         layout = self.layout
         layout.operator('object.mextrude')

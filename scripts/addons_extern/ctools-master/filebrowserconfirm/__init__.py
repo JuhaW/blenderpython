@@ -30,7 +30,6 @@ bl_info = {
     'category': 'User Interface',
 }
 
-
 import importlib
 import os
 import re
@@ -50,8 +49,7 @@ except NameError:
     from ..utils import registerinfo
     from ..utils import structures
     from ..utils import utils
-    from . import wrapoperator
-
+    from ..utils import wrapoperator
 
 translation_dict = {
     'ja_JP': {

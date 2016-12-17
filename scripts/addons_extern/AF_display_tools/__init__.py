@@ -91,7 +91,7 @@ class DisplayToolsPanel(bpy.types.Panel):
         view = context.space_data
         toolsettings = context.tool_settings
         layout = self.layout
-
+        ob = context.object
         # Display options
         box1 = self.layout.box()
         col = box1.column(align=True)
@@ -99,7 +99,9 @@ class DisplayToolsPanel(bpy.types.Panel):
 #        row.alignment = 'CENTER'
         row.prop(scene, "UTDisplayDrop", icon="TRIA_DOWN")
         if not DISPLAYDROP:
-            row.operator("view3d.display_wire_all1", text="", icon='WIRE')
+            row.prop(ob, "show_name", text="", icon='SORTALPHA')
+            row.prop(ob, "show_texture_space", text="", icon='FACESEL_HLT')
+            row.menu("VIEW3D_MT_Shade_menu", icon='SOLID', text="" )
         if DISPLAYDROP:
             col = box1.column(align=True)
             row = col.row(align=True)
@@ -122,7 +124,7 @@ class DisplayToolsPanel(bpy.types.Panel):
 #        row.alignment = 'CENTER'
         row.prop(scene, "UTShadingDrop", icon="TRIA_DOWN")
         if not SHADINGDROP:
-            row.menu("VIEW3D_MT_Shade_menu", icon='SOLID', text="" )
+            row.operator("view3d.display_wire_all1", text="", icon='WIRE')
         if SHADINGDROP:
             scene = context.scene
             layout = self.layout

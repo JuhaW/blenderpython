@@ -60,9 +60,9 @@ class BasePollCheck:
     def poll(cls, context):
         return True
 
-class View3D_TP_Display_DrawWire(bpy.types.Operator):
+class View3D_AF_Display_DrawWire(bpy.types.Operator):
     """Draw Type Wire"""
-    bl_idname = "tp_ops.draw_wire"
+    bl_idname = "af_ops.draw_wire"
     bl_label = "Draw Type Wire"
 
     def execute(self, context):
@@ -70,9 +70,9 @@ class View3D_TP_Display_DrawWire(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class View3D_TP_Display_DrawSolid(bpy.types.Operator):
+class View3D_AF_Display_DrawSolid(bpy.types.Operator):
     """Draw Type Solid"""
-    bl_idname = "tp_ops.draw_solid"
+    bl_idname = "af_ops.draw_solid"
     bl_label = "Draw Type Solid"
 
     def execute(self, context):
@@ -80,9 +80,9 @@ class View3D_TP_Display_DrawSolid(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class View3D_TP_Wire_All(bpy.types.Operator):
+class View3D_AF_Wire_All(bpy.types.Operator):
     """Wire on all objects in the scene"""
-    bl_idname = "tp_ops.wire_all"
+    bl_idname = "af_ops.wire_all"
     bl_label = "Wire on All Objects"
 
     @classmethod
@@ -101,9 +101,9 @@ class View3D_TP_Wire_All(bpy.types.Operator):
                              
         return {'FINISHED'} 
 
-class View3D_TP_Wire_On(bpy.types.Operator):
+class View3D_AF_Wire_On(bpy.types.Operator):
     '''Wire on'''
-    bl_idname = "tp_ops.wire_on"
+    bl_idname = "af_ops.wire_on"
     bl_label = "Wire on"
     bl_options = {'REGISTER', 'UNDO'}  
 
@@ -122,9 +122,9 @@ class View3D_TP_Wire_On(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class View3D_TP_Wire_Off(bpy.types.Operator):
+class View3D_AF_Wire_Off(bpy.types.Operator):
     '''Wire off'''
-    bl_idname = "tp_ops.wire_off"
+    bl_idname = "af_ops.wire_off"
     bl_label = "Wire off"
     bl_options = {'REGISTER', 'UNDO'}  
 

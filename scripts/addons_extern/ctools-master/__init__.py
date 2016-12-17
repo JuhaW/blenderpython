@@ -56,6 +56,7 @@ class CToolsPreferences(addongroup.AddonGroupPreferences,
 
     sub_modules = [
         'aligntools',
+        'boolutils',
         'drawnearest',
         'emulatenumpad',
         '_groupmanager',

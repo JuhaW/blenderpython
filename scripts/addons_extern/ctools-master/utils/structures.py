@@ -1153,6 +1153,8 @@ OPTYPE_PRESET = (1 << 5)  # show preset menu
 OPTYPE_INTERNAL = (1 << 6)
 
 OPTYPE_LOCK_BYPASS = (1 << 7)  # Allow operator to run when interface is locked
+PTYPE_UNDO_GROUPED = (1 << 8)  # Special type of undo which doesn't store
+                               #  itself multiple times
 
 
 class ExtensionRNA(Structure):
@@ -1166,47 +1168,56 @@ class ExtensionRNA(Structure):
 
 class wmOperatorType(Structure):
     """source/blender/windowmanager/WM_types.h: 518"""
-    _fields_ = fields(
-        c_char_p, 'name',
-        c_char_p, 'idname',
-        c_char_p, 'translation_context',
-        c_char_p, 'description',
 
-        # int (*exec)(struct bContext *, struct wmOperator *) ATTR_WARN_UNUSED_RESULT;
-        CFUNCTYPE(c_int, c_void_p, c_void_p), 'exec',
-        # bool (*check)(struct bContext *, struct wmOperator *);
-        CFUNCTYPE(c_bool, c_void_p, c_void_p), 'check',
-        # int (*invoke)(struct bContext *, struct wmOperator *, const struct wmEvent *) ATTR_WARN_UNUSED_RESULT;
-        CFUNCTYPE(c_int, c_void_p, c_void_p, c_void_p), 'invoke',
-        # void (*cancel)(struct bContext *, struct wmOperator *);
-        CFUNCTYPE(c_int, c_void_p, c_void_p), 'cancel',
-        # int (*modal)(struct bContext *, struct wmOperator *, const struct wmEvent *) ATTR_WARN_UNUSED_RESULT;
-        CFUNCTYPE(c_int, c_void_p, c_void_p, c_void_p), 'modal',
-
-        # int (*poll)(struct bContext *) ATTR_WARN_UNUSED_RESULT;
-        CFUNCTYPE(c_int, c_void_p), 'poll',
-
-        # void (*ui)(struct bContext *, struct wmOperator *);
-        CFUNCTYPE(c_int, c_void_p, c_void_p), 'ui',
-
-        StructRNA, '*srna',
-
-        c_void_p, 'last_properties',  # <IDProperty>
-
-        PropertyRNA, '*prop',  # <PropertyRNA>
-
-        ListBase, 'macro',
-
-        c_void_p, 'modalkeymap',  # <wmKeyMap>
-
-        # int (*pyop_poll)(struct bContext *, struct wmOperatorType *ot) ATTR_WARN_UNUSED_RESULT;
-        CFUNCTYPE(c_int, c_void_p, c_void_p), 'pyop_poll',
-
-        ExtensionRNA, 'ext',
-
-        c_short, 'flag',
+wmOperatorType_fields = fields(
+    c_char_p, 'name',
+    c_char_p, 'idname',
+    c_char_p, 'translation_context',
+    c_char_p, 'description'
+)
+if bpy.app.version[1] >= 28 and bpy.app.version[2] >= 4:
+    wmOperatorType_fields += fields(
+        # commit: 69470e36d6b17042260b06f26ca3c2f702747324
+        # Tue Nov 15 19:50:11 2016
+        c_char_p, 'undo_group',
     )
+wmOperatorType_fields += fields(
+    # int (*exec)(struct bContext *, struct wmOperator *) ATTR_WARN_UNUSED_RESULT;
+    CFUNCTYPE(c_int, c_void_p, c_void_p), 'exec',
+    # bool (*check)(struct bContext *, struct wmOperator *);
+    CFUNCTYPE(c_bool, c_void_p, c_void_p), 'check',
+    # int (*invoke)(struct bContext *, struct wmOperator *, const struct wmEvent *) ATTR_WARN_UNUSED_RESULT;
+    CFUNCTYPE(c_int, c_void_p, c_void_p, c_void_p), 'invoke',
+    # void (*cancel)(struct bContext *, struct wmOperator *);
+    CFUNCTYPE(c_int, c_void_p, c_void_p), 'cancel',
+    # int (*modal)(struct bContext *, struct wmOperator *, const struct wmEvent *) ATTR_WARN_UNUSED_RESULT;
+    CFUNCTYPE(c_int, c_void_p, c_void_p, c_void_p), 'modal',
 
+    # int (*poll)(struct bContext *) ATTR_WARN_UNUSED_RESULT;
+    CFUNCTYPE(c_int, c_void_p), 'poll',
+
+    # void (*ui)(struct bContext *, struct wmOperator *);
+    CFUNCTYPE(c_int, c_void_p, c_void_p), 'ui',
+
+    StructRNA, '*srna',
+
+    c_void_p, 'last_properties',  # <IDProperty>
+
+    PropertyRNA, '*prop',  # <PropertyRNA>
+
+    ListBase, 'macro',
+
+    c_void_p, 'modalkeymap',  # <wmKeyMap>
+
+    # int (*pyop_poll)(struct bContext *, struct wmOperatorType *ot) ATTR_WARN_UNUSED_RESULT;
+    CFUNCTYPE(c_int, c_void_p, c_void_p), 'pyop_poll',
+
+    ExtensionRNA, 'ext',
+
+    c_short, 'flag',
+)
+
+wmOperatorType._fields_ = wmOperatorType_fields
 
 class wmOperator(Structure):
     """source/blender/makesdna/DNA_windowmanager_types.h: 344

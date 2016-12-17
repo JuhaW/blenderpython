@@ -81,7 +81,7 @@ class Registerable:
             bpy.utils.unregister_class(cls)  # 例外を出させるため
 
 
-class OperatorTemplate(Registerable):
+class OperatorTemplate:
     bl_idname = ''
     bl_label = ''
     bl_description = ''

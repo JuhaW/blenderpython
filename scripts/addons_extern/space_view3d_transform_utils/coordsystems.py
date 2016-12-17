@@ -1078,7 +1078,7 @@ def get_coordsystem_manager(context=None):
 #addon.type_extend("Screen", "coordsystem_manager", (CoordSystemManagerPG | prop()))
 addon.Internal.coordsystem_manager = CoordSystemManagerPG | prop()
 
-@LeftRightPanel(idname="VIEW3D_PT_coordsystem", space_type='VIEW_3D', category="Move", label="Coordinate System")
+@LeftRightPanel(idname="VIEW3D_PT_coordsystem", space_type='VIEW_3D', category="Transform", label="Coordinate System")
 class Panel_Coordsystem:
     def draw(self, context):
         layout = NestedLayout(self.layout)

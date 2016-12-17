@@ -30,7 +30,6 @@ except:
 
 __all__ = [
     'AddonRegisterInfo',
-    'get_keymap',
 ]
 
 
@@ -760,14 +759,16 @@ class _AddonRegisterInfoKeyMap(_AddonRegisterInfo):
     __default_keymap_item_values = ()
 
     @staticmethod
-    def get_keymap(name):
+    def get_keymap(name, keyconfig='addon'):
         """KeyMaps.new()の結果を返す。name以外の引数は勝手に補間してくれる。
         :type name: str
+        :param keyconfig: 'addon' or 'user' or 'blender' or 'default'
+        :type keyconfig: str
         :rtype: bpy.types.KeyMap
         """
         import bpy_extras.keyconfig_utils
 
-        # blenderを起動してis_modalを確認するしか方法が無い
+        # Documentは無いのでblenderを起動してis_modalを確認するしか方法が無い
         modal_keymaps = {
             'View3D Gesture Circle', 'Gesture Border',
             'Gesture Zoom Border', 'Gesture Straight Line',
@@ -776,7 +777,15 @@ class _AddonRegisterInfoKeyMap(_AddonRegisterInfo):
             'View3D Walk Modal', 'View3D Rotate Modal', 'View3D Move Modal',
             'View3D Zoom Modal', 'View3D Dolly Modal', }
 
-        kc = bpy.context.window_manager.keyconfigs.addon
+        keyconfigs = bpy.context.window_manager.keyconfigs
+        if keyconfig == 'addon':  # 'Blender Addon'
+            kc = keyconfigs.addon
+        elif keyconfig == 'user':  # 'Blender User'
+            kc = keyconfigs.user
+        elif keyconfig in {'default', 'blender'}:  # 'Blender'
+            kc = keyconfigs.default
+        else:
+            raise ValueError()
         if not kc:
             return None
 
@@ -2131,6 +2140,3 @@ class AddonRegisterInfo(  # _AddonRegisterInfo,
             module.register, module.__name__, instance=instance)
         module.unregister = new_cls.unregister_addon(
             module.unregister, instance=instance)
-
-
-get_keymap = AddonRegisterInfo.get_keymap

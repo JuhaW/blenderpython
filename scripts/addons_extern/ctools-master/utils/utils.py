@@ -107,6 +107,62 @@ def unregister_module(module=None, verbose=False, ignore=()):
         print("done.\n")
 
 
+def get_keymap(name, keyconfig='addon'):
+    """KeyMaps.new()の結果を返す。name以外の引数は勝手に補間してくれる。
+
+    ※ registerinfo._AddonRegisterInfoKeyMap.get_keymapメソッドと一緒。
+
+    :type name: str
+    :param keyconfig: 'addon' or 'user' or 'blender' or 'default'
+    :type keyconfig: str
+    :rtype: bpy.types.KeyMap
+    """
+    import bpy_extras.keyconfig_utils
+
+    # Documentは無いのでblenderを起動してis_modalを確認するしか方法が無い
+    modal_keymaps = {
+        'View3D Gesture Circle', 'Gesture Border',
+        'Gesture Zoom Border', 'Gesture Straight Line',
+        'Standard Modal Map', 'Knife Tool Modal Map',
+        'Transform Modal Map', 'Paint Stroke Modal', 'View3D Fly Modal',
+        'View3D Walk Modal', 'View3D Rotate Modal', 'View3D Move Modal',
+        'View3D Zoom Modal', 'View3D Dolly Modal', }
+
+    keyconfigs = bpy.context.window_manager.keyconfigs
+    if keyconfig == 'addon':  # 'Blender Addon'
+        kc = keyconfigs.addon
+    elif keyconfig == 'user':  # 'Blender User'
+        kc = keyconfigs.user
+    elif keyconfig in {'default', 'blender'}:  # 'Blender'
+        kc = keyconfigs.default
+    else:
+        raise ValueError()
+    if not kc:
+        return None
+
+    # if 'INVALID_MODAL_KEYMAP' and name in modal_keymaps:
+    #     msg = "not support modal keymap: '{}'".format(name)
+    #     raise ValueError(msg)
+
+    def get(ls, name):
+        for keymap_name, space_type, region_type, children in ls:
+            if keymap_name == name:
+                is_modal = keymap_name in modal_keymaps
+                return kc.keymaps.new(keymap_name, space_type=space_type,
+                                      region_type=region_type,
+                                      modal=is_modal)
+            elif children:
+                km = get(children, name)
+                if km:
+                    return km
+
+    km = get(bpy_extras.keyconfig_utils.KM_HIERARCHY, name)
+    if not km:
+        msg = "Keymap '{}' not in builtins".format(name)
+        raise ValueError(msg)
+    return km
+
+
 def py_idname(name):
     """WM_operator_py_idname
     SOME_OT_op -> some.op

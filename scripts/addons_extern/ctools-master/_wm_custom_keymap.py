@@ -363,6 +363,7 @@ def register():
     add = functools.partial(new_keymap_item, 'Face Mask')
     kmi = add('paint.face_select_linked', 'BUTTON16MOUSE', 'PRESS', ctrl=True)
     kmi = add('paint.face_select_linked_pick', 'BUTTON16MOUSE', 'PRESS')
+    kmi.properties.deselect = False
     kmi = add('paint.face_select_linked_pick', 'BUTTON16MOUSE', 'PRESS',
               shift=True)
     kmi.properties.deselect = True
@@ -395,6 +396,7 @@ def register():
     add = functools.partial(new_keymap_item, 'Mesh')
     kmi = add('mesh.select_linked', 'BUTTON16MOUSE', 'PRESS', ctrl=True)
     kmi = add('mesh.select_linked_pick', 'BUTTON16MOUSE', 'PRESS')
+    kmi.properties.deselect = False
     kmi = add('mesh.select_linked_pick', 'BUTTON16MOUSE', 'PRESS', shift=True)
     kmi.properties.deselect = True
 
@@ -403,6 +405,7 @@ def register():
 
     add = functools.partial(new_keymap_item, 'Particle')
     kmi = add('particle.select_linked', 'BUTTON16MOUSE', 'PRESS')
+    kmi.properties.deselect = False
     kmi = add('particle.select_linked', 'BUTTON16MOUSE', 'PRESS', shift=True)
     kmi.properties.deselect = True
 
@@ -418,6 +421,7 @@ def register():
     add = functools.partial(new_keymap_item, 'Mask Editing')
     kmi = add('mask.select_linked', 'BUTTON16MOUSE', 'PRESS', ctrl=True)
     kmi = add('mask.select_linked_pick', 'BUTTON16MOUSE', 'PRESS')
+    kmi.properties.deselect = False
     kmi = add('mask.select_linked_pick', 'BUTTON16MOUSE', 'PRESS', shift=True)
     kmi.properties.deselect = True
 

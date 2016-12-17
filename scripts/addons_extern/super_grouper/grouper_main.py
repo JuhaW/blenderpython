@@ -91,7 +91,7 @@ class SG_BasePanel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_context = "objectmode"
-    bl_category = 'Relations'
+    bl_category = 'Layers'
 
     def draw(self, context):
         layout = self.layout

@@ -41,21 +41,83 @@ from . import vamath as vam
 """
 NOTE:
 
-頂点・辺・面のselect属性は、変更すると属する頂点と辺のselect属性にも影響を及ぼす。
+頂点・辺・面のselect属性は、変更するとその要素のselect属性にも影響を及ぼす。
+selectの属性変更とselect_set()の挙動は同じ。
+
+BMVert.select = True:
+    bmesh_marking.c: 398: BM_vert_select_set()
+    頂点が非表示なら何もしない。
+    1. 頂点を選択する
+
+BMVert.select = False:
+    bmesh_marking.c: 398: BM_vert_select_set()
+    頂点が非表示なら何もしない。
+    1. 頂点を非選択にする
+
+BMEdge.select = True:
+    bmesh_marking.c: 425: BM_edge_select_set()
+    辺が非表示なら何もしない。
+    1. 辺を選択する。
+    2. 両端の頂点に対して BMVert.select = True を実行する。
+
+BMEdge.select = False:
+    bmesh_marking.c: 425: BM_edge_select_set()
+    辺が非表示なら何もしない。
+    1.  辺を非選択にする。
+    2a. BMesh.select_modeで頂点選択が有効な場合:
+        両端の頂点に対して BMVert.select = False を実行する。
+    2b. BMesh.select_modeで頂点選択が無効な場合:
+        両端の頂点は、接続する辺が全て非選択なら BMVert.select = False を
+        実行する。
+
+BMFace.select = True:
+    bmesh_marking.c: 472: BM_face_select_set()
+    面が非表示なら何もしない。
+    1. 面を選択する。
+    2. 各要素に対して BMVert.select = True, BMEdge.select = True を実行する。
+
+BMFace.select = False:
+    bmesh_marking.c: 472: BM_face_select_set()
+    面が非表示なら何もしない。
+    1. 面を非選択にする。
+    2a. BMesh.select_modeで頂点選択が有効な場合:
+        各頂点に対して BMVert.select = False を実行する。
+        表示中の各辺を非選択にする。
+    2b. BMesh.select_modeで辺選択が有効な場合:
+        表示中の各辺を非選択にする。
+        各頂点に対して、接続する辺が全て非選択なら BMVert.select = False を
+        実行する。
+    2c. それ以外の場合:
+        各辺に対して、接続する面が全て非選択なら、辺が表示中の場合非選択にする。
+        各頂点に対して、接続する辺が全て非選択なら BMVert.select = False を
+        実行する。
+
 
 BMesh.select_flush(True):
-    表示中の辺と面に於いて、それに属する全ての頂点が選択されていたら辺と面も
-    選択状態になる。条件を満たさないものは変更されない。
+    bmesh_marking.c: 338: BM_mesh_select_flush()
+    表示中の辺と面に於いて、それに属する全ての頂点が選択されていたらそれぞれの
+    辺と面は選択状態になる。
+    頂点の状態は変更しない。
+
 BMesh.select_flush(False):
-    表示中の辺に於いて、それに属する何れかの頂点が非選択なら辺も非選択となり、
-    その辺を共有する全ての面も非選択となる。条件を満たさないものは変更されない。
+    bmesh_marking.c: 301: BM_mesh_deselect_flush()
+    表示中の辺に於いて、それに属する何れかの頂点が非選択なら辺は非選択となり
+    辺が非選択状態ならその辺を共有する全ての面も非選択となる。
+    頂点の状態は変更しない。
+    終わった後でBMesh.select_history.validate()を呼び出している。
+    (bmesh_marking.c: 984: BM_select_history_validate())
+
 BMesh.select_flush_mode():
-    頂点選択が有効:
-        表示中の辺と面に於いて、それに属する全ての頂点が選択されていたら辺と面も
-        選択状態になり、そうでないなら非選択となる。
-    辺選択が有効:
-        表示中の面に於いて、それに属する全ての辺が選択されていたら面も選択状態に
-        なり、そうでないなら非選択となる。
+    bmesh_marking.c: 293: BM_mesh_select_mode_flush()
+    BMesh.select_modeで頂点選択が有効:
+        それぞれの辺と面に於いて、表示中でそれに属する全ての頂点が選択されていたら
+        辺と面は選択状態になり、そうでないなら非選択となる。
+        頂点の状態は変更しない。
+    BMesh.select_modeで頂点選択が無効で辺選択が有効:
+        それぞれの面に於いて、表示中でそれに属する全ての辺が選択されていたら
+        面も選択状態になり、そうでないなら非選択となる。
+        頂点と辺の状態は変更しない。
+    終わった後でBMesh.select_history.validate()を呼び出している。
 """
 
 #==============================================================================

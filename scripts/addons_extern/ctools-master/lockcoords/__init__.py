@@ -312,20 +312,6 @@ def callback_scene_update_pre(scene):
                     eve.select = False
                     do_select_update = True
 
-    """
-    NOTE:
-    select_flush(True):
-        edgeループ(flag:頂点)の後faceループ(flag:頂点)
-        flag対象の全てが選択中の場合のみ適用
-    select_flush(False):
-        edgeループ(flag:頂点)とその中でloopを回してfaceを非選択へ(flag:辺)
-        flag対象のいずれかが非選択なら適用
-    select_flush_mode():
-        選択モードはbm.select_modeを参照する
-        if vert選択が有効: edge(flag:頂点)とface(flag:頂点)をループ。
-        elif edge選択が有効: face(flag:辺)をループ。
-    """
-
     if do_select_update:
         # EDBM_selectmode_toggleの中で呼び出すのはbm.select_flush(True)に当たる
         # ものなのでbm.select_flush(False)は必須
