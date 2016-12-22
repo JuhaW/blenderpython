@@ -34,6 +34,7 @@ def silhouette(self, context):
     space_data.use_matcap = False
     space_data.show_only_render = True
 
+
   else:
 
     light[0].diffuse_color = option.first_light_diffuse

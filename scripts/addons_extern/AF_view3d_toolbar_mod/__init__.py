@@ -294,7 +294,7 @@ class VIEW3D_PT_tools_layers(View3DPanel, Panel):
 
 
 class VIEW3D_PT_tools_relations(View3DPanel, Panel):
-    bl_category = "Tools"
+    bl_category = "Relations"
     bl_context = "objectmode"
     bl_label = "Relations"
 

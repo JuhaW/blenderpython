@@ -80,7 +80,7 @@ class CutoutAnimationInfo(bpy.types.Panel):
     bl_label = "Cutout Animation Social"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_category = "Cutout Animation"
+    bl_category = "Animation"
     
     @classmethod
     def poll(cls, context):
@@ -144,7 +144,7 @@ class CutoutAnimationObjectProperties(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_label = "Object Properties"
-    bl_category = "Cutout Animation"
+    bl_category = "Animation"
     
     @classmethod
     def poll(cls, context):
@@ -375,7 +375,7 @@ class CutoutAnimationTools(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_label = "Cutout Animation Tools"
-    bl_category = "Cutout Animation"
+    bl_category = "Animation"
     
     def snapping(self,context):
         if bpy.context.scene.coa_surface_snap:
@@ -661,7 +661,7 @@ class CutoutAnimationCollections(bpy.types.Panel):
     bl_label = "Cutout Animation Collections"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
-    bl_category = "Cutout Animation"
+    bl_category = "Animation"
     
     
     def set_actions(self,context):

@@ -1267,6 +1267,7 @@ class VIEW3D_MT_object(Menu):
         
         layout.menu("VIEW3D_MT_transform_object", icon='MANIPUL')
         layout.menu("VIEW3D_MT_snap", icon='CURSOR')
+        layout.menu("VIEW3D_MT_object_apply", icon='MATPLANE')
         layout.menu("VIEW3D_MT_object_parent", icon='ROTACTIVE')
         layout.menu("VIEW3D_MT_object_group", icon='GROUP')
         layout.menu("VIEW3D_MT_object_animation", icon="KEY_HLT")

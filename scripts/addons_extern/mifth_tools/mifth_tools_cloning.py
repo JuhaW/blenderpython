@@ -162,7 +162,7 @@ class MFTPanelCloning(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_context = "objectmode"
-    bl_category = 'Mifth'
+    bl_category = 'Tools'
     # bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):

@@ -22,7 +22,7 @@ bl_info = {
     "author": "MKB",
     "version": (0,1),
     "blender": (2, 7, 7),
-    "category": "User Display"
+    "category": "ToolPlus"
     }
 
 

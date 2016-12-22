@@ -6,3 +6,7 @@ def toggle(self, context):
     layout = self.layout
 
     layout.prop(context.scene.silhouette, 'show_silhouette')
+
+    if context.scene.silhouette.show_silhouette:
+
+      layout.prop(context.user_preferences.themes['Default'].view_3d.space.gradients, 'high_gradient', text='')

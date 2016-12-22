@@ -26,7 +26,6 @@ from bpy.types import Operator, AddonPreferences, PropertyGroup
 class MI_Addon_Settings(AddonPreferences):
     bl_idname = __package__
 
-    #from mi_settings
     key_inputs = EnumProperty(
         name = "Key Inputs Style",
         items = (('Blender', 'Blender', ''),
