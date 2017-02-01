@@ -20,7 +20,7 @@
 bl_info = {
     'name': 'Align Tools',
     'author': 'chromoly',
-    'version': (0, 1, 2),
+    'version': (0, 1, 3),
     'blender': (2, 78, 0),
     'location': 'View3D > Toolshelf',
     'description': '',
@@ -324,7 +324,7 @@ class PanelMain(bpy.types.Panel):
     bl_idname = 'LA_PT_main'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-    bl_category = 'Move'
+    bl_category = 'Tools'
     bl_label = 'Align Tools'
     bl_options = {'DEFAULT_CLOSED'}
 

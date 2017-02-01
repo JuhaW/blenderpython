@@ -68,6 +68,7 @@ except NameError:
     from ..utils import addongroup
     from ..utils import registerinfo
     from ..utils import utils
+    from ..utils import vagl
 from .modalmanager import ModalHandlerManager
 
 
@@ -91,7 +92,7 @@ class ScreenCastKeysPreferences(
     )
     color_shadow = bpy.props.FloatVectorProperty(
         name='Shadow Color',
-        default=(0.0, 0.0, 0.0, 1.0),
+        default=(0.0, 0.0, 0.0, 0.0),
         min=0.0,
         max=1.0,
         subtype='COLOR_GAMMA',
@@ -671,6 +672,7 @@ class ScreencastKeysStatus(bpy.types.Operator):
                 py += th + th * cls.SEPARATOR_HEIGHT
 
         bgl.glColor3f(*prefs.color)
+        margin = th * 0.2
         if cls.hold_keys or mhm.is_rendering():
             col = prefs.color_shadow[:3] + (prefs.color_shadow[3] * 2,)
             mod_names = cls.sorted_modifiers(cls.hold_keys)
@@ -681,24 +683,20 @@ class ScreencastKeysStatus(bpy.types.Operator):
                     text = ''
             else:
                 text = ' + '.join(mod_names)
-            blf.position(font_id, px, py, 0)
-            # blf.draw(font_id, text)
+
+            ofsy = -th * 0.0
+            box_h = th + margin * 2
+            blf.position(font_id, px, py + margin, 0)
             draw_text(text)
-            py += th
+            w, h = blf.dimensions(font_id, text)
+            vagl.draw_rounded_box(px - margin, py - margin + ofsy,
+                                  w + margin * 2, box_h, box_h * 0.2)
             draw_any = True
-        else:
-            py += th
+        py += th + margin * 2
 
         event_log = cls.removed_old_event_log()
 
-        if cls.hold_keys or event_log:
-            py += th * cls.SEPARATOR_HEIGHT * 0.2
-            tw = blf.dimensions(font_id, 'Left Mouse')[0]  # 適当
-            draw_line((px, py), (px + tw, py))
-            py += th * cls.SEPARATOR_HEIGHT * 0.8
-            draw_any = True
-        else:
-            py += th * cls.SEPARATOR_HEIGHT
+        py += th * cls.SEPARATOR_HEIGHT
 
         for event_time, event_type, modifiers, count in event_log[::-1]:
             color = prefs.color
@@ -983,7 +981,6 @@ class ScreencastKeysPanel(bpy.types.Panel):
     bl_label = 'Screencast Keys'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Display'
 
     def draw_header(self, context):
         layout = self.layout

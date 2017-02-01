@@ -20,7 +20,7 @@
 bl_info = {
     'name': 'List Valid Keys',
     'author': 'chromoly',
-    'version': (0, 1, 2),
+    'version': (0, 1, 3),
     'blender': (2, 78, 0),
     'location': 'Screen -> Shift + Ctrl + Alt + \\',
     'description': 'Print valid shortcut',
@@ -93,11 +93,10 @@ class wmKeyMap(ct.Structure):
     ]
 
 
-def _handler_keymaps(context, handlers):
+def _handler_keymaps(kc, handlers):
     if not handlers.first:
         return []
 
-    wm = context.window_manager
     keymaps = []
     handler_ptr = ct.cast(ct.c_void_p(handlers.first),
                           ct.POINTER(structures.wmEventHandler))
@@ -111,7 +110,7 @@ def _handler_keymaps(context, handlers):
                     km = ct.cast(ct.c_void_p(handler.keymap),
                                  ct.POINTER(wmKeyMap)).contents
                     name = km.idname.decode()
-                    keymap = wm.keyconfigs.user.keymaps.get(name)
+                    keymap = kc.keymaps.get(name)
                     if keymap:
                         keymaps.append(keymap.active())
                     else:
@@ -121,51 +120,54 @@ def _handler_keymaps(context, handlers):
     return keymaps
 
 
-def _window_modal_keymaps(context, window):
+def _window_modal_keymaps(kc, window):
     if not window:
         return []
     win = ct.cast(ct.c_void_p(window.as_pointer()),
                   ct.POINTER(structures.wmWindow)).contents
-    return _handler_keymaps(context, win.modalhandlers)
+    return _handler_keymaps(kc, win.modalhandlers)
 
 
-def _region_keymaps(context, region):
+def _region_keymaps(kc, region):
     if not region:
         return []
     ar = ct.cast(ct.c_void_p(region.as_pointer()),
                  ct.POINTER(structures.ARegion)).contents
-    return _handler_keymaps(context, ar.handlers)
+    return _handler_keymaps(kc, ar.handlers)
 
 
-def _area_keymaps(context, area):
+def _area_keymaps(kc, area):
     if not area:
         return []
     sa = ct.cast(ct.c_void_p(area.as_pointer()),
                  ct.POINTER(structures.ScrArea)).contents
-    return _handler_keymaps(context, sa.handlers)
+    return _handler_keymaps(kc, sa.handlers)
 
 
-def _window_keymaps(context, window):
+def _window_keymaps(kc, window):
     if not window:
         return []
     win = ct.cast(ct.c_void_p(window.as_pointer()),
                   ct.POINTER(structures.wmWindow)).contents
-    return _handler_keymaps(context, win.handlers)
+    return _handler_keymaps(kc, win.handlers)
 
 
-def context_keymaps(context, regions=None):
+def context_keymaps(context, keymap_type='USER', regions=None):
+    wm = context.window_manager
+    kc = getattr(wm.keyconfigs, keymap_type.lower())
+
     keymap_list = []
     # 'Screen Editing'
-    keymap_list.extend(_window_modal_keymaps(context, context.window))
+    keymap_list.extend(_window_modal_keymaps(kc, context.window))
     # region
     if regions is None:
         regions = [context.region]
     for region in regions:
-        keymap_list.extend(_region_keymaps(context, region))
+        keymap_list.extend(_region_keymaps(kc, region))
     # area (大抵は空)
-    keymap_list.extend(_area_keymaps(context, context.area))
+    keymap_list.extend(_area_keymaps(kc, context.area))
     # 'Window', 'Screen'
-    keymap_list.extend(_window_keymaps(context, context.window))
+    keymap_list.extend(_window_keymaps(kc, context.window))
 
     keymap_list = sorted(set(keymap_list), key=keymap_list.index)
     return keymap_list
@@ -182,6 +184,21 @@ class WM_OT_list_valid_keys(bpy.types.Operator):
     bl_idname = 'wm.list_valid_keys'
     bl_label = 'List Valid Keys'
     bl_description = 'See Console(Command prompt)'
+
+    keymap_type = bpy.props.EnumProperty(
+        name='KeyMap Type',
+        items=(('DEFAULT', 'Default', ''),
+               ('ADDON', 'Addon', ''),
+               # ('USER_MOD', 'User Modified', ''),
+               ('USER', 'User', 'Final keymaps')),
+        default='USER',
+        options={'SKIP_SAVE'}
+    )
+    use_all = bpy.props.BoolProperty(
+        name='All',
+        description='Ignore priority. Not include modal keymaps',
+        options={'SKIP_SAVE'}
+    )
 
     use_window = bpy.props.BoolProperty(
         name='Window', options={'SKIP_SAVE'})
@@ -205,6 +222,14 @@ class WM_OT_list_valid_keys(bpy.types.Operator):
         options={'SKIP_SAVE'}
     )
 
+    def __init__(self):
+        context = bpy.context
+        self.area = context.area
+        self.region = context.region
+
+    def check(self, context):
+        return True
+
     @staticmethod
     def sorted_region_types(region_types):
         prop = bpy.types.Region.bl_rna.properties['type']
@@ -220,16 +245,27 @@ class WM_OT_list_valid_keys(bpy.types.Operator):
         raise ValueError()
 
     def draw(self, context):
+        area = self.area
+        region = self.region
+
         layout = self.layout
+
+        layout.prop(self, 'keymap_type', text='KeyMap')
+        layout.prop(self, 'use_all')
+
         column = layout.column()
-        area_name = self.enum_item_identifer_to_name(
-            bpy.types.Area, 'type', context.area.type)
-        region_name = self.enum_item_identifer_to_name(
-            bpy.types.Region, 'type', context.region.type)
-        column.label('{} - {}'.format(area_name, region_name))
-        area_region_types = set(r.type for r in context.area.regions)
+        if self.use_all:
+            column.active = False
+            column.label('')
+        else:
+            area_name = self.enum_item_identifer_to_name(
+                bpy.types.Area, 'type', area.type)
+            region_name = self.enum_item_identifer_to_name(
+                bpy.types.Region, 'type', region.type)
+            column.label('{} - {}'.format(area_name, region_name))
+        area_region_types = set(r.type for r in area.regions)
         area_region_types = self.sorted_region_types(area_region_types)
-        visible_region_types = set(r.type for r in context.area.regions
+        visible_region_types = set(r.type for r in area.regions
                            if r.id != 0)
         flow = column.column_flow(2)
         for region_type in area_region_types:
@@ -241,44 +277,59 @@ class WM_OT_list_valid_keys(bpy.types.Operator):
     def execute(self, context):
         output = []
 
-        area_region_types = set(r.type for r in context.area.regions)
-        region_types = []
-        for attr in dir(self):
-            if attr.startswith('use_'):
-                region_type = attr.replace('use_', '').upper()
-                if region_type in area_region_types:
-                    if getattr(self, attr):
-                        region_types.append(region_type)
-        region_types = self.sorted_region_types(region_types)
-        region_types_name = [
-            self.enum_item_identifer_to_name(bpy.types.Region, 'type', rt)
-            for rt in region_types]
+        wm = context.window_manager
+        kc = getattr(wm.keyconfigs, self.keymap_type.lower())
 
-        area = context.area
-        # region = context.region
-        if len(region_types) == 1:
-            rt = region_types_name[0]
-        elif len(region_types_name) > 1:
-            rt = '[{}]'.format(', '.join(region_types_name))
+        if self.use_all:
+            output.append('Key Maps')
+            keymap_list = []
+            for km in kc.keymaps:
+                if not km.is_modal:
+                    keymap_list.append(km)
         else:
-            rt = 'NONE'
-        area_name = self.enum_item_identifer_to_name(
-            bpy.types.Area, 'type', area.type)
-        output.append('<{} - {}> Key Maps'.format(area_name, rt))
+            area_region_types = set(r.type for r in context.area.regions)
+            region_types = []
+            for attr in dir(self):
+                if attr.startswith('use_'):
+                    region_type = attr.replace('use_', '').upper()
+                    if region_type in area_region_types:
+                        if getattr(self, attr):
+                            region_types.append(region_type)
+            region_types = self.sorted_region_types(region_types)
+            region_types_name = [
+                self.enum_item_identifer_to_name(bpy.types.Region, 'type', rt)
+                for rt in region_types]
 
-        regions = [r for r in area.regions if r.type in region_types]
-        keymaps = context_keymaps(context, regions)
+            area = context.area
+            # region = context.region
+            if len(region_types) == 1:
+                rt = region_types_name[0]
+            elif len(region_types_name) > 1:
+                rt = '[{}]'.format(', '.join(region_types_name))
+            else:
+                rt = 'NONE'
+            area_name = self.enum_item_identifer_to_name(
+                bpy.types.Area, 'type', area.type)
+            output.append('<{} - {}> Key Maps'.format(area_name, rt))
 
+            regions = [r for r in area.regions if r.type in region_types]
+            keymap_list = context_keymaps(context, self.keymap_type, regions)
+
+        keymap_list_valid = []
         keymap_items = []
         kmi_km = {}
-        for km in keymaps:
-            if not self.include_invalid_keymaps:
+        km_name_max = kmi_name_max = 0
+        for km in keymap_list:
+            if not self.use_all and not self.include_invalid_keymaps:
                 if not keymap_poll(context, km):
                     output.append('    {}  ...fail'.format(km.name))
                     continue
+            keymap_list_valid.append(km)
             output.append('    {}'.format(km.name))
+            km_name_max = max(km_name_max, len(km.name))
             for kmi in km.keymap_items:
                 if kmi.active:
+                    kmi_name_max = max(kmi_name_max, len(kmi.name))
                     keymap_items.append(kmi)
                     kmi_km[kmi] = km
         output.append('')
@@ -310,6 +361,13 @@ class WM_OT_list_valid_keys(bpy.types.Operator):
                  'EVT_TWEAK_A': 'EVT_TWEAK_R',
                  'EVT_TWEAK_S': 'EVT_TWEAK_L',
                  }
+        if context.user_preferences.inputs.invert_zoom_wheel:
+            d['WHEELINMOUSE'] = 'WHEELDOWNMOUSE'
+            d['WHEELOUTMOUSE'] = 'WHEELUPMOUSE'
+        else:
+            d['WHEELINMOUSE'] = 'WHEELUPMOUSE'
+            d['WHEELOUTMOUSE'] = 'WHEELDOWNMOUSE'
+
         d_reversed = {v: k for k, v in d.items()}
 
         keymap_items_grouped = {}
@@ -330,8 +388,6 @@ class WM_OT_list_valid_keys(bpy.types.Operator):
                 t += ' ({})'.format(type_items[d_reversed[kmi_type]])
             output.append('{}'.format(t))
 
-            name_max = max([len(kmi.name) for kmi in items])
-
             for kmi in items:
                 mod = '*' if kmi.any else ' '
                 mod += 'S' if kmi.shift else '-'
@@ -343,13 +399,17 @@ class WM_OT_list_valid_keys(bpy.types.Operator):
                 else:
                     mod += '   '
                 # TODO: key_modifierが一文字でないとインデントが崩れる
-                output.append('    {} {:{}}    {:{}}    ({})'.format(
+                txt = '    {} {:{}}  {:{}}  {:{}}  {}'.format(
                     mod,
                     value_items[kmi.value],
                     value_max,
                     "'" + kmi.name + "'",
-                    name_max + 2,
-                    kmi_km[kmi].name))
+                    kmi_name_max + 2,
+                    '(' + kmi_km[kmi].name + ')',
+                    kmi_name_max + 2,
+                    'U' if kmi.is_user_defined or kmi.is_user_modified else ''
+                )
+                output.append(txt.rstrip())
         output.append('')
 
         output.append('Unused:')

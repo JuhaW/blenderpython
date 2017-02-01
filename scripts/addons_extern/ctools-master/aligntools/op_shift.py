@@ -25,7 +25,6 @@ from mathutils import Matrix, Vector
 import mathutils.geometry as geom
 import bmesh
 
-from ..utils import vaprops as vap
 from ..utils import vamath as vam
 from ..utils import vabmesh as vabm
 from ..utils import vaoperator as vaop
@@ -51,64 +50,84 @@ class OperatorShift(vaop.OperatorTemplate, bpy.types.Operator):
     p = bpy.types.Operator.bl_rna.properties['bl_options']
 
     # --- Shift Outline ---
-    offset_tangent = vap.FP('Tangent Offset', options={'SKIP_SAVE'}, step=1)
-    use_even_offset_tangent = vap.BP(
-        'Offset Even', 'Scale the offset to give more even thickness',
+    offset_tangent = bpy.props.FloatProperty(
+        name='Tangent Offset',
+        step=1,
+        options={'SKIP_SAVE'})
+    use_even_offset_tangent = bpy.props.BoolProperty(
+        name='Offset Even',
+        description='Scale the offset to give more even thickness',
         default=True)
-    tangent_calculation = vap.EP(
-        'Tangent Calculation',
+    tangent_calculation = bpy.props.EnumProperty(
+        name='Tangent Calculation',
         items=(('selected', 'Selected', ''),
                ('deselected', 'Deselected', ''),
                ('individual', 'Individual',
                 'Used for extrude individual')),
         default='selected')
-    align_edges = vap.BP('Align Edges', default=False)
-    align_edges_position = vap.FP(
-        'Align Edges Factor', min=0.0, max=1.0, soft_min=0.0, soft_max=1.0,
-        default=0.5, subtype='FACTOR')
+    align_edges = bpy.props.BoolProperty(
+        name='Align Edges')
+    align_edges_position = bpy.props.FloatProperty(
+        name='Align Edges Factor',
+        min=0.0,
+        max=1.0,
+        default=0.5,
+        subtype='FACTOR')
 
     # --- Solidify ---
-    offset_normal = vap.FP('Normal Offset', options={'SKIP_SAVE'}, step=1)
-    use_even_offset_normal = vap.BP(
-        'Offset Even', 'Scale the offset to give more even thickness',
+    offset_normal = bpy.props.FloatProperty(
+        name='Normal Offset',
+        step=1,
+        options={'SKIP_SAVE'})
+    use_even_offset_normal = bpy.props.BoolProperty(
+        name='Offset Even',
+        description='Scale the offset to give more even thickness',
         default=True)
-    normal_calculation = vap.EP(
-        'Normal Calculation',
+    normal_calculation = bpy.props.EnumProperty(
+        name='Normal Calculation',
         items=(('all', 'All', ''),
                ('selected', 'Selected', ''),
                ('deselected', 'Deselected', ''),
                ('individual', 'Individual',
                 'Used for extrude individual')),
         default='selected')
-    tri_angle_threshold = vap.FP(
-        'Tri Angle Threshold', '三角形同士の角度がこれ以下なら平面と見做す',
-        default=math.radians(0.1), min=0.0, precision=6, subtype='ANGLE')
+    tri_angle_threshold = bpy.props.FloatProperty(
+        name='Tri Angle Threshold',
+        description='三角形同士の角度がこれ以下なら平面と見做す',
+        default=math.radians(0.1),
+        min=0.0,
+        precision=6,
+        subtype='ANGLE')
 
     intersect_angle_threshold = math.radians(0.1)  # 固定でいいはず
 
     # --- Common ---
-    use_world_coords = vap.BP('Use World Coordinates', default=False)
-    extrude = vap.EP(
-        'Extrude',
+    use_world_coords = bpy.props.BoolProperty(
+        name='Use World Coordinates')
+    extrude = bpy.props.EnumProperty(
+        name='Extrude',
         items=(('none', 'None', ''),
                ('extrude', 'Extrude', ''),
                ('individual', 'Individual', 'Extrude individual'),),
         default='none')
-    extrude_move_original = vap.BP(
-        'Move Original Verts', "Used for 'extrude' and 'individual'",
-        default=False)
-    use_mirror_modifiers = vap.BP('Use Mirror Modifiers', default=True)
+    extrude_move_original = bpy.props.BoolProperty(
+        name='Move Original Verts',
+        description="Used for 'extrude' and 'individual'")
+    use_mirror_modifiers = bpy.props.BoolProperty(
+        name='Use Mirror Modifiers', default=True)
 
-    mode = vap.EP('Mode',
-                  items=(('tangent', 'Tangent', ''),
-                         ('normal', 'Normal', ''),
-                         ('none', 'None', '')),
-                  default='none',
-                  options={'HIDDEN'})
+    mode = bpy.props.EnumProperty(
+        name='Mode',
+        items=(('tangent', 'Tangent', ''),
+               ('normal', 'Normal', ''),
+               ('none', 'None', '')),
+        default='none',
+        options={'HIDDEN'})
 
-    cursor_to_center = vap.BP(
-        'Cursor to Center', 'Set cursor position at region center',
-        default=False, options={'SKIP_SAVE'})
+    cursor_to_center = bpy.props.BoolProperty(
+        name='Cursor to Center',
+        description='Set cursor position at region center',
+        options={'SKIP_SAVE'})
 
     WIRE = 1
     BORDER = 1 << 1  # WIREとBORDERのフラグが両方立つことはない

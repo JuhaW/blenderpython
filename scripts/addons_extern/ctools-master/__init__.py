@@ -20,7 +20,7 @@
 bl_info = {
     'name': 'CTools',
     'author': 'chromoly',
-    'version': (1, 8, 2),
+    'version': (1, 8, 3),
     'blender': (2, 78, 0),
     'location': '',
     'description': 'Collection of add-ons',
@@ -58,6 +58,7 @@ class CToolsPreferences(addongroup.AddonGroupPreferences,
         'aligntools',
         'boolutils',
         'drawnearest',
+        'editpanelcategory',
         'emulatenumpad',
         '_groupmanager',
         'filebrowserconfirm',
@@ -71,6 +72,7 @@ class CToolsPreferences(addongroup.AddonGroupPreferences,
         'regionruler',
         '_renametool',
         'screencastkeys',
+        '_specialkeybind',
         'splashscreen',
         'updatetag',
         'uvgrid',
@@ -84,6 +86,9 @@ class CToolsPreferences(addongroup.AddonGroupPreferences,
         '_space_view3d_utility_menu',
         '_mesh_add_custom_menu_items',
         '_wm_custom_keymap',
+
+        # 作業中
+        '_groupinstance',
     ]
 
 

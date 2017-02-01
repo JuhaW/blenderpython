@@ -24,21 +24,38 @@ context.active_bone: EditBone or Bone
 context.active_pose_bone: PoseBone
 
 EditBone:
-    matrix: 4x4。local座標系。scale成分は含まない。
+    <Armature Space>
+    matrix: 4x4。scale成分は含まない。
 
 Bone:
-    matrix: 3x3。parent_bone座標系。scale成分は含まない。
-    matrix_local: 4x4。local座標系。scale成分は含まない。EditBone.matrixと同じ。
+    <Bone Space>  親Bone基準の座標系。scale成分は含まず、親tailが原点。
+    matrix: 3x3行列。
+        (source: Bone.bone_mat  # rotation derived from head/tail/roll)
+    head: (source: Bone.head)
+    tail: (source: Bone.tail)
+
+    <Armature Space>
+    matrix_local: 4x4行列。scale成分は含まない。EditBone.matrixと同じ。
+         (source: Bone.arm_mat  # matrix: (bonemat(b)+head(b))*arm_mat(b-1), rest pos)
+    head_local: (source: Bone.arm_head)
+    tail_local: (source: Bone.arm_head)
 
 PoseBone:
-    matrix: local座標系。ドライバやConstraintも適用済み。
-        初期状態はこれに影響しない。
+    <Object Space>
+    matrix: ドライバやConstraintを適用済み。
+        (souce: bPoseChannel.pose_mat
+         # constraints accumulate here. in the end, pose_mat = bone->arm_mat * chan_mat
+           this matrix is object space)
+         ※ 実際の計算式はこうだが、コメが間違ってる？ pose_mat = chan_mat * bone->arm_mat
+    matrix_channel:
+        ドライバやConstraintを適用済み。読み込み専用。
+        PoseBone.matrix = PoseBone.matrix_channel * Bone.matrix_local という関係
+        (source: bPoseChannel.chan_mat
+         # matrix result of loc/quat/size, and where we put deform in, see next line)
 
-    matrix_basis: bone座標系。boneの初期状態からの差。
-        bone毎の座標系なので親の影響は受けない
-
-    matrix_channel: local座標系だが、この行列は初期状態からの差を表している。
-        ドライバやConstraintの適用前。読み込み専用。
+    <Pose Bone Space> (仮の名称)
+    matrix_basis:
+        location/scale/rotationのみ適用したもの。Constraint等は含まない
 """
 
 

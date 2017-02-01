@@ -481,7 +481,7 @@ def draw_add_curve_panel_layout(self, context, layout):
 class VIEW3D_TP_Add_Curve_Panel_TOOLS(bpy.types.Panel):
     bl_category = "Curve"
     bl_idname = "VIEW3D_TP_Add_Curve_Panel_TOOLS"
-    bl_label = "Add"
+    bl_label = "Curves"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
     bl_options = {'DEFAULT_CLOSED'}
@@ -496,7 +496,7 @@ class VIEW3D_TP_Add_Curve_Panel_TOOLS(bpy.types.Panel):
 
 class VIEW3D_TP_Add_Curve_Panel_UI(bpy.types.Panel):
     bl_idname = "VIEW3D_TP_Add_Curve_Panel_UI"
-    bl_label = "Add"
+    bl_label = "Curves"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_options = {'DEFAULT_CLOSED'}

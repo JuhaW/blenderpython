@@ -37,18 +37,22 @@ bl_info = {
 # Import From Files
 if "bpy" in locals():
     import importlib
-    importlib.reload(display_mode)
+    importlib.reload(display)
     importlib.reload(fast_navigate)
     importlib.reload(modifier_tools)
     importlib.reload(scene_vis)
     importlib.reload(shading_menu)
+    importlib.reload(select_tools)
+    importlib.reload(useless_tools)
 
 else:
-    from . import display_mode
+    from . import display
     from . import fast_navigate
     from . import modifier_tools
     from . import scene_vis
     from . import shading_menu
+    from . import select_tools
+    from . import useless_tools
 
 import bpy
 from bpy.types import (
@@ -81,119 +85,81 @@ class DisplayToolsPanel(bpy.types.Panel):
     bl_category = 'Display'
     bl_options = {'DEFAULT_CLOSED'}
 
+    draw_type_icons = {'BOUNDS':'BBOX',
+                       'WIRE':'WIRE',
+                       'SOLID':'SOLID', 
+                       'TEXTURED':'POTATO'}
+    
+    bounds_icons = {'BOX':'MESH_CUBE',
+                    'SPHERE':'MATSPHERE',
+                    'CYLINDER':'MESH_CYLINDER',
+                    'CONE':'MESH_CONE'}
+
     def draw(self, context):
         scene = context.scene
         DISPLAYDROP = scene.UTDisplayDrop
         SHADINGDROP = scene.UTShadingDrop
         SCENEDROP = scene.UTSceneDrop
         MODIFIERDROP = scene.UTModifierDrop
+        SELECT2DROP = scene.UTSelect2Drop
+        SUBSURF1DROP = scene.UTSubSurf1Drop
+        WIREDROP = scene.UTWireDrop
+        VIEWPORTDROP = scene.UTViewPortDrop
+        MISCDROP = scene.UTMiscDrop
         FASTNAVDROP = scene.UTFastnavDrop
         view = context.space_data
         toolsettings = context.tool_settings
         layout = self.layout
         ob = context.object
-        # Display options
-        box1 = self.layout.box()
-        col = box1.column(align=True)
-        row = col.row(align=True)
-#        row.alignment = 'CENTER'
-        row.prop(scene, "UTDisplayDrop", icon="TRIA_DOWN")
-        if not DISPLAYDROP:
-            row.prop(ob, "show_name", text="", icon='SORTALPHA')
-            row.prop(ob, "show_texture_space", text="", icon='FACESEL_HLT')
-            row.menu("VIEW3D_MT_Shade_menu", icon='SOLID', text="" )
-        if DISPLAYDROP:
-            col = box1.column(align=True)
-            row = col.row(align=True)
-            row.operator("view3d.display_draw_change", text="Textured",
-                         icon='TEXTURE_SHADED').drawing = 'TEXTURED'
-            row.operator("view3d.display_draw_change", text="Solid",
-                        icon='SOLID').drawing = 'SOLID'
-            col = box1.column(align=True)
-            col.alignment = 'EXPAND'
-            row = col.row()
-            row.operator("view3d.display_draw_change", text="Wire",
-                         icon='WIRE').drawing = 'WIRE'
-            row.operator("view3d.display_draw_change", text="Bounds",
-                         icon='BBOX').drawing = 'BOUNDS'
 
-        # Shading options
-        box1 = self.layout.box()
-        col = box1.column(align=True)
-        row = col.row(align=True)
-#        row.alignment = 'CENTER'
-        row.prop(scene, "UTShadingDrop", icon="TRIA_DOWN")
-        if not SHADINGDROP:
-            row.operator("view3d.display_wire_all1", text="", icon='WIRE')
-        if SHADINGDROP:
-            scene = context.scene
-            layout = self.layout
-            col = box1.column(align=True)
-            col.alignment = 'EXPAND'
-            row = col.row()
-            row.operator("view3d.display_shade_smooth_flat",
-                        text="Smooth").smoothing = True
-            row.operator("view3d.display_shade_smooth_flat",
-                        text="Flat").smoothing = False
-
-            row = col.row()
-            row.operator("view3d.display_shadeless_switch", "Shadeless On",
-                          icon='SOLID').shades = True
-            row.operator("view3d.display_shadeless_switch",
-                         "Shadeless Off", icon='SOLID').shades = False
-
-            row = col.row()
-            row.operator("view3d.display_wire_switch", "Wire On",
-                        icon='WIRE').wires = True
-            row.operator("view3d.display_wire_switch", "Wire Off",
-                        icon='WIRE').wires = False
-
-            row = col.row()
-            row.operator("view3d.display_bounds_switch", "Bounds On",
-                        icon='BBOX').bounds = True
-            row.operator("view3d.display_bounds_switch", "Bounds Off",
-                        icon='BBOX').bounds = False
-
-            row = col.row()
-            row.operator("view3d.display_double_sided_switch",
-                         "DSided On", icon='MESH_DATA').double_side = True
-            row.operator("view3d.display_double_sided_switch",
-                         "DSided Off", icon='MESH_DATA').double_side = False
-
-            row = col.row()
-            row.operator("view3d.display_x_ray_switch",
-                         "XRay On", icon='GHOST_ENABLED').xrays = True
-            row.operator("view3d.display_x_ray_switch",
-                         "XRay Off", icon='GHOST_ENABLED').xrays = False
-
-            row = col.row()
-            scene = context.scene.display_tools
-            row.prop(scene, "BoundingMode")
-            row = col.row()
-
-        # Scene options
+        # Display Scene options
         box1 = self.layout.box()
         col = box1.column(align=True)
         row = col.row(align=True)
         scene = context.scene
 #        row.alignment = 'CENTER'
         row.prop(scene, "UTSceneDrop", icon="TRIA_DOWN")
-
+        if not SCENEDROP:
+            row.prop(ob, "show_texture_space", text="", icon='FACESEL_HLT')
+            row.prop(ob, "show_name", text="", icon='SORTALPHA')
+            row.prop(ob, "show_axis", text="", icon='AXIS_TOP')
         if SCENEDROP:
-            layout = self.layout
+            col = box1.column(align=True)
+            col.alignment = 'EXPAND'
+            row = col.row()
             scene = context.scene
             render = scene.render
             space = context.space_data
-            layout.prop(space, "show_manipulator")
-            layout.prop(space, "show_outline_selected")
-            layout.prop(space, "show_only_render")
-            layout.prop(space, "show_textured_solid")
-            layout.prop(space, "show_backface_culling")
-            layout.prop(space, "show_all_objects_origin")
-            layout.prop(render, "use_simplify", "Simplify")
+            row.prop(space, "show_manipulator")
+
+            view = context.space_data
+            scene = context.scene
+
+            col = box1.column(align=True)
+            col.alignment = 'EXPAND'
+            row = col.row()
+            row.prop(view, "show_only_render")
+            row = col.row()
+            row.prop(view, "show_world")
+            row = col.row()
+            row.prop(space, "show_outline_selected")
+            row = col.row()
+            row.prop(space, "show_all_objects_origin")
+            row = col.row()
+            row.prop(space, "show_backface_culling")
+            row = col.row()
+            scene = context.scene
+            ob = context.object
+            ob_type = ob.type
+            row.prop(ob, "show_x_ray", text="X-Ray")
+            if ob_type == 'MESH' or is_empty_image:
+                row = col.row()
+                row.prop(ob, "show_transparent", text="Transparency")
+            row = col.row()
+            row.prop(render, "use_simplify", "Simplify")
 
             if scene.render.use_simplify is True:
-                layout.label("Settings :")
+                row.label("Settings :")
                 row = layout.row()
                 box = row.box()
                 box.prop(render, "simplify_subdivision", "Subdivision")
@@ -202,50 +168,183 @@ class DisplayToolsPanel(bpy.types.Panel):
                 box.prop(render, "simplify_ao_sss", "AO and SSS")
                 layout.operator("view3d.display_simplify")
 
+        # Draw Type options
+        box1 = self.layout.box()
+        col = box1.column(align=True)
+        row = col.row(align=True)
+        row.prop(scene, "UTDisplayDrop", icon="TRIA_DOWN")
+        if not DISPLAYDROP:
+            row.operator("ut.wirehideall", icon="MATSPHERE", text="").show = False
+            row.operator("ut.wirehideall", icon="MESH_UVSPHERE", text="").show = True
+            row.operator("ut.all_edges", icon="MESH_GRID", text="").on = True
+        if DISPLAYDROP:
+            col = box1.column(align=True)
+            col.alignment = 'EXPAND'
+            row = col.row()
+            row.label(text="Maximum:")
+            row.prop(ob, "draw_type", text="", icon=self.draw_type_icons[ob.draw_type])
+
+            col = box1.column(align=True)
+            col.alignment = 'EXPAND'
+            col.label(text="Selected Object(s):")
+            row = col.row()
+            row.operator("view3d.display_draw_change", text="Wire",
+                         icon='WIRE').drawing = 'WIRE'
+            row.operator("view3d.display_draw_change", text="Solid",
+                        icon='SOLID').drawing = 'SOLID'
+            row = col.row()
+
+            row1 = col.row(align=True)
+            row.operator("view3d.display_draw_change", text="Textured",
+                         icon='TEXTURE_SHADED').drawing = 'TEXTURED'
+            row.operator("view3d.display_draw_change", text="Bounds",
+                         icon='BBOX').drawing = 'BOUNDS'
+
+            col = box1.column(align=True)
+            col.alignment = 'CENTER'
+            col.label(text="Wire Overlay:")
+
+            if context.scene.WT_handler_enable:
+                row = col.row()
+                row.operator('object.wt_selection_handler_toggle', icon='X')
+            else:
+                row = col.row()
+                row.operator('object.wt_selection_handler_toggle', icon='MOD_WIREFRAME')
+
+            col = box1.column(align=True)
+            col.alignment = 'CENTER'
+            row = col.row(align=True)
+            row.operator("object.wt_hide_all_wire", icon="SOLID", text="Hide All")
+            row.operator("af_ops.wire_all", text="Toggle", icon='WIRE')
+            row = col.row()
+
+            row1 = col.row(align=True)
+            row1.operator("ut.wirehidesel", icon="MATSPHERE", text="Hide").show = False
+            row1.operator("ut.wirehidesel", icon="MESH_UVSPHERE", text="Show").show = True
+            col = box1.column(align=True)
+            col.alignment = 'CENTER'
+            row = col.row()
+            row3 = col.row(align=True)
+            row3.alignment = 'CENTER'
+            row3.label(text="All Edges:")
+            row3.operator("ut.all_edges", icon="MESH_PLANE", text="Off").on = False
+            row3.operator("ut.all_edges", icon="MESH_GRID", text="On").on = True
+            col = box1.column(align=True)
+            col.alignment = 'EXPAND'
+            row = col.row()
+            scene = context.scene.display_tools
+            row.prop(scene, "BoundingMode")
+            row = col.row()
+            row.operator("view3d.display_bounds_switch", "Bounds On",
+                        icon='BBOX').bounds = True
+            row.operator("view3d.display_bounds_switch", "Bounds Off",
+                        icon='BBOX').bounds = False
+
+
+        # Shading options
+        box1 = self.layout.box()
+        col = box1.column(align=True)
+        row = col.row(align=True)
+        scene = context.scene
+        row.prop(scene, "UTShadingDrop", icon="TRIA_DOWN")
+
+        if not SHADINGDROP:
+            row.operator("object.shade_smooth", icon="SMOOTH", text="" )
+            row.operator("object.shade_flat", icon="MESH_ICOSPHERE", text="" )
+            row.menu("VIEW3D_MT_Shade_menu", icon='SOLID', text="" )
+        if SHADINGDROP:
+            scene = context.scene
+            layout = self.layout
+
+            col = box1.column(align=True)
+            col.alignment = 'EXPAND'
+
+            view = context.space_data
+            scene = context.scene
+            gs = scene.game_settings
+            obj = context.object
+
+            col = layout.column()
+
+            if not scene.render.use_shading_nodes:
+                col.prop(gs, "material_mode", text="")
+
+            if view.viewport_shade == 'SOLID':
+                col.prop(view, "show_textured_solid")
+                col.prop(view, "use_matcap")
+                if view.use_matcap:
+                    col.template_icon_view(view, "matcap_icon")
+            if view.viewport_shade == 'TEXTURED' or context.mode == 'PAINT_TEXTURE':
+                if scene.render.use_shading_nodes or gs.material_mode != 'GLSL':
+                    col.prop(view, "show_textured_shadeless")
+
+            col.prop(view, "show_backface_culling")
+
+            if view.viewport_shade not in {'BOUNDBOX', 'WIREFRAME'}:
+                if obj and obj.mode == 'EDIT':
+                    col.prop(view, "show_occlude_wire")
+
+            fx_settings = view.fx_settings
+
+            if view.viewport_shade not in {'BOUNDBOX', 'WIREFRAME'}:
+                sub = col.column()
+                sub.active = view.region_3d.view_perspective == 'CAMERA'
+                sub.prop(fx_settings, "use_dof")
+                col.prop(fx_settings, "use_ssao", text="Ambient Occlusion")
+                if fx_settings.use_ssao:
+                    ssao_settings = fx_settings.ssao
+                    subcol = col.column(align=True)
+                    subcol.prop(ssao_settings, "factor")
+                    subcol.prop(ssao_settings, "distance_max")
+                    subcol.prop(ssao_settings, "attenuation")
+                    subcol.prop(ssao_settings, "samples")
+                    subcol.prop(ssao_settings, "color")
+
         # Modifier options
         box1 = self.layout.box()
         col = box1.column(align=True)
         row = col.row(align=True)
 #        row.alignment = 'CENTER'
+        scene = context.scene
         row.prop(scene, "UTModifierDrop", icon="TRIA_DOWN")
-
+        if not MODIFIERDROP:
+            row.operator("ut.subsurfhideall", icon="MOD_SOLIDIFY", text="").show = False
+            row.operator("ut.subsurfhideall", icon="MOD_SUBSURF", text="").show = True
+            row.operator("ut.optimaldisplayall", icon="MESH_PLANE", text="").on = True
         if MODIFIERDROP:
             layout = self.layout
             col = box1.column(align=True)
             col.alignment = 'EXPAND'
             row = col.row()
+            row.label('Render Visibility')
+            row = col.row()
             row.operator("view3d.display_modifiers_render_switch", text="On",
                           icon='RENDER_STILL').mod_render = True
             row.operator("view3d.display_modifiers_render_switch",
                           text="Off").mod_render = False
-            row.operator("view3d.display_modifiers_viewport_switch", text="On",
-                         icon='RESTRICT_VIEW_OFF').mod_switch = True
-            row.operator("view3d.display_modifiers_viewport_switch",
-                        text="Off").mod_switch = False
+            row = col.row()
+            row.label('Viewport Visibility')
+            row1 = col.row(align=True)
+            row1.operator("ut.subsurfhidesel", icon="MOD_SOLIDIFY", text="Hide").show = False
+            row1.operator("ut.subsurfhidesel", icon="MOD_SUBSURF", text="Show").show = True
+            row2 = col.row(align=True)
+            row2.operator("ut.subsurfhideall", icon="MOD_SOLIDIFY", text="Hide All").show = False
+            row2.operator("ut.subsurfhideall", icon="MOD_SUBSURF", text="Show All").show = True
             col = box1.column(align=True)
+            row = col.row()
+            row.label('Edit Mode Visibility')
             row = col.row()
             row.operator("view3d.display_modifiers_edit_switch", text="On",
                         icon='EDITMODE_HLT').mod_edit = True
             row.operator("view3d.display_modifiers_edit_switch",
                         text="Off").mod_edit = False
+            row = col.row()
+            row.label('Modifier Cage')
+            row = col.row()
             row.operator("view3d.display_modifiers_cage_set", text="On",
                          icon='EDITMODE_HLT').set_cage = True
             row.operator("view3d.display_modifiers_cage_set",
                          text="Off").set_cage = False
-            row = col.row(align=True)
-            row.operator("view3d.display_modifiers_expand_collapse", text="Expand",
-                        icon='TRIA_DOWN').expands = True
-            row.operator("view3d.display_modifiers_expand_collapse", text="Collapse",
-                        icon='TRIA_RIGHT').expands = False
-            row = col.row(align=True)
-            row.operator("view3d.display_modifiers_apply", icon='MODIFIER')
-            row.operator("view3d.display_modifiers_delete", icon='X')
-
-            row = col.row(align=True)
-            row.operator("view3d.display_modifiers_set_dummy",
-                         icon='OUTLINER_OB_ARMATURE')
-            row.operator("view3d.display_modifiers_delete_dummy",
-                         icon='X')
             row = col.row(align=True)
 
             row.label("Subdivision Level", icon='MOD_SUBSURF')
@@ -258,6 +357,65 @@ class DisplayToolsPanel(bpy.types.Panel):
             row.operator("view3d.modifiers_subsurf_level_set", text="4").level = 4
             row.operator("view3d.modifiers_subsurf_level_set", text="5").level = 5
             row.operator("view3d.modifiers_subsurf_level_set", text="6").level = 6
+
+
+            row3 = col.row(align=True)
+            row3.operator("ut.optimaldisplaysel", icon="MESH_GRID", text="S").on = False
+            row3.operator("ut.optimaldisplaysel", icon="MESH_PLANE", text="S").on = True
+            row3.operator("ut.optimaldisplayall", icon="MESH_GRID", text="A").on = False
+            row3.operator("ut.optimaldisplayall", icon="MESH_PLANE", text="A").on = True
+            row4 = col.row(align=True)
+            row4.operator("ut.remove_all_subsurfs", icon="PANEL_CLOSE")
+
+# Selection options
+        box1 = self.layout.box()
+        col = box1.column(align=True)
+        row = col.row(align=True)
+#        row.alignment = 'CENTER'
+        row.prop(scene, "UTSelect2Drop", icon="TRIA_DOWN")
+
+        if SELECT2DROP:
+            if context.object != None:
+                if context.object.mode == 'OBJECT':
+                    layout.operator('opr.show_hide_object', text='Show/Hide', icon='GHOST_ENABLED')
+
+            layout.operator('opr.show_all_objects', text='Show All', icon='RESTRICT_VIEW_OFF')
+            layout.operator('opr.hide_all_objects', text='Hide All', icon='RESTRICT_VIEW_ON')
+            row = layout.row(align=True)
+            row.operator("op.render_show_all_selected", icon='RESTRICT_VIEW_OFF')
+            row.operator("op.render_hide_all_selected", icon='RESTRICT_VIEW_ON')
+            row = layout.row(align=True)
+            if context.object != None:
+                if context.object.mode == 'OBJECT':
+                    layout.operator('opr.select_all', icon='MOD_MESHDEFORM')
+                    layout.operator('opr.inverse_selection', icon='MOD_REMESH')
+                    row = layout.row(align=True)
+                    row.operator('view3d.select_border', icon='MESH_PLANE')
+                    row.operator('view3d.select_circle', icon='MESH_CIRCLE')
+                    row = layout.row(align=True)
+                    row.operator('object.duplicate_move', text='Duplicate', icon='MOD_ARRAY')
+                    row.operator('object.delete', text='Delete', icon='X')
+
+                if context.object.type == 'MESH':
+                    if context.object.mode == 'EDIT':
+                        layout.operator('opr.select_all', icon='MOD_MESHDEFORM')
+                        layout.operator('opr.inverse_selection', icon='MOD_REMESH')
+                        layout.operator('view3d.select_border', icon='MESH_PLANE')
+                        layout.operator('view3d.select_circle', icon='MESH_CIRCLE')
+                        layout.operator('mesh.select_linked', icon='ROTATECOLLECTION')
+                        layout.operator('opr.loop_multi_select', icon='OUTLINER_DATA_MESH')
+                        layout.operator('mesh.fill', icon='MOD_TRIANGULATE')
+                        layout.operator('mesh.duplicate_move', text='Duplicate', icon='MOD_ARRAY')
+                        layout.operator('opr.delete_verts', icon='VERTEXSEL')
+                        layout.operator('opr.delete_edges', icon='EDGESEL')
+                        layout.operator('opr.delete_faces', icon='FACESEL')
+                        layout.operator('opr.delete_only_faces', icon='SNAP_FACE')
+                        layout.operator('opr.delete_only_edges_faces', icon='SNAP_VOLUME')
+            else:
+                layout.operator('opr.select_all', icon='MOD_MESHDEFORM')
+                layout.operator('opr.inverse_selection', icon='MOD_REMESH')
+                layout.operator('view3d.select_border', icon='MESH_PLANE')
+                layout.operator('view3d.select_circle', icon='MESH_CIRCLE')
 
         # fast nav options
         box1 = self.layout.box()
@@ -273,7 +431,7 @@ class DisplayToolsPanel(bpy.types.Panel):
             row.alignment = 'LEFT'
             row.operator("view3d.fast_navigate_operator")
             row.operator("view3d.fast_navigate_stop")
-            layout.label("Settings :")
+            row.label("Settings :")
             row = layout.row()
             box = row.box()
             box.prop(scene, "OriginalMode")
@@ -284,11 +442,6 @@ class DisplayToolsPanel(bpy.types.Panel):
             box.alignment = 'LEFT'
             box.prop(scene, "ShowParticles")
             box.prop(scene, "ParticlesPercentageDisplay")
-
-
-
-
-
 # define scene props
 class display_tools_scene_props(PropertyGroup):
     # Init delay variables
@@ -374,17 +527,17 @@ class display_tools_scene_props(PropertyGroup):
             )
 
     bpy.types.Scene.UTDisplayDrop = bpy.props.BoolProperty(
-        name="Display",
+        name="Draw Type",
         default=False,
-        description="Disply Tools")
+        description="Disply Draw Types")
     bpy.types.Scene.UTShadingDrop = bpy.props.BoolProperty(
         name="Shading",
         default=False,
         description="Shading Display")
     bpy.types.Scene.UTSceneDrop = bpy.props.BoolProperty(
-        name="Scene",
+        name="Display",
         default=False,
-        description="Scene Display")
+        description="Scene Display Settings")
     bpy.types.Scene.UTModifierDrop = bpy.props.BoolProperty(
         name="Modifiers",
         default=False,
@@ -393,11 +546,36 @@ class display_tools_scene_props(PropertyGroup):
         name="Fast Nav",
         default=False,
         description="Fast Nav")
+    bpy.types.Scene.UTSelect2Drop = bpy.props.BoolProperty(
+        name="Selection",
+        default=False,
+        description="Selection")
+    bpy.types.Scene.UTSubSurf1Drop = bpy.props.BoolProperty(
+        name="Subsurf",
+        default=False,
+        description="Quick batch subsurf control")
+    bpy.types.Scene.UTWireDrop = bpy.props.BoolProperty(
+        name="Wire",
+        default=False,
+        description="Wire display and overlay controls")
+    bpy.types.Scene.UTViewPortDrop = bpy.props.BoolProperty(
+        name="View",
+        default=False,
+        description="Viewport display and performance tweaks")
+    bpy.types.Scene.UTMiscDrop = bpy.props.BoolProperty(
+        name="Misc",
+        default=False,
+        description="I love your robot hand!")
+    bpy.types.Scene.WT_handler_enable = bpy.props.BoolProperty(default=False)
+    bpy.types.Scene.WT_handler_previous_object = bpy.props.StringProperty(default='')
+    bpy.types.Scene.WT_only_selection = bpy.props.BoolProperty(name="Only Selection", default=False)
+    bpy.types.Scene.WT_invert = bpy.props.BoolProperty(name="Invert", default=False)
+    bpy.types.Scene.WT_display_tools = bpy.props.BoolProperty(name="Display WireTools paramaters", default=False)
+
 # Addons Preferences Update Panel
 panels = [
         DisplayToolsPanel
         ]
-
 
 def update_panel(self, context):
     try:
@@ -441,7 +619,6 @@ def register():
     bpy.utils.register_module(__name__)
     # Register Scene Properties
 
-
     bpy.types.Scene.display_tools = bpy.props.PointerProperty(
                                             type=display_tools_scene_props
                                             )
@@ -450,8 +627,7 @@ def register():
 
 def unregister():
     del bpy.types.Scene.display_tools
+
     bpy.utils.unregister_module(__name__)
-
-
 if __name__ == "__main__":
     register()

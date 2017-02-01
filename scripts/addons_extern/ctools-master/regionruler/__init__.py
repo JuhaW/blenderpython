@@ -20,7 +20,7 @@
 bl_info = {
     'name': 'Region Ruler',
     'author': 'chromoly',
-    'version': (2, 4, 3),
+    'version': (2, 4, 5),
     'blender': (2, 78, 0),
     'location': 'View3D > Properties, ImageEditor > Properties',
     'description': '',
@@ -36,8 +36,8 @@ View3D、ImageEditor、NodeEditorにRulerを表示。
 Measureボタンで簡易的な距離、角度の計測が出来る。Shift+左クリックでポインタ
 追加、右クリックで削除、Shift+右ドラッグで移動、Measureボタンをもう一度押すか
 ESCキーで終了。
-設定からSimpleMeasureを有効にしていると、Altキーを押している間この機能が有効に
-なる。
+設定からSimpleMeasureを有効にしていると、Alt+Shiftキーでこの機能が有効になり、
+Altキーを離すと終了する。
 
 各SpaceのUnit,Origin等の値はTextObjectへ保存される。
 
@@ -52,6 +52,7 @@ from decimal import Decimal
 import importlib
 import logging
 import math
+import re
 import string
 
 import bpy
@@ -69,7 +70,6 @@ try:
     importlib.reload(utils)
     importlib.reload(vagl)
     importlib.reload(vam)
-    importlib.reload(vap)
     importlib.reload(vav)
     importlib.reload(vawm)
 except NameError:
@@ -80,7 +80,6 @@ except NameError:
     from ..utils import unitsystem
     from ..utils import vagl
     from ..utils import vamath as vam
-    from ..utils import vaprops as vap
     from ..utils import vaview3d as vav
     from ..utils import vawm
 
@@ -116,63 +115,80 @@ logger.addHandler(handler)
 # Property
 ###############################################################################
 class RegionRuler_PG_Font(bpy.types.PropertyGroup):
-    id = vap.IP(
-        'ID',
-        'Font ID',
+    id = bpy.props.IntProperty(
+        name='ID',
+        description='Font ID',
         default=0,
-        min=0, max=100, soft_min=0, soft_max=100)
-    margin = vap.IP(
-        'Margin',
+        min=0,
+        max=100)
+    margin = bpy.props.IntProperty(
+        name='Margin',
         default=3,
-        min=0, max=50, soft_min=0, soft_max=50)
-    size = vap.IP(
-        'Size',
-        'Font size',
+        min=0,
+        max=50)
+    size = bpy.props.IntProperty(
+        name='Size',
+        description='Font size',
         default=10,
-        min=1, max=100, soft_min=1, soft_max=100)
-    mcsize = vap.IP(
-        'MC-Size', 'Font size of mouse coordinate',
+        min=1,
+        max=100)
+    mcsize = bpy.props.IntProperty(
+        name='MC-Size',
+        description='Font size of mouse coordinate',
         default=12,
-        min=1, max=100, soft_min=1, soft_max=100)
-    measize = vap.IP(
-        'Mea-Size',
-        'Font size of measure',
+        min=1,
+        max=100)
+    measize = bpy.props.IntProperty(
+        name='Mea-Size',
+        description='Font size of measure',
         default=11,
-        min=1, max=100, soft_min=1, soft_max=100)
+        min=1,
+        max=100)
 
 
 class RegionRuler_PG_Color(bpy.types.PropertyGroup):
-    line = vap.FVP(
-        'Line',
+    line = bpy.props.FloatVectorProperty(
+        name='Line',
         default=(1.0, 1.0, 1.0),
-        min=0, max=1, soft_min=0, soft_max=1,
-        subtype='COLOR_GAMMA', size=3)
+        min=0,
+        max=1,
+        subtype='COLOR_GAMMA',
+        size=3)
     # 線と数字の色をわざわざ分ける必要は無さそうなので
     def number_getter(self):
         return self.line
     def number_setter(self, value):
         self.line = value
-    number = vap.FVP(
-        'Number',
+    number = bpy.props.FloatVectorProperty(
+        name='Number',
         default=(1.0, 1.0, 1.0),
-        min=0.0, max=1.0, soft_min=0.0, soft_max=1.0,
-        subtype='COLOR_GAMMA', size=3,
-        get=number_getter, set=number_setter)
-    number_outline = vap.FVP(
-        'Number Outline',
+        min=0.0,
+        max=1.0,
+        subtype='COLOR_GAMMA',
+        size=3,
+        get=number_getter,
+        set=number_setter)
+    number_outline = bpy.props.FloatVectorProperty(
+        name='Number Outline',
         default=(0.0, 0.0, 0.0, 1.0),
-        min=0.0, max=1.0, soft_min=0.0, soft_max=1.0,
-        subtype='COLOR_GAMMA', size=4)
-    cursor = vap.FVP(
-        'Cursor',
+        min=0.0,
+        max=1.0,
+        subtype='COLOR_GAMMA',
+        size=4)
+    cursor = bpy.props.FloatVectorProperty(
+        name='Cursor',
         default=(1.0, 1.0, 1.0, 0.3),
-        min=0.0, max=1.0, soft_min=0.0, soft_max=1.0,
-        subtype='COLOR_GAMMA', size=4)
-    cursor_bold = vap.FVP(
-        'Cursor Bold',
+        min=0.0,
+        max=1.0,
+        subtype='COLOR_GAMMA',
+        size=4)
+    cursor_bold = bpy.props.FloatVectorProperty(
+        name='Cursor Bold',
         default=(1.0, 1.0, 1.0, 1.0),
-        min=0.0, max=1.0, soft_min=0.0, soft_max=1.0,
-        subtype='COLOR_GAMMA', size=4)
+        min=0.0,
+        max=1.0,
+        subtype='COLOR_GAMMA',
+        size=4)
 
 
 class RegionRuler_PG(bpy.types.PropertyGroup):
@@ -184,9 +200,9 @@ class RegionRuler_PG(bpy.types.PropertyGroup):
                     bpy.ops.view3d.region_ruler('INVOKE_DEFAULT', False)
         redraw_regions(context)
 
-    enable = vap.BP('Enable',
-                    default=False,
-                    update=_enabled_update)
+    enable = bpy.props.BoolProperty(
+        name='Enable',
+        update=_enabled_update)
 
     def _update_redraw(self, context):
         redraw_regions(context)
@@ -199,11 +215,14 @@ class RegionRuler_PG(bpy.types.PropertyGroup):
     def _measure_set(self, value):
         self.__class__._measure = value
 
-    measure = vap.BP('Measure',get=_measure_get, set=_measure_set,
-                     update=_update_redraw)
+    measure = bpy.props.BoolProperty(
+        name='Measure',
+        get=_measure_get,
+        set=_measure_set,
+        update=_update_redraw)
 
-    origin_type = vap.EP(
-        'Origin Type',
+    origin_type = bpy.props.EnumProperty(
+        name='Origin Type',
         items=(('scene', 'Scene', 'Scene origin'),
                ('object', 'Active Object', 'Active object origin'),
                ('cursor', '3D Cursor', ''),
@@ -212,8 +231,8 @@ class RegionRuler_PG(bpy.types.PropertyGroup):
         default='scene',
         update=_update_redraw
     )
-    image_editor_origin_type = vap.EP(
-        'Origin Type',
+    image_editor_origin_type = bpy.props.EnumProperty(
+        name='Origin Type',
         items=(('uv', 'UV / Image', 'Lower left'),
                ('cursor', '2D Cursor', ''),
                ('view', 'View Center', 'View center'),
@@ -222,22 +241,23 @@ class RegionRuler_PG(bpy.types.PropertyGroup):
         update=_update_redraw
     )
 
-    origin_location = vap.FVP(
-        'Origin Location',
+    origin_location = bpy.props.FloatVectorProperty(
+        name='Origin Location',
         default=(0, 0, 0),
         subtype='XYZ',
         unit='LENGTH',
         update=_update_redraw)
 
-    image_editor_origin_location = vap.FVP(
-        'Origin Location',
+    image_editor_origin_location = bpy.props.FloatVectorProperty(
+        name='Origin Location',
         default=(0, 0),
         subtype='XYZ',
         unit='LENGTH',
+        size=2,
         update=_update_redraw)
 
-    unit = vap.EP(
-        'Unit',
+    unit = bpy.props.EnumProperty(
+        name='Unit',
         items=(('auto', 'Automatic', 'Use scene.unit_settings.system'),
                ('none', 'None', 'Blender unit'),
                ('metric', 'Metric', ''),
@@ -245,16 +265,16 @@ class RegionRuler_PG(bpy.types.PropertyGroup):
         default='auto',
         update=_update_redraw)
 
-    image_editor_unit = vap.EP(
-        'ImageEditor Unit',
+    image_editor_unit = bpy.props.EnumProperty(
+        name='ImageEditor Unit',
         items=(('pixel', 'Pixel', ''),
                ('uv', 'UV', '')),
         default='pixel',
         update=_update_redraw,
     )
 
-    node_editor_unit = vap.EP(
-        'NodeEditor Unit',
+    node_editor_unit = bpy.props.EnumProperty(
+        name='NodeEditor Unit',
         items=(('node', 'Node',
                 'used in Node.location and SpaceNodeEditor.cursor_location'),
                ('view2d', 'View2D', '')),
@@ -262,9 +282,9 @@ class RegionRuler_PG(bpy.types.PropertyGroup):
         update=_update_redraw,
     )
 
-    view_depth = vap.EP(
-        'View Depth',
-        "Used in 'PERSP' or 'CAMERA'",
+    view_depth = bpy.props.EnumProperty(
+        name='View Depth',
+        description="Used in 'PERSP' or 'CAMERA'",
         items=(('view', 'View', 'View or Camera'),
                ('cursor', '3D Cursor', '')),
         default='view',
@@ -307,64 +327,75 @@ class RegionRulerPreferences(
 
     bl_idname = __name__
 
-    font = vap.PP(
-        'Font',
+    font = bpy.props.PointerProperty(
+        name='Font',
         type=RegionRuler_PG_Font)
-    color = vap.PP(
-        'Color',
+    color = bpy.props.PointerProperty(
+        name='Color',
         type=RegionRuler_PG_Color)
 
-    scale_size = vap.IVP(
-        'Scale Size',
-        '[main, even, odd]',
+    scale_size = bpy.props.IntVectorProperty(
+        name='Scale Size',
+        description='[main, even, odd]',
         default=(6, 3, 3),
-        min=0, max=40, soft_min=0, soft_max=40, size=3)
-    number_min_px = vap.IVP(
-        'Number min px',
-        '[5, 1]. 最小グリッドの大きさ(dot)がこの値より大きくなると'
+        min=0,
+        max=40,
+        size=3)
+    number_min_px = bpy.props.IntVectorProperty(
+        name='Number min px',
+        description='[5, 1]. 最小グリッドの大きさ(dot)がこの値より大きくなると'
         '最小グリッド*5(or最小グリッド)の位置に数値を表示する。',
         default=(18, 90),  # (18, 36)
-        min=1, max=120, soft_min=6, soft_max=60, size=2)
-    draw_mouse_coordinates = vap.BP(
-        'Mouse Coordinates',
-        default=False)
-    mouse_coordinates_position = vap.EP(
-        'Mouse Coordinates Position',
+        min=1,
+        max=120,
+        soft_min=6,
+        soft_max=60,
+        size=2)
+    draw_mouse_coordinates = bpy.props.BoolProperty(
+        name='Mouse Coordinates')
+    mouse_coordinates_position = bpy.props.EnumProperty(
+        name='Mouse Coordinates Position',
         items=(('cursor', 'Cursor', ''),
                ('lower_right', 'Lower Right', '')),
         default='cursor')
-    autohide_mouse_coordinate = vap.BP(
-        'Auto Hide Mouse Coordinates',
+    autohide_mouse_coordinate = bpy.props.BoolProperty(
+        name='Auto Hide Mouse Coordinates',
         default=True)
-    autohide_MC_threshold = vap.IP(
-        'Threshold',
-        'Auto hide threshold',
+    autohide_MC_threshold = bpy.props.IntProperty(
+        name='Threshold',
+        description='Auto hide threshold',
         default=10,
-        min=0, max=100, soft_min=0, soft_max=100)
-    use_simple_measure = vap.BP(
-        'Use Simple Measure',
-        'Hold alt key',
-        default=False)
-    use_fill = vap.BP(
-        'Use Fill',
+        min=0,
+        max=100)
+    use_simple_measure = bpy.props.BoolProperty(
+        name='Use Simple Measure',
+        description='Hold alt + shift key')
+    use_fill = bpy.props.BoolProperty(
+        name='Use Fill',
         description='Fill text box',
         default=True)
-    text_object_name = vap.SP(
-        'TextObject Name',
+    text_object_name = bpy.props.StringProperty(
+        name='TextObject Name',
         default='region_ruler.config')
 
-    draw_cross_cursor = vap.BP(
-        'Cross Cursor',
-        default=False)
-    cross_cursor = vap.IVP(
-        'Cross Cursor',
-        '[offset, size]',
+    draw_cross_cursor = bpy.props.BoolProperty(
+        name='Cross Cursor')
+    cross_cursor = bpy.props.IntVectorProperty(
+        name='Cross Cursor',
+        description='[offset, size]',
         default=(15, 0),
         min=0, size=2)
 
-    auto_save = vap.BP(
-        'Auto Save',
-        "If a modal operator is running, don't autosave. "
+    cache_size = bpy.props.IntProperty(
+        name='Cache Size',
+        default=500,
+        min=0,
+        max=2000
+    )
+
+    auto_save = bpy.props.BoolProperty(
+        name='Auto Save',
+        description="If a modal operator is running, don't autosave. "
         'So Use imitated automatic saving '
         '(Sculpt or edit mode data will be saved!)',
         default=True
@@ -411,6 +442,7 @@ class RegionRulerPreferences(
         # self.draw_property('image_editor_unit', col, row=True, expand=True)
         # self.draw_property('view_depth', col)
         self.draw_property('use_fill', col)
+        self.draw_property('cache_size', col)
         self.draw_property('auto_save', col)
 
         self.layout.separator()
@@ -433,7 +465,6 @@ def get_widget_unit(context):
 
 
 def get_view_location(context):
-    prefs = RegionRulerPreferences.get_instance()
     ruler_settings = context.space_data.region_ruler
     region = context.region
     rv3d = context.region_data
@@ -443,15 +474,20 @@ def get_view_location(context):
         if rv3d.view_perspective == 'CAMERA':
             obj = context.scene.camera
             camera = obj.data
-            if camera.dof_object:
+            if obj.type == 'CAMERA' and camera.dof_object:
                 view_location = camera.dof_object.matrix_world.to_translation()
             else:
                 mat = obj.matrix_world
                 vec = -mat.col[2].to_3d().normalized()  # カメラ視線方向
-                if camera.dof_distance != 0.0:
-                    f = camera.dof_distance
+                if obj.type == 'CAMERA':
+                    if camera.dof_distance != 0.0:
+                        f = camera.dof_distance
+                    else:
+                        f = (camera.clip_start + camera.clip_end) / 2
                 else:
-                    f = (camera.clip_start + camera.clip_end) / 2
+                    # BKE_camera_params_init()参照
+                    # clip_start = 0.1, clip_end = 100.0
+                    f = (0.1 + 100.0) / 2
                 view_location = mat.to_translation() + f * vec
         else:
             view_location = rv3d.view_location
@@ -464,6 +500,8 @@ def get_view_location(context):
 
 
 class Data:
+    CACHE_SIZE = 500
+
     def __init__(self):
         # RegionRuler_PG.enableをTrueとした際に、そのプロパティのupdate関数が
         # オペレータを呼び出すのを抑制する
@@ -510,9 +548,11 @@ class Data:
         self.simple_measure = False
         self.measure_points = []  # 3D
         #self.active_point_index = None
-        self.shift = None
-        self.alt = False
+        self.hold_right = False  # measure用
         self.alt_disable_count = 0
+
+        # Cache
+        self.cache = OrderedDict()
 
     def wm_sync(self):
         """WindowManagerに存在しない物をself.operatorsとself.spacesから削除。
@@ -702,6 +742,61 @@ class Data:
         if is_inside:
             self.last_region_id = region.id
 
+    def make_cache_key(self, d):
+        """draw_free_ruler()のlocals()を引数に受け取る"""
+
+        prefs = d['prefs']
+        font = prefs.font
+        context = d['context']
+        region = context.region
+        unit_system = data.unit_system
+
+        # measure対策
+        area = context.area
+        if area.type == 'VIEW_3D':
+            pmat = tuple([tuple(row) for row in
+                         context.region_data.perspective_matrix])
+        else:
+            pmat = None
+
+        return (
+            tuple(d['start']),
+            tuple(d['end']),
+            d['offset'],
+            d['negative'],
+            d['line_feed'],
+            d['rotate_text'],
+            d['number_upper_side'],
+            d['double_side_scale'],
+            d['base_line'],
+            tuple(d['draw_zero']),
+
+            tuple(prefs.number_min_px),
+            tuple(prefs.scale_size),
+            font.id,
+            font.size,
+            font.margin,
+            context.user_preferences.system.dpi,
+
+            region.width, region.height,
+            unit_system.system, unit_system.dpbu, unit_system.use_separate,
+            unit_system.scale_length,
+
+            pmat
+        )
+
+    def get_cache(self, prefs, key):
+        if prefs.cache_size == 0:
+            return None
+        return self.cache.get(key)
+
+    def add_cache(self, prefs, key, value):
+        if prefs.cache_size == 0:
+            return
+        self.cache[key] = value
+        if len(self.cache) > prefs.cache_size:
+            self.cache.popitem(False)
+
 
 data = Data()
 
@@ -712,7 +807,6 @@ data = Data()
 def is_modal_needed(context):
     """偽を返すならmodalオペレータを終了してもいい。
     """
-    wm = context.window_manager
     prefs = RegionRulerPreferences.get_instance()
     if data.simple_measure or RegionRuler_PG._measure:
         return True
@@ -986,26 +1080,24 @@ def calc_relative_magnification(unit_system):
     return magnification
 
 
-def scale_label_interval(context, unit_system, cnt):
-    prefs = RegionRulerPreferences.get_instance()
-    magnification = calc_relative_magnification(unit_system)
+def scale_label_interval(number_min_px, unit_system, magnification, cnt):
     interval = 0
     if magnification and cnt % magnification == 0:
         interval = 10
     elif cnt % 5 == 0 and unit_system.system in ('NONE', 'METRIC'):
-        if unit_system.dpg >= prefs.number_min_px[0]:
+        if unit_system.dpg >= number_min_px[0]:
             interval = 5
-    elif unit_system.dpg >= prefs.number_min_px[1]:
+    elif unit_system.dpg >= number_min_px[1]:
         interval = 1
         if unit_system.system == 'NONE':
             interval = 1
-        elif unit_system.dpg >= prefs.number_min_px[1] * 2:
+        elif unit_system.dpg >= number_min_px[1] * 2:
             interval = 1
 
     return interval
 
 
-def make_scale_label(context, unit_system, cnt):
+def make_scale_label(number_min_px, unit_system, magnification, cnt):
     """
     :param unit_system:
     :type unit_system: unitsystem.UnitSystem
@@ -1020,7 +1112,8 @@ def make_scale_label(context, unit_system, cnt):
     if cnt == 0 and unit_system.system != 'NONE':
         return '0' + units.next_basic(unit.symbol)
 
-    interval = scale_label_interval(context, unit_system, cnt)
+    interval = scale_label_interval(number_min_px, unit_system,
+                                    magnification, cnt)
 
     if interval == 0:
         return ''
@@ -1219,91 +1312,102 @@ def draw_free_ruler(context, prefs, start, end, offset,
 
     magnification = calc_relative_magnification(unit_system)
 
-    lines = []
-    lines_bold = []
-    numbers = []
-    numbers_fill = []
-    triangles = []
+    number_min_px = list(prefs.number_min_px)
 
-    for count, p in generate_scale_points(
-            context, start, end, offset, negative):
-        # Scale
-        if not (count == 0 and 'scale' not in draw_zero):
-            if count % magnification == 0:
-                scale_size = ssmain
-                line_width = 3
-            else:
-                scale_size = sseven if count % 2 == 0 else ssodd
-                line_width = 1
+    cache_key = data.make_cache_key(locals())
+    cache = data.get_cache(prefs, cache_key)
+    running_measure = data.simple_measure or RegionRuler_PG._measure
+    if cache:
+        lines, lines_bold, numbers, numbers_fill, triangles = cache
+    else:
+        lines = []
+        lines_bold = []
+        numbers = []
+        numbers_fill = []
+        triangles = []
 
-            # 5-Triangles
-            if count % 5 == 0 and count % 10 != 0:
-                if unit_system.system != 'IMPERIAL':
-                    if ssmain >= 3:
-                        v1 = p + vvec * max(0, (ssodd - 3))  # top vertex
-                        v2 = vvec * 3
-                        v3 = hvec * 2
-                        triangles.append((v1 + v2 - v3, v1 + v2 + v3, v1))
-                        scale_size = max(0, scale_size - 3)
-
-            if double_side_scale:
-                val = (p + vvec * scale_size, p - vvec * scale_size)
-            else:
-                val = (p, p + vvec * scale_size)
-            if line_width == 1:
-                lines.append(val)
-            else:
-                lines_bold.append(val)
-
-        # 数値。複数行の場合は右揃え
-        if count == 0 and 'number' not in draw_zero:
-            text = ''
-        else:
-            text = make_scale_label(context, unit_system, count)
-        if line_feed:
-            text_lines = text.split(' ')
-            widths = [blf.dimensions(font.id, t)[0] for t in text_lines]
-        else:
-            text_lines = [text]
-            widths = [blf.dimensions(font.id, text)[0]]
-        box_width = max(widths) + margin * 2
-        box_height = len(widths) * th + (len(widths) + 1) * margin
-        if rotate_text:
-            vx = hvec
-            vy = -vvec
-            h = box_height
-        else:
-            vx = Vector((1, 0))
-            vy = Vector((0, 1))
-            rbox_width, h = rotated_bbox(box_width, box_height, -angle)
-        box_center = p + (ssmain + h / 2) * vvec
-        box_loc = box_center - box_width / 2 * vx - box_height / 2 * vy
-        if text:
-            for i in range(len(text_lines)):
-                txt = text_lines[-i - 1]
-                tw = widths[-i - 1]
-                fx = box_width - margin - tw
-                fy = margin + (th + margin) * i
-                v = box_loc + vx * fx + vy * fy
-                numbers.append((v[0], v[1], txt))
-                v -= (vx + vy) * margin
-                w = tw + margin * 2
-                h = th + margin * 2
-                numbers_fill.append((v[0], v[1], w, h))
-
-        # Origin Triangles
-        if count == 0:
-            if 'marker' in draw_zero:
-                if rotate_text:
-                    w = box_width / 2
+        for count, p in generate_scale_points(
+                context, start, end, offset, negative):
+            # Scale
+            if not (count == 0 and 'scale' not in draw_zero):
+                if count % magnification == 0:
+                    scale_size = ssmain
+                    line_width = 3
                 else:
-                    w = rbox_width / 2
-                triangles.append((box_center - hvec * w - vvec * (th / 2),
-                                  box_center - hvec * (w + 5),
-                                  box_center - hvec * w + vvec * (th / 2)))
-                triangles.append((box_center + hvec * w - vvec * (th / 2),
-                                  box_center + hvec * w + vvec * (th / 2),
-                                  box_center + hvec * (w + 5)))
+                    scale_size = sseven if count % 2 == 0 else ssodd
+                    line_width = 1
+
+                # 5-Triangles
+                if count % 5 == 0 and count % 10 != 0:
+                    if unit_system.system != 'IMPERIAL':
+                        if ssmain >= 3:
+                            v1 = p + vvec * max(0, (ssodd - 3))  # top vertex
+                            v2 = vvec * 3
+                            v3 = hvec * 2
+                            triangles.append((v1 + v2 - v3, v1 + v2 + v3, v1))
+                            scale_size = max(0, scale_size - 3)
+
+                if double_side_scale:
+                    val = (p + vvec * scale_size, p - vvec * scale_size)
+                else:
+                    val = (p, p + vvec * scale_size)
+                if line_width == 1:
+                    lines.append(val)
+                else:
+                    lines_bold.append(val)
+
+            # 数値。複数行の場合は右揃え
+            if count == 0 and 'number' not in draw_zero:
+                text = ''
+            else:
+                text = make_scale_label(number_min_px, unit_system,
+                                        magnification, count)
+            if line_feed:
+                text_lines = text.split(' ')
+                widths = [blf.dimensions(font.id, t)[0] for t in text_lines]
+            else:
+                text_lines = [text]
+                widths = [blf.dimensions(font.id, text)[0]]
+            box_width = max(widths) + margin * 2
+            box_height = len(widths) * th + (len(widths) + 1) * margin
+            if rotate_text:
+                vx = hvec
+                vy = -vvec
+                h = box_height
+            else:
+                vx = Vector((1, 0))
+                vy = Vector((0, 1))
+                rbox_width, h = rotated_bbox(box_width, box_height, -angle)
+            box_center = p + (ssmain + h / 2) * vvec
+            box_loc = box_center - box_width / 2 * vx - box_height / 2 * vy
+            if text:
+                for i in range(len(text_lines)):
+                    txt = text_lines[-i - 1]
+                    tw = widths[-i - 1]
+                    fx = box_width - margin - tw
+                    fy = margin + (th + margin) * i
+                    v = box_loc + vx * fx + vy * fy
+                    numbers.append((v[0], v[1], txt))
+                    v -= (vx + vy) * margin
+                    w = tw + margin * 2
+                    h = th + margin * 2
+                    numbers_fill.append((v[0], v[1], w, h))
+
+            # Origin Triangles
+            if count == 0:
+                if 'marker' in draw_zero:
+                    if rotate_text:
+                        w = box_width / 2
+                    else:
+                        w = rbox_width / 2
+                    triangles.append((box_center - hvec * w - vvec * (th / 2),
+                                      box_center - hvec * (w + 5),
+                                      box_center - hvec * w + vvec * (th / 2)))
+                    triangles.append((box_center + hvec * w - vvec * (th / 2),
+                                      box_center + hvec * w + vvec * (th / 2),
+                                      box_center + hvec * (w + 5)))
+        cache = lines, lines_bold, numbers, numbers_fill, triangles
+        data.add_cache(prefs, cache_key, cache)
 
     # 描画
     if base_line:
@@ -1317,13 +1421,19 @@ def draw_free_ruler(context, prefs, start, end, offset,
     bgl.glColor3f(*prefs.color.line)
 
     # 目盛
-    for line_width, lines in ((1.0, lines), (3.0, lines_bold)):
-        bgl.glLineWidth(line_width)
-        bgl.glBegin(bgl.GL_LINES)
-        for v1, v2 in lines:
-            bgl.glVertex2f(*v1)
-            bgl.glVertex2f(*v2)
-        bgl.glEnd()
+    bgl.glLineWidth(1.0)
+    bgl.glBegin(bgl.GL_LINES)
+    for v1, v2 in lines:
+        bgl.glVertex2f(*v1)
+        bgl.glVertex2f(*v2)
+    bgl.glEnd()
+    # 目盛(太)
+    bgl.glLineWidth(3.0)
+    bgl.glBegin(bgl.GL_LINES)
+    for v1, v2 in lines_bold:
+        bgl.glVertex2f(*v1)
+        bgl.glVertex2f(*v2)
+    bgl.glEnd()
     bgl.glLineWidth(1.0)
 
     # 三角形
@@ -1956,7 +2066,6 @@ def make_mouse_coordinate_label(context, unit_system, value):
     else:
         units = unit_system.units
         start = end = calc_exp = ''
-        i = units.index(unit_system.unit)
         for base_unit in units:
             if base_unit.flag & units.UNIT_BASE:
                 break
@@ -1967,20 +2076,23 @@ def make_mouse_coordinate_label(context, unit_system, value):
             # 表記は'mm'迄とする
             if unit_system.system == 'METRIC':
                 if units.scalar(end) <= units.scalar('mm'):
-                    end = 'mm'
-                    calc_exp = end
+                    calc_exp = end = 'mm'
         else:
-            if unit_system.system == 'METRIC':
-                unit = unit_system.unit
-                start = units.next_basic(unit.symbol, False)
-                # 表記は'mm'迄とする
-                if unit.scalar <= units.scalar('mm'):
-                    start = 'mm'
-                calc_exp = start
+            # make_scale_label()と単位を揃える
+            unit = unit_system.unit
+            st = ed = ''
+            if unit_system.use_separate:
+                ed = unit.symbol
             else:
-                next_unit = units[min(i + 1, len(units) - 1)]
-                start = modify_imperial_symbol(next_unit.symbol)
-                calc_exp = start
+                if unit_system.system == 'IMPERIAL':
+                    st = modify_imperial_symbol(unit.symbol)
+            exp = unit.symbol
+            text = unit_system.num_to_unit(
+                value, start=st, end=ed, verbose=(False, True, True),
+                rounding_exp=exp)
+            ls = text.split(' ')
+            m = re.match('-?\d*\.?\d+(.+)', ls[-1])
+            calc_exp = start = end = m.group(1)
 
         if calc_exp:
             base_per_dot = unit_system.bupd * unit_system.scale_length
@@ -2193,11 +2305,10 @@ def draw_callback(context):
     event = data.events[ptr]
 
     # simpleMeasure表示を消す。ここでのEvent.typeは当てにならない
-    if data.alt and not event.alt:
+    if not event.alt:
         if event.mco != event.mco_prev:
-            data.alt = False
             if data.simple_measure:
-                if not prop.measure and not data.alt:
+                if not prop.measure:
                     data.simple_measure = False
                     data.measure_points.clear()
 
@@ -2301,8 +2412,9 @@ class VIEW3D_OT_region_ruler(bpy.types.Operator):
 
     bl_options = {'REGISTER'}
 
-    get_event_only = vap.BP('get_event_only',
-                            default=False, options={'HIDDEN', 'SKIP_SAVE'})
+    get_event_only = bpy.props.BoolProperty(
+        name='get_event_only',
+        options={'HIDDEN', 'SKIP_SAVE'})
 
     def __init__(self):
         self.terminate = False
@@ -2332,26 +2444,34 @@ class VIEW3D_OT_region_ruler(bpy.types.Operator):
         else:
             rv3d = None
 
+        if not (running_measure or data.simple_measure):
+            data.hold_right = False
+        else:
+            if event.type == 'RIGHTMOUSE':
+                if event.value == 'PRESS':
+                    data.hold_right = True
+                elif event.value == 'RELEASE':
+                    data.hold_right = False
+
+        alt = event.alt
+        shift = event.shift
         if event.type in ('LEFT_ALT', 'RIGHT_ALT'):
             if event.value == 'PRESS':
-                data.alt = True
+                alt = True
             elif event.value == 'RELEASE':
-                data.alt = False
-        if event.type == 'MOUSEMOVE':
-            if data.alt and not event.alt:
-                if (event.mouse_x != event.mouse_prev_x or
-                        event.mouse_y != event.mouse_prev_y):
-                    data.alt = False
+                alt = False
+        if event.type in ('LEFT_SHIFT', 'RIGHT_SHIFT'):
+            if event.value == 'PRESS':
+                shift = True
+            elif event.value == 'RELEASE':
+                shift = False
 
         if data.simple_measure:
-            if not running_measure and not data.alt:
+            if not running_measure and not alt:
                 data.simple_measure = False
                 data.measure_points.clear()
                 retval = {'RUNNING_MODAL'}
                 do_redraw = True
-        if not event.shift or \
-           event.type not in ('MOUSEMOVE', 'INBETWEEN_MOUSEMOVE'):
-            data.shift = None
 
         if region and rv3d:
             mco = (event.mouse_x - region.x, event.mouse_y - region.y)
@@ -2377,14 +2497,12 @@ class VIEW3D_OT_region_ruler(bpy.types.Operator):
                 elif event.type == 'RIGHTMOUSE' and event.value == 'PRESS':
                     if data.simple_measure and data.measure_points or \
                        running_measure:
-                        if event.shift:
-                            data.shift = True
-                        else:
+                        if not shift:
                             data.measure_points[-1:] = []
                             do_redraw = True
                         retval = {'RUNNING_MODAL'}
                 elif event.type in ('MOUSEMOVE', 'INBETWEEN_MOUSEMOVE'):
-                    if data.shift and data.measure_points:
+                    if data.hold_right and shift and data.measure_points:
                         dvec = data.measure_points[-1]
                         vec1 = vav.unproject(region, rv3d, self.mco_prev, dvec)
                         vec2 = vav.unproject(region, rv3d, mco, dvec)
@@ -2393,13 +2511,18 @@ class VIEW3D_OT_region_ruler(bpy.types.Operator):
 
             if not running_measure:
                 enable = None
-                if event.type in ('LEFT_ALT', 'RIGHT_ALT'):
-                    if (event.value == 'PRESS' and not data.simple_measure and
-                            prefs.use_simple_measure):
-                        enable = True
-                    elif (event.value == 'RELEASE' or
-                              not prefs.use_simple_measure):
-                        enable = False
+                if prefs.use_simple_measure:
+                    if not data.simple_measure:
+                        if event.type in ('LEFT_ALT', 'RIGHT_ALT'):
+                            if event.value == 'PRESS':
+                                if event.shift:
+                                    enable = True
+                            elif event.value == 'RELEASE':
+                                enable = False
+                        elif event.type in ('LEFT_SHIFT', 'RIGHT_SHIFT'):
+                            if event.value == 'PRESS':
+                                if event.alt:
+                                    enable = True
                 if enable is not None:
                     if enable:
                         data.simple_measure = True
@@ -2748,6 +2871,7 @@ def scene_update_post_handler(dummy):
     """他のModalOperatorが開始され、マウスが動いたのに再描画がされない状況に
     対応する為、Rulerを再起動しハンドラの先頭に登録し直す。
     """
+    # TODO: 対応できていないオペレータがある
     window = bpy.context.window
     if not window:
         return

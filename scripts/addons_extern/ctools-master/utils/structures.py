@@ -41,6 +41,7 @@ from ctypes import CDLL, Structure, Union, POINTER, addressof, cast, \
     py_object, c_ssize_t, c_uint, c_int8, c_uint8, CFUNCTYPE, byref, \
     sizeof, c_ubyte, cdll
 from ctypes.util import find_library
+import enum
 import numpy as np
 import platform
 import re
@@ -219,6 +220,19 @@ class ListBase(Structure):
             link_p = link_p.contents.next
         return i
 
+    def to_list(self, link_type=None):
+        """各要素のcontentsからなるlistを返す"""
+        elems = []
+        ptr = cast(self.first, POINTER(Link))
+        while ptr:
+            link = ptr.contents
+            if link_type is not None:
+                elems.append(cast(ptr, POINTER(link_type)).contents)
+            else:
+                elems.append(link)
+            ptr = link.next
+        return elems
+
     def remove(self, vlink):
         """
         void BLI_remlink(ListBase *listbase, void *vlink)
@@ -381,7 +395,7 @@ class ListBase(Structure):
         while link_p:
             link_addr = addressof(link_p.contents)
             id_iter = cast(link_addr + offset, c_char_p).value
-            if identifier[0] == id_iter[0] and identifier == id_iter:
+            if identifier == id_iter:
                 return link_addr
             link_p = link_p.contents.next
         return None
@@ -644,6 +658,21 @@ StructRNA._fields_ = fields(
 ###############################################################################
 # blenkernel / makesdna / windowmanager/ editors
 ###############################################################################
+class ID(Structure):
+    """DNA_ID.h"""
+
+ID._fields_ = fields(
+    c_void_p, 'next', 'prev',
+    ID, '*newid',
+    c_void_p, 'lib',  # <struct Library>
+    c_char, 'name[66]',  # MAX_ID_NAME
+    c_short, 'flag',
+    c_int, 'us',
+    c_int, 'icon_id', 'pad2',
+    c_void_p, 'properties',  # <IDProperty>
+)
+
+
 class rcti(Structure):
     """DNA_vec_types.h: 86
     NOTE: region.width == ar.winrct.xmax - ar.winrct.xmin + 1
@@ -752,10 +781,61 @@ ARegionType._fields_ = fields(
 )
 
 
+BKE_ST_MAXNAME = 64
+
+
+class PanelType(Structure):
+    """BKE_screen.h: 173"""
+
+PanelType._fields_ = fields(
+    PanelType, '*next', '*prev',
+
+    c_char * BKE_ST_MAXNAME, 'idname',  # unique name
+    c_char * BKE_ST_MAXNAME, 'label',  # for panel header
+    c_char * BKE_ST_MAXNAME, 'translation_context',
+    c_char * BKE_ST_MAXNAME, 'context',  # for buttons window
+    c_char * BKE_ST_MAXNAME, 'category',  # for category tabs
+    c_int, 'space_type',
+    c_int, 'region_type',
+
+    c_int, 'flag',
+
+    # verify if the panel should draw or not
+    # int (*poll)(const struct bContext *, struct PanelType *);
+    CFUNCTYPE(c_int, c_void_p, c_void_p), 'poll',
+    # draw header (optional)
+    # void (*draw_header)(const struct bContext *, struct Panel *);
+    CFUNCTYPE(c_int, c_void_p, c_void_p), 'draw_header',
+    # draw entirely, view changes should be handled here
+    # void (*draw)(const struct bContext *, struct Panel *);
+    CFUNCTYPE(c_int, c_void_p, c_void_p), 'draw',
+
+    # ExtensionRNA ext;
+)
+
+
+class PanelCategoryDyn(Structure):
+    """DNA_screen_types.h: 131"""
+
+PanelCategoryDyn._fields_ = fields(
+    PanelCategoryDyn, '*next', '*prev',
+    c_char, 'idname[64]',
+    rcti, 'rect'
+)
+
+
+# region stack of active tabs
+class PanelCategoryStack(Structure):
+    """DNA_screen_types.h: 137"""
+
+PanelCategoryStack._fields_ = fields(
+    PanelCategoryStack, '*next', '*prev',
+    c_char, 'idname[64]'
+)
+
+
 class SpaceType(Structure):
     """BKE_screen.h: 66"""
-
-BKE_ST_MAXNAME = 64
 
 SpaceType._fields_ = fields(
     SpaceType, '*next', '*prev',
@@ -818,6 +898,60 @@ SpaceType._fields_ = fields(
     # default keymaps to add
     c_int, 'keymapflag'
 )
+
+
+# DNA_space_types.h: 1350: typedef enum eSpace_Type
+# SpaceType.spaceid
+class eSpace_Type(enum.IntEnum):
+    SPACE_EMPTY = 0
+    SPACE_VIEW3D = 1
+    SPACE_IPO = 2
+    SPACE_OUTLINER = 3
+    SPACE_BUTS = 4
+    SPACE_FILE = 5
+    SPACE_IMAGE = 6
+    SPACE_INFO = 7
+    SPACE_SEQ = 8
+    SPACE_TEXT = 9
+    # ifdef DNA_DEPRECATED
+    SPACE_IMASEL = 10  # deprecated
+    SPACE_SOUND = 11  # Deprecated
+    # endif
+    SPACE_ACTION = 12
+    SPACE_NLA = 13
+    # TO DO: fully deprecate
+    SPACE_SCRIPT = 14  # Deprecated
+    SPACE_TIME = 15
+    SPACE_NODE = 16
+    SPACE_LOGIC = 17
+    SPACE_CONSOLE = 18
+    SPACE_USERPREF = 19
+    SPACE_CLIP = 20
+    SPACEICONMAX = SPACE_CLIP
+
+
+class RNAEnumSpaceTypeItems(enum.IntEnum):
+    """EnumPropertyItem rna_enum_space_type_items
+    bpy.types.Area.typeで使われる名前と値
+    """
+    EMPTY = eSpace_Type.SPACE_EMPTY
+    VIEW_3D = eSpace_Type.SPACE_VIEW3D
+    TIMELINE = eSpace_Type.SPACE_TIME
+    GRAPH_EDITOR = eSpace_Type.SPACE_IPO
+    DOPESHEET_EDITOR = eSpace_Type.SPACE_ACTION
+    NLA_EDITOR = eSpace_Type.SPACE_NLA
+    IMAGE_EDITOR = eSpace_Type.SPACE_IMAGE
+    SEQUENCE_EDITOR = eSpace_Type.SPACE_SEQ
+    CLIP_EDITOR = eSpace_Type.SPACE_CLIP
+    TEXT_EDITOR = eSpace_Type.SPACE_TEXT
+    NODE_EDITOR = eSpace_Type.SPACE_NODE
+    LOGIC_EDITOR = eSpace_Type.SPACE_LOGIC
+    PROPERTIES = eSpace_Type.SPACE_BUTS
+    OUTLINER = eSpace_Type.SPACE_OUTLINER
+    USER_PREFERENCES = eSpace_Type.SPACE_USERPREF
+    INFO = eSpace_Type.SPACE_INFO
+    FILE_BROWSER = eSpace_Type.SPACE_FILE
+    CONSOLE = eSpace_Type.SPACE_CONSOLE
 
 
 class ScrArea(Structure):
@@ -893,6 +1027,106 @@ ARegion._fields_ = fields(
     c_char_p, 'headerstr',  # use this string to draw info
     c_void_p, 'regiondata',  # XXX 2.50, need spacedata equivalent?
 )
+
+
+# DNA_screen_types.h: 376:
+class eRegion_Type(enum.IntEnum):
+    RGN_TYPE_WINDOW = 0
+    RGN_TYPE_HEADER = 1
+    RGN_TYPE_CHANNELS = 2
+    RGN_TYPE_TEMPORARY = 3
+    RGN_TYPE_UI = 4
+    RGN_TYPE_TOOLS = 5
+    RGN_TYPE_TOOL_PROPS = 6
+    RGN_TYPE_PREVIEW = 7
+
+
+class RNAEnumRegionTypeItems(enum.IntEnum):
+    """EnumPropertyItem rna_enum_region_type_items
+    """
+    WINDOW = eRegion_Type.RGN_TYPE_WINDOW
+    HEADER = eRegion_Type.RGN_TYPE_HEADER
+    CHANNELS = eRegion_Type.RGN_TYPE_CHANNELS
+    TEMPORARY = eRegion_Type.RGN_TYPE_TEMPORARY
+    UI = eRegion_Type.RGN_TYPE_UI
+    TOOLS = eRegion_Type.RGN_TYPE_TOOLS
+    TOOL_PROPS = eRegion_Type.RGN_TYPE_TOOL_PROPS
+    PREVIEW = eRegion_Type.RGN_TYPE_PREVIEW
+
+
+class Panel(Structure):
+    """DNA_screen_types.h: 96"""
+
+Panel._fields_ = fields(
+    Panel, '*next', '*prev',
+
+    PanelType, '*type',
+    c_void, '*layout',  # uiLayout
+
+    c_char, 'panelname[64]', 'tabname[64]',
+    c_char, 'drawname[64]',
+    c_int, 'ofsx', 'ofsy', 'sizex', 'sizey',
+    c_short, 'labelofs', 'pad',
+    c_short, 'flag', 'runtime_flag',
+    c_short, 'control',
+    c_short, 'snap',
+    c_int, 'sortorder',  # panels are aligned according to increasing sortorder
+    Panel, '*paneltab',  # this panel is tabbed in *paneltab
+    c_void, '*activedata',  # runtime for panel manipulation
+)
+
+
+#未使用
+# class uiBlock(Structure):
+#     """interface_intern.h: 355"""
+#
+# uiBlock._fields_ = fields(
+#     uiBlock, '*next', '*prev',
+#
+#     ListBase, 'buttons',
+#     Panel, '*panel'
+#     # 以下略
+# )
+#
+#
+# class SpaceLink(Structure):
+#     """DNA_space_types.h: 78"""
+#
+# SpaceLink._fields_ = fields(
+#     SpaceLink, '*next', '*prev',
+#     ListBase, 'regionbase',  # storage of regions for inactive spaces
+#     c_int, 'spacetype',
+#     c_float, 'blockscale',  # DNA_DEPRECATED       XXX make deprecated
+#     c_short, 'blockhandler[8]',  # DNA_DEPRECATED  XXX make deprecated
+# )
+#
+#
+# class SpaceButs(Structure):
+#     """DNA_space_types.h: 114"""
+#
+# SpaceButs._fields_ = fields(
+#     SpaceLink, '*next', '*prev',
+#     ListBase, 'regionbase',  # storage of regions for inactive spaces
+#     c_int, 'spacetype',
+#     c_float, 'blockscale',  # DNA_DEPRECATED
+#
+#     c_short, 'blockhandler[8]',  # DNA_DEPRECATED
+#
+#     View2D, 'v2d',  # DNA_DEPRECATE  deprecated, copied to region
+#
+#     c_short, 'mainb', 'mainbo', 'mainbuser',  # context tabs
+#     c_short, 're_align', 'align',          # align for panels
+#     c_short, 'preview',                  # preview is signal to refresh
+#     # texture context selector (material, lamp, particles, world, other)
+#     c_short, 'texture_context', 'texture_context_prev',
+#     c_char, 'flag', 'pad[7]',
+#
+#     c_void, '*path',                     # runtime
+#     c_int, 'pathflag', 'dataicon',         # runtime
+#     ID, '*pinid',
+#
+#     c_void, '*texuser',
+# )
 
 
 class RegionView3D(Structure):
@@ -1219,6 +1453,7 @@ wmOperatorType_fields += fields(
 
 wmOperatorType._fields_ = wmOperatorType_fields
 
+
 class wmOperator(Structure):
     """source/blender/makesdna/DNA_windowmanager_types.h: 344
 
@@ -1456,21 +1691,6 @@ class bContext(Structure):
         # data context
         bContext_data, 'data',
     )
-
-
-class ID(Structure):
-    """DNA_ID.h"""
-
-ID._fields_ = fields(
-    c_void_p, 'next', 'prev',
-    ID, '*newid',
-    c_void_p, 'lib',  # <struct Library>
-    c_char, 'name[66]',  # MAX_ID_NAME
-    c_short, 'flag',
-    c_int, 'us',
-    c_int, 'icon_id', 'pad2',
-    c_void_p, 'properties',  # <IDProperty>
-)
 
 
 class Text(Structure):

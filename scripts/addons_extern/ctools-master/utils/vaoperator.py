@@ -19,8 +19,6 @@
 
 import bpy
 
-from . import vaprops as vap
-
 
 WM_OT_exec_func = None
 
@@ -254,12 +252,15 @@ class WM_OT_exec_string(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def prop_string(name='Exec String', description=''):
-        return vap.SP(name, description, options={'HIDDEN'})
+        return bpy.props.StringProperty(name=name, description=description,
+                                        options={'HIDDEN'})
     string = prop_string()
     shiftstring = prop_string()
     ctrlstring = prop_string()
     altstring = prop_string()
-    redraw = vap.BP('Redraw', default=False, options={'HIDDEN'})
+    redraw = bpy.props.BoolProperty(
+        name='Redraw',
+        options={'HIDDEN'})
     del prop_string
 
     def __init__(self):

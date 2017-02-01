@@ -314,7 +314,8 @@ def scene_update_func(scene):
     if screen:
         for area in screen.areas:
             if area.type == 'VIEW_3D':
-                if area.spaces.active.region_quadviews:
+                space = area.spaces.active
+                if space and space.region_quadviews:
                     sync_quad(bpy.context, area)
 
 

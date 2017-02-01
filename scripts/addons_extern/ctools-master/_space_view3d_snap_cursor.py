@@ -20,7 +20,7 @@
 bl_info = {
     'name': 'Snap Cursor',
     'author': 'chromoly',
-    'version': (0, 0, 2),
+    'version': (0, 0, 3),
     'blender': (2, 78, 0),
     'location': 'View3D > Mouse > Menu', 
     'description': '',
@@ -39,7 +39,6 @@ import mathutils.geometry as geom
 
 from .utils import addongroup
 from .utils import vamath as vam
-from .utils import vaprops as vap
 
 from .localutils.memoize import Memoize
 
@@ -62,19 +61,20 @@ class VIEW3D_OT_snap_cursor(bpy.types.Operator):
     # def poll(cls, context):
     #     return context.mode in ('OBJECT', 'EDIT_MESH')
     
-    mode = vap.EP('Mode',
-                  items=(('circle', 'Circle', '2D circle from 3 vertices'),
-                         ('sphere', 'Sphere', '3D sphere from 2 faces'),
-                         ('median', 'Median Applied Modifiers',
-                          'Apply modifiers in EDIT_MESH'),
-                         ('boundbox', 'BoundBox Applied Modifiers',
-                          'Apply modifiers in EDIT_MESH'),
-                         # ('selected', 'Selected', 'Default'),
-                         # ('center', 'Center', 'Default'),
-                         # ('grid', 'Grid', 'Default'),
-                         # ('active', 'Active', 'Default')
-                  ),
-                  default='circle')
+    mode = bpy.props.EnumProperty(
+        name='Mode',
+        items=(('circle', 'Circle', '2D circle from 3 vertices'),
+               ('sphere', 'Sphere', '3D sphere from 2 faces'),
+               ('median', 'Median Applied Modifiers',
+                'Apply modifiers in EDIT_MESH'),
+               ('boundbox', 'BoundBox Applied Modifiers',
+                'Apply modifiers in EDIT_MESH'),
+               # ('selected', 'Selected', 'Default'),
+               # ('center', 'Center', 'Default'),
+               # ('grid', 'Grid', 'Default'),
+               # ('active', 'Active', 'Default')
+               ),
+        default='circle')
 
     def get_dm_key(self, context):
         """@memoize用"""

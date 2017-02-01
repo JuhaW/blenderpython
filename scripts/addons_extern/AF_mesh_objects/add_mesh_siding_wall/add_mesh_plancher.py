@@ -456,6 +456,7 @@ class PlancherPanel(bpy.types.Panel):
     bl_category = "Create"
     bl_label = "Plancher"
     bl_options = {'DEFAULT_CLOSED'}
+    bl_context = "objectmode"
     #------------------------------------------------------------
     # PANEL
     #------------------------------------------------------------
@@ -750,17 +751,19 @@ def create_plancher(self, context):
     else:
         bpy.ops.object.mode_set(mode='OBJECT')                            # We are in 'OBJECT MODE' here, nothing to do
 
-    #---------------------------------------------------------------------MODIFIERS
-    nbop = len(cobj.modifiers)
+ 
+#---------------------------------------------------------------------MODIFIERS
     obj = context.active_object
+    nbop = len(obj.modifiers)
+
     if nbop == 0:
         obj.modifiers.new('Solidify', 'SOLIDIFY')
         obj.modifiers.new('Bevel', 'BEVEL')
-    cobj.modifiers['Solidify'].show_expanded = False
-    cobj.modifiers['Solidify'].thickness = self.height
-    cobj.modifiers['Bevel'].show_expanded = False
-    cobj.modifiers['Bevel'].width = 0.001
-    cobj.modifiers['Bevel'].use_clamp_overlap
+    obj.modifiers['Solidify'].show_expanded = False
+    obj.modifiers['Solidify'].thickness = self.height
+    obj.modifiers['Bevel'].show_expanded = False
+    obj.modifiers['Bevel'].width = 0.001
+    obj.modifiers['Bevel'].use_clamp_overlap
 
     bpy.context.user_preferences.edit.use_global_undo = True
 

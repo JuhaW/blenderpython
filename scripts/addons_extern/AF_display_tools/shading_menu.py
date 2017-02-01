@@ -274,25 +274,11 @@ class DisplayXRayOn(Operator, BasePollCheck):
 
 class VIEW3D_MT_Shade_menu(bpy.types.Menu):
     bl_label = "Shade"
-    bl_description = "Shading options"
+    bl_description = "Global Shading settings"
     def draw(self, context):
         layout = self.layout
 
         layout.prop(context.space_data, "viewport_shade", expand=True)
-
-        if context.active_object:
-            if(context.mode == 'EDIT_MESH'):
-                layout.operator("MESH_OT_faces_shade_smooth")
-                layout.operator("MESH_OT_faces_shade_flat")
-            else:
-                layout.operator("OBJECT_OT_shade_smooth")
-                layout.operator("OBJECT_OT_shade_flat")
-
-        layout.prop(context.object, "show_x_ray", text="X-Ray", icon="META_CUBE")
-
-        layout.prop(context.space_data.fx_settings, "use_ssao",
-                    text="Ambient Occlusion", icon="GROUP")
-        layout.prop(context.space_data, "use_matcap", icon="MATCAP_01")
 
         if context.space_data.use_matcap:
             row = layout.column(1)

@@ -201,6 +201,9 @@ def callback_save_pre(dummy):
                 bm.verts.layers.float.remove(layer)
         if not me.is_editmode:
             bm.to_mesh(me)
+    # Scene.update()をやらないと落ちる場合有り
+    for scene in bpy.data.scenes:
+        scene.update()
 
 
 @bpy.app.handlers.persistent

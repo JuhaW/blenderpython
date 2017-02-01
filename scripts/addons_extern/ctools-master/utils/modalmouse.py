@@ -35,7 +35,6 @@ from . import vaview3d as vav
 from . import vamath as vam
 from . import vagl
 from . import unitsystem, manipulatormatrix
-from . import vaprops as vap
 
 
 class _void:
@@ -1933,11 +1932,19 @@ class TEST_OT_modal_mouse(bpy.types.Operator):
     bl_label = 'Test Model Mouse'
     bl_options = {'REGISTER', 'UNDO', 'GRAB_CURSOR', 'BLOCKING'}
 
-    distance = vap.FP("Dist", default=0.0)
-    factor = vap.FP("Fac", default=0.0,
-                    min=0.0, max=1.0, soft_min=0.0, soft_max=1.0)
+    distance = bpy.props.FloatProperty(
+        name="Dist",
+        default=0.0)
+    factor = bpy.props.FloatProperty(
+        name="Fac",
+        default=0.0,
+        min=0.0,
+        max=1.0)
 
-    value = vap.FVP("Value", default=(0.0, 0.0, 0.0, 0.0), size=4)
+    value = bpy.props.FloatVectorProperty(
+        name="Value",
+        default=(0.0, 0.0, 0.0, 0.0),
+        size=4)
 
     @classmethod
     def poll(cls, context):

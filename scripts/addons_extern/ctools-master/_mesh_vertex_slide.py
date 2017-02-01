@@ -20,7 +20,7 @@
 bl_info = {
     'name': 'Vertex Slide',
     'author': 'chromoly',
-    'version': (0, 1, 0),
+    'version': (0, 1, 1),
     'blender': (2, 78, 0),
     'location': 'View3D > Mouse',
     'description': '',
@@ -40,7 +40,6 @@ from .utils import registerinfo
 
 from .utils import vagl as vagl
 from .utils import vaview3d as vav
-from .utils import vaprops as vap
 from .utils import modalmouse_old as modalmouse
 
 
@@ -50,16 +49,23 @@ class MESH_OT_vertext_slide(bpy.types.Operator):
     bl_label = 'Vertex Slide'
     bl_options = {'REGISTER', 'UNDO'}
 
-    value = vap.FP('Value', default=0.0, step=1)
-    mode = vap.EP('Mode',
-                  items=(('DISTANCE', 'Distance', ''),
-                         ('FACTOR', 'Factor', '')),
-                  default='DISTANCE')
-    flip = vap.IP('Flip', description='Direction. 0:center, -1or1:side',
-                  default=0,
-                  min=-1, max=1, soft_min=-1, soft_max=1)
-    use_local_coords = vap.BP('Use Local Coords', default=False)
-
+    value = bpy.props.FloatProperty(
+        name='Value',
+        default=0.0,
+        step=1)
+    mode = bpy.props.EnumProperty(
+        name='Mode',
+        items=(('DISTANCE', 'Distance', ''),
+               ('FACTOR', 'Factor', '')),
+        default='DISTANCE')
+    flip = bpy.props.IntProperty(
+        name='Flip',
+        description='Direction. 0:center, -1or1:side',
+        default=0,
+        min=-1,
+        max=1)
+    use_local_coords = bpy.props.BoolProperty(
+        name='Use Local Coords')
 
     @classmethod
     def poll(cls, context):

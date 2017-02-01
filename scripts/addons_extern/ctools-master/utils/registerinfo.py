@@ -409,7 +409,7 @@ def _area_region_types(area_type):
     if area_type == 'CONSOLE':
         return ['WINDOW', 'HEADER']
     elif area_type == 'FILE_BROWSER':
-        return ['WINDOW', 'TOOLS', 'HEADER']
+        return ['WINDOW', 'UI', 'TOOLS', 'TOOL_PROPS', 'HEADER']
     elif area_type == 'INFO':
         return ['WINDOW', 'HEADER']
     elif area_type == 'USER_PREFERENCES':
@@ -425,7 +425,8 @@ def _area_region_types(area_type):
     elif area_type == 'TEXT_EDITOR':
         return ['WINDOW', 'UI', 'HEADER']
     elif area_type == 'CLIP_EDITOR':
-        return ['WINDOW', 'PREVIEW', 'CHANNELS', 'UI', 'TOOLS', 'HEADER']
+        return ['WINDOW', 'PREVIEW', 'CHANNELS', 'UI', 'TOOLS', 'TOOL_PROPS',
+                'HEADER']
     elif area_type == 'SEQUENCE_EDITOR':
         return ['WINDOW', 'PREVIEW', 'UI', 'HEADER']
     elif area_type == 'IMAGE_EDITOR':

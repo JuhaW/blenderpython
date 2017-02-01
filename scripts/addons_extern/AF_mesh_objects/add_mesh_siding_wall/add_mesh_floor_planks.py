@@ -1082,6 +1082,7 @@ class FloorBoards(bpy.types.Panel):
     bl_region_type = "TOOLS"
     bl_category = "Create"
     bl_options = {'DEFAULT_CLOSED'}
+    bl_context = "objectmode"
 
     def draw(self, context):
         layout = self.layout

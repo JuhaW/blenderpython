@@ -10,13 +10,13 @@ import mmd_tools.core.model as mmd_model
 class _PanelBase(object):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-    bl_category = 'mmd_tools'
+    bl_category = 'Import'
 
 
 class MMDToolsObjectPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_object'
-    bl_label = 'Operator'
-    bl_context = ''
+    bl_label = 'MMD Operator'
+    bl_context = 'objectmode'
 
     def draw(self, context):
         active_obj = context.active_object
@@ -124,7 +124,7 @@ class MMD_ROOT_UL_display_items(UIList):
 
 class MMDDisplayItemsPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_display_items'
-    bl_label = 'Display Items'
+    bl_label = 'MMD Display'
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
@@ -236,7 +236,7 @@ class UL_BoneMorphOffsets(UIList):
 
 class MMDMorphToolsPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_morph_tools'
-    bl_label = 'Morph Tools'
+    bl_label = 'MMD Morph'
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
@@ -436,7 +436,7 @@ class UL_rigidbodies(UL_ObjectsMixIn, UIList):
 
 class MMDRigidbodySelectorPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_rigidbody_list'
-    bl_label = 'Rigid Bodies'
+    bl_label = 'MMD Rigid Bodies'
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
@@ -474,7 +474,7 @@ class UL_joints(UL_ObjectsMixIn, UIList):
 
 class MMDJointSelectorPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_joint_list'
-    bl_label = 'Joints'
+    bl_label = 'MMD Joints'
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):

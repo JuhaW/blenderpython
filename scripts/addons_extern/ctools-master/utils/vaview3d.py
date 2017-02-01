@@ -139,9 +139,9 @@ def project(region, rv3d, vec):
     v = rv3d.perspective_matrix * vec.to_4d()
     if abs(v[3]) > PROJECT_MIN_NUMBER:
         v /= v[3]
-    x = (1 + v[0]) * region.width * 0.5
-    y = (1 + v[1]) * region.height * 0.5
-    z = (1 + v[2]) * 0.5
+    x = (1.0 + v[0]) * region.width * 0.5
+    y = (1.0 + v[1]) * region.height * 0.5
+    z = (1.0 + v[2]) * 0.5
     return Vector((x, y, z))
 
 

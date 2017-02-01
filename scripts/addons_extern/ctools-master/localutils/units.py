@@ -40,13 +40,16 @@ class _void:
         return False
 
 
+# B_UNIT_DEF_NONE
 UNIT_NONE = 0
-UNIT_BASE = 1
-#  Use for units that are not used enough to be translated into for common use
-UNIT_SUPPRESS = 1 << 1
+# B_UNIT_DEF_SUPPRESS
+# Use for units that are not used enough to be translated into for common use
+UNIT_SUPPRESS = 1 << 0
+# B_UNIT_DEF_TENTH
 # Display a unit even if its value is 0.1, eg 0.1mm instead of 100um
-UNIT_TENTH = 1 << 2
-
+UNIT_TENTH = 1 << 1
+# base unit
+UNIT_BASE = 1 << 2
 
 # source/blender/blenkernel/intern/unit.c
 # Unit = namedtuple('Unit', ('name', 'plural', 'symbol', 'symbol_alt',
@@ -66,9 +69,9 @@ class Units(list):
     66.0234
     """
     UNIT_NONE = 0
-    UNIT_BASE = 1
-    UNIT_SUPPRESS = 1 << 1
-    UNIT_TENTH = 1 << 2
+    UNIT_SUPPRESS = 1 << 0
+    UNIT_TENTH = 1 << 1
+    UNIT_BASE = 1 << 2
 
     def __init__(self, elements=()):
         super().__init__(())

@@ -56,7 +56,7 @@
 頂点やオブジェクト等を整列する。  
 
 ## Emulate Numpad
-マウス中ボタンと特定キーの組み合わせで、テンキーに割り当てられたオペレーターを実行する。  
+スペースキーと特定キーの組み合わせで、テンキーに割り当てられたオペレーターを実行する。  
 
 ## Make UV Grid
 単純なUV Grid 画像を作成する。  
@@ -69,6 +69,10 @@ linuxでのみ動作する。
 
 ## File Browser Confirm
 画像を上書きする時にダイアログを表示する。
+
+## Edit Panel Category
+Panelのcategory(タブ名)を変更する。  
+![Image](__images/editpanelcategory.jpg)
 
 ## その他
 ### __patch/ui_layout_box.patch

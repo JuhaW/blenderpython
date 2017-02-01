@@ -871,20 +871,20 @@ class RestrictorSelection(bpy.types.Menu):
         layout = self.layout
         view = context.space_data
 
-        layout.operator("restrictor.mesh", icon=mesh, text="")
-        layout.operator("restrictor.curve", icon=curve, text="")
-        layout.operator("restrictor.arm", icon=arm, text="")
-        layout.operator("restrictor.empty", icon=empty, text="")
-        layout.operator("restrictor.cam", icon=cam, text="")
-        layout.operator("restrictor.lamp", icon=lamp, text="")
-        layout.operator("restrictor.lat", icon=lat, text="")
-        layout.operator("restrictor.font", icon=font, text="")
-        layout.operator("restrictor.meta", icon=meta, text="")
-        layout.operator("restrictor.surf", icon=surf, text="")
-        layout.operator("restrictor.speak", icon=speak, text="")
-        layout.operator("ignore.restrictors", icon='GHOST_ENABLED', text="").ignore = True
-        layout.operator("ignore.restrictors", icon='GHOST_DISABLED', text="").ignore = False
-        layout.operator("refresh.restrictors", icon='FILE_REFRESH', text="")
+        layout.operator("restrictor.mesh", icon=mesh, text="Mesh")
+        layout.operator("restrictor.curve", icon=curve, text="Curve")
+        layout.operator("restrictor.arm", icon=arm, text="Armature")
+        layout.operator("restrictor.empty", icon=empty, text="Empty")
+        layout.operator("restrictor.cam", icon=cam, text="Camera")
+        layout.operator("restrictor.lamp", icon=lamp, text="Lamp")
+        layout.operator("restrictor.lat", icon=lat, text="Lattice")
+        layout.operator("restrictor.font", icon=font, text="Font")
+        layout.operator("restrictor.meta", icon=meta, text="MetaBall")
+        layout.operator("restrictor.surf", icon=surf, text="Surface")
+        layout.operator("restrictor.speak", icon=speak, text="Speaker")
+        layout.operator("ignore.restrictors", icon='GHOST_ENABLED', text="Enable").ignore = True
+        layout.operator("ignore.restrictors", icon='GHOST_DISABLED', text="Disable").ignore = False
+        layout.operator("refresh.restrictors", icon='FILE_REFRESH', text="Refresh")
 
 
 def view3d_select_menu(self, context):

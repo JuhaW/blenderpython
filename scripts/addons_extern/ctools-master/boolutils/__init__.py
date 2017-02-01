@@ -29,10 +29,11 @@ bl_info = {
 }
 
 
-import itertools
+import math
 
 import bpy
 import bmesh
+from mathutils import Matrix, Quaternion, Vector
 
 try:
     importlib.reload(addongroup)
@@ -46,6 +47,8 @@ except NameError:
     from ..utils import registerinfo
     from ..utils import vaoperator
     from ..utils import wrapoperator
+    from ..utils import vaview3d as vav
+    from ..utils import vamath as vam
 
 
 translation_dict = {
@@ -497,11 +500,198 @@ class Menu(bpy.types.Menu):
         op.operation = 'DIFFERENCE'
 
 
+class PasteObject(bpy.types.Operator):
+    """
+    invokeでactiveobjectを複製
+    modal中でスナップ、クリックで位置確定、その後、回転とスケール、クリックで確定。
+    継続するならアクティブオブジェクトをまた複製
+    キャンセルで複製したオブジェクトを削除。
+
+
+    """
+    bl_idname = 'object.paste'
+    bl_label = 'Paste Object'
+    bl_options = {'REGISTER', 'UNDO', 'GRAB_CURSOR', 'BLOCKING'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT'
+
+    def view_axis(self, context, mco):
+        """手前から奥に向かうベクトル"""
+        region = context.region
+        rv3d = context.region_data
+
+        near = vav.unproject(region, rv3d, (*mco, 0.01))
+        far = vav.unproject(region, rv3d, (*mco, 1.0))
+        return (far - near).normalized()
+
+    def ray_cast(self, context, event):
+        """
+        :type context: bpy.types.Context
+        :type event: bpy.types.Event
+        """
+        mco = event.mouse_region_x, event.mouse_region_y
+        region = context.region
+        rv3d = context.region_data
+
+        origin = vav.unproject(region, rv3d, (*mco, 0.01))
+        direction = self.view_axis(context, mco)
+
+        self.actob.hide = True
+        self.dupliob.hide = True
+        # (result, location, normal, index, object, matrix)
+        result = context.scene.ray_cast(origin, direction)
+        self.actob.hide = False
+        self.dupliob.hide = False
+        return result
+
+    def pixel_size(self, context):
+        """1 pixel 分の blender unit を返す"""
+        # unitsystem.pyより
+        rv3d = context.region_data
+        if rv3d is None:
+            return None
+        region = context.region
+        sx, sy = region.width, region.height
+        view_location = rv3d.view_location
+        persmat = rv3d.perspective_matrix
+
+        v1 = persmat[0].to_3d()
+        v2 = persmat[1].to_3d()
+        len_px = 2.0 / min(v1.length, v2.length)
+        len_sc = max(sx, sy)
+        pixsize = len_px / len_sc
+
+        def mul_project_m4_v3_zfac(mat, co):
+            return ((mat.col[0][3] * co[0]) + (mat.col[1][3] * co[1]) + (
+                mat.col[2][3] * co[2]) + mat.col[3][3])
+
+        def ED_view3d_pixel_size(mat, co):
+            return mul_project_m4_v3_zfac(mat, co) * pixsize * 1.0
+
+        pixel_size = ED_view3d_pixel_size(persmat, view_location)
+
+        return pixel_size
+
+    def modal(self, context, event):
+        """
+        :type context: bpy.types.Context
+        :type event: bpy.types.Event
+        """
+        pixel_size = self.pixel_size(context)
+
+        mco = event.mouse_region_x, event.mouse_region_y
+
+        def calc_mat(mco):
+            _, location, normal, index, obj, matrix = self.result
+
+            mat = Matrix.Identity(3)
+            mat.col[2] = normal
+            mvec_near = vav.unproject(context.region, context.region_data,
+                                 (*mco, 0.01))
+            direction = self.view_axis(context, mco)
+            mvec_far = mvec_near + direction
+            plane = vam.PlaneVector(location, normal)
+            isect = plane.intersect(mvec_near, mvec_far)
+            mat.col[0] = (isect - location).normalized()
+            mat.col[1] = (mat.col[2].cross(mat.col[0])).normalized()
+            mat = mat.to_4x4()
+            mat.col[3][:3] = location
+            return mat
+
+        if not self.mco:
+            # result, location, normal, index, obj, matrix
+            result = self.ray_cast(context, event)
+            if result[0]:
+                self.result = result
+                mat = calc_mat((mco[0] + 10, mco[1]))
+                self.dupliob.matrix_world = mat
+
+        if event.type in {'MOUSEMOVE'}:
+            if self.mco:
+                # 回転、拡大縮小。右方向が回転の初期値
+                x = mco[0] - self.mco[0]
+                y = mco[1] - self.mco[1]
+                # angle = math.atan2(y, x)
+
+                mat = calc_mat(mco)
+                px_scale = math.sqrt(x ** 2 + y ** 2)
+                dim = self.actob.dimensions[0]
+                scale = px_scale * pixel_size / dim * 2
+                m = Matrix.Scale(scale, 4)
+                self.dupliob.matrix_world = mat * m
+
+        if event.type in {'LEFTMOUSE'}:
+            if event.value == 'PRESS':
+                self.dupliob.draw_type = 'TEXTURED'
+                self.mco = mco
+            elif event.value == 'RELEASE':
+                self.dupliob.select = False
+                self.duplicate_object(context)
+                self.mco = None
+
+        elif event.type in {'SPACE', 'RET', 'PADENTER'}:
+            if event.value == 'PRESS':
+                if not self.mco:
+                    self.cancel(context)
+                return {'FINISHED'}
+
+        elif event.type in {'RIGHTMOUSE', 'ESC'}:
+            if event.value == 'PRESS':
+                self.cancel(context)
+                return {'CANCELLED'}
+
+        else:
+            return {'PASS_THROUGH'}
+
+        return {'RUNNING_MODAL'}
+
+    def cancel(self, context):  # これ明示的に呼び出さないと駄目だっけ？
+        # dupliobを消す
+        objects = [ob for ob in context.selected_objects
+                   if ob != self.dupliob]
+        for ob in objects:
+            ob.select = False
+        self.dupliob.select = True
+        bpy.ops.object.delete()
+        for ob in objects:
+            ob.select = True
+        self.actob.select = True
+        context.scene.objects.active = self.actob
+
+    def duplicate_object(self, context):
+        objects = context.selected_objects
+        for ob in objects:
+            ob.select = False
+        self.actob.select = True
+        bpy.ops.object.duplicate()
+        self.dupliob = context.selected_objects[0]
+        context.scene.objects.active = self.dupliob
+        for ob in objects:
+            ob.select = True
+        self.actob.select = False
+
+        self.dupliob.draw_type = 'WIRE'
+
+    def invoke(self, context, event):
+        self.mco = None
+        self.actob = self.dupliob = None
+        self.result = None
+
+        self.actob = context.active_object
+        self.duplicate_object(context)
+
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+
+
 classes = [
     Preferences,
     OperatorKnifeProjectPlus,
     OperatorMeshIntersectPlus,
     Menu,
+    # PasteObject,
 ]
 
 

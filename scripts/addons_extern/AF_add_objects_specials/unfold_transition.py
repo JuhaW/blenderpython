@@ -244,6 +244,7 @@ class PanelFOLD(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_category = "Animation"
+    bl_context = "objectmode"
 
     def draw(self, context):
         wm = context.window_manager

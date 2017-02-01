@@ -351,7 +351,24 @@ def register():
     kmi = add('mesh.select_less', 'WHEELDOWNMOUSE', 'PRESS', ctrl=True,
               oskey=True)
 
+    ## Layer
+    try:
+        add = functools.partial(new_keymap_item, '3D View')
+        kmi = add('view3d.layers', 'ATKEY', 'PRESS')
+        kmi.properties.nr = 0
+        add = functools.partial(new_keymap_item, 'Armature')
+        kmi = add('armature.layers_show_all', 'ATKEY', 'PRESS', ctrl=True)
+        add = functools.partial(new_keymap_item, 'Pose')
+        kmi = add('armature.layers_show_all', 'ATKEY', 'PRESS', ctrl=True)
+    except:
+        pass
+
     bl_rna = bpy.types.Event.bl_rna
+
+    if 'BUTTON9MOUSE' in bl_rna.properties['type'].enum_items:
+        add = functools.partial(new_keymap_item, 'Outliner')
+        kmi = add('outliner.show_active', 'BUTTON9MOUSE', 'PRESS')
+
     if 'BUTTON16MOUSE' not in bl_rna.properties['type'].enum_items:
         return
 

@@ -14,7 +14,7 @@ class XPSToolsObjectPanel(bpy.types.Panel):
     bl_label = 'XPS Tools'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-    bl_category = 'XPS'
+    bl_category = 'Import'
     bl_context = 'objectmode'
 
     def draw(self, context):
@@ -60,7 +60,7 @@ class XPSToolsBonesPanel(bpy.types.Panel):
     bl_label = 'XPS Bones'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-    bl_category = 'XPS'
+    bl_category = 'Import'
     bl_context = 'objectmode'
 
     @classmethod
@@ -127,7 +127,7 @@ class XPSToolsAnimPanel(bpy.types.Panel):
     bl_label = 'XPS Anim'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-    bl_category = 'XPS'
+    bl_category = 'Import'
     bl_context = 'objectmode'
 
     @classmethod
@@ -167,7 +167,7 @@ class XPSToolsMaterialConverterPanel(bpy.types.Panel):
     bl_label = 'XPS Material Converter'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-    bl_category = 'XPS'
+    bl_category = 'Import'
     bl_context = 'objectmode'
 
     def draw(self, context):

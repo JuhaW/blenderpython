@@ -20,7 +20,7 @@
 bl_info = {
     'name': 'Local Grid',
     'author': 'chromoly',
-    'version': (1, 1, 1),
+    'version': (1, 1, 2),
     'blender': (2, 78, 0),
     'location': 'View3D',
     'category': '3D View'}
@@ -37,7 +37,6 @@ from .utils import addongroup
 from .utils import registerinfo
 from .utils import vaobject as vaob
 from .utils import vaview3d as vav
-from .utils import vaprops as vap
 from .utils import vaoperator as vaop
 from .utils import vaarmature as vaarm
 
@@ -99,7 +98,9 @@ class LocalGridPreset(bpy.types.PropertyGroup):
 
 class LocalGridData(bpy.types.PropertyGroup):
     """Scene.local_gridにメニューアイテムを確保"""
-    presets = vap.CP('Presets', type=LocalGridPreset)
+    presets = bpy.props.CollectionProperty(
+        name='Presets',
+        type=LocalGridPreset)
 
 
 ###############################################################################
