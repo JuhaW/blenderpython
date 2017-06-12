@@ -24,13 +24,10 @@ import ctypes
 
 import bpy
 from mathutils import Vector
-import bpy_extras.keyconfig_utils
 
 from .. import localutils
-from ..localutils import utils
 
 from . import vaoperator
-
 
 
 """
@@ -427,6 +424,41 @@ class AreaExist:
 # #define UI_UNIT_X               ((void)0, U.widget_unit)
 # #define UI_UNIT_Y               ((void)0, U.widget_unit)
 # U.pixelsize = wm_window_pixelsize(win);  # @ wm_window_add_ghostwindow() 通常は1
+
+
+def widget_unit():
+    """
+    blender/makesdna/DNA_userdef_types.h:527:
+        short widget_unit;  /* private, defaults to 20 for 72 DPI setting */
+
+    # #define UI_UNIT_X               ((void)0, U.widget_unit)
+    # #define UI_UNIT_Y               ((void)0, U.widget_unit)
+    # blender/blenkernel/intern/blender.c:237:
+    #     U.widget_unit = (U.pixelsize * U.dpi * 20 + 36) / 72;
+
+    dpi = context.user_preferences.system.dpi
+    PIXEL_SIZE = 1.0
+    widget_unit = int((PIXEL_SIZE * dpi * 20 + 36) / 72)
+    """
+    # dpi: 72 -> 20.5, 96: 27.2
+
+    u = bpy.context.user_preferences
+    return int((u.system.pixel_size * u.system.dpi * 20 + 36) / 72)
+
+
+UI_UNIT_X = widget_unit
+UI_UNIT_Y = widget_unit
+
+
+# icon_size = ICON_DEFAULT_HEIGHT * (PIXEL_SIZE * dpi / 72.0)
+ICON_DEFAULT_HEIGHT = 16
+
+
+def icon_size():
+    # 通常アイコンの大きさ。widget_unit * 0.8 でも可
+    u = bpy.context.user_preferences
+    f = u.system.pixel_size * u.system.dpi / 72
+    return ICON_DEFAULT_HEIGHT * f
 
 
 ###############################################################################

@@ -17,19 +17,24 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
+from collections import OrderedDict
 import contextlib
 import traceback
 
 import bpy
 
 
-try:
-    from .customproperty import CustomProperty
-except:
-    from _addon_customproperty import CustomProperty
+# try:
+#     from .customproperty import CustomProperty
+# except:
+#     from _addon_customproperty import CustomProperty
 
 __all__ = [
     'AddonRegisterInfo',
+    'area_region_types',
+    'bl_context_properties',
+    'bl_context_view3d',
+    'space_type_class_name',
 ]
 
 
@@ -405,40 +410,105 @@ class _MenuKeymapItemAdd(_Registerable, bpy.types.Menu):
 #####################################################################
 # panel
 #####################################################################
-def _area_region_types(area_type):
-    if area_type == 'CONSOLE':
-        return ['WINDOW', 'HEADER']
-    elif area_type == 'FILE_BROWSER':
-        return ['WINDOW', 'UI', 'TOOLS', 'TOOL_PROPS', 'HEADER']
-    elif area_type == 'INFO':
-        return ['WINDOW', 'HEADER']
-    elif area_type == 'USER_PREFERENCES':
-        return ['WINDOW', 'HEADER']
-    elif area_type == 'OUTLINER':
-        return ['WINDOW', 'HEADER']
-    elif area_type == 'PROPERTIES':
-        return ['WINDOW', 'HEADER']
-    elif area_type == 'LOGIC_EDITOR':
-        return ['WINDOW', 'UI', 'HEADER']
-    elif area_type == 'NODE_EDITOR':
-        return ['WINDOW', 'UI', 'TOOLS', 'HEADER']
-    elif area_type == 'TEXT_EDITOR':
-        return ['WINDOW', 'UI', 'HEADER']
-    elif area_type == 'CLIP_EDITOR':
-        return ['WINDOW', 'PREVIEW', 'CHANNELS', 'UI', 'TOOLS', 'TOOL_PROPS',
-                'HEADER']
-    elif area_type == 'SEQUENCE_EDITOR':
-        return ['WINDOW', 'PREVIEW', 'UI', 'HEADER']
-    elif area_type == 'IMAGE_EDITOR':
-        return ['WINDOW', 'UI', 'TOOLS', 'HEADER']
-    elif area_type in ('NLA_EDITOR', 'GRAPH_EDITOR', 'DOPESHEET_EDITOR'):
-        return ['WINDOW', 'CHANNELS', 'UI', 'HEADER']
-    elif area_type == 'VIEW_3D':
-        return ['WINDOW', 'UI', 'TOOLS', 'TOOL_PROPS', 'HEADER']
-    elif area_type == 'TIMELINE':
-        return ['WINDOW', 'HEADER']
-    else:
-        raise ValueError()
+area_region_types = OrderedDict([
+    # # EMPTY: 0
+    # ('EMPTY', []),
+    # VIEW_3D: 1
+    ('VIEW_3D', ['WINDOW', 'UI', 'TOOLS', 'TOOL_PROPS', 'HEADER']),
+    # TIMELINE: 15
+    ('TIMELINE', ['WINDOW', 'HEADER']),
+    # GRAPH_EDITOR: 2
+    ('GRAPH_EDITOR', ['WINDOW', 'CHANNELS', 'UI', 'HEADER']),
+    # DOPESHEET_EDITOR: 12
+    ('DOPESHEET_EDITOR', ['WINDOW', 'CHANNELS', 'UI', 'HEADER']),
+    # NLA_EDITOR: 13
+    ('NLA_EDITOR', ['WINDOW', 'CHANNELS', 'UI', 'HEADER']),
+    # IMAGE_EDITOR: 6
+    ('IMAGE_EDITOR', ['WINDOW', 'UI', 'TOOLS', 'HEADER']),
+    # SEQUENCE_EDITOR: 8
+    ('SEQUENCE_EDITOR', ['WINDOW', 'PREVIEW', 'UI', 'HEADER']),
+    # CLIP_EDITOR: 20
+    ('CLIP_EDITOR', ['WINDOW', 'PREVIEW', 'CHANNELS', 'UI', 'TOOLS',
+                     'TOOL_PROPS', 'HEADER']),
+    # TEXT_EDITOR: 9
+    ('TEXT_EDITOR', ['WINDOW', 'UI', 'HEADER']),
+    # NODE_EDITOR: 16
+    ('NODE_EDITOR', ['WINDOW', 'UI', 'TOOLS', 'HEADER']),
+    # LOGIC_EDITOR: 17
+    ('LOGIC_EDITOR', ['WINDOW', 'UI', 'HEADER']),
+    # PROPERTIES: 4
+    ('PROPERTIES', ['WINDOW', 'HEADER']),
+    # OUTLINER: 3
+    ('OUTLINER', ['WINDOW', 'HEADER']),
+    # USER_PREFERENCES: 19
+    ('USER_PREFERENCES', ['WINDOW', 'HEADER']),
+    # INFO: 7
+    ('INFO', ['WINDOW', 'HEADER']),
+    # FILE_BROWSER: 5
+    ('FILE_BROWSER', ['WINDOW', 'UI', 'TOOLS', 'TOOL_PROPS', 'HEADER']),
+    # CONSOLE: 18
+    ('CONSOLE', ['WINDOW', 'HEADER']),
+])
+
+# Panel.bL_space_typeがPROPERTIESの場合のPanel.bl_contextと
+# SpaceProperties.contextの対応。値はSpaceProperties.contextのidentifierとname
+bl_context_properties = OrderedDict([
+    ('scene', ('SCENE', 'Scene')),
+    ('render', ('RENDER', 'Render')),
+    ('render_layer', ('RENDER_LAYER', 'Render Layers')),
+    ('world', ('WORLD', 'World')),
+    ('object', ('OBJECT', 'Object')),
+    ('data', ('DATA', 'Data')),
+    ('material', ('MATERIAL', 'Material')),
+    ('texture', ('TEXTURE', 'Texture')),
+    ('particle', ('PARTICLES', 'Particles')),
+    ('physics', ('PHYSICS', 'Physics')),
+    ('bone', ('BONE', 'Bone')),
+    ('modifier', ('MODIFIER', 'Modifiers')),
+    ('constraint', ('CONSTRAINT', 'Constraints')),
+    ('bone_constraint', ('BONE_CONSTRAINT', 'Bone Constraints')),
+])
+
+# Panel.bl_space_typeがVIEW_3Dの場合のPanel.bl_contextと
+# Context.modeの対応。値はContext.modeのidentifierとname
+bl_context_view3d = OrderedDict([
+    ('mesh_edit', ('EDIT_MESH', 'Mesh Edit')),  # 0
+    ('curve_edit', ('EDIT_CURVE', 'Curve Edit')),  # 1
+    ('surface_edit', ('EDIT_SURFACE', 'Surface Edit')),  # 2
+    ('text_edit', ('EDIT_TEXT', 'Text Edit')),  # 3
+    ('armature_edit', ('EDIT_ARMATURE', 'Armature Edit')),  # 4
+    ('mball_edit', ('EDIT_METABALL', 'Metaball Edit')),  # 5
+    ('lattice_edit', ('EDIT_LATTICE', 'Lattice Edit')),  # 6
+    ('posemode', ('POSE', 'Pose')),  # 7
+    ('sculpt_mode', ('SCULPT', 'Sculpt')),  # 8
+    ('weightpaint', ('PAINT_WEIGHT', 'Weight Paint')),  # 9
+    ('vertexpaint', ('PAINT_VERTEX', 'Vertex Paint')),  # 10
+    ('imagepaint', ('PAINT_TEXTURE', 'Texture Paint')),  # 11
+    ('particlemode', ('PARTICLE', 'Particle')),  # 12
+    ('objectmode', ('OBJECT', 'Object')),  # 13
+])
+
+
+# Space.typeとクラス名の先頭の文字列との対応。例: bpy.types.USERPREF_HT_header
+space_type_class_name = OrderedDict([
+    ('VIEW_3D', 'VIEW3D'),
+    ('TIMELINE', 'TIME'),
+    ('GRAPH_EDITOR', 'GRAPH'),
+    ('DOPESHEET_EDITOR', 'DOPESHEET'),
+    ('NLA_EDITOR', 'NLA'),
+    ('IMAGE_EDITOR', 'IMAGE'),
+    ('SEQUENCE_EDITOR', 'SEQUENCER'),
+    ('CLIP_EDITOR', 'CLIP'),
+    ('TEXT_EDITOR', 'TEXT'),
+    ('NODE_EDITOR', 'NODE'),
+    ('LOGIC_EDITOR', 'LOGIC'),
+    ('PROPERTIES', 'PROPERTIES'),
+    ('OUTLINER', 'OUTLINER'),
+    ('USER_PREFERENCES', 'USERPREF'),
+    ('INFO', 'INFO'),
+    ('FILE_BROWSER', 'FILEBROWSER'),
+    ('CONSOLE', 'CONSOLE'),
+])
 
 
 def _panel_prop_bl_region_type_items(self, context):
@@ -452,7 +522,7 @@ def _panel_prop_bl_region_type_items(self, context):
                   ('PREVIEW', 'Preview')]
                  )
 
-    items = [(t, label[t], '') for t in _area_region_types(self.bl_space_type)]
+    items = [(t, label[t], '') for t in area_region_types[self.bl_space_type]]
     _panel_prop_bl_region_type_items.items = items
     return items
 
@@ -461,39 +531,14 @@ def _panel_prop_bl_context_items(self, context):
     if self.bl_space_type == 'PROPERTIES':
         # buttons_main_region_draw()より
         # bl_space_typeが'PROPERTIES'の場合に使う
-        items = (('empty', '', ''),
-                 ('scene', 'scene', ''),
-                 ('render', 'render', ''),
-                 ('render_layer', 'render_layer', ''),
-                 ('world', 'world', ''),
-                 ('object', 'object', ''),
-                 ('data', 'data', ''),
-                 ('material', 'material', ''),
-                 ('texture', 'texture', ''),
-                 ('particle', 'particle', ''),
-                 ('physics', 'physics', ''),
-                 ('bone', 'bone', ''),
-                 ('modifier', 'modifier', ''),
-                 ('constraint', 'constraint', ''),
-                 ('bone_constraint', 'bone_constraint', ''),
-                 )
+        items = [(k, k, '') for k in bl_context_properties]
+        items = [('empty', '', '')] + items
     else:
-        items = (('empty', '', ''),
-                 ('mesh_edit', 'Mesh Edit', ''),
-                 ('curve_edit', 'Curve Edit', ''),
-                 ('surface_edit', 'Surface Edit', ''),
-                 ('text_edit', 'Text Edit', ''),
-                 ('armature_edit', 'Armature Edit', ''),
-                 ('mball_edit', 'Metaball Edit', ''),
-                 ('lattice_edit', 'Lattice Edit', ''),
-                 ('posemode', 'Pose', ''),
-                 ('sculpt_mode', 'Sculpt', ''),
-                 ('weightpaint', 'Weight Paint', ''),
-                 ('vertexpaint', 'Vertex Paint', ''),
-                 ('imagepaint', 'Texture Paint', ''),
-                 ('particlemode', 'Particle', ''),
-                 ('objectmode', 'Object', ''),
-                 )
+        # view3d_tools_region_draw()より
+        # これが有効なのはbl_space_typeが'VIEW_3D'でbl_region_typeが
+        # 'TOOLS'の場合のみ
+        items = [(k, v[1], '') for k, v in bl_context_view3d.items()]
+        items = [('empty', '', '')] + items
     _panel_prop_bl_context_items.items = items
     return items
 
@@ -752,7 +797,7 @@ class _AddonRegisterInfoKeyMap(_AddonRegisterInfo):
     """:type: list[(str, int)]"""
 
     # keymaps_set_default()の際に_keymap_itemsを複製
-    # [(km.name, kmi.id), ...]
+    # [(km.name, kmi.id), ...]s
     __default_keymap_items = ()
     """:type: list[(str, int)]"""
 
@@ -1045,8 +1090,9 @@ class _AddonRegisterInfoKeyMap(_AddonRegisterInfo):
     def keymap_items_set_default(cls):
         """現在登録しているKeyMapItemを初期値(restore時の値)とする"""
         cls.__default_keymap_item_values.clear()
-        cls.__default_keymap_item_values[:] = \
-            cls.keymap_items_get_attributes()
+        values = cls.keymap_items_get_attributes()
+        if values:
+            cls.__default_keymap_item_values[:] = values
         cls.__default_keymap_items = cls.keymap_items[:]
 
     @classmethod
@@ -1543,6 +1589,8 @@ class _AddonRegisterInfoPanel(_AddonRegisterInfo):
     def panel_settings_restore(cls):
         """初期設定に戻す"""
         addon_prop = cls._get_addon_property_group()
+        if not addon_prop:
+            return
         if addon_prop.default_panel_settings:
             addon_prop['panel_settings'] = addon_prop['default_panel_settings']
         else:
@@ -1712,6 +1760,7 @@ class _AddonRegisterInfoClass(_AddonRegisterInfo):
         for class_type, class_name, base_class in classes:
             col1.label(base_class.__name__)
             col2.label(class_name)
+            print(class_type, getattr(class_type, 'bl_label', ''))
             col3.label(getattr(class_type, 'bl_label', ''))
 
 
@@ -1767,7 +1816,6 @@ class AddonRegisterInfo(  # _AddonRegisterInfo,
             name_mangling(_AddonRegisterInfoKeyMap.__name__, '__default_keymap_item_values'): [],
             'addon_classes': [],
             'addon_attributes': [],
-            'hoge': '############'
         }
         if bl_idname is not None:
             attrs['bl_idname'] = bl_idname

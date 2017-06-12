@@ -15,7 +15,7 @@
 #  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110 - 1301, USA.
 #
 # ##### END GPL LICENSE BLOCK #####
-
+"""
 bl_info = {
     'name': 'Simple Curve',
     'author': 'Spivak Vladimir (http://cwolf3d.korostyshev.net)',
@@ -26,8 +26,8 @@ bl_info = {
     'warning': '', # used for warning icon and text in addons panel
     'wiki_url': 'http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Curve/Simple_curves',
     'tracker_url': 'https://developer.blender.org/T37664',
-    'category': 'T+ Auxiliary'}
-
+    'category': ''}
+"""
 
 ##------------------------------------------------------------
 #### import modules
@@ -1427,7 +1427,7 @@ def SimpleVariables():
 class INFO_MT_simple_menu(bpy.types.Menu):
     # Define the "Extras" menu
     bl_idname = "INFO_MT_simple_menu"
-    bl_label = "Simple"
+    bl_label = "2D Simple"
 
     def draw(self, context):
         self.layout.operator_context = 'INVOKE_REGION_WIN'
@@ -1502,7 +1502,7 @@ def register():
     #bpy.utils.register_class(BezierPointsFillet)
     #bpy.utils.register_class(BezierDivide)
 
-    bpy.types.INFO_MT_curve_add.append(Simple_button)
+    #bpy.types.INFO_MT_curve_add.append(Simple_button)
 
     SimpleVariables()
 
@@ -1513,7 +1513,7 @@ def unregister():
     #bpy.utils.unregister_class(BezierPointsFillet)
     #bpy.utils.unregister_class(BezierDivide)
 
-    bpy.types.INFO_MT_curve_add.remove(Simple_button)
+    #bpy.types.INFO_MT_curve_add.remove(Simple_button)
 
 
 if __name__ == "__main__":

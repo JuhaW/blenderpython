@@ -611,7 +611,8 @@ def cache_init(context):
 # Manipulator Matrix
 ###############################################################################
 def _memo_manipulator_matrix(context):
-    v3d = context.space_data
+    area = context.area
+    v3d = context.space_data if area and area.type == 'VIEW_3D' else None
     if v3d:
         orientation = v3d.transform_orientation
         pivot_point = v3d.pivot_point
@@ -624,7 +625,10 @@ def _memo_manipulator_matrix(context):
     else:
         vmat = None
     if pivot_point == 'CURSOR':
-        cursor = tuple(context.scene.cursor_location)
+        if v3d:
+            cursor = tuple(v3d.cursor_location)
+        else:
+            cursor = tuple(context.scene.cursor_location)
     else:
         cursor = None
     return orientation, pivot_point, vmat, cursor

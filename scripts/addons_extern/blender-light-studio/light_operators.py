@@ -9,13 +9,7 @@ _ = os.sep
 
 class Blender_Light_Studio_Properties(bpy.types.PropertyGroup):
     initialized = BoolProperty(default = False)
-      
-    def get_light_x(self):
-        return getLightMesh().location.x
-    
-    def set_light_x(self, context):
-        getLightMesh().location.x = context
-        
+            
     def get_light_hidden(self):
         return getLightMesh().hide_render
     
@@ -24,10 +18,22 @@ class Blender_Light_Studio_Properties(bpy.types.PropertyGroup):
         light.hide_render = context
         light.hide = context
         bpy.context.scene.frame_current = bpy.context.scene.frame_current # refresh hack
-        refreshMaterials()  
+        refreshMaterials()
     
-    light_radius = FloatProperty(name="Light Distance", default=30.0, min=0.5, set=set_light_x, step=5, get=get_light_x)
     light_muted = BoolProperty(name="Mute Light", default=False, set=set_light_hidden, get=get_light_hidden)
+    
+    def get_selection_overriden(self):
+        from . selectOperator import addon_keymaps
+        #print(addon_keymaps)
+        return len(addon_keymaps)
+    def set_selection_overriden(self, context):
+        from . selectOperator import add_shortkeys, remove_shortkeys
+        if context:
+            add_shortkeys()
+        else:
+            remove_shortkeys()
+            
+    selection_overriden = BoolProperty(name="Override Selection", default=True, set=set_selection_overriden, get=get_selection_overriden)
     
     ''' Profile List '''
     profile_list = CollectionProperty(type = ListItem)
@@ -173,7 +179,9 @@ class AddBSLight(bpy.types.Operator):
             ob.use_fake_user = True
         
         lightGrp = [l for l in new_objects if l.name.startswith('BLS_LIGHT_GRP')][0]
-        lightGrp.parent = [ob for ob in bpy.context.scene.objects if ob and ob.name.startswith('BLS_PROFILE') and isFamily(ob)][0]
+        profile = [ob for ob in bpy.context.scene.objects if ob and ob.name.startswith('BLS_PROFILE') and isFamily(ob)][0]
+        handle = [ob for ob in profile.children if ob.name.startswith('BLS_HANDLE')][0]
+        lightGrp.parent = profile
         
         bpy.ops.object.select_all(action='DESELECT')
         light = [p for p in new_objects if p.name.startswith('BLS_LIGHT_MESH')][0]
@@ -255,7 +263,13 @@ class AddBSLight(bpy.types.Operator):
         c.frame_start = 1
         c.frame_end = 500
         #####
-
+        
+        c = light.constraints.new('COPY_LOCATION')
+        c.target = handle
+        c.use_x = True
+        c.use_y = True
+        c.use_z = True
+        c.use_offset = True
         bpy.context.scene.frame_current = bpy.context.scene.frame_current # refresh hack
         refreshMaterials()
                 
@@ -286,7 +300,17 @@ class DeleteBSLight(bpy.types.Operator):
         
         light = bpy.context.scene.objects.active
         
+        
         lightGrp = findLightGrp(light)
+        if lightGrp == None:
+            if light.parent and light.parent.name.startswith('BLS_PROFILE'):
+                light.select = False
+                self.report({'WARNING'}, "Delete Profile in order to delete Handle")
+                return {"CANCELLED"}
+            else:
+                scene.objects.unlink(light)
+                return {"FINISHED"}
+            
         ending = lightGrp.name.split('.')[1]
         
         #obsToRemove = [ob for ob in scene.objects if not ob.name.startswith('BLS_PROFILE.') and ob.name.endswith(ending) and isFamily(ob)]
@@ -369,9 +393,6 @@ class BSL_ShowAllLights(bpy.types.Operator):
     
     def execute(self, context):
         obs = context.scene.objects
-        lightGrp = obs.active
-        light_no = lightGrp.name.split('.')[1]
-    
         for light in (ob for ob in obs if ob.name.startswith('BLS_LIGHT_MESH') and isFamily(ob)):
             light.hide_render = False
             light.hide = False

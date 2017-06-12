@@ -323,7 +323,10 @@ class _OperatorTemplateAlign(OperatorTemplateGroup,
         elif self.relative_to == 'CENTER':
             loc = self._calc_groups_all_bb_center(context, space)
         elif self.relative_to == 'CURSOR':
-            loc = context.scene.cursor_location
+            if context.area.type == 'VIEW_3D':
+                loc = context.space_data.cursor_location
+            else:
+                loc = context.scene.cursor_location
         elif self.relative_to == 'SCENE':
             loc = Vector((0, 0, 0))
         else:

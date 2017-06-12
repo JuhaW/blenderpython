@@ -1,34 +1,51 @@
-__status__ = "toolplus custom version"
+__status__ = "toolplus"
 __author__ = "mkbreuer"
 __version__ = "1.0"
-__date__ = "2016"
+__date__ = "2017"
 
 
-import bpy, mathutils, math, re
-from mathutils.geometry import intersect_line_plane
-from mathutils import Vector
-from math import radians
-from bpy import*
+import bpy, os
+from bpy import *
+from bpy.props import *
+from . icons.icons import load_icons
 
 
 
-class View3D_TP_Origin_BBox(bpy.types.Operator):
+class View3D_TP_Origin_Batch(bpy.types.Operator):
     """TP Origin :)"""
     bl_label = "TP Origin :)"
-    bl_idname = "tp_batch.origin_bbox"               
+    bl_idname = "tp_batch.origin_batch"               
     bl_options = {'REGISTER', 'UNDO'}  
         
     def draw(self, context):
         layout = self.layout
+        
+        icons = load_icons()
         
         if context.mode == 'OBJECT':   
                 
             box = layout.box().column(1)  
 
             row = box.column(1)
-            row.operator("tp_ops.origin_set_cursor", text="3D Cursor", icon="LAYER_ACTIVE")
-            row.operator("tp_ops.origin_set_mass", text="Center of Mass", icon="LAYER_ACTIVE")
-            row.operator("tp_ops.origin_set_geom", text="Geometry to Origin", icon="LAYER_ACTIVE")
+            
+            button_origin_center_view = icons.get("icon_origin_center_view")
+            row.operator("object.transform_apply", text="Center", icon_value=button_origin_center_view.icon_id).location=True
+
+            button_origin_cursor = icons.get("icon_origin_cursor")
+            row.operator("tp_ops.origin_set_cursor", text="3D Cursor", icon_value=button_origin_cursor.icon_id)
+            
+            box.separator()
+            
+            button_origin_tomesh = icons.get("icon_origin_tomesh")
+            row.operator("tp_ops.origin_tomesh", text="Origin to Mesh", icon_value=button_origin_tomesh.icon_id)
+
+            button_origin_meshto = icons.get("icon_origin_meshto")
+            row.operator("tp_ops.origin_meshto", text="Mesh to Origin", icon_value=button_origin_meshto.icon_id)
+
+            box.separator()
+            
+            button_origin_mass = icons.get("icon_origin_mass")           
+            row.operator("tp_ops.origin_set_mass", text="Center of Mass", icon_value=button_origin_mass.icon_id)
             
             box.separator()
 
@@ -51,30 +68,44 @@ class View3D_TP_Origin_BBox(bpy.types.Operator):
                 sub3.alignment ='RIGHT'         
                 sub3.label("--Y Axis")
 
-                #####  
-                
+                #####                  
                 row = box.row(1)                                     
-                sub1 = row.row(1)
 
-                sub1.alignment ='LEFT' 
+                sub1 = row.row(1)
+                sub1.alignment ='LEFT'
+                 
+                button_origin_left_top = icons.get("icon_origin_left_top")   
+                sub1.operator('tp_ops.cubeback_cornertop_minus_xy', text="", icon_value=button_origin_left_top.icon_id)
+               
+                button_origin_top = icons.get("icon_origin_top")  
+                sub1.operator('tp_ops.cubeback_edgetop_minus_y', text="", icon_value=button_origin_top.icon_id)
                 
-                sub1.operator('tp_ops.cubeback_cornertop_minus_xy', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubeback_edgetop_minus_y', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubeback_cornertop_plus_xy', text="", icon = "LAYER_ACTIVE")
+                button_origin_right_top = icons.get("icon_origin_right_top")
+                sub1.operator('tp_ops.cubeback_cornertop_plus_xy', text="", icon_value=button_origin_right_top.icon_id)
 
                 sub2 = row.row(1)
                 sub2.alignment ='CENTER' 
                 
-                sub2.operator('tp_ops.cubefront_edgetop_minus_x', text="", icon = "LAYER_ACTIVE")
-                sub2.operator('tp_ops.cubefront_side_plus_z', text="", icon = "LAYER_ACTIVE")
-                sub2.operator('tp_ops.cubefront_edgetop_plus_x', text="", icon = "LAYER_ACTIVE")
+                button_origin_left_top = icons.get("icon_origin_left_top")   
+                sub2.operator('tp_ops.cubefront_edgetop_minus_x', text="", icon_value=button_origin_left_top.icon_id)
+                
+                button_origin_top = icons.get("icon_origin_top")  
+                sub2.operator('tp_ops.cubefront_side_plus_z', text="", icon_value=button_origin_top.icon_id)
+                
+                button_origin_right_top = icons.get("icon_origin_right_top")
+                sub2.operator('tp_ops.cubefront_edgetop_plus_x', text="", icon_value=button_origin_right_top.icon_id)
 
                 sub3 = row.row(1)
                 sub3.alignment ='RIGHT' 
                 
-                sub3.operator('tp_ops.cubefront_cornertop_minus_xy', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubeback_edgetop_plus_y', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubefront_cornertop_plus_xy', text="", icon = "LAYER_ACTIVE")
+                button_origin_left_top = icons.get("icon_origin_left_top")   
+                sub3.operator('tp_ops.cubefront_cornertop_minus_xy', text="", icon_value=button_origin_left_top.icon_id)
+                
+                button_origin_top = icons.get("icon_origin_top")  
+                sub3.operator('tp_ops.cubeback_edgetop_plus_y', text="", icon_value=button_origin_top.icon_id)
+                
+                button_origin_right_top = icons.get("icon_origin_right_top")
+                sub3.operator('tp_ops.cubefront_cornertop_plus_xy', text="", icon_value=button_origin_right_top.icon_id)
                 
                 #####
 
@@ -83,26 +114,42 @@ class View3D_TP_Origin_BBox(bpy.types.Operator):
                 sub1 = row.row(1)
                 sub1.alignment ='LEFT' 
                 
-                sub1.operator('tp_ops.cubefront_edgemiddle_minus_x', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubefront_side_plus_y', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubefront_edgemiddle_plus_x', text="", icon = "LAYER_ACTIVE")
+                button_origin_left = icons.get("icon_origin_left")
+                sub1.operator('tp_ops.cubefront_edgemiddle_minus_x', text="", icon_value=button_origin_left.icon_id)
+               
+                button_origin_cross = icons.get("icon_origin_cross")
+                sub1.operator('tp_ops.cubefront_side_plus_y', text="", icon_value=button_origin_cross.icon_id)
+                
+                button_origin_right = icons.get("icon_origin_right")
+                sub1.operator('tp_ops.cubefront_edgemiddle_plus_x', text="", icon_value=button_origin_right.icon_id)
 
                 sub2 = row.row(1)
                 sub2.alignment ='CENTER' 
 
-                sub2.operator('tp_ops.cubefront_side_minus_x', text="", icon = "LAYER_ACTIVE")
+                button_origin_left = icons.get("icon_origin_left")
+                sub2.operator('tp_ops.cubefront_side_minus_x', text="", icon_value=button_origin_left.icon_id)
+               
                 if context.mode == 'OBJECT':
-                    sub2.operator('object.origin_set', text="", icon = "LAYER_ACTIVE").type='ORIGIN_GEOMETRY'
+                    button_origin_diagonal = icons.get("icon_origin_diagonal")
+                    sub2.operator('object.origin_set', text="", icon_value=button_origin_diagonal.icon_id).type='ORIGIN_GEOMETRY'
                 else:
-                    sub2.operator('tp_ops.origin_set_editcenter', text="", icon = "LAYER_ACTIVE")
-                sub2.operator('tp_ops.cubefront_side_plus_x', text="", icon = "LAYER_ACTIVE")
+                    button_origin_diagonal = icons.get("icon_origin_diagonal")
+                    sub2.operator('tp_ops.origin_set_editcenter', text="", icon_value=button_origin_diagonal.icon_id)
+                
+                button_origin_right = icons.get("icon_origin_right")
+                sub2.operator('tp_ops.cubefront_side_plus_x', text="", icon_value=button_origin_right.icon_id)
 
                 sub3 = row.row(1)
                 sub3.alignment ='RIGHT' 
                 
-                sub3.operator('tp_ops.cubefront_edgemiddle_minus_y', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubefront_side_minus_y', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubefront_edgemiddle_plus_y', text="", icon = "LAYER_ACTIVE")
+                button_origin_left = icons.get("icon_origin_left")
+                sub3.operator('tp_ops.cubefront_edgemiddle_minus_y', text="", icon_value=button_origin_left.icon_id)
+                
+                button_origin_cross = icons.get("icon_origin_cross")
+                sub3.operator('tp_ops.cubefront_side_minus_y', text="", icon_value=button_origin_cross.icon_id)
+                
+                button_origin_right = icons.get("icon_origin_right")
+                sub3.operator('tp_ops.cubefront_edgemiddle_plus_y', text="", icon_value=button_origin_right.icon_id)
 
                 #####
 
@@ -111,25 +158,66 @@ class View3D_TP_Origin_BBox(bpy.types.Operator):
                 sub1 = row.row(1)
                 sub1.alignment ='LEFT' 
                 
-                sub1.operator('tp_ops.cubeback_cornerbottom_minus_xy', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubefront_edgebottom_plus_y', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubeback_cornerbottom_plus_xy', text="", icon = "LAYER_ACTIVE")
+                button_origin_left_bottom = icons.get("icon_origin_left_bottom")
+                sub1.operator('tp_ops.cubeback_cornerbottom_minus_xy', text="", icon_value=button_origin_left_bottom.icon_id)
+                
+                button_origin_bottom = icons.get("icon_origin_bottom")
+                sub1.operator('tp_ops.cubefront_edgebottom_plus_y', text="", icon_value=button_origin_bottom.icon_id)
+                
+                button_origin_right_bottom = icons.get("icon_origin_right_bottom")
+                sub1.operator('tp_ops.cubeback_cornerbottom_plus_xy', text="", icon_value=button_origin_right_bottom.icon_id)
 
                 sub2 = row.row(1)
                 sub2.alignment ='CENTER' 
 
-                sub2.operator('tp_ops.cubefront_edgebottom_minus_x', text="", icon = "LAYER_ACTIVE")
-                sub2.operator('tp_ops.cubefront_side_minus_z', text="", icon = "LAYER_ACTIVE")
-                sub2.operator('tp_ops.cubefront_edgebottom_plus_x', text="", icon = "LAYER_ACTIVE")    
-
-                sub3 = row.row(1)
-                sub3.alignment ='RIGHT' 
+                button_origin_left_bottom = icons.get("icon_origin_left_bottom")
+                sub2.operator('tp_ops.cubefront_edgebottom_minus_x', text="", icon_value=button_origin_left_bottom.icon_id)
                 
-                sub3.operator('tp_ops.cubefront_cornerbottom_minus_xy', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubefront_edgebottom_minus_y', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubefront_cornerbottom_plus_xy', text="", icon = "LAYER_ACTIVE")
+                button_origin_bottom = icons.get("icon_origin_bottom")
+                sub2.operator('tp_ops.cubefront_side_minus_z', text="", icon_value=button_origin_bottom.icon_id)
+                
+                button_origin_right_bottom = icons.get("icon_origin_right_bottom")
+                sub2.operator('tp_ops.cubefront_edgebottom_plus_x', text="", icon_value=button_origin_right_bottom.icon_id)    
+
+                sub3 = row.row(1)                
+                sub3.alignment ='RIGHT' 
+
+                button_origin_left_bottom = icons.get("icon_origin_left_bottom")
+                sub3.operator('tp_ops.cubefront_cornerbottom_minus_xy', text="", icon_value=button_origin_left_bottom.icon_id)
+                
+                button_origin_bottom = icons.get("icon_origin_bottom")
+                sub3.operator('tp_ops.cubefront_edgebottom_minus_y', text="", icon_value=button_origin_bottom.icon_id)
+                
+                button_origin_right_bottom = icons.get("icon_origin_right_bottom")
+                sub3.operator('tp_ops.cubefront_cornerbottom_plus_xy', text="", icon_value=button_origin_right_bottom.icon_id)
 
                 box.separator()
+         
+                box = layout.box().column(1) 
+                 
+                row = box.column(1)
+                button_origin_distribute = icons.get("icon_origin_distribute")  
+                row.operator("object.distribute_osc", "Distribute", icon_value=button_origin_distribute.icon_id)
+
+                button_origin_align = icons.get("icon_origin_align")                
+                row.operator("tp_origin.align_tools", "AlignTools", icon_value=button_origin_align.icon_id)    
+                
+                box.separator()
+
+                box = layout.box().row()
+                
+                row = box.column(1)
+                row.label("Center / Zero to...")               
+                row.operator("tp_ops.zero_all_axis", "Object")
+                row.operator("tp_ops.zero_cursor", "3D Cursor")
+                
+                
+                row = box.column(1)                 
+                row.operator("tp_ops.zero_x", "X-Axis")
+                row.operator("tp_ops.zero_y", "Y-Axis")
+                row.operator("tp_ops.zero_z", "Z-Axis")
+                
+                row.separator()
 
 
         else:   
@@ -160,23 +248,38 @@ class View3D_TP_Origin_BBox(bpy.types.Operator):
 
                 sub1.alignment ='LEFT' 
                 
-                sub1.operator('tp_ops.cubeback_cornertop_minus_xy', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubeback_edgetop_minus_y', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubeback_cornertop_plus_xy', text="", icon = "LAYER_ACTIVE")
+                button_origin_left_top = icons.get("icon_origin_left_top")   
+                sub1.operator('tp_ops.cubeback_cornertop_minus_xy', text="", icon_value=button_origin_left_top.icon_id)
+               
+                button_origin_top = icons.get("icon_origin_top")  
+                sub1.operator('tp_ops.cubeback_edgetop_minus_y', text="", icon_value=button_origin_top.icon_id)
+                
+                button_origin_right_top = icons.get("icon_origin_right_top")
+                sub1.operator('tp_ops.cubeback_cornertop_plus_xy', text="", icon_value=button_origin_right_top.icon_id)
 
                 sub2 = row.row(1)
                 sub2.alignment ='CENTER' 
                 
-                sub2.operator('tp_ops.cubefront_edgetop_minus_x', text="", icon = "LAYER_ACTIVE")
-                sub2.operator('tp_ops.cubefront_side_plus_z', text="", icon = "LAYER_ACTIVE")
-                sub2.operator('tp_ops.cubefront_edgetop_plus_x', text="", icon = "LAYER_ACTIVE")
+                button_origin_left_top = icons.get("icon_origin_left_top")   
+                sub2.operator('tp_ops.cubefront_edgetop_minus_x', text="", icon_value=button_origin_left_top.icon_id)
+                
+                button_origin_top = icons.get("icon_origin_top")  
+                sub2.operator('tp_ops.cubefront_side_plus_z', text="", icon_value=button_origin_top.icon_id)
+                
+                button_origin_right_top = icons.get("icon_origin_right_top")
+                sub2.operator('tp_ops.cubefront_edgetop_plus_x', text="", icon_value=button_origin_right_top.icon_id)
 
                 sub3 = row.row(1)
                 sub3.alignment ='RIGHT' 
                 
-                sub3.operator('tp_ops.cubefront_cornertop_minus_xy', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubeback_edgetop_plus_y', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubefront_cornertop_plus_xy', text="", icon = "LAYER_ACTIVE")
+                button_origin_left_top = icons.get("icon_origin_left_top")   
+                sub3.operator('tp_ops.cubefront_cornertop_minus_xy', text="", icon_value=button_origin_left_top.icon_id)
+                
+                button_origin_top = icons.get("icon_origin_top")  
+                sub3.operator('tp_ops.cubeback_edgetop_plus_y', text="", icon_value=button_origin_top.icon_id)
+                
+                button_origin_right_top = icons.get("icon_origin_right_top")
+                sub3.operator('tp_ops.cubefront_cornertop_plus_xy', text="", icon_value=button_origin_right_top.icon_id)
                 
                 #####
 
@@ -185,26 +288,42 @@ class View3D_TP_Origin_BBox(bpy.types.Operator):
                 sub1 = row.row(1)
                 sub1.alignment ='LEFT' 
                 
-                sub1.operator('tp_ops.cubefront_edgemiddle_minus_x', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubefront_side_plus_y', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubefront_edgemiddle_plus_x', text="", icon = "LAYER_ACTIVE")
+                button_origin_left = icons.get("icon_origin_left")
+                sub1.operator('tp_ops.cubefront_edgemiddle_minus_x', text="", icon_value=button_origin_left.icon_id)
+               
+                button_origin_cross = icons.get("icon_origin_cross")
+                sub1.operator('tp_ops.cubefront_side_plus_y', text="", icon_value=button_origin_cross.icon_id)
+                
+                button_origin_right = icons.get("icon_origin_right")
+                sub1.operator('tp_ops.cubefront_edgemiddle_plus_x', text="", icon_value=button_origin_right.icon_id)
 
                 sub2 = row.row(1)
                 sub2.alignment ='CENTER' 
 
-                sub2.operator('tp_ops.cubefront_side_minus_x', text="", icon = "LAYER_ACTIVE")
+                button_origin_left = icons.get("icon_origin_left")
+                sub2.operator('tp_ops.cubefront_side_minus_x', text="", icon_value=button_origin_left.icon_id)
+               
                 if context.mode == 'OBJECT':
-                    sub2.operator('object.origin_set', text="", icon = "LAYER_ACTIVE").type='ORIGIN_GEOMETRY'
+                    button_origin_diagonal = icons.get("icon_origin_diagonal")
+                    sub2.operator('object.origin_set', text="", icon_value=button_origin_diagonal.icon_id).type='ORIGIN_GEOMETRY'
                 else:
-                    sub2.operator('tp_ops.origin_set_editcenter', text="", icon = "LAYER_ACTIVE")
-                sub2.operator('tp_ops.cubefront_side_plus_x', text="", icon = "LAYER_ACTIVE")
+                    button_origin_diagonal = icons.get("icon_origin_diagonal")
+                    sub2.operator('tp_ops.origin_set_editcenter', text="", icon_value=button_origin_diagonal.icon_id)
+                
+                button_origin_right = icons.get("icon_origin_right")
+                sub2.operator('tp_ops.cubefront_side_plus_x', text="", icon_value=button_origin_right.icon_id)
 
                 sub3 = row.row(1)
                 sub3.alignment ='RIGHT' 
                 
-                sub3.operator('tp_ops.cubefront_edgemiddle_minus_y', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubefront_side_minus_y', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubefront_edgemiddle_plus_y', text="", icon = "LAYER_ACTIVE")
+                button_origin_left = icons.get("icon_origin_left")
+                sub3.operator('tp_ops.cubefront_edgemiddle_minus_y', text="", icon_value=button_origin_left.icon_id)
+                
+                button_origin_cross = icons.get("icon_origin_cross")
+                sub3.operator('tp_ops.cubefront_side_minus_y', text="", icon_value=button_origin_cross.icon_id)
+                
+                button_origin_right = icons.get("icon_origin_right")
+                sub3.operator('tp_ops.cubefront_edgemiddle_plus_y', text="", icon_value=button_origin_right.icon_id)
 
                 #####
 
@@ -213,23 +332,38 @@ class View3D_TP_Origin_BBox(bpy.types.Operator):
                 sub1 = row.row(1)
                 sub1.alignment ='LEFT' 
                 
-                sub1.operator('tp_ops.cubeback_cornerbottom_minus_xy', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubefront_edgebottom_plus_y', text="", icon = "LAYER_ACTIVE")
-                sub1.operator('tp_ops.cubeback_cornerbottom_plus_xy', text="", icon = "LAYER_ACTIVE")
+                button_origin_left_bottom = icons.get("icon_origin_left_bottom")
+                sub1.operator('tp_ops.cubeback_cornerbottom_minus_xy', text="", icon_value=button_origin_left_bottom.icon_id)
+                
+                button_origin_bottom = icons.get("icon_origin_bottom")
+                sub1.operator('tp_ops.cubefront_edgebottom_plus_y', text="", icon_value=button_origin_bottom.icon_id)
+                
+                button_origin_right_bottom = icons.get("icon_origin_right_bottom")
+                sub1.operator('tp_ops.cubeback_cornerbottom_plus_xy', text="", icon_value=button_origin_right_bottom.icon_id)
 
                 sub2 = row.row(1)
                 sub2.alignment ='CENTER' 
 
-                sub2.operator('tp_ops.cubefront_edgebottom_minus_x', text="", icon = "LAYER_ACTIVE")
-                sub2.operator('tp_ops.cubefront_side_minus_z', text="", icon = "LAYER_ACTIVE")
-                sub2.operator('tp_ops.cubefront_edgebottom_plus_x', text="", icon = "LAYER_ACTIVE")    
-
-                sub3 = row.row(1)
-                sub3.alignment ='RIGHT' 
+                button_origin_left_bottom = icons.get("icon_origin_left_bottom")
+                sub2.operator('tp_ops.cubefront_edgebottom_minus_x', text="", icon_value=button_origin_left_bottom.icon_id)
                 
-                sub3.operator('tp_ops.cubefront_cornerbottom_minus_xy', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubefront_edgebottom_minus_y', text="", icon = "LAYER_ACTIVE")
-                sub3.operator('tp_ops.cubefront_cornerbottom_plus_xy', text="", icon = "LAYER_ACTIVE")
+                button_origin_bottom = icons.get("icon_origin_bottom")
+                sub2.operator('tp_ops.cubefront_side_minus_z', text="", icon_value=button_origin_bottom.icon_id)
+                
+                button_origin_right_bottom = icons.get("icon_origin_right_bottom")
+                sub2.operator('tp_ops.cubefront_edgebottom_plus_x', text="", icon_value=button_origin_right_bottom.icon_id)    
+
+                sub3 = row.row(1)                
+                sub3.alignment ='RIGHT' 
+
+                button_origin_left_bottom = icons.get("icon_origin_left_bottom")
+                sub3.operator('tp_ops.cubefront_cornerbottom_minus_xy', text="", icon_value=button_origin_left_bottom.icon_id)
+                
+                button_origin_bottom = icons.get("icon_origin_bottom")
+                sub3.operator('tp_ops.cubefront_edgebottom_minus_y', text="", icon_value=button_origin_bottom.icon_id)
+                
+                button_origin_right_bottom = icons.get("icon_origin_right_bottom")
+                sub3.operator('tp_ops.cubefront_cornerbottom_plus_xy', text="", icon_value=button_origin_right_bottom.icon_id)
 
                 box.separator()
                     
@@ -238,7 +372,8 @@ class View3D_TP_Origin_BBox(bpy.types.Operator):
             box = layout.box().row()
             
             row = box.column(1) 
-            row.label("Origin", icon = "EDITMODE_HLT") 
+            button_origin_edm = icons.get("icon_origin_edm")  
+            row.label("Origin", icon_value=button_origin_edm.icon_id) 
             row.label("  in  ", icon = "BLANK1") 
             row.label("  Editmode") 
             
@@ -251,8 +386,9 @@ class View3D_TP_Origin_BBox(bpy.types.Operator):
             
             box = layout.box().row()            
                                 
-            row = box.column(1) 
-            row.label("Origin", icon = "OBJECT_DATAMODE") 
+            row = box.column(1)
+            button_origin_obj = icons.get("icon_origin_obj")  
+            row.label("Origin", icon_value=button_origin_obj.icon_id) 
             row.label("   to  ", icon = "BLANK1") 
             row.label("Objectmode") 
                                     
@@ -262,84 +398,16 @@ class View3D_TP_Origin_BBox(bpy.types.Operator):
             row.operator("tp_ops.origin_obm","> Selected")             
      
             box.separator()         
-                
-        #####
 
-        Display_Transform = context.user_preferences.addons[__package__].preferences.tab_transform_menu
-        if Display_Transform == 'on':
 
-            box = layout.box().column(1) 
-             
-            row = box.row(1)
-            row.label("", icon = "MAN_TRANS")
-            row.label("", icon = "MAN_ROT")
-            row.label("", icon = "MAN_SCALE")
-            row.label("Apply Transform")
-
-            if context.mode == 'OBJECT':
-                                
-                row = box.row(1)                
-                row.operator("object.transform_apply", "Location").location=True 
-                row.operator("object.transform_apply", "Rotation").rotation=True 
-                row.operator("object.transform_apply", "Scale").scale=True 
-                                
-            row = box.row(1)
-            sub = row.row(1)
-            sub.scale_x = 0.45                 
-            sub.operator("object.location_clear", "ZeroObj").clear_delta=False
-            sub.operator("tp_ops.zero_cursor", "Zero3dC")
-            
-            sub1 = row.row(1)
-            sub1.scale_x = 0.15                
-            sub1.operator("tp_ops.zero_x", "X")
-            sub1.operator("tp_ops.zero_y", "Y")
-            sub1.operator("tp_ops.zero_z", "Z")
-            
-            box.separator()
+        box = layout.box().column(1)  
         
-       
-        if context.mode == 'OBJECT': 
-                   
-            Display_Align = context.user_preferences.addons[__package__].preferences.tab_align_menu
-            if Display_Align == 'on':
-                 
-                box = layout.box().column(1) 
-                 
-                row = box.column(1)
-                row.operator("object.align_tools", icon = "MANIPUL")
-                row.operator("object.distribute_osc", icon = "ALIGN")
-                
-                box.separator()
-
-        box = layout.box().column(1) 
-         
         row = box.row(1)
-        if context.mode == 'OBJECT':
-            if len(bpy.context.selected_objects) == 0:
-                pass 
-            else:
-                row.operator("tp_ops.bounding_box_simple", "BBox", icon = "MOD_LATTICE")   
+        row.operator("ed.undo", text=" ", icon="LOOP_BACK")
+        row.operator("ed.redo", text=" ", icon="LOOP_FORWARDS") 
+       
+        box.separator()   
 
-        Display_BBox = context.user_preferences.addons[__package__].preferences.tab_bbox_menu
-        if Display_BBox == 'on':
-
-            row.prop(context.object, "show_bounds", text="ShowBounds", icon='STICKY_UVS_LOC') 
-
-            sub = row.row(1)
-            sub.scale_x = 0.5  
-            sub.prop(context.object, "draw_bounds_type", text="") 
-
-
-        Display_History = context.user_preferences.addons[__package__].preferences.tab_history_menu 
-        if Display_History == 'on':
-            
-            box = layout.box().column(1)  
-            
-            row = box.row(1)
-            row.operator("ed.undo", text=" ", icon="LOOP_BACK")
-            row.operator("ed.redo", text=" ", icon="LOOP_FORWARDS") 
-           
-            box.separator()   
 
     def execute(self, context):
    
@@ -354,48 +422,6 @@ class View3D_TP_Origin_BBox(bpy.types.Operator):
 
 
 
-
-    
-
-class View3D_TP_Origin_Cursor(bpy.types.Operator):
-    '''Set Origin to Cursor'''
-    bl_idname = "tp_ops.origin_set_cursor"
-    bl_label = "Origin to Cursor"
-    bl_options = {"REGISTER", 'UNDO'}   
-
-    def execute(self, context):
-
-        bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
-
-        return{'FINISHED'}
-
- 
-class View3D_TP_Origin_Mass(bpy.types.Operator):
-    '''Set Origin to Center of Mass'''
-    bl_idname = "tp_ops.origin_set_mass"
-    bl_label = "Origin to Center of Mass"
-    bl_options = {"REGISTER", 'UNDO'}   
-
-    def execute(self, context):
-
-        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
-        
-        return{'FINISHED'}
-
-
-class View3D_TP_Origin_Geom(bpy.types.Operator):
-    '''Set Geometry to Origin'''
-    bl_idname = "tp_ops.origin_set_geom"
-    bl_label = "Geometry to Origin"
-    bl_options = {"REGISTER", 'UNDO'}   
-
-    def execute(self, context):
-
-        bpy.ops.object.origin_set(type='GEOMETRY_ORIGIN')
-        
-        return{'FINISHED'}    
-    
-    
 
 def register():
 

@@ -6,7 +6,7 @@ bl_info = {
 	"location": "View3D > Properties Panel (N) > Objects Layer Manager",
 	"warning": "",
 	"description": "simple object layer manager with no count limitations. Only viewport visualization, not related to render process.",
-	"category": "3D View",
+	"category": "Object",
 }
 
 

@@ -29,7 +29,6 @@ bl_info = {
 import bpy
 
 from .utils import addongroup
-from .utils import registerinfo
 
 
 dtdict = {'BOUNDBOX': 0, 'WIREFRAME': 1, 'SOLID': 2, 'TEXTURED': 3}
@@ -130,11 +129,11 @@ addon_keymaps = []
 
 
 def register():
-    addongroup.AddonGroupPreferences.register_module(__name__)
-    km = registerinfo.AddonRegisterInfo.get_keymap('3D View')
+    addongroup.AddonGroup.register_module(__name__)
+    km = addongroup.AddonGroup.get_keymap('3D View')
     if km:
         kmi = km.keymap_items.new('wm.call_menu', 'D', 'PRESS',
-                                  shift=True, ctrl=True)
+                                  shift=True, ctrl=True, alt=True)
         kmi.properties.name = 'VIEW3D_MT_color_wire'
         addon_keymaps.append((km, kmi))
 
@@ -144,7 +143,7 @@ def unregister():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
 
-    addongroup.AddonGroupPreferences.unregister_module(__name__)
+    addongroup.AddonGroup.unregister_module(__name__)
 
 
 if __name__ == '__main__':

@@ -34,7 +34,7 @@ from bpy.props import FloatProperty, IntProperty, BoolProperty,EnumProperty,Stri
 
 
 class Boolean2DUnion(bpy.types.Operator):
-    """union boolean of 2D planar faces (plane)"""    
+    """union coplanar 2D Faces """    
     bl_idname = "bpt.boolean_2d_union"
     bl_label = "Boolean 2D Union"
     bl_options = {'REGISTER', 'UNDO'}
@@ -63,6 +63,7 @@ class Boolean2DUnion(bpy.types.Operator):
         
         return {"FINISHED"}
     def execute(self, context):
+        
         ob_old=context.object
         bpy.ops.mesh.separate(type='SELECTED')
         

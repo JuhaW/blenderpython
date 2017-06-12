@@ -1311,7 +1311,7 @@ class ModalMouse:
 
         # ManipulatorMatrix
         self.orientation = manipulatormatrix.ManipulatorMatrix(
-            context, default_location=context.scene.cursor_location,
+            context, default_location=context.space_data.cursor_location,
             use_normalized=use_normalized)
 
         # Number Input

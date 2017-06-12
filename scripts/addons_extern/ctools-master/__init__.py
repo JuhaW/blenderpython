@@ -2,7 +2,7 @@
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
+#  as published by the Free Software Foundation; either version 3
 #  of the License, or (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
@@ -20,7 +20,7 @@
 bl_info = {
     'name': 'CTools',
     'author': 'chromoly',
-    'version': (1, 8, 3),
+    'version': (1, 8, 9),
     'blender': (2, 78, 0),
     'location': '',
     'description': 'Collection of add-ons',
@@ -35,7 +35,6 @@ import hashlib
 import importlib
 import os
 import pathlib
-import platform
 import shutil
 import tempfile
 import urllib.request
@@ -43,23 +42,25 @@ import zipfile
 
 if 'bpy' in locals():
     importlib.reload(addongroup)
-    CToolsPreferences.reload_sub_modules()
+    CToolsPreferences.reload_submodules()
 else:
     from .utils import addongroup
 
 import bpy
 
 
-class CToolsPreferences(addongroup.AddonGroupPreferences,
+class CToolsPreferences(addongroup.AddonGroup,
                         bpy.types.AddonPreferences):
     bl_idname = __name__
 
-    sub_modules = [
+    submodules = [
         'aligntools',
+        'armaturehelper',
         'boolutils',
+        'dollyzoom',
         'drawnearest',
         'editpanelcategory',
-        'emulatenumpad',
+        'emulatekeymap',
         '_groupmanager',
         'filebrowserconfirm',
         'listvalidkeys',
@@ -71,9 +72,12 @@ class CToolsPreferences(addongroup.AddonGroupPreferences,
         'quickboolean',
         'regionruler',
         '_renametool',
+        'panelrestriction',
+        'piemenu',
         'screencastkeys',
-        '_specialkeybind',
         'splashscreen',
+        'stdout2pyconsole',
+        'systemsound',
         'updatetag',
         'uvgrid',
 
@@ -88,7 +92,9 @@ class CToolsPreferences(addongroup.AddonGroupPreferences,
         '_wm_custom_keymap',
 
         # 作業中
-        '_groupinstance',
+        '_groupeditor',
+
+        'transformorientation',
     ]
 
 
@@ -283,6 +289,7 @@ def register():
         bpy.utils.register_class(cls)
 
 
+@CToolsPreferences.unregister_addon
 def unregister():
     for cls in classes[::-1]:
         bpy.utils.unregister_class(cls)

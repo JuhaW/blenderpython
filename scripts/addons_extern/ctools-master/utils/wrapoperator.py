@@ -17,11 +17,13 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
+from collections import OrderedDict
 import ctypes as ct
 
 import bpy
 
 from . import structures as st
+from . import vaprops
 
 
 def get_operator_type(idname_py):
@@ -33,109 +35,9 @@ def get_operator_type(idname_py):
     mod, func = idname_py.split('.')
     pyop = getattr(getattr(bpy.ops, mod), func)
     opinst = pyop.get_instance()
-    pyrna = ct.cast(id(opinst), ct.POINTER(st.BPy_StructRNA)).contents
-    op = ct.cast(pyrna.ptr.data, ct.POINTER(st.wmOperator)).contents
+    pyrna = st.BPy_StructRNA.cast(id(opinst))
+    op = st.wmOperator.cast(pyrna.ptr.data)
     return op.type.contents
-
-
-def bl_prop_to_py_prop(prop):
-    if prop.type == 'BOOLEAN':
-        if prop.is_array:
-            prop_type = bpy.props.BoolVectorProperty
-        else:
-            prop_type = bpy.props.BoolProperty
-    elif prop.type == 'INT':
-        if prop.is_array:
-            prop_type = bpy.props.IntVectorProperty
-        else:
-            prop_type = bpy.props.IntProperty
-    elif prop.type == 'FLOAT':
-        if prop.is_array:
-            prop_type = bpy.props.FloatVectorProperty
-        else:
-            prop_type = bpy.props.FloatProperty
-    elif prop.type == 'ENUM':
-        prop_type = bpy.props.EnumProperty
-
-    elif prop.type == 'COLLECTION':
-        prop_type = bpy.props.CollectionProperty
-
-    else:
-        return None
-
-    attrs = {
-        'name': prop.name,
-        'description': prop.description,
-        # 'icon': prop.icon,
-    }
-    if prop.type in {'BOOLEAN', 'FLOAT', 'INT', 'STRING'}:
-        if getattr(prop, 'is_array', False):
-            attrs['default'] = prop.default_array
-            attrs['size'] = prop.array_length
-        else:
-            attrs['default'] = prop.default
-    elif prop.type == 'ENUM':
-        if prop.is_enum_flag:
-            attrs['default'] = prop.default_flag
-        else:
-            attrs['default'] = prop.default
-
-    if prop.type in {'BOOLEAN', 'FLOAT', 'INT', 'STRING'}:
-        attrs['subtype'] = prop.subtype
-    if prop.type in {'INT', 'FLOAT'}:
-        attrs['min'] = prop.hard_min
-        attrs['max'] = prop.hard_max
-        attrs['soft_min'] = prop.soft_min
-        attrs['soft_max'] = prop.soft_max
-        attrs['step'] = prop.step
-        if prop.type == 'FLOAT':
-            attrs['precision'] = prop.precision
-            attrs['unit'] = prop.unit
-    if prop.type == 'COLLECTION':
-        if issubclass(prop.fixed_type.__class__, bpy.types.PropertyGroup):
-            attrs['type'] = prop.fixed_type.__class__
-        else:
-            return None
-    if prop.type == 'ENUM':
-        items = attrs['items'] = []
-        for enum_item in prop.enum_items:
-            items.append((enum_item.identifier,
-                          enum_item.name,
-                          enum_item.description,
-                          enum_item.icon,
-                          enum_item.value))
-    if prop_type == 'STIRNG':
-        attrs['maxlen'] = prop.length_max
-
-    table = {
-        'is_hidden': 'HIDDEN',
-        'is_skip_save': 'SKIP_SAVE',
-        'is_animatable': 'ANIMATABLE',
-        'is_enum_flag': 'ENUM_FLAG',
-        'is_library_editable': 'LIBRARY_EDITABLE',
-        # '': 'PROPORTIONAL',
-        # '': 'TEXTEDIT_UPDATE',
-    }
-    options = attrs['options'] = set()
-    for key, value in table.items():
-        if getattr(prop, key):
-            options.add(value)
-
-    return prop_type(**attrs)
-
-
-def bl_props_to_py_props(bl_rna):
-    properties = {}
-    invalid_properties = []
-    for name, prop in bl_rna.properties.items():
-        if name == 'rna_type':
-            continue
-        p = bl_prop_to_py_prop(prop)
-        if p is not None:
-            properties[name] = p
-        else:
-            invalid_properties.append(name)
-    return properties, invalid_properties
 
 
 def convert_ot_flag(ot):
@@ -318,11 +220,11 @@ def get_py_class(ot):
 
 
 def convert_operator_attributes(idname_py):
-    """クラス定義に必要なオペレーターの属性を作成する。マクロは不可。
+    """クラス定義に必要なオペレーターの属性を作成してOrderedDictで返す。マクロは不可。
     :param idname_py: 'mod.func'
     :type idname_py: str
-    :return: 属性の辞書と変換に失敗したプロパティーのリスト
-    :rtype: (dict, list)
+    :return: 属性の辞書。変換に失敗したプロパティーの値はNone。
+    :rtype: dict[str, T | None]
     """
     mod, func = idname_py.split('.')
     pyop = getattr(getattr(bpy.ops, mod), func)
@@ -330,14 +232,15 @@ def convert_operator_attributes(idname_py):
 
     ot = get_operator_type(idname_py)
 
-    namespace = {}
+    namespace = OrderedDict()
 
     # namespace['_operator_type'] = ot
 
     namespace['bl_idname'] = idname_py
     namespace['bl_label'] = bl_rna.name
     namespace['bl_description'] = bl_rna.description
-    namespace['bl_translation_context'] = bl_rna.translation_context
+    # ↓Debugビルドだとこれを指定していた場合にassertで落とされる。
+    # namespace['bl_translation_context'] = bl_rna.translation_context
     namespace['bl_options'] = convert_ot_flag(ot)
     if ot.prop:
         namespace['bl_property'] = ot.prop.contents.identifier.decode()
@@ -370,7 +273,7 @@ def convert_operator_attributes(idname_py):
     if draw:
         namespace['draw'] = draw
 
-    properties, invalid_properties = bl_props_to_py_props(bl_rna)
+    properties = vaprops.bl_props_to_py_props(bl_rna)
     namespace.update(properties)
 
-    return namespace, invalid_properties
+    return namespace

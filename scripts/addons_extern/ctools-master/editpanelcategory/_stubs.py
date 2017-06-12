@@ -32,12 +32,11 @@ SPACE_USERPREF = 19
 
 
 def panel_aligned(area, region):
-    sa = ct.cast(area.as_pointer(), ct.POINTER(structures.ScrArea)).contents
-    ar = ct.cast(region.as_pointer(), ct.POINTER(structures.ARegion)).contents
+    sa = structures.ScrArea.cast(area)
+    ar = structures.ARegion.cast(region)
 
     if sa.spacetype == SPACE_BUTS and ar.regiontype == RGN_TYPE_WINDOW:
-        sbuts = ct.cast(sa.spacedata.first,
-                        ct.POINTER(structures.SpaceButs)).contents
+        sbuts = structures.SpaceButs.cast(sa.spacedata.first)
         return sbuts.align
     elif sa.spacetype == SPACE_USERPREF and ar.regiontype == RGN_TYPE_WINDOW:
         return BUT_VERTICAL
@@ -63,7 +62,7 @@ def toggle_panel_close(area, region, idname):
 
     align = panel_aligned(area, region)
 
-    ar = ct.cast(region.as_pointer(), ct.POINTER(structures.ARegion)).contents
+    ar = structures.ARegion.cast(region)
 
     for block in ar.uiblocks.to_list(structures.uiBlock):
         pa_p = block.panel
@@ -120,7 +119,12 @@ class TogglePanelClose(bpy.types.Operator):
         default='TOOLS'
     )
 
-    def execute(self, context):
+    def modal(self, context, event):
+        bpy.context.user_preferences.system.dpi += 1
+        context.window_manager.event_timer_remove(self.timer)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
         area = context.area
         for region in area.regions:
             if region.type == self.region_type:
@@ -135,4 +139,9 @@ class TogglePanelClose(bpy.types.Operator):
         ctx['region'] = region
         # bpy.ops.view2d.zoom_in(ctx, 'INVOKE_DEFAULT')
         # bpy.ops.view2d.zoom_out(ctx, 'INVOKE_DEFAULT')
-        return {'FINISHED'}
+
+        bpy.context.user_preferences.system.dpi -= 1
+
+        context.window_manager.modal_handler_add(self)
+        self.timer = context.window_manager.event_timer_add(0.0, context.window)
+        return {'RUNNING_MODAL'}

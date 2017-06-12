@@ -65,7 +65,6 @@ from bpy.app.handlers import persistent
 try:
     importlib.reload(addongroup)
     importlib.reload(customproperty)
-    importlib.reload(registerinfor)
     importlib.reload(unitsystem)
     importlib.reload(utils)
     importlib.reload(vagl)
@@ -75,7 +74,6 @@ try:
 except NameError:
     from ..utils import addongroup
     from ..utils import customproperty
-    from ..utils import registerinfo
     from ..utils import utils
     from ..utils import unitsystem
     from ..utils import vagl
@@ -292,8 +290,7 @@ class RegionRuler_PG(bpy.types.PropertyGroup):
 
 
 class RegionRulerPreferences(
-        addongroup.AddonGroupPreferences,
-        registerinfo.AddonRegisterInfo,
+        addongroup.AddonGroup,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
     def draw_property(self, attr, layout, text=None, skip_hidden=True,
@@ -452,24 +449,12 @@ class RegionRulerPreferences(
 ###############################################################################
 # Data
 ###############################################################################
-def get_widget_unit(context):
-    # U.widget_unit = (U.pixelsize * U.dpi * 20 + 36) / 72;
-    PIXEL_SIZE = 1.0  # macだと1.0以外の可能性
-    U = context.user_preferences
-    if U.system.virtual_pixel_mode == 'NATIVE':
-        pixel_size = PIXEL_SIZE * 1.0
-    else:  # 'DOUBLE'
-        pixel_size = PIXEL_SIZE * 2.0
-    dpi = U.system.dpi
-    return int((pixel_size * dpi * 20 + 36) / 72)
-
-
 def get_view_location(context):
     ruler_settings = context.space_data.region_ruler
     region = context.region
     rv3d = context.region_data
     if ruler_settings.view_depth == 'cursor':
-        view_location = context.scene.cursor_location
+        view_location = context.space_data.cursor_location
     else:
         if rv3d.view_perspective == 'CAMERA':
             obj = context.scene.camera
@@ -625,7 +610,7 @@ class Data:
                 uv_co = context.active_object.matrix_world.to_translation()
                 orig = vmat * uv_co
             elif ruler_settings.origin_type == 'cursor':
-                orig = vmat * context.scene.cursor_location
+                orig = vmat * v3d.cursor_location
             elif ruler_settings.origin_type == 'view':
                 orig = Vector((0, 0, 0))
             elif ruler_settings.origin_type == 'custom':
@@ -838,7 +823,7 @@ def region_drawing_rectangle(context, area, region):
     # right scroll bar
     if context.area.type == 'NODE_EDITOR':
         # V2D_SCROLLER_HANDLE_SIZE 等を参照。+1は誤差修正用
-        xmax -= int(get_widget_unit(context) * 0.8) + 1
+        xmax -= int(vawm.widget_unit() * 0.8) + 1
 
     # render info
     has_render_info = False
@@ -851,7 +836,7 @@ def region_drawing_rectangle(context, area, region):
             has_render_info = True
     if has_render_info:
         dpi = context.user_preferences.system.dpi
-        ymax -= get_widget_unit(context)
+        ymax -= vawm.widget_unit()
 
     if not context.user_preferences.system.use_region_overlap:
         return 0, ymin, xmax, ymax
@@ -1540,7 +1525,7 @@ def view3d_upper_left_text_rect(context):
     # #define UI_UNIT_Y               ((void)0, U.widget_unit)
     # blender/blenkernel/intern/blender.c:507:
     #     U.widget_unit = (U.pixelsize * U.dpi * 20 + 36) / 72;
-    widget_unit = get_widget_unit(context)
+    widget_unit = vawm.widget_unit()
     # 文字描画位置: [rect.xmin + widget_unit, rect.xmax - widget_unit]
 
     font_path = context.user_preferences.system.font_path_ui
@@ -1730,7 +1715,7 @@ def draw_measure(context, event):
     _, th = blf.dimensions(font.id, string.digits)
 
     if ruler_settings.view_depth == 'cursor':
-        depth_location = context.scene.cursor_location
+        depth_location = context.space_data.cursor_location
     else:
         depth_location = rv3d.view_location
 
@@ -2315,7 +2300,8 @@ def draw_callback(context):
     data.updated_space(context, glsettings)
 
     if context.area.type in ('IMAGE_EDITOR', 'NODE_EDITOR'):
-        cm = glsettings.region_pixel_space().enter()
+        cm = glsettings.region_pixel_space()
+        cm.__enter__()
 
     bgl.glColorMask(1, 1, 1, 1)
     bgl.glEnable(bgl.GL_BLEND)
@@ -2362,7 +2348,7 @@ def draw_callback(context):
         draw_region_rulers(context)
 
     if context.area.type in ('IMAGE_EDITOR', 'NODE_EDITOR'):
-        cm.exit()
+        cm.__exit__(None, None, None)
     glsettings.pop()
     glsettings.font_size()
 
@@ -2486,7 +2472,7 @@ class VIEW3D_OT_region_ruler(bpy.types.Operator):
                         dvec = data.measure_points[-1]
                         vec = vav.unproject(region, rv3d, mco, dvec)
                     else:
-                        dvec = Vector(context.scene.cursor_location)
+                        dvec = Vector(context.space_data.cursor_location)
                         vec = vav.unproject(region, rv3d, mco, dvec)
                     if event.shift:
                         data.measure_points.append(vec)
@@ -2535,6 +2521,7 @@ class VIEW3D_OT_region_ruler(bpy.types.Operator):
         return retval, do_redraw, do_redraw_panel
 
     def modal(self, context, event):
+        # import time
         # event = data.events[context.window.as_pointer()]
         # print(event.type, event.value,
         #       time.time(),
@@ -2559,23 +2546,10 @@ class VIEW3D_OT_region_ruler(bpy.types.Operator):
                 logger.debug(msg.format(context.window.as_pointer()))
                 return {'FINISHED', 'PASS_THROUGH'}
 
-        data.mouse_coords[context.window.as_pointer()] = event.mco
+        data.mouse_coords[context.window.as_pointer()] = data.events[ptr].mco
 
         if event.type == 'INBETWEEN_MOUSEMOVE':
             return {'PASS_THROUGH'}
-        elif event.type == 'MOUSEMOVE':
-            # commit 53a3850a8a05249942a0c4a16060e9491456af02
-            # source/blender/editors/interface/interface_handlers.c:9200
-            # let's make sure we are really not hovering a button by adding
-            # a mousemove!
-            # XXX some WM_event_add_mousemove calls may become unnecessary
-            # with this and can be removed
-            #
-            # パネル上のボタン類が無い所にマウスを置くと絶えず'MOUSEMOVE'
-            # イベントが発生し続ける。
-            if (event.mouse_x == event.mouse_prev_x and
-                    event.mouse_y == event.mouse_prev_y):
-                return {'PASS_THROUGH'}
         elif event.type.startswith('TIMER'):
             return {'PASS_THROUGH'}
 
@@ -2887,7 +2861,7 @@ def scene_update_post_handler(dummy):
                                'INVOKE_DEFAULT', _scene_update=False)
 
 
-CustomProperty = customproperty.CustomProperty.new_class()
+CustomProperty = customproperty.CustomProperty.derive()
 
 auto_save_manager = utils.AutoSaveManager()
 

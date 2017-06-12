@@ -1,23 +1,40 @@
+# ##### BEGIN GPL LICENSE BLOCK #####
+#
+#  This program is free software; you can redistribute it and / or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software Foundation,
+#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110 - 1301, USA.
+#
+# ##### END GPL LICENSE BLOCK #####
+__status__ = "toolplus"
+__author__ = "mkbreuer"
+__version__ = "1.0"
+__date__ = "2017"
 
-#bl_info = {
-#    "name": "Snap to Center (offset)",
-#    "location": "Search tool",
-#    "description": "Snap selected objects to center with offset.",
-#    "author": "Spirou4D",
-#    "version": (0,2),
-#    "blender": (2, 6, 9),
-#    "wiki_url": "",
-#    "tracker_url": "",
-#    "category": "3D View",
-#    }
-import bpy
 
+import bpy, bmesh, os
+from bpy import*
+from bpy.props import *
+from bpy.types import WindowManager
+
+
+#"name": "Snap to Center (offset)"
+#"author": "Spirou4D", "version": (0,2)
 ###------ Create Snapping Operators -------###
    
 class snapcenteroffset(bpy.types.Operator):
     """Snap the currently selected objects to Center with offset"""
     bl_idname = "mesh.snapcenteroffset"
-    bl_label = "Selection to center (offset)"
+    bl_label = "Selected to Center (offset)"
     bl_options = {'REGISTER', 'UNDO'}     
     
     
@@ -38,7 +55,6 @@ class snapcenteroffset(bpy.types.Operator):
             self.report({'INFO'}, "No objects selected") 
 
         return {"FINISHED"}     
-
 
 ## -----------------------------------SELECT LEFT---------------------
 def side (self, nombre, offset):
@@ -74,32 +90,111 @@ class SelectMenor (bpy.types.Operator):
 
         return {'FINISHED'}
 
-###------  Functions Menu add -------###
-def menu_display(self, context):
-    self.layout.operator(snapcenteroffset.bl_idname, icon="PLUGIN")
 
-###------  Functions Menu add -------###
-def menu_display(self, context):
-    self.layout.operator(snapcenteroffset.bl_idname, icon="PLUGIN")
 
-"""      
+
+#"name": "Cursor to Edge Intersection"
+#"author": "xxx", "version": (0,0)
+####### Operator #######------------------------------------------------------- 
+
+def abs(val):
+    if val > 0:
+        return val
+    return -val
+
+def EdgeIntersect(context, operator):
+    from mathutils.geometry import intersect_line_line
+
+    obj = context.active_object
+
+    if (obj.type != "MESH"):
+        operator.report({'ERROR'}, "Object must be a mesh")
+        return None
+
+    edges = []
+    mesh = obj.data
+    verts = mesh.vertices
+
+    is_editmode = (obj.mode == 'EDIT')
+    if is_editmode:
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+    for e in mesh.edges:
+        if e.select:
+            edges.append(e)
+
+            if len(edges) > 2:
+                break
+
+    if is_editmode:
+        bpy.ops.object.mode_set(mode='EDIT')
+
+    if len(edges) != 2:
+        operator.report({'ERROR'},
+                        "Operator requires exactly 2 edges to be selected")
+        return
+
+    line = intersect_line_line(verts[edges[0].vertices[0]].co,
+                               verts[edges[0].vertices[1]].co,
+                               verts[edges[1].vertices[0]].co,
+                               verts[edges[1].vertices[1]].co)
+
+    if line is None:
+        operator.report({'ERROR'}, "Selected edges do not intersect")
+        return
+
+    point = line[0].lerp(line[1], 0.5)
+    context.scene.cursor_location = obj.matrix_world * point
+
+
+class TP_Header_Cursor_to_Edge_Intersection(bpy.types.Operator):
+    "Finds the mid-point of the shortest distance between two edges"
+    bl_idname = "tp_header.snap_cursor_to_edge_intersection"
+    bl_label = "Edge Intersection"
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        return obj != None and obj.type == 'MESH'
+
+    def execute(self, context):
+        EdgeIntersect(context, self)
+        return {'FINISHED'}
+
+
+    
+
+
+####### Add Functions to VIEW3D_MT_snap #######------------------------------------------------------- 
+def menu_func(self, context):
+    layout = self.layout   
+     
+    layout.separator()     
+
+    if context.mode == 'OBJECT':
+        self.layout.operator(snapcenteroffset.bl_idname)
+    
+    if context.mode == 'EDIT_MESH':         
+        self.layout.operator("mesh.circlecentercursor", text="3point Center")
+        self.layout.operator(TP_Header_Cursor_to_Edge_Intersection.bl_idname)
+
+
+
+
+#######  Register  #######------------------------------------------------------- 
 def register():
-# Register menu
     bpy.utils.register_module(__name__)
-    #bpy.utils.register_class(snapcenteroffset)
-    bpy.types.VIEW3D_MT_snap.append(menu_display) 
+
+    bpy.types.VIEW3D_MT_snap.append(menu_func) 
+
 
 def unregister():
-# Unregister menu
-    #bpy.utils.unregister_class(snapcenteroffset)
-    bpy.types.VIEW3D_MT_snap.remove(menu_display)
     bpy.utils.unregister_module(__name__)
 
-"""
-
-
-
-
+    bpy.types.VIEW3D_MT_snap.remove(menu_func) 
+ 
+if __name__ == "__main__":
+    register()
 
 
 

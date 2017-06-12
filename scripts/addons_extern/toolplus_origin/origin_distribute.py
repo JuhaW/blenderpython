@@ -1,3 +1,10 @@
+__status__ = "toolplus"
+__author__ = "mkbreuer"
+__version__ = "1.0"
+__date__ = "2017"
+
+
+
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 #

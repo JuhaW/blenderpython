@@ -24,7 +24,6 @@ import bpy
 import itertools
 
 from .. import localutils
-from ..localutils import utils
 
 
 def sorted_objects(obs):

@@ -29,7 +29,7 @@ __all__ = (
 )
 
 import bpy as _bpy
-from _addon_register_info import AddonRegisterInfo
+from addongroup import AddonGroup
 _user_preferences = _bpy.context.user_preferences
 
 error_duplicates = False
@@ -347,7 +347,7 @@ def enable(module_name, *, default_set=False, persistent=False, handle_error=Non
 
         # 3) try run the modules register function
         try:
-            AddonRegisterInfo.wrap_module(mod)
+            AddonGroup.wrap_module(mod)
             mod.register()
         except Exception as ex:
             print("Exception in module register(): %r" %
@@ -436,7 +436,7 @@ def reset_all(*, reload_scripts=False):
                 mod = sys.modules.get(mod_name)
                 if mod:
                     importlib.reload(mod)
-                    AddonRegisterInfo.wrap_module(mod)
+                    AddonGroup.wrap_module(mod)
 
             if is_enabled == is_loaded:
                 pass

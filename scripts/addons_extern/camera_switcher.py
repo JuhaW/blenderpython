@@ -42,7 +42,7 @@ class CameraSwitcherPanel(bpy.types.Panel):
     bl_label = "Camera Switcher"
     bl_idname = "CAM_SWITCHER_BOX"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOL_PROPS'
+    bl_region_type = 'UI'
     bl_context = "objectmode"
 
     bpy.types.Scene.camera_switcher_sorted = \

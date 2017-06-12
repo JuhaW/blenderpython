@@ -1,3 +1,10 @@
+__status__ = "toolplus"
+__author__ = "mkbreuer"
+__version__ = "1.0"
+__date__ = "2017"
+
+
+
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 #
@@ -481,7 +488,7 @@ def align_function(subject, active_too, consistent, self_or_active, loc_x, loc_y
 
 class AlignTools(bpy.types.Operator):
     """Advanced Align Tools"""
-    bl_idname = "object.align_tools"
+    bl_idname = "tp_origin.align_tools"
     bl_label = "Advanced Align Tools"
     bl_description = "Align Object Tools"
     bl_options = {'REGISTER', 'UNDO'}
@@ -490,7 +497,7 @@ class AlignTools(bpy.types.Operator):
     #property definition
 
     #Object-Pivot-Cursor:
-    subject = EnumProperty (items=(("0", "Object", "Align Objects"), ("1", "Pivot", "Align Objects Pivot"), ("2", "Cursor", "Align Cursor To Active")), 
+    subject = EnumProperty (items=(("0", "Object", "Align Objects"), ("1", "Origin", "Align Objects Origin"), ("2", "Cursor", "Align Cursor To Active")), 
                         name = "Align To", description = "What will be moved")
     # Move active Too:                               
     active_too = BoolProperty (name = "Active too", default= False, description= "Move the active object too")
@@ -506,16 +513,16 @@ class AlignTools(bpy.types.Operator):
     loc_z = BoolProperty (name = "Align to Z axis", default= False, description= "Enable Z axis alignment")
    
     #Selection Option:
-    ref1 = EnumProperty (items=(("3", "Max", "Align the maximum point"), ("1", "Center", "Align the center point"), ("2", "Pivot", "Align the pivot"), 
+    ref1 = EnumProperty (items=(("3", "Max", "Align the maximum point"), ("1", "Center", "Align the center point"), ("2", "Origin", "Align the Origin"), 
                                     ("0", "Min", "Align the minimum point")),
                                     name = "Selection reference", description = "Moved objects reference point")   
     #Active Oject Option:
-    ref2 = EnumProperty (items=(("3", "Max", "Align to the maximum point"), ("1", "Center", "Align to the center point"), ("2", "Pivot", "Align to the pivot"),
+    ref2 = EnumProperty (items=(("3", "Max", "Align to the maximum point"), ("1", "Center", "Align to the center point"), ("2", "Origin", "Align to the Origin"),
                                  ("0", "Min", "Align to the minimum point"), ("4", "Cursor", "Description")),
                                     name = "Active reference", description = "Destination point")
     
     self_or_active = EnumProperty (items = (("0", "Self", "In relation of itself"), ("1", "Active", "In relation of the active object"), ("2", "Selection", "In relation of the entire selection")), 
-                                    name = "Relation", default = "1", description = "To what the pivot will be aligned")
+                                    name = "Relation", default = "1", description = "To what the Origin will be aligned")
     #Location Offset
     loc_offset = FloatVectorProperty(name="Location Offset", description="Offset for location align position", default=(0.0, 0.0, 0.0),
                 subtype='XYZ', size=3)
@@ -650,7 +657,7 @@ class AlignTools(bpy.types.Operator):
 """    
 #def menu_func(self, context):
 
-    #self.layout.operator("object.align_tools", text="Align Objects")
+    #self.layout.operator("tp_origin.align_tools", text="Align Objects")
 
 def register():
     bpy.utils.register_class(AlignTools)

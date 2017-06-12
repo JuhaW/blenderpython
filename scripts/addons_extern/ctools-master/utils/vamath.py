@@ -16,17 +16,16 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-'''
+"""
 Numpy is called in get_bounding_box(vecs)
 install numpy (linux):
 % git clone git://github.com/numpy/numpy.git numpy
 % cd numpy
 % python3.1 setup.py build
 % python3.1 setup.py install --prefix=$HOME/.local  # or --prefix=/usr
+"""
 
-'''
 import math
-# import cmath
 from collections import OrderedDict
 import itertools
 from itertools import combinations  # , permutations
@@ -69,7 +68,7 @@ ZAXIS = Vector([0, 0, 1])
 # inf = float('inf')
 
 
-### 平面の方程式 ################################################################
+# 平面の方程式 ################################################################
 class PlaneVector(Vector):
     """
     三次元平面を表す四次元ベクトル。
@@ -153,6 +152,7 @@ class PlaneVector(Vector):
     @property
     def location(self):
         return self._location
+
     @location.setter
     def location(self, value):
         """スライスで代入"""
@@ -163,6 +163,7 @@ class PlaneVector(Vector):
     @property
     def normal(self):
         return self._normal
+
     @normal.setter
     def normal(self, value):
         """スライスで代入"""
@@ -174,6 +175,7 @@ class PlaneVector(Vector):
     @property
     def rotation(self):
         return self._rotation
+
     @rotation.setter
     def rotation(self, value):
         self._rotation[:] = value
@@ -227,7 +229,7 @@ class PlaneVector(Vector):
         return locmat * rotmat
 
 
-### 階乗とか ####################################################################
+# 階乗とか ####################################################################
 # def nI(n):
 #     # 階乗
 #     m = n
@@ -239,13 +241,16 @@ class PlaneVector(Vector):
 
 nI = math.factorial
 
+
 def nPm(n, m):
     # n個の中からm個を取り出す順列の総数（重複無し）
     return nI(n) / nI(n - m)
 
+
 def nCm(n, m):
     # n個の中からm個を取り出す組み合わせの総数（重複無し）:
     return nI(n) / (nI(m) * nI(n - m))
+
 
 def nHr(n, r):
     # 重複組合せ（ちょうふくくみあわせ、repeated combination）
@@ -253,7 +258,7 @@ def nHr(n, r):
     return nI(n + r - 1) / (nI(r) * nI(n - 1))
 
 
-### 三角関数 ####################################################################
+# 三角関数 ####################################################################
 def saacos(fac):
     if fac <= -1.0:
         return math.pi
@@ -331,38 +336,6 @@ def vecs_angle_cw(vec1, vec2, axis=Vector([0, 0, -1]), ccw=False,
     return angle
 """
 
-def vecs_angle_around_axis(vec1, vec2, axis=Vector((0, 0, 1)),
-                           positive=False, fallback=NONE):
-    """
-    ※古い。vecs_angleを使うこと。
-    axisを法線とする平面にv1とv2を投影してv1とv2の成す角度を求める。
-    軸を視線とし、v1からv2への向きが時計回りなら正の値を返す。反時計回りなら負。
-    v1,v2,axis何れかの大きさが0ならNoneを返す。
-    positiveがTrueなら0 ~ math.pi*2の値に直す。
-    """
-    if vec1.length == 0.0 or vec2.length == 0.0 or axis.length == 0.0:
-        if fallback != NONE:
-            return fallback
-        elif axis.length == 0.0:
-            raise ValueError('axis length is zero')
-        else:
-            raise ValueError('zero length vectors have no valid angle')
-    if len(vec1) == 2:
-        vec1 = vec1.to_3d()
-    if len(vec2) == 2:
-        vec2 = vec2.to_3d()
-    v1 = vec1 - vec1.project(axis)
-    v2 = vec2 - vec2.project(axis)
-    angle = v1.angle(v2, None)
-    # if angle is None:
-    #    return fallback
-    cvec = v1.cross(v2)
-    if cvec.dot(axis) < 0.0:
-        angle *= -1
-    if positive and angle < 0.0:
-        angle = math.pi * 2 + angle
-    return angle
-
 
 def vecs_angle(vec1, vec2, axis=None, positive=False, fallback=None):
     """
@@ -403,7 +376,7 @@ def vecs_angle(vec1, vec2, axis=None, positive=False, fallback=None):
     if negative:
         angle = -angle
     if positive and angle < 0.0:
-        angle = math.pi * 2 + angle
+        angle += math.pi * 2
 
     return angle
 
@@ -466,7 +439,7 @@ def interp_quats(quats, weights=None):
     return from_ln_quat(ln_quat)
 
 
-### 凸形状 #####################################################################
+# 凸形状 ######################################################################
 def convex_vecs_2d(vectors):
     """
     xが最小となるベクトルから、反時計回りに凸形状となるようなインデックスのリストを返す。
@@ -579,9 +552,10 @@ def convex_vecs_2d(vectors):
     return new_orders
 
 
-### Destance ##################################################################
+# Destance ####################################################################
 def distance_point_to_plane_2d(point:'[x, y]', box:'[x, y, width, height]'):
-    """Boxと頂点の距離を求める。外側なら正、内側なら負の符号を付けた値を返す。"""
+    """Boxと頂点の距離を求める。外側なら正、内側なら負の符号を付けた値を返す。
+    """
     x, y = point
     xmin, ymin, w, h = box
     xmax = xmin + w
@@ -607,16 +581,16 @@ def distance_point_to_plane_2d(point:'[x, y]', box:'[x, y, width, height]'):
     return length
 
 
-### Intersect #################################################################
+# Intersect ###################################################################
 """
 intersect_***: ベクトル若しくはベクトルのリストを返す。
 inside_***: -1, 0, 1の何れかを返す。
 collision_***: 真偽値を返す。
 """
 
+
 def intersect_line_line(v1, v2, v3, v4, threshold=1e-6):
-    """
-    三次元での直線同士の交差判定。平行だった場合、中間地点を求める。
+    """三次元での直線同士の交差判定。平行だった場合、中間地点を求める。
     二次元が与えられたら三次元に拡張する。
     parallel_threshold:
         平行であるとする閾値
@@ -669,16 +643,16 @@ def intersect_line_line(v1, v2, v3, v4, threshold=1e-6):
     else:
         result = geom.intersect_line_line(v1, v2, v3, v4)
         if result is not None:
-    #        isect1, isect2 = result
-    #        if not math.isnan(isect1[0]) and not math.isnan(isect2[0]):
-    #            return isect1, isect2
+            # isect1, isect2 = result
+            # if not math.isnan(isect1[0]) and not math.isnan(isect2[0]):
+            #     return isect1, isect2
             return result
 
     return None
 
 
 def intersect_line_tri_2d(v1, v2, tv1, tv2, tv3):
-    """ 三角形と線分の交点を求める。 返り値のリストは0~2の長さ。 """
+    """三角形と線分の交点を求める。 返り値のリストは0~2の長さ。"""
     vec1 = geom.intersect_line_line_2d(v1, v2, tv1, tv2)
     vec2 = geom.intersect_line_line_2d(v1, v2, tv2, tv3)
     vec3 = geom.intersect_line_line_2d(v1, v2, tv3, tv1)
@@ -686,9 +660,9 @@ def intersect_line_tri_2d(v1, v2, tv1, tv2, tv3):
 
 
 def intersect_tri_tri_2d(v1, v2, v3, v4, v5, v6):
-    """
-    三角形同士の交点を求める。
-    返り値が可変長で最大6つになり、順番も揃って無いので、主に交差しているか否かだけを求める場合に使う。
+    """三角形同士の交点を求める。
+    返り値が可変長で最大6つになり、順番も揃って無いので、主に交差しているか
+    否かだけを求める場合に使う。
     """
     vecs1 = intersect_line_tri_2d(v4, v5, v1, v2, v3)
     vecs2 = intersect_line_tri_2d(v5, v6, v1, v2, v3)
@@ -697,8 +671,7 @@ def intersect_tri_tri_2d(v1, v2, v3, v4, v5, v6):
 
 
 def inside_tri_tri_2d(v1, v2, v3, v4, v5, v6):
-    """
-    (v1, v2, v3)が(v4,v5,v6)の内側に在る場合1を返す(重なる場合も含む)。
+    """(v1, v2, v3)が(v4,v5,v6)の内側に在る場合1を返す(重なる場合も含む)。
     逆なら-1(重なる場合も含む), 重ならない場合は0を返す。
     """
     if geom.intersect_point_tri_2d(v1, v4, v5, v6):
@@ -713,8 +686,7 @@ def inside_tri_tri_2d(v1, v2, v3, v4, v5, v6):
 
 
 def collision_tri_quat_2d(v1, v2, v3, v4, v5, v6, v7):
-    """
-    二次元の三角形と四角形の衝突を判定。内側に在る場合もTrueを返す。
+    """二次元の三角形と四角形の衝突を判定。内側に在る場合もTrueを返す。
     vec1から反時計回り、若しくは時計回り
     """
     v1 = v1.to_2d()
@@ -748,8 +720,7 @@ def collision_tri_quat_2d(v1, v2, v3, v4, v5, v6, v7):
 
 
 def collision_quad_quat_2d(v1, v2, v3, v4, v5, v6, v7, v8):
-    """
-    二次元の四角形の衝突を判定。内側に在る場合もTrueを返す。
+    """二次元の四角形の衝突を判定。内側に在る場合もTrueを返す。
     vec1から反時計回り、若しくは時計回り
     """
     v1 = v1.to_2d()
@@ -1056,9 +1027,9 @@ def test_intersect_line_quad_2d():
     print('ok')
 
 
-#==============================================================================
+###############################################################################
 # 外接円
-#==============================================================================
+###############################################################################
 def center_of_circumscribed_circle_tri(v1, v2, v3):
     """三角形の外接円の中心点を求める"""
     if v1 != v2 and v2 != v3 and v3 != v1:
@@ -1076,9 +1047,9 @@ def center_of_circumscribed_circle_tri(v1, v2, v3):
     return None
 
 
-#==============================================================================
+###############################################################################
 # PCA
-#==============================================================================
+###############################################################################
 def pca(vecs:'list of Vector or np.ndarray (2D or 3D)',
         to_rotation:'bool blender用の回転行列に変換する'=False):
     """
@@ -1130,9 +1101,9 @@ def pca(vecs:'list of Vector or np.ndarray (2D or 3D)',
         return list(w), Matrix(v)
 
 
-#==============================================================================
+###############################################################################
 # Bounding Box
-#==============================================================================
+###############################################################################
 def get_obb(vectors):
     """
     Return OBB.
@@ -1393,9 +1364,9 @@ def group_masses(masses, group_type='aabb', expand=0.0):
     return groups
 
 
-#==============================================================================
+###############################################################################
 # UV
-#==============================================================================
+###############################################################################
 def calc_t(vec, v1, v2, v3, v4):
     v5 = v1 - v2 + v3 - v4
     v6 = -v1 + v4
@@ -1497,9 +1468,10 @@ def uv_in_tri_2d(vec, v1, v2, v3):
         return u, v
     return None
 
-#==============================================================================
+
+###############################################################################
 # 空間分割
-#==============================================================================
+###############################################################################
 # 2D --------------------------------------------------------------------------
 def bit_saparete_32(n):
     # ビット分割関数
@@ -1508,12 +1480,14 @@ def bit_saparete_32(n):
     n = (n | n << 2) & 0x33333333
     return (n | n << 1) & 0x55555555
 
+
 def get_2d_morton_number(x, y):
     # 2D空間のモートン番号を算出
 
     bx = bit_saparete_32(x)
     by = bit_saparete_32(y)
     return bx | by << 1
+
 
 def point_to_morton_number(x, y, sx, sy, level):
     """
@@ -1527,6 +1501,7 @@ def point_to_morton_number(x, y, sx, sy, level):
     yi = int(y / w)
     return get_2d_morton_number(xi, yi)
 
+
 # 3D --------------------------------------------------------------------------
 def bit_saparete_for_3d(n):
     # 3ビット毎に間隔を開ける関数
@@ -1535,12 +1510,14 @@ def bit_saparete_for_3d(n):
     n = (n | n << 2) & 0x00249249
     return n
 
+
 def get_3d_morton_number(x, y, z):
     # 8分木モートン順序算出関数
     bx = bit_saparete_for_3d(x)
     by = bit_saparete_for_3d(y)
     bz = bit_saparete_for_3d(z)
     return bx | by << 1 | bz << 2
+
 
 def get_morton_number_3d(x, y, z, sx, sy, sz, level):
     """
@@ -1555,6 +1532,7 @@ def get_morton_number_3d(x, y, z, sx, sy, sz, level):
     w = sz / 2 ** level
     zi = int(z / w)
     return get_3d_morton_number(xi, yi, zi)
+
 
 def get_poly_morton_number_3d(vecs, sx, sy, sz, level):
     """
@@ -1603,17 +1581,21 @@ def make_liner_octree_call(polygons, bbox_min, bbox_max, level=4):
         i = sum_geometric_progression(1, 8, lv - 1) + morton_number
         liner_octree[i].append(poly)
 
+
 class Face:
     def __init__(self):
         self.e1 = None  # ptr
         self.e2 = None
         self.e3 = None
+
+
 class Edge:
     def __init__(self):
         self.f = 0  # flag
         self.v1 = None  # ptr
         self.v2 = None
         self.v3 = None
+
 
 def make_liner_octree(obs):
     pass

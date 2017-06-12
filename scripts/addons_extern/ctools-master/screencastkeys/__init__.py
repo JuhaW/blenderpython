@@ -23,7 +23,7 @@ bl_info = {
     'name': 'Screencast Keys Mod',
     'author': 'Paulo Gomes, Bart Crouch, John E. Herrenyo, '
               'Gaia Clary, Pablo Vazquez, chromoly, Nutti',
-    'version': (2, 0, 3),
+    'version': (2, 0, 4),
     'blender': (2, 78, 0),
     'location': '3D View > Properties Panel > Screencast Keys',
     'warning': '',
@@ -60,13 +60,11 @@ import bpy.props
 
 try:
     importlib.reload(addongroup)
-    importlib.reload(registerinfo)
     importlib.reload(structures)
     importlib.reload(utils)
     importlib.reload(modalmanager)
 except NameError:
     from ..utils import addongroup
-    from ..utils import registerinfo
     from ..utils import utils
     from ..utils import vagl
 from .modalmanager import ModalHandlerManager
@@ -76,8 +74,7 @@ from .modalmanager import ModalHandlerManager
 # Addon Preferences
 ###############################################################################
 class ScreenCastKeysPreferences(
-    addongroup.AddonGroupPreferences,
-    registerinfo.AddonRegisterInfo,
+    addongroup.AddonGroup,
     bpy.types.PropertyGroup if '.' in __name__ else
     bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -377,7 +374,7 @@ class ScreencastKeysStatus(bpy.types.Operator):
         for mod in modifiers:
             name = mod.names[mod.name]
             if mod in cls.modifier_event_types:
-                name = re.sub('(Left | Right )', '', name)
+                name = re.sub('(Left |Right )', '', name)
             if name not in names:
                 names.append(name)
         return names

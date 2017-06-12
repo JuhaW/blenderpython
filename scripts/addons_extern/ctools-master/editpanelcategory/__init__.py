@@ -54,12 +54,10 @@ import bpy
 try:
     importlib.reload(addongroup)
     importlib.reload(customproperty)
-    importlib.reload(registerinfo)
     importlib.reload(structures)
 except NameError:
     from ..utils import addongroup
     from ..utils import customproperty
-    from ..utils import registerinfo
     from ..utils import structures
 
 
@@ -84,8 +82,7 @@ except:
 
 
 class ToolPropsPanelPreferences(
-        addongroup.AddonGroupPreferences,
-        registerinfo.AddonRegisterInfo,
+        addongroup.AddonGroup,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -139,7 +136,7 @@ def get_space_types():
     """
     screen = bpy.context.screen
     area = screen.areas[0]
-    sa = ct.cast(area.as_pointer(), ct.POINTER(structures.ScrArea)).contents
+    sa = structures.ScrArea.cast(area)
 
     st_p = sa.type
     st = None
@@ -178,7 +175,7 @@ def get_region_types():
 
 
 def UI_panel_category_find(region, idname):
-    ar = ct.cast(region.as_pointer(), ct.POINTER(structures.ARegion)).contents
+    ar = structures.ARegion.cast(region)
     return ar.panels_category.find_string(
         idname.encode('utf-8'), structures.PanelCategoryDyn.idname.offset)
 
@@ -189,7 +186,7 @@ def UI_panel_category_active_get(region):
     if region.type not in {'TOOLS', 'UI'}:
         raise ValueError()
 
-    ar = ct.cast(region.as_pointer(), ct.POINTER(structures.ARegion)).contents
+    ar = structures.ARegion.cast(region)
     pc_act_ptr = ct.cast(ar.panels_category_active.first,
                          ct.POINTER(structures.PanelCategoryStack))
     while pc_act_ptr:
@@ -208,7 +205,7 @@ def UI_panel_category_active_set(context, region, idname):
     if region.type not in {'TOOLS', 'UI'}:
         raise ValueError()
 
-    ar = ct.cast(region.as_pointer(), ct.POINTER(structures.ARegion)).contents
+    ar = structures.ARegion.cast(region)
 
     if not UI_panel_category_find(region, idname):
         return False
@@ -550,7 +547,7 @@ class LastOperatorPanel:
         else:
             text = bpy.app.translations.pgettext_iface('Operator', '*')
 
-        pa = ct.cast(self.as_pointer(), ct.POINTER(structures.Panel)).contents
+        pa = structures.Panel.cast(self)
         pa.drawname = text.encode('utf-8')[:64]
 
     def draw(self, context):
@@ -647,8 +644,7 @@ def region_active_category_setter(self, category):
 
 
 def region_panel_categories_get(self):
-    ar = ct.cast(self.as_pointer(),
-                 ct.POINTER(structures.ARegion)).contents
+    ar = structures.ARegion.cast(self)
     categories = ar.panels_category.to_list(structures.PanelCategoryDyn)
     return [c.idname.decode('utf-8') for c in categories]
 

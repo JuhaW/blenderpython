@@ -38,11 +38,9 @@ import bpy
 
 try:
     importlib.reload(addongroup)
-    importlib.reload(registerinfo)
     importlib.reload(structures)
 except NameError:
     from ..utils import addongroup
-    from ..utils import registerinfo
     from ..utils import structures
 
 
@@ -50,8 +48,7 @@ TEXT_NAME = 'valid_shortcuts.txt'
 
 
 class ListValidKeysPreferences(
-    addongroup.AddonGroupPreferences,
-    registerinfo.AddonRegisterInfo,
+    addongroup.AddonGroup,
     bpy.types.PropertyGroup if '.' in __name__ else
     bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -98,8 +95,8 @@ def _handler_keymaps(kc, handlers):
         return []
 
     keymaps = []
-    handler_ptr = ct.cast(ct.c_void_p(handlers.first),
-                          ct.POINTER(structures.wmEventHandler))
+    handler_ptr = structures.wmEventHandler.cast(handlers.first,
+                                                 contents=False)
     while handler_ptr:
         handler = handler_ptr.contents
         if ord(handler.flag) & structures.WM_HANDLER_DO_FREE:
@@ -123,36 +120,39 @@ def _handler_keymaps(kc, handlers):
 def _window_modal_keymaps(kc, window):
     if not window:
         return []
-    win = ct.cast(ct.c_void_p(window.as_pointer()),
-                  ct.POINTER(structures.wmWindow)).contents
+    win = structures.wmWindow.cast(window)
     return _handler_keymaps(kc, win.modalhandlers)
 
 
 def _region_keymaps(kc, region):
     if not region:
         return []
-    ar = ct.cast(ct.c_void_p(region.as_pointer()),
-                 ct.POINTER(structures.ARegion)).contents
+    ar = structures.ARegion.cast(region)
     return _handler_keymaps(kc, ar.handlers)
 
 
 def _area_keymaps(kc, area):
     if not area:
         return []
-    sa = ct.cast(ct.c_void_p(area.as_pointer()),
-                 ct.POINTER(structures.ScrArea)).contents
+    sa = structures.ScrArea.cast(area)
     return _handler_keymaps(kc, sa.handlers)
 
 
 def _window_keymaps(kc, window):
     if not window:
         return []
-    win = ct.cast(ct.c_void_p(window.as_pointer()),
-                  ct.POINTER(structures.wmWindow)).contents
+    win = structures.wmWindow.cast(window)
     return _handler_keymaps(kc, win.handlers)
 
 
-def context_keymaps(context, keymap_type='USER', regions=None):
+def keymap_poll(context, keymap):
+    C = ct.c_void_p(context.as_pointer())
+    km_ptr = ct.cast(ct.c_void_p(keymap.as_pointer()), ct.POINTER(wmKeyMap))
+    km = km_ptr.contents
+    return not km.poll or km.poll(C)
+
+
+def context_keymaps(context, keymap_type='USER', regions=None, poll=False):
     wm = context.window_manager
     kc = getattr(wm.keyconfigs, keymap_type.lower())
 
@@ -170,14 +170,11 @@ def context_keymaps(context, keymap_type='USER', regions=None):
     keymap_list.extend(_window_keymaps(kc, context.window))
 
     keymap_list = sorted(set(keymap_list), key=keymap_list.index)
+
+    if poll:
+        keymap_list = [km for km in keymap_list if keymap_poll(context, km)]
+
     return keymap_list
-
-
-def keymap_poll(context, keymap):
-    C = ct.c_void_p(context.as_pointer())
-    km_ptr = ct.cast(ct.c_void_p(keymap.as_pointer()), ct.POINTER(wmKeyMap))
-    km = km_ptr.contents
-    return not km.poll or km.poll(C)
 
 
 class WM_OT_list_valid_keys(bpy.types.Operator):

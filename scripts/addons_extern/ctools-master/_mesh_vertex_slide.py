@@ -36,7 +36,6 @@ import bmesh
 
 
 from .utils import addongroup
-from .utils import registerinfo
 
 from .utils import vagl as vagl
 from .utils import vaview3d as vav
@@ -192,7 +191,8 @@ class MESH_OT_vertext_slide(bpy.types.Operator):
     def draw_callback_px(self, context):
         glsettings = vagl.GLSettings(context)
         glsettings.push()
-        cm = glsettings.region_view3d_space().enter()
+        cm = glsettings.region_view3d_space()
+        cm.__enter__()
 
         # draw edgelines
         bgl.glColor4f(0.8, 0.8, 0.8, 1.0)
@@ -209,7 +209,7 @@ class MESH_OT_vertext_slide(bpy.types.Operator):
             bgl.glVertex3f(*p2)
         bgl.glEnd()
 
-        cm.exit()
+        cm.__exit__(None, None, None)
         glsettings.pop()
 
     def modal(self, context, event):
@@ -293,10 +293,10 @@ addon_keymaps = []
 
 
 def register():
-    addongroup.AddonGroupPreferences.register_module(__name__)
+    addongroup.AddonGroup.register_module(__name__)
     bpy.types.VIEW3D_MT_edit_mesh_vertices.append(menu_func)
 
-    km = registerinfo.AddonRegisterInfo.get_keymap('Mesh')
+    km = addongroup.AddonGroup.get_keymap('Mesh')
     if km:
         kmi = km.keymap_items.new('mesh.vertex_slide', 'V', 'PRESS',
                                   shift=True, head=True)
@@ -304,7 +304,7 @@ def register():
 
 
 def unregister():
-    addongroup.AddonGroupPreferences.unregister_module(__name__)
+    addongroup.AddonGroup.unregister_module(__name__)
     bpy.types.VIEW3D_MT_edit_mesh_vertices.remove(menu_func)
 
     for km, kmi in addon_keymaps:

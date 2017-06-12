@@ -404,6 +404,90 @@ class VIEW3D_TP_Snapset_Selected_3d(bpy.types.Operator):
 
 
 
+
+class VIEW3D_TP_Cursor_to_Center(bpy.types.Operator):
+    """3D Cursor to Center"""
+    bl_idname = "tp_ops.cursor_to_center"
+    bl_label = "3d Cursor to Center"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):                    
+        bpy.context.space_data.cursor_location[0] = 0 
+        bpy.context.space_data.cursor_location[1] = 0 
+        bpy.context.space_data.cursor_location[2] = 0 
+        return {'FINISHED'}
+
+class VIEW3D_TP_Cursor_to_Selected(bpy.types.Operator):
+    """3D Cursor to Selected"""
+    bl_idname = "tp_ops.cursor_to_selected"
+    bl_label = "3d Cursor to Selected"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):                    
+        bpy.ops.view3d.snap_cursor_to_selected()
+        return {'FINISHED'}
+
+class VIEW3D_TP_Cursor_to_Active(bpy.types.Operator):
+    """3D Cursor to Active"""
+    bl_idname = "tp_ops.cursor_to_active"
+    bl_label = "3d Cursor to Active"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):                    
+        bpy.ops.view3d.snap_cursor_to_active()
+        return {'FINISHED'}
+
+class VIEW3D_TP_Cursor_to_Grid(bpy.types.Operator):
+    """3D Cursor to Grid"""
+    bl_idname = "tp_ops.cursor_to_grid"
+    bl_label = "3d Cursor to Grid"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):                    
+        bpy.ops.view3d.snap_cursor_to_grid()
+        return {'FINISHED'}
+    
+class VIEW3D_TP_Selected_to_Cursor(bpy.types.Operator):
+    """Selected to Cursor"""
+    bl_idname = "tp_ops.selected_to_cursor"
+    bl_label = "Selected to Cursor"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):                    
+        bpy.ops.view3d.snap_selected_to_cursor(use_offset=False)
+        return {'FINISHED'}    
+    
+class VIEW3D_TP_Selected_to_Active(bpy.types.Operator):
+    """Selected to Active"""
+    bl_idname = "tp_ops.selected_to_active"
+    bl_label = "Selected to Active"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):                    
+        bpy.ops.object.align_location_all()
+        return {'FINISHED'}  
+    
+class VIEW3D_TP_Selected_to_Grid(bpy.types.Operator):
+    """Selected to Grid"""
+    bl_idname = "tp_ops.selected_to_grid"
+    bl_label = "Selected to Grid"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):                    
+        bpy.ops.view3d.snap_selected_to_grid()
+        return {'FINISHED'}      
+
+class VIEW3D_TP_Selected_to_Cursor_Offset(bpy.types.Operator):
+    """Selected to Cursor with Offset"""
+    bl_idname = "tp_ops.selected_to_cursor_offset"
+    bl_label = "Selected to Cursor with Offset"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):                    
+        bpy.ops.view3d.snap_selected_to_cursor(use_offset=True)
+        return {'FINISHED'}    
+        
+
 def register():
     bpy.utils.register_module(__name__)
    

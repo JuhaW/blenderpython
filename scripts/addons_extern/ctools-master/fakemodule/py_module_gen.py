@@ -44,7 +44,7 @@ import gpu
 import mathutils.noise
 
 sys.path.append(os.path.dirname(__file__))
-from . import bgl_functions
+import bgl_functions
 
 
 REPLACE_MOD = True

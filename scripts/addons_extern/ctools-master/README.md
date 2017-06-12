@@ -55,8 +55,9 @@
 ## Align Tools
 頂点やオブジェクト等を整列する。  
 
-## Emulate Numpad
+## Emulate Key Map
 スペースキーと特定キーの組み合わせで、テンキーに割り当てられたオペレーターを実行する。  
+Shift + Space の後、入力されたキーに対応したオペレーターを実行する。  
 
 ## Make UV Grid
 単純なUV Grid 画像を作成する。  
@@ -73,6 +74,37 @@ linuxでのみ動作する。
 ## Edit Panel Category
 Panelのcategory(タブ名)を変更する。  
 ![Image](__images/editpanelcategory.jpg)
+
+## Dolly Zoom
+CAMERA表示の際、焦点距離変更時に表示領域を維持するようにカメラを前後にする。  
+ORTHO,PERSPの場合はSpaceView3D.view_distanceを調整する。  
+View Navigation にこの機能を追加したもの -> View Navigation EX (Ctrl + Shift + F)。  
+![Image](__images/dollyzoom.jpg)
+
+## System Sound
+特定のアクションの時に、UserPreferencesで設定したフォルダにある音声ファイルをランダムで一つ選んで再生する。  
+* 起動
+* 終了
+* blendファイルの読み込み
+* blendファイルの保存(AutoSaveを含む)
+* スタートアップファイルの再読み込み(Ctrl+N)
+* UserPreferences画面の表示(Ctrl+Alt+U)
+
+終了時の音声(Power Off Post)は再生終了までユーザーからの入力を一切受け付けなくなるので注意。
+
+## Panel Restriction
+任意のパネルを非表示にする。  
+設定はファイルに保存される。  
+![Image](__images/panelrestriction.jpg)
+
+## StdOut to Python Console
+sys.stdoutとsys.stderrを変更して、pythonの標準出力と標準エラー出力をPythonConsoleにも出力する。  
+※SyntaxErrorのエラー出力には対応していない。  
+![Image](__images/stdout.jpg)
+
+## Transform Orientation Editor
+作成した Transform Orientation を編集する。
+![Image](__images/transformorientation.jpg)
 
 ## その他
 ### __patch/ui_layout_box.patch

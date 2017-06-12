@@ -1,0 +1,15 @@
+*~
+*.swp
+config.json
+node_modules/
+src/js/ext/
+bower_components/
+
+npm-debug.log
+*.db
+.DS_Store
+
+cacert.pem
+build/
+
+Gemfile.lock

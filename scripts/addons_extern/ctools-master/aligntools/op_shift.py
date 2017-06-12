@@ -38,6 +38,7 @@ memoize = tool_data.memoize
 
 
 EPS = 1e-5
+AREA_EPS = 0.0
 
 
 ###############################################################################
@@ -249,7 +250,7 @@ class OperatorShift(vaop.OperatorTemplate, bpy.types.Operator):
         for eve in bm.verts:
             eve.tag = not eve.hide
         for tri in loop_tris:
-            tri.tag = not tri[0].face.hide and tri.area > EPS
+            tri.tag = not tri[0].face.hide and tri.area > AREA_EPS
 
         if self.use_world_coords:
             self.init_called[1] = True

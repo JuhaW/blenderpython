@@ -533,9 +533,8 @@ class ModalMouse:
                                              **self.exp_args['TRACKBALL'])
 
         # Manipulator Matrix --------------------------------------------------
-        scn = context.scene
         self.manipulator_matrix = manipulatormatrix.ManipulatorMatrix(
-            context, default_location=scn.cursor_location,
+            context, default_location=context.space_data.cursor_location,
             use_normalized=use_normalized_orientation)
         self.use_current_orientation = False  # False: Global, True: manipul
         self.axis = self.CONSTNONE  # 全て真 == 全て偽

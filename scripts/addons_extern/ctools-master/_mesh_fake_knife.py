@@ -35,7 +35,6 @@ import bgl
 import blf
 import bmesh
 
-from .utils import registerinfo
 from .utils import addongroup
 from .utils import vaview3d as vav
 from .utils import vagl as vagl
@@ -1371,11 +1370,11 @@ addon_keymaps = []
 
 # Register
 def register():
-    addongroup.AddonGroupPreferences.register_module(__name__)
+    addongroup.AddonGroup.register_module(__name__)
 
     bpy.types.VIEW3D_MT_edit_mesh_specials.append(menu_func)
 
-    km = registerinfo.AddonRegisterInfo.get_keymap('Mesh')
+    km = addongroup.AddonGroup.get_keymap('Mesh')
     if km:
         kmi = km.keymap_items.new('mesh.bm_fake_knife', 'K', 'PRESS',
                                   ctrl=True)
@@ -1386,7 +1385,7 @@ def register():
 
 
 def unregister():
-    addongroup.AddonGroupPreferences.unregister_module(__name__)
+    addongroup.AddonGroup.unregister_module(__name__)
 
     bpy.types.VIEW3D_MT_edit_mesh_specials.remove(menu_func)
 

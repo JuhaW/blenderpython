@@ -1316,7 +1316,7 @@ class GroupManagerProperties(bpy.types.PropertyGroup):
 
 # Register
 def register():
-    addongroup.AddonGroupPreferences.register_module(__name__)
+    addongroup.AddonGroup.register_module(__name__)
     bpy.types.Scene.group_manager = bpy.props.PointerProperty(
         name='Group Manager',
         type=GroupManager)
@@ -1330,7 +1330,7 @@ def register():
 
 
 def unregister():
-    addongroup.AddonGroupPreferences.unregister_module(__name__)
+    addongroup.AddonGroup.unregister_module(__name__)
     if TEST_UIList:
         del bpy.types.Group.active_object_index
 

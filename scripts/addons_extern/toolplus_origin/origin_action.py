@@ -1,14 +1,17 @@
-__status__ = "toolplus custom version"
+__status__ = "toolplus"
 __author__ = "mkbreuer"
 __version__ = "1.0"
-__date__ = "2016"
+__date__ = "2017"
 
 
-import bpy, mathutils, math, re
-from mathutils.geometry import intersect_line_plane
-from mathutils import Vector
-from math import radians
-from bpy import*
+import bpy
+from bpy import *
+from bpy.props import *
+
+        #scene = bpy.context.scene 
+        #selected = bpy.context.selected_objects 
+
+        #for obj in selected: 
 
 
 class View3D_TP_Origin_EditCenter(bpy.types.Operator):
@@ -27,7 +30,7 @@ class View3D_TP_Origin_EditCenter(bpy.types.Operator):
         bpy.ops.mesh.select_all(action='DESELECT') 
         
         return{'FINISHED'}  
-
+    
 
 class View3D_TP_OriginObm(bpy.types.Operator):
     """set origin to selected / stay in objectmode"""                 
@@ -93,137 +96,87 @@ class View3D_TP_Origin_Obm_Cursor(bpy.types.Operator):
 
         return {'FINISHED'}   
 
- 
 
-class View3D_TP_Zero_X(bpy.types.Operator):
-    """Zero X Axis"""                 
-    bl_idname = "tp_ops.zero_x"          
-    bl_label = "ZeroX"                 
-    bl_options = {'REGISTER', 'UNDO'}   
 
-    tp_switch = bpy.props.EnumProperty(
-        items=[("tp_obj"    ,"Object"       ,"05"),
-               ("tp_crs"    ,"3D Cursor"    ,"08")],
-               name = "ZeroX",
-               default = "tp_obj",    
-               description = "zero object or cursor to x axis")
+class View3D_TP_Origin_Center(bpy.types.Operator):
+    '''Set Origin to Center'''
+    bl_idname = "tp_ops.origin_set_center"
+    bl_label = "Origin to Center"
+    bl_options = {"REGISTER", 'UNDO'}   
 
-    def draw(self, context):
-        layout = self.layout
-        
-        box = layout.box().column(1)
-
-        row = box.row()
-        row.prop(self, 'tp_switch', expand=True)
-
-        box.separator()
-        
     def execute(self, context):
 
-        if self.tp_switch == "tp_obj":        
-            bpy.context.object.location[0] = 0  
+        if context.mode == 'OBJECT':
 
-        if self.tp_switch == "tp_crs":        
-            bpy.context.space_data.cursor_location[0] = 0 
+            bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)                 
 
-        return {'FINISHED'} 
+        else:   
+            bpy.ops.object.editmode_toggle()
+            
+            bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+            
+            bpy.ops.object.editmode_toggle()
 
-    def invoke(self, context, event):
-        dpi_value = bpy.context.user_preferences.system.dpi        
-        return context.window_manager.invoke_props_dialog(self, width=dpi_value*2, height=300)
+        return{'FINISHED'}
 
 
+class View3D_TP_Origin_Cursor(bpy.types.Operator):
+    '''Set Origin to Cursor'''
+    bl_idname = "tp_ops.origin_set_cursor"
+    bl_label = "Origin to Cursor"
+    bl_options = {"REGISTER", 'UNDO'}   
+
+    set_cursor = bpy.props.BoolProperty(name="Set 3D Cursor",  description="set pivot to 3d cursor", default = False)   
     
-class View3D_TP_Zero_Y(bpy.types.Operator):
-    """Zero Y Axis"""                 
-    bl_idname = "tp_ops.zero_y"          
-    bl_label = "ZeroY"                 
-    bl_options = {'REGISTER', 'UNDO'}   
-
-    tp_switch = bpy.props.EnumProperty(
-        items=[("tp_obj"    ,"Object"       ,"05"),
-               ("tp_crs"    ,"3D Cursor"    ,"08")],
-               name = "ZeroY",
-               default = "tp_obj",    
-               description = "zero object or cursor to y axis")
-
-    def draw(self, context):
-        layout = self.layout
-        
-        box = layout.box().column(1)
-
-        row = box.row()
-        row.prop(self, 'tp_switch', expand=True)
-
-        box.separator()
-        
     def execute(self, context):
 
-        if self.tp_switch == "tp_obj":        
-            bpy.context.object.location[1] = 0  
-
-        if self.tp_switch == "tp_crs":        
-            bpy.context.space_data.cursor_location[1] = 0 
-
-        return {'FINISHED'} 
-
-    def invoke(self, context, event):
-        dpi_value = bpy.context.user_preferences.system.dpi        
-        return context.window_manager.invoke_props_dialog(self, width=dpi_value*2, height=300)
-
-
-
-class View3D_TP_Zero_Z(bpy.types.Operator):
-    """Zero Z Axis"""                 
-    bl_idname = "tp_ops.zero_z"          
-    bl_label = "ZeroZ"                 
-    bl_options = {'REGISTER', 'UNDO'}   
-
-    tp_switch = bpy.props.EnumProperty(
-        items=[("tp_obj"    ,"Object"       ,"05"),
-               ("tp_crs"    ,"3D Cursor"    ,"08")],
-               name = "ZeroZ",
-               default = "tp_obj",    
-               description = "zero object or cursor to z axis")
-
-    def draw(self, context):
-        layout = self.layout
+        bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
         
-        box = layout.box().column(1)
-
-        row = box.row()
-        row.prop(self, 'tp_switch', expand=True)
-
-        box.separator()
+        for i in range(self.set_cursor):
         
-    def execute(self, context):
+            bpy.context.space_data.pivot_point = 'CURSOR'
 
-        if self.tp_switch == "tp_obj":        
-            bpy.context.object.location[2] = 0  
+        return{'FINISHED'}
 
-        if self.tp_switch == "tp_crs":        
-            bpy.context.space_data.cursor_location[2] = 0 
-
-        return {'FINISHED'} 
-
-    def invoke(self, context, event):
-        dpi_value = bpy.context.user_preferences.system.dpi        
-        return context.window_manager.invoke_props_dialog(self, width=dpi_value*2, height=300)
-
-
-class View3D_TP_Zero_Cursor(bpy.types.Operator):
-    """Zero Cursor"""                 
-    bl_idname = "tp_ops.zero_cursor"          
-    bl_label = "Zero3DC"                 
-    bl_options = {'REGISTER', 'UNDO'}   
+ 
+class View3D_TP_Origin_Mass(bpy.types.Operator):
+    '''Set Origin to Center of Mass'''
+    bl_idname = "tp_ops.origin_set_mass"
+    bl_label = "Origin to Center of Mass"
+    bl_options = {"REGISTER", 'UNDO'}   
 
     def execute(self, context):
 
-        bpy.context.space_data.cursor_location[0] = 0 
-        bpy.context.space_data.cursor_location[1] = 0 
-        bpy.context.space_data.cursor_location[2] = 0 
+        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
+        
+        return{'FINISHED'}
 
-        return {'FINISHED'} 
+
+class View3D_TP_Origin_toMesh(bpy.types.Operator):
+    '''Set Origin to Mesh'''
+    bl_idname = "tp_ops.origin_tomesh"
+    bl_label = "Origin to Mesh"
+    bl_options = {"REGISTER", 'UNDO'}   
+
+    def execute(self, context):
+
+        bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY')
+        
+        return{'FINISHED'}    
+    
+    
+class View3D_TP_Origin_Meshto(bpy.types.Operator):
+    '''Set Mesh to Origin'''
+    bl_idname = "tp_ops.origin_meshto"
+    bl_label = "Mesh to Origin"
+    bl_options = {"REGISTER", 'UNDO'}   
+
+    def execute(self, context):
+
+        bpy.ops.object.origin_set(type='GEOMETRY_ORIGIN')
+        
+        return{'FINISHED'}  
+
 
 
 

@@ -54,10 +54,8 @@ from mathutils import Vector
 
 try:
     importlib.reload(addongroup)
-    importlib.reload(registerinfo)
 except NameError:
     from ..utils import addongroup
-    from ..utils import registerinfo
 
 
 # BMLayerItem name
@@ -791,8 +789,7 @@ def draw_header(self, context):
 # AddonPreferences
 ###############################################################################
 class LockCoordsPreferences(
-        addongroup.AddonGroupPreferences,
-        registerinfo.AddonRegisterInfo,
+        addongroup.AddonGroup,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
     bl_idname = __name__

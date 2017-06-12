@@ -821,20 +821,20 @@ def move_verts(object, bm, mapping, move, lock, influence):
 
 # load custom tool settings
 def settings_load(self):
-    lt = bpy.context.window_manager.looptools
+    tp = bpy.context.window_manager.tp_align_looptools
     tool = self.name.split()[0].lower()
     keys = self.as_keywords().keys()
     for key in keys:
-        setattr(self, key, getattr(lt, tool + "_" + key))
+        setattr(self, key, getattr(tp, tool + "_" + key))
 
 
 # store custom tool settings
 def settings_write(self):
-    lt = bpy.context.window_manager.looptools
+    tp = bpy.context.window_manager.tp_align_looptools
     tool = self.name.split()[0].lower()
     keys = self.as_keywords().keys()
     for key in keys:
-        setattr(lt, tool + "_" + key, getattr(self, key))
+        setattr(tp, tool + "_" + key, getattr(self, key))
 
 
 # clean up and set settings back to original state
@@ -2948,9 +2948,9 @@ def gstretch_update_max(self, context):
             self.conversion_max = self.conversion_min
     # called from toolbar
     else:
-        lt = context.window_manager.looptools
-        if lt.gstretch_conversion_min > lt.gstretch_conversion_max:
-            lt.gstretch_conversion_max = lt.gstretch_conversion_min
+        tp = context.window_manager.looptools
+        if tp.gstretch_conversion_min > tp.gstretch_conversion_max:
+            tp.gstretch_conversion_max = tp.gstretch_conversion_min
 
 
 # force consistency in GUI, min value can never be higher than max value
@@ -2961,9 +2961,9 @@ def gstretch_update_min(self, context):
             self.conversion_min = self.conversion_max
     # called from toolbar
     else:
-        lt = context.window_manager.looptools
-        if lt.gstretch_conversion_max < lt.gstretch_conversion_min:
-            lt.gstretch_conversion_min = lt.gstretch_conversion_max
+        tp = context.window_manager.looptools
+        if tp.gstretch_conversion_max < tp.gstretch_conversion_min:
+            tp.gstretch_conversion_min = tp.gstretch_conversion_max
 
 
 ##########################################
@@ -3151,7 +3151,7 @@ splines):
 ##########################################
 
 # bridge operator
-class Bridge(bpy.types.Operator):
+class LPT_Bridge(bpy.types.Operator):
     bl_idname = 'mesh.looptools_bridge'
     bl_label = "Bridge / Loft"
     bl_description = "Bridge two, or loft several, loops of vertices"
@@ -3325,7 +3325,7 @@ class Bridge(bpy.types.Operator):
 
 
 # circle operator
-class Circle(bpy.types.Operator):
+class LPT_Circle(bpy.types.Operator):
     bl_idname = "mesh.looptools_circle"
     bl_label = "Circle"
     bl_description = "Move selected vertices into a circle shape"
@@ -3483,7 +3483,7 @@ class Circle(bpy.types.Operator):
 
 
 # curve operator
-class Curve(bpy.types.Operator):
+class LPT_Curve(bpy.types.Operator):
     bl_idname = "mesh.looptools_curve"
     bl_label = "Curve"
     bl_description = "Turn a loop into a smooth curve"
@@ -3615,7 +3615,7 @@ class Curve(bpy.types.Operator):
 
 
 # flatten operator
-class Flatten(bpy.types.Operator):
+class LPT_Flatten(bpy.types.Operator):
     bl_idname = "mesh.looptools_flatten"
     bl_label = "Flatten"
     bl_description = "Flatten vertices on a best-fitting plane"
@@ -3728,7 +3728,7 @@ class Flatten(bpy.types.Operator):
 
 
 # gstretch operator
-class GStretch(bpy.types.Operator):
+class LPT_GStretch(bpy.types.Operator):
     bl_idname = "mesh.looptools_gstretch"
     bl_label = "Gstretch"
     bl_description = "Stretch selected vertices to Grease Pencil stroke"
@@ -3966,7 +3966,7 @@ class GStretch(bpy.types.Operator):
 
 
 # relax operator
-class Relax(bpy.types.Operator):
+class LPT_Relax(bpy.types.Operator):
     bl_idname = "mesh.looptools_relax"
     bl_label = "Relax"
     bl_description = "Relax the loop, so it is smoother"
@@ -3977,7 +3977,7 @@ class Relax(bpy.types.Operator):
                 "parallel loops as input"),
             ("selected", "Selection","Only use selected vertices as input")),
         description = "Loops that are relaxed",
-        default = 'selected')
+        default = 'all')
     interpolation = bpy.props.EnumProperty(name = "Interpolation",
         items = (("cubic", "Cubic", "Natural cubic spline, smooth results"),
             ("linear", "Linear", "Simple and fast linear algorithm")),
@@ -4058,7 +4058,7 @@ class Relax(bpy.types.Operator):
 
 
 # space operator
-class Space(bpy.types.Operator):
+class LPT_Space(bpy.types.Operator):
     bl_idname = "mesh.looptools_space"
     bl_label = "Space"
     bl_description = "Space the vertices in a regular distrubtion on the loop"
@@ -4176,307 +4176,12 @@ class Space(bpy.types.Operator):
 ####### GUI and registration #############
 ##########################################
 
-# menu containing all tools
-class VIEW3D_MT_edit_mesh_looptools(bpy.types.Menu):
-    """LoopTools"""
-    bl_label = "LoopTools"
 
-    def draw(self, context):
-        layout = self.layout
 
-        layout.label("Looptools")
-        layout.separator()
-        layout.operator("mesh.looptools_bridge", text="Bridge").loft = False
-        layout.operator("mesh.looptools_circle")
-        layout.operator("mesh.looptools_curve")
-        layout.operator("mesh.looptools_flatten")
-        layout.operator("mesh.looptools_gstretch")
-        layout.operator("mesh.looptools_bridge", text="Loft").loft = True
-        layout.operator("mesh.looptools_relax")
-        layout.operator("mesh.looptools_space")
 
-"""
-# panel containing all tools
-class VIEW3D_PT_tools_looptools(bpy.types.Panel):
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
-    bl_category = 'Tools'
-    bl_context = "mesh_edit"
-    bl_label = "LoopTools"
-    bl_options = {'DEFAULT_CLOSED'}
-
-    def draw(self, context):
-        layout = self.layout
-        col = layout.column(align=True)
-        lt = context.window_manager.looptools
-
-        # bridge - first line
-        split = col.split(percentage=0.15, align=True)
-        if lt.display_bridge:
-            split.prop(lt, "display_bridge", text="", icon='DOWNARROW_HLT')
-        else:
-            split.prop(lt, "display_bridge", text="", icon='RIGHTARROW')
-        split.operator("mesh.looptools_bridge", text="Bridge").loft = False
-        # bridge - settings
-        if lt.display_bridge:
-            box = col.column(align=True).box().column()
-            #box.prop(self, "mode")
-
-            # top row
-            col_top = box.column(align=True)
-            row = col_top.row(align=True)
-            col_left = row.column(align=True)
-            col_right = row.column(align=True)
-            col_right.active = lt.bridge_segments != 1
-            col_left.prop(lt, "bridge_segments")
-            col_right.prop(lt, "bridge_min_width", text="")
-            # bottom row
-            bottom_left = col_left.row()
-            bottom_left.active = lt.bridge_segments != 1
-            bottom_left.prop(lt, "bridge_interpolation", text="")
-            bottom_right = col_right.row()
-            bottom_right.active = lt.bridge_interpolation == 'cubic'
-            bottom_right.prop(lt, "bridge_cubic_strength")
-            # boolean properties
-            col_top.prop(lt, "bridge_remove_faces")
-
-            # override properties
-            col_top.separator()
-            row = box.row(align = True)
-            row.prop(lt, "bridge_twist")
-            row.prop(lt, "bridge_reverse")
-
-        # circle - first line
-        split = col.split(percentage=0.15, align=True)
-        if lt.display_circle:
-            split.prop(lt, "display_circle", text="", icon='DOWNARROW_HLT')
-        else:
-            split.prop(lt, "display_circle", text="", icon='RIGHTARROW')
-        split.operator("mesh.looptools_circle")
-        # circle - settings
-        if lt.display_circle:
-            box = col.column(align=True).box().column()
-            box.prop(lt, "circle_fit")
-            box.separator()
-
-            box.prop(lt, "circle_flatten")
-            row = box.row(align=True)
-            row.prop(lt, "circle_custom_radius")
-            row_right = row.row(align=True)
-            row_right.active = lt.circle_custom_radius
-            row_right.prop(lt, "circle_radius", text="")
-            box.prop(lt, "circle_regular")
-            box.separator()
-
-            col_move = box.column(align=True)
-            row = col_move.row(align=True)
-            if lt.circle_lock_x:
-                row.prop(lt, "circle_lock_x", text = "X", icon='LOCKED')
-            else:
-                row.prop(lt, "circle_lock_x", text = "X", icon='UNLOCKED')
-            if lt.circle_lock_y:
-                row.prop(lt, "circle_lock_y", text = "Y", icon='LOCKED')
-            else:
-                row.prop(lt, "circle_lock_y", text = "Y", icon='UNLOCKED')
-            if lt.circle_lock_z:
-                row.prop(lt, "circle_lock_z", text = "Z", icon='LOCKED')
-            else:
-                row.prop(lt, "circle_lock_z", text = "Z", icon='UNLOCKED')
-            col_move.prop(lt, "circle_influence")
-
-        # curve - first line
-        split = col.split(percentage=0.15, align=True)
-        if lt.display_curve:
-            split.prop(lt, "display_curve", text="", icon='DOWNARROW_HLT')
-        else:
-            split.prop(lt, "display_curve", text="", icon='RIGHTARROW')
-        split.operator("mesh.looptools_curve")
-        # curve - settings
-        if lt.display_curve:
-            box = col.column(align=True).box().column()
-            box.prop(lt, "curve_interpolation")
-            box.prop(lt, "curve_restriction")
-            box.prop(lt, "curve_boundaries")
-            box.prop(lt, "curve_regular")
-            box.separator()
-
-            col_move = box.column(align=True)
-            row = col_move.row(align=True)
-            if lt.curve_lock_x:
-                row.prop(lt, "curve_lock_x", text = "X", icon='LOCKED')
-            else:
-                row.prop(lt, "curve_lock_x", text = "X", icon='UNLOCKED')
-            if lt.curve_lock_y:
-                row.prop(lt, "curve_lock_y", text = "Y", icon='LOCKED')
-            else:
-                row.prop(lt, "curve_lock_y", text = "Y", icon='UNLOCKED')
-            if lt.curve_lock_z:
-                row.prop(lt, "curve_lock_z", text = "Z", icon='LOCKED')
-            else:
-                row.prop(lt, "curve_lock_z", text = "Z", icon='UNLOCKED')
-            col_move.prop(lt, "curve_influence")
-
-        # flatten - first line
-        split = col.split(percentage=0.15, align=True)
-        if lt.display_flatten:
-            split.prop(lt, "display_flatten", text="", icon='DOWNARROW_HLT')
-        else:
-            split.prop(lt, "display_flatten", text="", icon='RIGHTARROW')
-        split.operator("mesh.looptools_flatten")
-        # flatten - settings
-        if lt.display_flatten:
-            box = col.column(align=True).box().column()
-            box.prop(lt, "flatten_plane")
-            #box.prop(lt, "flatten_restriction")
-            box.separator()
-
-            col_move = box.column(align=True)
-            row = col_move.row(align=True)
-            if lt.flatten_lock_x:
-                row.prop(lt, "flatten_lock_x", text = "X", icon='LOCKED')
-            else:
-                row.prop(lt, "flatten_lock_x", text = "X", icon='UNLOCKED')
-            if lt.flatten_lock_y:
-                row.prop(lt, "flatten_lock_y", text = "Y", icon='LOCKED')
-            else:
-                row.prop(lt, "flatten_lock_y", text = "Y", icon='UNLOCKED')
-            if lt.flatten_lock_z:
-                row.prop(lt, "flatten_lock_z", text = "Z", icon='LOCKED')
-            else:
-                row.prop(lt, "flatten_lock_z", text = "Z", icon='UNLOCKED')
-            col_move.prop(lt, "flatten_influence")
-
-        # gstretch - first line
-        split = col.split(percentage=0.15, align=True)
-        if lt.display_gstretch:
-            split.prop(lt, "display_gstretch", text="", icon='DOWNARROW_HLT')
-        else:
-            split.prop(lt, "display_gstretch", text="", icon='RIGHTARROW')
-        split.operator("mesh.looptools_gstretch")
-        # gstretch settings
-        if lt.display_gstretch:
-            box = col.column(align=True).box().column()
-            box.prop(lt, "gstretch_method")
-            box.prop(lt, "gstretch_delete_strokes")
-            box.separator()
-
-            col_conv = box.column(align=True)
-            col_conv.prop(lt, "gstretch_conversion", text="")
-            if lt.gstretch_conversion == 'distance':
-                col_conv.prop(lt, "gstretch_conversion_distance")
-            elif lt.gstretch_conversion == 'limit_vertices':
-                row = col_conv.row(align=True)
-                row.prop(lt, "gstretch_conversion_min", text="Min")
-                row.prop(lt, "gstretch_conversion_max", text="Max")
-            elif lt.gstretch_conversion == 'vertices':
-                col_conv.prop(lt, "gstretch_conversion_vertices")
-            box.separator()
-
-            col_move = box.column(align=True)
-            row = col_move.row(align=True)
-            if lt.gstretch_lock_x:
-                row.prop(lt, "gstretch_lock_x", text = "X", icon='LOCKED')
-            else:
-                row.prop(lt, "gstretch_lock_x", text = "X", icon='UNLOCKED')
-            if lt.gstretch_lock_y:
-                row.prop(lt, "gstretch_lock_y", text = "Y", icon='LOCKED')
-            else:
-                row.prop(lt, "gstretch_lock_y", text = "Y", icon='UNLOCKED')
-            if lt.gstretch_lock_z:
-                row.prop(lt, "gstretch_lock_z", text = "Z", icon='LOCKED')
-            else:
-                row.prop(lt, "gstretch_lock_z", text = "Z", icon='UNLOCKED')
-            col_move.prop(lt, "gstretch_influence")
-
-        # loft - first line
-        split = col.split(percentage=0.15, align=True)
-        if lt.display_loft:
-            split.prop(lt, "display_loft", text="", icon='DOWNARROW_HLT')
-        else:
-            split.prop(lt, "display_loft", text="", icon='RIGHTARROW')
-        split.operator("mesh.looptools_bridge", text="Loft").loft = True
-        # loft - settings
-        if lt.display_loft:
-            box = col.column(align=True).box().column()
-            #box.prop(self, "mode")
-
-            # top row
-            col_top = box.column(align=True)
-            row = col_top.row(align=True)
-            col_left = row.column(align=True)
-            col_right = row.column(align=True)
-            col_right.active = lt.bridge_segments != 1
-            col_left.prop(lt, "bridge_segments")
-            col_right.prop(lt, "bridge_min_width", text="")
-            # bottom row
-            bottom_left = col_left.row()
-            bottom_left.active = lt.bridge_segments != 1
-            bottom_left.prop(lt, "bridge_interpolation", text="")
-            bottom_right = col_right.row()
-            bottom_right.active = lt.bridge_interpolation == 'cubic'
-            bottom_right.prop(lt, "bridge_cubic_strength")
-            # boolean properties
-            col_top.prop(lt, "bridge_remove_faces")
-            col_top.prop(lt, "bridge_loft_loop")
-
-            # override properties
-            col_top.separator()
-            row = box.row(align = True)
-            row.prop(lt, "bridge_twist")
-            row.prop(lt, "bridge_reverse")
-
-        # relax - first line
-        split = col.split(percentage=0.15, align=True)
-        if lt.display_relax:
-            split.prop(lt, "display_relax", text="", icon='DOWNARROW_HLT')
-        else:
-            split.prop(lt, "display_relax", text="", icon='RIGHTARROW')
-        split.operator("mesh.looptools_relax")
-        # relax - settings
-        if lt.display_relax:
-            box = col.column(align=True).box().column()
-            box.prop(lt, "relax_interpolation")
-            box.prop(lt, "relax_input")
-            box.prop(lt, "relax_iterations")
-            box.prop(lt, "relax_regular")
-
-        # space - first line
-        split = col.split(percentage=0.15, align=True)
-        if lt.display_space:
-            split.prop(lt, "display_space", text="", icon='DOWNARROW_HLT')
-        else:
-            split.prop(lt, "display_space", text="", icon='RIGHTARROW')
-        split.operator("mesh.looptools_space")
-        # space - settings
-        if lt.display_space:
-            box = col.column(align=True).box().column()
-            box.prop(lt, "space_interpolation")
-            box.prop(lt, "space_input")
-            box.separator()
-
-            col_move = box.column(align=True)
-            row = col_move.row(align=True)
-            if lt.space_lock_x:
-                row.prop(lt, "space_lock_x", text = "X", icon='LOCKED')
-            else:
-                row.prop(lt, "space_lock_x", text = "X", icon='UNLOCKED')
-            if lt.space_lock_y:
-                row.prop(lt, "space_lock_y", text = "Y", icon='LOCKED')
-            else:
-                row.prop(lt, "space_lock_y", text = "Y", icon='UNLOCKED')
-            if lt.space_lock_z:
-                row.prop(lt, "space_lock_z", text = "Z", icon='LOCKED')
-            else:
-                row.prop(lt, "space_lock_z", text = "Z", icon='UNLOCKED')
-            col_move.prop(lt, "space_influence")
-
-"""
 # property group containing all properties for the gui in the panel
-class LoopToolsProps(bpy.types.PropertyGroup):
-    """
-    Fake module like class
-    bpy.context.window_manager.looptools
-    """
+class Align_LoopToolsProps(bpy.types.PropertyGroup):
+
 
     # general display properties
     display_bridge = bpy.props.BoolProperty(name = "Bridge settings",
@@ -4776,7 +4481,7 @@ class LoopToolsProps(bpy.types.PropertyGroup):
                 "parallel loops as input"),
             ("selected", "Selection","Only use selected vertices as input")),
         description = "Loops that are spaced",
-        default = 'all')
+        default = 'selected')
 
     space_interpolation = bpy.props.EnumProperty(name = "Interpolation",
         items = (("cubic", "Cubic", "Natural cubic spline, smooth results"),
@@ -4795,43 +4500,33 @@ class LoopToolsProps(bpy.types.PropertyGroup):
         default = False)
 
 
-"""
-# draw function for integration in menus
-def menu_func(self, context):
-    self.layout.menu("VIEW3D_MT_edit_mesh_looptools")
-    self.layout.separator()
 
 # define classes for registration
-classes = [VIEW3D_MT_edit_mesh_looptools,
-    VIEW3D_PT_tools_looptools,
-    LoopToolsProps,
-    Bridge,
-    Circle,
-    Curve,
-    Flatten,
-    GStretch,
-    Relax,
-    Space]
+classes = [Align_LoopToolsProps,
+           LPT_Bridge,
+           LPT_Circle,
+           LPT_Curve,
+           LPT_Flatten,
+           LPT_GStretch,
+           LPT_Relax,
+           LPT_Space]
 
 
 # registering and menu integration
 def register():
     for c in classes:
         bpy.utils.register_class(c)
-    bpy.types.VIEW3D_MT_edit_mesh_specials.prepend(menu_func)
-    bpy.types.WindowManager.looptools = bpy.props.PointerProperty(type = LoopToolsProps)
+
+    bpy.types.WindowManager.tp_align_looptools = bpy.props.PointerProperty(type = Align_LoopToolsProps)
 
 
 # unregistering and removing menus
 def unregister():
     for c in classes:
         bpy.utils.unregister_class(c)
-    bpy.types.VIEW3D_MT_edit_mesh_specials.remove(menu_func)
+
     try:
-        del bpy.types.WindowManager.looptools
+        del bpy.types.WindowManager.tp_align_looptools
     except:
         pass
-"""
-
-
 

@@ -10,7 +10,7 @@ except:
     pass
 
 
-'''
+"""
 import logging
 #import logging.handlers
 import valog
@@ -35,9 +35,9 @@ valog.logger.removeHandler(handler)
 handler.close()
 
 # handler.baseFilename
-'''
+"""
 
-'''
+"""
 logging.Formatter書式
 %(name)s     ロガー (ログ記録チャネル) の名前
 %(levelno)s     メッセージのログ記録レベルを表す数字 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -55,9 +55,9 @@ logging.Formatter書式
 %(threadName)s     スレッド名 (取得できる場合)
 %(process)d     プロセス ID (取得できる場合)
 %(message)s     レコードが発信された際に処理された msg % args の結果
-'''
+"""
 
-'''
+"""
 レベル
 logging.DEBUG
 logging.INFO
@@ -69,7 +69,7 @@ logger.info("info message")
 logger.warning("warning message")
 logger.error("error message")
 logger.critical("critical message")
-'''
+"""
 
 
 LOG_FILENAME = 'logging_rotatingfile_example.log'
@@ -81,21 +81,22 @@ BLENDER_LOGGER_NAME = 'bpy'
 WRITE_TEXT_HANDLER_NAME = 'write_text'
 RECORD_LOG_HANDLER_NAME = 'record_log'
 
-#==============================================================================
+
+###############################################################################
 # logger
-#==============================================================================
-'''
+###############################################################################
+"""
 def get_logger(name, level=logging.DEBUG):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     return logger
-'''
-'''def init_logger(name, level=logging.DEBUG):
+"""
+"""def init_logger(name, level=logging.DEBUG):
     global logger
     if not logger:
         logger = get_logger(name, level)
     return logger
-'''
+"""
 # NOTSETは使える？
 level_dict = {#logging.NOTSET: logging.NOTSET,
               logging.DEBUG: logging.DEBUG,
@@ -117,11 +118,11 @@ level_dict = {#logging.NOTSET: logging.NOTSET,
               'critical': logging.CRITICAL}
 
 
-#==============================================================================
+###############################################################################
 # 例外
-#==============================================================================
+###############################################################################
 def excepthook(hook=True, logger_name=''):
-    '''例外を端末に表示し、logger.error()も行う'''
+    """例外を端末に表示し、logger.error()も行う"""
     class ExceptHook:
         def __init__(self, logger_name=''):
             self.logger_name = logger_name  # 後に変更可能
@@ -137,15 +138,15 @@ def excepthook(hook=True, logger_name=''):
         sys.excepthook = sys.__excepthook__
 
 
-#==============================================================================
+###############################################################################
 # printラッパ
-#==============================================================================
+###############################################################################
 def print_wrapper():
-    '''ログに送り、通常のprintも行う
+    """ログに送り、通常のprintも行う
     e.g.
     print = print_wrapper()
     print('message', end='', level='error')
-    '''
+    """
     class PrintWrapper():
         default_level = logging.DEBUG
         
@@ -179,9 +180,9 @@ def print_wrapper():
     return PrintWrapper()
 
 
-#==============================================================================
+###############################################################################
 # blender専用
-#==============================================================================
+###############################################################################
 def get_blender_text(name):
     if name in bpy.data.texts:
         return bpy.data.texts[name]
@@ -190,7 +191,7 @@ def get_blender_text(name):
 
 
 class WriteBlenderText:
-    '''インスタンスをlogging.StreamHandlerに渡す'''
+    """インスタンスをlogging.StreamHandlerに渡す"""
     
     def __init__(self, text_name):
         self.text_name = text_name
@@ -204,7 +205,7 @@ class WriteBlenderText:
 
 
 def verbose_update_func(self, context):
-    '''ハンドラのフォーマットの設定。logconf.verboseに設定する'''
+    """ハンドラのフォーマットの設定。logconf.verboseに設定する"""
     logconf = context.window_manager.logconf
     logger = logging.getLogger(BLENDER_LOGGER_NAME)
 
@@ -220,7 +221,9 @@ def verbose_update_func(self, context):
 
 
 def record_log_update_func(self, context):
-    '''ファイル出力ハンドラの更新。logconf.record_log, logconf.log_file_pathに設定する'''
+    """ファイル出力ハンドラの更新。logconf.record_log,
+    logconf.log_file_pathに設定する
+    """
     logconf = context.window_manager.logconf
     logger = logging.getLogger(BLENDER_LOGGER_NAME)
     
@@ -246,9 +249,9 @@ def record_log_update_func(self, context):
             logger.addHandler(handler)
             verbose_update_func(self, context)
 
-#==============================================================================
+###############################################################################
 # テスト
-#==============================================================================
+###############################################################################
 class StdOut:
     def write(self, string):
         sys.__stdout__.write('StdOut class\n')
@@ -263,13 +266,13 @@ class ExceptHook:
         print('ExceptHook', msg)
 
 def _main():
-    '''import test
+    """import test
     x = test.hoge
     x()
     y = test.piyo
     yi = y()
     yi()
-    '''
+    """
     #Logger.exception(msg[, *args])
     #レベル ERROR のメッセージをこのロガーで記録します。引数は debug() と同じように解釈されます。
     #例外情報がログメッセージに追加されます。このメソッドは例外ハンドラからのみ呼び出されます。
@@ -302,7 +305,7 @@ def _main():
     logger2.addHandler(handler2)
     
     
-    '''
+    """
     logger2 = logging.getLogger('example.piyo')
     logger2.setLevel(logging.DEBUG)
     handler2 = logging.handlers.RotatingFileHandler(
@@ -310,7 +313,7 @@ def _main():
     formatter2 = logging.Formatter()
     handler2.setFormatter(formatter2)
     logger2.addHandler(handler2)
-    '''
+    """
     logger.info('#######################')
     logger.debug('hoge')
     logger2.info('piyo')

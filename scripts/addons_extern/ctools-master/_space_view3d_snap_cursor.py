@@ -204,7 +204,7 @@ class VIEW3D_OT_snap_cursor(bpy.types.Operator):
             bpy.ops.object.mode_set(mode='EDIT')
 
         if loc:
-            context.scene.cursor_location = loc
+            context.space_data.cursor_location = loc
 
         return {'FINISHED'}
     
@@ -235,7 +235,7 @@ def draw(self, context):
 
 
 def register():
-    addongroup.AddonGroupPreferences.register_module(__name__)
+    addongroup.AddonGroup.register_module(__name__)
 
     bpy.types.VIEW3D_MT_snap.append(draw)
 
@@ -243,7 +243,7 @@ def register():
 def unregister():
     bpy.types.VIEW3D_MT_snap.remove(draw)
 
-    addongroup.AddonGroupPreferences.unregister_module(__name__)
+    addongroup.AddonGroup.unregister_module(__name__)
 
 
 if __name__ == '__main__':

@@ -260,6 +260,56 @@ class AddonGroupPreferences:
         name='Show Hidden',
         default=False)
 
+    _addon_filter_items = None
+
+    def addon_filter_items(self, context):
+        items = [('All', 'All', 'All Add-ons'),
+                 ('Enabled', 'Enabled', 'All Enabled Add-ons'),
+                 ('Disabled', 'Disabled', 'All Disabled Add-ons'),
+                 ]
+
+        items_unique = set()
+
+        for mod_name, fake_mod in self._fake_sub_modules.items():
+            info = fake_mod.bl_info
+            items_unique.add(info['category'])
+
+        items.extend([(cat, cat, '') for cat in sorted(items_unique)])
+        self.__class__._addon_filter_items = items
+        return items
+
+    def addon_search_get(self):
+        return getattr(self, 'addon_search__', '')
+
+    def addon_search_set(self, value):
+        setattr(self.__class__, 'addon_search__', value)
+
+    def addon_filter_get(self):
+        return getattr(self, 'addon_filter__', 0)
+
+    def addon_filter_set(self, value):
+        setattr(self.__class__, 'addon_filter__', value)
+
+    addon_search_ = bpy.props.StringProperty(
+        name='Search',
+        description='Search within the selected filter. '
+                    'If startswith \'/\'/, use path search ',
+        options={'TEXTEDIT_UPDATE'},
+        get=addon_search_get,
+        set=addon_search_set,
+    )
+    addon_filter_ = bpy.props.EnumProperty(
+        items=addon_filter_items,
+        name='Category',
+        description='Filter add-ons by category',
+        get=addon_filter_get,
+        set=addon_filter_set,
+    )
+
+    del addon_filter_items
+    del addon_search_get, addon_search_set
+    del addon_filter_get, addon_filter_set
+
     def __getattribute__(self, name):
         prefix, base = re.match('(use_|show_expanded_|)(.*)', name).groups()
         if base in super().__getattribute__('_fake_sub_modules'):
@@ -717,6 +767,8 @@ class AddonGroupPreferences:
         :type context: bpy.types.Context
         :type layout: bpy.types.UILayout
         """
+        wm = context.window_manager
+
         layout = self.layout
         """:type: bpy.types.UILayout"""
 
@@ -731,12 +783,60 @@ class AddonGroupPreferences:
             align_box_draw = root_prefs.align_box_draw_
             use_indent_draw = root_prefs.use_indent_draw_
 
+        if self._fake_sub_modules:
+            split = layout.split()
+            col = split.column()
+            sp = col.split(0.8)
+            row = sp.row()
+            row.prop(self, 'addon_search_', text='', icon='VIEWZOOM')
+            sp.row()
+            col = split.column()
+            sp = col.split(0.8)
+            row = sp.row()
+            row.prop(self, 'addon_filter_')
+            sp.row()
+
+        filter = self.addon_filter_
+        search = self.addon_search_
+
         for mod_name, fake_mod in self._fake_sub_modules.items():
             if not self.show_hidden_ and mod_name.startswith('_'):
                 continue
 
             mod_name_attr = self.__mod_to_attr(fake_mod)
             info = fake_mod.bl_info
+
+            is_enabled = getattr(self, 'use_' + mod_name)
+            if ((filter == 'All') or
+                (filter == info['category']) or
+                (filter == 'Enabled' and is_enabled) or
+                (filter == 'Disabled' and not is_enabled)):
+                pass
+            else:
+                continue
+
+            if search:
+                if search.startswith('//'):
+                    if re.search(search.lstrip('//'), fake_mod.__file__):
+                        match = True
+                    else:
+                        match = False
+                else:
+                    match = True
+                    for word in search.split(' '):
+                        if not word:
+                            continue
+                        if word.lower() in info["name"].lower():
+                            pass
+                        elif (info["author"] and
+                              word.lower() in info["author"].lower()):
+                            pass
+                        else:
+                            match = False
+                            break
+                if not match:
+                    continue
+
             column = layout.column(align=align_box_draw)
 
             # インデント
@@ -758,6 +858,7 @@ class AddonGroupPreferences:
             op = sub.operator('wm.context_toggle', text='', icon=icon,
                               emboss=False)
             op.data_path = 'addon_prefs.show_expanded_' + mod_name
+            sub = row.row()
             sub.label('{}: {}'.format(info['category'], info['name']))
             sub = row.row()
             sub.alignment = 'RIGHT'
@@ -833,8 +934,14 @@ class AddonGroupPreferences:
                         except:
                             traceback.print_exc()
                             has_error = True
-                        introspect = eval(col_body.introspect())
-                        if introspect[0] or has_error:
+                        has_introspect_error = False
+                        try:
+                            # " や ' の問題でSyntaxErrorが発生する場合あり
+                            introspect = eval(col_body.introspect())
+                        except:
+                            # traceback.print_exc()
+                            has_introspect_error = True
+                        if has_introspect_error or introspect[0] or has_error:
                             if not align_box_draw:
                                 sub = col_head.row()
                                 sub.active = False  # 色を薄くする為

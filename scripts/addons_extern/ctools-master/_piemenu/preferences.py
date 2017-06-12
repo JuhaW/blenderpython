@@ -24,7 +24,6 @@ import bpy
 import blf
 
 from ..utils import addongroup
-from ..utils import registerinfo
 
 from . import oputils
 
@@ -904,8 +903,7 @@ def font_id_get(self):
     return 0
 
 
-class PieMenuPreferences(addongroup.AddonGroupPreferences,
-                         registerinfo.AddonRegisterInfo,
+class PieMenuPreferences(addongroup.AddonGroup,
                          bpy.types.PropertyGroup if '.' in __name__ else
                          bpy.types.AddonPreferences):
     bl_idname = __package__

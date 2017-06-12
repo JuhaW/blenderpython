@@ -17,24 +17,15 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-import sys
-import math
 import re
-from functools import reduce, wraps
-import hashlib
-import pickle
-import collections
-from collections import OrderedDict, defaultdict, namedtuple
-import types
-import functools
-
+from functools import reduce
+from collections import defaultdict
 
 try:
     import bpy
     from bpy.props import *
     import mathutils as Math
     from mathutils import Matrix, Euler, Vector, Quaternion
-    #geo = mathutils.geometry
     import blf
     import bgl
     from bgl import glRectf
@@ -157,7 +148,7 @@ def inrange(index, ls_or_int:'sequence or int'):
     return index
 
 
-### Save Properties ###########################################################
+# Save Properties #############################################################
 class SaveProperties:
     """全オペレータのプロパティを一括管理。
     """
@@ -241,7 +232,7 @@ class WatchProperties:
         return changed
 
 
-### Rename ####################################################################
+# Rename ######################################################################
 def get_basename(name, only_remove_numbers=False):
     if only_remove_numbers:
         m = re.match('^(.*)\.(\d+)$', name)
@@ -385,7 +376,7 @@ def no_overlap_name(name, names, search_smaller=False,
     return newname
 
 
-### Snap ######################################################################
+# Snap ########################################################################
 def get_matrix_element_square(mat, center, r):
     """
     # centerの周り、r距離分の要素を左上から順に返す。
@@ -417,7 +408,7 @@ def get_matrix_element_square(mat, center, r):
         cnt += 1
 
 
-### Utils #####################################################################
+# Utils #######################################################################
 def the_other(ls, item):
     return ls[ls.index(item) - 1]
 
@@ -636,7 +627,7 @@ def pair_items_to_list(pair_items, order:list=None, secure=False):
 #     return args, kw
 
 
-### print #####################################################################
+# print #######################################################################
 def print_mat(label, matrix, column=4):
     if isinstance(matrix[0], (float, int)):
         # buffer用

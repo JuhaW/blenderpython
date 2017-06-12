@@ -2,7 +2,7 @@ import bpy
 from bpy import*
 from bpy.props import *
 
-class View3D_TP_Normals(bpy.types.Operator):
+class VIEW3D_TP_Normals(bpy.types.Operator):
     """Recalculate Normals for all selected Objects in Objectmode"""
     bl_idname = "tp_ops.rec_normals"
     bl_label = "Recalculate Normals"     

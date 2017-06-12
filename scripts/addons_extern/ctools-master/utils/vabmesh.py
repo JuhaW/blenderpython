@@ -17,24 +17,19 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
-import time
 import math
 from functools import reduce
-from collections import OrderedDict, Counter, defaultdict
+from collections import OrderedDict, defaultdict
 from itertools import combinations, chain
 
 import bpy
-from bpy.props import *
-import mathutils as Math
-from mathutils import Matrix, Euler, Vector, Quaternion
+from mathutils import  Vector
 import mathutils.geometry as geom
 import bmesh
 
 from .. import localutils
 from ..localutils.checkargs import CheckArgs
 
-from . import vaview3d as vav
-from . import vautils as vau
 from . import vamath as vam
 
 
@@ -120,9 +115,10 @@ BMesh.select_flush_mode():
     終わった後でBMesh.select_history.validate()を呼び出している。
 """
 
-#==============================================================================
+
+###############################################################################
 # Dict
-#==============================================================================
+###############################################################################
 def vert_verts_dict(bm=None, select=None, hide=None, verts=None, edges=None):
     """
     selectとhideは接続する辺で判別する。辺が選択されていたらその両端の頂点をキーとして追加する。
@@ -172,7 +168,6 @@ def vert_verts_dict(bm=None, select=None, hide=None, verts=None, edges=None):
 
 def edge_edges_dict(bm=None, select=None, hide=None, edges=None):
     """
-    
     接続する辺の状態で判別する。check()が真となるものだけがキーとして挿入される。
     select:     True:選択中, False:非選択, None:全て
     hide:       True:非表示, False:表示, None:全て
@@ -257,9 +252,9 @@ def face_faces_dict(bm=None, select=None, hide=None, faces=None,
     return face_faces
 
 
-#==============================================================================
+###############################################################################
 # Connect
-#==============================================================================
+###############################################################################
 def linked_vertices_list(bm=None, select=None, hide=None,
                          verts=None, edges=None):
     """辺で繋がった頂点の二次元リストを返す"""
@@ -268,7 +263,6 @@ def linked_vertices_list(bm=None, select=None, hide=None,
     def key(v1, v2, data):
         return v1 in data[v2] or v2 in data[v1]
     return localutils.utils.groupwith(vert_verts.keys(), key, vert_verts)
-
 
 
 def linked_faces_list(bm=None, select=None, hide=None, faces=None,
@@ -281,9 +275,9 @@ def linked_faces_list(bm=None, select=None, hide=None, faces=None,
     return localutils.utils.groupwith(face_faces.keys(), key, face_faces)
 
 
-#==============================================================================
+###############################################################################
 # Path
-#==============================================================================
+###############################################################################
 class Path(list):
         def __init__(self, arg=(), cyclic=False):
             super().__init__(arg)
@@ -366,9 +360,9 @@ def make_face_outline_paths(bm=None, select=None, hide=None, faces=None,
     return outline_paths
 
 
-#==============================================================================
+###############################################################################
 # LoopTri
-#==============================================================================
+###############################################################################
 class LoopTri:
     def __init__(self, loops: "sequence or LoopTri", sort=False):
         self.loops = list(loops)
@@ -453,9 +447,9 @@ class LoopTri:
     edge_keys = property(_edge_keys_get)
 
 
-#==============================================================================
+###############################################################################
 # LoopTris
-#==============================================================================
+###############################################################################
 class LoopTris(list):
     """
     このクラスの各ソートはBMeshを参照せず、各要素のindexでソートする為、
@@ -608,11 +602,11 @@ class LoopTris(list):
         if faces:
             bm.faces.index_update()
         if loops:
-#            i = 0
-#            for face in bm.faces:
-#                for loop in face.loops:
-#                    loop.index = i
-#                    i += 1
+            # i = 0
+            # for face in bm.faces:
+            #     for loop in face.loops:
+            #         loop.index = i
+            #         i += 1
             for i, loop in enumerate(chain(*(f.loops for f in bm.faces))):
                 loop.index = i
 
@@ -624,17 +618,17 @@ class LoopTris(list):
             sorted_items = tuple(sorted_items)
         return sorted_items
 
-#    @classmethod
-#    def sorted_loops(cls, loops):
-#        """loopsをBMFace.loopsでの位置によりソートしたものを返す"""
-#        def key_func(loop):
-#            for i, l in enumerate(loop.face.loops):
-#                if l == loop:
-#                    return i
-#        sorted_items = sorted(loops, key=key_func)
-#        if isinstance(loops, tuple):
-#            sorted_items = tuple(sorted_items)
-#        return sorted_items
+    # @classmethod
+    # def sorted_loops(cls, loops):
+    #     """loopsをBMFace.loopsでの位置によりソートしたものを返す"""
+    #     def key_func(loop):
+    #         for i, l in enumerate(loop.face.loops):
+    #             if l == loop:
+    #                 return i
+    #     sorted_items = sorted(loops, key=key_func)
+    #     if isinstance(loops, tuple):
+    #         sorted_items = tuple(sorted_items)
+    #     return sorted_items
 
     # Correct -----------------------------------------------------------------
     @classmethod
@@ -704,73 +698,72 @@ class LoopTris(list):
     def correct_face(cls, face):
         return cls.correct_vectors([v.co for v in face.verts])
 
-
-#    def correct(self, sort=True):
-#        """
-#        v4--v5--------v6
-#          /    \     
-#         /       \   
-#        v1 - v2 ---v3
-#        v1-v2-3がほぼ直線の時、v1-v2-v3でtriが生成される場合があるので、
-#        v1-v2-5, v2-v3-v5で貼り直す。
-#        """
-#        face_tris_dict = self.face_dict()
-#        removed_tris = set()
-#
-#        corrected_faces_num = 0
-#        for tri in self:
-#            if tri in removed_tris or len(tri[0].face.verts) == 3:
-#                continue
-#
-#            l1, l2, l3 = tri
-#
-#            # loop1 -(next)-> loop2 -(next)-> loop3
-#            if l1.link_loop_next == l2 and l2.link_loop_next == l3:
-#                loop1, loop2, loop3 = l1, l2, l3
-#            elif l2.link_loop_next == l3 and l3.link_loop_next == l1:
-#                loop1, loop2, loop3 = l2, l3, l1
-#            elif l3.link_loop_next == l1 and l1.link_loop_next == l2:
-#                loop1, loop2, loop3 = l3, l1, l2
-#            else:
-#                continue
-#            v1 = loop1.vert.co - loop2.vert.co
-#            v2 = loop3.vert.co - loop2.vert.co
-#            angle = v1.angle(v2, 0.0)
-#            if angle >= self.ANGLE_THRESHOLD:
-#                # loop1とloop3を持つ面を探す
-#                for link_tri in face_tris_dict[loop1.face]:
-#                    if link_tri != tri:
-#                        if loop1 in link_tri and loop3 in link_tri:
-#                            break
-#                else:
-#                    link_tri = None
-#                if link_tri:
-#                    loop4 = link_tri[link_tri.index(loop1) - 1]
-#                    v3 = loop4.vert.co - loop2.vert.co
-#                    if v3.length > self.DIST_THRESHOLD:
-#                        tri1 = LoopTri((loop1, loop2, loop4))
-#                        tri2 = LoopTri((loop2, loop3, loop4))
-#
-#                        face_tris_dict[loop1.face].append(tri1)
-#                        face_tris_dict[loop1.face].append(tri2)
-#
-#                        face_tris_dict[loop1.face].remove(tri)
-#                        face_tris_dict[loop1.face].remove(link_tri)
-#                        removed_tris.add(tri)
-#                        removed_tris.add(link_tri)
-#
-#                        corrected_faces_num += 1
-#
-#        self[:] = []
-#        for tris in face_tris_dict.values():
-#            self.extend(tris)
-#
-#        if sort:
-#            self.sort(key=lambda tri: tri[0].face.index)
-#            for tri in self:
-#                tri.sort()
-#
-#        return corrected_faces_num  # 確認用
+    # def correct(self, sort=True):
+    #     """
+    #     v4--v5--------v6
+    #       /    \
+    #      /       \
+    #     v1 - v2 ---v3
+    #     v1-v2-3がほぼ直線の時、v1-v2-v3でtriが生成される場合があるので、
+    #     v1-v2-5, v2-v3-v5で貼り直す。
+    #     """
+    #     face_tris_dict = self.face_dict()
+    #     removed_tris = set()
+    #
+    #     corrected_faces_num = 0
+    #     for tri in self:
+    #         if tri in removed_tris or len(tri[0].face.verts) == 3:
+    #             continue
+    #
+    #         l1, l2, l3 = tri
+    #
+    #         # loop1 -(next)-> loop2 -(next)-> loop3
+    #         if l1.link_loop_next == l2 and l2.link_loop_next == l3:
+    #             loop1, loop2, loop3 = l1, l2, l3
+    #         elif l2.link_loop_next == l3 and l3.link_loop_next == l1:
+    #             loop1, loop2, loop3 = l2, l3, l1
+    #         elif l3.link_loop_next == l1 and l1.link_loop_next == l2:
+    #             loop1, loop2, loop3 = l3, l1, l2
+    #         else:
+    #             continue
+    #         v1 = loop1.vert.co - loop2.vert.co
+    #         v2 = loop3.vert.co - loop2.vert.co
+    #         angle = v1.angle(v2, 0.0)
+    #         if angle >= self.ANGLE_THRESHOLD:
+    #             # loop1とloop3を持つ面を探す
+    #             for link_tri in face_tris_dict[loop1.face]:
+    #                 if link_tri != tri:
+    #                     if loop1 in link_tri and loop3 in link_tri:
+    #                         break
+    #             else:
+    #                 link_tri = None
+    #             if link_tri:
+    #                 loop4 = link_tri[link_tri.index(loop1) - 1]
+    #                 v3 = loop4.vert.co - loop2.vert.co
+    #                 if v3.length > self.DIST_THRESHOLD:
+    #                     tri1 = LoopTri((loop1, loop2, loop4))
+    #                     tri2 = LoopTri((loop2, loop3, loop4))
+    #
+    #                     face_tris_dict[loop1.face].append(tri1)
+    #                     face_tris_dict[loop1.face].append(tri2)
+    #
+    #                     face_tris_dict[loop1.face].remove(tri)
+    #                     face_tris_dict[loop1.face].remove(link_tri)
+    #                     removed_tris.add(tri)
+    #                     removed_tris.add(link_tri)
+    #
+    #                     corrected_faces_num += 1
+    #
+    #     self[:] = []
+    #     for tris in face_tris_dict.values():
+    #         self.extend(tris)
+    #
+    #     if sort:
+    #         self.sort(key=lambda tri: tri[0].face.index)
+    #         for tri in self:
+    #             tri.sort()
+    #
+    #     return corrected_faces_num  # 確認用
 
     def correct(self, sort=True):
         """
@@ -912,9 +905,9 @@ class LoopTris(list):
             for tris in self.tris_of_face_ccw(face, face_dict):
                 yield tris
 
-#    # Generator: LoopTri around BMVert ----------------------------------------
-#    def tris_of_vert_ccw(self):
-#        pass
+    # # Generator: LoopTri around BMVert ----------------------------------------
+    # def tris_of_vert_ccw(self):
+    #     pass
 
     # Loop Tangent ------------------------------------------------------------
     @classmethod
@@ -979,7 +972,7 @@ class LoopTris(list):
 
     # Normal -----------------------------------------------------------------
     @classmethod
-    def calc_vert_normal(self, vert, looptris, fallback=Vector((0, 0, 0))):
+    def calc_vert_normal(cls, vert, looptris, fallback=Vector((0, 0, 0))):
         normal = Vector()
         num = 0
         for tri in looptris:
@@ -1072,9 +1065,9 @@ class LoopTris(list):
     loops = property(_loops_get)
 
 
-#==============================================================================
+###############################################################################
 # Calc Tangent
-#==============================================================================
+###############################################################################
 def calc_loop_tangent_vector(co_prev, co, co_next, tris):
     """
     calc_loop_tangent()と違い、Vectorを受け取る。
@@ -1205,9 +1198,9 @@ def calc_loop_tangents(bm, looptris=None):
     return tangents
 
 
-#==============================================================================
+###############################################################################
 # Apply Modifiers
-#==============================================================================
+###############################################################################
 object_modifier_types = {
     'UV_PROJECT', 'VERTEX_WEIGHT_EDIT', 'VERTEX_WEIGHT_MIX',
     'VERTEX_WEIGHT_PROXIMITY', 'ARRAY', 'BEVEL', 'BOOLEAN', 'BUILD',
@@ -1280,9 +1273,9 @@ def from_object(ob, apply_modifiers=True, settings='PREVIEW',
     return bm
 
 
-#==============================================================================
+###############################################################################
 # Face Angle
-#==============================================================================
+###############################################################################
 # def tri_angles(vectors):
 #     """三角形の各頂点の角度を求める"""
 #     angles = []
@@ -1309,10 +1302,9 @@ def from_object(ob, apply_modifiers=True, settings='PREVIEW',
 #     return angles
 
 
-#==============================================================================
+###############################################################################
 # Duplicate
-#==============================================================================
-
+###############################################################################
 def duplicate_elements(context, verts=(), edges=(), faces=(),
                        normal_update=False, redraw=False):
     """
@@ -1396,9 +1388,9 @@ def duplicate_elements(context, verts=(), edges=(), faces=(),
     return old_new, new_old
 
 
-#==============================================================================
+###############################################################################
 # Snap
-#==============================================================================
+###############################################################################
 # def snap(context, event):
 #     if context.mode != 'EDIT_MESH':
 #         return None
@@ -1440,9 +1432,9 @@ def duplicate_elements(context, verts=(), edges=(), faces=(),
 #     bm.verts.remove(tmp_vert)
 
 
-#==============================================================================
+###############################################################################
 # Test
-#==============================================================================
+###############################################################################
 # def quads_convert_to_tris(context, offset=(0, 0, 0)):
 #     """
 #     選択要素を複製後、三角ポリゴンに分割。
@@ -1514,4 +1506,3 @@ def duplicate_elements(context, verts=(), edges=(), faces=(),
 #
 #     return (new_verts, new_edges, new_faces,
 #             old_and_new_connection, select_flags)
-

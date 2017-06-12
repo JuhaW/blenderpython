@@ -1,6 +1,6 @@
 import bpy
 from bpy.props import BoolProperty, IntVectorProperty
-from . common import isFamily, findLightGrp, family, refreshMaterials
+from . common import isFamily, findLightGrp, getLightMesh, family, refreshMaterials
 
 class SelectionOperator(bpy.types.Operator):
     """ Custom selection """
@@ -20,27 +20,33 @@ class SelectionOperator(bpy.types.Operator):
         return context.area.type == 'VIEW_3D' and context.mode == 'OBJECT'
     
     def execute(self, context):
-        deactivate=''
-        if context.active_object:
-            obname = context.active_object.name
-            deactivate = obname.startswith('BLS_CONTROLLER.') or obname.startswith('BLS_LIGHT_MESH.')
+        #deactivate=False
+        #if context.active_object:
+        #    obname = context.active_object.name
+        #    deactivate = obname.startswith('BLS_CONTROLLER.') or obname.startswith('BLS_LIGHT_MESH.')
             
-        bpy.ops.view3d.select(extend=self.extend, deselect=self.deselect, toggle=self.toggle, center=self.center, enumerate=self.enumerate, object=self.object, location=(self.location[0] , self.location[1] ))
+        #result = bpy.ops.view3d.select(extend=self.extend, deselect=self.deselect, toggle=self.toggle, center=self.center, enumerate=self.enumerate, object=self.object)
+        result = bpy.ops.view3d.select(extend=self.extend, deselect=self.deselect, toggle=self.toggle, center=self.center, enumerate=self.enumerate, object=self.object, location=(self.location[0], self.location[1]))
+        if 'FINISHED' not in result:
+            return {'PASS_THROUGH'}
         if context.active_object:
             obname = context.active_object.name
             if obname.startswith('BLS_CONTROLLER.'):
-                lno = obname.split('.')[1]
-                lno = context.scene.objects.find('BLS_LIGHT_MESH.'+lno)
-                if lno is not -1:
-                    context.scene.objects[lno].select = True
+                lm = getLightMesh()
+                if lm:
+                    lm.select = True
                 
-            if deactivate or obname.startswith('BLS_CONTROLLER.') or obname.startswith('BLS_LIGHT_MESH.'):
-                refreshMaterials()
+            #if deactivate or obname.startswith('BLS_CONTROLLER.') or obname.startswith('BLS_LIGHT_MESH.'):
+            #    refreshMaterials()
                     
             context.scene.frame_current = context.scene.frame_current
             refreshMaterials()
-            
-        return {'FINISHED'}
+        
+        if context.user_preferences.inputs.select_mouse == 'RIGHT':
+            return {'FINISHED'}
+        elif self.toggle:
+            return {'FINISHED'}
+        return {'PASS_THROUGH'}
 
     def invoke(self, context, event):
         self.location[0] = event.mouse_region_x
@@ -48,6 +54,7 @@ class SelectionOperator(bpy.types.Operator):
         return self.execute(context)
 
 addon_keymaps = []
+addin_kmis = []
 def add_shortkeys():
     def prepKmi(kmi):
         kmi.properties.toggle = False
@@ -62,21 +69,25 @@ def add_shortkeys():
     
     addon_kmi = addon_km.keymap_items.new(SelectionOperator.bl_idname, 'SELECTMOUSE', 'PRESS')
     prepKmi(addon_kmi)
+    addin_kmis.append(addon_kmi)
     
     addon_kmi = addon_km.keymap_items.new(SelectionOperator.bl_idname, 'SELECTMOUSE', 'PRESS')
     addon_kmi.shift = True
     prepKmi(addon_kmi)
     addon_kmi.properties.toggle = True
+    addin_kmis.append(addon_kmi)
     
     addon_kmi = addon_km.keymap_items.new(SelectionOperator.bl_idname, 'SELECTMOUSE', 'PRESS')
     addon_kmi.ctrl = True
     prepKmi(addon_kmi)
     addon_kmi.properties.center = True
     addon_kmi.properties.object = True
+    addin_kmis.append(addon_kmi)
     
     addon_kmi = addon_km.keymap_items.new(SelectionOperator.bl_idname, 'SELECTMOUSE', 'PRESS')
     addon_kmi.alt = True
     addon_kmi.properties.enumerate = True
+    addin_kmis.append(addon_kmi)
     
     addon_kmi = addon_km.keymap_items.new(SelectionOperator.bl_idname, 'SELECTMOUSE', 'PRESS')
     addon_kmi.shift = True
@@ -85,6 +96,7 @@ def add_shortkeys():
     addon_kmi.properties.center = True
     addon_kmi.properties.extend = True
     addon_kmi.properties.toggle = True
+    addin_kmis.append(addon_kmi)
     
     addon_kmi = addon_km.keymap_items.new(SelectionOperator.bl_idname, 'SELECTMOUSE', 'PRESS')
     addon_kmi.ctrl = True
@@ -92,6 +104,7 @@ def add_shortkeys():
     prepKmi(addon_kmi)
     addon_kmi.properties.center = True
     addon_kmi.properties.enumerate = True
+    addin_kmis.append(addon_kmi)
     
     addon_kmi = addon_km.keymap_items.new(SelectionOperator.bl_idname, 'SELECTMOUSE', 'PRESS')
     addon_kmi.shift = True
@@ -99,6 +112,7 @@ def add_shortkeys():
     prepKmi(addon_kmi)
     addon_kmi.properties.enumerate = True
     addon_kmi.properties.toggle = True
+    addin_kmis.append(addon_kmi)
     
     addon_kmi = addon_km.keymap_items.new(SelectionOperator.bl_idname, 'SELECTMOUSE', 'PRESS')
     addon_kmi.shift = True
@@ -108,12 +122,16 @@ def add_shortkeys():
     addon_kmi.properties.center = True
     addon_kmi.properties.enumerate = True
     addon_kmi.properties.toggle = True
+    addin_kmis.append(addon_kmi)
     
     addon_keymaps.append(addon_km)
     
 def remove_shortkeys():
     wm = bpy.context.window_manager
-    for km in addon_keymaps:
-        wm.keyconfigs.addon.keymaps.remove(km)
         
+    for km in addon_keymaps:
+        for kmi in addin_kmis:
+            km.keymap_items.remove(kmi)
+            
     addon_keymaps.clear()
+    addin_kmis.clear()

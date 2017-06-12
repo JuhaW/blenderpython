@@ -31,10 +31,11 @@
 #
 #    Author Site: http://www.jordiart.com
 
-__status__ = "toolplus custom version"
+
+__status__ = "toolplus"
 __author__ = "mkbreuer"
 __version__ = "1.0"
-__date__ = "2016"
+__date__ = "2017"
 
 
 
@@ -43,7 +44,50 @@ from bpy import*
 from bpy.props import *
 
 
-class View3D_TP_Wire_On(bpy.types.Operator):
+class VIEW3D_TP_Display_DrawWire(bpy.types.Operator):
+    """Draw Type Wire"""
+    bl_idname = "tp_ops.draw_wire"
+    bl_label = "Draw Type Wire"
+
+    def execute(self, context):
+        bpy.context.object.draw_type = 'WIRE'       
+        return {'FINISHED'}
+
+
+class VIEW3D_TP_Display_DrawSolid(bpy.types.Operator):
+    """Draw Type Solid"""
+    bl_idname = "tp_ops.draw_solid"
+    bl_label = "Draw Type Solid"
+
+    def execute(self, context):
+        bpy.context.object.draw_type = 'SOLID'       
+        return {'FINISHED'}
+
+
+class VIEW3D_TP_Wire_All(bpy.types.Operator):
+    """Wire on all objects in the scene"""
+    bl_idname = "tp_ops.wire_all"
+    bl_label = "Wire on All Objects"
+
+    @classmethod
+    def poll(cls, context):
+        return context.active_object is not None
+
+    def execute(self, context):
+        
+        for obj in bpy.data.objects:
+            if obj.show_wire:
+                obj.show_all_edges = False
+                obj.show_wire = False            
+            else:
+                obj.show_all_edges = True
+                obj.show_wire = True
+                             
+        return {'FINISHED'} 
+    
+
+
+class VIEW3D_TP_Wire_On(bpy.types.Operator):
     '''Wire on'''
     bl_idname = "tp_ops.wire_on"
     bl_label = "Wire on"
@@ -64,7 +108,7 @@ class View3D_TP_Wire_On(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class View3D_TP_Wire_Off(bpy.types.Operator):
+class VIEW3D_TP_Wire_Off(bpy.types.Operator):
     '''Wire off'''
     bl_idname = "tp_ops.wire_off"
     bl_label = "Wire off"
@@ -420,12 +464,10 @@ class ModifiersSubsurfLevel_6(bpy.types.Operator):
 
 
 
-def register():
-    
+def register():    
     bpy.utils.register_module(__name__)
 
-def unregister():
-   
+def unregister():   
     bpy.utils.unregister_module(__name__)
 
 if __name__ == "__main__":

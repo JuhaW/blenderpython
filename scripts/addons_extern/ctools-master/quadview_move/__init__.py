@@ -45,12 +45,10 @@ import bpy
 try:
     importlib.reload(addongroup)
     importlib.reload(customproperty)
-    importlib.reload(registerinfo)
     importlib.reload(st)
 except NameError:
     from ..utils import addongroup
     from ..utils import customproperty
-    from ..utils import registerinfo
     from ..utils import structures as st
 
 
@@ -59,8 +57,7 @@ MIN_SIZE = 5
 
 
 class QuadViewMovePreferences(
-        addongroup.AddonGroupPreferences,
-        registerinfo.AddonRegisterInfo,
+        addongroup.AddonGroup,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -83,11 +80,11 @@ class QuadViewMovePreferences(
 
 
 def swin_from_region(window, region):
-    win = ct.cast(window.as_pointer(), ct.POINTER(st.wmWindow)).contents
-    ar = ct.cast(region.as_pointer(), ct.POINTER(st.ARegion)).contents
+    win = st.wmWindow.cast(window)
+    ar = st.ARegion.cast(region)
     swinid = ar.swinid
 
-    swin_ptr = ct.cast(win.subwindows.first, ct.POINTER(st.wmSubWindow))
+    swin_ptr = st.wmSubWindow.cast(win.subwindows.first, contents=False)
     while swin_ptr:
         swin = swin_ptr.contents
         if swin.swinid == swinid:
@@ -129,7 +126,7 @@ class VIEW3D_PG_QuadViewAspect(bpy.types.PropertyGroup):
     center = bpy.props.FloatVectorProperty(size=2)
 
 
-CustomProperty = customproperty.CustomProperty.new_class()
+CustomProperty = customproperty.CustomProperty.derive()
 
 
 def sync_quad(context, area):
@@ -141,8 +138,7 @@ def sync_quad(context, area):
         return
     fx, fy = prop.center
 
-    addr = context.window.as_pointer()
-    win = ct.cast(addr, ct.POINTER(st.wmWindow)).contents
+    win = st.wmWindow.cast(context.window)
     event = win.eventstate.contents
 
     regions = [region for region in area.regions if region.type == 'WINDOW']
@@ -164,8 +160,7 @@ def sync_quad(context, area):
     centy = round(centy)
 
     for i, region in enumerate(regions):
-        addr = region.as_pointer()
-        ar = ct.cast(addr, ct.POINTER(st.ARegion)).contents
+        ar = st.ARegion.cast(region)
         rct = ar.winrct
         rect = [rct.xmin, rct.ymin, rct.xmax, rct.ymax]
         rect_bak = rect[:]
@@ -202,7 +197,7 @@ def sync_quad(context, area):
         rv3d_list = []
         for region_data in area.spaces.active.region_quadviews:
             addr = region_data.as_pointer()
-            rv3d = ct.cast(addr, ct.POINTER(st.RegionView3D)).contents
+            rv3d = st.RegionView3D.cast(addr)
             rv3d_list.append(rv3d)
         index = get_active_region_index(context, event.x, event.y, regions,
                                         rv3d_list)

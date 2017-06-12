@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Sculpt Tools UI",
-    "author": "Ian Lloyd Dela Cruz, Nicholas Bishop, Roberto Roch, Bartosz Styperek, Piotr Adamowicz, modified by Kent Trammell",
-    "version": (1, 1),
+    "author": "Ian Lloyd Dela Cruz, Nicholas Bishop, Roberto Roch, Bartosz Styperek, Piotr Adamowicz",
+    "version": (1, 0),
     "blender": (2, 7, 0),
     "location": "3d View > Tool shelf, Shift-Ctrl-B",
     "description": "Simple UI for Boolean and Remesh operators",
@@ -22,12 +22,11 @@ if "bpy" in locals():
 else:
     from . import helper, booleanOps, greaseTrim, meshExtract, utilOps, Freeze
     print("Imported multifiles")
-
+    
 import bpy
 import mathutils
 import bmesh
 from bpy.props import *
-
 
 class RemeshBooleanPanel(bpy.types.Panel):
     """UI panel for the Remesh and Boolean buttons"""
@@ -41,32 +40,28 @@ class RemeshBooleanPanel(bpy.types.Panel):
         layout = self.layout
         edit = context.user_preferences.edit
         wm = context.window_manager
-
+        
         row_rem = layout.row(align=True)
         row_rem.alignment = 'EXPAND'
         row_rem.operator("sculpt.remesh", text='Remesh')
-
+        
         row_remint = layout.row(align=True)
         row_remint.alignment = 'EXPAND'
 
         try:
             row_remint.prop(wm, 'remeshDepthInt', text="Depth")
             row_remint.prop(wm, 'remeshSubdivisions', text="Subdivisions")
-
+            
         except:
             pass
-
+            
         row_rem2 = layout.row(align=True)
         row_rem2.alignment = 'EXPAND'
         row_rem2.prop(wm, 'remeshPreserveShape', text="Preserve Shape")
-        row_rem2 = layout.row(align=True)
-        row_rem2.prop(wm, 'useAutoDecimate', text="Decimate")  # added by Kent Trammell
-        if wm.useAutoDecimate == True:
-            row_rem2.prop(wm, "autoDecimateRatio", text="Ratio")
-
+            
         layout.separator()
         row_freeze = layout.row(align=True)
-        row_freeze.alignment = 'EXPAND'
+        row_freeze.alignment = 'EXPAND'        
         row_freeze.operator("boolean.freeze", text="Freeze")
         row_freeze.operator("boolean.unfreeze", text="Unfreeze")
         layout.separator()
@@ -76,46 +71,46 @@ class RemeshBooleanPanel(bpy.types.Panel):
         row_b1.operator("boolean.union", text="Union")
         row_b1.operator("boolean.difference", text="Difference")
         row_b1.operator("boolean.intersect", text="Intersect")
-
+        
         row_b2 = layout.row(align=True)
         row_b2.alignment = 'EXPAND'
-
+        
         row_b2.operator("boolean.separate", text="Separate")
         row_b2.operator("boolean.clone", text="Clone")
-
+        
         layout.separator()
-
+        
         row_ma = layout.row(align=True)
         row_ma.alignment = 'EXPAND'
         row_ma.operator("boolean.mod_apply", text="Apply Mods")
-
+        
         row_md = layout.row(align=True)
         row_md.alignment = 'EXPAND'
         row_md.operator("boolean.mesh_deform", text="Mesh Deform")
-
+        
         row_dso = layout.row(align=True)
         row_dso.alignment = 'EXPAND'
         row_dso.operator("boolean.double_sided_off", text="Double Sided Off")
-
+        
         row_sym = layout.row(align=True)
         row_sym.operator("boolean.grease_symm", text='Symmetrize')
         row_sym.prop(wm, "bolsymm", text="")
-
+        
         row_mir = layout.row(align=True)
         row_mir.alignment = 'EXPAND'
         row_mir.operator("boolean.mod_xmirror", text="X-mirror")
-
+        
         row_me_oprow = layout.row(align=True)
         row_me_oprow.alignment = 'EXPAND'
         row_me_oprow.operator("boolean.mask_extract", text="Extract Mask")
-
+        
         layout.separator()
-
+        
         row_gt = layout.row(align=True)
         row_gt.operator("boolean.grease_trim", text='Grease Cut')
-
+        
         box = layout.box().column(align=True)
-        if wm.expand_grease_settings == False:
+        if wm.expand_grease_settings == False: 
             box.prop(wm, "expand_grease_settings", icon="TRIA_RIGHT", icon_only=True, text=" Grease Pencil Settings", emboss=False)
         else:
             box.prop(wm, "expand_grease_settings", icon="TRIA_DOWN", icon_only=True, text=" Grease Pencil Settings", emboss=False)
@@ -125,12 +120,11 @@ class RemeshBooleanPanel(bpy.types.Panel):
             boxrow = box.row(align=True)
             boxrow.prop(edit, "use_grease_pencil_smooth_stroke", text="Smooth")
             boxrow.prop(edit, "use_grease_pencil_simplify_stroke", text="Simplify")
-            boxrow = box.row(align=True)
-            boxrow.prop(wm, "useSubtractMode", text="Subtract")  # added by Kent Trammell
-            box.separator()
+            box.separator()                                         
             box.operator("boolean.purge_pencils", text='Purge All Grease Pencils')
+        
 
-
+        
 class BooleanOpsMenu(bpy.types.Menu):
     bl_label = "Booleans"
 
@@ -147,6 +141,7 @@ class BooleanOpsMenu(bpy.types.Menu):
         layout.operator("boolean.intersect",
                         text="Intersection",
                         icon='ROTATECENTER')
+
 
         layout.separator()
         layout.operator("boolean.separate",
@@ -171,62 +166,58 @@ class BooleanOpsMenu(bpy.types.Menu):
         layout.operator("boolean.mask_extract",
                         text="Mask Extract",
                         icon='RETOPO')
-
+        
 
 def register():
     bpy.utils.register_module(__name__)
-
+    
     kc = bpy.context.window_manager.keyconfigs.addon
     if kc:
         km = kc.keymaps.new(name="3D View", space_type="VIEW_3D")
-        kmi = km.keymap_items.new('wm.call_menu', 'B', 'PRESS', ctrl=True, shift=True)
+        kmi = km.keymap_items.new('wm.call_menu', 'B', 'PRESS', ctrl = True, shift = True)
         kmi.properties.name = "BooleanOpsMenu"
-
+        
         kmi = km.keymap_items.new('sculpt.optimize', 'U', 'PRESS')
-
+        
         kmi = km.keymap_items.new('wm.context_toggle', 'X', 'PRESS')
         kmi.properties.data_path = "tool_settings.sculpt.use_symmetry_x"
-
-        kmi = km.keymap_items.new('wm.context_toggle', 'E', 'PRESS', shift=True)
+        
+        kmi = km.keymap_items.new('wm.context_toggle', 'E', 'PRESS', shift = True)
         kmi.properties.data_path = "tool_settings.sculpt.use_edge_collapse"
+        
+        kmi = km.keymap_items.new('sculpt.dynamic_topology_toggle', 'D', 'PRESS', shift = True)
 
-        kmi = km.keymap_items.new('sculpt.dynamic_topology_toggle', 'D', 'PRESS', shift=True)
+    bpy.types.Object.frozen = BoolProperty(name="frozen", default = False)
+        
+    bpy.types.WindowManager.remeshDepthInt = IntProperty(min = 2, max = 10, default = 4)
+    bpy.types.WindowManager.remeshSubdivisions = IntProperty(min = 0, max = 6, default = 0)
+    bpy.types.WindowManager.remeshPreserveShape = BoolProperty(default = True)
 
-    bpy.types.Object.frozen = BoolProperty(name="frozen", default=False)
+    bpy.types.WindowManager.extractDepthFloat = FloatProperty(min = -10.0, max = 10.0, default = 0.1)
+    bpy.types.WindowManager.extractOffsetFloat = FloatProperty(min = -10.0, max = 10.0, default = 0.0)
 
-    bpy.types.WindowManager.remeshDepthInt = IntProperty(min=2, max=10, default=4)
-    bpy.types.WindowManager.remeshSubdivisions = IntProperty(min=0, max=6, default=0)
-    bpy.types.WindowManager.remeshPreserveShape = BoolProperty(default=True)
-    bpy.types.WindowManager.useAutoDecimate = BoolProperty(default=False)  # added by Kent Trammell
-    bpy.types.WindowManager.autoDecimateRatio = FloatProperty(min=0.00, max=1.00, default=0.10)
-    bpy.types.WindowManager.useSubtractMode = BoolProperty(default=True)  # added by Kent Trammell
-
-    bpy.types.WindowManager.extractDepthFloat = FloatProperty(min=-10.0, max=10.0, default=0.1)
-    bpy.types.WindowManager.extractOffsetFloat = FloatProperty(min=-10.0, max=10.0, default=0.0)
-
-    bpy.types.WindowManager.extractSmoothIterationsInt = IntProperty(min=0, max=50, default=5)
-
+    bpy.types.WindowManager.extractSmoothIterationsInt = IntProperty(min = 0, max = 50, default = 5)
+    
     bpy.types.WindowManager.extractStyleEnum = EnumProperty(name="Extract style",
-                                                            items=(("SOLID", "Solid", ""),
-                                                                   ("SINGLE", "Single Sided", ""),
-                                                                   ("FLAT", "Flat", "")),
-                                                            default="SOLID")
-
+                     items = (("SOLID","Solid",""),
+                              ("SINGLE","Single Sided",""),
+                              ("FLAT","Flat","")),
+                     default = "SOLID")
+    
     bpy.types.WindowManager.expand_grease_settings = BoolProperty(default=False)
 
     bpy.types.WindowManager.bolsymm = EnumProperty(name="",
-                                                   items=(("NEGATIVE_X", "-X to +X", ""),
-                                                          ("POSITIVE_X", "+X to -X", ""),
-                                                          ("NEGATIVE_Y", "-Y to +Y", ""),
-                                                          ("POSITIVE_Y", "+Y to -Y", ""),
-                                                          ("NEGATIVE_Z", "-Z to +Z", ""),
-                                                          ("POSITIVE_Z", "+Z to -Z", "")),
-                                                   default="NEGATIVE_X")
-
-
+                     items = (("NEGATIVE_X","-X to +X",""),
+                              ("POSITIVE_X","+X to -X",""),
+                              ("NEGATIVE_Y","-Y to +Y",""),
+                              ("POSITIVE_Y","+Y to -Y",""),
+                              ("NEGATIVE_Z","-Z to +Z",""),
+                              ("POSITIVE_Z","+Z to -Z","")),                                                                                           
+                     default = "NEGATIVE_X")
+    
 def unregister():
     bpy.utils.unregister_module(__name__)
-
+    
     kc = bpy.context.window_manager.keyconfigs.addon
     if kc:
         km = kc.keymaps["3D View"]
@@ -241,7 +232,7 @@ def unregister():
         del bpy.types.WindowManager.extractDepthFloat
         del bpy.types.WindowManager.extractSmoothIterationsInt
         del bpy.types.WindowManager.bolsymm
-
+        
     except:
         pass
 

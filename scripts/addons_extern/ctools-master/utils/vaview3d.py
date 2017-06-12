@@ -18,11 +18,10 @@
 
 
 import math
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
 import numpy as np
 
 import bpy
-from bpy.props import *
 import mathutils
 from mathutils import Matrix, Vector, Quaternion
 
@@ -31,29 +30,10 @@ from ..localutils.checkargs import CheckArgs
 from . import vautils as vau
 from . import vawm as vawm
 
-
-#Matrix = Matrix
-#Quaternion = Quaternion
-#Vector = Vector
-
 try:
     import mathutilsd as db
 except:
     db = None
-
-def use_double(use:"bool"):
-    if use and db:
-        Euler = db.Euler
-        Matrix = db.Matrix
-        Quaternion = db.Quaternion
-        Vector = db.Vector
-        return use
-    else:
-        Euler = mathutils.Euler
-        Matrix = mathutils.Matrix
-        Quaternion = mathutils.Quaternion
-        Vector = mathutils.Vector
-        return not use
 
 
 MIN_NUMBER = 1E-8
@@ -441,14 +421,14 @@ def screen_to_world(vec, scn, imat):
 
 
 def get_DPBU_dx_unit_pow(region, scale_length=1.0, system_grid=False):
-    '''画面中心pと、そこからBlenderUnit分だけ画面と平行に移動したqを
+    """画面中心pと、そこからBlenderUnit分だけ画面と平行に移動したqを
     それぞれwindow座標に変換(p,qは共にworld座標)
     scale_length: context.scene.unit_settings.scale_length
     return:
         dot_per_blender_unit: 1ドット分のblender_unit
         dx: 1グリッド分のblender_unit
         unit_pow: dx = 10 ** (unit_pow)
-    '''
+    """
 
     sx = region.width
     sy = region.height
@@ -479,9 +459,9 @@ def get_DPBU_dx_unit_pow(region, scale_length=1.0, system_grid=False):
     return dot_per_blender_unit, dx, unit_pow
 
 
-#==============================================================================
+###############################################################################
 # Shortcut
-#==============================================================================
+###############################################################################
 class Shortcut:
     @CheckArgs.checkargs(type=list(vau.event_types) + [None])
     def __init__(self, type='NONE', press=True,
@@ -503,9 +483,9 @@ class Shortcut:
             value_to = {'PRESS': True, 'RELEASE': False, 'NOTHING': None}
             if value_to[event.value] == self.press:
                 if ((self.shift is None or self.shift is event.shift) and
-                    (self.ctrl is None or self.ctrl is event.ctrl) and
-                    (self.alt is None or self.alt is event.alt) and
-                    (self.oskey is None or self.oskey is event.oskey)):
+                        (self.ctrl is None or self.ctrl is event.ctrl) and
+                        (self.alt is None or self.alt is event.alt) and
+                        (self.oskey is None or self.oskey is event.oskey)):
                     return True
         return False
 
@@ -527,7 +507,7 @@ class Shortcut:
 
 
 def check_shortcuts(shortcuts, event, name:'type:str'=None):
-    '''nameを指定するとその名前に限定'''
+    """nameを指定するとその名前に限定"""
     for shortcut in shortcuts:
         if shortcut.check(event):
             if name is not None:
@@ -538,18 +518,18 @@ def check_shortcuts(shortcuts, event, name:'type:str'=None):
     return None
 
 
-#==============================================================================
+###############################################################################
 # Snap
-#==============================================================================
+###############################################################################
 def make_snap_matrix(sx, sy, persmat, snap_to='selected', \
                      snap_to_origin='selected', apply_modifiers=True, \
                      objects=None, subdivide=100):
-    '''
+    """
     snap_to: ('active', 'selected', 'visible') # snap to mesh & bone
     snap_to_origin: (None, 'none', 'active', 'selected', 'visible', 'objects')\
                                                          #snap to object origin
     apply_modifiers: (True, False)
-    '''
+    """
     scn = bpy.context.scene
     actob = bpy.context.active_object
     if objects is None:
@@ -760,50 +740,50 @@ def get_viewmat_and_viewname(context):
 """
 void ED_view3d_update_viewmat(Scene *scene, View3D *v3d, ARegion *ar, float viewmat[4][4], float winmat[4][4])
 {
-	RegionView3D *rv3d = ar->regiondata;
+    RegionView3D *rv3d = ar->regiondata;
 
-	/* setup window matrices */
-	if (winmat)
-		copy_m4_m4(rv3d->winmat, winmat);
-	else
-		setwinmatrixview3d(ar, v3d, NULL);
+    /* setup window matrices */
+    if (winmat)
+        copy_m4_m4(rv3d->winmat, winmat);
+    else
+        setwinmatrixview3d(ar, v3d, NULL);
 
-	/* setup view matrix */
-	if (viewmat)
-		copy_m4_m4(rv3d->viewmat, viewmat);
-	else
-		setviewmatrixview3d(scene, v3d, rv3d);  /* note: calls BKE_object_where_is_calc for camera... */
+    /* setup view matrix */
+    if (viewmat)
+        copy_m4_m4(rv3d->viewmat, viewmat);
+    else
+        setviewmatrixview3d(scene, v3d, rv3d);  /* note: calls BKE_object_where_is_calc for camera... */
 
-	/* update utilitity matrices */
-	mul_m4_m4m4(rv3d->persmat, rv3d->winmat, rv3d->viewmat);
-	invert_m4_m4(rv3d->persinv, rv3d->persmat);
-	invert_m4_m4(rv3d->viewinv, rv3d->viewmat);
+    /* update utilitity matrices */
+    mul_m4_m4m4(rv3d->persmat, rv3d->winmat, rv3d->viewmat);
+    invert_m4_m4(rv3d->persinv, rv3d->persmat);
+    invert_m4_m4(rv3d->viewinv, rv3d->viewmat);
 
-	/* calculate pixelsize factor once, is used for lamps and obcenters */
-	{
-		/* note:  '1.0f / len_v3(v1)'  replaced  'len_v3(rv3d->viewmat[0])'
-		 * because of float point precision problems at large values [#23908] */
-		float v1[3], v2[3];
-		float len_px, len_sc;
+    /* calculate pixelsize factor once, is used for lamps and obcenters */
+    {
+        /* note:  '1.0f / len_v3(v1)'  replaced  'len_v3(rv3d->viewmat[0])'
+         * because of float point precision problems at large values [#23908] */
+        float v1[3], v2[3];
+        float len_px, len_sc;
 
-		v1[0] = rv3d->persmat[0][0];
-		v1[1] = rv3d->persmat[1][0];
-		v1[2] = rv3d->persmat[2][0];
+        v1[0] = rv3d->persmat[0][0];
+        v1[1] = rv3d->persmat[1][0];
+        v1[2] = rv3d->persmat[2][0];
 
-		v2[0] = rv3d->persmat[0][1];
-		v2[1] = rv3d->persmat[1][1];
-		v2[2] = rv3d->persmat[2][1];
+        v2[0] = rv3d->persmat[0][1];
+        v2[1] = rv3d->persmat[1][1];
+        v2[2] = rv3d->persmat[2][1];
 
-		len_px = 2.0f / sqrtf(min_ff(len_squared_v3(v1), len_squared_v3(v2)));
-		len_sc = (float)MAX2(ar->winx, ar->winy);
+        len_px = 2.0f / sqrtf(min_ff(len_squared_v3(v1), len_squared_v3(v2)));
+        len_sc = (float)MAX2(ar->winx, ar->winy);
 
-		rv3d->pixsize = len_px / len_sc;
-	}
+        rv3d->pixsize = len_px / len_sc;
+    }
 }
 
 MINLINE float len_squared_v3(const float v[3])
 {
-	return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+    return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
 }
 
 MAX2 -> ((ar->winx) > (ar->winy) ? (ar->winx) : (ar->winy))

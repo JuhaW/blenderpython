@@ -88,7 +88,7 @@ def generate_cat(self, context):
     cate = []
     mat = 1
     for ca in os.listdir(os.path.dirname(__file__)):
-        if str(ca) != "__init__.py" and str(ca) != "__pycache__":
+        if str(ca) != "__init__.py" and str(ca) != "__pycache__" and str(ca) != "ui_mode.txt":
             if mat == 1:
                 cate.append(("Dynamats", "Dynamats", ""))
             name = str(ca)
@@ -119,6 +119,9 @@ def specify_thumb(self, context):
     sub = bpy.context.scene.dynamats_SubCategory.lower()
     try:
         bpy.context.scene.dynamats_preview_thumbs = "1"
+    except:
+        pass
+    try:
         bpy.context.scene.dynamats_preview_thumbs_dir = os.path.join(os.path.dirname(__file__), cat, sub)
     except:
         pass
@@ -134,7 +137,6 @@ class RefreshMenu(bpy.types.Operator):
         return{'FINISHED'}
 
 class DynaPropsPanel(bpy.types.Panel):
-    bl_category = "Custom"
     bl_label = "Dynamat"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -177,40 +179,53 @@ def DynamatUI(self, context):
 
     row = layout.row()
     col = row.column()
-    col.scale_y= 6
-    col.operator(PreviousMat.bl_idname, icon="TRIA_LEFT",text="")
-    col = row.column()
-    col.template_icon_view(bpy.context.scene, "dynamats_preview_thumbs", show_labels=True, scale=5.2) #layout
+    if len(bpy.context.scene.dynamats_preview_thumbs) != 0:
+        col.scale_y= 6
+        col.operator(PreviousMat.bl_idname, icon="TRIA_LEFT",text="")
+        col = row.column()
+        col.template_icon_view(bpy.context.scene, "dynamats_preview_thumbs", show_labels=True, scale=5.2) #layout
 
-    col = row.column()
-    col.scale_y= 6
-    col.operator(NextMat.bl_idname, text="", icon='TRIA_RIGHT')
+        col = row.column()
+        col.scale_y= 6
+        col.operator(NextMat.bl_idname, text="", icon='TRIA_RIGHT')
+    else:
+        col.label()
+        col.label("No Material(s) in", icon='UGLYPACKAGE')
+        col.label("this category")
+        col.label()
 
     row = layout.row()
     split = row.split(percentage=0.75)
     col = split.column(align=True)
     row = col.row(align=True)
-    row.scale_y = 1.2
-    row.operator(Assign.bl_idname, text="Assign")
-    col1 = split.column(align=True)
-    row = col1.row(align=True)
-    row.scale_y = 1.2
-    row.operator('addmat.button' ,icon = 'ZOOMIN')
-    row.operator('removemat.button' ,icon = 'ZOOMOUT')
+    if len(bpy.context.scene.dynamats_preview_thumbs) != 0:
+        row.scale_y = 1.2
+        row.operator(Assign.bl_idname, text="Assign")
+        col1 = split.column(align=True)
+        row = col1.row(align=True)
+        row.scale_y = 1.2
+        row.operator('addmat.button' ,icon = 'ZOOMIN')
+        row.operator('removemat.button' ,icon = 'ZOOMOUT')
+    else:
+        col3 = layout.column(align=True)
+        row = col3.row(align=True)
+        row.scale_y = 1.2
+        row.scale_x = 5
+        row.operator('addmat.button' ,icon = 'ZOOMIN', text="")
+        row.operator('removemat.button' ,icon = 'ZOOMOUT', text="")
 
-    #row = layout.row()
-    #row = layout.row()
-    #name = bpy.context.object.active_material.name
-    #ntree = bpy.data.node_groups[name]
-    #mat = bpy.context.object.active_material
-    #ntree2 = mat.node_tree
-    #node = ntree2.nodes.active
-    #for socket in node.inputs:
-        #layout.template_node_view(ntree2, node,socket)
+    """row = layout.row()
+    row = layout.row()
+    name = bpy.context.object.active_material.name
+    ntree = bpy.data.node_groups[name]
+    mat = bpy.context.object.active_material
+    ntree2 = mat.node_tree
+    node = ntree2.nodes.active
+    for socket in node.inputs:
+        layout.template_node_view(ntree2, node,socket)"""
 class selno(bpy.types.Operator):
     bl_idname = 'selno.button'
     bl_label = 'Display'
-
 
     def execute(self, context):
         layout = self.layout
@@ -223,9 +238,6 @@ class selno(bpy.types.Operator):
             node.select = True
 
         return{'FINISHED'}
-
-
-
 
 class removemat(bpy.types.Operator):
 
@@ -243,18 +255,19 @@ class removemat(bpy.types.Operator):
         os.remove(bfp)
 
         bpy.context.scene.dynamats_SubCategory = bpy.context.scene.dynamats_SubCategory
-        bpy.context.scene.dynamats_preview_thumbs = '1'
+        try:
+            bpy.context.scene.dynamats_preview_thumbs = '1'
+        except:
+            pass
         return{'FINISHED'}
 
 class addmat(bpy.types.Operator):
-
     bl_idname = 'addmat.button'
     bl_label = ''
 
     def execute(self, context):
         cat = bpy.context.scene.dynamats_MainCategory.lower()
         sub = bpy.context.scene.dynamats_SubCategory.lower()
-
 
         #blendpath = 'C:/Users/drago/Desktop/matsetup.blend'
         blendpath = os.path.join(os.path.dirname(__file__), cat,"matsetup.blend")
@@ -270,19 +283,14 @@ class addmat(bpy.types.Operator):
             bpy.context.scene.render.engine = 'CYCLES'
             bpy.ops.world.new()
 
-
             link = False
 
             with bpy.data.libraries.load(blendpath,link=link) as (data_from, data_to):
                 data_to.objects = data_from.objects
 
-
-
-
             for obj in data_to.objects:
                 if obj is not None:
-                   bpy.context.scene.objects.link(obj)
-
+                    bpy.context.scene.objects.link(obj)
 
             matcam = bpy.data.objects['matcam']
             bpy.context.scene.camera = matcam
@@ -295,8 +303,7 @@ class addmat(bpy.types.Operator):
             #img = bpy.data.images[matname]
             bpy.data.scenes['asd'].render.filepath = os.path.join(os.path.dirname(__file__), cat,sub, matname+'.jpg')
             #os.path.join('//matsphere_' , matname + ".jpg")
-            bpy.ops.render.render( write_still=True )
-
+            bpy.ops.render.render(write_still=True)
 
             blend = "mat2.blend"
             savepath = os.path.join(os.path.dirname(__file__), cat,matname+".blend")
@@ -315,20 +322,14 @@ class addmat(bpy.types.Operator):
             bpy.context.window.screen.scene = bpy.data.scenes['asd']
 
             #bpy.context.scene.render.engine = 'CYCLES'
-
-
             link = False
 
             with bpy.data.libraries.load(blendpath,link=link) as (data_from, data_to):
                 data_to.objects = data_from.objects
 
-
-
-
             for obj in data_to.objects:
                 if obj is not None:
-                   bpy.context.scene.objects.link(obj)
-
+                    bpy.context.scene.objects.link(obj)
 
             matcam = bpy.data.objects['matcam']
             a1 = bpy.data.lamps['a1']
@@ -350,8 +351,7 @@ class addmat(bpy.types.Operator):
             #img = bpy.data.images[matname]
             bpy.data.scenes['asd'].render.filepath = os.path.join(os.path.dirname(__file__), cat,sub, matname+'.jpg')
             #os.path.join('//matsphere_' , matname + ".jpg")
-            bpy.ops.render.render( write_still=True )
-
+            bpy.ops.render.render(write_still=True)
 
             blend = "mat2.blend"
             savepath = os.path.join(os.path.dirname(__file__), cat,matname+".blend")
@@ -363,8 +363,10 @@ class addmat(bpy.types.Operator):
 
             bpy.ops.scene.delete()
         bpy.context.scene.dynamats_SubCategory = bpy.context.scene.dynamats_SubCategory
-        bpy.context.scene.dynamats_preview_thumbs = '1'
-
+        try:
+            bpy.context.scene.dynamats_preview_thumbs = '1'
+        except:
+            pass
 
         return{'FINISHED'}
 
@@ -412,16 +414,15 @@ class Assign(bpy.types.Operator):
                 blend = mat_name+'.blend'
                 path = os.path.join(os.path.dirname(__file__), cat, mat_name+".blend")
 
+                """blend = ""
+                if "-" in mat_name:
+                    indi = mat_name.rfind("-")+1
+                    blend = mat_name[indi:]+".blend"
+                    mat_name = mat_name[:indi-1]
+                else:
+                    blend = "materials.blend"
 
-                #blend = ""
-                #if "-" in mat_name:
-                    #indi = mat_name.rfind("-")+1
-                    #blend = mat_name[indi:]+".blend"
-                    #mat_name = mat_name[:indi-1]
-                #else:
-                    #blend = "materials.blend"
-
-                #path = os.path.join(os.path.dirname(__file__), cat, 'materials.blend')
+                path = os.path.join(os.path.dirname(__file__), cat, 'materials.blend')"""
 
                 with bpy.data.libraries.load(path) as (data_from, data_to):
                     if data_from.materials:
@@ -539,6 +540,18 @@ def set_dyna_loc(self, context):
     except:
         pass
 
+    file_py = open(os.path.join(os.path.dirname(__file__), "ui_mode.txt"), 'w')
+
+    path = os.path.join(os.path.dirname(__file__), "ui_mode.txt")
+    f = open(path, 'w+')
+    if choice == "0":
+        f.write("0"+"\n")
+    elif choice == "1":
+        f.write("1"+"\n")
+    elif choice == "2":
+        f.write("2"+"\n")
+    f.close()
+    return None
 
 def register():
     try:
@@ -564,12 +577,37 @@ def register():
 
     bpy.types.Scene.dynamats_MainCategory = EnumProperty(name="Category", description="Choose the Main Category of Materials", items=generate_cat, update=MainCat_Update)
     bpy.types.Scene.dynamats_SubCategory = EnumProperty(name="Type", description="Choose the Type of Material", items=generate_subcat, update=specify_thumb)
-    bpy.types.Scene.dynamats_PanelLoc = EnumProperty(name="Panel Location", description="Choose the Location for the Dynamat Panel", items=(('0', 'Properties', 'Choose the Properties Panel'),
-                                                                                                                                            ('1', 'Tools', 'Choose the Tools Panel'),
-                                                                                                                                            ('2', 'Materials', 'Choose the Materials Panel')), default='0', update=set_dyna_loc)
+    #Assigning default Value during registration
+    check = False
+    val = ""
+    try:
+        f = open(os.path.join(os.path.dirname(__file__), "ui_mode.txt"), "r")
+        val = f.readline()
+        val = val[0]
+        f.close()
+        check = True
+    except:
+        check = False
+
+    if check == True:
+        bpy.types.Scene.dynamats_PanelLoc = EnumProperty(name="Panel Location", description="Choose the Location for the Dynamat Panel", items=(('0', 'Properties', 'Choose the Properties Panel'),
+                                                                                                                                                ('1', 'Tools', 'Choose the Tools Panel'),
+                                                                                                                                                ('2', 'Materials', 'Choose the Materials Panel')), default=val, update=set_dyna_loc)
+    else:
+        bpy.types.Scene.dynamats_PanelLoc = EnumProperty(name="Panel Location", description="Choose the Location for the Dynamat Panel", items=(('0', 'Properties', 'Choose the Properties Panel'),
+                                                                                                                                                ('1', 'Tools', 'Choose the Tools Panel'),
+                                                                                                                                                ('2', 'Materials', 'Choose the Materials Panel')), default='0', update=set_dyna_loc)
 
     bpy.utils.register_class(RefreshMenu)
-    bpy.utils.register_class(DynaPropsPanel)
+    if val == '0':
+        bpy.utils.register_class(DynaPropsPanel)
+    elif val == '1':
+        bpy.utils.register_class(DynaToolsPanel)
+    elif val == '2':
+        bpy.utils.register_class(DynaMatePanel)
+    else:
+        bpy.utils.register_class(DynaPropsPanel)
+
     bpy.utils.register_class(removemat)
     bpy.utils.register_class(selno)
     bpy.utils.register_class(addmat)

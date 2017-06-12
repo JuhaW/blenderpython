@@ -44,13 +44,11 @@ from mathutils import *
 
 try:
     importlib.reload(addongroup)
-    importlib.reload(registerinfo)
     importlib.reload(unitsystem)
     importlib.reload(vagl)
     importlib.reload(vaview3d)
 except NameError:
     from ..utils import addongroup
-    from ..utils import registerinfo
     from ..utils import unitsystem
     from ..utils import vagl
     from ..utils import vaview3d
@@ -91,8 +89,7 @@ view_operators = [
 
 
 class QuickBooleanPreferences(
-        addongroup.AddonGroupPreferences,
-        registerinfo.AddonRegisterInfo,
+        addongroup.AddonGroup,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
 
@@ -477,7 +474,7 @@ def intersect(context, mode, mouse_coords, reverse, circle_segments,
     dists = [(v - bb[0]).project(view_axis).dot(view_axis) for v in bb]
     depth_loc_near = bb[dists.index(max(dists))] + view_axis * EPS
     if use_cursor_limit:
-        depth_loc_far = context.scene.cursor_location
+        depth_loc_far = context.space_data.cursor_location
     else:
         depth_loc_far = bb[dists.index(min(dists))] - view_axis * EPS
 

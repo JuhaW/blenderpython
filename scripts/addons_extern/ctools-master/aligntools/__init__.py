@@ -33,57 +33,48 @@ bl_info = {
 
 # TODO: オペレータでmode毎に値を保存
 
-from collections import OrderedDict
 import importlib
-import itertools
-import os
-import math
-import time
 
 import bpy
 import bpy.utils.previews
-import bmesh
-import bgl
-import mathutils
-from mathutils import Matrix, Vector
 
 try:
     importlib.reload(addongroup)
-    importlib.reload(registerinfo)
     importlib.reload(localutils)
-    importlib.reload(va)
     importlib.reload(enums)
     importlib.reload(funcs)
     importlib.reload(grouping)
     importlib.reload(memocoords)
     importlib.reload(tooldata)
+
+    importlib.reload(op_stubs)
+    importlib.reload(op_plane)
+    importlib.reload(op_align)
+    importlib.reload(op_edge)
+    importlib.reload(op_matrix)
+    importlib.reload(op_shift)
+    importlib.reload(custom_icons)
+
 except NameError:
     from ..utils import addongroup
-    from ..utils import registerinfo
     from .. import localutils
     from . import enums
     from . import funcs
     from . import grouping
     from . import memocoords
     from . import tooldata
-from ..localutils.checkargs import CheckArgs
-# from ..utils import vaoperator as vaop
-# from ..utils import vaarmature as vaarm
-# from ..utils import vamath as vam
-# from ..utils import convexhull
-# from ..utils import vagl
-# from ..utils import unitsystem
-# from ..utils import manipulatormatrix
-# from ..utils import vaview3d as vav
-from .enums import *
 
-from . import op_stubs
-from . import op_plane
-from . import op_align
-from . import op_edge
-from . import op_matrix
-from . import op_shift
-from . import custom_icons
+    from . import op_stubs
+    from . import op_plane
+    from . import op_align
+    from . import op_edge
+    from . import op_matrix
+    from . import op_shift
+    from . import custom_icons
+    from . import enums
+
+from ..localutils.checkargs import CheckArgs
+from .enums import *
 
 
 tool_data = tooldata.tool_data
@@ -99,8 +90,7 @@ EPS = 1e-5
 # Preference
 ###############################################################################
 class AlignToolsPreferences(
-        addongroup.AddonGroupPreferences,
-        registerinfo.AddonRegisterInfo,
+        addongroup.AddonGroup,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -114,13 +104,7 @@ class AlignToolsPreferences(
         super().draw(context)
 
     def update_keymap_items(self, context=None):
-        items = []
-        for km_name, kmi_id in self.keymap_items:
-            km = self.get_keymap(km_name)
-            for kmi in km.keymap_items:
-                if kmi.id == kmi_id:
-                    items.append(kmi)
-        for kmi in items:
+        for km, kmi in keymap_items:
             if self.use_pie_menu:
                 if kmi.idname == 'wm.call_menu':
                     if kmi.properties.name == MenuMain.bl_idname:
@@ -415,6 +399,9 @@ classes.extend(op_matrix.classes)
 classes.extend(op_shift.classes)
 
 
+keymap_items = []
+
+
 @AlignToolsPreferences.register_addon
 def register():
     for cls in classes:
@@ -432,6 +419,8 @@ def register():
         # kmi.active = False
         kmi.properties.name = MenuMain.bl_idname
 
+        keymap_items.append((km, kmi))
+
         addon_prefs.update_keymap_items()
 
     custom_icons.load_icons()
@@ -447,6 +436,7 @@ def unregister():
 
     for cls in classes[::-1]:
         bpy.utils.unregister_class(cls)
+
 
 if __name__ == '__main__':
     register()

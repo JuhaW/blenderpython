@@ -7,8 +7,7 @@ __date__ = "2016"
 import bpy
 from bpy import*
 from bpy.props import *
-
-#from deform_meshcage import *
+from . icons.icons import load_icons
 
 
 class View3D_TP_Deform_Batch(bpy.types.Operator):
@@ -29,6 +28,9 @@ class View3D_TP_Deform_Batch(bpy.types.Operator):
         tpw = context.window_manager.tpw_defom_window
         
         layout = self.layout
+      
+        icons = load_icons()
+
         wm = bpy.context.window_manager    
         layout.operator_context = 'INVOKE_REGION_WIN'
         
@@ -104,13 +106,17 @@ class View3D_TP_Deform_Batch(bpy.types.Operator):
 
                     row = box.row(1)
                     row.alignment = 'CENTER'
-                    row.label("Easy Lattice Mesh Deform")
+                    row.label("Easy Lattice")
                    
                     box.separator()   
                     
-                    row = box.row(1)                           
-                    row.operator("object.easy_lattice_panel", text="Create", icon ="OUTLINER_DATA_LATTICE")  
-                    row.operator("retopo.latticeapply", text = "Apply", icon="MOD_LATTICE")                    
+                    row = box.row(1)        
+                                       
+                    button_lattice_create = icons.get("icon_lattice_create")                                                               
+                    row.operator("object.easy_lattice_panel", text="Create", icon_value=button_lattice_create.icon_id)  
+
+                    button_lattice_apply = icons.get("icon_lattice_apply")    
+                    row.operator("tp_ops.lattice_apply", text = "Apply", icon_value=button_lattice_apply.icon_id)                     
                         
                     box.separator()   
                     
@@ -271,11 +277,29 @@ class View3D_TP_Deform_Batch(bpy.types.Operator):
             row = box.row(1)
             row.alignment = 'CENTER'
             row.label("Easy Lattice")
-            
-            row = box.row(1)                           
-            row.operator("object.easy_lattice", text="Create", icon ="OUTLINER_DATA_LATTICE")  
-            row.operator("retopo.latticeapply", text = "Apply", icon="MOD_LATTICE")                               
+          
+            box.separator()                 
+          
+            row = box.row(1)      
+                                 
+            button_lattice_create = icons.get("icon_lattice_create")                                                               
+            row.operator("object.easy_lattice_panel", text="Create", icon_value=button_lattice_create.icon_id)  
+
+            button_lattice_apply = icons.get("icon_lattice_apply")    
+            row.operator("tp_ops.lattice_apply", text = "Apply", icon_value=button_lattice_apply.icon_id)                                                   
                       
+            box.separator()   
+            
+            row = box.row(1) 
+            row.prop(context.scene, "lat_u", text="X")
+            row.prop(context.scene, "lat_w", text="Y")
+            row.prop(context.scene, "lat_m", text="Z")
+            
+            box.separator()           
+            
+            row = box.row(1)
+            row.prop(context.scene, "lat_type", text = "Type")
+
             ###
             box.separator()     
 
@@ -326,9 +350,9 @@ class View3D_TP_Deform_Batch(bpy.types.Operator):
                 pass
 
 
-            Display_VertexGroups = context.user_preferences.addons[__name__].preferences.tab_vertgrp_menu 
+            Display_VertexGroups = context.user_preferences.addons[__package__].preferences.tab_vertgrp_menu 
             if Display_VertexGroups == 'on':   
-
+ 
                 box = layout.box().column(1)   
 
                 row = box.row(1)              

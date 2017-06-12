@@ -444,7 +444,7 @@ class INFO_MT_help(Menu):
 
         layout.operator(
                 "wm.url_open", text="Manual", icon='HELP',
-                ).url = "https://www.blender.org/manual"
+                ).url = "https://docs.blender.org/manual/en/dev/"
         layout.operator(
                 "wm.url_open", text="Release Log", icon='URL',
                 ).url = "http://wiki.blender.org/index.php/Dev:Ref/Release_Notes/%d.%d" % bpy.app.version[:2]
@@ -478,5 +478,29 @@ class INFO_MT_help(Menu):
 
         layout.operator("wm.splash", icon='BLENDER')
 
-if __name__ == "__main__":  # only for live edit.
-    bpy.utils.register_module(__name__)
+
+if bpy.app.version[2] > 0:
+    classes = (
+        INFO_OT_toggle_bone_selection,
+        INFO_HT_header,
+        INFO_MT_editor_menus,
+        INFO_MT_file,
+        INFO_MT_file_import,
+        INFO_MT_file_export,
+        INFO_MT_file_external_data,
+        INFO_MT_file_previews,
+        INFO_MT_game,
+        INFO_MT_render,
+        INFO_MT_opengl_render,
+        INFO_MT_window,
+        INFO_MT_help,
+    )
+
+    if __name__ == "__main__":  # only for live edit.
+        from bpy.utils import register_class
+        for cls in classes:
+            register_class(cls)
+
+else:
+    if __name__ == "__main__":  # only for live edit.
+        bpy.utils.register_module(__name__)

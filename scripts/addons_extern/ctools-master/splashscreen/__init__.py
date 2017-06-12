@@ -45,10 +45,8 @@ import bpy
 
 try:
     importlib.reload(addongroup)
-    importlib.reload(registerinfo)
 except NameError:
     from ..utils import addongroup
-    from ..utils import registerinfo
 
 
 EPS = 0.005
@@ -70,8 +68,7 @@ qt_queue = queue.Queue()
 
 
 class SplashScreenPreferences(
-        addongroup.AddonGroupPreferences,
-        registerinfo.AddonRegisterInfo,
+        addongroup.AddonGroup,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
     bl_idname = __name__

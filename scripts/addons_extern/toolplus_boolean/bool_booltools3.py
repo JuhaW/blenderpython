@@ -96,7 +96,7 @@ def FindCanvas(obj):
 def isFTransf():
     addons = bpy.context.user_preferences.addons
     user_preferences = bpy.context.user_preferences
-    addon_prefs = addons[__name__].preferences
+    addon_prefs = addons[__package__].preferences
     if addon_prefs.fast_transform:
         return True
     else:
@@ -835,7 +835,7 @@ class BTool_BrushToMesh(Operator):
 
 # ---------------- Bool Tools ---------------------
 class BoolTool_Brush_TOOLS(Panel):
-    bl_label = "BoolTool"
+    bl_label = "Brush Boolean"
     bl_idname = "BoolTool_Tools"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -846,12 +846,6 @@ class BoolTool_Brush_TOOLS(Panel):
         layout = self.layout
         
         box = layout.box().column(1)
-
-        row = box.row(1)              
-        row.alignment = 'CENTER'
-        row.label("Brush Boolean:", icon="MOD_MESHDEFORM")
-
-        box.separator()
 
         row = box.column(1) 
         row.operator("btool.boolean_union", text="Union", icon="ROTATECOLLECTION")
@@ -874,7 +868,7 @@ class BoolTool_Brush_TOOLS(Panel):
 
 
 class BoolTool_Brush_UI(Panel):
-    bl_label = "BoolTool"
+    bl_label = "Brush Boolean"
     bl_idname = "BoolTool_Tools"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -884,12 +878,6 @@ class BoolTool_Brush_UI(Panel):
         layout = self.layout
         
         box = layout.box().column(1)
-
-        row = box.row(1)              
-        row.alignment = 'CENTER'
-        row.label("Brush Boolean:", icon="MOD_MESHDEFORM")
-
-        box.separator()
 
         row = box.column(1) 
         row.operator("btool.boolean_union", text="Union", icon="ROTATECOLLECTION")

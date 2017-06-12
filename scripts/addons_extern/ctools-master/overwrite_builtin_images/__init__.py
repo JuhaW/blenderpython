@@ -39,10 +39,8 @@ import bpy.props
 
 try:
     importlib.reload(addongroup)
-    importlib.reload(registerinfo)
 except NameError:
     from ..utils import addongroup
-    from ..utils import registerinfo
 
 
 def test_platform():
@@ -197,8 +195,7 @@ def update_icons32(self, context):
 
 
 class OverwriteSplashImagePreferences(
-        addongroup.AddonGroupPreferences,
-        registerinfo.AddonRegisterInfo,
+        addongroup.AddonGroup,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
     bl_idname = __name__

@@ -169,14 +169,19 @@ class COAModal(bpy.types.Operator):
                 if obj.coa_modulate_color != obj.coa_modulate_color_last:
                     set_modulate_color(obj,context,obj.coa_modulate_color)
                     obj.coa_modulate_color_last = obj.coa_modulate_color
-            
+                
                 ### leaving object edit mode
-                if obj.type == "MESH" and self.obj_mode_hist == "EDIT" and obj.mode == "OBJECT":        
+                if obj.type == "MESH" and self.obj_mode_hist == "EDIT" and obj.mode == "OBJECT":
                     set_uv_default_coords(context,obj)
                     ### Store sprite dimension in coa_sprite_dimension when mesh is rescaled
                     for obj in context.selected_objects:
                         if obj != None and "coa_sprite":
                             obj.coa_sprite_dimension = Vector((get_local_dimension(obj)[0],0,get_local_dimension(obj)[1]))
+            
+            ### will be executed when leaving armature edit mode                
+            if get_sprite_object(obj)!= None and obj.type == "ARMATURE" and self.obj_mode_hist == "EDIT" and obj.mode != "EDIT":
+                ### fix bone roll to properly export
+                fix_bone_roll(obj)
             
             if obj != None:        
                 self.obj_mode_hist = str(obj.mode)

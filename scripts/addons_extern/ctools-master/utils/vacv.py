@@ -1,4 +1,5 @@
-'''*M///////////////////////////////////////////////////////////////////////////////////////
+"""
+*M///////////////////////////////////////////////////////////////////////////////////////
 //
 //  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
 //
@@ -38,15 +39,17 @@
 // or tort (including negligence or otherwise) arising in any way out of
 // the use of this software, even if advised of the possibility of such damage.
 //
-//M*'''
+//M*
+"""
+
 
 import math
 
+
 def solve_cubic(coeffs, roots):
-    '''
-    三次方程式の解
+    """三次方程式の解
     opencv-2.2.0: modules/core/src/mathfuncs.cpp: 2231: cvSolveCubic
-    '''
+    """
     if not (isinstance(coeffs, (list, tuple)) and len(coeffs) >= 3):
         raise TypeError('check coeffs')
     if not (isinstance(roots, list) and len(coeffs) >= 3):

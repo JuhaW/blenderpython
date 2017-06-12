@@ -18,22 +18,36 @@
 
 
 bl_info = {
-    "name": "TP CopyShop",
+    "name": "T+ CopyShop",
     "author": "MKB",
-    "version": (0, 1, 2),
+    "version": (1, 3, 0),
     "blender": (2, 7, 8),
     "location": "View3D > Tool Shelf [T] or Property Shelf [N]",
-    "description": "Copy Tools Panel",
+    "description": "CopyShop Tools",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
     "category": "ToolPlus"}
 
 
-from toolplus_copyshop.copy_menu            import (View3D_TP_Copy_Menu)
+
+# LOAD UI #
+
+from .copy_ui_menu     import (View3D_TP_Copy_Menu)
+
+from .copy_ui_panel     import (VIEW3D_TP_Copy_Panel_UI)
+from .copy_ui_panel     import (VIEW3D_TP_Copy_Panel_TOOLS)
+from .copy_ui_panel     import (VIEW3D_TP_Copy_Panel_PROPS)
+
+# LOAD PROPS #
 from toolplus_copyshop.copy_mifthcloning    import (MFTProperties)
 
-##################################
+# LOAD ICONS #
+from . icons.icons                  import load_icons
+from . icons.icons                  import clear_icons
+
+
+# LOAD OPERATORS #
 
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'toolplus_copyshop'))
@@ -42,46 +56,51 @@ if "bpy" in locals():
     import imp
     imp.reload(copy_action)
     imp.reload(copy_attributes)
-    imp.reload(copy_copy_to_face)
     imp.reload(copy_mifthcloning)
     imp.reload(copy_pivot)
     imp.reload(copy_replicator)
-    imp.reload(copy_toall)
     imp.reload(copy_fpath)
     imp.reload(copy_display)
+    imp.reload(copy_to_all)
+    imp.reload(copy_origin)
+    imp.reload(copy_to_mesh)
 
 else:
     from . import copy_action         
-    from . import copy_attributes         
-    from . import copy_copy_to_face                   
+    from . import copy_attributes                          
     from . import copy_mifthcloning          
     from . import copy_pivot       
-    from . import copy_replicator     
-    from . import copy_toall       
-    from . import copy_fpath       
+    from . import copy_replicator           
+    from . import copy_fpath            
     from . import copy_display       
+    from . import copy_to_all       
+    from . import copy_origin       
+    from . import copy_to_mesh       
     
 
-##################################
+# LOAD MODULS #
 
-
-import bpy, re
+import bpy
 from bpy import *
+from bpy.props import* 
+
 import bpy.utils.previews
-
 from bpy.types import AddonPreferences, PropertyGroup
-from bpy.props import* #(StringProperty, BoolProperty, FloatVectorProperty, FloatProperty, EnumProperty, IntProperty)
 
+
+# UI REGISTRY #
 
 def update_panel_position(self, context):
     try:
         bpy.utils.unregister_class(VIEW3D_TP_Copy_Panel_UI)
         bpy.utils.unregister_class(VIEW3D_TP_Copy_Panel_TOOLS)
+        bpy.utils.unregister_class(VIEW3D_TP_Copy_Panel_PROPS)
     except:
         pass
     
     try:
         bpy.utils.unregister_class(VIEW3D_TP_Copy_Panel_UI)
+        bpy.utils.unregister_class(VIEW3D_TP_Copy_Panel_PROPS)
     except:
         pass
     
@@ -89,9 +108,19 @@ def update_panel_position(self, context):
         VIEW3D_TP_Copy_Panel_TOOLS.bl_category = context.user_preferences.addons[__name__].preferences.tools_category
         bpy.utils.register_class(VIEW3D_TP_Copy_Panel_TOOLS)
     
-    else:
+    if context.user_preferences.addons[__name__].preferences.tab_location == 'ui':
         bpy.utils.register_class(VIEW3D_TP_Copy_Panel_UI)
-  
+
+    if context.user_preferences.addons[__name__].preferences.tab_location == 'props':
+        bpy.utils.register_class(VIEW3D_TP_Copy_Panel_PROPS)
+
+    if context.user_preferences.addons[__name__].preferences.tab_location == 'off':
+        pass
+
+
+
+
+# TOOLS REGISTRY #
 
 def update_display_tools(self, context):
 
@@ -107,6 +136,8 @@ def update_display_tools(self, context):
         pass 
 
 
+
+# MENUS REGISTRY #
 
 addon_keymaps_menu = []
 
@@ -141,7 +172,9 @@ def update_menu(self, context):
         pass
     
 
-#Panel preferences
+
+# ADDON PREFERENCES #
+
 class TP_Panels_Preferences(AddonPreferences):
     bl_idname = __name__
     
@@ -157,8 +190,10 @@ class TP_Panels_Preferences(AddonPreferences):
     tab_location = EnumProperty(
         name = 'Panel Location',
         description = 'save user settings and restart blender after switching the panel location',
-        items=(('tools', 'Tool Shelf', 'place panel in the tool shelf [T]'),
-               ('ui', 'Property Shelf', 'place panel in the property shelf [N]')),
+        items=(('tools',    'Tool Shelf',           'place panel in the tool shelf [T]'),
+               ('ui',       'Property Shelf',       'place panel in the property shelf [N]'),
+               ('props',    'Properties Object',    'place panel in the object properties tab'),
+               ('off',      'Off',                  'hide panel')),
                default='tools', update = update_panel_position)
 
     tab_menu_view = EnumProperty(
@@ -169,20 +204,69 @@ class TP_Panels_Preferences(AddonPreferences):
                default='menu', update = update_menu)
 
 
-    tab_dynamics = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'Dymanic on', 'enable tools in panel'), ('off', 'Dymanic off', 'disable tools in panel')), default='off', update = update_display_tools)
 
-    tab_array = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'Array on', 'enable tools in panel'), ('off', 'Array off', 'disable tools in panel')), default='on', update = update_display_tools)
+    # Panel
+    tab_title = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Title on', 'enable tools in panel'), ('off', 'Title off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_pivot = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Pivot on', 'enable tools in panel'), ('off', 'Pivot off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_duplicate = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Duplicate on', 'enable tools in panel'), ('off', 'Duplicate off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_radial = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Radial Clone on', 'enable tools in panel'), ('off', 'Radial Clone off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_cursor = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Copy to Cursor on', 'enable tools in panel'), ('off', 'Copy to Cursor off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_copy_to_mesh = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Copy to Mesh on', 'enable tools in panel'), ('off', 'Copy to Mesh off', 'disable tools in panel')), default='on', update = update_display_tools)
 
     tab_dupli = EnumProperty(name = 'Display Tools', description = 'on / off',
                   items=(('on', 'Dupli on', 'enable tools in panel'), ('off', 'Dupli off', 'disable tools in panel')), default='on', update = update_display_tools)
 
-    tab_linked = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'Optimize on', 'enable tools in panel'), ('off', 'Optimize off', 'disable tools in panel')), default='on', update = update_display_tools)
+    tab_arewo = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'ARewO on', 'enable tools in panel'), ('off', 'ARewO off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_array = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Array on', 'enable tools in panel'), ('off', 'Array off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_advance = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Advance Copy on', 'enable tools in panel'), ('off', 'Advance Copy off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_instances = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Instances on', 'enable tools in panel'), ('off', 'Instances off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_dynamics = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Dymanic on', 'enable tools in panel'), ('off', 'Dymanic off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_transform = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Transform on', 'enable tools in panel'), ('off', 'Transform off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_shade = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Shade on', 'enable tools in panel'), ('off', 'Shade off', 'disable tools in panel')), default='on', update = update_display_tools)
 
     tab_history = EnumProperty(name = 'Display Tools', description = 'on / off',
                   items=(('on', 'History on', 'enable tools in panel'), ('off', 'History off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+
+    # Menu
+    tab_menu_copy = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Copy on', 'enable tools in panel'), ('off', 'Copy off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_menu_arewo = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Arewo on', 'enable tools in panel'), ('off', 'Arewo off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_menu_array = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Array on', 'enable tools in panel'), ('off', 'Array off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_menu_optimize = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Optimize on', 'enable tools in panel'), ('off', 'Optimize off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_menu_origin = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Origin on', 'enable tools in panel'), ('off', 'Origin off', 'disable tools in panel')), default='on', update = update_display_tools)
 
 
     tools_category = StringProperty(name = "TAB Category", description = "add name for a new category tab", default = 'T+', update = update_panel_position)
@@ -198,35 +282,67 @@ class TP_Panels_Preferences(AddonPreferences):
         row.prop(self, "prefs_tabs", expand=True)
        
         if self.prefs_tabs == 'info':
+
             box = layout.box().column(1)
-             
+            
             row = box.column(1)   
-            row.label(text="Welcome to CopyShop!")  
-            row.label(text="This custom addon set is for object duplication")   
-            row.label(text="There are three ways to execute the tools:")   
-            row.label(text="> use the panel function or the included menu")   
-            row.label(text="> or use the dynamic tools in your own custom pie menu")   
-            row.label(text="Have Fun! :)")   
+            row.label(text="Welcome to T+ CopyShop!")  
+            row.label(text="This addon is for object duplication.")
+           
+            row.separator()           
+           
+            row.label(text="The Panels are adaptable can be place in the toolshelf [T] or property shelf [N]")
+            row.label(text="Or placed to Properties: 'Object' TAB")
+            row.label(text="A included Menu have ALT+SHIFT+Q as shortcut")
+           
+            row.separator()        
+                        
+            row.label(text="Have Fun! :)")  
        
 
         #Tools
         if self.prefs_tabs == 'toolsets':
           
             box = layout.box().column(1)
-
+          
             row = box.row()
-            row.prop(self, 'tab_dynamics', expand=True)
-            row.prop(self, 'tab_array', expand=True)
+            row.label(text="Panel Tools")
+           
+            row = box.column_flow(5)
+            row.prop(self, 'tab_title', expand=True)
+            row.prop(self, 'tab_pivot', expand=True)
+            row.prop(self, 'tab_duplicate', expand=True)
+            row.prop(self, 'tab_radial', expand=True)
+            row.prop(self, 'tab_cursor', expand=True)
+            row.prop(self, 'tab_copy_to_mesh', expand=True)
             row.prop(self, 'tab_dupli', expand=True)
-            
-            box.separator() 
-            
-            row = box.row()
-            row.prop(self, 'tab_linked', expand=True)
+            row.prop(self, 'tab_arewo', expand=True)
+            row.prop(self, 'tab_array', expand=True)
+            row.prop(self, 'tab_advance', expand=True)
+            row.prop(self, 'tab_instances', expand=True)
+            row.prop(self, 'tab_dynamics', expand=True)
+            row.prop(self, 'tab_transform', expand=True)
+            row.prop(self, 'tab_shade', expand=True)
             row.prop(self, 'tab_history', expand=True)
 
+            box.separator() 
+            
+            box = layout.box().column(1)
+          
+            row = box.row()
+            row.label(text="Menu Tools")
+           
+            row = box.column_flow(3)
+            row.prop(self, 'tab_menu_copy', expand=True)
+            row.prop(self, 'tab_menu_arewo', expand=True)
+            row.prop(self, 'tab_menu_array', expand=True)
+            row.prop(self, 'tab_menu_optimize', expand=True)
+            row.prop(self, 'tab_menu_origin', expand=True)
+
+            box.separator()
+
             row = layout.row()
-            row.label(text="! save user settings for permant on/off !", icon ="INFO")
+            row.label(text="! save user settings for a durably on or off !", icon ="INFO")
 
             box.separator() 
 
@@ -251,10 +367,12 @@ class TP_Panels_Preferences(AddonPreferences):
                 
                 row.prop(self, "tools_category")
 
-            row = layout.row()
-            row.label(text="! please reboot blender after changing the panel location !", icon ="INFO")
+            box.separator()
 
-            box.separator() 
+            row = layout.row()
+            row.label(text="! save user settings for a durably new panel location !", icon ="INFO")
+
+            box.separator()  
             
         #Keymap
         if self.prefs_tabs == 'keymap':
@@ -262,10 +380,7 @@ class TP_Panels_Preferences(AddonPreferences):
             box = layout.box().column(1)
              
             row = box.column(1)  
-            row.label("CopsShop Menu:", icon ="COLLAPSEMENU") 
-            
-            row.separator()           
-            row.label("Menu: 'Q', 'PRESS', alt=True, shift=True")
+            row.label("Menu: ALT+SHIFT+Q", icon ="COLLAPSEMENU") 
 
             row = box.row(1)          
             row.prop(self, 'tab_menu_view', expand=True)
@@ -279,7 +394,7 @@ class TP_Panels_Preferences(AddonPreferences):
 
             box.separator() 
              
-            row.operator('wm.url_open', text = 'recommended: is key free addon', icon = 'PLUGIN').url = "https://github.com/Antonioya/blender/tree/master/iskeyfree"
+            row.operator('wm.url_open', text = '!Tip: is key free', icon = 'PLUGIN').url = "https://github.com/Antonioya/blender/tree/master/iskeyfree"
 
 
             box.separator() 
@@ -298,17 +413,14 @@ class TP_Panels_Preferences(AddonPreferences):
             row.operator('wm.url_open', text = 'ARewO', icon = 'HELP').url = "https://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Animation/ARewO"
             row.operator('wm.url_open', text = 'To All', icon = 'HELP').url = "https://www.artunchained.de/tiny-new-addon-to-all/"
             row.operator('wm.url_open', text = 'Follow Path', icon = 'HELP').url = "https://blenderartists.org/forum/showthread.php?325179-Follow-Path-Array"
+            row.operator('wm.url_open', text = 'Copy2', icon = 'HELP').url = "https://blenderartists.org/forum/showthread.php?347973-add-on-Copy2-vertices-edges-or-faces"
             row.operator('wm.url_open', text = 'Copy Attributes', icon = 'HELP').url = "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/3D_interaction/Copy_Attributes_Menu"
-            row.operator('wm.url_open', text = 'Thread', icon = 'BLENDER').url = "https://blenderartists.org/forum/showthread.php?409893-Addon-T-CopyShop&p=3116714#post3116714"
+            row.operator('wm.url_open', text = 'BlenderArtist', icon = 'BLENDER').url = "https://blenderartists.org/forum/showthread.php?409893-Addon-T-CopyShop&p=3116714#post3116714"
 
 
-
-# property group containing all properties for the gui in the panel
+# PROPERTY GROUP #
+# containe all properties for the gui in the panel
 class Dropdown_TP_CopyShop_Props(bpy.types.PropertyGroup):
-    """
-    Fake module like class
-    tp_props = context.window_manager.tp_collapse_copyshop_props
-    """
 
     display_copy_to_faces = bpy.props.BoolProperty(name = "Copy to Faces Tools", description = "open / close props", default = False)
     display_toall = bpy.props.BoolProperty(name = "Copy to All", description = "open / close props", default = False)
@@ -317,1005 +429,29 @@ class Dropdown_TP_CopyShop_Props(bpy.types.PropertyGroup):
     display_array = bpy.props.BoolProperty(name = "Curve Array", description = "open / close props", default = False)
     display_axis_array = bpy.props.BoolProperty(name = "Axis Array", description = "open / close props", default = False)
     display_array_tools = bpy.props.BoolProperty(name = "Array Tools", description = "open / close props", default = False)
+    display_apply = bpy.props.BoolProperty(name="Open / Close", description="Open / Close", default=False)    
+    display_display = bpy.props.BoolProperty(name="Open / Close", description="Open / Close", default=False)    
 
 
-def draw_copy_panel_layout(self, context, layout):
-        
-        tp_props = context.window_manager.tp_collapse_copyshop_props
-        
-        icons = icon_collections["main"]
-  
-        #my_button_one = icons.get("my_image1")
-        #row.label(text="Icon", icon_value=my_button_one.icon_id)  
-         
-        obj = context.active_object     
-        if obj:
-           obj_type = obj.type
-                          
-           if obj_type in {'MESH'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("MESH") 
-                                  
-           if obj_type in {'LATTICE'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("LATTICE") 
 
-           if obj_type in {'CURVE'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("CURVE")               
-               
-           if obj_type in {'SURFACE'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("SURFACE")                 
-               
-           if obj_type in {'META'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("MBall")                 
-               
-           if obj_type in {'FONT'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("FONT")  
-                                              
-           if obj_type in {'ARMATURE'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("ARMATURE") 
 
-           if obj_type in {'EMPTY'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("EMPTY") 
 
-           if obj_type in {'CAMERA'}:
-              box = layout.box()
-              row = box.row(1)                                        
-              row.alignment = "CENTER"
-              row.label("CAMERA") 
-
-           if obj_type in {'LAMP'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("LAMP") 
-
-           if obj_type in {'SPEAKER'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("SPEAKER") 
-
-
-        box = layout.box()
-        
-        row = box.row(1)  
-        sub = row.row(1)
-        sub.scale_x = 7
-
-        sub.operator("tp_ops.pivot_bounding_box", "", icon="ROTATE")
-        sub.operator("tp_ops.pivot_3d_cursor", "", icon="CURSOR")
-        sub.operator("tp_ops.pivot_active", "", icon="ROTACTIVE")
-        sub.operator("tp_ops.pivot_individual", "", icon="ROTATECOLLECTION")
-        sub.operator("tp_ops.pivot_median", "", icon="ROTATECENTER")          
-        #row.menu("tp_ops.delete_menu", "", icon="PANEL_CLOSE")    
-
-
-        if context.mode == 'OBJECT':
-
-            box = layout.box().column(1)
-             
-            row = box.column(1)
-            row.operator("object.duplicate_move", text="Duplicate", icon="MOD_BOOLEAN")
-            row.operator("object.duplicate_move_linked", text="Duplicate Linked", icon="CONSTRAINT_DATA")            
-                      
-             
-            box = layout.box().column(1)
-             
-            row = box.row(1)
-            if tp_props.display_copy_to_faces:
-                row.prop(tp_props, "display_copy_to_faces", text="", icon='TRIA_DOWN')
-            else:
-                row.prop(tp_props, "display_copy_to_faces", text="", icon='TRIA_RIGHT')
-
-            Display_Dynamics = context.user_preferences.addons[__name__].preferences.tab_dynamics
-            if Display_Dynamics == 'on':     
-                row.operator("tp_ops.copy_to_faces", text="",icon="UV_FACESEL")
-            else:
-                pass
-            
-            row.operator("tp_ops.copy_to_faces_panel", text="Copy to Faces", icon='BLANK1') 
-         
-            if tp_props.display_copy_to_faces:
-                
-                box = layout.box().column(1)
-                    
-                row = box.row(1)            
-                row.label("Origin to:")       
-                
-                row = box.row(1) 
-                row.prop(context.scene, "pl_set_plus_z")       
-                row.prop(context.scene, "pl_set_minus_z")  
-                
-                box.separator() 
-                
-                row = box.row(1)            
-                row.label("Duplication:")
-
-                row = box.row(1)                                           
-                row.prop(context.scene, "pl_dupli_linked", text = "Linked")
-                row.prop(context.scene, "pl_dupli", text = "Unlinked")
-
-                box.separator() 
-                
-                row = box.row(1)            
-                row.label("To Edit:")     
-                
-                row = box.row(1) 
-                row.prop(context.scene, "pl_set_edit_target", text = "Target")                           
-                row.prop(context.scene, "pl_set_edit_source", text = "Source")
-                
-
-            box.separator()  
-
-            box = layout.box().column(1) 
-             
-            row = box.row(1)
-            
-            Display_Dynamics = context.user_preferences.addons[__name__].preferences.tab_dynamics
-            if Display_Dynamics == 'on':          
-                row.operator("mft.radialclone", text="", icon="FILE_REFRESH")
-            else:
-                pass    
-            row.operator("mft.radialclone_panel", text="Radial Z-Axis Clone", icon="BLANK1")
-
-            row = box.row(1) 
-            row.prop(context.scene, "radialClonesAngle", text="")
-            row.prop(context.scene, "clonez", text="")
-
-            box.separator()  
-                        
-            box = layout.box().column(1) 
-             
-            row = box.row(1)                     
-
-            Display_Dynamics = context.user_preferences.addons[__name__].preferences.tab_dynamics
-            if Display_Dynamics == 'on':
-                row.operator("tp_ops.copy_to_cursor", text="", icon="NEXT_KEYFRAME")
-            else:
-                pass    
-                                     
-            row.operator("tp_ops.copy_to_cursor_panel", text="Copy to Cursor", icon="BLANK1")                     
-            
-            row = box.row(1)  
-            row.prop(context.scene, "ctc_total", text="How many?")
-                                   
-            box.separator()            
-
-            box = layout.box().column(1) 
-             
-            row = box.row(1)  
-            row.operator("object.simplearewo", text="ARewO Replicator", icon="FRAME_NEXT")   
-          
-            box.separator()   
-
-            Display_ModsArray = context.user_preferences.addons[__name__].preferences.tab_array
-            if Display_ModsArray == 'on':
-
-                box = layout.box().column(1) 
-                 
-                row = box.row(1)  
-                
-                if tp_props.display_array_tools:
-                    row.prop(tp_props, "display_array_tools", text="Array Tools", icon='RESTRICT_VIEW_OFF')
-                else:
-                    row.prop(tp_props, "display_array_tools", text="Array Tools", icon='RESTRICT_VIEW_ON')  
-
-                if tp_props.display_array_tools:
-                   
-                    box = layout.box().column(1) 
-
-                    row = box.row(1) 
-                    if tp_props.display_axis_array:
-                        row.prop(tp_props, "display_axis_array", text="", icon='TRIA_DOWN')
-                    else:
-                        row.prop(tp_props, "display_axis_array", text="", icon='TRIA_RIGHT')   
-                                      
-                    row.operator("tp_ops.x_array", text="X Array")    
-                    row.operator("tp_ops.y_array", text="Y Array")    
-                    row.operator("tp_ops.z_array", text="Z Array")      
-
-                    if tp_props.display_axis_array:
-                                            
-                        mod_types = []
-                        append = mod_types.append
-
-                        obj = context.active_object     
-                        if obj:
-                            if obj.modifiers:
-                                  
-                                box = layout.box().column(1)                 
-                                
-                                row = box.row(1)
-                                row.operator("object.transform_apply", text="Applied Scale?", icon="OUTLINER_DATA_EMPTY").scale=True
-                                row.operator("tp_ops.expand_mod","" ,icon = 'TRIA_DOWN')  
-                                row.operator("tp_ops.collapse_mod", "" ,icon = 'TRIA_UP') 
-
-                                row = box.row(1) 
-                                row.operator("tp_ops.modifier_off","off" ,icon = 'VISIBLE_IPO_OFF')  
-                                row.operator("tp_ops.modifier_on", "on" ,icon = 'RESTRICT_VIEW_OFF') 
-                                row.operator("tp_ops.remove_mod", text="del." , icon='X') 
-                                row.operator("tp_ops.apply_mod", text="set" , icon='FILE_TICK') 
-                   
-                                box.separator()
-                                
-                                for mod in context.active_object.modifiers:
-
-                                    row = box.row(1)
-
-                                    if mod.show_expanded == True:
-                                        if mod.type == 'ARRAY':
-                                            append(mod.type)                                       
-                                            
-                                            box = layout.box().column(1)
-                                            
-                                            row = box.row(1)                                        
-                                            row.label(mod.name)
-                                            
-                                            if mod.fit_type == 'FIXED_COUNT':
-                                                row.prop(mod, "count", text = "")                    
-
-                                            box.separator()
-                                            
-                                            row = box.row(1)
-                                            row.prop(mod, "relative_offset_displace", text="")
-
-                                            box.separator()
-                                            
-                                            row = box.row(1)
-                                            row.prop(mod, "use_merge_vertices", text="Merge")
-                                            row.prop(mod, "use_merge_vertices_cap", text="First Last")
-                                            
-                                            row = box.row(1)
-                                            row.prop(mod, "merge_threshold", text="Distance")
-
-                                    else:
-                                        box.separator()  
-                            
-                            else:
-                                box = layout.box().column(1) 
-                                
-                                row = box.row(1)
-                                row.operator("tp_help.axis_array", text = "! nothing selected !", icon ="INFO")  
-                                    
-                        else:
-                            box = layout.box().column(1) 
-                            
-                            row = box.row(1)
-                            row.operator("tp_help.axis_array", text = "! nothing selected !", icon ="INFO") 
-                            ###                           
-
-                                      
-                    box.separator()
-                                      
-                    box = layout.box().column(1) 
-
-                    row = box.row(1) 
-                    if tp_props.display_empty:
-                        row.prop(tp_props, "display_empty", text="", icon='TRIA_DOWN')
-                    else:
-                        row.prop(tp_props, "display_empty", text="", icon='TRIA_RIGHT')                  
-                    
-                    row.operator("tp_ops.add_empty_array_mods", text="Empty Plane", icon="MOD_ARRAY")
-                    row.operator("tp_ops.add_empty_array", text="", icon="OUTLINER_DATA_EMPTY")
-
-                    row = box.row(1) 
-                    if tp_props.display_empty:
-                        row.prop(tp_props, "display_empty", text="", icon='TRIA_DOWN')
-                    else:
-                        row.prop(tp_props, "display_empty", text="", icon='TRIA_RIGHT')                  
-                    
-                    row.operator("tp_ops.add_empty_curve_mods", text="Empty Array", icon="MOD_ARRAY")
-                    row.operator("tp_ops.add_empty_curve", text="", icon="OUTLINER_DATA_CURVE")
-                    
-
-                    if tp_props.display_empty:  
-
-                        mod_types = []
-                        append = mod_types.append
-                                              
-                        obj = context.active_object       
-                        if obj:
-
-                            if obj.modifiers:
-                        
-                                box = layout.box().column(1)                 
-                                
-                                row = box.row(1)
-                                row.operator("object.transform_apply", text="Applied Scale?", icon="OUTLINER_DATA_EMPTY").scale=True
-                                row.operator("tp_ops.expand_mod","" ,icon = 'TRIA_DOWN')  
-                                row.operator("tp_ops.collapse_mod", "" ,icon = 'TRIA_UP') 
-
-                                row = box.row(1) 
-                                row.operator("tp_ops.modifier_off","off" ,icon = 'VISIBLE_IPO_OFF')  
-                                row.operator("tp_ops.modifier_on", "on" ,icon = 'RESTRICT_VIEW_OFF') 
-                                row.operator("tp_ops.remove_mod", text="del." , icon='X') 
-                                row.operator("tp_ops.apply_mod", text="set" , icon='FILE_TICK') 
-
-                                box.separator()
-
-                                for mod in context.active_object.modifiers:
-                                      
-                                    if mod.show_expanded == True:
-                                        if mod.type == 'ARRAY':
-                                            append(mod.type)
-                                            
-                                            box = layout.box().column(1) 
-                                            
-                                            if mod.fit_type == 'FIXED_COUNT':
-                                                
-                                                row = box.row(1)                                        
-                                                row.label("Mesh Array")
-                                                
-                                                if mod.fit_type == 'FIXED_COUNT':
-                                                    row.prop(mod, "count", text = "")                    
-
-                                                box.separator()
-                                                
-                                                row = box.row(1)
-                                                row.prop(mod, "relative_offset_displace", text="")
-
-                                                box.separator()
-                                                
-                                                row = box.row(1)
-                                                row.prop(mod, "use_merge_vertices", text="Merge")
-                                                row.prop(mod, "use_merge_vertices_cap", text="First Last")
-                                                
-                                                row = box.row(1)
-                                                row.prop(mod, "merge_threshold", text="Distance")
-
-                                                box.separator()   
-                                                
-                                                row = box.column(1)
-                                                row.prop(mod, "offset_object", text="")   
-                                                
-                                                box.separator()
-
-                                            elif mod.fit_type == 'FIT_CURVE':
-                                               
-                                                box.separator()
-                                            
-                                                row = box.row(1)
-                                                row.label(text="Mesh Offset")                                                                                      
-                                               
-                                                row = box.row(1)
-                                                row.prop(mod, "relative_offset_displace", text = "")
-
-                                                box.separator()
-                                                
-                                                row = box.row(1)
-                                                row.prop(mod, "use_merge_vertices", text="Merge")
-                                                row.prop(mod, "use_merge_vertices_cap", text="First Last")
-                                                
-                                                row = box.row(1)
-                                                row.prop(mod, "merge_threshold", text="Distance")
-                                                
-                                                box.separator()   
-                                                
-                                                row = box.row(1)                                          
-                                                row.prop(mod, "curve", text = "")    
-
-                                                box.separator()                      
-                                       
-                                        elif mod.type == 'CURVE':
-                                            append(mod.type)                         
-                                            
-                                            box = layout.box().column(1) 
-                                            
-                                            row = box.column(1)
-                                            row.label(text="Curve Deformation Axis")
-                                            
-                                            row = box.column(1)                                        
-                                            row.row().prop(mod, "deform_axis", expand=True)
-                                            
-                                            box.separator()
-                                            
-                                            row = box.column(1) 
-                                            row.prop(mod, "object", text="")
-                                                                                    
-                                            box.separator()
-                                
-                                    else:
-                                        box.separator()  
-                            
-                            else:
-                                box = layout.box().column(1) 
-                                
-                                row = box.row(1)
-                                row.operator("tp_help.empty_array", text = "! nothing selected !", icon ="INFO")   
-                            
-                                box = layout.box().column(1) 
-                                    
-                        else:
-                            box = layout.box().column(1) 
-                            
-                            row = box.row(1)
-                            row.operator("tp_help.empty_array", text = "! nothing selected !", icon ="INFO")             
-                            
-                            box = layout.box().column(1) 
-                          
-                          
-                    box.separator() 
-
-                    row = box.row(1) 
-                    if tp_props.display_array:
-                        row.prop(tp_props, "display_array", text="", icon='TRIA_DOWN')
-                    else:
-                        row.prop(tp_props, "display_array", text="", icon='TRIA_RIGHT')                  
-
-                    row.operator("tp_ops.add_curve_array_mods", text="Curve Array", icon="MOD_ARRAY")     
-                    row.operator("tp_ops.add_curve_array", text="", icon="CURVE_BEZCURVE")    
-                          
-                    row = box.row(1) 
-                    if tp_props.display_array:
-                        row.prop(tp_props, "display_array", text="", icon='TRIA_DOWN')
-                    else:
-                        row.prop(tp_props, "display_array", text="", icon='TRIA_RIGHT')                           
-
-                    row.operator("tp_ops.add_circle_array_mods", text="Circle Array", icon="MOD_ARRAY")
-                    row.operator("tp_ops.add_circle_array", text="", icon="CURVE_BEZCIRCLE")
-                    
-                    if tp_props.display_array:
-
-                        mod_types = []
-                        append = mod_types.append
-                        
-                        obj = context.active_object       
-                        if obj:
-
-                            if obj.modifiers:
-                         
-                                box = layout.box().column(1)                 
-                                
-                                row = box.row(1)
-                                row.operator("object.transform_apply", text="Applied Scale?", icon="OUTLINER_DATA_EMPTY").scale=True
-                                row.operator("tp_ops.expand_mod","" ,icon = 'TRIA_DOWN')  
-                                row.operator("tp_ops.collapse_mod", "" ,icon = 'TRIA_UP') 
-
-                                row = box.row(1) 
-                                row.operator("tp_ops.modifier_off","off" ,icon = 'VISIBLE_IPO_OFF')  
-                                row.operator("tp_ops.modifier_on", "on" ,icon = 'RESTRICT_VIEW_OFF') 
-                                row.operator("tp_ops.remove_mod", text="del." , icon='X') 
-                                row.operator("tp_ops.apply_mod", text="set" , icon='FILE_TICK') 
-
-                                box.separator() 
-                        
-                                for mod in context.active_object.modifiers:
-                                      
-                                    if mod.show_expanded == True:
-                                        if mod.type == 'ARRAY':
-                                            append(mod.type)
-                                            
-                                            box = layout.box().column(1) 
-                                            
-                                            if mod.fit_type == 'FIXED_COUNT':
-                                                
-                                                row = box.row(1)                                        
-                                                row.label("Mesh Array")
-                                                
-                                                if mod.fit_type == 'FIXED_COUNT':
-                                                    row.prop(mod, "count", text = "")                    
-
-                                                box.separator()
-                                                
-                                                row = box.row(1)
-                                                row.prop(mod, "relative_offset_displace", text="")
-
-                                                box.separator()
-                                                
-                                                row = box.row(1)
-                                                row.prop(mod, "use_merge_vertices", text="Merge")
-                                                row.prop(mod, "use_merge_vertices_cap", text="First Last")
-                                                
-                                                row = box.row(1)
-                                                row.prop(mod, "merge_threshold", text="Distance")
-
-                                                box.separator()   
-                                                
-                                                row = box.column(1)
-                                                row.prop(mod, "offset_object", text="")   
-                                                
-                                                box.separator()
-
-                                            elif mod.fit_type == 'FIT_CURVE':
-                                               
-                                                box.separator()
-                                            
-                                                row = box.row(1)
-                                                row.label(text="Mesh Offset")                                                                                      
-                                               
-                                                row = box.row(1)
-                                                row.prop(mod, "relative_offset_displace", text = "")
-
-                                                box.separator()
-                                                
-                                                row = box.row(1)
-                                                row.prop(mod, "use_merge_vertices", text="Merge")
-                                                row.prop(mod, "use_merge_vertices_cap", text="First Last")
-                                                
-                                                row = box.row(1)
-                                                row.prop(mod, "merge_threshold", text="Distance")
-                                                
-                                                box.separator()   
-                                                
-                                                row = box.row(1)                                          
-                                                row.prop(mod, "curve", text = "")    
-
-                                                box.separator()                      
-                                       
-                                        elif mod.type == 'CURVE':
-                                            append(mod.type)                         
-                                            
-                                            box = layout.box().column(1) 
-                                            
-                                            row = box.column(1)
-                                            row.label(text="Curve Deformation Axis")
-                                            
-                                            row = box.column(1)                                        
-                                            row.row().prop(mod, "deform_axis", expand=True)
-                                            
-                                            box.separator()
-                                            
-                                            row = box.column(1) 
-                                            row.prop(mod, "object", text="")
-                                                                                    
-                                            box.separator()
-                                
-                                    else:
-                                        box.separator()  
-                            
-                            else:
-                                box = layout.box().column(1) 
-                                
-                                row = box.row(1)
-                                row.operator("tp_help.curve_array", text = "! nothing selected !", icon ="INFO")   
-                            
-                                box = layout.box().column(1) 
-                                    
-                        else:
-                            box = layout.box().column(1) 
-                            
-                            row = box.row(1)
-                            row.operator("tp_help.curve_array", text = "! nothing selected !", icon ="INFO")             
-                            
-                            box = layout.box().column(1) 
-                          
-                      
-                    box.separator()                        
-                     
-                    row = box.row(1) 
-                    if tp_props.display_pfath:
-                        row.prop(tp_props, "display_pfath", text="", icon='TRIA_DOWN')
-                    else:
-                        row.prop(tp_props, "display_pfath", text="", icon='TRIA_RIGHT')            
-
-                    Display_Dynamics = context.user_preferences.addons[__name__].preferences.tab_dynamics
-                    if Display_Dynamics == 'on':     
-                        row.operator("object.fpath_array", text="", icon ="ALIGN")                              
-                    else:
-                        pass
-                    
-                    row.operator("tp_ops.add_fpath_con", text="Add Follow Path", icon="CONSTRAINT_DATA")          
-                    row.operator("tp_ops.add_fpath_curve", text="", icon="CURVE_BEZCIRCLE")
-                   
-                    box.separator() 
-                    
-                    if tp_props.display_pfath:
-                        
-                        con_types = []
-                        append = con_types.append
-                        
-                        obj = context.active_object     
-                        if obj:                                            
-                            if obj.constraints:
-                                                                                            
-                                for con in context.active_object.constraints:
-
-                                    box = layout.box().column(1)
-                            
-                                    row = box.row(1)
-                                    row.operator("object.fpath_array_panel", text="Set FPath Array", icon ="MOD_ARRAY")  
-                                    
-                                    box.separator()
-                                    
-                                    row = box.row(1)
-                                    row.prop(context.scene, "type", )    
-                                    
-                                    row = box.row(1)                            
-                                    row.prop(context.scene, "count")
-
-                                                                     
-                                    box.separator() 
-
-                                    row = box.row(1)
-                                    layout.operator_context = 'INVOKE_REGION_WIN'                    
-                                    row.prop(context.scene, "frame_current", text="Frame")
-                                    row.operator("object.select_grouped", text="Select Group").type='GROUP'
-                                        
-                                    row = box.row(1)      
-                                    row.operator("tp_ops.linked_fpath",text="Set Linked")                  
-                                    row.operator("tp_ops.single_fpath",text="Set Unlinked")  
-
-                                    box.separator() 
-                                    
-                                    box = layout.box().column(1)                 
-                                    
-                                    row = box.row(1)
-                                      
-                                    row.operator("object.transform_apply", text="Applied Scale?", icon="OUTLINER_DATA_EMPTY").scale=True
-                                    row.operator("tp_ops.expand_con","" ,icon = 'TRIA_DOWN')  
-                                    row.operator("tp_ops.collapse_con", "" ,icon = 'TRIA_UP') 
-
-                                    row = box.row(1) 
-                                    row.operator("tp_ops.constraint_off","off" ,icon = 'VISIBLE_IPO_OFF')  
-                                    row.operator("tp_ops.constraint_on", "on" ,icon = 'RESTRICT_VIEW_OFF') 
-                                    row.operator("object.constraints_clear", text="clear" , icon='X') 
-
-                                    box.separator()                                     
-
-                                    if con.show_expanded == True:  
-                                                                                
-                                        box = layout.box().column(1) 
-                                
-                                        row = box.row(1)  
-                                        
-                                        if con.type == 'FOLLOW_PATH':
-                                           
-                                            append(con.type)
-
-                                            box.label(con.name)
-                                            
-                                            box.prop(con, "target")
-
-                                            box.separator() 
-                                            
-                                            row = box.column(1)                                                      
-                                            row.operator("constraint.followpath_path_animate", text="Animate Path", icon='ANIM_DATA')
-                                            row.label("!need activation in properties!")  
-                                            
-                                            box.separator()
-                                            
-                                            if context.scene.type == "OFFSET":
-                                                row.prop(context.scene,"offset")
-                                       
-                                            elif context.scene.type == "FIXED_POSITION":
-                                                row.prop(context.scene,"factor", "Offset")
-                                                                                         
-                                            box.separator() 
-                                            
-                                            row.prop(con, "use_curve_follow")
-                                            
-                                            row = box.row(1)
-                                            row.label("Axis")
-                                            row.prop(con, "forward_axis", expand=True)
-
-                                            box.separator() 
-                                            
-                                            row = box.row(1)                            
-                                            row.prop(con, "up_axis", text="Up")
-                                            row.label()
-
-                                            ###
-                                            box.separator()   
-                                    
-                            else:
-                                box = layout.box().column(1) 
-                                
-                                row = box.row(1)
-                                row.operator("tp_help.follow_path", text ="! no constraint active !", icon ="INFO")  
-                                    
-                        else:
-                            box = layout.box().column(1) 
-                            
-                            row = box.row(1)
-                            row.operator("tp_help.follow_path", text = "! nothing selected !", icon ="INFO")             
-
-            else:
-                pass
-
-            Display_DupliTools = context.user_preferences.addons[__name__].preferences.tab_dupli 
-            if Display_DupliTools == 'on':     
-
-                obj = context.active_object     
-                if obj:
-                    obj_type = obj.type
-                                                                          
-                    if obj_type in {'MESH'}:
-
-                        box = layout.box().column(1)
-                        
-                        row = box.row(1)
-                        row.operator("tp_ops.dupli_set_panel", "Duplication to Active", icon = "CONSTRAINT_DATA") 
-
-                        box.separator()
-                                    
-                        row = box.row(1)
-                        row.prop(context.object, "dupli_type", expand=True)            
-
-                        box.separator()
-                                   
-                        if context.object.dupli_type == 'FRAMES':
-                            row = box.row(1)   
-                            row.prop(context.object, "dupli_frames_start", text="Start")
-                            row.prop(context.object, "dupli_frames_end", text="End")
-
-                            row = box.row(1)                           
-                            row.prop(context.object, "dupli_frames_on", text="On")
-                            row.prop(context.object, "dupli_frames_off", text="Off")
-
-                            row = box.row(1)   
-                            row.prop(context.object, "use_dupli_frames_speed", text="Speed")
-
-                        elif context.object.dupli_type == 'VERTS':
-                            row = box.row(1)   
-                            row.prop(context.object, "use_dupli_vertices_rotation", text="Rotation")
-
-                        elif context.object.dupli_type == 'FACES':
-                            row = box.row(1)                       
-                            row.prop(context.object, "use_dupli_faces_scale", text="Scale")
-                           
-                            sub = row.row()
-                            sub.active = context.object.use_dupli_faces_scale
-                            sub.prop(context.object, "dupli_faces_scale", text="Inherit Scale")
-
-                        elif context.object.dupli_type == 'GROUP':
-                            row = box.row(1)
-                            row.prop(context.object, "dupli_group", text="Group")
-
-                        row = box.row(1)
-                        row.prop(context.scene, "dupli_align", text="Align")
-                        row.prop(context.scene, "dupli_single", text="Single")
-                        
-                        if context.scene.dupli_single == True:
-                            
-                            row = box.row(1)            
-                            row.prop(context.scene, "dupli_separate", text="Separate")
-                            row.prop(context.scene, "dupli_link", text="As Instance")
-
-
-            box.separator() 
-             
-            box = layout.box().column(1) 
-             
-            row = box.row(1)
-            
-            if tp_props.display_toall:
-                row.prop(tp_props, "display_toall", text="", icon='TRIA_DOWN')
-            else:
-                row.prop(tp_props, "display_toall", text="", icon='TRIA_RIGHT')
-
-            row.menu("VIEW3D_MT_copypopup", text="Advance Copy", icon = "DISCLOSURE_TRI_RIGHT") 
-         
-            if tp_props.display_toall:
-                scene = context.scene
-                
-                box = layout.box().column(1)
-                    
-                row = box.row(1) 
-                row.alignment = 'CENTER'                
-                row.label("Material", icon='MATERIAL') 
-
-                row = box.row(1) 
-                row.label("copy to:") 
-                                  
-                row = box.row(1)   
-                row.operator("scene.to_all", text="Selected").mode = "material, selected"
-                row.operator("scene.to_all", text="Children").mode = "material, children"
-
-                box.separator()
-                                
-                row = box.row(1) 
-                row.label("append to:") 
-                                  
-                row = box.row(1)   
-                row.operator("scene.to_all", text="Selected").mode = "material, selected, append"
-                row.operator("scene.to_all", text="Children").mode = "material, children, append"
-
-                box.separator()
-
-                box = layout.box().column(1)
-                    
-                row = box.row(1) 
-                row.alignment = 'CENTER'                
-                row.label("Modifier", icon='MODIFIER') 
- 
-                row = box.row(1) 
-                row.label("copy to:") 
-                                  
-                row = box.row(1)   
-                row.operator("scene.to_all", text="Selected").mode = "modifier, selected"
-                row.operator("scene.to_all", text="Children").mode = "modifier, children"
-
-                box.separator()                
-
-                row = box.row(1) 
-                row.label("append to:") 
-                                  
-                row = box.row(1)   
-                row.operator("scene.to_all", text="Selected").mode = "modifier, selected, append"
-                row.operator("scene.to_all", text="Children").mode = "modifier, children, append"
-                
-                box.separator()  
-
-                row = box.row(1)
-                row.prop(context.scene, "excludeMod")              
-                
-
-
-            Display_LinkedTools = context.user_preferences.addons[__name__].preferences.tab_linked
-            if Display_LinkedTools == 'on':
-                
-                box.separator()      
-
-                box = layout.box().column(1) 
-                 
-                row = box.column(1)
-                row.label("Linked Instances", icon = "CONSTRAINT_DATA")
-                
-                box.separator() 
-                                 
-                row = box.row(1)     
-                row.operator("object.make_links_data","Set", icon="LINKED").type='OBDATA'
-                row.operator("tp_ops.make_single","Clear", icon="UNLINKED")
-               
-                box.separator() 
-               
-                row = box.row(1)                 
-                row.operator("object.select_linked", text="Select Linked", icon="RESTRICT_SELECT_OFF")   
-                row.operator("object.join", text="Join all", icon="AUTOMERGE_ON")             
-
-                box.separator() 
-               
-                row = box.row(1)  
-
-                row.operator_menu_enum("object.make_links_data", "type","links",  icon="CONSTRAINT")
-                
-                sub = row.row(1)
-                sub.scale_x = 0.3333            
-                sub.operator("tp_ops.origin_plus_z", text="T", icon="LAYER_USED")  
-                sub.operator("object.origin_set", text="M", icon="LAYER_USED").type='ORIGIN_GEOMETRY'
-                sub.operator("tp_ops.origin_minus_z", text="B", icon="LAYER_USED")
-
-                box.separator()
-
-            else:
-                pass
-
-
-        if context.mode == 'EDIT_MESH':
-
-            box = layout.box().column(1)
-             
-            row = box.column(1)
-            row.operator("mesh.duplicate_move", text="Duplicate", icon="MOD_BOOLEAN")
-            
-            box = layout.box().column(1) 
-             
-            row = box.column(1)  
-            row.operator("tp_ops.copy_to_cursor_panel", text="Copy to Cursor", icon="NEXT_KEYFRAME")                      
-            row.prop(context.scene, "ctc_total", text="How many?")
-
-            box.separator()   
-
-        Display_History = context.user_preferences.addons[__name__].preferences.tab_history 
-        if Display_History == 'on':
-            
-            box = layout.box().column(1)  
-
-            row = box.row(1)        
-            row.operator("view3d.ruler", text="Ruler")   
-             
-            row.operator("ed.undo_history", text="History")
-            row.operator("ed.undo", text="", icon="LOOP_BACK")
-            row.operator("ed.redo", text="", icon="LOOP_FORWARDS") 
-           
-            box.separator()   
-
-        else:
-            pass     
-  
-  
-        
-
-class VIEW3D_TP_Copy_Panel_TOOLS(bpy.types.Panel):
-    bl_category = "Tools"
-    bl_idname = "VIEW3D_TP_Copy_Panel_TOOLS"
-    bl_label = "CopyShop"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
-    bl_context = 'objectmode'
-    bl_options = {'DEFAULT_CLOSED'}
-
-    @classmethod
-    def poll(cls, context):
-        isModelingMode = not (
-        #context.sculpt_object or 
-        context.vertex_paint_object
-        or context.weight_paint_object
-        or context.image_paint_object)   
-        return isModelingMode 
-
-
-    def draw(self, context):
-        layout = self.layout.column_flow(1)  
-        layout.operator_context = 'INVOKE_REGION_WIN'
-        #layout.operator_context = 'INVOKE_AREA'
-
-        draw_copy_panel_layout(self, context, layout) 
-        
-
-class VIEW3D_TP_Copy_Panel_UI(bpy.types.Panel):
-    bl_idname = "VIEW3D_TP_Copy_Panel_UI"
-    bl_label = "CopyShop"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_context = 'objectmode'
-    bl_options = {'DEFAULT_CLOSED'}
-
-    @classmethod
-    def poll(cls, context):
-        isModelingMode = not (
-        #context.sculpt_object or 
-        context.vertex_paint_object
-        or context.weight_paint_object
-        or context.image_paint_object) 
-        return isModelingMode 
-
-
-    def draw(self, context):
-        layout = self.layout.column_flow(1)  
-        layout.operator_context = 'INVOKE_REGION_WIN'
-        #layout.operator_context = 'INVOKE_AREA'                                   
-
-        draw_copy_panel_layout(self, context, layout) 
-
-
-
-
-# register
+# REGISTRY #
 
 import traceback
 
-icon_collections = {}
-
 def register():
 
-    mkb_icons = bpy.utils.previews.new()
-
-    icons_dir = os.path.join(os.path.dirname(__file__), "icons")
-
-    mkb_icons.load("my_image1", os.path.join(icons_dir, "icon_image1.png"), 'IMAGE')
-    mkb_icons.load("my_image2", os.path.join(icons_dir, "icon_image2.png"), 'IMAGE')
-
-    icon_collections['main'] = mkb_icons
-    
     try: bpy.utils.register_module(__name__)
     except: traceback.print_exc()
         
     update_panel_position(None, bpy.context)
-    
+
+    ### Tools
+    update_menu(None, bpy.context)
+    update_display_tools(None, bpy.context)
+
+
     ### copyaction
     bpy.types.WindowManager.tp_collapse_copyshop_props = bpy.props.PointerProperty(type = Dropdown_TP_CopyShop_Props)
    
@@ -1323,16 +459,7 @@ def register():
     bpy.types.Scene.mifthTools = PointerProperty(name="Mifth Tools Variables", type=MFTProperties, description="Mifth Tools Properties")
 
 
-    ### Tools
-    update_menu(None, bpy.context)
-    update_display_tools(None, bpy.context)
-
-
 def unregister():
-
-    for icon in icon_collections.values():
-        bpy.utils.previews.remove(icon)
-    icon_collections.clear()
 
     try: bpy.utils.unregister_module(__name__)
     except: traceback.print_exc()

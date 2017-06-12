@@ -24,12 +24,12 @@ bl_info = {
     "description": "Tools for cutting and trimming mesh objects",
     "author":      "Patrick Moore",
     "version":     (0, 0, 1),
-    "blender":     (2, 7, 6),
+    "blender":     (2, 7, 8),
     "location":    "View 3D > Tool Shelf",
     "warning":     "",  # used for warning icon and text in addons panel
-    "wiki_url":    "",
+    "wiki_url":    "https://github.com/patmo141/cut_mesh/wiki",
     "tracker_url": "https://github.com/patmo141/cut_mesh/issues",
-    "category":    "3D View"
+    "category":    "Mesh"
     }
 
 # Blender imports
@@ -39,25 +39,32 @@ import bpy
 #TODO Menu
 
 #Tools
-from .op_polytrim.polytrim_modal import CGC_Polytrim
+from .op_polytrim.polytrim_modal import CutMesh_Polytrim
 from .op_geopath.geopath_modal import CGC_Geopath
 from .op_slice.slice_modal import CGC_Slice
 from .op_triangle_fill import TriangleFill
+from .convenience import CUTMESH_OT_delete_strokes, CUTMESH_OT_hide_strokes, CUTMESH_OT_join_strokes
 
 def register(): 
     #bpy.utils.register_class(CutMeshPreferences) #TODO
     #bpy.utils.register_class(CutMesh_panel)  #TODO
     #bpy.utils.register_class(CutMesh_menu)  #TODO
-    bpy.utils.register_class(CGC_Polytrim)
+    bpy.utils.register_class(CutMesh_Polytrim)
     bpy.utils.register_class(CGC_Geopath)
     bpy.utils.register_class(CGC_Slice)
     bpy.utils.register_class(TriangleFill)
+    bpy.utils.register_class(CUTMESH_OT_delete_strokes)
+    bpy.utils.register_class(CUTMESH_OT_hide_strokes)
+    bpy.utils.register_class(CUTMESH_OT_join_strokes)
     
 def unregister():
     #bpy.utils.register_class(CutMeshPreferences)  #TODO
     #bpy.utils.register_class(CutMesh_panel)  #TODO
     #bpy.utils.register_class(CutMesh_menu)  #TODO
-    bpy.utils.unregister_class(CGC_Polytrim)
+    bpy.utils.unregister_class(CutMesh_Polytrim)
     bpy.utils.unregister_class(CGC_Geopath)
     bpy.utils.unregister_class(CGC_Slice)
     bpy.utils.unregister_class(TriangleFill)
+    bpy.utils.unregister_class(CUTMESH_OT_delete_strokes)
+    bpy.utils.unregister_class(CUTMESH_OT_hide_strokes)
+    bpy.utils.unregister_class(CUTMESH_OT_join_strokes)

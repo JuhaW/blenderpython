@@ -6,7 +6,7 @@ from bpy.props import *
 
 class VIEW3D_TP_Batch_Modifier(bpy.types.Operator):
     bl_idname = "tp_batch.modifier_stack"
-    bl_label = "T+ Modifier :)"
+    bl_label = "T+ Modifier Stack"
     #bl_options = {'REGISTER', 'UNDO'}
         
     def execute(self, context):
@@ -27,15 +27,25 @@ class VIEW3D_TP_Batch_Modifier(bpy.types.Operator):
         mod_list = context.active_object.modifiers
         if mod_list:
                                         
-            row.operator("tp_ops.mods_render","", icon = 'RESTRICT_RENDER_OFF')     
-            row.operator("tp_ops.mods_view","", icon = 'RESTRICT_VIEW_OFF')                                                                       
+            row.operator("tp_ops.mods_render","", icon = 'RESTRICT_RENDER_OFF')                                                                       
+            row.operator("object.toggle_apply_modifiers_view", text="", icon='RESTRICT_VIEW_OFF') 
             row.operator("tp_ops.mods_edit","", icon='EDITMODE_HLT')                                                    
-            row.operator("tp_ops.mods_cage","", icon='OUTLINER_OB_MESH')                                                    
-            row.operator("tp_ops.collapse_mod", text="", icon='TRIA_UP')      
-            row.operator("tp_ops.expand_mod", text="", icon='TRIA_DOWN')    
-            row.operator("tp_ops.remove_mod", text="", icon='X') 
-            row.operator("tp_ops.apply_mod", text="", icon='FILE_TICK')             
+            row.operator("tp_ops.mods_cage","", icon='OUTLINER_OB_MESH')                  
+            row.operator("object.apply_all_modifiers", text="", icon='FILE_TICK') 
+            row.operator("object.delete_all_modifiers", text="", icon='X')   
+            row.operator("wm.toggle_all_show_expanded", text="", icon='FULLSCREEN_ENTER')          
            
+
+            row = box.row(1)
+            row.prop(context.scene, "tp_mods_type", text="")
+            row.operator("tp_ops.remove_mods_type", text="Rem. Type")                           
+
+            if context.mode == 'OBJECT':
+                row.operator("scene.to_all", text="To Childs", icon='LINKED').mode = "modifier, children"  
+                row.operator("scene.to_all", text="To Selected", icon='FRAME_NEXT').mode = "modifier, selected"
+ 
+
+
             box.separator()
 
 

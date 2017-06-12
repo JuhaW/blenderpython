@@ -43,7 +43,7 @@ from bpy import*
 from bpy.props import *
 
 
-class View3D_TP_Render_On_Off(bpy.types.Operator):
+class VIEW3D_TP_Render_On_Off(bpy.types.Operator):
     '''render on / off'''
     bl_idname = "tp_ops.mods_render"
     bl_label = "Render"
@@ -73,7 +73,7 @@ class View3D_TP_Render_On_Off(bpy.types.Operator):
         
         
 
-class View3D_TP_Modifier_On_Off(bpy.types.Operator):
+class VIEW3D_TP_Modifier_On_Off(bpy.types.Operator):
     '''view on / off'''
     bl_idname = "tp_ops.mods_view"
     bl_label = "View"
@@ -104,7 +104,7 @@ class View3D_TP_Modifier_On_Off(bpy.types.Operator):
     
 
 
-class View3D_TP_Edit_On_Off(bpy.types.Operator):
+class VIEW3D_TP_Edit_On_Off(bpy.types.Operator):
     '''edit on / off'''
     bl_idname = "tp_ops.mods_edit"
     bl_label = "Edit"
@@ -135,7 +135,7 @@ class View3D_TP_Edit_On_Off(bpy.types.Operator):
         
 
 
-class View3D_TP_Cage_On_Off(bpy.types.Operator):
+class VIEW3D_TP_Cage_On_Off(bpy.types.Operator):
     '''cage  on / off'''
     bl_idname = "tp_ops.mods_cage"
     bl_label = "Cage"

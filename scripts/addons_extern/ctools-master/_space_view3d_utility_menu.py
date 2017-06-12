@@ -31,7 +31,6 @@ bl_info = {
 import bpy
 
 from .utils import addongroup
-from .utils import registerinfo
 from .utils.vaarmature import get_visible_bones, get_selected_bones
 
 
@@ -471,17 +470,18 @@ addon_keymaps = []
 
 
 def register():
-    addongroup.AddonGroupPreferences.register_module(__name__)
+    addongroup.AddonGroup.register_module(__name__)
 
-    km = registerinfo.AddonRegisterInfo.get_keymap('3D View')
+    km = addongroup.AddonGroup.get_keymap('3D View')
     if km:
-        kmi = km.keymap_items.new('wm.call_menu', 'D', 'PRESS', ctrl=True)
+        kmi = km.keymap_items.new('wm.call_menu', 'D', 'PRESS', shift=True,
+                                  ctrl=True)
         kmi.properties.name = 'VIEW3D_MT_utilities'
         addon_keymaps.append((km, kmi))
 
 
 def unregister():
-    addongroup.AddonGroupPreferences.unregister_module(__name__)
+    addongroup.AddonGroup.unregister_module(__name__)
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()

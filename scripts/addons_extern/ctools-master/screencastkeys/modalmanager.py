@@ -117,9 +117,8 @@ class ModalHandlerManager:
         if not window:
             return
 
-        addr = window.as_pointer()
-        win = cast(addr, POINTER(wmWindow)).contents
-        ptr = cast(win.modalhandlers.first, POINTER(wmEventHandler))
+        win = wmWindow.cast(window)
+        ptr = wmEventHandler.cast(win.modalhandlers.first, contents=False)
 
         import time
         i = 0
@@ -426,8 +425,7 @@ class ModalHandlerManager:
     def active_window(context):
         wm = context.window_manager
         for window in wm.windows:
-            addr = window.as_pointer()
-            win = cast(addr, POINTER(wmWindow)).contents
+            win = wmWindow.cast(window)
             if win.active:
                 return window
 

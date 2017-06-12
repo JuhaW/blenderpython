@@ -59,12 +59,12 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         sc = bpy.context.scene
         o.select = True
         sc.objects.active = o
-
+    
     ao = context.scene.objects.active
     # obs = [ob for ob in context.scene.objects if ob.name != ao.name and ob.select]
     # make it easier to select all, exclude non-mesh objects from list
     obs = [ob for ob in context.scene.objects if ob.name != ao.name and ob.select and ob.type == 'MESH']
-
+    
     # some checks
     for o in obs:
         if(o.type != 'MESH'):
@@ -73,9 +73,9 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         if(len(o.data.uv_layers) < 1):
             operator.report({'ERROR'}, "Object {} has no uv map.".format(o.name))
             return False
-
+    
     cache = {}
-
+    
     def calc_areas(o):
         # cache
         k = o.name
@@ -120,7 +120,7 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         # cache
         cache[k] = (mesh_area, uv_area, )
         return mesh_area, uv_area
-
+    
     if(not use_active):
         obs.append(ao)
         oms = []
@@ -133,7 +133,7 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         aouv = sum(ouvs) / len(ouvs)
     else:
         aom, aouv = calc_areas(ao)
-
+    
     for o in obs:
         activate_object(o)
         # store image assignments
@@ -141,7 +141,7 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         uv = o.data.uv_textures.active
         for p in uv.data:
             pi.append(p.image)
-
+        
         # average and pack islands
         if(use_pack):
             bpy.ops.object.mode_set(mode='EDIT')
@@ -155,34 +155,34 @@ def equalize(operator, context, use_pack, rotate, margin, use_active, ):
         if(not use_pack):
             bpy.ops.mesh.select_all(action='SELECT')
             bpy.ops.uv.select_all(action='SELECT')
-
+        
         original_type = bpy.context.area.type
         bpy.context.area.type = "IMAGE_EDITOR"
         # reset image inside editor, it might be Render Result and in this case,
         # UV operators will not work because UVs will not be displayed..
         bpy.context.area.spaces[0].image = None
-
+        
         om, ouv = calc_areas(o)
         x = (aouv / aom) * om
         v = x / ouv
         v = math.sqrt(v)
-
+        
         bpy.ops.transform.resize(value=(v, v, v), )
         bpy.context.area.type = original_type
-
+        
         bpy.ops.object.mode_set(mode='OBJECT')
-
+        
         # restore image assignments
         uv = o.data.uv_textures.active
         for i, p in enumerate(uv.data):
             p.image = pi[i]
-
+    
     # activate the one which was not changed
     activate_object(ao)
     # reselect objects for convenience
     for o in obs:
         o.select = True
-
+    
     return True
 
 
@@ -191,7 +191,7 @@ class UVEqualize(bpy.types.Operator):
     bl_label = "UV Equalize"
     bl_description = "Equalizes scale of UVs of selected objects to active object."
     bl_options = {'REGISTER', 'UNDO'}
-
+    
     use_active = BoolProperty(name="Use Active",
                               description="Use active object as scale specimen. Otherwise will be used object with largest polygons after packing. This object will be packed to fit bounds.",
                               default=True, )
@@ -206,25 +206,25 @@ class UVEqualize(bpy.types.Operator):
                            min=0.0,
                            max=1.0,
                            default=0.001, )
-
+    
     @classmethod
     def poll(cls, context):
         ao = context.active_object
         so = bpy.context.selected_objects
         return (ao and ao.type == 'MESH' and len(so) > 1 and context.mode == 'OBJECT')
-
+    
     def execute(self, context):
         r = equalize(self, context, self.use_pack, self.rotate, self.margin, self.use_active, )
         if(r is False):
             return {'CANCELLED'}
         return {'FINISHED'}
-
+    
     def draw(self, context):
         l = self.layout
-
+        
         r = l.row()
         r.prop(self, "use_active")
-
+        
         r = l.row()
         r.prop(self, "use_pack")
         r = l.row()

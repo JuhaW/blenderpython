@@ -48,20 +48,17 @@ from mathutils import geometry as geom
 try:
     importlib.reload(addongroup)
     importlib.reload(customproperty)
-    importlib.reload(registerinfo)
     importlib.reload(structures)
     importlib.reload(vagl)
 except NameError:
     from ..utils import addongroup
     from ..utils import customproperty
-    from ..utils import registerinfo
     from ..utils import structures
     from ..utils import vagl
 
 
 class LockCursorPreferences(
-        addongroup.AddonGroupPreferences,
-        registerinfo.AddonRegisterInfo,
+        addongroup.AddonGroup,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -177,7 +174,7 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
 
         center = center_of_circumscribed_circle_tri(*vecs)
         if center is not None:
-            self.set_cursor_location(context, center)
+            context.space_data.cursor_location = center
 
     def view_axis(self, context):
         """画面のZ軸の方を向いている軸を返す。
@@ -221,8 +218,7 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
         rv3d = context.region_data
         """:type: bpy.types.RegionView3D"""
 
-        c_rv3d = ct.cast(rv3d.as_pointer(),
-                         ct.POINTER(structures.RegionView3D)).contents
+        c_rv3d = structures.RegionView3D.cast(rv3d)
         bupg = c_rv3d.gridview
         if precision:
             if context.scene.unit_settings.system == 'NONE':
@@ -259,20 +255,6 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
 
         return v
 
-    def get_cursor_location(self, context):
-        v3d = context.space_data
-        if v3d.local_view:
-            return v3d.cursor_location
-        else:
-            return context.scene.cursor_location
-
-    def set_cursor_location(self, context, vec):
-        v3d = context.space_data
-        if v3d.local_view:
-            v3d.cursor_location = vec
-        else:
-            context.scene.cursor_location = vec
-
     def cursor3d(self, context, event):
         U = context.user_preferences
         use_depth = U.view.use_mouse_depth_cursor
@@ -287,9 +269,9 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
             self.call_builtin_cursor3d(context, event)
             U.view.use_mouse_depth_cursor = use_depth
 
-            cur = self.get_cursor_location(context)
+            cur = v3d.cursor_location
             cur = self.snap_grid(context, cur, self.use_precision)
-            self.set_cursor_location(context, cur)
+            v3d.cursor_location = cur
 
             # depth
             cur_2d_near = project(region, rv3d, cur)
@@ -304,7 +286,7 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
                 v1, ray)
             if result:
                 location = (location - cur).project(ray) + cur
-                self.set_cursor_location(context, location)
+                v3d.cursor_location = location
 
         else:
             U.view.use_mouse_depth_cursor = self.use_depth
@@ -312,14 +294,11 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
             U.view.use_mouse_depth_cursor = use_depth
 
             if self.use_snap:
-                cur = self.get_cursor_location(context)
+                cur = v3d.cursor_location
                 cur = self.snap_grid(context, cur, self.use_precision)
-                self.set_cursor_location(context, cur)
+                v3d.cursor_location = cur
 
-        if v3d.local_view:
-            self.cursor_location = v3d.cursor_location
-        else:
-            self.cursor_location = scene.cursor_location
+        self.cursor_location = v3d.cursor_location
 
     def action_select_mouse(self, context):
         U = context.user_preferences
@@ -368,7 +347,7 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
 
         if event.type == self.event_type and event.value == 'RELEASE':
             if self.mco != self.mco_prev:
-                self.set_cursor_location(context, self.cursor_location_bak)
+                context.space_data.cursor_location = self.cursor_location_bak
                 self.cursor3d(context, event)
             self.exit(context)
             return {'FINISHED'}
@@ -415,7 +394,7 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
                             'LEFT_ALT', 'RIGHT_ALT'}:
             update_cursor = True
         if update_cursor:
-            self.set_cursor_location(context, self.cursor_location_bak)
+            context.space_data.cursor_location = self.cursor_location_bak
             self.cursor3d(context, event)
         elif event.value == 'PRESS':
             if event.type == 'A':
@@ -449,7 +428,7 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
         glsettings.push()
 
         cursor_2d = project(context.region, context.region_data,
-                            self.get_cursor_location(context))
+                            context.space_data.cursor_location)
 
         unit_settings = context.scene.unit_settings
         text_lines = []
@@ -512,7 +491,7 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
 
         self.mco = event.mouse_region_x, event.mouse_region_y
         self.mco_prev = self.mco
-        self.cursor_location = self.get_cursor_location(context).copy()
+        self.cursor_location = context.space_data.cursor_location.copy()
         self.cursor_location_bak = self.cursor_location.copy()
 
         if not self.properties.is_property_set('use_depth'):
@@ -541,7 +520,7 @@ class VIEW3D_OT_cursor3d(bpy.types.Operator):
             return {'FINISHED'}
 
 
-CustomProperty = customproperty.CustomProperty.new_class()
+CustomProperty = customproperty.CustomProperty.derive()
 
 
 draw_func_bak = None
@@ -609,9 +588,8 @@ def register():
     # オリジナルのwmOperatorTypeを確保しておく
     pyop = bpy.ops.view3d.cursor3d
     opinst = pyop.get_instance()
-    pyrna = ct.cast(id(opinst), ct.POINTER(structures.BPy_StructRNA)).contents
-    op = ct.cast(pyrna.ptr.data,
-                 ct.POINTER(structures.wmOperator)).contents
+    pyrna = structures.BPy_StructRNA.cast(id(opinst))
+    op = structures.wmOperator.cast(pyrna.ptr.data)
     VIEW3D_OT_cursor3d.operator_type = op.type.contents
 
     for cls in classes:

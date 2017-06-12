@@ -38,32 +38,45 @@ class _CollectionOperator:
     """
 
     class _Operator:
+        bl_idname = ''
         bl_description = ''
         bl_options = {'REGISTER', 'INTERNAL'}
 
-        _functions = None
-        """:type: dict"""
+        _functions = {}  # 継承する際に必ず別オブジェクトを割り当てる事
 
         data_path = bpy.props.StringProperty(options={'SKIP_SAVE'})
+
+        # register_function()で登録した関数を実行する場合に使用する。
+        # 値はregister_function()時の引数のkeyを指定する
         function = bpy.props.StringProperty(options={'SKIP_SAVE'})
 
         @classmethod
         def register_function(cls, key, func):
+            if not isinstance(key, str):
+                raise TypeError('引数のkeyは文字列でないといけない')
             cls._functions[key] = func
 
         @classmethod
         def register(cls):
-            mod, func = cls.bl_idname.split('.')
-            name = mod.upper() + '_OT_' + func.lower()
-            cls_ = getattr(bpy.types, name)
-            if cls == cls_:
-                cls._functions = {}
-            else:
-                cls._functions = cls_._functions
+            # mod, func = cls.bl_idname.split('.')
+            # name = mod.upper() + '_OT_' + func.lower()
+            # cls_ = getattr(bpy.types, name)
+            # if cls == cls_:
+            #     cls._functions = {}
+            # else:
+            #     cls._functions = cls_._functions
+
+            # ↑必要なさそうなのでコメントアウトしてみる
+            pass
 
         @classmethod
         def unregister(cls):
-            cls._functions = None
+            # cls._functions = None
+            pass
+
+        @property
+        def operator(self):
+            return eval('bpy.ops.' + self.bl_idname)
 
     class _Add(_Operator):
         """
@@ -76,6 +89,7 @@ class _CollectionOperator:
 
         bl_idname = 'wm.collection_add'
         bl_label = 'Collection Add'
+        _functions = {}
 
         def execute(self, context):
             if self.data_path:
@@ -96,6 +110,7 @@ class _CollectionOperator:
 
         bl_idname = 'wm.collection_remove'
         bl_label = 'Collection Remove'
+        _functions = {}
 
         index = bpy.props.IntProperty(options={'SKIP_SAVE'})
 
@@ -110,6 +125,7 @@ class _CollectionOperator:
     class _Clear(_Operator):
         bl_idname = 'wm.collection_clear'
         bl_label = 'Collection Clear'
+        _functions = {}
 
         def execute(self, context):
             if self.data_path:
@@ -122,6 +138,7 @@ class _CollectionOperator:
     class _Move(_Operator):
         bl_idname = 'wm.collection_move'
         bl_label = 'Collection Move'
+        _functions = {}
 
         index_from = bpy.props.IntProperty(options={'SKIP_SAVE'})
         index_to = bpy.props.IntProperty(options={'SKIP_SAVE'})
@@ -290,8 +307,12 @@ class _CustomProperty:
                 raise ValueError()
 
             cls = self._cls
-
-            cls.dynamic_property(obj, attr, prop)
+            if obj == bpy.types.Space:
+                for ob in set(self.space_types.values()):
+                    if ob != bpy.types.Space:
+                        cls.dynamic_property(ob, attr, prop)
+            else:
+                cls.dynamic_property(obj, attr, prop)
 
             idprop_key = self._space_porperty_id_prop_key(obj, attr)
 
@@ -355,7 +376,12 @@ class _CustomProperty:
 
             idprop_key = self._space_porperty_id_prop_key(obj, attr)
 
-            cls.dynamic_property_delete(obj, attr)
+            if obj == bpy.types.Space:
+                for ob in set(self.space_types.values()):
+                    if ob != bpy.types.Space:
+                        cls.dynamic_property_delete(ob, attr)
+            else:
+                cls.dynamic_property_delete(obj, attr)
 
             for func in bpy.app.handlers.save_pre:
                 if getattr(func, 'key', None) == idprop_key:

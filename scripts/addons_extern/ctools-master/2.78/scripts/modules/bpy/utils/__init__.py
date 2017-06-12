@@ -55,10 +55,10 @@ from _bpy import (
         _utils_units as units,
         blend_paths,
         escape_identifier,
-        register_class as _register_class,
+        register_class,
         resource_path,
         script_paths as _bpy_script_paths,
-        unregister_class as _unregister_class,
+        unregister_class,
         user_resource as _user_resource,
         )
 
@@ -154,14 +154,15 @@ def load_scripts(reload_scripts=False, refresh_scripts=False):
         original_modules = _sys.modules.values()
 
     if reload_scripts:
-        _bpy_types.TypeMap.clear()
-
         # just unload, don't change user defaults, this means we can sync
         # to reload. note that they will only actually reload of the
         # modification time changes. This `won't` work for packages so...
         # its not perfect.
         for module_name in [ext.module for ext in _user_preferences.addons]:
             _addon_utils.disable(module_name)
+
+        # *AFTER* unregistering all add-ons, otherwise all calls to unregister_module() will silently fail (do nothing).
+        _bpy_types.TypeMap.clear()
 
     def register_module_call(mod):
         register = getattr(mod, "register", None)
@@ -612,25 +613,6 @@ def user_resource(resource_type, path="", create=False):
                 target_path = ""
 
     return target_path
-
-
-_registered_classes = set()
-
-
-def register_class(cls):
-    try:
-        _register_class(cls)
-    finally:
-        if getattr(cls, 'is_registered', None) is True:
-            _registered_classes.add(cls)
-
-
-def unregister_class(cls):
-    try:
-        _unregister_class(cls)
-    finally:
-        if getattr(cls, 'is_registered', None) is False:
-            _registered_classes.discard(cls)
 
 
 def _bpy_module_classes(module, is_registered=False):

@@ -364,19 +364,19 @@ class Add_iterative_Tree(bpy.types.Operator):
 # the class who creates the buttons and call other classes
 
 
-class TreeMaker(bpy.types.Panel):
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
-    bl_context = "objectmode"
-    bl_category = "Create"
-    bl_label = "Add Tree"
-    bl_options = {'DEFAULT_CLOSED'}
+#class TreeMaker(bpy.types.Panel):
+    #bl_space_type = "VIEW_3D"
+    #bl_region_type = "TOOLS"
+    #bl_context = "objectmode"
+    #bl_category = "Create"
+    #bl_label = "Add Tree"
+    #bl_options = {'DEFAULT_CLOSED'}
 
-    def draw(self, context):
-        TheCol = self.layout.column()
-        TheCol.operator("mesh.add_iterative_tree", text="Add Tree")
-        TheCol.operator("mesh.addleaves", text="Add leaves")
-        TheCol.operator("mesh.adddetail", text="Add detail")
+    #def draw(self, context):
+        #TheCol = self.layout.column()
+        #TheCol.operator("mesh.add_iterative_tree", text="Add Tree")
+        #TheCol.operator("mesh.addleaves", text="Add leaves")
+        #TheCol.operator("mesh.adddetail", text="Add detail")
 
 
 # the class who adds details to the created tree
@@ -422,6 +422,7 @@ class AddDetail(bpy.types.Operator):
 
 # I'm sure you can guess for this one
 class AddLeaves(bpy.types.Operator):
+    """need smaller edges than the length / eg: unregular subdivided bezier curve"""
     bl_idname = "mesh.addleaves"
     bl_label = "Add leaves"
     bl_options = {'REGISTER', 'UNDO'}
@@ -582,14 +583,14 @@ def add_detail(ob, length, iterations, fractal):
 
 def register():
     bpy.utils.register_class(Add_iterative_Tree)
-    bpy.utils.register_class(TreeMaker)
+    #py.utils.register_class(TreeMaker)
     bpy.utils.register_class(AddLeaves)
     bpy.utils.register_class(AddDetail)
 
 
 def unregister():
     bpy.utils.unregister_class(Add_iterative_Tree)
-    bpy.utils.unregister_class(TreeMaker)
+    #bpy.utils.unregister_class(TreeMaker)
     bpy.utils.unregister_class(AddLeaves)
     bpy.utils.unregister_class(AddDetail)
 

@@ -26,6 +26,7 @@
 >>> eve = EDBM_vert_find_nearest_ex(ctypes.byref(vc), ctypes.byref(dist), \
                                     ctypes.c_bool(1), use_cycle)
 >>> # address -> function
+>>> # WARNING! wrong code -> addr = ctypes.addressof(EDBM_vert_find_nearest_ex)
 >>> addr = ctypes.cast(EDBM_vert_find_nearest_ex, ctypes.c_void_p).value
 >>> functype = ctypes.CFUNCTYPE(POINTER(BMVert), POINTER(ViewContext),
                    POINTER(ctypes.c_float), ctypes.c_bool, ctypes.c_bool)
@@ -93,6 +94,29 @@ def fields(*field_items):
 def set_fields(cls, *field_items):
     """'_fields_'のスペルミス多発の為"""
     cls._fields_ = fields(*field_items)
+
+
+class Cast:
+    @classmethod
+    def cast(cls, obj, contents=True):
+        if not obj:
+            return None
+        if isinstance(obj, int):
+            addr = obj
+        elif hasattr(obj, 'as_pointer'):
+            addr = obj.as_pointer()
+        else:
+            addr = obj
+        if contents:
+            return ct.cast(addr, ct.POINTER(cls)).contents
+        else:
+            return ct.cast(addr, ct.POINTER(cls))
+
+    def to_pointer(self):
+        return cast(addressof(self), POINTER(self.__class__))
+
+    def recast(self):
+        return cast(addressof(self), POINTER(self.__class__)).contents
 
 
 ###############################################################################
@@ -364,10 +388,15 @@ class ListBase(Structure):
         newlink.prev = gen_ptr(prevlink)
         prevlink.next = gen_ptr(newlink)
         if newlink.next:
-            newlink.next.prev = gen_ptr(newlink)
+            newlink.next.contents.prev = gen_ptr(newlink)
 
     def insert(self, i, vlink):
+        if i < 0:
+            i = len(self) - i
         self.insert_after(self.find(i - 1), vlink)
+
+    def append(self, vlink):
+        self.insert_after(self.find(len(self) - 1), vlink)
 
     def find_string(self, identifier, offset):
         """
@@ -430,7 +459,7 @@ class _PointerRNA_id(Structure):
     )
 
 
-class PointerRNA(Structure):
+class PointerRNA(Cast, Structure):
     """makesrna/RNA_types.h"""
     _fields_ = fields(
         _PointerRNA_id, 'id',
@@ -541,7 +570,7 @@ FloatPropertyRNA._fields_ = fields(
 )
 
 
-class BPy_StructRNA(Structure):
+class BPy_StructRNA(Cast, Structure):
     """python/intern/bpy_rna.h"""
     _fields_ = fields(
         PyObject_HEAD, 'head',
@@ -558,7 +587,7 @@ class BPy_PropertyRNA(Structure):
     )
 
 
-class BPy_PropertyArrayRNA(Structure):
+class BPy_PropertyArrayRNA(Cast, Structure):
     """python/intern/bpy_rna.h"""
     _fields_ = fields(
         PyObject_HEAD, 'head',
@@ -655,6 +684,63 @@ StructRNA._fields_ = fields(
 )
 
 
+class ExtensionRNA(Structure):
+    _fields_ = fields(
+        c_void, '*data',
+        StructRNA, '*srna',
+        c_void_p,'call',  # <StructCallbackFunc>
+        c_void_p,'free'  # <StructFreeFunc>
+    )
+
+
+class FunctionRNA(Structure):
+    """rna_internal_types.h: 135
+
+    func = bpy.types.UILayout.bl_rna.functions['label']
+    function_rna = ct.cast(func.as_pointer(), ct.POINTER(st.FunctionRNA)).contents
+
+    UILayout.label()を取得する場合:
+    コンパイル時のrna_ui_gen.cのUILayout_label_callとか参照
+    uiLayout *_self = ptr->data
+    char *_data = _parms->data
+    # ↓_dataの中身
+    # text, text_ctxt, translate, icon, icon_value
+    # 8, 8, 4, 4, 4, (char *, char *, int, int, int)
+
+    ptr = PointerRNA()
+    ptr.data = layout.as_pointer()
+    params = ParameterList()
+    data = c_char * (8 + 8 + 4 + 4 + 4)
+
+    function_rna.call(context.as_pointer(), None, ct.byref(ptr), ct.byref(params))
+
+    """
+    _fields_ = fields(
+        ContainerRNA, 'cont',
+        c_char_p, 'identifier',
+        c_int, 'flag',
+        c_char_p, 'description',
+        # typedef void (*CallFunc)(struct bContext *C, struct ReportList *reports, PointerRNA *ptr, ParameterList *parms);
+        CFUNCTYPE(c_int, c_void_p, c_void_p, c_void_p, c_void_p), 'call',
+        PropertyRNA, '*c_ret'
+    )
+
+
+class ParameterList(Structure):
+    _fields_ = fields(
+        # storage for parameters
+        c_void, '*data',
+
+        # function passed at creation time
+        FunctionRNA, '*func',
+
+        # store the parameter size
+        c_int, 'alloc_size',
+
+        c_int, 'arg_count', 'ret_count'
+    )
+
+
 ###############################################################################
 # blenkernel / makesdna / windowmanager/ editors
 ###############################################################################
@@ -691,6 +777,99 @@ class rctf(Structure):
     )
 
 
+"""
+typedef struct UserDef {
+    /* UserDef has separate do-version handling, and can be read from other files */
+    int versionfile, subversionfile',
+
+    int flag, dupflag',
+    int savetime',
+    char tempdir[768]',    /* FILE_MAXDIR length */
+    char fontdir[768]',
+    char renderdir[1024]', /* FILE_MAX length */
+    /* EXR cache path */
+    char render_cachedir[768]',  /* 768 = FILE_MAXDIR */
+    char textudir[768]',
+    char pythondir[768]',
+    char sounddir[768]',
+    char i18ndir[768]',
+    char image_editor[1024]',    /* 1024 = FILE_MAX */
+    char anim_player[1024]',        /* 1024 = FILE_MAX */
+    int anim_player_preset',
+
+    short v2d_min_gridsize',        /* minimum spacing between gridlines in View2D grids */
+    short timecode_style',        /* style of timecode display */
+
+    short versions',
+    short dbl_click_time',
+
+    short gameflags',
+    short wheellinescroll',
+    int uiflag, uiflag2',
+    int language',
+    short userpref, viewzoom',
+
+    int mixbufsize',
+    int audiodevice',
+    int audiorate',
+    int audioformat',
+    int audiochannels',
+
+    int scrollback',    /* console scrollback limit */
+    int dpi',           /* range 48-128? */
+    float ui_scale',     /* interface scale */
+    int pad1',
+    char node_margin',  /* node insert offset (aka auto-offset) margin, but might be useful for later stuff as well */
+    char pad2',
+    short transopts',
+    short menuthreshold1, menuthreshold2',
+
+    struct ListBase themes',
+    struct ListBase uifonts',
+    struct ListBase uistyles',
+    struct ListBase keymaps  DNA_DEPRECATED', /* deprecated in favor of user_keymaps */
+    struct ListBase user_keymaps',
+    struct ListBase addons',
+    struct ListBase autoexec_paths',
+    char keyconfigstr[64]',
+
+    short undosteps',
+    short undomemory',
+    short gp_manhattendist, gp_euclideandist, gp_eraser',
+    short gp_settings',
+    short tb_leftmouse, tb_rightmouse',
+    struct SolidLight light[3]',
+    short tw_hotspot, tw_flag, tw_handlesize, tw_size',
+    short textimeout, texcollectrate',
+    short wmdrawmethod', /* removed wmpad */
+    short dragthreshold',
+    int memcachelimit',
+    int prefetchframes',
+    float pad_rot_angle', /* control the rotation step of the view when PAD2, PAD4, PAD6&PAD8 is use */
+    short frameserverport',
+    short pad4',
+    short obcenter_dia',
+    short rvisize',            /* rotating view icon size */
+    short rvibright',        /* rotating view icon brightness */
+    short recent_files',        /* maximum number of recently used files to remember  */
+    short smooth_viewtx',    /* miliseconds to spend spinning the view */
+    short glreslimit',
+    short curssize',
+    short color_picker_type',
+    char  ipo_new',            /* interpolation mode for newly added F-Curves */
+    char  keyhandles_new',    /* handle types for newly added keyframes */
+    char  gpu_select_method',
+    char  view_frame_type',
+
+    int view_frame_keyframes', /* number of keyframes to zoom around current frame */
+    float view_frame_seconds', /* seconds to zoom around current frame */
+
+    short scrcastfps',        /* frame rate for screencast to be played back */
+    short scrcastwait',        /* milliseconds between screencast snapshots */
+
+    short widget_unit',        /* private, defaults to 20 for 72 DPI setting */
+"""
+
 class View2D(Structure):
     """DNA_view2d_types.h: 40"""
 
@@ -725,6 +904,85 @@ View2D._fields_ = fields(
     c_void_p, 'sms',  # struct SmoothView2DStore
     c_void_p, 'smooth_timer',  # struct wmTimer
 )
+
+
+# DNA_space_types.h: 1350: typedef enum eSpace_Type
+# SpaceType.spaceid
+class eSpace_Type(enum.IntEnum):
+    SPACE_EMPTY = 0
+    SPACE_VIEW3D = 1
+    SPACE_IPO = 2
+    SPACE_OUTLINER = 3
+    SPACE_BUTS = 4
+    SPACE_FILE = 5
+    SPACE_IMAGE = 6
+    SPACE_INFO = 7
+    SPACE_SEQ = 8
+    SPACE_TEXT = 9
+    # ifdef DNA_DEPRECATED
+    SPACE_IMASEL = 10  # deprecated
+    SPACE_SOUND = 11  # Deprecated
+    # endif
+    SPACE_ACTION = 12
+    SPACE_NLA = 13
+    # TO DO: fully deprecate
+    SPACE_SCRIPT = 14  # Deprecated
+    SPACE_TIME = 15
+    SPACE_NODE = 16
+    SPACE_LOGIC = 17
+    SPACE_CONSOLE = 18
+    SPACE_USERPREF = 19
+    SPACE_CLIP = 20
+    SPACEICONMAX = SPACE_CLIP
+
+
+class RNAEnumSpaceTypeItems(enum.IntEnum):
+    """EnumPropertyItem rna_enum_space_type_items
+    bpy.types.Area.typeで使われる名前と値
+    """
+    EMPTY = eSpace_Type.SPACE_EMPTY
+    VIEW_3D = eSpace_Type.SPACE_VIEW3D
+    TIMELINE = eSpace_Type.SPACE_TIME
+    GRAPH_EDITOR = eSpace_Type.SPACE_IPO
+    DOPESHEET_EDITOR = eSpace_Type.SPACE_ACTION
+    NLA_EDITOR = eSpace_Type.SPACE_NLA
+    IMAGE_EDITOR = eSpace_Type.SPACE_IMAGE
+    SEQUENCE_EDITOR = eSpace_Type.SPACE_SEQ
+    CLIP_EDITOR = eSpace_Type.SPACE_CLIP
+    TEXT_EDITOR = eSpace_Type.SPACE_TEXT
+    NODE_EDITOR = eSpace_Type.SPACE_NODE
+    LOGIC_EDITOR = eSpace_Type.SPACE_LOGIC
+    PROPERTIES = eSpace_Type.SPACE_BUTS
+    OUTLINER = eSpace_Type.SPACE_OUTLINER
+    USER_PREFERENCES = eSpace_Type.SPACE_USERPREF
+    INFO = eSpace_Type.SPACE_INFO
+    FILE_BROWSER = eSpace_Type.SPACE_FILE
+    CONSOLE = eSpace_Type.SPACE_CONSOLE
+
+
+# DNA_screen_types.h: 376:
+class eRegion_Type(enum.IntEnum):
+    RGN_TYPE_WINDOW = 0
+    RGN_TYPE_HEADER = 1
+    RGN_TYPE_CHANNELS = 2
+    RGN_TYPE_TEMPORARY = 3
+    RGN_TYPE_UI = 4
+    RGN_TYPE_TOOLS = 5
+    RGN_TYPE_TOOL_PROPS = 6
+    RGN_TYPE_PREVIEW = 7
+
+
+class RNAEnumRegionTypeItems(enum.IntEnum):
+    """EnumPropertyItem rna_enum_region_type_items
+    """
+    WINDOW = eRegion_Type.RGN_TYPE_WINDOW
+    HEADER = eRegion_Type.RGN_TYPE_HEADER
+    CHANNELS = eRegion_Type.RGN_TYPE_CHANNELS
+    TEMPORARY = eRegion_Type.RGN_TYPE_TEMPORARY
+    UI = eRegion_Type.RGN_TYPE_UI
+    TOOLS = eRegion_Type.RGN_TYPE_TOOLS
+    TOOL_PROPS = eRegion_Type.RGN_TYPE_TOOL_PROPS
+    PREVIEW = eRegion_Type.RGN_TYPE_PREVIEW
 
 
 class ARegionType(Structure):
@@ -784,7 +1042,7 @@ ARegionType._fields_ = fields(
 BKE_ST_MAXNAME = 64
 
 
-class PanelType(Structure):
+class PanelType(Cast, Structure):
     """BKE_screen.h: 173"""
 
 PanelType._fields_ = fields(
@@ -810,7 +1068,29 @@ PanelType._fields_ = fields(
     # void (*draw)(const struct bContext *, struct Panel *);
     CFUNCTYPE(c_int, c_void_p, c_void_p), 'draw',
 
-    # ExtensionRNA ext;
+    ExtensionRNA, 'ext',
+)
+
+
+class Panel(Cast, Structure):
+    """DNA_screen_types.h: 96"""
+
+Panel._fields_ = fields(
+    Panel, '*next', '*prev',
+
+    PanelType, '*type',
+    c_void, '*layout',  # uiLayout
+
+    c_char, 'panelname[64]', 'tabname[64]',
+    c_char, 'drawname[64]',
+    c_int, 'ofsx', 'ofsy', 'sizex', 'sizey',
+    c_short, 'labelofs', 'pad',
+    c_short, 'flag', 'runtime_flag',
+    c_short, 'control',
+    c_short, 'snap',
+    c_int, 'sortorder',  # panels are aligned according to increasing sortorder
+    Panel, '*paneltab',  # this panel is tabbed in *paneltab
+    c_void, '*activedata',  # runtime for panel manipulation
 )
 
 
@@ -900,61 +1180,22 @@ SpaceType._fields_ = fields(
 )
 
 
-# DNA_space_types.h: 1350: typedef enum eSpace_Type
-# SpaceType.spaceid
-class eSpace_Type(enum.IntEnum):
-    SPACE_EMPTY = 0
-    SPACE_VIEW3D = 1
-    SPACE_IPO = 2
-    SPACE_OUTLINER = 3
-    SPACE_BUTS = 4
-    SPACE_FILE = 5
-    SPACE_IMAGE = 6
-    SPACE_INFO = 7
-    SPACE_SEQ = 8
-    SPACE_TEXT = 9
-    # ifdef DNA_DEPRECATED
-    SPACE_IMASEL = 10  # deprecated
-    SPACE_SOUND = 11  # Deprecated
-    # endif
-    SPACE_ACTION = 12
-    SPACE_NLA = 13
-    # TO DO: fully deprecate
-    SPACE_SCRIPT = 14  # Deprecated
-    SPACE_TIME = 15
-    SPACE_NODE = 16
-    SPACE_LOGIC = 17
-    SPACE_CONSOLE = 18
-    SPACE_USERPREF = 19
-    SPACE_CLIP = 20
-    SPACEICONMAX = SPACE_CLIP
+class bScreen(Cast, Structure):
+    """DNA_screen_types.h: 48"""
+
+bScreen._fields_ = fields(
+    ID, 'id',
+
+    ListBase, 'vertbase',
+    ListBase, 'edgebase',
+    ListBase, 'areabase',
+    ListBase, 'regionbase',
+
+    c_void_p, '*scene',
+)
 
 
-class RNAEnumSpaceTypeItems(enum.IntEnum):
-    """EnumPropertyItem rna_enum_space_type_items
-    bpy.types.Area.typeで使われる名前と値
-    """
-    EMPTY = eSpace_Type.SPACE_EMPTY
-    VIEW_3D = eSpace_Type.SPACE_VIEW3D
-    TIMELINE = eSpace_Type.SPACE_TIME
-    GRAPH_EDITOR = eSpace_Type.SPACE_IPO
-    DOPESHEET_EDITOR = eSpace_Type.SPACE_ACTION
-    NLA_EDITOR = eSpace_Type.SPACE_NLA
-    IMAGE_EDITOR = eSpace_Type.SPACE_IMAGE
-    SEQUENCE_EDITOR = eSpace_Type.SPACE_SEQ
-    CLIP_EDITOR = eSpace_Type.SPACE_CLIP
-    TEXT_EDITOR = eSpace_Type.SPACE_TEXT
-    NODE_EDITOR = eSpace_Type.SPACE_NODE
-    LOGIC_EDITOR = eSpace_Type.SPACE_LOGIC
-    PROPERTIES = eSpace_Type.SPACE_BUTS
-    OUTLINER = eSpace_Type.SPACE_OUTLINER
-    USER_PREFERENCES = eSpace_Type.SPACE_USERPREF
-    INFO = eSpace_Type.SPACE_INFO
-    FILE_BROWSER = eSpace_Type.SPACE_FILE
-    CONSOLE = eSpace_Type.SPACE_CONSOLE
-
-
-class ScrArea(Structure):
+class ScrArea(Cast, Structure):
     """DNA_screen_types.h: 202"""
 
 ScrArea._fields_ = fields(
@@ -986,7 +1227,7 @@ ScrArea._fields_ = fields(
 )
 
 
-class ARegion(Structure):
+class ARegion(Cast, Structure):
     """DNA_screen_types.h: 229"""
 
 ARegion._fields_ = fields(
@@ -1024,69 +1265,85 @@ ARegion._fields_ = fields(
 
     c_void_p, 'regiontimer',  # <struct wmTimer>  # blend in/out
 
-    c_char_p, 'headerstr',  # use this string to draw info
+    c_char_p, 'headerstr',  # use this string to draw info  最大:UI_MAX_DRAW_STR:400
     c_void_p, 'regiondata',  # XXX 2.50, need spacedata equivalent?
 )
 
 
-# DNA_screen_types.h: 376:
-class eRegion_Type(enum.IntEnum):
-    RGN_TYPE_WINDOW = 0
-    RGN_TYPE_HEADER = 1
-    RGN_TYPE_CHANNELS = 2
-    RGN_TYPE_TEMPORARY = 3
-    RGN_TYPE_UI = 4
-    RGN_TYPE_TOOLS = 5
-    RGN_TYPE_TOOL_PROPS = 6
-    RGN_TYPE_PREVIEW = 7
-
-
-class RNAEnumRegionTypeItems(enum.IntEnum):
-    """EnumPropertyItem rna_enum_region_type_items
-    """
-    WINDOW = eRegion_Type.RGN_TYPE_WINDOW
-    HEADER = eRegion_Type.RGN_TYPE_HEADER
-    CHANNELS = eRegion_Type.RGN_TYPE_CHANNELS
-    TEMPORARY = eRegion_Type.RGN_TYPE_TEMPORARY
-    UI = eRegion_Type.RGN_TYPE_UI
-    TOOLS = eRegion_Type.RGN_TYPE_TOOLS
-    TOOL_PROPS = eRegion_Type.RGN_TYPE_TOOL_PROPS
-    PREVIEW = eRegion_Type.RGN_TYPE_PREVIEW
-
-
-class Panel(Structure):
-    """DNA_screen_types.h: 96"""
-
-Panel._fields_ = fields(
-    Panel, '*next', '*prev',
-
-    PanelType, '*type',
-    c_void, '*layout',  # uiLayout
-
-    c_char, 'panelname[64]', 'tabname[64]',
-    c_char, 'drawname[64]',
-    c_int, 'ofsx', 'ofsy', 'sizex', 'sizey',
-    c_short, 'labelofs', 'pad',
-    c_short, 'flag', 'runtime_flag',
-    c_short, 'control',
-    c_short, 'snap',
-    c_int, 'sortorder',  # panels are aligned according to increasing sortorder
-    Panel, '*paneltab',  # this panel is tabbed in *paneltab
-    c_void, '*activedata',  # runtime for panel manipulation
-)
-
-
 #未使用
-# class uiBlock(Structure):
-#     """interface_intern.h: 355"""
-#
-# uiBlock._fields_ = fields(
-#     uiBlock, '*next', '*prev',
-#
-#     ListBase, 'buttons',
-#     Panel, '*panel'
-#     # 以下略
-# )
+UI_MAX_DRAW_STR = 400  # UI_interface.h
+UI_MAX_NAME_STR = 128
+UI_MAX_SHORTCUT_STR = 16
+
+class uiBlock(Structure):
+    """interface_intern.h: 355"""
+
+uiBlock._fields_ = fields(
+    uiBlock, '*next', '*prev',
+
+    ListBase, 'buttons',
+    Panel, '*panel',
+    uiBlock, '*oldblock',
+
+    ListBase, 'butstore',  # UI_butstore_* runtime function
+
+    ListBase, 'layouts',
+    c_void, '*curlayout',  # struct uiLayout
+
+    ListBase, 'contexts',
+
+    c_char * UI_MAX_NAME_STR, 'name',
+
+    c_float, 'winmat[4][4]',
+
+    rctf, 'rect',
+    c_float, 'aspect',
+
+    c_uint, 'puphash',  # popup menu hash for memory
+
+    c_void_p, 'func',  # uiButHandleFunc
+    c_void, '*func_arg1',
+    c_void, '*func_arg2',
+
+    c_void_p, 'funcN',  # uiButHandleNFunc
+    c_void, '*func_argN',
+
+    c_void_p, 'butm_func',  # uiMenuHandleFunc
+    c_void, '*butm_func_arg',
+
+    c_void_p, 'handle_func',  # uiBlockHandleFunc
+    c_void, '*handle_func_arg',
+
+    # custom extra handling
+    # int (*block_event_func)(const struct bContext *C, struct uiBlock *, const struct wmEvent *)
+    c_void, '*block_event_func',
+
+    # extra draw function for custom blocks
+    # void (*drawextra)(const struct bContext *C, void *idv, void *arg1, void *arg2, rcti *rect);
+    c_void, '*drawextra',
+    c_void, '*drawextra_arg1',
+    c_void, '*drawextra_arg2',
+
+    c_int, 'flag',
+    c_short, 'alignnr',
+
+    c_char, 'direction',
+    c_char, 'dt',  # drawtype: UI_EMBOSS, UI_EMBOSS_NONE ... etc, copied to buttons
+    c_bool, 'auto_open',
+    c_char, '_pad[7]',
+    c_double, 'auto_open_last',
+
+    c_char_p, 'lockstr',
+
+    c_char, 'lock',
+    c_uint8, 'active',  # c_char # to keep blocks while drawing and free them afterwards
+    c_char, 'tooltipdisabled',  # to avoid tooltip after click
+    c_char, 'endblock',  # UI_block_end done?
+
+    c_int, 'bounds_type',  # enum eBlockBoundsCalc
+    c_int, 'mx', 'my',
+    c_int, 'bounds', 'minbounds',
+)
 #
 #
 # class SpaceLink(Structure):
@@ -1101,7 +1358,7 @@ Panel._fields_ = fields(
 # )
 #
 #
-# class SpaceButs(Structure):
+# class SpaceButs(Cast, Structure):
 #     """DNA_space_types.h: 114"""
 #
 # SpaceButs._fields_ = fields(
@@ -1129,7 +1386,7 @@ Panel._fields_ = fields(
 # )
 
 
-class RegionView3D(Structure):
+class RegionView3D(Cast, Structure):
     """DNA_view3d_types.h: 86"""
 
 RegionView3D._fields_ = fields(
@@ -1165,7 +1422,7 @@ RegionView3D._fields_ = fields(
     c_float, 'dist',  # distance from 'ofs' along -viewinv[2] vector, where result is negative as is 'ofs'
     c_float, 'camdx', 'camdy',  # camera view offsets, 1.0 = viewplane moves entire width/height
     c_float, 'pixsize',  # runtime only
-    c_float, 'ofs[3]',  # view center & orbit pivot, negative of worldspace location, also matches -viewinv[3][0:3] in ortho mode. 
+    c_float, 'ofs[3]',  # view center & orbit pivot, negative of worldspace location, also matches -viewinv[3][0:3] in ortho mode.
     c_float, 'camzoom',  # viewport zoom on the camera frame, see BKE_screen_view3d_zoom_to_fac
     c_char, 'is_persp',   # check if persp/ortho view, since 'persp' cant be used for this since
                             # it can have cameras assigned as well. (only set in view3d_winmatrix_set)
@@ -1285,9 +1542,9 @@ View3D._fields_ = fields(
 
     # # XXX deprecated?
     # struct bGPdata *gpd  DNA_DEPRECATED        # Grease-Pencil Data (annotation layers)
-    # 
+    #
     # short usewcol, dummy3[3]
-    # 
+    #
     #  # multiview - stereo 3d
     # short stereo3d_flag
     # char stereo3d_camera
@@ -1295,7 +1552,7 @@ View3D._fields_ = fields(
     # float stereo3d_convergence_factor
     # float stereo3d_volume_alpha
     # float stereo3d_convergence_alpha
-    # 
+    #
     # # local grid
     # char localgrid, cursor_snap_grid, dummy[2]
     # float lg_loc[3], dummy2[2] // orign(x,y,z)
@@ -1303,7 +1560,7 @@ View3D._fields_ = fields(
 )
 
 
-class wmSubWindow(Structure):
+class wmSubWindow(Cast, Structure):
     """windowmanager/intern/wm_subwindow.c: 67"""
 
 wmSubWindow._fields_ = fields(
@@ -1313,8 +1570,22 @@ wmSubWindow._fields_ = fields(
 )
 
 
-class wmEvent(Structure):
+class wmEvent(Cast, Structure):
     """windowmanager/WM_types.h: 431"""
+
+    def is_timer_event(self, timer):
+        """
+        :type timer: bpy.types.Timer | int
+        :rtype: bool
+        """
+        TIMER = 272  # 'TIMER'
+        if isinstance(timer, int):
+            addr = timer
+        elif isinstance(timer, bpy.types.Timer):
+            addr = timer.as_pointer()
+        else:
+            raise TypeError()
+        return self.type == TIMER and self.customdata == addr
 
 wmEvent._fields_ = fields(
     wmEvent, '*next', '*prev',
@@ -1391,15 +1662,6 @@ PTYPE_UNDO_GROUPED = (1 << 8)  # Special type of undo which doesn't store
                                #  itself multiple times
 
 
-class ExtensionRNA(Structure):
-    _fields_ = fields(
-        c_void, '*data',
-        StructRNA, '*srna',
-        c_void_p,'call',  # <StructCallbackFunc>
-        c_void_p,'free'  # <StructFreeFunc>
-    )
-
-
 class wmOperatorType(Structure):
     """source/blender/windowmanager/WM_types.h: 518"""
 
@@ -1454,7 +1716,7 @@ wmOperatorType_fields += fields(
 wmOperatorType._fields_ = wmOperatorType_fields
 
 
-class wmOperator(Structure):
+class wmOperator(Cast, Structure):
     """source/blender/makesdna/DNA_windowmanager_types.h: 344
 
     pythonインスタンスからの取得方法:
@@ -1489,7 +1751,7 @@ wmOperator._fields_ = fields(
 )
 
 
-class wmEventHandler(Structure):
+class wmEventHandler(Cast, Structure):
     """source/blender/windowmanager/wm_event_system.h: 45"""
 
 wmEventHandler._fields_ = fields(
@@ -1524,7 +1786,7 @@ wmEventHandler._fields_ = fields(
 WM_HANDLER_DO_FREE = 1 << 7
 
 
-class wmWindow(Structure):
+class wmWindow(Cast, Structure):
     """source/blender/makesdna/DNA_windowmanager_types.h: 175"""
 
     @classmethod
@@ -1542,7 +1804,7 @@ class wmWindow(Structure):
 
         handlers = []
 
-        ptr = cast(win.modalhandlers.first, POINTER(wmEventHandler))
+        ptr = wmEventHandler.cast(win.modalhandlers.first, contents=False)
         while ptr:
             # http://docs.python.jp/3/library/ctypes.html#surprises
             # この辺りの事には注意する事
@@ -1568,8 +1830,8 @@ wmWindow._fields_ = fields(
 
     c_void_p, 'ghostwin',
 
-    c_void_p, 'screen',  # struct bScreen
-    c_void_p, 'newscreen',  # struct bScreen
+    bScreen, '*screen',
+    bScreen, '*newscreen',
     c_char, 'screenname[64]',
 
     c_short, 'posx', 'posy', 'sizex', 'sizey',
@@ -1614,7 +1876,7 @@ wmWindow._fields_ = fields(
 )
 
 
-class SpaceText(Structure):
+class SpaceText(Cast, Structure):
     """source/blender/makesdna/DNA_space_types.h: 981"""
 
 SpaceText._fields_ = fields(
@@ -1658,13 +1920,13 @@ SpaceText._fields_ = fields(
 )
 
 
-class bContext(Structure):
+class bContext(Cast, Structure):
     """source/blender/blenkernel/intern/context.c:61"""
     class bContext_wm(Structure):
         _fields_ = fields(
             c_void_p, 'manager',  # struct wmWindowManager
             wmWindow, '*window',
-            c_void_p, 'screen',  # struct bScreen
+            bScreen, '*screen',
             ScrArea, '*area',
             ARegion, '*region',
             ARegion, '*menu',
@@ -1692,8 +1954,78 @@ class bContext(Structure):
         bContext_data, 'data',
     )
 
+    @classmethod
+    def wm_window_set(cls, window):
+        """CTX_wm_window_set"""
+        ctx = cls.cast(bpy.context)
 
-class Text(Structure):
+        if window:
+            ctx.wm.window = wmWindow.cast(window, False)
+        else:
+            ctx.wm.window = None
+        if window and window.screen:
+            ctx.wm.screen = window.screen.as_pointer()
+        else:
+            ctx.wm.screen = None
+        if ctx.wm.screen:
+            ctx.data.scene = ctx.wm.screen.scene
+        ctx.wm.area = None
+        ctx.wm.region = None
+
+    @classmethod
+    def wm_screen_set(cls, screen):
+        """CTX_wm_screen_set"""
+        ctx = cls.cast(bpy.context)
+
+        if screen:
+            ctx.wm.screen = bScreen.cast(screen, False)
+        else:
+            ctx.wm.screen = None
+        if ctx.wm.screen:
+            ctx.data.scene = ctx.wm.screen.scene
+        ctx.wm.area = None
+        ctx.wm.region = None
+
+    @classmethod
+    def wm_area_set(cls, area):
+        """CTX_wm_area_set"""
+        ctx = cls.cast(bpy.context)
+
+        if area:
+            ctx.wm.area = ScrArea.cast(area, False)
+        else:
+            ctx.wm.area = None
+        ctx.wm.region = None
+
+    @classmethod
+    def wm_region_set(cls, region, calc_mouse=False):
+        """CTX_wm_region_set"""
+        ctx = cls.cast(bpy.context)
+
+        if region:
+            ctx.wm.region = ARegion.cast(region, False)
+        else:
+            ctx.wm.region = None
+        if calc_mouse:
+            cls.calc_mouse()
+
+    @classmethod
+    def calc_mouse(cls):
+        context = bpy.context
+        ctx = cls.cast(context)
+        win_p = ctx.wm.window
+        if win_p:
+            win = win_p.contents
+            event = win.eventstate.contents
+            region = context.region
+            if region:
+                event.mval[0] = event.x - region.x
+                event.mval[1] = event.y - region.y
+            else:
+                event.mval[0] = event.mval[1] = 0
+
+
+class Text(Cast, Structure):
     """makesdna/DNA_text_types.h: 50"""
     _fields_ = fields(
         ID, 'id',
@@ -1789,9 +2121,9 @@ class MCol(Structure):
 # new face structure, replaces MFace, which is now only used for storing tessellations.
 class MPoly(Structure):
     _fields_ = fields(
-        # offset into loop array and number of loops in the face 
+        # offset into loop array and number of loops in the face
         c_int, 'loopstart',
-        c_int, 'totloop',  # keep signed since we need to subtract when getting the previous loop 
+        c_int, 'totloop',  # keep signed since we need to subtract when getting the previous loop
         c_short, 'mat_nr',
         c_char, 'flag', 'pad',
     )
@@ -1834,7 +2166,7 @@ class Mesh(Structure):
         # END BMESH ONLY
 
         # mface stores the tessellation (triangulation) of the mesh,
-        # real faces are now stored in nface. 
+        # real faces are now stored in nface.
         c_void, '*mface',  # struct MFace  # array of mesh object mode faces for tessellation
         c_void, '*mtface',  # struct MTFace  # store tessellation face UV's and texture here
         c_void, '*tface',  # struct TFace  # DNA_DEPRECATED   # deprecated, use mtface
@@ -2307,6 +2639,111 @@ class BMWalker(Structure):
 
 
 ###############################################################################
+# Node
+###############################################################################
+class bNodeSocket(Cast, Structure):
+    """DNA_node_types.h: 86"""
+    # 選択状態は flag & SELECT
+
+bNodeSocket._fields_ = fields(
+    bNodeSocket, '*next', '*prev', '*new_sock',
+    c_void, '*prop',  # IDProperty
+
+    c_char, 'identifier[64]',
+
+    c_char, 'name[64]',
+
+    c_void, '*storage',
+
+    c_short, 'type', 'flag',
+    c_short, 'limit',
+    c_short, 'in_out',
+    c_void, '*typeinfo',  # struct bNodeSocketType
+    c_char, 'idname[64]',
+
+    c_float, 'locx', 'locy',
+
+    # 以下略
+)
+
+
+class bNode(Cast, Structure):
+    """DNA_node_types.h: 86"""
+    # 選択状態は flag & SELECT
+
+
+bNode._fields_ = fields(
+    bNode, '*next', '*prev', '*new_node',
+
+    c_void, '*prop',  # IDProperty  # user-defined properties
+
+    c_void, '*typeinfo',  # struct bNodeType  # runtime type information
+    c_char, 'idname[64]',  # runtime type identifier
+
+    c_char, 'name[64]',  # MAX_NAME
+    c_int, 'flag',
+    c_short, 'type', 'pad',
+    c_short, 'done', 'level',  # both for dependency and sorting
+    c_short, 'lasty', 'menunr',  # lasty: check preview render status, menunr: browse ID blocks
+    c_short, 'stack_index',  # for groupnode, offset in global caller stack
+    c_short, 'nr',  # number of this node in list, used for UI exec events
+    c_float, 'color[3]',  # custom user-defined color
+
+    ListBase, 'inputs', 'outputs',
+    bNode, '*parent',  # parent node
+    ID, '*id',  # optional link to libdata
+    c_void, '*storage',  # custom data, must be struct, for storage in file
+    bNode, '*original',  # the original node in the tree (for localized tree)
+    ListBase, 'internal_links',  # list of cached internal links (input to output), for muted nodes and operators
+
+    c_float, 'locx', 'locy',  # root offset for drawing (parent space)
+    c_float, 'width', 'height',  # node custom width and height
+    c_float, 'miniwidth',  # node width if hidden
+    c_float, 'offsetx', 'offsety',  # additional offset from loc
+    c_float, 'anim_init_locx',  # initial locx for insert offset animation
+    c_float, 'anim_ofsx',  # offset that will be added to locx for insert offset animation
+
+    c_int, 'update',  # update flags
+
+    c_char, 'label[64]',  # custom user-defined label, MAX_NAME
+    c_short, 'custom1', 'custom2',  # to be abused for buttons
+    c_float, 'custom3', 'custom4',
+
+    c_short, 'need_exec', 'exec',  # need_exec is set as UI execution event, exec is flag during exec
+    c_void, '*threaddata',  # optional extra storage for use in thread (read only then!)
+    rctf, 'totr',  # entire boundbox (worldspace)
+    rctf, 'butr',  # optional buttons area
+    rctf, 'prvr',  # optional preview area
+
+    c_short, 'preview_xsize', 'preview_ysize',  # reserved size of the preview rect
+    c_int, 'pad2',
+    c_void, '*block',  # struct uiBlock  # runtime during drawing
+)
+
+
+# 未使用
+# class bNodeTree(Cast, Structure):
+#     """DNA_node_types.h: 329"""
+#
+# bNodeTree._fields_ = fields(
+#     ID, 'id',
+#     c_void, '*adt',  # struct AnimData  # animation data (must be immediately after id for utilities to use it)
+#
+#     c_void, '*typeinfo',  # struct bNodeTreeType  # runtime type information
+#     c_char, 'idname[64]',  # runtime type identifier
+#
+#     c_void, '*interface_type',  # struct StructRNA  # runtime RNA type of the group interface
+#
+#     c_void, '*gpd',  # struct bGPdata  # grease pencil data
+#     c_float, 'view_center[2]',  # node tree stores own offset for consistent editor view
+#
+#     ListBase, 'nodes', 'links',
+#
+#     # 以下略
+# )
+
+
+###############################################################################
 #
 ###############################################################################
 def image_pixels_get(image):
@@ -2321,7 +2758,7 @@ def image_pixels_get(image):
 
     image_pixels = image.pixels  # インスタンスは終わるまで残しとかないと駄目
     addr = id(image_pixels)
-    bpy_prop = cast(addr, POINTER(BPy_PropertyArrayRNA)).contents
+    bpy_prop = BPy_PropertyArrayRNA.cast(addr)
     ptr = cast(addressof(bpy_prop.ptr), POINTER(PointerRNA))
     prop = bpy_prop.prop
     pixels = np.zeros(len(image.pixels), dtype=np.float32)

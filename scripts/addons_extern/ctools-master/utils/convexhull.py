@@ -574,7 +574,8 @@ def test(use_random=True, random_count=10, lifetime=3.0):
         obb_scale_2d = Vector(obb_scale_2d)
 
         # draw 3d obb
-        cm = glsettings.region_view3d_space().enter()
+        cm = glsettings.region_view3d_space()
+        cm.__enter__()
         x, y, z = obb_scale / 2
         vecs = [obb_mat * Vector(v) for v in
                 [(-x, -y, -z),
@@ -618,7 +619,7 @@ def test(use_random=True, random_count=10, lifetime=3.0):
             draw_line(vecs[i], vecs[i + 4])
         bgl.glEnd()
 
-        cm.exit()
+        cm.__exit__(None, None, None)
 
         # draw 2d
         bgl.glLineWidth(1.0)

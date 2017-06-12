@@ -429,12 +429,11 @@ class USERPREF_PT_system(Panel):
 
         col.separator()
 
-        if hasattr(system, "compute_device_type"):
-            col.label(text="Compute Device:")
-            col.row().prop(system, "compute_device_type", expand=True)
-            sub = col.row()
-            sub.active = system.compute_device_type != 'CPU'
-            sub.prop(system, "compute_device", text="")
+        if bpy.app.build_options.cycles:
+            addon = userpref.addons.get("cycles")
+            if addon is not None:
+                addon.preferences.draw_impl(col, context)
+            del addon
 
         if hasattr(system, "opensubdiv_compute_type"):
             col.label(text="OpenSubdiv compute:")
@@ -454,6 +453,7 @@ class USERPREF_PT_system(Panel):
         col.separator()
         col.label(text="Selection")
         col.prop(system, "select_method", text="")
+        col.prop(system, "use_select_pick_depth")
 
         col.separator()
 
@@ -1181,11 +1181,18 @@ class USERPREF_PT_input(Panel):
             col.separator()
             col.label(text="NDOF Device:")
             sub = col.column(align=True)
-            sub.prop(inputs, "ndof_sensitivity", text="NDOF Sensitivity")
-            sub.prop(inputs, "ndof_orbit_sensitivity", text="NDOF Orbit Sensitivity")
-            sub.prop(inputs, "ndof_deadzone", text="NDOF Deadzone")
+            sub.prop(inputs, "ndof_sensitivity", text="Pan Sensitivity")
+            sub.prop(inputs, "ndof_orbit_sensitivity", text="Orbit Sensitivity")
+            sub.prop(inputs, "ndof_deadzone", text="Deadzone")
+
+            sub.separator()
+            col.label(text="Navigation Style:")
             sub = col.column(align=True)
             sub.row().prop(inputs, "ndof_view_navigate_method", expand=True)
+
+            sub.separator()
+            col.label(text="Rotation Style:")
+            sub = col.column(align=True)
             sub.row().prop(inputs, "ndof_view_rotate_method", expand=True)
 
         row.separator()
@@ -1237,7 +1244,7 @@ class USERPREF_MT_addons_online_resources(Menu):
                 "wm.url_open", text="API Concepts", icon='URL',
                 ).url = bpy.types.WM_OT_doc_view._prefix + "/info_quickstart.html"
         layout.operator("wm.url_open", text="Add-on Tutorial", icon='URL',
-                ).url = "http://www.blender.org/api/blender_python_api_current/info_tutorial_addon.html"
+                ).url = bpy.types.WM_OT_doc_view._prefix + "/info_tutorial_addon.html"
 
 
 class USERPREF_PT_addons(Panel):
@@ -1284,7 +1291,6 @@ class USERPREF_PT_addons(Panel):
 
     def draw(self, context):
         import os
-        import re
         import addon_utils
 
         layout = self.layout
@@ -1312,11 +1318,18 @@ class USERPREF_PT_addons(Panel):
 
         # set in addon_utils.modules_refresh()
         if addon_utils.error_duplicates:
-            self.draw_error(col,
-                            "Multiple addons using the same name found!\n"
-                            "likely a problem with the script search path.\n"
-                            "(see console for details)",
-                            )
+            box = col.box()
+            row = box.row()
+            row.label("Multiple addons with the same name found!")
+            row.label(icon='ERROR')
+            box.label("Please delete one of each pair:")
+            for (addon_name, addon_file, addon_path) in addon_utils.error_duplicates:
+                box.separator()
+                sub_col = box.column(align=True)
+                sub_col.label(addon_name + ":")
+                sub_col.label("    " + addon_file)
+                sub_col.label("    " + addon_path)
+
 
         if addon_utils.error_encoding:
             self.draw_error(col,
@@ -1348,22 +1361,24 @@ class USERPREF_PT_addons(Panel):
                 ):
 
                 if search:
-                    match = True
-                    for word in search.split(' '):
-                        if not word:
-                            continue
-                        if word.startswith(os.path.sep):
-                            if not re.search(word, mod.__file__):
-                                match = False
-                                break
-                        elif word.lower() in info["name"].lower():
-                            pass
-                        elif (info["author"] and
-                              word.lower() in info["author"].lower()):
-                            pass
+                    if search.startswith('//'):
+                        if re.search(search.lstrip('//'), mod.__file__):
+                            match = True
                         else:
                             match = False
-                            break
+                    else:
+                        match = True
+                        for word in search.split(' '):
+                            if not word:
+                                continue
+                            if word.lower() in info["name"].lower():
+                                pass
+                            elif (info["author"] and
+                                  word.lower() in info["author"].lower()):
+                                pass
+                            else:
+                                match = False
+                                break
                     if not match:
                         continue
 
@@ -1481,5 +1496,31 @@ class USERPREF_PT_addons(Panel):
                 row.label(text=module_name, translate=False)
 
 
-if __name__ == "__main__":  # only for live edit.
-    bpy.utils.register_module(__name__)
+if bpy.app.version[2] > 0:
+    classes = (
+        USERPREF_HT_header,
+        USERPREF_PT_tabs,
+        USERPREF_MT_interaction_presets,
+        USERPREF_MT_appconfigs,
+        USERPREF_MT_splash,
+        USERPREF_MT_splash_footer,
+        USERPREF_PT_interface,
+        USERPREF_PT_edit,
+        USERPREF_PT_system,
+        USERPREF_MT_interface_theme_presets,
+        USERPREF_PT_theme,
+        USERPREF_PT_file,
+        USERPREF_MT_ndof_settings,
+        USERPREF_MT_keyconfigs,
+        USERPREF_PT_input,
+        USERPREF_MT_addons_online_resources,
+        USERPREF_PT_addons,
+    )
+
+    if __name__ == "__main__":  # only for live edit.
+        from bpy.utils import register_class
+        for cls in classes:
+            register_class(cls)
+else:
+    if __name__ == "__main__":  # only for live edit.
+        bpy.utils.register_module(__name__)

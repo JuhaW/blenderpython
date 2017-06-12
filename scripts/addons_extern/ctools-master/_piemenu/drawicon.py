@@ -337,7 +337,7 @@ internal_icons = OrderedDict((
 
 
 icon_buffer = []  # [buffer, img_sx, img_sy]
-textures = {}  # {[texture(int), sx, sy] or func, ...}
+textures = {}  # {[texture(int), buffer, sx, sy, x, y, w, h] or func, ...}
 
 
 def get_image_buffer(path):
@@ -390,7 +390,6 @@ def get_texture(name):
         sx, sy = img.size
         buf = bgl.Buffer(bgl.GL_FLOAT, 4 * sx * sy)
         img.gl_load(filter=bgl.GL_LINEAR, mag=bgl.GL_LINEAR)
-        # TODO: 仕様変更があったので動作確認 -> img.bindcode
         bgl.glBindTexture(bgl.GL_TEXTURE_2D, img.bindcode[0])
         bgl.glGetTexImage(bgl.GL_TEXTURE_2D, 0,
                           bgl.GL_RGBA, bgl.GL_FLOAT, buf)

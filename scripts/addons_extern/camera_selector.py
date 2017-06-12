@@ -86,7 +86,9 @@ class SetSceneCamera(bpy.types.Operator):
             for c in [o for o in scene.objects if o.type == 'CAMERA']:
                 c.hide = (c != chosen_camera)
         scene.camera = chosen_camera
-
+        bpy.context.scene.objects.active = chosen_camera
+        bpy.ops.object.select_all(action='TOGGLE')
+        chosen_camera.select = True 
         return {'FINISHED'}
 
     def invoke(self, context, event):

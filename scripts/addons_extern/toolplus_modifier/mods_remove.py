@@ -22,7 +22,7 @@ bl_info = {
     "author": "MKB",
     "version": (0, 1, 0),
     "blender": (2, 7, 8),
-    "location": "View3D",
+    "location": "VIEW3D",
     "description": "Remove Modifier by Type",
     "warning": "",
     "wiki_url": "",
@@ -35,7 +35,7 @@ import bpy
 
 
 
-class View3D_TP_Remove_Modifier_Type(bpy.types.Operator):
+class VIEW3D_TP_Remove_Modifier_Type(bpy.types.Operator):
     """remove modifier by type"""
     bl_idname = "tp_ops.remove_mods_type"
     bl_label = "Mods Type Remove"

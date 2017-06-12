@@ -18,7 +18,7 @@
 
 
 bl_info = {
-    'name': 'Pie Menu',
+    'name': 'Pie Menu Old',
     'author': 'chromoly',
     'version': (0, 1, 0),
     'blender': (2, 78, 0),
@@ -51,16 +51,23 @@ from mathutils import Vector
 import blf
 import bgl
 
-from ..utils import addongroup
-from ..utils import registerinfo
 from ..utils import vagl as vagl
 from ..utils.structures import *
+from ..utils import vawm
 
-from . import drawicon
-from . import preferences
-from .preferences import PieMenuPreferences
-
-from . import oputils
+# from . import drawicon
+# from . import preferences
+# from .preferences import PieMenuPreferences
+#
+# from . import oputils
+try:
+    importlib.reload(drawicon)
+    importlib.reload(preferences)
+    importlib.reload(oputils)
+except NameError:
+    from . import drawicon
+    from . import preferences
+    from . import oputils
 
 
 config_dir_name = 'piemenus'
@@ -80,30 +87,8 @@ def is_instance(obj):
 
 
 def get_addon_preferences():
-    """:rtype: PieMenuPreferences"""
+    """:rtype: preferences.PieMenuPreferences"""
     return preferences.PieMenuPreferences.get_instance()
-
-
-def get_widget_unit(dpi=None):
-    """
-    blender/makesdna/DNA_userdef_types.h:518:
-        short widget_unit;  /* private, defaults to 20 for 72 DPI setting */
-
-    # #define UI_UNIT_X               ((void)0, U.widget_unit)
-    # #define UI_UNIT_Y               ((void)0, U.widget_unit)
-    # blender/blenkernel/intern/blender.c:507:
-    #     U.widget_unit = (U.pixelsize * U.dpi * 20 + 36) / 72;
-
-    dpi = context.user_preferences.system.dpi
-    PIXEL_SIZE = 1.0
-    widget_unit = int((PIXEL_SIZE * dpi * 20 + 36) / 72)
-    """
-
-    # dpi: 72 -> 20.5, 96: 27.2
-
-    if dpi is None:
-        dpi = bpy.context.user_preferences.system.dpi
-    return int((PIXEL_SIZE * dpi * 20 + 36) / 72)
 
 
 def get_event():
@@ -435,7 +420,7 @@ class Menu:
             else:
                 pie_angle = math.pi * 2 / num
 
-            widget_unit = get_widget_unit()
+            widget_unit = vawm.widget_unit()
             if self.icon_size > 0:
                 # icon_box_w = max(widget_unit, self.icon_size + 2)
                 icon_box_w = max(widget_unit, self.icon_size)
@@ -525,6 +510,8 @@ class Menu:
         import bpy_extras.keyconfig_utils
 
         kc = bpy.context.window_manager.keyconfigs.addon
+        if not kc:
+            return
 
         modal_keymaps = [
             'View3D Gesture Circle',
@@ -639,7 +626,7 @@ class DrawingManager:
         U = context.user_preferences
         self.op = op
 
-        self.widget_unit = get_widget_unit()
+        self.widget_unit = vawm.widget_unit()
         self.dpi = context.user_preferences.system.dpi
         f = PIXEL_SIZE * self.dpi / 72
         # フォントの高さ。blf.dimensionsでは一定にならないのでこれを使う
@@ -673,7 +660,7 @@ class DrawingManager:
         self.icon_size = ICON_DEFAULT_HEIGHT * f
 
         # TODO: 暫定的な調整値
-        self.ICON_TEXT_MARGIN = self.widget_unit * 0.2
+        self.ICON_TEXT_MARGIN = self.widget_unit * 0.1
 
     def update(self, context, op):
         self.__init__(context, op)
@@ -2033,7 +2020,7 @@ class WM_OT_pie_menu(bpy.types.Operator):
         try:
             import ctools.regionruler as regionruler
             p = context.user_preferences.addons[
-                'ctools'].preferences.regionruler
+                'ctools'].preferences.get_instance("regionruler")
             self.draw_cross_cursor = p.draw_cross_cursor
             simple_measure = regionruler.data.simple_measure
             regionruler.data.simple_measure = False
@@ -2053,7 +2040,7 @@ class WM_OT_pie_menu(bpy.types.Operator):
     def regionruler_restore(self, context):
         try:
             p = context.user_preferences.addons[
-                'ctools'].preferences.regionruler
+                'ctools'].preferences.get_instance("regionruler")
             p.draw_cross_cursor = self.draw_cross_cursor
         except:
             pass
@@ -2307,8 +2294,7 @@ class WM_OT_pie_menu(bpy.types.Operator):
         items = bpy.types.Event.bl_rna.properties['type'].enum_items
         # get(name)はEnumPropertyItemを、find(name)はインデックスを得る
         value = items.get(event_type).value
-        addr = context.window.as_pointer()
-        win = cast(c_void_p(addr), POINTER(wmWindow)).contents
+        win = wmWindow.cast(context.window)
         win.lock_pie_event = value
 
     # 未使用
@@ -2321,34 +2307,7 @@ class WM_OT_pie_menu(bpy.types.Operator):
 
     def get_modal_handlers(self, context):
         window = context.window
-        if not window:
-            return []
-
-        addr = window.as_pointer()
-        win = cast(c_void_p(addr), POINTER(wmWindow)).contents
-
-        handlers = []
-
-        ptr = cast(win.modalhandlers.first, POINTER(wmEventHandler))
-        while ptr:
-            # http://docs.python.jp/3/library/ctypes.html#surprises
-            # この辺りの事には注意する事
-            handler = ptr.contents
-            area = handler.op_area  # NULLの場合はNone
-            region = handler.op_region  # NULLの場合はNone
-            idname = 'UNKNOWN'
-            if handler.ui_handle:
-                idname = 'UI'
-            if handler.op:
-                op = handler.op.contents
-                ot = op.type.contents
-                if ot.idname:
-                    idname = ot.idname.decode()
-            handlers.append((handler, idname, area, region,
-                             handler.op_region_type))
-            ptr = handler.next
-
-        return handlers
+        return wmWindow.modal_handlers(window)
 
     def invoke(self, context, event):
         self.__class__.event = event  # get_event()用
@@ -2446,6 +2405,11 @@ def import_user_pie_menus():
         except:
             traceback.print_exc()
             continue
+        try:  # F8でのリロード後にSnapメニューで問題が起こったので
+            importlib.reload(mod)
+        except:
+            traceback.print_exc()
+            continue
         register_user_moudle(mod)
     sys.path.pop(0)
 
@@ -2457,7 +2421,7 @@ classes = [
 ]
 
 
-@PieMenuPreferences.register_addon
+@preferences.PieMenuPreferences.register_addon
 def register():
     preferences.register()
     drawicon.register()
@@ -2482,7 +2446,7 @@ def register():
     # pie_keymap_items.append((km, kmi))
 
 
-@PieMenuPreferences.unregister_addon
+@preferences.PieMenuPreferences.unregister_addon
 def unregister():
     preferences.unregister()
     drawicon.unregister()

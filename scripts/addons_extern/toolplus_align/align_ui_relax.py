@@ -1,100 +1,69 @@
+__status__ = "toolplus"
+__author__ = "mkbreuer"
+__version__ = "1.0"
+__date__ = "2017"
 
 
 
 import bpy
 from bpy import *
 from bpy.props import *
+from . icons.icons import load_icons
 
 
 def draw_align_relax_tools_panel_layout(self, context, layout):
-        lt = context.window_manager.looptools
-
-        #icons = icon_collections["main"]
-
-        #my_button_one = icons.get("my_image1")
-        #row.label(text="Icon", icon_value=my_button_one.icon_id)
+        tp = context.window_manager.tp_align_looptools
+        
+        icons = load_icons()
 
         box = layout.box().column(1)    
-         
+
+        row = box.column(1)                      
+ 
+        button_align_vertices = icons.get("icon_align_vertices") 
+        row.operator("mesh.vertices_smooth","Vertices", icon_value=button_align_vertices.icon_id) 
+
+        button_align_laplacian = icons.get("icon_align_laplacian")
+        row.operator("mesh.vertices_smooth_laplacian","Laplacian", icon_value=button_align_laplacian.icon_id)  
+
+        button_align_shrinkwrap = icons.get("icon_align_shrinkwrap")
+        row.operator("mesh.shrinkwrap_smooth","Shrinkwrap", icon_value=button_align_shrinkwrap.icon_id)         
+
+        box.separator()   
+
         row = box.row(1)              
-        row.alignment = 'CENTER'
-        row.label("", icon ="SPHERECURVE")
 
-        box.separator()  
+        button_align_planar = icons.get("icon_align_planar")  
+        row.operator("mesh.face_make_planar", "Planar Faces", icon_value=button_align_planar.icon_id) 
 
-        row = box.column(1)    
-        row.operator("mesh.vertices_smooth","Smooth Vertices", icon ="BLANK1") 
-        row.operator("mesh.vertices_smooth_laplacian","Smooth Laplacian", icon ="BLANK1")  
-        row.operator("mesh.shrinkwrap_smooth","Smooth Shrinkwrap", icon ="BLANK1")                 
-
-        box.separator()  
-
-        row = box.row(1)                      
+        box.separator()    
+                     
+        row = box.row(1)                 
+                     
         # relax - first line
         split = row.split(percentage=0.15, align=True)
-        if lt.display_relax:
-            split.prop(lt, "display_relax", text="", icon='TRIA_DOWN')
+        if tp.display_relax:
+            button_align_looptools = icons.get("icon_align_looptools")
+            split.prop(tp, "display_relax", text="", icon_value=button_align_looptools.icon_id)
+            split.operator("mesh.looptools_relax", text="  LoopTool Relax")
+
         else:
-            split.prop(lt, "display_relax", text="", icon='TRIA_RIGHT')
-        split.operator("mesh.looptools_relax", text="LoopTools  Relax", icon ="BLANK1")
+            button_align_looptools = icons.get("icon_align_looptools")
+            split.prop(tp, "display_relax", text="", icon_value=button_align_looptools.icon_id)
+            split.operator("mesh.looptools_relax", text="  LoopTool Relax")
+
         # relax - settings
-        if lt.display_relax:
+        if tp.display_relax:
             box = layout.box().column(1)    
              
             row = box.column(1)  
-            row.prop(lt, "relax_interpolation")
-            row.prop(lt, "relax_input")
-            row.prop(lt, "relax_iterations")
-            row.prop(lt, "relax_regular")
-
-            box.separator() 
-            box = layout.box().column(1)   
-
-
-        row = box.row(1) 
-        # flatten - first line
-        split = row.split(percentage=0.15, align=True)
-        if lt.display_flatten:
-            split.prop(lt, "display_flatten", text="", icon='TRIA_DOWN')
-        else:
-            split.prop(lt, "display_flatten", text="", icon='TRIA_RIGHT')
-        split.operator("mesh.looptools_flatten", text="LoopTools  Flatten", icon ="BLANK1")
-        # flatten - settings
-        if lt.display_flatten:
-            box = layout.box().column(1)    
-             
-            row = box.column(1)  
-            row.prop(lt, "flatten_plane")
-
-            box.separator()
-
-            col_move = box.column(align=True)
-            row = col_move.row(align=True)
-            if lt.flatten_lock_x:
-                row.prop(lt, "flatten_lock_x", text = "X", icon='LOCKED')
-            else:
-                row.prop(lt, "flatten_lock_x", text = "X", icon='UNLOCKED')
-            if lt.flatten_lock_y:
-                row.prop(lt, "flatten_lock_y", text = "Y", icon='LOCKED')
-            else:
-                row.prop(lt, "flatten_lock_y", text = "Y", icon='UNLOCKED')
-            if lt.flatten_lock_z:
-                row.prop(lt, "flatten_lock_z", text = "Z", icon='LOCKED')
-            else:
-                row.prop(lt, "flatten_lock_z", text = "Z", icon='UNLOCKED')
-            col_move.prop(lt, "flatten_influence")
-
-            box.separator() 
-            box = layout.box().column(1)   
-
-
-        box.separator()  
-
-        row = box.row(1)              
-        row.operator("mesh.face_make_planar", "Make Faces Planar", icon ="IMGDISPLAY")  
+            row.prop(tp, "relax_interpolation")
+            row.prop(tp, "relax_input")
+            row.prop(tp, "relax_iterations")
+            row.prop(tp, "relax_regular")
 
         ###
-        box.separator()                         
+        box.separator()    
 
 
         Display_History = context.user_preferences.addons[__package__].preferences.tab_history_relax 
@@ -102,8 +71,10 @@ def draw_align_relax_tools_panel_layout(self, context, layout):
             
             box = layout.box().column(1)  
 
-            row = box.row(1)        
-            row.operator("view3d.ruler", text="Ruler")   
+            row = box.row(1)    
+                
+            button_ruler_triangle = icons.get("icon_ruler_triangle") 
+            row.operator("view3d.ruler", text="Ruler", icon_value=button_ruler_triangle.icon_id)   
              
             row.operator("ed.undo_history", text="History")
             row.operator("ed.undo", text="", icon="LOOP_BACK")

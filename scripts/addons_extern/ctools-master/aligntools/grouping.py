@@ -99,6 +99,13 @@ def memo_bb_type(context, bb_type, bb_space, individual_orientation):
     return (bb_type, bb_space, individual_orientation) + key
 
 
+def get_cursor_location(context):
+    if context.area.type == 'VIEW_3D':
+        return context.space_data.cursor_location
+    else:
+        return context.scene.cursor_location
+
+
 ###############################################################################
 # Group
 ###############################################################################
@@ -373,7 +380,7 @@ class Group(collections.abc.Sequence):
                 key.append(flatten(target))
             key.append(distance)
         elif pivot_point == PivotPoint.CURSOR:
-            key.append(tuple(context.scene.cursor_location))
+            key.append(tuple(get_cursor_location(context)))
         return tuple(key)
 
     @memoize(_memo_calc_pivot, use_instance=True)
@@ -404,7 +411,7 @@ class Group(collections.abc.Sequence):
         elif pivot_point == PivotPoint.ACTIVE:
             pivot = self.calc_pivot_active(context, head_tail)
         elif pivot_point == PivotPoint.CURSOR:
-            pivot = context.scene.cursor_location.copy()
+            pivot = get_cursor_location(context).copy()
         elif pivot_point == PivotPoint.ROOT:
             pivot = self.calc_pivot_root(context, head_tail)
         elif pivot_point == PivotPoint.HEAD_TAIL:

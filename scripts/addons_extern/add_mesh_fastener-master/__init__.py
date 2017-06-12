@@ -45,7 +45,7 @@ from bpy.props import (
 ##### REGISTER #####
 
 def add_mesh_bolt_button(self, context):
-    self.layout.operator(Boltfactory.MESH_OT_add_fastener.bl_idname, text="Bolt", icon="PLUGIN")
+    self.layout.operator(Boltfactory.MESH_OT_add_fastener.bl_idname, text="Fastener", icon="MOD_SCREW")
 
 
 def register():

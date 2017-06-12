@@ -208,18 +208,18 @@ def register():
     bpy.utils.register_module(__name__)
 
     # Add "Specials" menu to the "Modifiers" menu
-    bpy.types.DATA_PT_modifiers.prepend(menu)
+    #bpy.types.DATA_PT_modifiers.prepend(menu)
 
     # Add apply operator to the Apply 3D View Menu
-    bpy.types.VIEW3D_MT_object_apply.append(menu_func)
+    #bpy.types.VIEW3D_MT_object_apply.append(menu_func)
 
 
 def unregister():
     # Remove "Specials" menu from the "Modifiers" menu.
-    bpy.types.DATA_PT_modifiers.remove(menu)
+    #bpy.types.DATA_PT_modifiers.remove(menu)
 
     # Remove apply operator to the Apply 3D View Menu
-    bpy.types.VIEW3D_MT_object_apply.remove(menu_func)
+    #bpy.types.VIEW3D_MT_object_apply.remove(menu_func)
 
     bpy.utils.unregister_module(__name__)
 

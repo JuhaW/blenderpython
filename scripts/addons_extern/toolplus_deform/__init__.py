@@ -20,10 +20,10 @@
 bl_info = {
     "name": "T+ Deform",
     "author": "Multi Authors (see URL), MKB",
-    "version": (0, 1, 2),
+    "version": (0, 1, 3),
     "blender": (2, 7, 8),
-    "location": "View3D > Tool Shelf [T] or Property Shelf [N]",
-    "description": "Deform Tools Panel",
+    "location": "View3D > Tool Shelf [T] or Property Shelf [N] > Menu",
+    "description": "Panel and Menu for Deform Tools",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
@@ -31,6 +31,9 @@ bl_info = {
 
 
 from toolplus_deform.deform_batch  import (View3D_TP_Deform_Batch)
+
+from . icons.icons                  import load_icons
+from . icons.icons                  import clear_icons
 
 from .mesh_project import __init__
 from .mesh_project import bound
@@ -121,47 +124,47 @@ def update_panel_position(self, context):
 def update_display_tools(self, context):
    
     if context.user_preferences.addons[__name__].preferences.tab_meshcage == 'on':
-        return True
+        return 
     elif context.user_preferences.addons[__name__].preferences.tab_meshcage_menu == 'on':
-        return True
+        return 
     elif context.user_preferences.addons[__name__].preferences.tab_project == 'on':
-        return True
+        return 
     elif context.user_preferences.addons[__name__].preferences.tab_project_menu == 'on':
-        return True
+        return 
     elif context.user_preferences.addons[__name__].preferences.tab_vertgrp == 'on':
-        return True
+        return 
     elif context.user_preferences.addons[__name__].preferences.tab_vertgrp_menu == 'on':
-        return True
+        return 
     elif context.user_preferences.addons[__name__].preferences.tab_hook == 'on':
-        return True
+        return 
     elif context.user_preferences.addons[__name__].preferences.tab_hook_menu == 'on':
-        return True    
+        return 
     elif context.user_preferences.addons[__name__].preferences.tab_history == 'on':
-        return True    
+        return   
     elif context.user_preferences.addons[__name__].preferences.tab_history_menu == 'on':
-        return True    
+        return   
 
     
     if context.user_preferences.addons[__name__].preferences.tab_meshcage == 'off':
-        return False 
+        pass
     elif context.user_preferences.addons[__name__].preferences.tab_meshcage_menu == 'off':
-        return False 
+        pass
     elif context.user_preferences.addons[__name__].preferences.tab_project == 'off':
-        return False 
+        pass
     elif context.user_preferences.addons[__name__].preferences.tab_project_menu == 'off':
-        return False 
+        pass
     elif context.user_preferences.addons[__name__].preferences.tab_vertgrp == 'off':
-        return False 
+        pass
     elif context.user_preferences.addons[__name__].preferences.tab_vertgrp_menu == 'off':
-        return False 
+        pass
     elif context.user_preferences.addons[__name__].preferences.tab_hook == 'off':
-        return False     
+        pass   
     elif context.user_preferences.addons[__name__].preferences.tab_hook_menu == 'off':
-        return False        
+        pass      
     elif context.user_preferences.addons[__name__].preferences.tab_history == 'off':
-        return False   
+        pass
     elif context.user_preferences.addons[__name__].preferences.tab_history_menu == 'off':
-        return False  
+        pass
 
 
     
@@ -190,7 +193,7 @@ def update_menu(self, context):
         wm = bpy.context.window_manager
         km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
 
-        kmi = km.keymap_items.new('tp_batch.batch_deform', 'THREE', 'PRESS', alt=True) #,ctrl=True, shift=True, 
+        kmi = km.keymap_items.new('tp_batch.batch_deform', 'Y', 'PRESS', ctrl=True, shift=True) #,alt=True
         #kmi.properties.name = ''
 
     if context.user_preferences.addons[__name__].preferences.tab_menu_view == 'off':
@@ -227,36 +230,35 @@ class TP_Panels_Preferences(AddonPreferences):
 
 
     tab_meshcage = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'MeshCage on', 'enable tools in panel'), ('off', 'MeshCage off', 'disable tools in panel')), default='on', update = update_display_tools)
+                  items=(('on', 'MeshCage on', 'enable tools in panel'), ('off', 'MeshCage off', 'disable tools in panel')), default='off', update = update_display_tools)
 
     tab_project = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'Project on', 'enable tools in menu'), ('off', 'Project off', 'disable tools in menu')), default='on', update = update_display_tools)
+                  items=(('on', 'Project on', 'enable tools in menu'), ('off', 'Project off', 'disable tools in menu')), default='off', update = update_display_tools)
 
     tab_vertgrp = EnumProperty(name = 'Display Tools', description = 'on / off',
                   items=(('on', 'VertexGroup on', 'enable tools in panel'), ('off', 'VertexGroup off', 'disable tools in panel')), default='on', update = update_display_tools)
 
     tab_hook = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'Hook on', 'enable tools in menu'), ('off', 'Hook off', 'disable tools in menu')), default='on', update = update_display_tools)
+                  items=(('on', 'Hook on', 'enable tools in menu'), ('off', 'Hook off', 'disable tools in menu')), default='off', update = update_display_tools)
 
     tab_history = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'History on', 'enable tools in panel'), ('off', 'History off', 'disable tools in panel')), default='on', update = update_display_tools)
+                  items=(('on', 'History on', 'enable tools in panel'), ('off', 'History off', 'disable tools in panel')), default='off', update = update_display_tools)
 
  
     tab_meshcage_menu = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'MeshCage on', 'enable tools in panel'), ('off', 'MeshCage off', 'disable tools in panel')), default='on', update = update_display_tools)
+                  items=(('on', 'MeshCage on', 'enable tools in panel'), ('off', 'MeshCage off', 'disable tools in panel')), default='off', update = update_display_tools)
 
     tab_project_menu = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'Project on', 'enable tools in menu'), ('off', 'Project off', 'disable tools in menu')), default='on', update = update_display_tools)
+                  items=(('on', 'Project on', 'enable tools in menu'), ('off', 'Project off', 'disable tools in menu')), default='off', update = update_display_tools)
 
     tab_vertgrp_menu = EnumProperty(name = 'Display Tools', description = 'on / off',
                   items=(('on', 'VertexGroup on', 'enable tools in panel'), ('off', 'VertexGroup off', 'disable tools in panel')), default='on', update = update_display_tools)
 
     tab_hook_menu = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'Hook on', 'enable tools in menu'), ('off', 'Hook off', 'disable tools in menu')), default='on', update = update_display_tools)
+                  items=(('on', 'Hook on', 'enable tools in menu'), ('off', 'Hook off', 'disable tools in menu')), default='off', update = update_display_tools)
 
     tab_history_menu = EnumProperty(name = 'Display Tools', description = 'on / off',
-                  items=(('on', 'History on', 'enable tools in panel'), ('off', 'History off', 'disable tools in panel')), default='on', update = update_display_tools)
-
+                  items=(('on', 'History on', 'enable tools in panel'), ('off', 'History off', 'disable tools in panel')), default='off', update = update_display_tools)
  
     tools_category = StringProperty(name = "TAB Category", description = "add name for a new category tab", default = 'T+', update = update_panel_position)
 
@@ -271,14 +273,12 @@ class TP_Panels_Preferences(AddonPreferences):
        
         if self.prefs_tabs == 'info':
             row = layout.row()
-            row.label(text="Welcome to custom Deform addon")
+            row.label(text="Welcome to T+ Deform Collection")
             
             row = layout.column()
-            row.label(text="This setup helps to optimize and sculpt your mesh a bit easier.") 
-            row.label(text="There are three ways to execute the tools:")   
-            row.label(text="> use the function in the panel or in the menu")   
-            row.label(text="> or create new shortcuts (rightclick) and save them (user settings)")                  
-            row.label(text="Have Fun! :) ")     
+            row.label(text="This setup helps to make fast adjustment to an finished object. etc.")
+            row.label(text=" for your own workflow you can enable or disable the functions in the panel or in the menu") 
+            row.label(text="Have Fun! ;) ")     
             
 
         #Tools
@@ -290,10 +290,14 @@ class TP_Panels_Preferences(AddonPreferences):
             row.prop(self, 'tab_meshcage', expand=True)
             row.prop(self, 'tab_project', expand=True)
             row.prop(self, 'tab_vertgrp', expand=True)
+           
+            box.separator()               
+           
+            row = box.row()
             row.prop(self, 'tab_hook', expand=True)
             row.prop(self, 'tab_history', expand=True)
 
-            row = layout.row()
+            row = box.row()
             row.label(text="! save user settings for permant on/off !", icon ="INFO")
 
             box.separator() 
@@ -334,7 +338,7 @@ class TP_Panels_Preferences(AddonPreferences):
             row.label("Deform Menu:", icon ="COLLAPSEMENU") 
             
             row.separator()           
-            row.label("Menu: 'THREE', 'PRESS', alt=True")
+            row.label("Menu: CTRL+SHIFT+Y")
 
             row = box.row(1)          
             row.prop(self, 'tab_menu_view', expand=True)
@@ -348,7 +352,7 @@ class TP_Panels_Preferences(AddonPreferences):
 
             box.separator() 
              
-            row.operator('wm.url_open', text = 'recommended: is key free addon', icon = 'PLUGIN').url = "https://github.com/Antonioya/blender/tree/master/iskeyfree"
+            row.operator('wm.url_open', text = 'tip: iskeyfree', icon = 'PLUGIN').url = "https://github.com/Antonioya/blender/tree/master/iskeyfree"
 
             box.separator() 
         
@@ -356,12 +360,16 @@ class TP_Panels_Preferences(AddonPreferences):
             row.prop(self, 'tab_meshcage_menu', expand=True)
             row.prop(self, 'tab_project_menu', expand=True)
             row.prop(self, 'tab_vertgrp_menu', expand=True)
+        
+            box.separator()             
+          
+            row = box.row()              
             row.prop(self, 'tab_hook_menu', expand=True)
             row.prop(self, 'tab_history_menu', expand=True)
 
             box.separator() 
             
-            row = layout.row(1) 
+            row = box.row(1) 
             row.label(text="! if needed change keys durably in TAB Input !", icon ="INFO")
 
 
@@ -407,100 +415,10 @@ def draw_deform_panel_layout(self, context, layout):
                         
         tpw = context.window_manager.tpw_defom_window
 
+        icons = load_icons()
+
         layout.operator_context = 'INVOKE_REGION_WIN'
-        
-        icons = icon_collections["main"]
 
-        #my_button_one = icons.get("my_image1")
-        #row.label(text="Icon", icon_value=my_button_one.icon_id)
-
-        if context.mode == 'OBJECT':
-                  
-            obj = context.active_object     
-            if obj:
-               obj_type = obj.type
-                              
-               if obj_type in {'MESH'}:
-                   box = layout.box()
-                   row = box.row(1)                                        
-                   row.alignment = "CENTER"
-                   row.label("MESH") 
-                                      
-               if obj_type in {'LATTICE'}:
-                   box = layout.box()
-                   row = box.row(1)                                        
-                   row.alignment = "CENTER"
-                   row.label("LATTICE") 
-
-               if obj_type in {'CURVE'}:
-                   box = layout.box()
-                   row = box.row(1)                                        
-                   row.alignment = "CENTER"
-                   row.label("CURVE")               
-                   
-               if obj_type in {'SURFACE'}:
-                   box = layout.box()
-                   row = box.row(1)                                        
-                   row.alignment = "CENTER"
-                   row.label("SURFACE")                 
-                   
-               if obj_type in {'META'}:
-                   box = layout.box()
-                   row = box.row(1)                                        
-                   row.alignment = "CENTER"
-                   row.label("MBall")                 
-                   
-               if obj_type in {'FONT'}:
-                   box = layout.box()
-                   row = box.row(1)                                        
-                   row.alignment = "CENTER"
-                   row.label("FONT")  
-                                                  
-               if obj_type in {'ARMATURE'}:
-                   box = layout.box()
-                   row = box.row(1)                                        
-                   row.alignment = "CENTER"
-                   row.label("ARMATURE") 
-
-               if obj_type in {'EMPTY'}:
-                   box = layout.box()
-                   row = box.row(1)                                        
-                   row.alignment = "CENTER"
-                   row.label("EMPTY") 
-
-               if obj_type in {'CAMERA'}:
-                  box = layout.box()
-                  row = box.row(1)                                        
-                  row.alignment = "CENTER"
-                  row.label("CAMERA") 
-
-               if obj_type in {'LAMP'}:
-                   box = layout.box()
-                   row = box.row(1)                                        
-                   row.alignment = "CENTER"
-                   row.label("LAMP") 
-
-               if obj_type in {'SPEAKER'}:
-                   box = layout.box()
-                   row = box.row(1)                                        
-                   row.alignment = "CENTER"
-                   row.label("SPEAKER") 
-
-
-
-        box = layout.box()
-        
-        row = box.row(1)  
-        sub = row.row(1)
-        sub.scale_x = 7
-
-        sub.operator("tp_ops.pivot_bounding_box", "", icon="ROTATE")
-        sub.operator("tp_ops.pivot_3d_cursor", "", icon="CURSOR")
-        sub.operator("tp_ops.pivot_active", "", icon="ROTACTIVE")
-        sub.operator("tp_ops.pivot_individual", "", icon="ROTATECOLLECTION")
-        sub.operator("tp_ops.pivot_median", "", icon="ROTATECENTER")          
-        #row.menu("tp_ops.delete_menu", "", icon="PANEL_CLOSE")    
-      
 
         if context.mode == 'EDIT_LATTICE':
             
@@ -570,13 +488,17 @@ def draw_deform_panel_layout(self, context, layout):
 
                     row = box.row(1)
                     row.alignment = 'CENTER'
-                    row.label("Easy Lattice Mesh Deform")
+                    row.label("Easy Lattice")
                    
                     box.separator()   
                     
-                    row = box.row(1)                           
-                    row.operator("object.easy_lattice_panel", text="Create", icon ="OUTLINER_DATA_LATTICE")  
-                    row.operator("retopo.latticeapply", text = "Apply", icon="MOD_LATTICE")                    
+                    row = box.row(1) 
+                    
+                    button_lattice_create = icons.get("icon_lattice_create")                                                               
+                    row.operator("object.easy_lattice_panel", text="Create", icon_value=button_lattice_create.icon_id)  
+
+                    button_lattice_apply = icons.get("icon_lattice_apply")    
+                    row.operator("tp_ops.lattice_apply", text = "Apply", icon_value=button_lattice_apply.icon_id)                       
                         
                     box.separator()   
                     
@@ -605,7 +527,7 @@ def draw_deform_panel_layout(self, context, layout):
                 box.separator()   
                 
                 row = box.row(1)         
-                row.operator("tp_ops.add_bound_meshcage", "MeshCageBox", icon ="MOD_MESHDEFORM")            
+                row.operator("tp_ops.add_bound_meshcage", "Add CageBox", icon ="MOD_MESHDEFORM")            
 
                 
                 obj = context.object
@@ -736,11 +658,29 @@ def draw_deform_panel_layout(self, context, layout):
             row = box.row(1)
             row.alignment = 'CENTER'
             row.label("Easy Lattice")
-            
+    
+            box.separator()               
+     
             row = box.row(1)                           
-            row.operator("object.easy_lattice", text="Create", icon ="OUTLINER_DATA_LATTICE")  
-            row.operator("retopo.latticeapply", text = "Apply", icon="MOD_LATTICE")                               
+
+            button_lattice_create = icons.get("icon_lattice_create")                                                               
+            row.operator("object.easy_lattice_panel", text="Create", icon_value=button_lattice_create.icon_id)  
+          
+            button_lattice_apply = icons.get("icon_lattice_apply")    
+            row.operator("tp_ops.lattice_apply", text = "Apply", icon_value=button_lattice_apply.icon_id)                               
                       
+            box.separator()   
+            
+            row = box.row(1) 
+            row.prop(context.scene, "lat_u", text="X")
+            row.prop(context.scene, "lat_w", text="Y")
+            row.prop(context.scene, "lat_m", text="Z")
+            
+            box.separator()           
+            
+            row = box.row(1)
+            row.prop(context.scene, "lat_type", text = "Type")
+
             ###
             box.separator()     
 

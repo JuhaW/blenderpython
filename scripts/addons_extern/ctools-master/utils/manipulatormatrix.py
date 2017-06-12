@@ -752,9 +752,10 @@ class ManipulatorMatrix(Matrix):
                     override_context['edit_object'] = None
             v3d = area.spaces.active
             orient_bak = v3d.transform_orientation
+            current_orientation_bak = v3d.current_orientation
             bpy.ops.transform.create_orientation(override_context, False,
                                                  name='Normal', use=True)
-            if v3d.current_orientation:
+            if v3d.current_orientation != current_orientation_bak:
                 mat = v3d.current_orientation.matrix.copy()
                 bpy.ops.transform.delete_orientation(override_context, False)
                 v3d.transform_orientation = orient_bak
@@ -1152,7 +1153,7 @@ class ManipulatorMatrix(Matrix):
             if actob and actob in selobs:
                 locations['ACTIVE_ELEMENT'] = mat.to_translation()
 
-        locations['CURSOR'] = context.scene.cursor_location.copy()
+        locations['CURSOR'] = context.space_data.cursor_location.copy()
 
         def cp(value):
             return value.copy() if isinstance(value, Vector) else value
@@ -1192,7 +1193,8 @@ class ManipulatorMatrix(Matrix):
         :param cursor_only: 'CURSOR' のみを更新する。
         """
         if cursor_only and self.pivot_points:
-            self.pivot_points['CURSOR'] = context.scene.cursor_location.copy()
+            self.pivot_points['CURSOR'] = \
+                context.space_data.cursor_location.copy()
         else:
             self.pivot_points = self.calc_pivot_points(context)
         self.pivot_point = self.pivot_point

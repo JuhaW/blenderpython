@@ -17,6 +17,7 @@
 # END GPL LICENSE BLOCK #####
 
 
+
 bl_info = {
     "name": "Smart Join",
     "author": "Andrej Ivanis",
@@ -36,10 +37,8 @@ if "bpy" in locals():
 else:
     from . import core, gui
 
-import bpy
-import bmesh
+import bpy, bmesh
 from bpy.props import *
-
 
 def register():
     bpy.utils.register_module(__name__)
@@ -48,7 +47,7 @@ def register():
     # this is used if mesh is renamed or duplicated
     bpy.types.Mesh.sjoin_link_name = StringProperty()
     bpy.types.Mesh.expanded_obj = StringProperty()
-    bpy.types.Object.sjoin_mesh = StringProperty(default='')
+    bpy.types.Object.sjoin_mesh = StringProperty(default = '')
     # add empty smart join
     # bpy.types.INFO_MT_add.append(add_menu_func)
     bpy.types.VIEW3D_MT_object_specials.append(special_menu_func)
@@ -56,17 +55,17 @@ def register():
     bpy.app.handlers.save_pre.append(core.before_save)
     # global update_lock
     # update_lock = False
-
-
+    
+    
 class ExampleAddonPreferences(bpy.types.AddonPreferences):
     # this must match the addon name, use '__package__'
     # when defining this in a submodule of a python package.
     bl_idname = __package__
 
     allow_edit_mode = bpy.props.BoolProperty(
-        name="Allow edit mode",
-        default=False
-    )
+            name="Allow edit mode",
+            default=False
+            )
 
     def draw(self, context):
         layout = self.layout
@@ -74,24 +73,16 @@ class ExampleAddonPreferences(bpy.types.AddonPreferences):
         layout.label(text="NOTE: any changes to smart join in the edit mode will be reverted after expanding")
         layout.label(text="You can Apply the join in the Relationships tab, but you won't be able to expand it any more")
 
-class SpecialsJoinItems(bpy.types.Menu):
-    bl_idname = "VIEW3D_MT_smart_join_specials"
-    bl_label = "Smart Join"
-    bl_description = "Add Smart Join Menu items"
-    
-    def draw(self, context):
-        self.layout.separator()
-        layout = self.layout
-        layout.operator('sjoin.join')
-        layout.operator('sjoin.join_add')
-        layout.operator('sjoin.separate')
-        layout.operator('sjoin.update_rec')
-        layout.separator()
-        layout.operator('sjoin.expand')
-        layout.operator('sjoin.collapse')
-
 def special_menu_func(self, context):
-    self.layout.menu(SpecialsJoinItems.bl_idname, icon="PLUGIN")
+    self.layout.separator()
+    layout = self.layout
+    layout.operator('sjoin.join')
+    layout.operator('sjoin.join_add')
+    layout.operator('sjoin.separate')
+    layout.operator('sjoin.update_rec')
+    layout.separator()
+    layout.operator('sjoin.expand')
+    layout.operator('sjoin.collapse')
 
 
 def unregister():
@@ -102,6 +93,7 @@ def unregister():
     bpy.app.handlers.save_pre.remove(core.before_save)
     # bpy.types.INFO_MT_add.remove(add_menu_func)
     bpy.utils.unregister_module(__name__)
+
 
 
 if __name__ == "__main__":

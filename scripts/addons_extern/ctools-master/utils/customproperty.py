@@ -24,13 +24,20 @@ class _CollectionOperator:
     """CollectionPropertyに対する複数のオペレータを纏めて登録する。
 
     最初にregister_classでこのクラスを登録しておく。
-    >>> bpy.utils.register_class(CollectionOperator)
+    CO = CollectionOperator.new_class()
+    >>> bpy.utils.register_class(CO)
 
-    bpy.ops.wm.collection_add(data_path='', function='')
-    bpy.ops.wm.collection_remove(data_path='', function='', index=0)
-    bpy.ops.wm.collection_clear(data_path='', function='')
-    bpy.ops.wm.collection_move(data_path='', function='', index_from=0,
-                               index_to=0)
+    # bpy.ops.wm.collection_add
+    CO.Add.operator(data_path='', function='')
+
+    # bpy.ops.wm.collection_remove
+    CO.Remove.operator(data_path='', function='', index=0)
+
+    # bpy.ops.wm.collection_clear
+    CO.Clear.operator(data_path='', function='')
+
+    # bpy.ops.wm.collection_move
+    CO.Move.operator(data_path='', function='', index_from=0, index_to=0)
 
     data_path引数を指定するとcontext属性を参照する。
     function引数を使う場合は、事前にregister_functionクラスメソッドで関数を
@@ -38,32 +45,27 @@ class _CollectionOperator:
     """
 
     class _Operator:
+        bl_idname = ''
         bl_description = ''
         bl_options = {'REGISTER', 'INTERNAL'}
 
-        _functions = None
-        """:type: dict"""
+        _functions = {}  # 継承する際に必ず別オブジェクトを割り当てる事
 
         data_path = bpy.props.StringProperty(options={'SKIP_SAVE'})
+
+        # register_function()で登録した関数を実行する場合に使用する。
+        # 値はregister_function()時の引数のkeyを指定する
         function = bpy.props.StringProperty(options={'SKIP_SAVE'})
 
         @classmethod
         def register_function(cls, key, func):
+            if not isinstance(key, str):
+                raise TypeError('引数のkeyは文字列でないといけない')
             cls._functions[key] = func
 
-        @classmethod
-        def register(cls):
-            mod, func = cls.bl_idname.split('.')
-            name = mod.upper() + '_OT_' + func.lower()
-            cls_ = getattr(bpy.types, name)
-            if cls == cls_:
-                cls._functions = {}
-            else:
-                cls._functions = cls_._functions
-
-        @classmethod
-        def unregister(cls):
-            cls._functions = None
+        @property
+        def operator(self):
+            return eval('bpy.ops.' + self.bl_idname)
 
     class _Add(_Operator):
         """
@@ -76,6 +78,7 @@ class _CollectionOperator:
 
         bl_idname = 'wm.collection_add'
         bl_label = 'Collection Add'
+        _functions = {}
 
         def execute(self, context):
             if self.data_path:
@@ -96,6 +99,7 @@ class _CollectionOperator:
 
         bl_idname = 'wm.collection_remove'
         bl_label = 'Collection Remove'
+        _functions = {}
 
         index = bpy.props.IntProperty(options={'SKIP_SAVE'})
 
@@ -110,6 +114,7 @@ class _CollectionOperator:
     class _Clear(_Operator):
         bl_idname = 'wm.collection_clear'
         bl_label = 'Collection Clear'
+        _functions = {}
 
         def execute(self, context):
             if self.data_path:
@@ -122,6 +127,7 @@ class _CollectionOperator:
     class _Move(_Operator):
         bl_idname = 'wm.collection_move'
         bl_label = 'Collection Move'
+        _functions = {}
 
         index_from = bpy.props.IntProperty(options={'SKIP_SAVE'})
         index_to = bpy.props.IntProperty(options={'SKIP_SAVE'})
@@ -136,13 +142,16 @@ class _CollectionOperator:
             return {'FINISHED'}
 
     class Add(_Add, bpy.types.Operator):
-        pass
+        _functions = {}
+
     class Remove(_Remove, bpy.types.Operator):
-        pass
+        _functions = {}
+
     class Clear(_Clear, bpy.types.Operator):
-        pass
+        _functions = {}
+
     class Move(_Move, bpy.types.Operator):
-        pass
+        _functions = {}
 
     @classmethod
     def _to_bl_idname(cls, name):
@@ -174,13 +183,19 @@ class _CollectionOperator:
             bpy.utils.unregister_class(c)
 
     @classmethod
-    def new_class(cls):
-        """:rtype: CollectionOperator"""
+    def derive(cls):
+        """bl_idnameが衝突しないように変更を加えた新しいクラスを返す
+        :rtype: CollectionOperator
+        """
         name_space = {
-            'Add': type('Add', (cls._Add, bpy.types.Operator), {}),
-            'Remove': type('Remove', (cls._Remove, bpy.types.Operator), {}),
-            'Clear': type('Clear', (cls._Clear, bpy.types.Operator), {}),
-            'Move': type('Move', (cls._Move, bpy.types.Operator), {}),
+            'Add': type('Add', (cls._Add, bpy.types.Operator),
+                        {'_functions': {}}),
+            'Remove': type('Remove', (cls._Remove, bpy.types.Operator),
+                           {'_functions': {}}),
+            'Clear': type('Clear', (cls._Clear, bpy.types.Operator),
+                          {'_functions': {}}),
+            'Move': type('Move', (cls._Move, bpy.types.Operator),
+                         {'_functions': {}}),
         }
         return type('CollectionOperator',
                     (_CollectionOperator, bpy.types.PropertyGroup),
@@ -290,13 +305,17 @@ class _CustomProperty:
                 raise ValueError()
 
             cls = self._cls
-
-            cls.dynamic_property(obj, attr, prop)
+            if obj == bpy.types.Space:
+                for ob in set(self.space_types.values()):
+                    if ob != bpy.types.Space:
+                        cls.dynamic_property(ob, attr, prop)
+            else:
+                cls.dynamic_property(obj, attr, prop)
 
             idprop_key = self._space_porperty_id_prop_key(obj, attr)
 
             @bpy.app.handlers.persistent
-            def saev_pre(scene):
+            def save_pre(scene):
                 for screen in bpy.data.screens:
                     data = []
                     data_used = []
@@ -312,8 +331,8 @@ class _CustomProperty:
                     screen[idprop_key] = data
                     screen['_' + idprop_key] = data_used
 
-            saev_pre.key = idprop_key
-            bpy.app.handlers.save_pre.append(saev_pre)
+            save_pre.key = idprop_key
+            bpy.app.handlers.save_pre.append(save_pre)
 
             @bpy.app.handlers.persistent
             def load_post(scene):
@@ -355,7 +374,12 @@ class _CustomProperty:
 
             idprop_key = self._space_porperty_id_prop_key(obj, attr)
 
-            cls.dynamic_property_delete(obj, attr)
+            if obj == bpy.types.Space:
+                for ob in set(self.space_types.values()):
+                    if ob != bpy.types.Space:
+                        cls.dynamic_property_delete(ob, attr)
+            else:
+                cls.dynamic_property_delete(obj, attr)
 
             for func in bpy.app.handlers.save_pre:
                 if getattr(func, 'key', None) == idprop_key:
@@ -901,8 +925,10 @@ class _CustomProperty:
         cls.utils = cls._Utils()
 
     @classmethod
-    def new_class(cls):
-        """:rtype: CustomProperty"""
+    def derive(cls):
+        """新しいクラスを返す
+        :rtype: CustomProperty
+        """
         return type('CustomProperty',
                     (_CustomProperty, bpy.types.PropertyGroup), {})
 
@@ -918,9 +944,9 @@ def test():
     >>> customproperty.test()
     """
 
-    CP = CustomProperty.new_class()
+    CP = CustomProperty.derive()
     bpy.utils.register_class(CP)
-    OP = CollectionOperator.new_class()
+    OP = CollectionOperator.derive()
     bpy.utils.register_class(OP)
 
     class CustomItem:

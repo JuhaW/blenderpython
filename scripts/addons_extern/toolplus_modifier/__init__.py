@@ -18,69 +18,97 @@
 
 
 bl_info = {
-    "name": "TP Modifier",
+    "name": "T+ Modifier",
     "author": "MKB",
-    "version": (0, 1, 2),
+    "version": (1, 3, 1),
     "blender": (2, 7, 8),
-    "location": "View3D > Tool Shelf [T] or Property Shelf [N]",
-    "description": "Modifier Tools Panel",
+    "location": "VIEW3D > Tool Shelf [T] or Property Shelf [N] and Properties TAB: Modifier",
+    "description": "panels and menu for modifier tools",
     "warning": "",
     "wiki_url": "",
     "tracker_url": "",
     "category": "ToolPlus"}
 
 
-from toolplus_modifier.mods_menu           import (VIEW3D_TP_Modifier_Menu)
-from toolplus_modifier.mods_stack_ui       import (VIEW3D_TP_Modifier_Stack_Panel_UI)
-from toolplus_modifier.mods_stack_tools    import (VIEW3D_TP_Modifier_Stack_Panel_TOOLS)
+# LOAD UI #
+from toolplus_modifier.mods_ui_menu         import (VIEW3D_TP_Modifier_Menu)
 
-##################################
+from toolplus_modifier.mods_ui_stack        import (VIEW3D_TP_Modifier_Stack_Panel_UI)
+from toolplus_modifier.mods_ui_stack_tools  import (VIEW3D_TP_Modifier_Stack_Panel_TOOLS)
 
+from toolplus_modifier.mods_ui_panel        import (VIEW3D_TP_Modifier_Panel_TOOLS)
+from toolplus_modifier.mods_ui_panel        import (VIEW3D_TP_Modifier_Panel_UI)
+
+
+# LOAD ICONS #
+from . icons.icons                  import load_icons
+from . icons.icons                  import clear_icons
+
+
+# LOAD OPERATORS #
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'toolplus_modifier'))
 
 if "bpy" in locals():
     import imp
     imp.reload(mods_action)
-    imp.reload(mods_automirror)
+    imp.reload(mods_array)
     imp.reload(mods_batch)
     imp.reload(mods_batch_atm)
+    imp.reload(mods_bevel)
+    imp.reload(mods_cut_auto)
     imp.reload(mods_display)
+    imp.reload(mods_mirror)
+    imp.reload(mods_mirror_auto)
     imp.reload(mods_normals)
     imp.reload(mods_pivot)
     imp.reload(mods_remove)
+    imp.reload(mods_sdeform)
     imp.reload(mods_show)
+    imp.reload(mods_solidifiy)
+    imp.reload(mods_subsurf)
     imp.reload(mods_toall)
     imp.reload(mods_tools)
 
 
 else:
     from . import mods_action         
-    from . import mods_automirror                
+    from . import mods_array                
     from . import mods_batch                       
     from . import mods_batch_atm                       
+    from . import mods_bevel                       
+    from . import mods_cut_auto                                              
     from . import mods_display                       
+    from . import mods_mirror         
+    from . import mods_mirror_auto                
     from . import mods_normals         
     from . import mods_pivot                   
     from . import mods_remove               
+    from . import mods_sdeform               
     from . import mods_show               
+    from . import mods_solidifiy               
+    from . import mods_subsurf               
     from . import mods_toall               
     from . import mods_tools               
 
 
 
+# LOAD MODULS #
+
 import bpy
 from bpy import*
+from bpy.props import*
 
 import bpy.utils.previews
 from bpy.types import AddonPreferences, PropertyGroup
-from bpy.props import* #(StringProperty, BoolProperty, FloatVectorProperty, FloatProperty, EnumProperty, IntProperty)
 
 
-def update_panel_position(self, context):
+
+# UI REGISTRY #
+
+def update_panel_location(self, context):
     try:
-        bpy.utils.unregister_class(VIEW3D_TP_Modifier_Panel_UI)
-       
+        bpy.utils.unregister_class(VIEW3D_TP_Modifier_Panel_UI)     
         bpy.utils.unregister_class(VIEW3D_TP_Modifier_Panel_TOOLS)
    
     except:
@@ -106,7 +134,7 @@ def update_panel_position(self, context):
 
 
 
-def update_panel_position_stack(self, context):
+def update_panel_location_stack(self, context):
     try:
         bpy.utils.unregister_class(VIEW3D_TP_Modifier_Stack_Panel_UI)
        
@@ -134,17 +162,43 @@ def update_panel_position_stack(self, context):
 
 
 
+# TOOL REGISTRY #
 
 def update_display_tools(self, context):
 
     if context.user_preferences.addons[__name__].preferences.tab_display_tools == 'on':
-        return True
+        return 
 
     else:        
         if context.user_preferences.addons[__name__].preferences.tab_display_tools == 'off':
-            return False 
+            pass
+ 
 
 
+def update_tools_modifier(self, context):
+
+    try:                
+        bpy.types.DATA_PT_modifiers.remove(menu_func)                   
+
+    except:
+        pass
+    
+    try:
+        bpy.types.DATA_PT_modifiers.remove(menu_func)
+
+    except:
+        pass
+
+    if context.user_preferences.addons[__name__].preferences.tab_tools_modifier == 'win':
+
+        bpy.types.DATA_PT_modifiers.prepend(menu_func)
+
+    if context.user_preferences.addons[__name__].preferences.tab_tools_modifier == 'off':
+        pass
+
+
+
+# MENU REGISTRY #
 
 addon_keymaps_menu = []
 
@@ -172,7 +226,7 @@ def update_menu(self, context):
         wm = bpy.context.window_manager
         km = wm.keyconfigs.addon.keymaps.new(name='3D View', space_type='VIEW_3D')
 
-        kmi = km.keymap_items.new('wm.call_menu', 'D', 'PRESS', ctrl=True) #,shift=True, alt=True, 
+        kmi = km.keymap_items.new('wm.call_menu', 'V', 'PRESS', shift=True) #,ctrl=True, alt=True, 
         kmi.properties.name = 'VIEW3D_TP_Modifier_Menu'
 
     if context.user_preferences.addons[__name__].preferences.tab_menu_view == 'off':
@@ -181,7 +235,8 @@ def update_menu(self, context):
 
 
 
-#Panel preferences
+# ADDON PREFERENCES #
+
 class TP_Panels_Preferences(AddonPreferences):
     bl_idname = __name__
     
@@ -197,28 +252,46 @@ class TP_Panels_Preferences(AddonPreferences):
 
     tab_location = EnumProperty(
         name = 'Panel Location',
-        description = 'save user settings and restart blender after switching the panel location',
+        description = 'location switch',
         items=(('tools', 'Tool Shelf', 'place panel in the tool shelf [T]'),
                ('ui', 'Property Shelf', 'place panel in the property shelf [N]'),
                ('off', 'Off', 'on or off for panel in the shelfs')),
-               default='tools', update = update_panel_position)
+               default='tools', update = update_panel_location)
 
     tab_location_stack = EnumProperty(
         name = 'Panel Location',
-        description = 'save user settings and restart blender after switching the panel location',
+        description = 'location switch',
         items=(('tools', 'Tool Shelf', 'place panel in the tool shelf [T]'),
                ('ui', 'Property Shelf', 'place panel in the property shelf [N]'),
                ('off', 'Off', 'on or off for panel in the shelfs')),
-               default='tools', update = update_panel_position_stack)
+               default='tools', update = update_panel_location_stack)
 
     tab_menu_view = EnumProperty(
         name = '3d View Menu',
-        description = 'save user settings and restart blender after switching the panel location',
+        description = 'location switch',
         items=(('menu', 'Menu on', 'enable menu for 3d view'),
                ('off', 'Menu off', 'enable or disable menu for 3d view')),
                default='menu', update = update_menu)
 
-    # Panel
+
+    # Tools  
+    
+    tab_tools_modifier = EnumProperty(
+        name = 'Panel Location',
+        description = 'tool switch',
+        items=(('win', 'Properties: Modifier', 'enable tools in properties: modifier'),
+               ('off', 'Off', 'disable tools in properties: modifier')),
+               default='win', update = update_tools_modifier)
+
+
+
+    # Shelf Panel
+    tab_title = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Title on', 'enable tools in panel'), ('off', 'Title off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_pivot= EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Pivot on', 'enable tools in panel'), ('off', 'Pivot off', 'disable tools in panel')), default='on', update = update_display_tools)
+
     tab_display_tools = EnumProperty(name = 'Display Tools', description = 'on / off',
                   items=(('on', 'Display Tools on', 'enable tools in panel'), ('off', 'Display Tools off', 'disable tools in panel')), default='on', update = update_display_tools)
 
@@ -255,8 +328,23 @@ class TP_Panels_Preferences(AddonPreferences):
     tab_remove_type = EnumProperty(name = 'Display Tools', description = 'on / off',
                   items=(('on', 'Remove Type on', 'enable tools in panel'), ('off', 'Remove Type off', 'disable tools in panel')), default='on', update = update_display_tools)
 
+    tab_toall = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'ToAll on', 'enable tools in panel'), ('off', 'ToAll off', 'disable tools in panel')), default='on', update = update_display_tools)
+
     tab_history = EnumProperty(name = 'Display Tools', description = 'on / off',
                   items=(('on', 'History on', 'enable tools in panel'), ('off', 'History off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+
+    # Modifier Properties
+    tab_props_remove_type = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Remove Type on', 'enable tools in panel'), ('off', 'Remove Type off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_props_toall = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'ToAll on', 'enable tools in panel'), ('off', 'ToAll off', 'disable tools in panel')), default='on', update = update_display_tools)
+
+    tab_props_osd = EnumProperty(name = 'Display Tools', description = 'on / off',
+                  items=(('on', 'Display Tools on', 'enable tools in panel'), ('off', 'Display Tools off', 'disable tools in panel')), default='on', update = update_display_tools)
+
 
     # Menu
     tab_tp_menus = EnumProperty(name = 'Display Tools', description = 'on / off',
@@ -278,12 +366,13 @@ class TP_Panels_Preferences(AddonPreferences):
                   items=(('on', 'HoverTools on', 'enable tools in menu'), ('off', 'HoverTools off', 'disable tools in menu')), default='on', update = update_display_tools)
 
 
-    tools_category = StringProperty(name = "TAB Category", description = "add name for a new category tab", default = 'T+', update = update_panel_position)
-    tools_category_stack = StringProperty(name = "TAB Category", description = "add name for a new category tab", default = 'T+', update = update_panel_position_stack)
-
+    # Tab
+    tools_category = StringProperty(name = "TAB Category", description = "add name for a new category tab", default = 'T+', update = update_panel_location)
+    tools_category_stack = StringProperty(name = "TAB Category", description = "add name for a new category tab", default = 'T+', update = update_panel_location_stack)
     tools_category_menu = bpy.props.BoolProperty(name = "Modifier Menu", description = "enable or disable menu", default=True, update = update_menu)
 
 
+    # DRAW PREFERENCES #
     def draw(self, context):
         layout = self.layout
         
@@ -296,11 +385,23 @@ class TP_Panels_Preferences(AddonPreferences):
             box = layout.box().column(1)
             
             row = box.column(1)   
-            row.label(text="Welcome to Modifier!")  
-            row.label(text="This custom addon is for editing.")
-            row.label(text="There are two ways to execute the tools:")   
-            row.label(text="> use the functions in the panel")      
-            row.label(text="> or the included menu")      
+            row.label(text="Welcome to T+ Modifier!")  
+            row.label(text="This addon is for editing mesh objects with modifier.")
+           
+            row.separator()           
+           
+            row.label(text="The Panels are adaptable can be place in the toolshelf [T] or property shelf [N]")
+            row.label(text="A included Menu have SHIFT+V﻿ as shortcut")
+            row.label(text="Tools for Properties: 'Modifier' can also be activated")
+           
+            row.separator()        
+         
+            row.label("To use the Menu in editmode disable Vertex Slide!") 
+            row.label("Pressing Transform Grab/Move (G) twice do the same job!") 
+            row.label("go to TAB: Input > Key-Binding > Mesh > Vertex Slide > deactivate it") 
+
+            row.separator()
+                        
             row.label(text="Have Fun! :)")         
 
 
@@ -308,8 +409,15 @@ class TP_Panels_Preferences(AddonPreferences):
         if self.prefs_tabs == 'toolsets':
           
             box = layout.box().column(1)
+            
+            row = box.column(1)
+            row.label(text="Panel Tools: 3D Viewport", icon ="INFO")
 
+            box.separator() 
+            
             row = box.column_flow(4)
+            row.prop(self, 'tab_title', expand=True)
+            row.prop(self, 'tab_pivot', expand=True)
             row.prop(self, 'tab_subsurf', expand=True)
             row.prop(self, 'tab_automirror', expand=True)
             row.prop(self, 'tab_mirror_cut', expand=True)
@@ -321,10 +429,28 @@ class TP_Panels_Preferences(AddonPreferences):
             row.prop(self, 'tab_transform', expand=True)
             row.prop(self, 'tab_shade', expand=True)
             row.prop(self, 'tab_remove_type', expand=True)
+            row.prop(self, 'tab_toall', expand=True)
             row.prop(self, 'tab_history', expand=True)
 
+            box.separator() 
+
+            box = layout.box().column(1)
+            
+            row = box.column(1)
+            row.label(text="Tools Properties: Modifier", icon ="INFO")
+
+            box.separator() 
+            
+            row = box.column_flow(4)
+            row.prop(self, 'tab_props_remove_type', expand=True)
+            row.prop(self, 'tab_props_toall', expand=True)
+            row.prop(self, 'tab_props_osd', expand=True)
+
+            box.separator() 
+
+
             row = layout.row()
-            row.label(text="! save user settings for permant on/off !", icon ="INFO")
+            row.label(text="! save user settings for a durably on or off !", icon ="INFO")
 
             box.separator() 
             
@@ -335,7 +461,7 @@ class TP_Panels_Preferences(AddonPreferences):
             box = layout.box().column(1)
              
             row = box.row(1) 
-            row.label("Location Modifier Sets:")
+            row.label("Location 3D View: Main Panel")
             
             row = box.row(1)
             row.prop(self, 'tab_location', expand=True)
@@ -350,9 +476,9 @@ class TP_Panels_Preferences(AddonPreferences):
                 row.prop(self, "tools_category")
 
             box.separator()
-            
+
             row = box.row(1) 
-            row.label("Location Modifier Stack:")            
+            row.label("Location 3D View: Modifier Stack:")            
          
             row = box.row(1)             
             row.prop(self, 'tab_location_stack', expand=True)
@@ -365,9 +491,21 @@ class TP_Panels_Preferences(AddonPreferences):
                 box.separator() 
                 
                 row.prop(self, "tools_category_stack")
-                
+
+            box.separator()
+
+            box = layout.box().column(1)             
+
+            row = box.row(1) 
+            row.label("Tools for Properties: Modifier")
+            
+            row = box.row(1)
+            row.prop(self, 'tab_tools_modifier', expand=True)
+
+            box.separator()
+
             row = layout.row()
-            row.label(text="! please reboot blender after changing the panel location !", icon ="INFO")
+            row.label(text="! save user settings for a durably new panel location !", icon ="INFO")
 
             box.separator() 
 
@@ -378,10 +516,9 @@ class TP_Panels_Preferences(AddonPreferences):
             box = layout.box().column(1)
              
             row = box.column(1)  
-            row.label("Modifier Menu:", icon ="COLLAPSEMENU") 
-            
-            row.separator()           
-            row.label("Menu: 'D', 'PRESS', ctrl=True")
+            row.label("Modifier Menu:[SHIFT+V]", icon ="COLLAPSEMENU") 
+       
+            row.separator()                         
 
             row = box.row(1)          
             row.prop(self, 'tab_menu_view', expand=True)
@@ -391,18 +528,17 @@ class TP_Panels_Preferences(AddonPreferences):
                 box.separator() 
                 
                 row = box.row(1) 
-                row.label(text="! menu hidden with next reboot durably!", icon ="INFO")
-
-            box.separator() 
-             
-            row.operator('wm.url_open', text = 'recommended: is key free addon', icon = 'PLUGIN').url = "https://github.com/Antonioya/blender/tree/master/iskeyfree"
+                row.label(text="! menu hidden with next restart durably!", icon ="INFO")
 
             box.separator() 
             
             row = box.row(1) 
             row.label(text="! if needed change keys durably in TAB Input !", icon ="INFO")
-
+            row.operator('wm.url_open', text = 'Tip: is key free', icon = 'PLUGIN').url = "https://github.com/Antonioya/blender/tree/master/iskeyfree"
           
+            box.separator()
+
+
             box = layout.box().column(1)
 
             row = box.column_flow(3)
@@ -412,8 +548,10 @@ class TP_Panels_Preferences(AddonPreferences):
             row.prop(self, 'tab_clear_menu', expand=True)
             row.prop(self, 'tab_hover_menu', expand=True)
 
-            row = box.row()
-            row.label(text="! save user settings for permant on/off !", icon ="INFO")
+            box.separator()
+            
+            row = layout.row()
+            row.label(text="! save user settings for a durably on or off !", icon ="INFO")
 
             box.separator() 
 
@@ -428,10 +566,12 @@ class TP_Panels_Preferences(AddonPreferences):
             row.operator('wm.url_open', text = 'Copy To All', icon = 'HELP').url = "https://www.artunchained.de/tiny-new-addon-to-all/"
             row.operator('wm.url_open', text = 'Display Tools', icon = 'HELP').url = "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/3D_interaction/Display_Tools"
             row.operator('wm.url_open', text = 'Modifier Tools', icon = 'HELP').url = "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/3D_interaction/modifier_tools"
-            row.operator('wm.url_open', text = 'Thread', icon = 'BLENDER').url = "https://blenderartists.org/forum/showthread.php?411265-Addon-T-Modifier&p=3124733#post3124733"
+            row.operator('wm.url_open', text = 'BlenderArtist', icon = 'BLENDER').url = "https://blenderartists.org/forum/showthread.php?411265-Addon-T-Modifier&p=3124733#post3124733"
 
 
 
+
+# PROPERTY GROUP #
 class Dropdown_TP_Modifier_Props(bpy.types.PropertyGroup):
 
 
@@ -443,743 +583,116 @@ class Dropdown_TP_Modifier_Props(bpy.types.PropertyGroup):
     display_sdeform = bpy.props.BoolProperty(name="Open / Close", description="Open / Close", default=True)    
     display_array = bpy.props.BoolProperty(name="Open / Close", description="Open / Close", default=True)    
     display_apply = bpy.props.BoolProperty(name="Open / Close", description="Open / Close", default=False)    
-    display_display = bpy.props.BoolProperty(name="Open / Close", description="Open / Close", default=True)    
+    display_display = bpy.props.BoolProperty(name="Open / Close", description="Open / Close", default=False)    
 
 
 
-def draw_modifier_panel_layout(self, context, layout):
-    
-        tp_props = context.window_manager.tp_collapse_menu_modifier
-  
-        ob = context.object  
-        obj = context.object
-        scene = context.scene
-        scn = context.scene
-        rs = bpy.context.scene 
 
-        obj = context.active_object     
-        if obj:
-           obj_type = obj.type
-                          
-           if obj_type in {'MESH'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("MESH") 
-                                  
-           if obj_type in {'LATTICE'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("LATTICE") 
+#TAB MODIFIER IN PROPERTIES #
 
-           if obj_type in {'CURVE'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("CURVE")               
-               
-           if obj_type in {'SURFACE'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("SURFACE")                 
-               
-           if obj_type in {'META'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("MBall")                 
-               
-           if obj_type in {'FONT'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("FONT")  
-                                              
-           if obj_type in {'ARMATURE'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("ARMATURE") 
+def menu_func(self, context):
+    if (context.active_object):
+        if (len(context.active_object.modifiers)):
+            col = self.layout.column(1)
 
-           if obj_type in {'EMPTY'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("EMPTY") 
+            display_toall = context.user_preferences.addons[__package__].preferences.tab_props_toall
+            if display_toall == 'on':
 
-           if obj_type in {'CAMERA'}:
-              box = layout.box()
-              row = box.row(1)                                        
-              row.alignment = "CENTER"
-              row.label("CAMERA") 
+                if context.mode == 'OBJECT':
 
-           if obj_type in {'LAMP'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("LAMP") 
+                    row = col.row(1)
+                    row.operator("scene.to_all", text="Copy to Childs", icon='LINKED').mode = "modifier, children" 
+                    row.operator("scene.to_all", text="Copy to Selected", icon='FRAME_NEXT').mode = "modifier, selected"
 
-           if obj_type in {'SPEAKER'}:
-               box = layout.box()
-               row = box.row(1)                                        
-               row.alignment = "CENTER"
-               row.label("SPEAKER") 
+            display_RemoveType = context.user_preferences.addons[__package__].preferences.tab_props_remove_type
+            if display_RemoveType == 'on':
+
+                row = col.row(1)
+                row.prop(context.scene, "tp_mods_type", text="")
+                row.operator("tp_ops.remove_mods_type", text="Remove Type", icon='ZOOMOUT')    
 
 
-        box = layout.box()
-        
-        row = box.row(1)  
-        sub = row.row(1)
-        sub.scale_x = 7
+            display_osd = context.user_preferences.addons[__package__].preferences.tab_props_osd
+            if display_osd == 'on':
+              
+                col.separator()
+                
+                row = col.row(1)
+                
+                obj = context.active_object
+                if obj:               
+                    if obj.draw_type == 'WIRE':
+                        row.operator("tp_ops.draw_solid", text=" ", icon='GHOST_DISABLED')     
+                    else:
+                        row.operator("tp_ops.draw_wire", text=" ", icon='GHOST_ENABLED')        
+                else:
+                    row.label("", icon="BLANK1")  
 
-        sub.operator("tp_ops.pivot_bounding_box", "", icon="ROTATE")
-        sub.operator("tp_ops.pivot_3d_cursor", "", icon="CURSOR")
-        sub.operator("tp_ops.pivot_active", "", icon="ROTACTIVE")
-        sub.operator("tp_ops.pivot_individual", "", icon="ROTATECOLLECTION")
-        sub.operator("tp_ops.pivot_median", "", icon="ROTATECENTER")          
-        #row.menu("tp_ops.delete_menu", "", icon="PANEL_CLOSE")   
-        
-        box = layout.box().column(1)  
+                row.operator("tp_ops.wire_all", text=" ", icon='WIRE')
+
+                obj = context.active_object
+                if obj:
+                    active_wire = obj.show_wire 
+                    if active_wire == True:
+                        row.operator("tp_ops.wire_off", " ", icon = 'MESH_PLANE')              
+                    else:                       
+                        row.operator("tp_ops.wire_on", " ", icon = 'MESH_GRID')
+                else:
+                    row.label("", icon="BLANK1")  
+                
+                row.prop(context.object, "show_bounds", text=" ", icon='STICKY_UVS_LOC') 
+
+
+                if context.mode == 'EDIT_MESH':          
+
+                    row.operator("mesh.faces_shade_flat", text=" ", icon="MESH_CIRCLE") 
+                    row.operator("mesh.faces_shade_smooth", text=" ", icon="SMOOTH")  
+                    row.operator("mesh.normals_make_consistent", text=" ", icon="SNAP_NORMAL")  
+                
+                if context.mode == 'OBJECT':             
+      
+                    row.operator("object.shade_flat", text=" ", icon="MESH_CIRCLE")
+                    row.operator("object.shade_smooth", text=" ", icon="SMOOTH")  
+                    row.operator("tp_ops.rec_normals", text=" ", icon="SNAP_NORMAL") 
+
+
+
+            col.separator()
             
-        row = box.row(1) 
-        row.operator_menu_enum("object.modifier_add", "type","   Add new Modifier", icon="MODIFIER")     
-
-        mod_list = context.active_object.modifiers
-        if mod_list:
-            
-            row = box.row(1) 
-            row.operator("tp_ops.mods_render"," ", icon = 'RESTRICT_RENDER_OFF') 
-            row.operator("tp_ops.mods_view"," ", icon = 'RESTRICT_VIEW_OFF')                                                                       
+            row = col.row(1)
+            row.operator("tp_ops.mods_render"," ", icon = 'RESTRICT_RENDER_OFF')                                                                       
+            row.operator("object.toggle_apply_modifiers_view", text=" ", icon='RESTRICT_VIEW_OFF') 
             row.operator("tp_ops.mods_edit"," ", icon='EDITMODE_HLT')                                                    
             row.operator("tp_ops.mods_cage"," ", icon='OUTLINER_OB_MESH')                  
-            row.operator("tp_ops.remove_mod", text=" ", icon='X') 
-            row.operator("tp_ops.apply_mod", text=" ", icon='FILE_TICK')          
+            row.operator("object.apply_all_modifiers", text=" ", icon='FILE_TICK') 
+            row.operator("object.delete_all_modifiers", text=" ", icon='X')   
+            row.operator("wm.toggle_all_show_expanded", text=" ", icon='FULLSCREEN_ENTER') 
+      
 
-        else:
-            pass
 
 
-        box.separator()
-        
-        Display_Subsurf = context.user_preferences.addons[__package__].preferences.tab_subsurf
-        if Display_Subsurf == 'on':
 
-            box = layout.box().column(1)
-            
-            row = box.row(1)
-            if tp_props.display_subsurf:            
-                row.prop(tp_props, "display_subsurf", text="", icon="MOD_SUBSURF")
-            else:
-                row.prop(tp_props, "display_subsurf", text="", icon="MOD_SUBSURF")
-                
-            row.label("SubSurf")
 
-            box.separator()  
-            
-            row = box.row(1)
-            row.scale_x = 0.6             
-            row.operator("tp_ops.subsurf_0")
-            row.operator("tp_ops.subsurf_1")
-            row.operator("tp_ops.subsurf_2")            
-            row.operator("tp_ops.subsurf_3")
-            row.operator("tp_ops.subsurf_4")
-            row.operator("tp_ops.subsurf_5")
-            #row.operator("tp_ops.subsurf_6")
-            
-            box.separator() 
-            
-            if tp_props.display_subsurf: 
-            
-                mo_types = []
-                append = mo_types.append
 
-                for mo in context.active_object.modifiers:
-                    if mo.type == 'SUBSURF':
-                        append(mo.type)
-
-                        #box.label(mo.name)
-
-                        row = box.row(1)
-                        row.prop(mo, "use_subsurf_uv",text="UVs")
-                        row.prop(mo, "show_only_control_edges",text="Optimal")                    
-                        #row.prop(mo, "use_opensubdiv",text="OPSubdiv")                    
-                        #row.prop(system, "opensubdiv_compute_type", text="")
-
-                        box.separator() 
-
-
-
-        Display_AutoMirror = context.user_preferences.addons[__package__].preferences.tab_automirror
-        if Display_AutoMirror == 'on':
-
-            obj = context.object
-            if obj:
-                if obj.type in {'MESH'}:
-                    
-                    box = layout.box().column(1)
-                    
-                    row = box.row(1)
-                    if tp_props.display_automirror:            
-                        row.prop(tp_props, "display_automirror", text="", icon="MOD_WIREFRAME")
-                    else:
-                        row.prop(tp_props, "display_automirror", text="", icon="MOD_WIREFRAME")
-   
-                    row.label("AutoMirror")
-
-                    box.separator() 
-                    
-                    row = box.row()
-                    row.prop(context.scene, "AutoMirror_orientation", text="")                                     
-                    row.prop(context.scene, "AutoMirror_axis", text="")  
-                
-                    box.separator()                  
-                 
-                    row = box.row()
-                    row.prop(context.scene, "AutoMirror_threshold", text="Threshold") 
-                    row.operator("object.automirror", text="Execute") 
-
-                    box.separator() 
-
-                    if tp_props.display_automirror: 
-                                          
-                        box = layout.box().column(1) 
-                        row = box.row(1)
-                        row.prop(context.scene, "AutoMirror_toggle_edit", text="Editmode")
-                        row.prop(context.scene, "AutoMirror_cut", text="Cut+Mirror")
-                        
-                        row = box.row(1)
-                        row.prop(context.scene, "AutoMirror_use_clip", text="Use Clip")
-                        row.prop(context.scene, "AutoMirror_show_on_cage", text="Editable")            
-
-                        box.separator() 
-
-                   
-                    Display_Mirror_Cut = context.user_preferences.addons[__package__].preferences.tab_mirror_cut
-                    if Display_Mirror_Cut == 'on':
-
-                        box = layout.box().column(1)
-                        
-                        row = box.row(1)
-                        row.label("", icon="MOD_MESHDEFORM")            
-                        row.label("AutoCuts")   
-                        
-                        row = box.row(1)  
-                        row.prop(context.scene, "tp_axis", text="")
-                        sub = row.row(1)
-                        sub.scale_x = 0.5
-                        sub.prop(context.scene, "tp_axis_cut", text="")
-                        row.operator("tp_ops.mods_autocut", text="Execute")                           
-                       
-                        box.separator() 
-                        
-            else:
-                box = layout.box().column(1)
-                
-                row = box.row(1)                   
-                row.label("nothing selected", icon ="INFO")                   
-     
-        
-        Display_Mirror = context.user_preferences.addons[__package__].preferences.tab_mirror
-        if Display_Mirror == 'on':
-        
-            box = layout.box().column(1)
-            
-            row = box.row(1)
-            if tp_props.display_mirror:            
-                row.prop(tp_props, "display_mirror", text="", icon="MOD_MIRROR")
-            else:
-                row.prop(tp_props, "display_mirror", text="", icon="MOD_MIRROR")
-          
-            row.label("Mirror")                   
-           
-            sub = row.row(1)
-            sub.scale_x = 0.3  
-            sub.operator("tp_ops.mod_mirror_x", "Add")
-            
-            box.separator()              
-            
-            if tp_props.display_mirror:             
-            
-                mo_types = []
-                append = mo_types.append
-
-                for mo in context.active_object.modifiers:
-                                                  
-                    if mo.type == 'MIRROR':
-                        append(mo.type)
-
-                        #box.label(mo.name)
-
-                        row = box.row(1)
-                        row.prop(mo, "use_x")
-                        row.prop(mo, "use_y")
-                        row.prop(mo, "use_z")
-                        
-                        row = box.row(1)
-                        row.prop(mo, "use_mirror_merge", text="Merge")
-                        row.prop(mo, "use_clip", text="Clipping")
-         
-                        box.separator() 
-
-        
-        Display_Bevel = context.user_preferences.addons[__package__].preferences.tab_bevel
-        if Display_Bevel == 'on':
-        
-            if context.active_object.type in {'MESH'}:
-                
-                box = layout.box().column(1)
-                
-                row = box.row(1)
-                if tp_props.display_bevel:            
-                    row.prop(tp_props, "display_bevel", text="", icon="MOD_BEVEL")
-                else:
-                    row.prop(tp_props, "display_bevel", text="", icon="MOD_BEVEL")
-                    
-                row.label("Bevel")
-              
-                sub = row.row(1)
-                sub.scale_x = 0.3   
-                sub.operator("tp_ops.mods_bevel", text="Add")
-                
-                box.separator()  
-                
-                if tp_props.display_bevel: 
-                                              
-                    mo_types = []
-                    append = mo_types.append
-
-                    for mo in context.active_object.modifiers:
-                                    
-                        if mo.type == 'BEVEL':
-                            
-                            append(mo.type)
-                            
-                            row = box.row(1)  
-                            row.prop(mo, "profile", text="")
-                            row.prop(mo, "segments", text="")
-                            row.prop(mo, "width", text="")
-
-                            row = box.row(1)  
-                            row.label(text="profile")                       
-                            row.label(text="segments")
-                            row.label(text="width")
-            
-                            box.separator() 
-
-
-        Display_Solidify = context.user_preferences.addons[__package__].preferences.tab_solidify
-        if Display_Solidify == 'on':
-        
-            if context.active_object.type in {'MESH'}:
-                
-                box = layout.box().column(1)
-                                
-                row = box.row(1)
-                if tp_props.display_solidify:            
-                    row.prop(tp_props, "display_solidify", text="", icon="MOD_SOLIDIFY")
-                else:
-                    row.prop(tp_props, "display_solidify", text="", icon="MOD_SOLIDIFY")
-                               
-                row.label("Solidify")
-                
-                sub = row.row(1)
-                sub.scale_x = 0.3                                       
-                sub.operator("tp_ops.mods_solidify", text="Add") 
-                
-                box.separator()  
-                
-                if tp_props.display_solidify:  
-                                              
-                    mo_types = []
-                    append = mo_types.append
-
-                    for mo in context.active_object.modifiers:
-                                    
-                        if mo.type == 'SOLIDIFY':
-                            
-                            append(mo.type)
-                            
-                            row = box.column(1)  
-                            row.prop(mo, "thickness")
-                            row.prop(mo, "thickness_clamp")        
-                            row.prop(mo, "offset")
-                            
-                            row = box.row(1)
-                            row.prop(mo, "use_rim", text ="Fill")
-                            row.prop(mo, "use_rim_only", text ="Rim")    
-                            row.prop(mo, "use_even_offset", text ="Even")
-            
-                            box.separator() 
-
-
-
-        Display_Simple = context.user_preferences.addons[__package__].preferences.tab_simple
-        if Display_Simple == 'on':
-        
-            if context.active_object.type in {'MESH'}:
-                
-                box = layout.box().column(1)
-                
-                row = box.row(1)
-                if tp_props.display_sdeform:            
-                    row.prop(tp_props, "display_sdeform", text="", icon="MOD_SIMPLEDEFORM")
-                else:
-                    row.prop(tp_props, "display_sdeform", text="", icon="MOD_SIMPLEDEFORM")
-                                         
-                row.label("SDeform")
-
-                sub = row.row(1)
-                sub.scale_x = 0.3                                   
-                sub.operator("object.modifier_add", text="Add").type='SIMPLE_DEFORM'          
-                
-                box.separator()  
-
-                if tp_props.display_sdeform:    
-                           
-                    mo_types = []
-                    append = mo_types.append
-
-                    for mo in context.active_object.modifiers:
-                                    
-                        if mo.type == 'SIMPLE_DEFORM':
-                            
-                            append(mo.type)
-                            
-                            row = box.row(1)  
-                            row.prop(mo, "deform_method", expand=True)
-                            
-                            box.separator() 
-                          
-                            row = box.row(1)  
-                            row.prop_search(mo, "vertex_group", ob, "vertex_groups", text="VGrp")
-                            row.prop(mo, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
-
-                            row = box.row(1)  
-                            row.prop(mo, "origin", text="Axis")
-                            row.label(text="", icon ="BLANK1")
-
-                            if mo.deform_method in {'TAPER', 'STRETCH', 'TWIST'}:
-                                
-                                row = box.row(1) 
-                                row.prop(mo, "lock_x")
-                                row.prop(mo, "lock_y")
-
-                            box.separator() 
-                            
-                            row = box.row(1)                         
-                            if mo.deform_method in {'TAPER', 'STRETCH'}:
-                                row.scale_x = 3
-                                row.prop(mo, "factor", text="Deform Factor:")
-                            else:
-                                row.prop(mo, "angle", text="Deform Angle:")
-                            
-                            box.separator() 
-                            
-                            row = box.row(1) 
-                            row.prop(mo, "limits", slider=True, text="Limits")
-
-                            box.separator() 
-                        
-                        
-       
-        Display_Array = context.user_preferences.addons[__name__].preferences.tab_array
-        if Display_Array == 'on':     
-
-            box = layout.box().column(1)
-                            
-            row = box.row(1)
-            if tp_props.display_array:            
-                row.prop(tp_props, "display_array", text="", icon="MOD_ARRAY")
-            else:
-                row.prop(tp_props, "display_array", text="", icon="MOD_ARRAY")
-           
-            row.label("Array")  
-
-            sub = row.row(1)
-            sub.scale_x = 0.3                 
-            sub.operator("tp_ops.x_array",  text="X")
-            sub.operator("tp_ops.y_array",  text="Y")
-            sub.operator("tp_ops.z_array",  text="Z")
-                                 
-            box.separator() 
-           
-            if tp_props.display_array: 
-          
-                mo_types = []
-                append = mo_types.append
-
-                for mo in context.active_object.modifiers:
-                    if mo.type == 'ARRAY':
-                        if mo.fit_type == 'FIXED_COUNT':
-                            append(mo.type)
-
-                            split = box.split()
-
-                            row = box.row(1)
-                            row.label(mo.name)  
-                            row.prop(mo, "count")
-                            
-                            box.separator() 
-                            
-                            row = box.row(1)  
-                            row.prop(mo, "relative_offset_displace", text="")
-                            
-                            row = box.row(1) 
-                            row.prop(mo, "start_cap", text="")
-                            row.prop(mo, "end_cap", text="")  
-                                                 
-                            box.separator() 
-                                           
-
-        Display_Transform = context.user_preferences.addons[__package__].preferences.tab_transform
-        if Display_Transform == 'on':
-            
-            if context.mode == 'OBJECT':  
-                
-                box = layout.box().column(1)
-                
-                row = box.row(1)
-                if tp_props.display_apply:            
-                    row.prop(tp_props, "display_apply", text="", icon="MANIPUL")
-                else:
-                    row.prop(tp_props, "display_apply", text="", icon="MANIPUL")
-                             
-                row.label("Apply")  
-
-                sub = row.row(1)
-                sub.scale_x = 0.3           
-                sub.operator("object.transform_apply", text=" ", icon ="MAN_TRANS").location=True
-                sub.operator("object.transform_apply", text=" ", icon ="MAN_ROT").rotation=True                
-                sub.operator("object.transform_apply", text=" ", icon ="MAN_SCALE").scale=True                             
-                
-                if tp_props.display_apply: 
-                   
-                    box = layout.box().column(1)
-                    
-                    row = box.column_flow(2)
-                    row.label("Transforms to Deltas")  
-                    row.operator("object.transforms_to_deltas", text="Location").mode='LOC'
-                    row.operator("object.transforms_to_deltas", text="Rotation").mode='ROT' 
-                    row.operator("object.transforms_to_deltas", text="All").mode='ALL'
-                    row.operator("object.transforms_to_deltas", text="Scale").mode='SCALE'                    
-                    row.operator("object.anim_transforms_to_deltas", text="Animated")
-                    
-                    box.separator() 
-                   
-                    row = box.column(1)
-                    row.operator("object.visual_transform_apply")
-                    row.operator("object.duplicates_make_real")
-                                                  
-                box.separator()                     
-
-        Display_Shade = context.user_preferences.addons[__name__].preferences.tab_shade
-        if Display_Shade == 'on':                                         
-
-            box = layout.box().column(1)
-            
-            row = box.row(1)
-            if tp_props.display_display:            
-                row.prop(tp_props, "display_display", text="", icon="WORLD")
-            else:
-                row.prop(tp_props, "display_display", text="", icon="WORLD")
-                
-            row.label("Display")
-            
-            if tp_props.display_display: 
-            
-                box.separator()
-                
-                row = box.row(1)                                                          
-                row.operator("tp_ops.wire_all", text="Wire all", icon='WIRE')
-                
-                active_wire = bpy.context.object.show_wire 
-                if active_wire == True:
-                    row.operator("tp_ops.wire_off", "Wire Select", icon = 'MESH_PLANE')              
-                else:                       
-                    row.operator("tp_ops.wire_on", "Wire Select", icon = 'MESH_GRID')            
-               
-                row = box.row(1)
-                if context.object.draw_type == 'WIRE':
-                    row.operator("tp_ops.draw_solid", text="Solid Shade", icon='GHOST_DISABLED')     
-                else:
-                    row.operator("tp_ops.draw_wire", text="Wire Shade", icon='GHOST_ENABLED')        
-
-                row.prop(context.object, "draw_type", text="")
-
-                row = box.row(1)
-                row.prop(context.object, "show_bounds", text="ShowBounds", icon='STICKY_UVS_LOC') 
-                row.prop(context.object, "draw_bounds_type", text="")    
-                
-                if context.mode == 'EDIT_MESH':          
-                    
-                    box.separator() 
-                    
-                    row = box.row(1)  
-                    row.operator("mesh.faces_shade_flat", text="Flat", icon="MESH_CIRCLE") 
-                    row.operator("mesh.faces_shade_smooth", text="Smooth", icon="SMOOTH") 
-                    
-                    row = box.row(1)  
-                    row.operator("mesh.normals_make_consistent", text="Consistent Normals", icon="SNAP_NORMAL")  
-                
-                else:            
-                    
-                    box.separator() 
-                    
-                    if context.mode == 'OBJECT': 
-                        
-                        row = box.row(1)  
-                        row.operator("object.shade_flat", text="Flat", icon="MESH_CIRCLE")
-                        row.operator("object.shade_smooth", text="Smooth", icon="SMOOTH")  
-                   
-                    row = box.row(1)  
-                    row.operator("tp_ops.rec_normals", text="Consistent Normals", icon="SNAP_NORMAL")  
-
-                box.separator() 
-
-
-        
-        mod_list = context.active_object.modifiers
-        if mod_list:
-                                
-            if context.mode == 'OBJECT':
-                box = layout.box().column(1)
-                
-                row = box.column(1)
-                row.operator("scene.to_all", text="copy active to selected", icon='FRAME_NEXT').mode = "modifier, selected"
-                row.operator("scene.to_all", text="copy active to children", icon='LINKED').mode = "modifier, children"        
-               
-                box.separator()               
-
-
-                Display_RemoveType = context.user_preferences.addons[__package__].preferences.tab_remove_type
-                if Display_RemoveType == 'on':
-
-                    box = layout.box().column(1)
-                    
-                    row = box.row(1)
-                    row.label("", icon="COLLAPSEMENU")            
-                    row.label("Remove Type")   
-                    
-                    row = box.row(1)  
-                    row.prop(context.scene, "tp_mods_type", text="")
-                    row.operator("tp_ops.remove_mods_type", text="Execute")                           
-                   
-                    box.separator() 
-
-        else:
-
-            box = layout.box().column(1)    
- 
-            row = box.row(1)                    
-           
-            box.label('no modifier on active' , icon ="ERROR")
-            
-            box.separator()
-
-
-
-        Display_History = context.user_preferences.addons[__name__].preferences.tab_history 
-        if Display_History == 'on':
-            
-            box = layout.box().column(1)  
-
-            row = box.row(1)        
-            row.operator("view3d.ruler", text="Ruler")   
-             
-            row.operator("ed.undo_history", text="History")
-            row.operator("ed.undo", text="", icon="LOOP_BACK")
-            row.operator("ed.redo", text="", icon="LOOP_FORWARDS") 
-           
-            box.separator()   
-
-
-
-
-class VIEW3D_TP_Modifier_Panel_TOOLS(bpy.types.Panel):
-    bl_category = "Origin"
-    bl_idname = "VIEW3D_TP_Modifier_Panel_TOOLS"
-    bl_label = "Modifier"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
-    bl_options = {'DEFAULT_CLOSED'}
-
-    @classmethod
-    def poll(cls, context):
-        isModelingMode = not (
-        #context.sculpt_object or 
-        context.vertex_paint_object
-        or context.weight_paint_object
-        or context.image_paint_object)
-        return (isModelingMode)
-
-    def draw(self, context):
-        layout = self.layout.column_flow(1)  
-        layout.operator_context = 'INVOKE_REGION_WIN'
-
-        draw_modifier_panel_layout(self, context, layout) 
-
-
-
-class VIEW3D_TP_Modifier_Panel_UI(bpy.types.Panel):
-    bl_idname = "VIEW3D_TP_Modifier_Panel_UI"
-    bl_label = "Modifier"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_options = {'DEFAULT_CLOSED'}
-
-    @classmethod
-    def poll(cls, context):
-        isModelingMode = not (
-        #context.sculpt_object or 
-        context.vertex_paint_object
-        or context.weight_paint_object
-        or context.image_paint_object)
-        return (isModelingMode)
-
-    def draw(self, context):
-        layout = self.layout.column_flow(1)  
-        layout.operator_context = 'INVOKE_REGION_WIN'  
-
-        draw_modifier_panel_layout(self, context, layout) 
-
-
-
-
-# register
+# REGISTRY #
 
 import traceback
 
-icon_collections = {}
-
 def register():
-
-    mkb_icons = bpy.utils.previews.new()
-
-    icons_dir = os.path.join(os.path.dirname(__file__), "icons")
-
-    mkb_icons.load("my_image1", os.path.join(icons_dir, "icon_image1.png"), 'IMAGE')
-    mkb_icons.load("my_image2", os.path.join(icons_dir, "icon_image2.png"), 'IMAGE')
-
-    icon_collections['main'] = mkb_icons
     
     try: bpy.utils.register_module(__name__)
     except: traceback.print_exc()
 
     bpy.types.WindowManager.tp_collapse_menu_modifier = bpy.props.PointerProperty(type = Dropdown_TP_Modifier_Props)
-
-        
+       
     update_menu(None, bpy.context)
-    update_panel_position(None, bpy.context)
-    update_panel_position_stack(None, bpy.context)
+    update_panel_location(None, bpy.context)
+    update_tools_modifier(None, bpy.context)
+    update_panel_location_stack(None, bpy.context)
+
 
 
 def unregister():
-
-    for icon in icon_collections.values():
-        bpy.utils.previews.remove(icon)
-    icon_collections.clear()
 
     try: bpy.utils.unregister_module(__name__)
     except: traceback.print_exc()

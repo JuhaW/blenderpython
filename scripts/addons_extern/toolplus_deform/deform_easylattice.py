@@ -327,16 +327,30 @@ class EasyLattice( bpy.types.Operator ):
 
     def execute( self, context ):
         
-        lat_u = self.lat_u
-        lat_w = self.lat_w
-        lat_m = self.lat_m
-        
-        # this is a reference to the "items" used to generate the
-        # enum property.
-        lat_type = self.lat_types[int( self.lat_type )][1]
-        lat_props = [lat_u, lat_w, lat_m, lat_type]
+        #check if it's in local mode
+        if context.space_data.local_view is not None:                                
+            bpy.ops.view3d.localview() 
+        else:
+            pass   
 
-        main( context, lat_props )
+        lat_u = context.scene.lat_u
+        lat_w = context.scene.lat_w
+        lat_m = context.scene.lat_m
+        
+        #check if some vertices selected
+        selected_verts = [v for v in bpy.context.active_object.data.vertices if v.select]      
+        for v in selected_verts:
+            if v.select == True:
+                
+                # this is a reference to the "items" used to generate the
+                # enum property.
+                lat_type = self.lat_types[int( context.scene.lat_type )][1]
+                lat_props = [lat_u, lat_w, lat_m, lat_type]
+
+                main( context, lat_props )
+            else:
+                pass
+            
         return {'FINISHED'}
 
     def invoke( self, context, event ):
@@ -364,39 +378,57 @@ class EasyLattice_Panel( bpy.types.Operator ):
         return context.active_object is not None
 
     def execute( self, context ):
-        
+
+        #check if it's in local mode
+        if context.space_data.local_view is not None:                                
+            bpy.ops.view3d.localview() 
+        else:
+            pass   
+
         lat_u = context.scene.lat_u
         lat_w = context.scene.lat_w
         lat_m = context.scene.lat_m
         
-        # this is a reference to the "items" used to generate the
-        # enum property.
-        lat_type = self.lat_types[int( context.scene.lat_type )][1]
-        lat_props = [lat_u, lat_w, lat_m, lat_type]
+        #check if some vertices selected
+        selected_verts = [v for v in bpy.context.active_object.data.vertices if v.select]      
+        for v in selected_verts:
+            if v.select == True:
+                
+                # this is a reference to the "items" used to generate the
+                # enum property.
+                lat_type = self.lat_types[int( context.scene.lat_type )][1]
+                lat_props = [lat_u, lat_w, lat_m, lat_type]
 
-        main( context, lat_props )
+                main( context, lat_props )
+            else:
+                pass
+
         return {'FINISHED'}
         return ( self )
 
 
 
 
-
-
-class LatticeApply(bpy.types.Operator):
+class TP_Lattice_Apply(bpy.types.Operator):
     """apply easy-lattice & delete it from deformed object"""
-    bl_idname = "retopo.latticeapply"
+    bl_idname = "tp_ops.lattice_apply"
     bl_label = "Apply E-Lattice and delete it"
     
     def execute(self, context):       
+        
+        if bpy.context.mode == "EDIT_MESH":
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.object.modifier_apply(apply_as='DATA', modifier="latticeeasytemp")
+            bpy.ops.object.select_pattern(pattern="LatticeEasytTemp", extend=False)
+            bpy.ops.object.delete(use_global=False)            
+            bpy.ops.object.editmode_toggle()
 
-        bpy.ops.object.modifier_apply(apply_as='DATA', modifier="latticeeasytemp")
-        bpy.ops.object.select_pattern(pattern="LatticeEasytTemp", extend=False)
-        bpy.ops.object.delete(use_global=False)
+        else:
+            bpy.ops.object.modifier_apply(apply_as='DATA', modifier="latticeeasytemp")
+            bpy.ops.object.select_pattern(pattern="LatticeEasytTemp", extend=False)
+            bpy.ops.object.delete(use_global=False)
 
         return {'FINISHED'}
-
-bpy.utils.register_class(LatticeApply)
 
 
 def menu_draw( self, context ): 

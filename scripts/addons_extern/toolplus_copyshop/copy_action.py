@@ -367,16 +367,24 @@ class View3D_TP_Copy2Cursor(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout.column(1)
+       
 
         box = layout.box().column(1)
         
         row = box.column(1)        
         row.prop(self, 'total', text="Steps")
+        
+        if context.mode == 'OBJECT':
 
-        row = box.row(1) 
-        row.prop(self, 'join', text="Join")
-        row.label("or")
-        row.prop(self, 'unlink', text="Unlink")
+            obj = context.active_object     
+            if obj:
+               obj_type = obj.type
+                              
+               if obj_type in {'MESH'}:            
+                    row = box.row(1) 
+                    row.prop(self, 'join', text="Join")
+                    row.label("or")
+                    row.prop(self, 'unlink', text="Unlink")
 
 
     def execute(self, context):

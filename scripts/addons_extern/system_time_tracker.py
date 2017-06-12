@@ -53,35 +53,34 @@ class Runtime():
 
 
 class Utils():
-
     @staticmethod
     def format_stamp(t):
         return t.strftime('%Y.%m.%d-%H.%M.%S')
-
+    
     @staticmethod
     def format_time(d):
         # http://stackoverflow.com/a/13409708
         return '{:02}:{:02}:{:02}'.format(d // 3600, d % 3600 // 60, d % 60)
-
+    
     @staticmethod
     def format_time_summary(d):
         return '{:02}h {:02}m'.format(d // 3600, d % 3600 // 60)
-
+    
     @staticmethod
     def format_time_summary_seconds(d):
         # http://stackoverflow.com/a/13409708
         return '{:02}h {:02}m {:02}s'.format(d // 3600, d % 3600 // 60, d % 60)
-
+    
     @staticmethod
     def get_default_csv_path():
         return os.path.join(os.path.dirname(os.path.realpath(__file__)), "{0}.csv".format(os.path.splitext(os.path.split(os.path.realpath(__file__))[1])[0]))
-
+    
     @staticmethod
     def get_preferences():
         a = os.path.splitext(os.path.split(os.path.realpath(__file__))[1])[0]
         p = bpy.context.user_preferences.addons[a].preferences
         return p
-
+    
     @staticmethod
     def find_handlers():
         l = -1
@@ -103,26 +102,26 @@ class Utils():
 def summary():
     prefs = Utils.get_preferences()
     p = prefs.csv_path
-
+    
     if(not os.path.exists(p)):
         Runtime.summary_message = "File {} does not exist.".format(p)
         return []
     else:
         Runtime.summary_message = ""
-
+    
     # get modified time of csv
     tm = os.path.getmtime(p)
-
+    
     if(Runtime.summary is not None):
         if(tm == Runtime.modified and prefs.level == Runtime.level):
             # return already parsed results
             return Runtime.summary
-
+    
     Runtime.modified = tm
     Runtime.level = prefs.level
-
+    
     db = []
-    with open(p) as f:
+    with open(p, encoding='utf-8', ) as f:
         reader = csv.reader(f)
         for i, r in enumerate(reader):
             if(i == 0):
@@ -131,19 +130,19 @@ def summary():
             if(r[4] != "" and r[5] != "" and t != 0):
                 a = [r[0], r[1], t, r[3], r[4], r[5]]
                 db.append(a)
-
+    
     def proj(path, level, ):
         # split path until level is reached
         def slice_last_dir(p):
             return os.path.split(p)[0]
-
+        
         h, t = os.path.split(path)
         pp = "{0}".format(h)
         for i in range(level):
             pp = slice_last_dir(pp)
         proj = os.path.split(pp)[1]
         return proj
-
+    
     # split to projects
     dbp = {}
     for r in db:
@@ -153,7 +152,7 @@ def summary():
         except:
             dbp[p] = []
             dbp[p].append(r)
-
+    
     # sum projects
     a = []
     for proj, ls in dbp.items():
@@ -169,60 +168,60 @@ def summary():
             a.append([proj, Utils.format_time_summary_seconds(s), d])
         else:
             a.append([proj, Utils.format_time_summary(s), d])
-
+    
     # sort by project name
     a.sort(key=lambda v: v[0])
-
+    
     # and make strings
     r = []
     for i, l in enumerate(a):
         r.append(["project '{0}': {1}".format(l[0], l[1]), l[2]])
-
+    
     # store results, so it will not be calculated on each ui redraw
     Runtime.summary = r
-
+    
     return r
 
 
 def update(self, context):
     prefs = Utils.get_preferences()
-
+    
     # current = os.path.realpath(prefs.csv_path)
     current = prefs.csv_path
     previous = prefs.previous_csv_path
-
+    
     if(current == previous):
         # no change
         return
-
+    
     # remove message at this point. earlier will not be visible
     Runtime.path_message = ""
-
+    
     if(current == ""):
         # no path, use default
         current = Utils.get_default_csv_path()
-
+    
     if(os.path.isdir(current)):
         # is directory, add default file name
         current = os.path.join(current, os.path.split(Utils.get_default_csv_path())[1])
-
+    
     # add correct extension
     current = bpy.path.ensure_ext(current, ".csv", case_sensitive=True, )
-
+    
     # check if directory is writeable
     d = os.path.split(current)[0]
     if(not os.access(d, os.W_OK)):
         # if not, put default path and write message
         current = Utils.get_default_csv_path()
         Runtime.path_message = "Location '{0}' is not writable.".format(d)
-
+    
     # check if path has changed, and if so, write previous .csv to it if there is none (if it exists too)
     if(current != previous and not os.path.exists(current) and os.path.exists(previous)):
         with open(current, mode='w', encoding='utf-8') as f:
             with open(previous, encoding='utf-8') as o:
                 c = "".join(o.readlines())
             f.write(c)
-
+    
     prefs.previous_csv_path = current
     # update after previous path to prevent recursion
     prefs.csv_path = current
@@ -248,7 +247,7 @@ def scene_update_update(self, context):
 
 class TimeTrackerPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
-
+    
     # internal
     csv_first_line = bpy.props.StringProperty(name=".csv First Line",
                                               description=".csv first line to be written, contains field names.",
@@ -258,7 +257,7 @@ class TimeTrackerPreferences(bpy.types.AddonPreferences):
                                                  default=Utils.get_default_csv_path(),
                                                  maxlen=1024,
                                                  subtype='FILE_PATH', )
-
+    
     # user changeable
     enabled = bpy.props.BoolProperty(name="Tracking Enabled",
                                      description="When enabled, loading and saving of files is logged.",
@@ -278,7 +277,7 @@ class TimeTrackerPreferences(bpy.types.AddonPreferences):
     summary = bpy.props.BoolProperty(name="Show Summary",
                                      description="When enabled, shows tracked data bellow in simple format (project name - total time spent).",
                                      default=False, )
-
+    
     # advanced options
     show_advanced = bpy.props.BoolProperty(name="Show Advanced Options",
                                            description="",
@@ -297,7 +296,7 @@ class TimeTrackerPreferences(bpy.types.AddonPreferences):
                                                            description="",
                                                            update=scene_update_update,
                                                            default=False, )
-
+    
     def draw(self, context):
         l = self.layout
         r = l.row()
@@ -348,15 +347,15 @@ class WM_OT_time_tracker_show_project_directory(bpy.types.Operator):
     bl_idname = "wm.time_tracker_show_project_directory"
     bl_label = "Show Project Directory"
     bl_description = "Show project directory."
-
+    
     directory = bpy.props.StringProperty()
-
+    
     def execute(self, context):
         d = self.directory
         if(not os.path.exists(d)):
             self.report({'ERROR'}, "The directory {0} does not exist.".format(d))
             return {'FINISHED'}
-
+        
         # http://stackoverflow.com/a/1795849
         p = platform.system()
         if(p == 'Windows'):
@@ -367,7 +366,7 @@ class WM_OT_time_tracker_show_project_directory(bpy.types.Operator):
             subprocess.Popen(['xdg-open', d], )
         else:
             raise OSError("Unknown platform: {}.".format(p))
-
+        
         return {'FINISHED'}
 
 
@@ -375,13 +374,13 @@ class WM_OT_time_tracker_clear_data(bpy.types.Operator):
     bl_idname = "wm.time_tracker_clear_data"
     bl_label = "Clear Data"
     bl_description = "Removes all tracked data."
-
+    
     def execute(self, context):
         prefs = Utils.get_preferences()
         p = prefs.csv_path
         with open(p, mode='w', encoding='utf-8') as f:
             f.write("{0}\n".format(prefs.csv_first_line))
-
+        
         return {'FINISHED'}
 
 
@@ -407,12 +406,12 @@ def TIME_TRACKER_update_handler(null):
 def start():
     prefs = Utils.get_preferences()
     p = prefs.csv_path
-
+    
     # write starting csv if there is none
     if(not os.path.exists(p)):
         with open(p, mode='w', encoding='utf-8') as f:
             f.write("{0}\n".format(prefs.csv_first_line))
-
+    
     # set handlers
     l, s, u = Utils.find_handlers()
     h = bpy.app.handlers
@@ -429,12 +428,12 @@ def track(e):
     prefs = Utils.get_preferences()
     if(not prefs.enabled):
         return
-
+    
     p = bpy.data.filepath
     n = datetime.datetime.now()
     d = n - Runtime.start
     h, t = os.path.split(p)
-
+    
     '''
     if(e == 'update'):
         # rewrite last record if it was load
@@ -442,13 +441,13 @@ def track(e):
             ls = f.readlines()
             last = ls[-1:][0].rstrip('\n')
             lls = last.split(",")
-
+            
             if(lls[1] == 'update'):
                 # modify last update entry
                 l = "{0},{1},{2},{3},{4},{5}\n".format(lls[0], lls[1], d.seconds, Utils.format_time(d.seconds), lls[4], lls[5], )
                 lines = ls[:]
                 lines[len(lines) - 1] = l
-
+                
                 # safer overwriting..
                 tmpp = "{}.tmp".format(prefs.csv_path)
                 with open(tmpp, mode='w', encoding='utf-8') as f:
@@ -468,7 +467,7 @@ def track(e):
             f.write(l)
         Runtime.start = n
     '''
-
+    
     # log file load, save and update
     l = "{0},{1},{2},{3},{4},{5}\n".format(Utils.format_stamp(n), e, d.seconds, Utils.format_time(d.seconds), t, p, )
     with open(prefs.csv_path, mode='a', encoding='utf-8') as f:
@@ -493,7 +492,7 @@ class WM_PT_time_tracker_panel(bpy.types.Panel):
     bl_context = "scene"
     bl_region_type = 'UI'
     bl_options = {'DEFAULT_CLOSED'}
-
+    
     def draw(self, context):
         prefs = Utils.get_preferences()
         l = self.layout

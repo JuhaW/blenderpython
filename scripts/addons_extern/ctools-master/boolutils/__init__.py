@@ -20,7 +20,7 @@
 bl_info = {
     'name': 'Boolean Utils',
     'author': 'chromoly',
-    'version': (0, 0, 1),
+    'version': (0, 0, 2),
     'blender': (2, 78, 0),
     'location': 'View3D',
     'description': '',
@@ -33,22 +33,22 @@ import math
 
 import bpy
 import bmesh
-from mathutils import Matrix, Quaternion, Vector
+from mathutils import Matrix
 
 try:
     importlib.reload(addongroup)
     importlib.reload(customproperty)
-    importlib.reload(registerinfo)
     importlib.reload(vaoperator)
+    importlib.reload(vaprops)
     importlib.reload(wrapoperator)
 except NameError:
     from ..utils import addongroup
     from ..utils import customproperty
-    from ..utils import registerinfo
     from ..utils import vaoperator
-    from ..utils import wrapoperator
-    from ..utils import vaview3d as vav
     from ..utils import vamath as vam
+    from ..utils import vaprops
+    from ..utils import vaview3d as vav
+    from ..utils import wrapoperator
 
 
 translation_dict = {
@@ -59,8 +59,7 @@ translation_dict = {
 
 
 class Preferences(
-        addongroup.AddonGroupPreferences,
-        registerinfo.AddonRegisterInfo,
+        addongroup.AddonGroup,
         bpy.types.PropertyGroup if '.' in __name__ else
         bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -341,15 +340,16 @@ class OperatorMeshIntersectPlus(vaoperator.OperatorTemplate,
     bl_label = 'Intersect (Knife) Plus'
     bl_options = {'REGISTER', 'UNDO'}
 
-    mode = wrapoperator.bl_prop_to_py_prop(
+    mode = vaprops.bl_prop_to_py_prop(
         bpy.types.MESH_OT_intersect.bl_rna.properties['mode'])
-    use_separate = wrapoperator.bl_prop_to_py_prop(
-        bpy.types.MESH_OT_intersect.bl_rna.properties['use_separate'])
+    # separate_modeはuse_add_elementsが有効な時は無意味になる
+    separate_mode = vaprops.bl_prop_to_py_prop(
+        bpy.types.MESH_OT_intersect.bl_rna.properties['separate_mode'])
     use_add_elements = bpy.props.BoolProperty(
         name='Add elements',
         description='Instead of subdivision'
     )
-    threshold = wrapoperator.bl_prop_to_py_prop(
+    threshold = vaprops.bl_prop_to_py_prop(
         bpy.types.MESH_OT_intersect.bl_rna.properties['threshold'])
 
     @classmethod
@@ -362,7 +362,7 @@ class OperatorMeshIntersectPlus(vaoperator.OperatorTemplate,
 
         if not self.use_add_elements:
             bpy.ops.mesh.intersect(
-                mode=self.mode, use_separate=self.use_separate,
+                mode=self.mode, separate_mode=self.separate_mode,
                 threshold=self.threshold)
             return {'FINISHED'}
 
@@ -426,7 +426,7 @@ class OperatorMeshIntersectPlus(vaoperator.OperatorTemplate,
                 threshold=self.threshold)
         else:
             bpy.ops.mesh.intersect(
-                mode='SELECT', use_separate=False, threshold=self.threshold)
+                mode='SELECT', separate_mode='CUT', threshold=self.threshold)
         if (list(bm.verts) == verts and list(bm.edges) == edges and
                 list(bm.faces) == faces):
             non_delete_elems = set(orig_elems)
