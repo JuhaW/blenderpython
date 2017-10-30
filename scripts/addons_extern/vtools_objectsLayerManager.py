@@ -34,12 +34,12 @@ def callback_toogleObjectsVisibility(self,value):
 	hidSceneName = sceneName + "#hidden"
 	sceneNames = []
 	for i in bpy.data.scenes:
-	    sceneNames.append(i.name)
+		sceneNames.append(i.name)
 
 	if hidSceneName not in sceneNames:
-	    hiddenScene = bpy.data.scenes.new(hidSceneName)
+		hiddenScene = bpy.data.scenes.new(hidSceneName)
 	else:
-	    hiddenScene = bpy.data.scenes[hidSceneName]
+		hiddenScene = bpy.data.scenes[hidSceneName]
 	if layer.visible == False:
 		#layer.visible = False
 		for obj in bpy.data.objects:
@@ -78,28 +78,33 @@ def callback_toogleObjectsTemplate(self,value):
 
 def callback_toogleObjectsSelection(self,value):
 	layer = self
+	
 	if layer.selectable == False:
 		for obj in bpy.data.objects:
 			if obj.objectLayerManager.name == layer.name:
 				obj.select = True
-				obj.hide_select = False
+				bpy.context.scene.objects.active = obj
+				#obj.hide_select = False
+			elif not bpy.context.scene.objectsLayerManager_ExtendSelection:
+				obj.select = False
 	else:
 		for obj in bpy.data.objects:
 			if obj.objectLayerManager.name == layer.name:
 				obj.select = False
-				obj.hide_select = False
-
+				#obj.hide_select = False
+	
+		
 # def callback_toogleObjectsSelection(self,value):
-# 	layer = self
-# 	bpy.ops.object.mode_set(mode = 'OBJECT')
-# 	idSelected = bpy.context.scene.objectsLayerManager_ID_index
-# 	if idSelected != -1:
-# 		layerName = bpy.context.scene.objectsLayerManager[idSelected].name
-# 		#bpy.ops.object.select_all(action="DESELECT")
-# 		for obj in bpy.data.objects:
-# 			if obj.objectLayerManager.name == layerName:
-# 				obj.select = True
-# 				#bpy.context.scene.objects.active= obj
+#	layer = self
+#	bpy.ops.object.mode_set(mode = 'OBJECT')
+#	idSelected = bpy.context.scene.objectsLayerManager_ID_index
+#	if idSelected != -1:
+#		layerName = bpy.context.scene.objectsLayerManager[idSelected].name
+#		#bpy.ops.object.select_all(action="DESELECT")
+#		for obj in bpy.data.objects:
+#			if obj.objectLayerManager.name == layerName:
+#				obj.select = True
+#				#bpy.context.scene.objects.active= obj
 
 def callback_toogleObjectsRenderable(self,value):
 	layer = self
@@ -267,7 +272,9 @@ class VTOOLS_UIL_objectsLayerManagerUI(bpy.types.UIList):
 			row.enabled = item.enabled
 			row.prop(item, "solo", text="",emboss = False, icon='LINK')
 			row.prop(item, "name", text="", emboss=False, translate=False)
-			row.prop(item, "selectable", text="", emboss = False, icon='RESTRICT_SELECT_OFF')
+			if context.scene.objectsLayerManager[index].template:
+				row.prop(item, "selectable", text="", emboss = False, icon='RESTRICT_SELECT_ON' if context.scene.objectsLayerManager[index].selectable else 'RESTRICT_SELECT_OFF')
+			
 			if item.visible:
 				row.prop(item, "visible", text="",emboss = False, icon='RESTRICT_VIEW_OFF')
 			else:
@@ -352,6 +359,8 @@ class VTOOLS_PN_objectsLayerManager(bpy.types.Panel):
 		row.operator(VTOOLS_OP_addObjectToLayer.bl_idname, text="Add")
 		row.operator(VTOOLS_OP_removeObjectFromLayer.bl_idname, text="Remove")
 		row.operator(VTOOLS_OP_removeObjectFromLayer.bl_idname, text="Clean")
+		row = layout.row(align=True)
+		row.prop(context.scene,"objectsLayerManager_ExtendSelection", text = "Extend selection")
 
 def register():
 	bpy.utils.register_module(__name__)
@@ -359,14 +368,16 @@ def register():
 	bpy.types.Scene.objectsLayerManager_ID_index = bpy.props.IntProperty()
 	bpy.types.Object.objectLayerManager = bpy.props.PointerProperty(type=objectlayerManagerProps)
 	bpy.types.Scene.objectsLayerManager_showVisibleLayers = bpy.props.BoolProperty(default=False, description="show only objects layers linked to visible layers")
+	bpy.types.Scene.objectsLayerManager_ExtendSelection = bpy.props.BoolProperty(default=False, description="Extend objects selection")
 
 def unregister():
 	bpy.utils.unregister_module(__name__)
-
+	
 	del bpy.types.Scene.objectsLayerManager
 	del bpy.types.Scene.objectsLayerManager_ID_index
 	del bpy.types.Object.objectLayerManager
 	del bpy.types.Scene.objectsLayerManager_showVisibleLayers
+	del bpy.types.Scene.objectsLayerManager_ExtendSelection
 
 if __name__ == "__main__":
 	register()
